@@ -9,6 +9,7 @@ const paths: Record<string, string> = {
   shield: "M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z M8.5 12l2.5 2.5 4.5-5",
   file: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z M14 2v6h6 M8 13h8 M8 17h5",
   arrow: "M5 12h14 M13 6l6 6-6 6",
+  external: "M14 3h7v7 M21 3l-11 11 M10 3H3v18h18v-7",
   chevron: "m9 5 7 7-7 7",
   check: "m5 12 4 4L19 6",
   lock: "M5 10h14v11H5Z M8 10V7a4 4 0 0 1 8 0v3 M12 14v3",

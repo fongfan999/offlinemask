@@ -41,7 +41,7 @@ export const findings: readonly Finding[] = [
     value: "GD202609080126",
     alias: "[GD_DEMO_01]",
     reason:
-      "Mã giao dịch có thể dùng để truy ngược hồ sơ. Cân nhắc che nếu bản tóm tắt không cần mã này.",
+      "Mã giao dịch có thể dùng để truy ngược hồ sơ. Cân nhắc ẩn nếu bản tóm tắt không cần mã này.",
     source: "Cần đánh giá theo mục đích sử dụng",
   },
   {
@@ -50,7 +50,7 @@ export const findings: readonly Finding[] = [
     value: "0901234567",
     alias: "[SDT_DEMO_01]",
     reason:
-      "Thông tin liên hệ xuất hiện sau “qua số”. Che số điện thoại khi không cần liên hệ trực tiếp.",
+      "Thông tin liên hệ xuất hiện sau “qua số”. Ẩn số điện thoại khi không cần liên hệ trực tiếp.",
     source: "Thông tin liên hệ · mẫu minh họa",
   },
   {

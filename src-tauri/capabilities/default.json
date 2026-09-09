@@ -1,7 +1,13 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Allow the main window to read the application version only.",
+  "description": "Read the app version and open the product homepage in the default browser.",
   "windows": ["main"],
-  "permissions": ["core:app:allow-version"]
+  "permissions": [
+    "core:app:allow-version",
+    {
+      "identifier": "opener:allow-open-url",
+      "allow": [{ "url": "https://offlinemask.com/" }]
+    }
+  ]
 }

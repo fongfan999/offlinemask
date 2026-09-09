@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useTemplateRef } from "vue";
 import AppIcon from "./components/AppIcon.vue";
+import MaskingPreview from "./components/MaskingPreview.vue";
+import { version } from "../package.json";
+import { openProductWebsite, productWebsite } from "./adapters/desktop";
 import { findings, sampleText } from "./core/review";
 import {
   createSession,
@@ -18,6 +21,15 @@ import {
 
 const sessions = ref<SampleSession[]>([]);
 const storageError = ref("");
+const websiteError = ref("");
+async function visitWebsite(event: MouseEvent) {
+  websiteError.value = "";
+  try {
+    await openProductWebsite(event);
+  } catch {
+    websiteError.value = "Chưa mở được trình duyệt. Bạn có thể truy cập offlinemask.com.";
+  }
+}
 try {
   sessions.value = decodeSessions(localStorage.getItem(historyKey));
 } catch {
@@ -63,8 +75,8 @@ const title = computed(() =>
   active.value
     ? sessionTitle(active.value)
     : format.value === "text"
-      ? "Che thông tin trong văn bản."
-      : "Che thông tin trong Excel.",
+      ? "Ẩn thông tin trong văn bản."
+      : "Ẩn thông tin trong bảng tính.",
 );
 function save() {
   // Leave unreadable history intact instead of overwriting it without recovery.
@@ -177,9 +189,6 @@ function dateLabel(value: string) {
         <span class="brand-mark"><AppIcon name="shield" :size="22" /></span
         >OfflineMask
       </button>
-      <button class="new-session" @click="navigate('home')">
-        <AppIcon name="plus" />Phiên mới<AppIcon name="compose" :size="16" />
-      </button>
       <nav aria-label="Định dạng">
         <button
           :aria-current="page === 'home' ? 'page' : undefined"
@@ -197,7 +206,7 @@ function dateLabel(value: string) {
           :aria-current="page === 'excel' && !active ? 'page' : undefined"
           @click="navigate('excel')"
         >
-          <AppIcon name="table" />Excel
+          <AppIcon name="table" />Bảng tính
         </button>
       </nav>
       <div class="history-heading">
@@ -205,7 +214,7 @@ function dateLabel(value: string) {
       </div>
       <div class="history-list">
         <p v-if="!sessions.length" class="empty-history">
-          Mỗi lần che tạo một phiên.<br />Bạn có thể quay lại tại đây.
+          Chưa có phiên nào.
         </p>
         <button
           v-for="session in sessions"
@@ -223,14 +232,16 @@ function dateLabel(value: string) {
           >
         </button>
       </div>
-      <div class="sidebar-footer">
-        <span class="offline-dot"></span
-        ><span>Lưu trên thiết bị<small>Không cần tài khoản</small></span
-        ><AppIcon name="lock" :size="15" />
-      </div>
+      <footer class="sidebar-footer">
+        <a :href="productWebsite" target="_blank" rel="noopener noreferrer" @click="visitWebsite">
+          offlinemask.com<AppIcon name="external" :size="12" />
+        </a>
+        <span class="app-version" :aria-label="`Phiên bản ${version}`">{{ version }}</span>
+        <p v-if="websiteError" class="website-error" role="alert">{{ websiteError }}</p>
+      </footer>
     </aside>
     <div class="workspace" :inert="sidebarOpen">
-      <header class="topbar">
+      <header class="topbar" :class="{ 'home-topbar': page === 'home' }">
         <div>
           <button
             ref="sidebarToggle"
@@ -241,64 +252,55 @@ function dateLabel(value: string) {
             @click="openSidebar"
           >
             <AppIcon name="list" /></button
-          ><span>{{
-            page === "home"
-              ? "Không gian của bạn"
-              : format === "text"
-                ? "Văn bản"
-                : "Excel"
+          ><span v-if="page !== 'home'">{{
+            format === "text" ? "Văn bản" : "Bảng tính"
           }}</span>
         </div>
-        <span class="privacy-label"
-          ><AppIcon name="lock" :size="13" />Chỉ trên thiết bị của bạn</span
-        >
       </header>
       <main :class="{ 'home-page': page === 'home' }">
         <template v-if="page === 'home'">
           <div class="introduction">
-            <span class="hero-emblem glass"
-              ><AppIcon name="shield" :size="31"
-            /></span>
-            <h1 ref="heading" tabindex="-1">Bạn muốn che nội dung nào?</h1>
-            <p>Chọn định dạng. Che thông tin. Sẵn sàng chia sẻ.</p>
+            <span class="hero-logo brand-mark" aria-hidden="true">
+              <AppIcon name="shield" :size="28" />
+            </span>
+            <h1 ref="heading" tabindex="-1">
+              Ẩn thông tin nhạy cảm<span>trước khi chia sẻ với AI.</span>
+            </h1>
+            <p>Thay thông tin riêng tư bằng bí danh. Không cần Internet.</p>
+            <MaskingPreview />
           </div>
-          <section class="format-grid" aria-label="Chọn định dạng">
+          <section class="format-grid" aria-labelledby="format-heading">
+            <h2 id="format-heading">Chọn nội dung để bắt đầu</h2>
             <button class="format-card glass" @click="navigate('text')">
               <span class="format-icon"><AppIcon name="text" :size="29" /></span
               ><span class="format-title"
                 >Văn bản<AppIcon name="arrow" :size="20" /></span
               ><span class="format-description"
-                >Email, tin nhắn và nội dung<br />trước khi gửi cho AI.</span
-              ><span class="format-meta">Khám phá mẫu văn bản</span>
+                >Email, tin nhắn, tài liệu</span>
             </button>
             <button class="format-card glass" @click="navigate('excel')">
               <span class="format-icon"
                 ><AppIcon name="table" :size="29" /></span
               ><span class="format-title"
-                >Excel<AppIcon name="arrow" :size="20" /></span
+                >Bảng tính<AppIcon name="arrow" :size="20" /></span
               ><span class="format-description"
-                >Thông tin trong bảng tính,<br />giữ cách nhìn quen thuộc.</span
-              ><span class="format-meta">Khám phá mẫu bảng tính</span>
+                >Excel, CSV</span>
             </button>
           </section>
-          <div class="coming-soon">
-            <span>SẮP CÓ</span><span>PDF</span><span>Word</span><span>CSV</span
-            ><span>Hình ảnh</span>
-          </div>
-          <p class="home-note">
-            <AppIcon name="reset" :size="15" />Mỗi lần che được lưu thành một
-            phiên để bạn quay lại.
-          </p>
-          <p class="prototype-note">
-            Bản trải nghiệm: văn bản và bảng tính mẫu. Chưa nhập dữ liệu hoặc
-            tệp riêng.
-          </p>
+          <aside class="coming-soon" aria-labelledby="upcoming-formats">
+            <span id="upcoming-formats">Định dạng sắp có</span>
+            <ul aria-labelledby="upcoming-formats">
+              <li>PDF</li>
+              <li>Word</li>
+              <li>Hình ảnh</li>
+            </ul>
+          </aside>
         </template>
         <template v-else>
           <div class="editor-heading">
             <div>
               <span class="eyebrow">{{
-                active ? "PHIÊN ĐÃ CHE" : "THỬ VỚI DỮ LIỆU MẪU"
+                active ? "PHIÊN ĐÃ XỬ LÝ" : "THỬ VỚI DỮ LIỆU MẪU"
               }}</span>
               <h1 ref="heading" tabindex="-1">{{ title }}</h1>
               <p>
@@ -320,7 +322,9 @@ function dateLabel(value: string) {
           <section
             class="glass-card glass"
             :aria-label="
-              format === 'text' ? 'Che văn bản mẫu' : 'Che bảng tính mẫu'
+              format === 'text'
+                ? 'Ẩn thông tin trong văn bản mẫu'
+                : 'Ẩn thông tin trong bảng tính mẫu'
             "
           >
             <header class="card-header">
@@ -333,7 +337,7 @@ function dateLabel(value: string) {
                   :aria-pressed="view === 'masked'"
                   @click="view = 'masked'"
                 >
-                  Bản đã che</button
+                  Bản đã ẩn thông tin</button
                 ><button
                   :aria-pressed="view === 'original'"
                   @click="view = 'original'"
@@ -354,7 +358,7 @@ function dateLabel(value: string) {
             </header>
             <template v-if="format === 'text' || manualCopy"
               ><label class="sr-only" for="document-content">{{
-                active && view === "masked" ? "Bản đã che" : "Văn bản mẫu"
+                active && view === "masked" ? "Bản đã ẩn thông tin" : "Văn bản mẫu"
               }}</label
               ><textarea
                 id="document-content"
@@ -374,7 +378,7 @@ function dateLabel(value: string) {
               <table>
                 <caption class="sr-only">
                   {{
-                    active && view === "masked" ? "Bảng đã che" : "Bảng gốc"
+                    active && view === "masked" ? "Bảng đã ẩn thông tin" : "Bảng gốc"
                   }}
                 </caption>
                 <thead>
@@ -416,7 +420,7 @@ function dateLabel(value: string) {
                 @click="changesOpen = !changesOpen"
               >
                 <span
-                  ><AppIcon name="check" :size="15" />Đã che
+                  ><AppIcon name="check" :size="15" />Đã ẩn
                   {{ maskCount }} loại thông tin</span
                 ><span
                   >{{ changesOpen ? "Thu gọn" : "Xem thay đổi"
@@ -454,7 +458,7 @@ function dateLabel(value: string) {
                     : "Bản gốc luôn được giữ nguyên."
                 }}</span
               ><button v-if="!active" class="primary-action" @click="mask">
-                <AppIcon name="sparkle" :size="17" />Che thông tin<AppIcon
+                <AppIcon name="sparkle" :size="17" />Ẩn thông tin<AppIcon
                   name="arrow"
                   :size="16"
                 /></button
@@ -465,11 +469,7 @@ function dateLabel(value: string) {
                 @click="copy"
               >
                 <AppIcon :name="copied ? 'check' : 'copy'" :size="17" />{{
-                  copied
-                    ? "Đã sao chép"
-                    : format === "text"
-                      ? "Sao chép bản che"
-                      : "Sao chép bảng che"
+                  copied ? "Đã sao chép" : "Sao chép kết quả"
                 }}
               </button>
             </footer>
@@ -485,7 +485,7 @@ function dateLabel(value: string) {
           <p class="prototype-note">
             {{
               format === "excel"
-                ? "Bảng mẫu tương tác. Chưa nhập hoặc xuất tệp Excel; sao chép ở dạng bảng phân cách bằng tab."
+                ? "Bảng mẫu tương tác. Chưa nhập hoặc xuất tệp Excel/CSV; sao chép ở dạng bảng phân cách bằng tab."
                 : "Văn bản mẫu tương tác. Chưa hỗ trợ nội dung riêng hoặc khôi phục."
             }}
           </p>
@@ -494,11 +494,6 @@ function dateLabel(value: string) {
           {{ storageError }}
         </p>
       </main>
-      <footer class="workspace-footer">
-        <AppIcon name="shield" :size="13" />Riêng tư từ bước đầu tiên.<span
-          >OfflineMask · Preview</span
-        >
-      </footer>
     </div>
   </div>
 </template>

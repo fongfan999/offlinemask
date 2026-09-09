@@ -226,6 +226,8 @@ Installation prerequisites must be bundled or distributable through an offline i
 
 The app itself does not submit material to AI. Export is a deliberate local file or copy action. Any later external sharing happens separately under the user's control.
 
+The owner-requested product website link is a deliberate external-browser action, separate from the offline workflow. Opening `https://offlinemask.com/` requires connectivity in the browser; no input, aliases, session metadata, or other app content is sent with the URL. No background website request is made.
+
 ### Local data handling
 
 - Keep source files unchanged and write separate outputs.
