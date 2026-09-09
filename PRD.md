@@ -2,11 +2,11 @@
 
 **Product name:** OfflineMask
 
-**Version:** 0.1 — MVP draft
+**Version:** 0.2 — MVP draft with application stack selected
 
 **Updated:** 9 September 2026
 
-**Status:** Product name selected and MVP scope documented. Technology selection is next; no application implementation or foundation has been selected.
+**Status:** Product name, MVP scope, and application foundation selected: Tauri 2 + Vue 3 + TypeScript + Vite. Ready for initialization; application code has not been scaffolded. See [Decision 0001](docs/decisions/0001-desktop-stack.md).
 
 ## 1. Product purpose
 
@@ -243,9 +243,9 @@ Benchmark cold start, warm detection, export, and restoration separately for tex
 
 ## 11. Product architecture boundaries
 
-Technology selection should prioritise development speed, high-quality UI/UX, cross-platform support, lightweight distribution, and responsive processing. A possible future mobile mini version should be considered when separating portable rules, profiles, and business logic from desktop-specific file handling and interfaces. Mobile is not an MVP requirement and does not require feature parity with the desktop application.
+The selected application foundation is Tauri 2 with Vue 3, TypeScript, and Vite, using pnpm and a focused Rust native layer. [Decision 0001](docs/decisions/0001-desktop-stack.md) records the rationale and initialization handoff. Implementation should prioritise development speed, high-quality UI/UX, broader compatibility, lightweight distribution, and responsive processing. A possible future mobile mini version should be considered when separating portable rules, profiles, and business logic from desktop-specific file handling and interfaces. Mobile is not an MVP requirement and does not require feature parity with the desktop application.
 
-These are responsibilities, not technology selections:
+The following responsibilities remain separate modules within the selected foundation:
 
 1. **Desktop experience:** projects, import, review, profiles, previews, and export.
 2. **Format adapters:** parsing and writing supported formats, source locations, and compatibility findings.
@@ -257,7 +257,7 @@ These are responsibilities, not technology selections:
 
 User-configurable rule packs are distinct from developer-maintained software modules. Adding a future file adapter or detector should not require replacing the review workflow or mapping system. Proven parsers, detectors, storage, and cryptographic libraries should be reused where suitable.
 
-No commitment has been made to Prompt Anonymizer, Presidio, OpenMed, any model, frontend framework, language, database, or desktop runtime. Their selection follows this PRD.
+The desktop shell and frontend foundation are selected. Format libraries, detection providers (including Prompt Anonymizer, Presidio, or OpenMed), any model, and database/vault implementation remain subject to evaluation against this PRD. No provider or model is required merely by the framework choice.
 
 ## 12. Pilot and acceptance plan
 
@@ -290,7 +290,7 @@ If the prototype does not demonstrate a useful advantage, narrow the workflow, i
 
 ## 13. Delivery sequence
 
-1. Review this PRD and choose the technology stack for OfflineMask using the priorities above.
+1. Initialize the selected Tauri 2 + Vue 3 + TypeScript + Vite foundation following [Decision 0001](docs/decisions/0001-desktop-stack.md), preserving this documentation and the existing repository history.
 2. Define the first fixtures, supported-file matrix, offline resource plan, vault lifecycle, and measurable acceptance thresholds.
 3. Build a complete text and simple-table flow: import, review, alias, export, save/reopen, and restore.
 4. Add pack/profile management and the remember-for-similar-files flow.
@@ -303,7 +303,7 @@ No delivery dates or effort estimates are committed in this document.
 
 | Decision | When needed |
 | --- | --- |
-| Technology stack and third-party licences | Next technical selection; OfflineMask is the selected product name. |
+| Remaining component libraries, exact versions, and third-party licences | During initialization and adapter evaluation; the application foundation is selected in Decision 0001. |
 | Detection providers and whether a pretrained model is necessary | After evaluating the initial corpus and supported cases. |
 | Exact XLSX feature subset for import, export, and restoration | Before implementing file adapters; pasted text and CSV restoration are already required. |
 | Vault unlock, retention, deletion, recovery, and private backup scope | Before implementing persistent sensitive storage. |

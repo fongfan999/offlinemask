@@ -8,6 +8,10 @@ The MVP covers pasted text, CSV, supported Excel workbooks, user review, consist
 
 ## Project status
 
-Product definition. The product name is selected; the technology stack and implementation have not been chosen.
+Ready for initialization. The selected application stack is **Tauri 2 + Vue 3 + TypeScript + Vite**, with pnpm for frontend dependencies and a focused Rust layer for native integration.
+
+Start with the [accepted stack decision and initialization handoff](docs/decisions/0001-desktop-stack.md). Application code has not been scaffolded yet.
 
 See [the product requirements document](PRD.md) for scope, user journeys, acceptance criteria, and open decisions.
+
+See [Tauri 2 versus Electrobun 2](docs/desktop-framework-comparison.md) for the supporting comparison and unmeasured performance questions.
