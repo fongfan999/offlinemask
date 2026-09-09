@@ -1,0 +1,35 @@
+{
+  "name": "offlinemask",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "pnpm typecheck && vite build",
+    "preview": "vite preview",
+    "tauri": "tauri",
+    "typecheck": "vue-tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
+    "check:native": "cargo fmt --manifest-path src-tauri/Cargo.toml -- --check && cargo clippy --manifest-path src-tauri/Cargo.toml --locked --all-targets -- -D warnings",
+    "desktop:dev": "tauri dev",
+    "desktop:build": "tauri build",
+    "test": "node --test tests/*.test.mjs"
+  },
+  "dependencies": {
+    "vue": "^3.5.13",
+    "@tauri-apps/api": "^2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.7",
+    "typescript": "~6.0.3",
+    "vite": "^8.0.16",
+    "vue-tsc": "^3.3.5",
+    "@tauri-apps/cli": "^2",
+    "@types/node": "^24"
+  },
+  "description": "Offline desktop workspace for reviewing sensitive data",
+  "packageManager": "pnpm@11.18.0",
+  "engines": {
+    "node": "^22.12.0 || >=24.0.0",
+    "pnpm": "11.18.0"
+  }
+}

@@ -2,7 +2,7 @@
 
 Date: 9 September 2026
 
-Status: **Accepted — ready for project initialization.**
+Status: **Accepted — desktop boilerplate initialized.**
 
 ## Decision
 
@@ -78,7 +78,7 @@ Encrypt persisted private mappings and dictionaries with established cryptograph
 
 ## Initialization handoff
 
-The user will initialize the project. This decision adds documentation only.
+Initialization was completed on 9 September 2026 from the official Vue/TypeScript template. The original sequence below is retained as context; use the [development guide](../development.md) for the current mise-based setup.
 
 1. Install the current [Tauri development prerequisites](https://v2.tauri.app/start/prerequisites/) and [pnpm](https://pnpm.io/installation) for the development machine.
 2. Run `pnpm create tauri-app` in a temporary location. Choose a new scaffold directory, TypeScript/JavaScript, pnpm, Vue, and TypeScript. Verify the generated application uses Tauri 2 and Vue 3.

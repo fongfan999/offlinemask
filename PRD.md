@@ -6,7 +6,9 @@
 
 **Updated:** 9 September 2026
 
-**Status:** Product name, MVP scope, and application foundation selected: Tauri 2 + Vue 3 + TypeScript + Vite. Ready for initialization; application code has not been scaffolded. See [Decision 0001](docs/decisions/0001-desktop-stack.md).
+**Status:** Product name, MVP scope, and application foundation selected: Tauri 2 + Vue 3 + TypeScript + Vite. Desktop foundation and an interactive sample review prototype are implemented; format home, sidebar navigation, and persistent sample-session history are implemented; production detection, file handling, encrypted private-data persistence, and restoration remain pending. See [Decision 0001](docs/decisions/0001-desktop-stack.md).
+
+**Boilerplate acceptance:** On 9 September 2026, the owner accepted the current UI as a starting baseline and will provide page-by-page feedback later. Preserve the agreed simplicity, palette, navigation, and session model. See [product direction](docs/product-direction.md); production requirements below remain outstanding.
 
 ## 1. Product purpose
 
@@ -234,6 +236,18 @@ The app itself does not submit material to AI. Export is a deliberate local file
 - Expose private data only when required for local review or restoration. Do not include it in shared configuration by default.
 
 Reversible masking is pseudonymisation. Retained transaction facts and contextual details can still be sensitive or identify someone. The product must describe what it changed and checked without promising anonymity, universal compliance, or permission to upload the result.
+
+### Open-source development
+
+OfflineMask is intended to be released as an open-source project. Use standard, maintainable framework patterns, reproducible mise-based setup, committed dependency lockfiles, documented architecture and dependency provenance, focused tests, and clear contributor guidance. Evaluate dependency and bundled-resource licenses before public distribution. Keep demo behavior distinguishable from production capabilities. Do not include private data or machine-specific configuration in public artifacts.
+
+License selection, copyright ownership/attribution, private vulnerability reporting, public repository hosting, and release/CI setup remain required before publication. The intended open-source status is not itself a license grant. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### Workspace and session navigation
+
+Keep the home screen focused on Text and Excel entry points, with other formats marked coming soon. Users can choose formats and revisit conversions from a left sidebar. Every conversion creates a distinct session; revisiting restores its input context, output, and review choices. Starting a new session does not overwrite earlier work. Real-input history must use the private storage boundary above; the prototype may persist only synthetic sample references and choices.
+
+The current visual direction is restrained liquid glass with blue, white, and neutral colors; avoid purple and lavender. Shared design tokens, clear text, keyboard access, responsive navigation, and measured rendering performance take priority over decorative effects.
 
 ### Usability and performance
 
