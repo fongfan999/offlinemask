@@ -1,0 +1,16 @@
+{
+  "verifiedAt": "2026-09-19T13:47:05.515Z",
+  "hashes": {
+    "source.json": "16a6c6216db403b351d08a1dff71d85a59b6dcdeff29e94a81acfde25e850780",
+    "cases.json": "ca74f34e1c7d41fe92fce83c58dcb41c1cc7cbc2d28320abb1e2ddde998cdc30",
+    "protocol.json": "45da712e6cd6fee44c5073004a99aac1e7785f795710e40e3096caedb22418ee",
+    "review-ledger.json": "faeaeba099316903789b38cd2d46f9a33fe26abbe6f7ddf2855fedd52b26d79c",
+    "review.md": "1fb789f3ca249bd9991f7cce0aaa967a9422b9f6ff9fee46cf056514ca507f3f"
+  },
+  "cases": 24,
+  "exactSourceSpans": 30,
+  "pendingReviews": 24,
+  "modelExecutions": 0,
+  "productionAndHistoricalEvidence": "Verified unchanged",
+  "scope": "Preparation checks only; not detector accuracy or human approval."
+}
