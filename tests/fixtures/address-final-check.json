@@ -1,0 +1,14 @@
+[
+ {"id":"final-apartment","group":"address","annotated":"Địa chỉ: [[address|căn hộ C905, tòa C, 70 Nguyễn Văn Huyên, phường Nghĩa Đô, Hà Nội]]."},
+ {"id":"final-street","group":"address","annotated":"Gửi đến [[address|39A Lê Quý Đôn, phường Thạch Thang, Đà Nẵng]]."},
+ {"id":"final-village","group":"address","annotated":"Địa chỉ: [[address|thôn Trung Sơn, xã Hòa Liên, huyện Hòa Vang, Đà Nẵng]]."},
+ {"id":"final-room","group":"address","annotated":"Nơi nhận: [[address|phòng 412, tòa E, 21 Tôn Đức Thắng, Hà Nội]]; phí 25.000 đồng."},
+ {"id":"final-hamlet","group":"address","annotated":"Cư trú tại [[address|ấp An Hòa, xã Mỹ Phú, tỉnh Long An]]."},
+ {"id":"final-short","group":"address","annotated":"Từ [[address|Hà Nội]] chuyển đến [[address|Hải Phòng]], ngày 14/09/2026."},
+ {"id":"final-numeric-room","group":"negative","annotated":"Phòng 402 có 16 người. Tầng 8 đang được kiểm tra."},
+ {"id":"final-numeric-building","group":"negative","annotated":"Tòa 3 có 7 tầng, mỗi tầng có 8 phòng. Đây là số liệu tổng hợp."},
+ {"id":"final-title","group":"address","annotated":"Báo Cáo Tại [[address|Đà Nẵng]], có 19 giao dịch."},
+ {"id":"final-facts","group":"negative","annotated":"Ngày 14/09/2026: 29 hồ sơ, 16.000.000 đồng. Chưa có địa chỉ nhận thư."},
+ {"id":"final-phone","group":"address","annotated":"Địa chỉ: [[address|93 Phan Chu Trinh, phường Phước Ninh, Đà Nẵng]], điện thoại [[phone|0901234567]]."},
+ {"id":"final-empty","group":"negative","annotated":"Phường, xã, tên đường và số nhà đều chưa được cung cấp."}
+]
