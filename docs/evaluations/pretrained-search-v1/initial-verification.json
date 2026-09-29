@@ -1,0 +1,24 @@
+{
+  "verifiedAt": "2026-09-19T15:38:05.715Z",
+  "priorEvidence": "All inherited source/fixture and approval hashes unchanged",
+  "runs": {
+    "readme-labels": {
+      "executions": 398,
+      "errors": 0,
+      "sourceCoverage": "Every nonwhitespace code point processed",
+      "replay": "Exact model/source spans, all categories and six selected previews, metrics and gate decisions verified",
+      "protocolSha256": "32372532ed7092a5459a806166354ad62fca858bb1181396992ee78ce17fd0fc",
+      "rawSha256": "722103ca13df6b4cd0313d664580dec32b2572d6de50c871e62709db64366ebc",
+      "resultsSha256": "78f82918c62ae9be4a2a3b562b19c827db6a4ffdba5752fc414c03400d950b83"
+    },
+    "/schema": {
+      "executions": 398,
+      "errors": 0,
+      "sourceCoverage": "Every nonwhitespace code point processed",
+      "replay": "Exact model/source spans, all categories and six selected previews, metrics and gate decisions verified",
+      "protocolSha256": "0e5ae0e8fb3e89788e901057b6ac5b8424515b6201249fda2d034053051dd3c9",
+      "rawSha256": "0d202d5b72b14aefb9e062edba240847bad4c73a8926deaecaff07917fa82c7d",
+      "resultsSha256": "4af8aeb5beb20f12ee7dd013ea0a8184d600a94310af6ff7f7d8178bbd9a6061"
+    }
+  }
+}
