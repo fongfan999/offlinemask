@@ -1,0 +1,427 @@
+{
+  "fixtureSha256": "44046c29eafb3084f4e2bdd0a13cc9c6b5998006d096516d18822ed2b684045f",
+  "summary": {
+    "cases": 12,
+    "failedCases": 0,
+    "entities": 20,
+    "fullyCovered": 18,
+    "partial": 2,
+    "missed": 0,
+    "sensitiveChars": 292,
+    "coveredChars": 282,
+    "ordinaryChars": 344,
+    "falsePositiveChars": 17,
+    "characterPrecision": 0.9431438127090301,
+    "excessMaskingRate": 0.04941860465116279,
+    "negativeCases": 3,
+    "falsePositiveNegativeCases": 2,
+    "byCategory": {
+      "name": {
+        "total": 11,
+        "full": 11,
+        "selectedFull": 11
+      },
+      "address": {
+        "total": 2,
+        "full": 0,
+        "selectedFull": 0
+      },
+      "email": {
+        "total": 2,
+        "full": 2,
+        "selectedFull": 2
+      },
+      "phone": {
+        "total": 2,
+        "full": 2,
+        "selectedFull": 2
+      },
+      "banking": {
+        "total": 3,
+        "full": 3,
+        "selectedFull": 3
+      },
+      "other": {
+        "total": 0,
+        "full": 0,
+        "selectedFull": 0
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "fresh-name-transfer",
+      "group": "banking",
+      "entities": [
+        {
+          "category": "name",
+          "start": 0,
+          "end": 12,
+          "value": "Đỗ Ngọc Trâm",
+          "total": 10,
+          "covered": 10,
+          "full": true,
+          "selectedFull": true
+        },
+        {
+          "category": "name",
+          "start": 47,
+          "end": 58,
+          "value": "Bùi Đức Huy",
+          "total": 9,
+          "covered": 9,
+          "full": true,
+          "selectedFull": true
+        },
+        {
+          "category": "banking",
+          "start": 74,
+          "end": 89,
+          "value": "CK-20260910-073",
+          "total": 15,
+          "covered": 15,
+          "full": true,
+          "selectedFull": true
+        }
+      ],
+      "sensitiveChars": 32,
+      "coveredChars": 32,
+      "ordinaryChars": 37,
+      "falsePositiveChars": 0,
+      "falsePositives": [],
+      "error": null
+    },
+    {
+      "id": "fresh-name-contact",
+      "group": "banking",
+      "entities": [
+        {
+          "category": "name",
+          "start": 15,
+          "end": 25,
+          "value": "Vũ Hải Yến",
+          "total": 8,
+          "covered": 8,
+          "full": true,
+          "selectedFull": true
+        },
+        {
+          "category": "email",
+          "start": 33,
+          "end": 58,
+          "value": "yen.synthetic@example.org",
+          "total": 25,
+          "covered": 25,
+          "full": true,
+          "selectedFull": true
+        },
+        {
+          "category": "phone",
+          "start": 71,
+          "end": 81,
+          "value": "0912345678",
+          "total": 10,
+          "covered": 10,
+          "full": true,
+          "selectedFull": true
+        }
+      ],
+      "sensitiveChars": 40,
+      "coveredChars": 40,
+      "ordinaryChars": 25,
+      "falsePositiveChars": 0,
+      "falsePositives": [],
+      "error": null
+    },
+    {
+      "id": "fresh-apartment",
+      "group": "address",
+      "entities": [
+        {
+          "category": "name",
+          "start": 11,
+          "end": 24,
+          "value": "Hoàng Gia Bảo",
+          "total": 11,
+          "covered": 11,
+          "full": true,
+          "selectedFull": true
+        },
+        {
+          "category": "address",
+          "start": 38,
+          "end": 89,
+          "value": "căn 1208, tòa B, 36 Nguyễn Trãi, Thanh Xuân, Hà Nội",
+          "total": 41,
+          "covered": 34,
+          "full": false,
+          "selectedFull": false
+        }
+      ],
+      "sensitiveChars": 48,
+      "coveredChars": 42,
+      "ordinaryChars": 19,
+      "falsePositiveChars": 0,
+      "falsePositives": [],
+      "error": null
+    },
+    {
+      "id": "fresh-rural",
+      "group": "address",
+      "entities": [
+        {
+          "category": "name",
+          "start": 12,
+          "end": 24,
+          "value": "Đinh Thị Thu",
+          "total": 10,
+          "covered": 10,
+          "full": true,
+          "selectedFull": true
+        },
+        {
+          "category": "address",
+          "start": 26,
+          "end": 74,
+          "value": "thôn Đông, xã Bình Minh, huyện Thanh Oai, Hà Nội",
+          "total": 39,
+          "covered": 35,
+          "full": false,
+          "selectedFull": false
+        }
+      ],
+      "sensitiveChars": 46,
+      "coveredChars": 42,
+      "ordinaryChars": 9,
+      "falsePositiveChars": 0,
+      "falsePositives": [],
+      "error": null
+    },
+    {
+      "id": "fresh-nfd",
+      "group": "name",
+      "entities": [
+        {
+          "category": "name",
+          "start": 11,
+          "end": 29,
+          "value": "Nguyễn Ngọc Hà",
+          "total": 16,
+          "covered": 16,
+          "full": true,
+          "selectedFull": true
+        },
+        {
+          "category": "banking",
+          "start": 47,
+          "end": 59,
+          "value": "007700112233",
+          "total": 12,
+          "covered": 12,
+          "full": true,
+          "selectedFull": true
+        }
+      ],
+      "sensitiveChars": 28,
+      "coveredChars": 28,
+      "ordinaryChars": 20,
+      "falsePositiveChars": 0,
+      "falsePositives": [],
+      "error": null
+    },
+    {
+      "id": "fresh-crlf",
+      "group": "banking",
+      "entities": [
+        {
+          "category": "name",
+          "start": 9,
+          "end": 24,
+          "value": "Trương Bảo Châu",
+          "total": 13,
+          "covered": 13,
+          "full": true,
+          "selectedFull": true
+        },
+        {
+          "category": "banking",
+          "start": 32,
+          "end": 44,
+          "value": "012345678901",
+          "total": 12,
+          "covered": 12,
+          "full": true,
+          "selectedFull": true
+        }
+      ],
+      "sensitiveChars": 25,
+      "coveredChars": 25,
+      "ordinaryChars": 29,
+      "falsePositiveChars": 0,
+      "falsePositives": [],
+      "error": null
+    },
+    {
+      "id": "fresh-emoji",
+      "group": "name",
+      "entities": [
+        {
+          "category": "name",
+          "start": 22,
+          "end": 34,
+          "value": "Tạ Minh Quân",
+          "total": 10,
+          "covered": 10,
+          "full": true,
+          "selectedFull": true
+        },
+        {
+          "category": "phone",
+          "start": 64,
+          "end": 74,
+          "value": "0987654321",
+          "total": 10,
+          "covered": 10,
+          "full": true,
+          "selectedFull": true
+        }
+      ],
+      "sensitiveChars": 20,
+      "coveredChars": 20,
+      "ordinaryChars": 31,
+      "falsePositiveChars": 0,
+      "falsePositives": [],
+      "error": null
+    },
+    {
+      "id": "fresh-literals",
+      "group": "name",
+      "entities": [
+        {
+          "category": "name",
+          "start": 17,
+          "end": 28,
+          "value": "Lý Ngọc Mai",
+          "total": 9,
+          "covered": 9,
+          "full": true,
+          "selectedFull": true
+        },
+        {
+          "category": "email",
+          "start": 50,
+          "end": 75,
+          "value": "mai.synthetic@example.org",
+          "total": 25,
+          "covered": 25,
+          "full": true,
+          "selectedFull": true
+        }
+      ],
+      "sensitiveChars": 31,
+      "coveredChars": 31,
+      "ordinaryChars": 26,
+      "falsePositiveChars": 6,
+      "falsePositives": [
+        {
+          "start": 1,
+          "end": 5,
+          "value": "CLS]"
+        },
+        {
+          "start": 30,
+          "end": 34,
+          "value": "SEP]"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "fresh-negative-uppercase",
+      "group": "negative",
+      "entities": [],
+      "sensitiveChars": 0,
+      "coveredChars": 0,
+      "ordinaryChars": 43,
+      "falsePositiveChars": 6,
+      "falsePositives": [
+        {
+          "start": 21,
+          "end": 28,
+          "value": "BÁO CÁO"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "fresh-negative-unicode",
+      "group": "negative",
+      "entities": [],
+      "sensitiveChars": 0,
+      "coveredChars": 0,
+      "ordinaryChars": 19,
+      "falsePositiveChars": 5,
+      "falsePositives": [
+        {
+          "start": 33,
+          "end": 37,
+          "value": "CLS]"
+        },
+        {
+          "start": 52,
+          "end": 53,
+          "value": "a"
+        },
+        {
+          "start": 54,
+          "end": 55,
+          "value": "b"
+        }
+      ],
+      "error": null
+    },
+    {
+      "id": "fresh-negative-facts",
+      "group": "negative",
+      "entities": [],
+      "sensitiveChars": 0,
+      "coveredChars": 0,
+      "ordinaryChars": 47,
+      "falsePositiveChars": 0,
+      "falsePositives": [],
+      "error": null
+    },
+    {
+      "id": "fresh-repeated",
+      "group": "name",
+      "entities": [
+        {
+          "category": "name",
+          "start": 0,
+          "end": 13,
+          "value": "Phan Đức Long",
+          "total": 11,
+          "covered": 11,
+          "full": true,
+          "selectedFull": true
+        },
+        {
+          "category": "name",
+          "start": 46,
+          "end": 59,
+          "value": "Phan Đức Long",
+          "total": 11,
+          "covered": 11,
+          "full": true,
+          "selectedFull": true
+        }
+      ],
+      "sensitiveChars": 22,
+      "coveredChars": 22,
+      "ordinaryChars": 39,
+      "falsePositiveChars": 0,
+      "falsePositives": [],
+      "error": null
+    }
+  ]
+}
