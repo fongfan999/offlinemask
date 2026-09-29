@@ -1,0 +1,15 @@
+{
+  "cases": [
+    {
+      "phase": "loading",
+      "exitMs": 968,
+      "passed": true
+    },
+    {
+      "phase": "inference",
+      "exitMs": 124,
+      "passed": true
+    }
+  ],
+  "network": "Run under OS outbound network denial"
+}

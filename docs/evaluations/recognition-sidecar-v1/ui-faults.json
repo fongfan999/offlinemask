@@ -1,0 +1,31 @@
+{
+  "hostPid": 99229,
+  "baselineHelperPid": 99285,
+  "hang": {
+    "signal": "SIGSTOP",
+    "configuredChunkDeadlineSeconds": 15,
+    "draftRetainedExactly": true,
+    "failedRequestCreatedSession": false,
+    "hostSurvived": true,
+    "helperReaped": true,
+    "retryHelperPid": 81334,
+    "retryExpectedNameMask": true
+  },
+  "crash": {
+    "signal": "SIGKILL",
+    "helperPid": 81334,
+    "draftUtf16Length": 50000,
+    "draftRetainedExactly": true,
+    "failedRequestCreatedSession": false,
+    "hostSurvived": true,
+    "retryHelperPid": 81564,
+    "retryFindings": 3,
+    "previousSessionsRetained": true
+  },
+  "source": "Manual CUA UI observations and exact test-process PID checks; synthetic text only",
+  "build": {
+    "binary": "src-tauri/target/release/bundle/macos/OfflineMask Sidecar UI.app/Contents/MacOS/offlinemask",
+    "sha256": "642b103d9a328c99a85f497def0463fb91ce08416fcbc3f2da57c7be924b7607",
+    "note": "Fault UI trial before the subsequent explicit RunEvent::Exit cleanup addition; supervisor timeout and restart implementation unchanged."
+  }
+}

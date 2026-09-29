@@ -1,0 +1,101 @@
+{
+  "wallStart": 1789961154090,
+  "wallEnd": 1789961246409,
+  "phase": "Completed",
+  "maxHeartbeatDelayMs": 30,
+  "parity": {
+    "checked": 398,
+    "differences": []
+  },
+  "results": [
+    {
+      "label": "prepared-8s",
+      "utf16Length": 161,
+      "detectionMs": 1874,
+      "firstProcessingMs": 1757,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-1",
+      "utf16Length": 161,
+      "detectionMs": 7468,
+      "firstProcessingMs": 7375,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-2",
+      "utf16Length": 161,
+      "detectionMs": 7518,
+      "firstProcessingMs": 7334,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-3",
+      "utf16Length": 161,
+      "detectionMs": 6615,
+      "firstProcessingMs": 6567,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "cancel-loading",
+      "utf16Length": 161,
+      "detectionMs": 11418,
+      "firstProcessingMs": 11340,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "cancel-warm-1",
+      "utf16Length": 161,
+      "detectionMs": 115,
+      "firstProcessingMs": 81,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "cancel-warm-2",
+      "utf16Length": 161,
+      "detectionMs": 103,
+      "firstProcessingMs": 71,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "cancel-warm-3",
+      "utf16Length": 161,
+      "detectionMs": 109,
+      "firstProcessingMs": 74,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "medium",
+      "utf16Length": 2000,
+      "detectionMs": 994,
+      "firstProcessingMs": 81,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "long",
+      "utf16Length": 10000,
+      "detectionMs": 4057,
+      "firstProcessingMs": 88,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "limit",
+      "utf16Length": 50000,
+      "detectionMs": 19637,
+      "firstProcessingMs": 357,
+      "findings": 3,
+      "addressCovered": true
+    }
+  ],
+  "evidence": "Completed synthetic benchmark accessibility report"
+}

@@ -1,0 +1,13 @@
+{
+  "hostPid": 92192,
+  "helperPid": 92233,
+  "helperStoppedBeforeQuit": true,
+  "hostExited": true,
+  "helperReaped": true,
+  "normalUserProcessesUntouched": [
+    16321,
+    29625
+  ],
+  "binarySha256": "c59d9c9199bfa66e7804ba07791136c8f54c19b00d4167e6f75d71625c8f09f2",
+  "evidence": "CUA Quit action followed by exact PID checks; no test PID remained."
+}

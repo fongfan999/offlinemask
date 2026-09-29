@@ -1,0 +1,83 @@
+{
+  "recordedAt": "2026-09-21T16:05:39.490177+00:00",
+  "platform": "macOS arm64, Apple M1 Pro, 16 GiB RAM",
+  "backend": "Isolated Rust helper / ONNX Runtime 1.24.3, four CPU threads",
+  "sources": {
+    "src-tauri/src/lib.rs": "e8c11e4c9366397e26082ebd448e07dadd5a9a1a1d7487dabc4e961687c48488",
+    "src-tauri/src/recognition_sidecar.rs": "7a355cc6fff2bc0c1fa1b9d5cfff4e56954c0033870adcf6285971c034e5b8b2",
+    "src-tauri/src/recognition_process.rs": "1251a76f8c0b14789cad27254950338f022075058370a9c4aed436a5d6dc2490",
+    "src-tauri/src/bin/recognition_sidecar.rs": "b9e7b4782e615909f8a111821e6e27e2a4d8df6d854c91d1bd96699d47f9791a",
+    "src-tauri/Cargo.toml": "b81aa387c593e0922d54766b5d713a42988c48135d224174c09c1bfc1e214778",
+    "src-tauri/Cargo.lock": "f0d78e9306de7466a51782bd0e99312df1168a4544c2fc84a5553b6767cdc747",
+    "src/core/detection/native-recognition.ts": "55e787e044a1f73da84bf0428050c2f1853ae1c08a33a6f44d51af87c55d809c",
+    "src/adapters/text-detection.ts": "1d9c34f639afc4d3ba4c3e94e181293d5213b537bbe511f745d29bb82f741eb6",
+    "src/workers/detection.worker.ts": "d2f501afb96c26f9768991a41cc33ef4f181141aad15f00bbc2c54d8b15b74ad",
+    "scripts/release-pack-v1.json": "cfa171d195ef6aa7b512cd64c67b3f40135b2546d42a571998b8a48c0c1c835c",
+    "scripts/native-prototype/runtime-manifest.json": "7a9161d28af983ded63b56389771f91f0a76e2060644af45cae25796f985ebcc",
+    "scripts/recognition-sidecar-v1/index.html": "d38fb53a483741c34b5dea12cbadcd7cc7f0a3785dc3de894cc4a6480ffe34f3",
+    "scripts/recognition-sidecar-v1/monitor.py": "10789a4f9ba650eeed0122b0092504a1f6a60ff8ffa0a04e0a8b6ec7fcada6f1",
+    "scripts/recognition-sidecar-v1/build-ui.mjs": "cecefd6341b17c266a100991c330854dbe2ddeedff75ad3c423949f5edaa8fda",
+    "scripts/recognition-sidecar-v1/main.ts": "df04236ab0e81dea7df783efc47ab6a182a0a64bb468143d8bcfa4b56ffd899c",
+    "scripts/recognition-sidecar-v1/check-child-lifecycle.mjs": "712ba0344418fb2d1228992507690da4f5bc9ee7d93d97c8c5a66dc52ac243e2",
+    "scripts/recognition-sidecar-v1/build.mjs": "60978a2e9057bb492fe7511902a2b13e91e8b1f15118597349358e6edd13d1e9",
+    "scripts/recognition-sidecar-v1/style.css": "a021757adcfd03d80e50839625c53e78a87ccd6e4ce524e18059ab1aebb00ded"
+  },
+  "artifacts": {
+    "src-tauri/target/release/bundle/macos/OfflineMask Sidecar QA.app/Contents/MacOS/offlinemask": {
+      "sha256": "e6de0b5f2c80e602150634da3195c0e00a2091e78c0e24c424b47f2f60d2f571",
+      "bytes": 11997120
+    },
+    "src-tauri/target/release/bundle/macos/OfflineMask Sidecar QA.app/Contents/Resources/native/libonnxruntime.1.24.3.dylib": {
+      "sha256": "76831409ce6eded92b4cb343cf422c458a60c1ea1d5f3cfa69692ab7fcc67f0f",
+      "bytes": 35937208
+    },
+    "src-tauri/target/release/bundle/macos/OfflineMask Sidecar QA.app/Contents/Resources/native/recognition-sidecar": {
+      "sha256": "b4fde2d1145d9f116c57e8c4874acb87b7178422f3b960923751b9a9a48eaefd",
+      "bytes": 519024
+    },
+    "src-tauri/target/release/bundle/macos/OfflineMask Sidecar UI.app/Contents/MacOS/offlinemask": {
+      "sha256": "c59d9c9199bfa66e7804ba07791136c8f54c19b00d4167e6f75d71625c8f09f2",
+      "bytes": 12013632
+    },
+    "src-tauri/target/release/bundle/macos/OfflineMask Sidecar UI.app/Contents/Resources/native/libonnxruntime.1.24.3.dylib": {
+      "sha256": "76831409ce6eded92b4cb343cf422c458a60c1ea1d5f3cfa69692ab7fcc67f0f",
+      "bytes": 35937208
+    },
+    "src-tauri/target/release/bundle/macos/OfflineMask Sidecar UI.app/Contents/Resources/native/recognition-sidecar": {
+      "sha256": "b4fde2d1145d9f116c57e8c4874acb87b7178422f3b960923751b9a9a48eaefd",
+      "bytes": 519024
+    },
+    "artifacts/recognition-sidecar-v1/frontend/index.html": {
+      "sha256": "bbc88397cd3be72bb5c5b94a59c941594ee589291542be25b3947f6054a94ed6",
+      "bytes": 534
+    },
+    "artifacts/recognition-sidecar-v1/frontend/replay.json": {
+      "sha256": "1244964e99fa5068b316dff9a52474658441369929b6c3755eeed065cbf1b12a",
+      "bytes": 236702
+    },
+    "artifacts/recognition-sidecar-v1/frontend/assets/detection.worker-BZwrM4fL.js": {
+      "sha256": "32d5e04b306a30c68785dc25d9008115ad78c7758ba0213a113d236190bfde3b",
+      "bytes": 804025
+    },
+    "artifacts/recognition-sidecar-v1/frontend/assets/index-Dx7fBFrN.js": {
+      "sha256": "982aca14b55a876d0ce753d921e63263620f3f659fb8c78727decd269b4e204d",
+      "bytes": 14620
+    },
+    "artifacts/recognition-sidecar-v1/frontend/assets/ort-wasm-simd-threaded.asyncify-DMmc6YqF.wasm": {
+      "sha256": "e0c0c6d3e73d43b8a249972f8358f845b08cc16fec3c80efafdf8bed40366786",
+      "bytes": 23567050
+    },
+    "artifacts/recognition-sidecar-v1/frontend/assets/index-CWCtMEH8.css": {
+      "sha256": "fd5531d07b17687ba5cca43a376b299ca114daeddfdf2cb4e0fbabb1a17b7c8d",
+      "bytes": 185
+    }
+  },
+  "outputs": {
+    "ui-faults.json": "dd689702390f5aa3060146efff73ed6da8bf5623da52717b3362880e5d16d107",
+    "shutdown.json": "939028607e22ea1c6493692e44a47fef452fc3b31ef693635c70ca096a86caa8",
+    "memory.json": "61b2d6c5bb464f34c2a6aba483554261fab3bf9e2ff1f9c3c890f23adeb58be6",
+    "results.json": "36120283afdebfee6ac9310913c6755d91fa2e99b03b0b449a00aebd2930b9b6",
+    "child-lifecycle.json": "a44cbf13e23306b4ae529bde02cd39982daa2a12a6603ecba90220bcd11f0d75"
+  },
+  "qualification": "Benchmark and fault UI preceded exit-only cleanup. Final UI shutdown tested separately; ui-faults.json preserves its earlier executable hash. GUI trials used normal network; child pipe-close trial ran under OS network denial. Windows/Linux untested."
+}
