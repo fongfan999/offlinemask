@@ -1,0 +1,72 @@
+{
+  "createdAt": "2026-09-15T03:04:12.082Z",
+  "node": "v24.10.0",
+  "files": {
+    "tests/fixtures/release-challenge-v1.json": "85ac6f349139d13ebb028670d50bcdf7b0e5b2a45982a1411235a1e7716235d8",
+    "tests/challenge-core.test.mjs": "9164f674fa13491fbacb73fc074ea0aae7acc9b526bdd4f7d3f085118eeda576",
+    "docs/evaluations/release-challenge-v1-spec.md": "f7503d29a0e042eb46997fcb1988c16be1ca31350562571792d6fef5d90471c1",
+    "scripts/challenge-core/common.mjs": "0e628f21accb02513af8eebf171cbd6b59b0f8f2e834ff272e8a6a41f48f8999",
+    "scripts/challenge-core/evaluate.mjs": "b680ffc50b225d7ef8c1df35ff08cf0a28e233787535ade61889d30363fd4303",
+    "scripts/challenge-core/freeze.mjs": "539cc6f3deed53e28638806bba87b0513751b23680921738bbd24ede3062f505",
+    "scripts/challenge-core/report.mjs": "b3ff46af86c3c0bb0452b9daca87afecd2d60f01ff778abdff4659c63e8fecfb"
+  },
+  "parentProtocolSha256": "ee588fc262749372181598d5170faab74af81da36c6e84abc636df7872bd1f68",
+  "variants": [
+    "small",
+    "large",
+    "combined",
+    "bigmed-native",
+    "underthesea"
+  ],
+  "composition": {
+    "cases": 100,
+    "families": 48,
+    "negativeCases": 24,
+    "values": 142,
+    "criticalValues": 65,
+    "representations": {
+      "prose": 24,
+      "labelled-text": 24,
+      "simulated-extraction": 24,
+      "long-text": 4,
+      "ordinary-text": 24
+    },
+    "types": {
+      "person": 39,
+      "address": 13,
+      "email": 10,
+      "phone": 12,
+      "account": 10,
+      "identity": 9,
+      "passport": 3,
+      "transaction": 3,
+      "tax": 3,
+      "card": 3,
+      "customer": 3,
+      "birthdate": 6,
+      "organization": 7,
+      "username": 6,
+      "password": 6,
+      "apikey": 3,
+      "ip": 6
+    }
+  },
+  "reusedAnnotatedValues": [
+    "4111 1111 1111 1111"
+  ],
+  "partition": "One new synthetic challenge partition. All representations of a record stay together. The prior 262 cases remain observed regressions. This is not independently authored or representative field data. Once scored, this set is observed and must not be recycled as a fresh holdout.",
+  "method": "Two separate sequential Node CPU processes per candidate. Unchanged core, metrics, thresholds and pinned assets. BigMed uses the verified native preprocessing provider. Both model-derived and complete stages; no production changes or candidate tuning. No downloads; fetch blocked during runs.",
+  "gates": {
+    "overall": 0.95,
+    "selectedNameAddressOther": 0.95,
+    "selectedEmailPhoneBanking": 0.99,
+    "perSubtypeUsesCategoryThreshold": true,
+    "shortOrdinaryMaskingMaximum": 0.01,
+    "affectedNegativeCasesMaximum": 1,
+    "requestFailuresMaximum": 0,
+    "criticalCompleteAndSelectedRequired": true,
+    "criticalRegressionAgainstPairAllowed": false,
+    "identicalRepeatRequired": true
+  },
+  "limits": "No final release selection from this test alone. No independent annotation review, real customer data, extraction/source-region proof, packaged app qualification or resource budgets. Repeated variants and runs are not independent samples."
+}
