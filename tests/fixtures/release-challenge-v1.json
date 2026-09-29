@@ -1,0 +1,1024 @@
+[
+  {
+    "id": "complaint-prose",
+    "recordId": "complaint",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Tôi là [[name|Phạm Gia Bảo]], chủ tài khoản [[banking|000748291635]]. Đề nghị gửi kết quả đối soát tới [[email|gia.bao77@example.org]]. Giao dịch 870.000 đồng vẫn đang chờ xử lý.",
+    "entityTypes": [
+      "person",
+      "account",
+      "email"
+    ]
+  },
+  {
+    "id": "complaint-fields",
+    "recordId": "complaint",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Họ tên: [[name|Phạm Gia Bảo]]\nTài khoản: [[banking|000748291635]]\nEmail: [[email|gia.bao77@example.org]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "person",
+      "account",
+      "email"
+    ]
+  },
+  {
+    "id": "complaint-extracted",
+    "recordId": "complaint",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Tôi là [[name|Phạm Gia Bảo]], chủ tài khoản [[banking|000748291635]]. Đề nghị gửi kết quả đối soát tới [[email|gia.bao77@example.org]]. Giao dịch 870.000 đồng vẫn đang chờ xử lý.",
+    "entityTypes": [
+      "person",
+      "account",
+      "email"
+    ]
+  },
+  {
+    "id": "callback-prose",
+    "recordId": "callback",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Vui lòng gọi cho [[name|Bùi Thảo Nhi]] qua số [[phone|0987 654 321]]. Hồ sơ xác minh ghi CCCD [[banking|079204581632]]; không thay đổi hạn mức 15 triệu đồng.",
+    "entityTypes": [
+      "person",
+      "phone",
+      "identity"
+    ]
+  },
+  {
+    "id": "callback-fields",
+    "recordId": "callback",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Khách hàng: [[name|Bùi Thảo Nhi]]\nĐiện thoại: [[phone|0987 654 321]]\nCCCD: [[banking|079204581632]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "person",
+      "phone",
+      "identity"
+    ]
+  },
+  {
+    "id": "callback-extracted",
+    "recordId": "callback",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Vui long goi cho [[name|Bui Thao Nhi]] qua so [[phone|0987 654 321]]. Ho so xac minh ghi CCCD [[banking|079204581632]]; khong thay doi han muc 15 trieu dong.",
+    "entityTypes": [
+      "person",
+      "phone",
+      "identity"
+    ]
+  },
+  {
+    "id": "delivery-prose",
+    "recordId": "delivery",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Người nhận thẻ là [[name|Đỗ Trọng Khang]], ở [[address|42/7 đường Võ Oanh, phường 25, quận Bình Thạnh]]. Liên lạc qua [[phone|0918 234 567]] trước khi giao. Phí giao thẻ là 30.000 đồng.",
+    "entityTypes": [
+      "person",
+      "address",
+      "phone"
+    ]
+  },
+  {
+    "id": "delivery-fields",
+    "recordId": "delivery",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Người nhận: [[name|Đỗ Trọng Khang]]\nĐịa chỉ: [[address|42/7 đường Võ Oanh, phường 25, quận Bình Thạnh]]\nĐiện thoại: [[phone|0918 234 567]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "person",
+      "address",
+      "phone"
+    ]
+  },
+  {
+    "id": "delivery-extracted",
+    "recordId": "delivery",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Người nhận thẻ là [[name|Đỗ\nTrọng Khang]], ở [[address|42/7\nđường Võ Oanh, phường 25, quận Bình Thạnh]]. Liên lạc qua [[phone|0918 234 567]] trước khi giao. Phí giao thẻ là 30.000 đồng.",
+    "entityTypes": [
+      "person",
+      "address",
+      "phone"
+    ]
+  },
+  {
+    "id": "transfer-prose",
+    "recordId": "transfer",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "[[name|Lê Ánh Dương]] chuyển 6.250.000 đồng cho [[name|Mai Đức Toàn]]. Mã giao dịch [[banking|FT260915847291]] cần được tra soát trong vòng 3 ngày.",
+    "entityTypes": [
+      "person",
+      "person",
+      "transaction"
+    ]
+  },
+  {
+    "id": "transfer-fields",
+    "recordId": "transfer",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Người chuyển: [[name|Lê Ánh Dương]]\nNgười nhận: [[name|Mai Đức Toàn]]\nMã giao dịch: [[banking|FT260915847291]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "person",
+      "person",
+      "transaction"
+    ]
+  },
+  {
+    "id": "transfer-extracted",
+    "recordId": "transfer",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "📄\n[[name|Lê Ánh Dương]] chuyển 6.250.000 đồng cho [[name|Mai Đức Toàn]].\nMã giao dịch [[banking|FT260915847291]] cần được tra soát trong vòng 3 ngày.",
+    "entityTypes": [
+      "person",
+      "person",
+      "transaction"
+    ]
+  },
+  {
+    "id": "identity-prose",
+    "recordId": "identity",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Hồ sơ của [[name|Trần Ngọc Diệp]] ghi CMND [[banking|273849156]], sinh ngày [[other|21/04/1987]]. Hồ sơ được bổ sung vào ngày 15/09/2026.",
+    "entityTypes": [
+      "person",
+      "identity",
+      "birthdate"
+    ]
+  },
+  {
+    "id": "identity-fields",
+    "recordId": "identity",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Họ tên: [[name|Trần Ngọc Diệp]]\nCMND: [[banking|273849156]]\nNgày sinh: [[other|21/04/1987]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "person",
+      "identity",
+      "birthdate"
+    ]
+  },
+  {
+    "id": "identity-extracted",
+    "recordId": "identity",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Hồ sơ của [[name|Trần Ngọc Diệp]] ghi CMND [[banking|273849156]], sinh ngày [[other|21/04/1987]]. Hồ sơ được bổ sung vào ngày 15/09/2026.",
+    "entityTypes": [
+      "person",
+      "identity",
+      "birthdate"
+    ]
+  },
+  {
+    "id": "passport-prose",
+    "recordId": "passport",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Khách hàng [[name|Ngô Tuấn Kiệt]] xuất trình hộ chiếu [[banking|C8472916]]. Bản xác nhận cần gửi tới [[email|tuan.kiet+hoso@example.net]]; lệ phí đã được thanh toán.",
+    "entityTypes": [
+      "person",
+      "passport",
+      "email"
+    ]
+  },
+  {
+    "id": "passport-fields",
+    "recordId": "passport",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Khách hàng: [[name|Ngô Tuấn Kiệt]]\nHộ chiếu: [[banking|C8472916]]\nEmail: [[email|tuan.kiet+hoso@example.net]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "person",
+      "passport",
+      "email"
+    ]
+  },
+  {
+    "id": "passport-extracted",
+    "recordId": "passport",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Khach hang [[name|Ngo Tuan Kiet]] xuat trinh ho chieu [[banking|C8472916]]. Ban xac nhan can gui toi [[email|tuan.kiet+hoso@example.net]]; le phi da duoc thanh toan.",
+    "entityTypes": [
+      "person",
+      "passport",
+      "email"
+    ]
+  },
+  {
+    "id": "address-prose",
+    "recordId": "address",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "[[name|Vũ Hồng Phúc]] đề nghị cập nhật nơi thường trú thành [[address|118 đường Trần Quang Diệu, phường An Hải Tây, quận Sơn Trà, Đà Nẵng]]. Ngày áp dụng là 16/09/2026.",
+    "entityTypes": [
+      "person",
+      "address"
+    ]
+  },
+  {
+    "id": "address-fields",
+    "recordId": "address",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Người đăng ký: [[name|Vũ Hồng Phúc]]\nĐịa chỉ thường trú: [[address|118 đường Trần Quang Diệu, phường An Hải Tây, quận Sơn Trà, Đà Nẵng]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "person",
+      "address"
+    ]
+  },
+  {
+    "id": "address-extracted",
+    "recordId": "address",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "[[name|Vũ\nHồng Phúc]] đề nghị cập nhật nơi thường trú thành [[address|118\nđường Trần Quang Diệu, phường An Hải Tây, quận Sơn Trà, Đà Nẵng]]. Ngày áp dụng là 16/09/2026.",
+    "entityTypes": [
+      "person",
+      "address"
+    ]
+  },
+  {
+    "id": "company-prose",
+    "recordId": "company",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Hồ sơ doanh nghiệp [[other|Công ty TNHH Gốm Mộc Lam]] có mã số thuế [[banking|0318472956]]. Đề nghị hoàn tiền vào tài khoản [[banking|001672948305]]. Số tiền hoàn là 2.450.000 đồng.",
+    "entityTypes": [
+      "organization",
+      "tax",
+      "account"
+    ]
+  },
+  {
+    "id": "company-fields",
+    "recordId": "company",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Đơn vị: [[other|Công ty TNHH Gốm Mộc Lam]]\nMã số thuế: [[banking|0318472956]]\nTài khoản: [[banking|001672948305]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "organization",
+      "tax",
+      "account"
+    ]
+  },
+  {
+    "id": "company-extracted",
+    "recordId": "company",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "📄\nHồ sơ doanh nghiệp [[other|Công ty TNHH Gốm Mộc Lam]] có mã số thuế [[banking|0318472956]].\nĐề nghị hoàn tiền vào tài khoản [[banking|001672948305]].\nSố tiền hoàn là 2.450.000 đồng.",
+    "entityTypes": [
+      "organization",
+      "tax",
+      "account"
+    ]
+  },
+  {
+    "id": "access-prose",
+    "recordId": "access",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Nhật ký kiểm thử ghi tên đăng nhập [[other|nv_quay_827]], mật khẩu [[other|DemoOnly!K7r2v9]], kết nối từ IP [[other|192.0.2.83]]. Đây là tình huống giả lập, không phải thông tin truy cập thật.",
+    "entityTypes": [
+      "username",
+      "password",
+      "ip"
+    ]
+  },
+  {
+    "id": "access-fields",
+    "recordId": "access",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Tên đăng nhập: [[other|nv_quay_827]]\nMật khẩu: [[other|DemoOnly!K7r2v9]]\nIP: [[other|192.0.2.83]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "username",
+      "password",
+      "ip"
+    ]
+  },
+  {
+    "id": "access-extracted",
+    "recordId": "access",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Nhật ký kiểm thử ghi tên đăng nhập [[other|nv_quay_827]], mật khẩu [[other|DemoOnly!K7r2v9]], kết nối từ IP [[other|192.0.2.83]]. Đây là tình huống giả lập, không phải thông tin truy cập thật.",
+    "entityTypes": [
+      "username",
+      "password",
+      "ip"
+    ]
+  },
+  {
+    "id": "api-prose",
+    "recordId": "api",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Cấu hình kiểm thử chứa API key [[other|demo_9d3a71b8c52e46f0]]. Yêu cầu tới từ địa chỉ IP [[other|2001:db8:4a::27]]; hệ thống trả mã HTTP 200.",
+    "entityTypes": [
+      "apikey",
+      "ip"
+    ]
+  },
+  {
+    "id": "api-fields",
+    "recordId": "api",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "API key: [[other|demo_9d3a71b8c52e46f0]]\nIP: [[other|2001:db8:4a::27]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "apikey",
+      "ip"
+    ]
+  },
+  {
+    "id": "api-extracted",
+    "recordId": "api",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Cau hinh kiem thu chua API key [[other|demo_9d3a71b8c52e46f0]]. Yeu cau toi tu dia chi IP [[other|2001:db8:4a::27]]; he thong tra ma HTTP 200.",
+    "entityTypes": [
+      "apikey",
+      "ip"
+    ]
+  },
+  {
+    "id": "card-prose",
+    "recordId": "card",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Chủ thẻ [[name|Đặng Thiên An]] yêu cầu kiểm tra số thẻ thử nghiệm [[banking|4111 1111 1111 1111]]. Tổng phí kỳ này là 120.000 đồng.",
+    "entityTypes": [
+      "person",
+      "card"
+    ]
+  },
+  {
+    "id": "card-fields",
+    "recordId": "card",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Chủ thẻ: [[name|Đặng Thiên An]]\nSố thẻ: [[banking|4111 1111 1111 1111]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "person",
+      "card"
+    ]
+  },
+  {
+    "id": "card-extracted",
+    "recordId": "card",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Chủ thẻ [[name|Đặng\nThiên An]] yêu cầu kiểm tra số thẻ thử nghiệm [[banking|4111 1111 1111 1111]]. Tổng phí kỳ này là 120.000 đồng.",
+    "entityTypes": [
+      "person",
+      "card"
+    ]
+  },
+  {
+    "id": "customer-code-prose",
+    "recordId": "customer-code",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Hồ sơ của [[name|Hoàng Bích Ngân]] có mã khách hàng [[banking|CIF00847291]]. Số điện thoại đăng ký là [[phone|0906 345 789]]. Khách đề nghị nâng hạn mức vào tháng sau.",
+    "entityTypes": [
+      "person",
+      "customer",
+      "phone"
+    ]
+  },
+  {
+    "id": "customer-code-fields",
+    "recordId": "customer-code",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Khách hàng: [[name|Hoàng Bích Ngân]]\nMã khách hàng: [[banking|CIF00847291]]\nSố điện thoại: [[phone|0906 345 789]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "person",
+      "customer",
+      "phone"
+    ]
+  },
+  {
+    "id": "customer-code-extracted",
+    "recordId": "customer-code",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "📄\nHồ sơ của [[name|Hoàng Bích Ngân]] có mã khách hàng [[banking|CIF00847291]].\nSố điện thoại đăng ký là [[phone|0906 345 789]].\nKhách đề nghị nâng hạn mức vào tháng sau.",
+    "entityTypes": [
+      "person",
+      "customer",
+      "phone"
+    ]
+  },
+  {
+    "id": "person-short-prose",
+    "recordId": "person-short",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Người liên hệ về hồ sơ này là [[name|Tạ Uyên Chi]]. Vui lòng kiểm tra các chứng từ đính kèm.",
+    "entityTypes": [
+      "person"
+    ]
+  },
+  {
+    "id": "person-short-fields",
+    "recordId": "person-short",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Người liên hệ: [[name|Tạ Uyên Chi]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "person"
+    ]
+  },
+  {
+    "id": "person-short-extracted",
+    "recordId": "person-short",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Người liên hệ về hồ sơ này là [[name|Tạ Uyên Chi]]. Vui lòng kiểm tra các chứng từ đính kèm.",
+    "entityTypes": [
+      "person"
+    ]
+  },
+  {
+    "id": "person-uppercase-prose",
+    "recordId": "person-uppercase",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "[[name|ĐOÀN QUỐC BÌNH]] đã phản hồi rằng khoản hoàn tiền chưa xuất hiện trong sao kê.",
+    "entityTypes": [
+      "person"
+    ]
+  },
+  {
+    "id": "person-uppercase-fields",
+    "recordId": "person-uppercase",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Họ tên: [[name|ĐOÀN QUỐC BÌNH]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "person"
+    ]
+  },
+  {
+    "id": "person-uppercase-extracted",
+    "recordId": "person-uppercase",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "[[name|DOAN QUOC BINH]] da phan hoi rang khoan hoan tien chua xuat hien trong sao ke.",
+    "entityTypes": [
+      "person"
+    ]
+  },
+  {
+    "id": "address-rural-prose",
+    "recordId": "address-rural",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Khách đề nghị gửi thông báo về [[address|thôn Phú Lộc, xã Hòa Thắng, huyện Bắc Bình, Bình Thuận]]. Không gửi thêm bản giấy tới văn phòng.",
+    "entityTypes": [
+      "address"
+    ]
+  },
+  {
+    "id": "address-rural-fields",
+    "recordId": "address-rural",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Địa chỉ: [[address|thôn Phú Lộc, xã Hòa Thắng, huyện Bắc Bình, Bình Thuận]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "address"
+    ]
+  },
+  {
+    "id": "address-rural-extracted",
+    "recordId": "address-rural",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Khách đề nghị gửi thông báo về [[address|thôn\nPhú Lộc, xã Hòa Thắng, huyện Bắc Bình, Bình Thuận]]. Không gửi thêm bản giấy tới văn phòng.",
+    "entityTypes": [
+      "address"
+    ]
+  },
+  {
+    "id": "address-apartment-prose",
+    "recordId": "address-apartment",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Nơi ở hiện tại được cập nhật thành [[address|căn 1208, tòa B2, 63 đường Nguyễn Cơ Thạch, Hà Nội]]. Thời hạn xử lý còn 2 ngày làm việc.",
+    "entityTypes": [
+      "address"
+    ]
+  },
+  {
+    "id": "address-apartment-fields",
+    "recordId": "address-apartment",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Nơi ở: [[address|căn 1208, tòa B2, 63 đường Nguyễn Cơ Thạch, Hà Nội]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "address"
+    ]
+  },
+  {
+    "id": "address-apartment-extracted",
+    "recordId": "address-apartment",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "📄\nNơi ở hiện tại được cập nhật thành [[address|căn 1208, tòa B2, 63 đường Nguyễn Cơ Thạch, Hà Nội]].\nThời hạn xử lý còn 2 ngày làm việc.",
+    "entityTypes": [
+      "address"
+    ]
+  },
+  {
+    "id": "email-punctuation-prose",
+    "recordId": "email-punctuation",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Có thể gửi hồ sơ tới ([[email|ho.so_827@example.com]]), kèm bản đối chiếu đã kiểm tra.",
+    "entityTypes": [
+      "email"
+    ]
+  },
+  {
+    "id": "email-punctuation-fields",
+    "recordId": "email-punctuation",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Email: [[email|ho.so_827@example.com]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "email"
+    ]
+  },
+  {
+    "id": "email-punctuation-extracted",
+    "recordId": "email-punctuation",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Có thể gửi hồ sơ tới ([[email|ho.so_827@example.com]]), kèm bản đối chiếu đã kiểm tra.",
+    "entityTypes": [
+      "email"
+    ]
+  },
+  {
+    "id": "phone-country-prose",
+    "recordId": "phone-country",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Số liên lạc quốc tế của khách là [[phone|+84 934 567 821]]; chỉ gọi trong giờ hành chính.",
+    "entityTypes": [
+      "phone"
+    ]
+  },
+  {
+    "id": "phone-country-fields",
+    "recordId": "phone-country",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Điện thoại: [[phone|+84 934 567 821]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "phone"
+    ]
+  },
+  {
+    "id": "phone-country-extracted",
+    "recordId": "phone-country",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "So lien lac quoc te cua khach la [[phone|+84 934 567 821]]; chi goi trong gio hanh chinh.",
+    "entityTypes": [
+      "phone"
+    ]
+  },
+  {
+    "id": "account-leading-zero-prose",
+    "recordId": "account-leading-zero",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Khách xác nhận STK [[banking|000091628473]] là nơi nhận tiền. Số dư tối thiểu là 50.000 đồng.",
+    "entityTypes": [
+      "account"
+    ]
+  },
+  {
+    "id": "account-leading-zero-fields",
+    "recordId": "account-leading-zero",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "STK: [[banking|000091628473]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "account"
+    ]
+  },
+  {
+    "id": "account-leading-zero-extracted",
+    "recordId": "account-leading-zero",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Khách xác nhận STK [[banking|000091628473]] là nơi nhận tiền. Số dư tối thiểu là 50.000 đồng.",
+    "entityTypes": [
+      "account"
+    ]
+  },
+  {
+    "id": "identity-leading-zero-prose",
+    "recordId": "identity-leading-zero",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Đề nghị kiểm tra CCCD [[banking|001196482735]] trước khi duyệt hồ sơ. Bản sao được nộp hôm qua.",
+    "entityTypes": [
+      "identity"
+    ]
+  },
+  {
+    "id": "identity-leading-zero-fields",
+    "recordId": "identity-leading-zero",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "CCCD: [[banking|001196482735]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "identity"
+    ]
+  },
+  {
+    "id": "identity-leading-zero-extracted",
+    "recordId": "identity-leading-zero",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "📄\nĐề nghị kiểm tra CCCD [[banking|001196482735]] trước khi duyệt hồ sơ.\nBản sao được nộp hôm qua.",
+    "entityTypes": [
+      "identity"
+    ]
+  },
+  {
+    "id": "birthdate-words-prose",
+    "recordId": "birthdate-words",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Ngày sinh của khách được ghi là [[other|ngày 7 tháng 11 năm 1992]]. Ngày hẹn trả kết quả là 18/09/2026.",
+    "entityTypes": [
+      "birthdate"
+    ]
+  },
+  {
+    "id": "birthdate-words-fields",
+    "recordId": "birthdate-words",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Ngày sinh: [[other|ngày 7 tháng 11 năm 1992]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "birthdate"
+    ]
+  },
+  {
+    "id": "birthdate-words-extracted",
+    "recordId": "birthdate-words",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Ngày sinh của khách được ghi là [[other|ngày 7 tháng 11 năm 1992]]. Ngày hẹn trả kết quả là 18/09/2026.",
+    "entityTypes": [
+      "birthdate"
+    ]
+  },
+  {
+    "id": "organization-prose",
+    "recordId": "organization",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Đề nghị lập hồ sơ chi trả cho [[other|Hợp tác xã Nông sản Suối Mơ]]. Tổng số chứng từ là 24, tổng giá trị là 68 triệu đồng.",
+    "entityTypes": [
+      "organization"
+    ]
+  },
+  {
+    "id": "organization-fields",
+    "recordId": "organization",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Đơn vị: [[other|Hợp tác xã Nông sản Suối Mơ]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "organization"
+    ]
+  },
+  {
+    "id": "organization-extracted",
+    "recordId": "organization",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "De nghi lap ho so chi tra cho [[other|Hop tac xa Nong san Suoi Mo]]. Tong so chung tu la 24, tong gia tri la 68 trieu dong.",
+    "entityTypes": [
+      "organization"
+    ]
+  },
+  {
+    "id": "password-prose",
+    "recordId": "password",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Trong kịch bản giả lập, khách đã dán mật khẩu [[other|OnlyForTest#6pZ4]] vào nội dung yêu cầu. Không sử dụng chuỗi này cho tài khoản thật.",
+    "entityTypes": [
+      "password"
+    ]
+  },
+  {
+    "id": "password-fields",
+    "recordId": "password",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Mật khẩu: [[other|OnlyForTest#6pZ4]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "password"
+    ]
+  },
+  {
+    "id": "password-extracted",
+    "recordId": "password",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "Trong kịch bản giả lập, khách đã dán mật khẩu [[other|OnlyForTest#6pZ4]] vào nội dung yêu cầu. Không sử dụng chuỗi này cho tài khoản thật.",
+    "entityTypes": [
+      "password"
+    ]
+  },
+  {
+    "id": "username-prose",
+    "recordId": "username",
+    "representation": "prose",
+    "group": "short",
+    "annotated": "Yêu cầu khôi phục quyền truy cập cho tên đăng nhập [[other|kh_demo_5842]]. Thời gian chờ xử lý là 30 phút.",
+    "entityTypes": [
+      "username"
+    ]
+  },
+  {
+    "id": "username-fields",
+    "recordId": "username",
+    "representation": "labelled-text",
+    "group": "short",
+    "annotated": "Tên đăng nhập: [[other|kh_demo_5842]]\nSố hồ sơ đã xử lý: 18. Số tiền: 4.600.000 đồng.",
+    "entityTypes": [
+      "username"
+    ]
+  },
+  {
+    "id": "username-extracted",
+    "recordId": "username",
+    "representation": "simulated-extraction",
+    "group": "short",
+    "annotated": "📄\nYêu cầu khôi phục quyền truy cập cho tên đăng nhập [[other|kh_demo_5842]].\nThời gian chờ xử lý là 30 phút.",
+    "entityTypes": [
+      "username"
+    ]
+  },
+  {
+    "id": "complaint-long",
+    "recordId": "complaint",
+    "representation": "long-text",
+    "group": "long",
+    "annotated": "Tôi là [[name|Phạm Gia Bảo]], chủ tài khoản [[banking|000748291635]]. Đề nghị gửi kết quả đối soát tới [[email|gia.bao77@example.org]]. Giao dịch 870.000 đồng vẫn đang chờ xử lý.",
+    "entityTypes": [
+      "person",
+      "account",
+      "email"
+    ],
+    "prefixRepeat": 160
+  },
+  {
+    "id": "address-long",
+    "recordId": "address",
+    "representation": "long-text",
+    "group": "long",
+    "annotated": "[[name|Vũ Hồng Phúc]] đề nghị cập nhật nơi thường trú thành [[address|118 đường Trần Quang Diệu, phường An Hải Tây, quận Sơn Trà, Đà Nẵng]]. Ngày áp dụng là 16/09/2026.",
+    "entityTypes": [
+      "person",
+      "address"
+    ],
+    "prefixRepeat": 160
+  },
+  {
+    "id": "person-short-long",
+    "recordId": "person-short",
+    "representation": "long-text",
+    "group": "long",
+    "annotated": "Người liên hệ về hồ sơ này là [[name|Tạ Uyên Chi]]. Vui lòng kiểm tra các chứng từ đính kèm.",
+    "entityTypes": [
+      "person"
+    ],
+    "prefixRepeat": 160
+  },
+  {
+    "id": "organization-long",
+    "recordId": "organization",
+    "representation": "long-text",
+    "group": "long",
+    "annotated": "Đề nghị lập hồ sơ chi trả cho [[other|Hợp tác xã Nông sản Suối Mơ]]. Tổng số chứng từ là 24, tổng giá trị là 68 triệu đồng.",
+    "entityTypes": [
+      "organization"
+    ],
+    "prefixRepeat": 160
+  },
+  {
+    "id": "negative-01",
+    "recordId": "negative-01",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Tổng số giao dịch: 128. Tổng tiền: 76.420.000 đồng. Chênh lệch: 0 đồng.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-02",
+    "recordId": "negative-02",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Ngày giao dịch: 15/09/2026. Ngày hạch toán: 16/09/2026. Không có hồ sơ quá hạn.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-03",
+    "recordId": "negative-03",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Lãi suất 5,8% mỗi năm; kỳ hạn 12 tháng. Phí duy trì 11.000 đồng mỗi tháng.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-04",
+    "recordId": "negative-04",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Số lượng tài khoản mới trong tháng là 120; số tài khoản đã đóng là 8.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-05",
+    "recordId": "negative-05",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Báo cáo không chứa họ tên, email, số điện thoại hay số tài khoản của khách.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-06",
+    "recordId": "negative-06",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "CCCD: chưa cung cấp\nSTK: chưa cập nhật\nEmail: không có\nĐiện thoại: đang bổ sung",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-07",
+    "recordId": "negative-07",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Mật khẩu phải có ít nhất 12 ký tự. Không ghi mật khẩu vào biên bản.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-08",
+    "recordId": "negative-08",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "API key chưa được cấp. Tên đăng nhập đang để trống. Không có địa chỉ IP trong báo cáo.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-09",
+    "recordId": "negative-09",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Địa chỉ nhận thẻ sẽ được khách bổ sung sau. Nhân viên chưa xác nhận nơi cư trú.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-10",
+    "recordId": "negative-10",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Mã HTTP 404 cho biết tài nguyên không tồn tại. Phiên bản phần mềm: 1.4.2.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-11",
+    "recordId": "negative-11",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Hàng hóa: 120 thùng; đơn giá: 275.000 đồng; thành tiền: 33.000.000 đồng.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-12",
+    "recordId": "negative-12",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Thời gian phục vụ từ 08:00 đến 17:00, nghỉ trưa 12:00 đến 13:00.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-13",
+    "recordId": "negative-13",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Hồ sơ số 17 trong danh sách cần thêm chứng từ. Có 3 mục chưa hoàn tất.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-14",
+    "recordId": "negative-14",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Dòng 15, cột 8 bị thiếu dữ liệu. Trang 2 gồm 24 dòng, trang 3 gồm 18 dòng.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-15",
+    "recordId": "negative-15",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Chuyển khoản nội bộ không thu phí. Giao dịch liên ngân hàng áp dụng biểu phí mới.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-16",
+    "recordId": "negative-16",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Khách hàng đồng ý nhận kết quả sau ba ngày làm việc và không yêu cầu bản giấy.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-17",
+    "recordId": "negative-17",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Tỷ lệ hồ sơ đầy đủ tăng từ 92% lên 96%. Có 4% hồ sơ cần bổ sung.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-18",
+    "recordId": "negative-18",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Han muc moi la 50 trieu dong. Thoi gian duyet ho so toi da 2 ngay lam viec.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-19",
+    "recordId": "negative-19",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Đối chiếu đã hoàn tất. Không phát hiện chênh lệch số tiền hoặc số lượng chứng từ.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-20",
+    "recordId": "negative-20",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "📊 Báo cáo quý III\nDoanh thu: 185.700.000 đồng\nChi phí: 82.300.000 đồng",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-21",
+    "recordId": "negative-21",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "STK là viết tắt của số tài khoản. CCCD là tên một loại giấy tờ định danh.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-22",
+    "recordId": "negative-22",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Họ tên | Địa chỉ | Số điện thoại\n(chưa nhập) | (chưa nhập) | (chưa nhập)",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-23",
+    "recordId": "negative-23",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Tên đăng nhập không được chứa khoảng trắng. Địa chỉ email phải đúng định dạng.",
+    "entityTypes": []
+  },
+  {
+    "id": "negative-24",
+    "recordId": "negative-24",
+    "representation": "ordinary-text",
+    "group": "short",
+    "annotated": "Khoản vay có kỳ hạn 36 tháng, gốc 240 triệu đồng; thanh toán vào ngày 10 hằng tháng.",
+    "entityTypes": []
+  }
+]
