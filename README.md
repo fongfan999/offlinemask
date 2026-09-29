@@ -12,9 +12,9 @@ The owner accepted the current UI as **good enough for the boilerplate**, with p
 
 The desktop boilerplate uses **Tauri 2 + Vue 3 + TypeScript + Vite**, with pnpm for frontend dependencies and a focused Rust layer for native integration. Node, pnpm, and Rust versions are pinned in `mise.toml`.
 
-The home page offers **Text and Excel sample workspaces**, with other formats marked coming soon. Every sample conversion creates a separate session in the left sidebar. Sessions and mask/keep choices survive reloads and app restarts on the same device. Only fixture references and choices are stored; this is not a private-data vault. Excel currently provides a sample table with tab-separated clipboard output, not XLSX import/export.
+The home page offers **real text processing and an Excel sample workspace**, with other formats marked coming soon. Type or paste text, process it locally, review the original and masked preview, adjust mask/keep choices, and copy the result. Each conversion creates a separate sidebar session. Private text stays in memory and clears on close/reload; only synthetic sample sessions persist. Excel provides a sample table with tab-separated clipboard output, not XLSX import/export. See [text detection and model setup](docs/decisions/0005-library-text-detection.md) and [session storage boundaries](docs/decisions/0004-text-processing.md).
 
-The interface uses standard CSS glass surfaces with shared tokens and a blue/white palette. No glass library or remote UI assets are required. Real-input detection, file adapters, encrypted storage, and restoration remain unimplemented.
+The interface uses standard CSS glass surfaces with shared tokens and a blue/white palette. No glass library or remote UI assets are required. Text detection uses contact-parsing libraries and optional Vietnamese models downloaded through Settings, with documented gaps; it is not comprehensive detection. File adapters, encrypted storage, and restoration remain unimplemented.
 
 OfflineMask is **intended to be open source**. The owner must select a license before publication; no license has been granted yet. See [contribution guidance](CONTRIBUTING.md) and the [workspace/design decision](docs/decisions/0002-workspace-and-glass.md).
 
@@ -43,10 +43,20 @@ With mise activated in your shell, you can use `pnpm desktop:dev` directly. `mis
 | --- | --- |
 | `mise exec -- pnpm dev` | Browser preview at localhost:1420; no native APIs. |
 | `mise exec -- pnpm typecheck` | Check Vue, TypeScript, and Vite configuration. |
-| `mise exec -- pnpm test` | Check sample transformations and the review gate. |
-| `mise exec -- pnpm build` | Type check and build frontend assets. |
+| `mise exec -- pnpm test` | Check text detection, transformations, session isolation, storage boundaries, and sample review. |
+| `mise exec -- pnpm models:download` | Optional developer download of pinned model assets for model evaluations. |
+| `mise exec -- pnpm models:check` | Verify local model hashes; no downloads. |
+| `mise exec -- pnpm test:models` | Run synthetic regressions against real local model weights. |
+| `mise exec -- pnpm compare:models` | Compare each pinned model and the pair on 66 synthetic cases; write coverage, failure, CPU timing and peak-memory reports locally. |
+| `mise exec -- pnpm build` | Prepare local WASM, type check, and build frontend assets without model weights. |
 | `mise exec -- pnpm check:native` | Rust formatting and Clippy checks. |
 | `mise exec -- pnpm desktop:build` | Build desktop release and platform bundles. |
 | `mise exec -- pnpm tauri build --bundles app -- --locked` | Build a macOS app using the Cargo lockfile. |
+
+The default app includes **no model weights**. Email, phone, and labelled banking identifiers work immediately. Settings explicitly downloads one optional **Vietnamese recognition pack: 712 MB transferred, 1.14 GB installed**. It contains Underthesea INT8 + OpenMed mSuperClinical INT8. Downloads support pause/resume; transport and restored files are verified before the complete pack becomes ready. Startup and text processing do not access the Internet. See [pack delivery](docs/decisions/0041-compressed-pack-installer-and-r2.md) and [production integration](docs/decisions/0042-production-recognition-pair.md).
+
+The production adapter matches the selected pair’s **398 recorded synthetic outcomes** on CPU, including category-specific masking; 386 independent records cover 500 annotated values, of which 495 are fully covered under their correct category. Known misses and unwanted masking remain. This is integration parity, not 100% detection, real banking accuracy, or completion of the previous quality gates. Review results before sharing. See [evidence and platform limitations](docs/evaluations/recognition-production-v1/README.md).
+
+Developers can run `mise exec -- pnpm models:download` for the historical OpenMed evaluation baseline. The shipping pack is pinned separately in `scripts/release-pack-v1.json`. These assets stay in ignored `public/models/` and are excluded from both frontend and desktop production builds. They are not required to build or test the lightweight flow.
 
 Keep `pnpm-lock.yaml` and `src-tauri/Cargo.lock` in version control. Tool installation and initial dependency downloads require a network connection; this is separate from the application's offline runtime requirement.
