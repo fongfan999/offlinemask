@@ -1,0 +1,86 @@
+{
+  "recordedAt": "2026-09-19T13:50:23.835Z",
+  "reviewer": "project owner via conversation",
+  "responseVerbatim": "Agree 13–18",
+  "protocolSha256": "45da712e6cd6fee44c5073004a99aac1e7785f795710e40e3096caedb22418ee",
+  "originalLedgerSha256": "faeaeba099316903789b38cd2d46f9a33fe26abbe6f7ddf2855fedd52b26d79c",
+  "previousApproval": {
+    "path": "02-examples-07-12.json",
+    "sha256": "5a94ff4d67b1514239e7bf97af38bf2f50ccd031ff0275a242b22ef65f23b0e1"
+  },
+  "approvals": [
+    {
+      "id": "rv13",
+      "number": 13,
+      "textSha256": "a06d3bc2ba307e2586522aba62eb0c46a339d0cb92dccea4474fc12462d2947a",
+      "annotationSha256": "76f35125c022c5d21b83f2a974cb56a06186a1874fee0a8eef38095fe9f276ac",
+      "status": "APPROVED"
+    },
+    {
+      "id": "rv14",
+      "number": 14,
+      "textSha256": "37f5fb3c89fd132f50008b6b31ba4b73f4c59043f526a7006ff8794c76ef8013",
+      "annotationSha256": "526439c9ba91cbfa259776469b1224cdb9f5a7d8cb78b04c00df50fb4b964b06",
+      "status": "APPROVED"
+    },
+    {
+      "id": "rv15",
+      "number": 15,
+      "textSha256": "064065b219ecbbcd13d0b97195c4d4b8f5b1ddf77a64ef895848150aac4295eb",
+      "annotationSha256": "aa054506561fb9771bd35e8f9bd648cb2054f14a077c4785478a7672733c26f3",
+      "status": "APPROVED"
+    },
+    {
+      "id": "rv16",
+      "number": 16,
+      "textSha256": "ef66accdac650e28cc0cef89b48876416f9f87457acdbc99f482f53fe0b56553",
+      "annotationSha256": "446ee6ae80700db16cc2434ece90fae778ea109edac2016ba3ce63376f3d2ce9",
+      "status": "APPROVED"
+    },
+    {
+      "id": "rv17",
+      "number": 17,
+      "textSha256": "05446c6866da7cd653095e4d74888394165d93b09df9e5f1c38c9301d20ecb6b",
+      "annotationSha256": "d2581ed658f2ce1b922819b3489c093b105cef8d5297daababf6fe68ad41e6ff",
+      "status": "APPROVED"
+    },
+    {
+      "id": "rv18",
+      "number": 18,
+      "textSha256": "0384ed63665430c752f53ffc64cc63cea651f9c436d7c5b049e971e36900d1ec",
+      "annotationSha256": "0cf6524417c712c1a1e8b7e1b77c5e820afe2d75fac1d48fb0c80438daf02814",
+      "status": "APPROVED"
+    }
+  ],
+  "approvedNumbersToDate": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18
+  ],
+  "pendingNumbers": [
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+  ],
+  "status": "PARTIALLY_REVIEWED",
+  "modelRuns": 0,
+  "scope": "Approval of exact proposed text and masking annotations for examples 13–18 only; earlier 1–12 approvals retained. No model execution or release approval inferred."
+}

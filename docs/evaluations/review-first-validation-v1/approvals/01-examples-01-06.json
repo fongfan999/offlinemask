@@ -1,0 +1,74 @@
+{
+  "recordedAt": "2026-09-19T13:48:14.417Z",
+  "reviewer": "project owner via conversation",
+  "responseVerbatim": "Agree 1–6",
+  "protocolSha256": "45da712e6cd6fee44c5073004a99aac1e7785f795710e40e3096caedb22418ee",
+  "originalLedgerSha256": "faeaeba099316903789b38cd2d46f9a33fe26abbe6f7ddf2855fedd52b26d79c",
+  "approvals": [
+    {
+      "id": "rv01",
+      "number": 1,
+      "textSha256": "7b9d27029907e2fa6131f932853c8d86fc7324c423cce44c719ea2bfb5e4ee50",
+      "annotationSha256": "77830c0eb4243fc3bbfeffc1b4314a001afbb3c12697334cc3f282aa35e1e4f1",
+      "status": "APPROVED"
+    },
+    {
+      "id": "rv02",
+      "number": 2,
+      "textSha256": "e3df179aecf39c76efff1217485c7d2f2280a8c4a5f6f4f20d1ec34e209bcf63",
+      "annotationSha256": "0ed3cb3e7a4eda52fb3abdce5e5b958722c897e869d79f5ed9a7de7191ee6c57",
+      "status": "APPROVED"
+    },
+    {
+      "id": "rv03",
+      "number": 3,
+      "textSha256": "78cbefa5885f5c6a151bf3548e8647e22776962b0991fb0e1f619e6b0f915ac6",
+      "annotationSha256": "aa9ad8f51153f6de380080e63aa95d198fc93f19d0bfd6ebb0099512f36a6b64",
+      "status": "APPROVED"
+    },
+    {
+      "id": "rv04",
+      "number": 4,
+      "textSha256": "63669e86a917fd62859cfadc64cb505e9268df3963decb1d48554da14417ae35",
+      "annotationSha256": "18a61220e91d3f76fad9cc1827d1bcfbcafde5df5f72afe0717c451a8b8d21b9",
+      "status": "APPROVED"
+    },
+    {
+      "id": "rv05",
+      "number": 5,
+      "textSha256": "0a459f5b061dfe01eb4f11625aa00bbeb1f70e4bb748598c010cbc3d0405bd94",
+      "annotationSha256": "a9325eea83dd85f5511fcf7d62d3732b6d6f2fee75fdfc291ebebb1aaaa0f84f",
+      "status": "APPROVED"
+    },
+    {
+      "id": "rv06",
+      "number": 6,
+      "textSha256": "0335090f4860e7f03cb1148404078edec1ef8b6f8b623811a4862f090759208f",
+      "annotationSha256": "4d8a121ef3405298027dfc0a9f4e973bdfb1cff950d2aff898317c1034e25dee",
+      "status": "APPROVED"
+    }
+  ],
+  "pendingNumbers": [
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19,
+    20,
+    21,
+    22,
+    23,
+    24
+  ],
+  "status": "PARTIALLY_REVIEWED",
+  "modelRuns": 0,
+  "scope": "Approval of exact proposed text and masking annotations for examples 1–6 only. No model execution or release approval inferred."
+}
