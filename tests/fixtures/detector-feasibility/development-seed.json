@@ -1,0 +1,553 @@
+[
+  {
+    "id": "seed-person",
+    "familyId": "seed-family-person",
+    "templateId": "seed-template-person",
+    "split": "development",
+    "representation": "prose",
+    "annotated": "Khách [[person|Lê Ánh Tường Vy]] đề nghị nhận bản giải thích phí sau khi đối soát.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-address",
+    "familyId": "seed-family-address",
+    "templateId": "seed-template-address",
+    "split": "development",
+    "representation": "prose",
+    "annotated": "Nơi nhận phong bì được sửa thành [[address|căn 7C, số 43/8 đường Mây Trắng, phường An Bình, Cần Thơ]].",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-organization",
+    "familyId": "seed-family-organization",
+    "templateId": "seed-template-organization",
+    "split": "development",
+    "representation": "prose",
+    "annotated": "Bên ký yêu cầu bổ sung là [[organization|Công ty Cổ phần Dệt Sợi Gió Lành]], thời hạn xử lý ba ngày.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-birthdate",
+    "familyId": "seed-family-birthdate",
+    "templateId": "seed-template-birthdate",
+    "split": "development",
+    "representation": "prose",
+    "annotated": "Khách cho biết mình sinh [[birthdate|ngày 23 tháng 4 năm 1986]]; ngày nhận hồ sơ là 18/09/2026.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-email",
+    "familyId": "seed-family-email",
+    "templateId": "seed-template-email",
+    "split": "development",
+    "representation": "fields",
+    "annotated": "Hộp thư nhận xác nhận: [[email|ho-so.thu@example.net]]; bản gốc giữ tại quầy.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-phone",
+    "familyId": "seed-family-phone",
+    "templateId": "seed-template-phone",
+    "split": "development",
+    "representation": "prose",
+    "annotated": "Số liên hệ thử nghiệm do tác giả đặt: [[phone|0901234786]]; không gọi số này.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-account",
+    "familyId": "seed-family-account",
+    "templateId": "seed-template-account",
+    "split": "development",
+    "representation": "fields",
+    "annotated": "Tài khoản nhận khoản hoàn: [[account|000631472895]]; tổng tiền hoàn 75.000 đồng.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-identity",
+    "familyId": "seed-family-identity",
+    "templateId": "seed-template-identity",
+    "split": "development",
+    "representation": "fields",
+    "annotated": "CCCD được nhập trong bản minh họa: [[identity|079203681452]]; trạng thái đối chiếu chưa hoàn tất.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-passport",
+    "familyId": "seed-family-passport",
+    "templateId": "seed-template-passport",
+    "split": "development",
+    "representation": "prose",
+    "annotated": "Hồ sơ giả lập ghi hộ chiếu [[passport|P6147298]], đề nghị kiểm tra bản sao sau.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-tax",
+    "familyId": "seed-family-tax",
+    "templateId": "seed-template-tax",
+    "split": "development",
+    "representation": "fields",
+    "annotated": "Mã số thuế của bên gửi: [[tax|0316947258-002]]; số chứng từ cần bổ sung: 2.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-transaction",
+    "familyId": "seed-family-transaction",
+    "templateId": "seed-template-transaction",
+    "split": "development",
+    "representation": "prose",
+    "annotated": "Mã giao dịch [[transaction|TX260918A729]] được dùng để tra khoản hoàn trong dữ liệu minh họa.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-customer",
+    "familyId": "seed-family-customer",
+    "templateId": "seed-template-customer",
+    "split": "development",
+    "representation": "fields",
+    "annotated": "Mã khách hàng trong danh sách thử: [[customer|KH-M42-719]]; nhóm xử lý: hồ sơ bổ sung.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-card",
+    "familyId": "seed-family-card",
+    "templateId": "seed-template-card",
+    "split": "development",
+    "representation": "fields",
+    "annotated": "Thẻ thử nghiệm: [[card|4111 1111 1111 1111]]; tuyệt đối không dùng dữ liệu này để giao dịch.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-cvv",
+    "familyId": "seed-family-cvv",
+    "templateId": "seed-template-cvv",
+    "split": "development",
+    "representation": "fields",
+    "annotated": "Mã CVV trong tình huống giả lập: [[cvv|628]]; mã HTTP của trang hướng dẫn: 200.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-pin",
+    "familyId": "seed-family-pin",
+    "templateId": "seed-template-pin",
+    "split": "development",
+    "representation": "prose",
+    "annotated": "Khách gõ mã PIN [[pin|7149]] vào nội dung minh họa; phần này phải được che khi sao chép.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-username",
+    "familyId": "seed-family-username",
+    "templateId": "seed-template-username",
+    "split": "development",
+    "representation": "prose",
+    "annotated": "Tài khoản đăng nhập được ghi là [[username|thu-nghiem.48]] để minh họa lỗi đăng nhập.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-password",
+    "familyId": "seed-family-password",
+    "templateId": "seed-template-password",
+    "split": "development",
+    "representation": "fields",
+    "annotated": "Mật khẩu giả lập: \"[[password|Hoàng! 82#demo]]\"; giữ nguyên câu hướng dẫn bên ngoài dấu ngoặc.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-apikey",
+    "familyId": "seed-family-apikey",
+    "templateId": "seed-template-apikey",
+    "split": "development",
+    "representation": "fields",
+    "annotated": "API key của bài thử: [[apikey|demo_only_Zp76-AB42]]; không kết nối đến dịch vụ nào.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-ip",
+    "familyId": "seed-family-ip",
+    "templateId": "seed-template-ip",
+    "split": "development",
+    "representation": "prose",
+    "annotated": "Phiên truy cập minh họa xuất phát từ [[ip|192.0.2.164]], sau đó chuyển sang [[ip|2001:db8:76::42]].",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-negative-headings",
+    "familyId": "seed-family-negative-headings",
+    "templateId": "seed-template-negative-headings",
+    "split": "development",
+    "representation": "negative",
+    "annotated": "QUY TRÌNH ĐỐI CHIẾU CHỨNG TỪ\nHướng dẫn bổ sung bản sao và kiểm tra chữ ký, chưa có thông tin khách hàng.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-negative-numbers",
+    "familyId": "seed-family-negative-numbers",
+    "templateId": "seed-template-negative-numbers",
+    "split": "development",
+    "representation": "negative",
+    "annotated": "Tổ đã xử lý 46 hồ sơ trong ngày 18/09/2026; tổng phí là 230.000 đồng và lãi suất minh họa 4,8%/năm.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-negative-instructions",
+    "familyId": "seed-family-negative-instructions",
+    "templateId": "seed-template-negative-instructions",
+    "split": "development",
+    "representation": "negative",
+    "annotated": "Không gửi mã PIN hoặc mật khẩu trong thư. Nếu thiếu địa chỉ, để trống trường và yêu cầu người gửi bổ sung.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-negative-location",
+    "familyId": "seed-family-negative-location",
+    "templateId": "seed-template-negative-location",
+    "split": "development",
+    "representation": "negative",
+    "annotated": "Địa chỉ nhận: chưa xác định. Biểu mẫu chỉ hướng dẫn ghi số nhà, tên đường, phường và thành phố.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-negative-tech",
+    "familyId": "seed-family-negative-tech",
+    "templateId": "seed-template-negative-tech",
+    "split": "development",
+    "representation": "negative",
+    "annotated": "Tài liệu kỹ thuật phiên bản 4.8.2 giải thích mã HTTP 401 và thời gian chờ 12:45:30.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-negative-company",
+    "familyId": "seed-family-negative-company",
+    "templateId": "seed-template-negative-company",
+    "split": "development",
+    "representation": "negative",
+    "annotated": "Công ty cần kiểm tra lại thủ tục; hợp tác xã phải gửi bản xác nhận. Văn bản này không ghi tên đơn vị cụ thể.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-negative-scope",
+    "familyId": "seed-family-negative-scope",
+    "templateId": "seed-template-negative-scope",
+    "split": "development",
+    "representation": "negative",
+    "annotated": "Tên người nhận chưa cung cấp; số tài khoản đang chờ bổ sung. Có 3 ô bắt buộc còn trống.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-negative-product",
+    "familyId": "seed-family-negative-product",
+    "templateId": "seed-template-negative-product",
+    "split": "development",
+    "representation": "negative",
+    "annotated": "Danh mục có loại thẻ, số chứng từ và thời hạn lưu trữ; đây là tên các cột, chưa có dòng dữ liệu.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-negative-ambiguous",
+    "familyId": "seed-family-negative-ambiguous",
+    "templateId": "seed-template-negative-ambiguous",
+    "split": "development",
+    "representation": "negative",
+    "annotated": "Ô không có tiêu đề chứa 631472895; không tự suy đoán đây là tài khoản hay số lượng.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  },
+  {
+    "id": "seed-person-nfd",
+    "familyId": "seed-family-person",
+    "templateId": "seed-template-person",
+    "split": "development",
+    "representation": "nfd-prose",
+    "annotated": "📎 Khách [[person|Lê Ánh Tường Vy]] đề nghị nhận bản giải thích phí sau khi đối soát.",
+    "provenance": {
+      "kind": "authored-synthetic",
+      "author": "codex-author-2026-09-18",
+      "createdAt": "2026-09-18",
+      "sourceId": "offlinemask-feasibility-seed-v1",
+      "realRecordsUsed": false
+    },
+    "review": {
+      "status": "author-reviewed",
+      "reviewer": "codex-author-2026-09-18"
+    }
+  }
+]
