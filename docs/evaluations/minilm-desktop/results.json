@@ -1,0 +1,247 @@
+{
+  "createdAt": "2026-09-18T03:48:55.803Z",
+  "gates": {
+    "completed": true,
+    "allBehaviorChecks": true,
+    "packagedParity": true,
+    "cold": true,
+    "warm": false,
+    "long": false,
+    "nativeCancel": true,
+    "workerCancel": true,
+    "sampledMemory": false,
+    "networkDeniedLaunch": true,
+    "preciseProcessTreeMemory": false,
+    "crossPlatform": false,
+    "privacyQuality": false
+  },
+  "budget": {
+    "coldMs": 2565,
+    "warm2kP95Ms": 794,
+    "long50kMs": 19969,
+    "nativeCancelAckMs": 1.9999999999990905,
+    "nativeCancelDrainMs": 22.99999999999909,
+    "workerCancelMs": 0.999999999996362,
+    "heartbeatDelayMs": 33.99999999999977,
+    "sampledFootprintBytes": 2322142080
+  },
+  "report": {
+    "completed": true,
+    "metrics": [
+      {
+        "kind": "cold",
+        "durationMs": 2565,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "parity",
+        "durationMs": 0,
+        "count": 20,
+        "maxError": 2.682209014892578e-7,
+        "passed": true
+      },
+      {
+        "kind": "boundaries",
+        "durationMs": 0,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "cancel_ack",
+        "durationMs": 1.9999999999990905,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "cancel_drain",
+        "durationMs": 22.99999999999909,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "busy",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "stale",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "recovery",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 794,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 766,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 781,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 756,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 789,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 783,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 776,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 775,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 767,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 769,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "long",
+        "durationMs": 19969,
+        "count": 46,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "worker_cancel",
+        "durationMs": 0.999999999996362,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "recovery",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "network",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "heartbeat",
+        "durationMs": 33.99999999999977,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      }
+    ]
+  },
+  "memory": {
+    "samplePeriodMs": 200,
+    "peakRssKiB": 1871136,
+    "peakFootprintBytes": 2322142080,
+    "attribution": "Includes all newly observed WebKit processes during this run; conservative attribution, not precise ownership. Sampling may miss transient peaks."
+  },
+  "intentionalChanges": [
+    {
+      "file": "src-tauri/Cargo.toml",
+      "beforeSha256": "19143db6e89ae6cc8d010a68de80e9f3330fca13a6894d76a3eb5c5ab325fa0d",
+      "afterSha256": "cce388e4f4fd4d83681d4b48f056a420922d6bfba9a5d5a47dc3f6d95a745257"
+    },
+    {
+      "file": "src-tauri/Cargo.lock",
+      "beforeSha256": "dc45b0323139034f5526ddad59c4719934f467c46aacd6a2f99259bf8b8de9ce",
+      "afterSha256": "9fb657f4091385be3e02541541b7af5665eb52de4ddb90ea8521c52f4431995f"
+    },
+    {
+      "file": "src-tauri/src/lib.rs",
+      "beforeSha256": "4f56f953fd88d276f0c60e950a4482d78debe3a8390f987a323fb233c9856638",
+      "afterSha256": "90f4295a39d43128ae7ca1ba005fb874b3e61500ced2b686aaf0997f44336fcf"
+    }
+  ],
+  "sourceHashes": {
+    "src-tauri/Cargo.toml": "cce388e4f4fd4d83681d4b48f056a420922d6bfba9a5d5a47dc3f6d95a745257",
+    "src-tauri/Cargo.lock": "9fb657f4091385be3e02541541b7af5665eb52de4ddb90ea8521c52f4431995f",
+    "src-tauri/src/lib.rs": "90f4295a39d43128ae7ca1ba005fb874b3e61500ced2b686aaf0997f44336fcf",
+    "src-tauri/src/minilm_prototype.rs": "e6d7002b274f3a5f9a22a7d60a93e87253ab98907f2e0e6e10916c9f4955a11c",
+    "scripts/minilm-desktop/build.mjs": "ac4315edaed915e2b6554defdb59f2307e690b114246da5fb1ed61df5f9c2467",
+    "scripts/minilm-desktop/run.py": "3fc57cf0a6307273f3fe20b7e35bbe14c334339b6bb68c555ea294d933e0fba3",
+    "scripts/minilm-desktop/report.mjs": "456b4140430630e02882bae09e83abd932a23d2f82adb8d0426f8983e8f124b0",
+    "scripts/minilm-desktop/native-client.mjs": "d70f514d6e741259aaad888990bdf6bf125d06433d5edfcf20bc7b6f8d92319c",
+    "scripts/minilm-desktop/frontend/main.mjs": "376be8da10a9a7d96e49babd55d57bea14418615c4ad11ff8f42565d2c8c0021",
+    "scripts/minilm-desktop/frontend/inference.worker.mjs": "20d8ccad3f81d5cc62972a007bc05757e2178c9b728b683ea39b9c31ff57bfdb",
+    "scripts/minilm-desktop/frontend/index.html": "af64e1354b1cd7e87b886d936bdc0f8a6045059f979b53ddbc11dd2b6df98597",
+    "tests/minilm-desktop.test.mjs": "5ef7ebc32ea860f22e3c3dbae79ae134b97c36dba0e5793e576a526bbd61f854",
+    "docs/evaluations/minilm-desktop/spec.md": "5dbd5db9c2c27016ebe3b18dfa8de7420b7345c2ca5de59a6168a19b11570fd2"
+  },
+  "rawHashes": {
+    "report.json": "8e4b6a4c1e26df86798cdc94ef30535836538230269b7265a569f4b27822f826",
+    "launch.json": "0237522fa852e4956cdcfe8e686979e4f019e94c4c7fac67877b7e8130011471",
+    "intentional-changes.json": "9bd4e116b056728ba1750076e5dfe66e7a69bea088d1137b2af044a3715f6cb8",
+    "fixtures.json": "a8aa9092ad09247ad807e7dc77e78c1921019667b714a5f3b97321457ff1d370",
+    "network-deny.sb": "0d4debba15ea943764c139569dd8f03a5e326cf523627a7edd58699f03e7d2a5",
+    "build-final.log": "e38be6ea9777bc740c111fcdb37177fbb2d2c3934d2ea182d03eb7dad8bc462c",
+    "frontend-build-final.log": "01b5ae5179a0c0b7455a766003bd1f4369bff2abef217ee0345628c162bb61bf",
+    "clippy-feature.log": "570894c3863dc3350c553d1b58546c65cb502bba258080bb0b055ae145c7a2b4",
+    "native-default.log": "53b4f44a964c8a746dae7e6732e26a9e059cd0c81d6be16fd3e5adb769ec8547",
+    "tests-final.log": "edda4ddf01468f7c1e7f31f9748fe9a24db3712fc1b1f0bcabf50b6e1b2dc8bb",
+    "production-build.log": "a56428f25a84af6455a4f174a189d124f02464a0ebdd15dfce55ebac8b31335b",
+    "default-dependencies.txt": "7f2e31d1b5fe30934593c2beac465ce7b64488e5999a46b6249dcbbd7c3b898f"
+  },
+  "limits": "macOS arm64 developer bundle; fixed random classification head and synthetic input. Memory includes newly observed WebKit processes rather than precise process ownership, and sampling may miss peaks. Network-deny profile is applied at main-process launch; WebKit XPC services have separate sandboxing, while CSP and local assets constrain frontend fetches. No final detector or privacy-accuracy claim."
+}
