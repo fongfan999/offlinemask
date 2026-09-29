@@ -1,0 +1,30 @@
+{
+  "verifiedAt": "2026-09-20T03:47:50.468Z",
+  "executions": 398,
+  "rankedCases": 386,
+  "windowCount": 471,
+  "errors": 0,
+  "runtimeRepair": {
+    "originalExitCode": -6,
+    "compatibleExitCode": 0,
+    "scoredOutcomes": "Identical across 1.22.1 and 1.20.1; initial failed shutdown retained as diagnostic evidence"
+  },
+  "priorAnnotationsAndApprovals": "Unchanged",
+  "organizationAnnotations": 14,
+  "networkConnections": "Denied by macOS sandbox; connection probe rejected",
+  "originalTextSpans": "All raw UTF-16 spans and complete non-whitespace window coverage verified",
+  "scores": "Exact replay of frozen policy and all six options, retained scope and full scope for four recipes",
+  "replayNormalization": "JSON round-trip before equality to omit optional undefined fields, matching saved JSON; no score or prediction adjustment",
+  "releaseGate": "NOT_PASSED",
+  "files": {
+    "docs/evaluations/gliner2-compact-v1/compatible/protocol.json": "b0d228f8035d5a3b2432219e66ebfbb0fa4fd5d1fa066c046158c654d7a734df",
+    "docs/evaluations/gliner2-compact-v1/compatible/results.json": "a1550f27d89dd10d83ae362ad760825fc7210cd2da1b7682458301c7bf4b0f99",
+    "artifacts/gliner2-compact-v1/compatible/raw.jsonl": "f6e2e98f8975b91460a271285ac554d6cbade081488fbbe3eef65d2daa253c08",
+    "artifacts/gliner2-compact-v1/compatible/execution.json": "28db711e0bfe3c2a6245571fcfe0b68ed4678082c11668bcb11e9c2af76c5aae",
+    "artifacts/gliner2-compact-v1/raw.jsonl": "1d8fe3b7920d97fb8fbaf9f17f0f10e53e6ecd666fbe5de7963c5da9b81e89a3",
+    "artifacts/gliner2-compact-v1/execution.json": "6fe2c9d6887d388cf263a5b85200918cd4374641476cc17dde6a88fe5a7a455a",
+    "docs/evaluations/gliner2-compact-v1/results.json": "30bc3c955aded9d538f6283abb411660fde166ce7954697b095dc9bf46448c5b",
+    "scripts/gliner2-compact-v1/run.py": "52fcbd764868f0d0dc43e31ed38f2b029505865de49204d6181322670cd8fb93",
+    "scripts/gliner2-compact-v1/verify.mjs": "18cd76283fc76a325d21435d65fa0620bbf353aed3226419a528aa85cac1f250"
+  }
+}

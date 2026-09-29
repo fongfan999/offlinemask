@@ -1,0 +1,218 @@
+{
+  "frozenAt": "2026-09-20T03:43:24.524Z",
+  "candidate": "pii-engineer/PII-Engineer-Multi-NER-v2.1",
+  "revision": "efacd9242671d0300da535207d7952dc3f82f57e",
+  "assets": {
+    "repository": "pii-engineer/PII-Engineer-Multi-NER-v2.1",
+    "revision": "efacd9242671d0300da535207d7952dc3f82f57e",
+    "license": "Apache-2.0",
+    "files": {
+      "config.json": {
+        "size": 665,
+        "sha256": "23057cc82fb7943a81582ba645c0928722841fa01a64dd3859aea83239c0a5fe"
+      },
+      "tokenizer.json": {
+        "size": 16337353,
+        "sha256": "a1c7ccb287623cccb7c03150953b6d2a09dd95122933393c9151c3a60095c97e"
+      },
+      "tokenizer_config.json": {
+        "size": 638,
+        "sha256": "c9ee5e7be08c94d50e2dbe2a15939911dec1da22aaa46cb306107ad93b6ec37c"
+      },
+      "README.md": {
+        "size": 4104,
+        "sha256": "b92f5ac3e77b6813a12ddc31efcd221f920f89667af1a2439753e18193b8b1ee"
+      },
+      "onnx/encoder_int8.onnx": {
+        "size": 535410041,
+        "sha256": "5f52e0ec887799cd25ed490de11a5a44d6070dfa97c060e1cd32ff61e5cce044"
+      },
+      "onnx/span_rep.onnx": {
+        "size": 66124778,
+        "sha256": "cbae9ee3ddb04f6268004523dc0a43167b28bbb08af4b6bb53e9e17a3b513c62"
+      },
+      "onnx/count_embed.onnx": {
+        "size": 42669056,
+        "sha256": "8eec7e663be53ae9f3733311b4958dd0c89584aad8e8984a8693e23c25ccaae8"
+      },
+      "onnx/count_pred.onnx": {
+        "size": 4848553,
+        "sha256": "4b9de5557fbf786dee5144e71650bb422d15e9ae02e6802286591af13d91fe1d"
+      },
+      "onnx/classifier.onnx": {
+        "size": 4731923,
+        "sha256": "121ef33a7de8218f82399894c2b09b2f3d91144ca539616ebba5d63e16c4cc01"
+      }
+    },
+    "runtimeAlias": {
+      "gliner_config.json": "config.json"
+    }
+  },
+  "upstreamRevision": "4ff53986a53351b3a516872a557832b44b166628",
+  "runtime": "Unmodified publisher Rust GlinerSpanModel, ort 2.0.0-rc.9, local ONNX Runtime 1.20.1, CPU 4 intra / 1 inter threads; no server/downloader during inference.",
+  "labels": [
+    "person_name",
+    "phone_number",
+    "government_id",
+    "street_address",
+    "date_of_birth",
+    "email_address",
+    "passport_number",
+    "license_plate",
+    "bank_account_number"
+  ],
+  "prompt": "Publisher default nine labels; no descriptions/boost. Publisher word splitting and lowercase preprocessing unchanged.",
+  "threshold": 0.25,
+  "role": "Only person_name and street_address predictions feed unchanged shared rules. Other raw labels retained diagnostically. No organization predictor added.",
+  "windows": {
+    "maxWords": 120,
+    "maxTokens": 384,
+    "overlapWords": 24,
+    "policy": "Shrink windows until the exact publisher prompt fits. Verify every word covered. Never permit silent 512-token truncation."
+  },
+  "sourceMapping": "Canonical NFC input; publisher UTF-8 byte spans converted to UTF-16 in harness, then restored to original graphemes by existing normalizedSource.",
+  "organizationAnnotations": [
+    {
+      "index": 45,
+      "entityIndex": 0,
+      "id": "other-org",
+      "value": "Công ty TNHH Ánh Sao Thử Nghiệm"
+    },
+    {
+      "index": 166,
+      "entityIndex": 0,
+      "id": "other-organization",
+      "value": "Công ty TNHH Thử Nghiệm Ánh Sao"
+    },
+    {
+      "index": 283,
+      "entityIndex": 0,
+      "id": "company-prose",
+      "value": "Công ty TNHH Gốm Mộc Lam"
+    },
+    {
+      "index": 284,
+      "entityIndex": 0,
+      "id": "company-fields",
+      "value": "Công ty TNHH Gốm Mộc Lam"
+    },
+    {
+      "index": 285,
+      "entityIndex": 0,
+      "id": "company-extracted",
+      "value": "Công ty TNHH Gốm Mộc Lam"
+    },
+    {
+      "index": 325,
+      "entityIndex": 0,
+      "id": "organization-prose",
+      "value": "Hợp tác xã Nông sản Suối Mơ"
+    },
+    {
+      "index": 326,
+      "entityIndex": 0,
+      "id": "organization-fields",
+      "value": "Hợp tác xã Nông sản Suối Mơ"
+    },
+    {
+      "index": 327,
+      "entityIndex": 0,
+      "id": "organization-extracted",
+      "value": "Hop tac xa Nong san Suoi Mo"
+    },
+    {
+      "index": 337,
+      "entityIndex": 0,
+      "id": "organization-long",
+      "value": "Hợp tác xã Nông sản Suối Mơ"
+    },
+    {
+      "index": 372,
+      "entityIndex": 0,
+      "id": "rv11",
+      "value": "Công ty TNHH Gốm Lam Khê"
+    },
+    {
+      "index": 373,
+      "entityIndex": 0,
+      "id": "rv12",
+      "value": "Hop tac xa Nong nghiep Ben Lau"
+    },
+    {
+      "index": 374,
+      "entityIndex": 0,
+      "id": "rv13",
+      "value": "Công ty Cổ phần Dịch vụ Tín Thảo"
+    },
+    {
+      "index": 375,
+      "entityIndex": 2,
+      "id": "rv14",
+      "value": "Công ty TNHH Dệt Mây Sớm"
+    },
+    {
+      "index": 393,
+      "entityIndex": 0,
+      "id": "organization-extracted",
+      "value": "Hop tac xa Nong san Suoi Mo"
+    }
+  ],
+  "evaluation": "398 executions; owner12 overlay excluded from ranked 386. Keep original full-scope scores and separate retained-scope entity metrics; exclude organization spans from retained sensitive-character totals, never count them as ordinary text. Keep original negative-case definitions. Report organization category leaks separately.",
+  "gates": "Existing per-category full/own floors (name/address/other 95%, email/phone/banking 99%), overall full95%, short ordinary excess<=1%, at most1 original negative changed per stage, zero errors. No quality tuning on results.",
+  "comparators": [
+    "underthesea",
+    "underthesea+large",
+    "underthesea+bigmed+large"
+  ],
+  "limits": "Already observed synthetic selection data; not a fresh holdout, training, field accuracy, or packaged-app qualification.",
+  "files": {
+    "artifacts/quality-first-v1/cases.json": "347c8eff304b2520d88e0f4019fc44d7829fa3f894ac5ba7db6b65428f5b579d",
+    "artifacts/gliner2-compact-v1/inputs.json": "f8c9d0526c209bcf36b880a1602ebcf7f777b0b6f2ef6f12092163d376b1e084",
+    "artifacts/gliner2-compact-v1/assets.json": "ddea9666aab6fb8b8fc1a1187e13cba7661035aa7e1152257fabc64469713594",
+    "scripts/gliner2-compact-v1/runner.rs": "424d8f6441937d94eb41cf83ff7471e21e263ad8162e92634a8cd8d906ca71f1",
+    "scripts/gliner2-compact-v1/prepare.mjs": "0d4217ba2e6b05081751fbd84fe0a04113ffa0a9fb974b3fb9676904914424bf",
+    "scripts/gliner2-compact-v1/score.mjs": "fe622ccbf842b041b7802fde23427bbe3f162a5e753684d9a2d686856fff23bd",
+    "scripts/pretrained-scope/common.mjs": "b2e4b59e71dda509abaa215113edfc77c446ec862e1222cd40fa10736d4c1b06",
+    "scripts/shared-core/metrics.mjs": "cea5f37ea2d9379a9c398179a71a42c0656a5508b5a0971c8a534064926e109f",
+    "scripts/model-comparison-metrics.mjs": "8eb090bae5e61a7b9389f12bfc478edc75d22a36807bdb5dfba4af4c2670e1c9",
+    "scripts/contextual-repair-v1/normalized-source.mjs": "813938e1c8285b371d44510b0b36bca5c1b89672ebd921547a098aaa047db87b",
+    "src/core/text.ts": "c136a115b37f956f6a43097de9d688b828b9c1f7ae6c954750e2efa1034e3559",
+    "src/core/unicode.ts": "1676fc68ad528be6f1ea29376982dcd93588338a19ea1cdbbf2af6f066ee2c48",
+    "src/core/detection/address-boundaries.ts": "4f4a99a2174daa5a39ec6b750a9052d5251c342b36ed629ceea8e8fef2c686b8",
+    "src/core/detection/banking.ts": "91c5cb013699d86c2c128a43493f0a882d046a88cffae767bc66e64b832e489c",
+    "src/core/detection/chunks.ts": "f827cb3f70115ec6b9e5a60e77be4d8588235f11c0911b431cc9f8259103a892",
+    "src/core/detection/contact.ts": "24613d1095299c8633f541b4e4ff95df9b410852bf0743cab6abf2786a0f0d12",
+    "src/core/detection/context-fields.ts": "fdb06a483320e3db5ed33197c88cca016ea135e521762408a63d72e5d80b9cee",
+    "src/core/detection/engine.ts": "72e5a87c86cf0aed94d8d3835e70151f0a86cb27ff6cb25e897cc6653d10dad0",
+    "src/core/detection/labelled-fields.ts": "5298d383357b4ccd3b00b8aea381b8a26bd721f1f82aa5790b3000cafac540ca",
+    "src/core/detection/model-policy.ts": "472e8bcdedf6fe6ba09259ab6c6c203a69908d0cdc8037d5f8edfb2caff68d62",
+    "src/core/detection/model-runner.ts": "9c4db93cf89d12998eebe968a42fef48faceb810d73151744ec7227a7f8ffbc6",
+    "src/core/detection/openmed.ts": "2193e8f72b8ee9bbd41aaa7bee1e7ed9e9750cae0ffdc43296dfa056aae4a870",
+    "src/core/detection/options.ts": "ea66ec6bc0ca66d89e3dcb70d307eb991b07b8507e82e8e722d7d00a68ebe131",
+    "src/core/detection/policy.ts": "f8bf90cd79b01b87fc9577cbcba0c20c58858b4150a03a302ab79ac4fc759038",
+    "src/core/detection/source-offsets.ts": "0753a9ab9f64259f50c9371538642bdd940d54b15f9038510ed834b1f1b64249",
+    "src/core/detection/structured-values.ts": "08873bc990a0b3e083434a7b7279da3663716f67af4b459751f6017eefa672c2",
+    "src/core/detection/token-predictions.ts": "e1e86cfdc5e0a9cca51c66f078d79a386c595573dc398985193e647b57be5f43",
+    "src/core/detection/types.ts": "b111dad6329c7f4066b3eafca9875521083c7e8fe464c09522514b3106644f55",
+    "artifacts/gliner2-compact-v1/upstream/crates/pii-engineer-core/src/chinese_ner.rs": "2e4a2cbb0e160d09d0a5bc8e85872885617afd6e268f602e5d1a834c2558abba",
+    "artifacts/gliner2-compact-v1/upstream/crates/pii-engineer-core/src/error.rs": "ff1c9153b289703b3e21d69c5bc470deffa0413a48d761a689f2045feee5c2de",
+    "artifacts/gliner2-compact-v1/upstream/crates/pii-engineer-core/src/labels.rs": "72a6959359b67f2cf929174769ce612769e4095bde8f3c337a8e8bfb361dae7b",
+    "artifacts/gliner2-compact-v1/upstream/crates/pii-engineer-core/src/lang.rs": "375250dc64f870776264224c628129529b611a6ed8545ac19f9190a320542952",
+    "artifacts/gliner2-compact-v1/upstream/crates/pii-engineer-core/src/lib.rs": "e44216de3688299bc8ffb5749c7225c923f3c4031408b19884b69874c5020630",
+    "artifacts/gliner2-compact-v1/upstream/crates/pii-engineer-core/src/pipeline.rs": "bac45e2085c11eb575e050dd086eb3968fd048f8f3fa899febdc3d4d5c9e9629",
+    "artifacts/gliner2-compact-v1/upstream/crates/pii-engineer-core/src/gliner/mod.rs": "78d55021d75ddc53742905d1d9b809bc40ae2e7ad7b40903407282baa63d81f9",
+    "artifacts/gliner2-compact-v1/upstream/crates/pii-engineer-core/src/gliner/shared.rs": "1c4c3a990122aaf707cecfc902a89b5754968cd79fa9e838daa9026f8b73cdf8",
+    "artifacts/gliner2-compact-v1/upstream/crates/pii-engineer-core/src/gliner/v1.rs": "8838d04494932c83e3c11d92515f4d3cabb73c45670bac8391313c673d02eeb6",
+    "artifacts/gliner2-compact-v1/upstream/crates/pii-engineer-core/src/gliner/v2_compat.rs": "260a34b284c656e1be2ec91a54e9420011755d5bb36de13a5c699043aeea9521",
+    "artifacts/gliner2-compact-v1/upstream/crates/pii-engineer-core/src/gliner/v2_full.rs": "85e8582bcd5e9b4b9635cd37e12e76f1534fd25676bf208823ac3acb09ab1c4f",
+    "artifacts/gliner2-compact-v1/upstream/Cargo.lock": "6f30f5265453028f9debaf50bba67a31e76f4d019d5c586b47b4c7a04eee647b",
+    "artifacts/gliner2-compact-v1/upstream/Cargo.toml": "305b3513dc1a2aa3556444a388f04ce2b6bfe17de7ec4689612a298da19d4ea9",
+    "artifacts/gliner2-compact-v1/upstream/target/release/examples/offlinemask_eval": "632fd6390ed1b241bfe62c9b79a12d1ac49c9bfa61fd3c7da3a251107c8cccc9",
+    "scripts/gliner2-compact-v1/score-compatible.mjs": "d02622e20c1c412b965c64b96a7e05ebaea94fe3f386b879a35efbec9fe2ef24",
+    "scripts/gliner2-compact-v1/prepare-compatible.mjs": "5c65946c816be31dadcbeeaeee0a4393731a8e6859ea9d690962ca6690bd40e4",
+    "scripts/gliner2-compact-v1/run.py": "52fcbd764868f0d0dc43e31ed38f2b029505865de49204d6181322670cd8fb93",
+    "artifacts/gliner2-compact-v1/ort120/onnxruntime/capi/libonnxruntime.1.20.1.dylib": "f713f7fdd4201fee5c2867eb308ba67a36904fcf409a93bcbadf837df8386aa1"
+  },
+  "previousProtocolSha256": "341ab96df9e3b47b0f78ffcdd4f80abe1ed49d796cd3c45111756f56951e23cd",
+  "runtimeChange": "ONNX Runtime 1.20.1 matches ort rc.9 version family. 1.22.1 run completed predictions but aborted during process shutdown. No inference/model/scoring setting changed."
+}
