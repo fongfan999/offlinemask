@@ -1,0 +1,14 @@
+{
+  "createdAt": "2026-09-18T12:45:19.203Z",
+  "node": "v24.10.0",
+  "cases": 362,
+  "sourceHashes": {
+    "docs/evaluations/pretrained-scope/spec.md": "c1b126c003f41f1c8fa85f49527919f51e39dce2a0b03eb32115d5ed2876acbd",
+    "docs/evaluations/model-recheck-v1-results.json": "9bf57545d1f32844e1b11dd6abe90c692168da6c8ccf4943865a6d8ea3bad863",
+    "scripts/pretrained-scope/common.mjs": "b2e4b59e71dda509abaa215113edfc77c446ec862e1222cd40fa10736d4c1b06",
+    "scripts/pretrained-scope/evaluate.mjs": "4a527a89e298765000dfde2d1567233cc94df5da321b4741a7eb7dbc52db7c98",
+    "scripts/pretrained-scope/freeze.mjs": "ecf7a4e927c2433e63d37f180b8f04b45d088a9238a976ea048115c1418a98b6",
+    "scripts/pretrained-scope/report.mjs": "ee6788f8695cc89963bcf9fbda44422c49000203b8c68fdca69121976e1dd363",
+    "tests/pretrained-scope.test.mjs": "ce46e72f580c75d20e6a932dd4883fa600f002a1fb79a0b74803d7d5f9b8543a"
+  }
+}
