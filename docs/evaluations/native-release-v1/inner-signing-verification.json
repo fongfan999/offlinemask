@@ -1,0 +1,11 @@
+{
+  "signatureVerified": true,
+  "modelsBundled": false,
+  "totalBytes": 48711973,
+  "runtimeSha256AfterSigning": "292aaf46a0d0155ca9372a437712ad45dbdd583b26c56afe769ec3842d2e064a",
+  "helperSha256AfterSigning": "f25ccdcf3947f8eebac2690d14992cec6d6506d260532099c232da71a4da2b12",
+  "uiMaskPassed": true,
+  "date": "2026-09-29",
+  "localInnerSigningOptions": "0",
+  "developerIdPathTested": false
+}

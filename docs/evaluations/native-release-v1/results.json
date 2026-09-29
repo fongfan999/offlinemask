@@ -1,0 +1,18 @@
+{
+  "signatureVerified": true,
+  "modelsBundled": false,
+  "totalBytes": 48887693,
+  "runtimeSha256AfterSigning": "76831409ce6eded92b4cb343cf422c458a60c1ea1d5f3cfa69692ab7fcc67f0f",
+  "helperSha256AfterSigning": "b4fde2d1145d9f116c57e8c4874acb87b7178422f3b960923751b9a9a48eaefd",
+  "verifiedOn": "2026-09-29",
+  "zipBytes": 18045607,
+  "hostSha256": "5cb5465e86c47699f0c5a4c6f6f1e91dcd3bb5a12a46618d649c80fb952599c3",
+  "normalUiMaskPassed": true,
+  "offlineUiMaskPassed": true,
+  "alteredRuntimeRejectedBeforeHelperSpawn": true,
+  "draftPreservedOnIntegrityFailure": true,
+  "noPartialSession": true,
+  "restoredRuntimeRetryPassed": true,
+  "adHocSignatureOnly": true,
+  "publicNotarizationVerified": false
+}

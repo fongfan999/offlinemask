@@ -1,0 +1,11 @@
+{
+  "sourcePackage": "onnxruntime-node",
+  "version": "1.24.3",
+  "platform": "darwin",
+  "arch": "arm64",
+  "file": "libonnxruntime.1.24.3.dylib",
+  "sha256": "76831409ce6eded92b4cb343cf422c458a60c1ea1d5f3cfa69692ab7fcc67f0f",
+  "bytes": 35937208,
+  "license": "MIT",
+  "distribution": "Existing development dependency only; not bundled by default"
+}

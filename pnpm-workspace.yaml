@@ -1,0 +1,5 @@
+allowBuilds:
+  # Browser/WASM text inference needs no native postinstall downloads or image tooling.
+  onnxruntime-node: false
+  protobufjs: false
+  sharp: false

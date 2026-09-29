@@ -28,3 +28,6 @@ dist-ssr
 src-tauri/target/
 src-tauri/gen/
 *.tsbuildinfo
+
+# Local native packaging and verification outputs.
+artifacts/

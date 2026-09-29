@@ -80,3 +80,13 @@ Verified on macOS 26.6.2 / Apple Silicon:
 - Browser UI checks passed sample loading, clearing, Vietnamese text input, leading-zero retention, and resetting text on reload. The packaged app passed sample loading and clearing with Vietnamese text rendered correctly.
 
 Windows and Linux have not been built or tested here. The UI checks do not certify Vietnamese IME composition, grapheme counting, file processing, or complete offline installation.
+
+### Native macOS arm64 release preparation
+
+`mise exec -- pnpm desktop:build:native` prepares the pinned ONNX Runtime and helper, builds the normal UI with native recognition, signs the package (ad hoc locally unless `APPLE_SIGNING_IDENTITY` is set), and verifies the resulting bundle. This path never seeds app data or downloads the recognition pack. The pack remains optional and manually downloaded. Build dependencies must already be available for an offline build.
+
+For an isolated QA build, run `mise exec -- node scripts/prepare-native-desktop.mjs --qa`, then `mise exec -- pnpm tauri build --features recognition-native-release --bundles app --config artifacts/native-desktop/tauri.conf.json`. Verify it with `mise exec -- node scripts/verify-native-desktop.mjs 'src-tauri/target/release/bundle/macos/OfflineMask Release QA.app'`. The QA identity starts without model fixtures; staging does not install any. Do not launch the production identity to test failure/restart behavior while a user has RAM-only sessions open.
+
+Runtime/license provenance is in `docs/licenses/onnxruntime-1.24.3/README.md`. Signed builds verify the complete bundle locally before loading recognition. Re-signing correctly changes the runtime bytes, so only pre-signing staging uses the upstream full-file checksum. Public Developer ID/notarization and project licensing are separate release prerequisites; ad hoc QA signing is not public distribution approval. Other platforms remain unqualified for native recognition. Browser and ordinary `tauri dev` workflows retain WASM.
+
+The standard `mise exec -- pnpm desktop:build` selects this verified native path on macOS arm64. Other platforms retain the prior Tauri build. Custom QA configurations use explicit `tauri build` as above. Current local QA ZIP size is about 18 MB; this is separate from the optional recognition pack and is not a public notarized installer measurement.
