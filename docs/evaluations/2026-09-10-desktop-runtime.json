@@ -1,0 +1,152 @@
+{
+  "wallStart": 1789036582108,
+  "phase": "Completed",
+  "maxHeartbeatDelayMs": 374,
+  "wallEnd": 1789037076256,
+  "results": [
+    {
+      "label": "cold-short",
+      "utf16Length": 161,
+      "detectionMs": 12933,
+      "firstProcessingMs": 12370,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "warm-short-1",
+      "utf16Length": 161,
+      "detectionMs": 892,
+      "firstProcessingMs": 287,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "warm-short-2",
+      "utf16Length": 161,
+      "detectionMs": 876,
+      "firstProcessingMs": 356,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "warm-short-3",
+      "utf16Length": 161,
+      "detectionMs": 807,
+      "firstProcessingMs": 345,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "medium",
+      "utf16Length": 2000,
+      "detectionMs": 14774,
+      "firstProcessingMs": 1545,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "long",
+      "utf16Length": 10000,
+      "detectionMs": 62611,
+      "firstProcessingMs": 2744,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "limit",
+      "utf16Length": 50000,
+      "detectionMs": 400708,
+      "firstProcessingMs": 7508,
+      "findings": 3,
+      "addressCovered": true
+    }
+  ],
+  "memory": {
+    "samplePeriodMs": 500,
+    "samplesDuringRun": 881,
+    "peakRssKiB": 3859136,
+    "peakPhysicalFootprintBytes": 7733552248,
+    "finalPhysicalFootprintBytes": 4852802968,
+    "pids": [
+      1505,
+      1520,
+      1521,
+      1522
+    ]
+  },
+  "environment": {
+    "chip": "Apple M1 Pro",
+    "ramGiB": 16,
+    "os": "macOS 26.6.2 (25G83)",
+    "architecture": "arm64",
+    "backend": "production WASM worker, one thread",
+    "models": "scripts/model-manifest.json",
+    "measurement": "one complete synthetic sequence; other applications open"
+  },
+  "sourceSha256": {
+    "src/core/detection/openmed.ts": "3b9c2d72299391b42134348b145523131149d4d48d08da5e23209b37dbbd356c",
+    "src/core/detection/chunks.ts": "f827cb3f70115ec6b9e5a60e77be4d8588235f11c0911b431cc9f8259103a892",
+    "src/core/detection/token-predictions.ts": "e1e86cfdc5e0a9cca51c66f078d79a386c595573dc398985193e647b57be5f43",
+    "src/core/unicode.ts": "1676fc68ad528be6f1ea29376982dcd93588338a19ea1cdbbf2af6f066ee2c48",
+    "scripts/desktop-benchmark/main.ts": "0ac1bb6b70a80facbde68f9734c6fa879cae5394a684a25010fc9765ab8e6300",
+    "scripts/model-manifest.json": "1678299365f89122014a05a1344ab378698eb13ce6e168cfb0a66e3aeb2d5c2e"
+  },
+  "cpuReference": {
+    "runtime": "Node native ONNX CPU reference; default CPU threading; not packaged desktop",
+    "node": "v24.10.0",
+    "platform": "darwin",
+    "arch": "arm64",
+    "network": "fetch disabled",
+    "results": [
+      {
+        "label": "cold-short",
+        "utf16Length": 161,
+        "detectionMs": 4268,
+        "findings": 3,
+        "addressCovered": true
+      },
+      {
+        "label": "warm-short-1",
+        "utf16Length": 161,
+        "detectionMs": 55,
+        "findings": 3,
+        "addressCovered": true
+      },
+      {
+        "label": "warm-short-2",
+        "utf16Length": 161,
+        "detectionMs": 53,
+        "findings": 3,
+        "addressCovered": true
+      },
+      {
+        "label": "warm-short-3",
+        "utf16Length": 161,
+        "detectionMs": 50,
+        "findings": 3,
+        "addressCovered": true
+      },
+      {
+        "label": "medium",
+        "utf16Length": 2000,
+        "detectionMs": 1364,
+        "findings": 3,
+        "addressCovered": true
+      },
+      {
+        "label": "long",
+        "utf16Length": 10000,
+        "detectionMs": 8399,
+        "findings": 3,
+        "addressCovered": true
+      },
+      {
+        "label": "limit",
+        "utf16Length": 50000,
+        "detectionMs": 38167,
+        "findings": 4,
+        "addressCovered": true
+      }
+    ]
+  }
+}
