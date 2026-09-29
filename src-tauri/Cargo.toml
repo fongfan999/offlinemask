@@ -3,8 +3,38 @@ name = "offlinemask"
 version = "1.0.0"
 description = "Offline desktop workspace for reviewing sensitive data"
 edition = "2021"
+default-run = "offlinemask"
+
+[features]
+recognition-evaluation = []
+recognition-native-desktop = ["dep:ort"]
+recognition-native-sidecar = ["recognition-native-desktop"]
+recognition-native-release = ["recognition-native-sidecar"]
+native-inference-prototype = ["dep:ort"]
+minilm-desktop-prototype = ["dep:minilm-tokenizer"]
+minilm-native-desktop-prototype = ["minilm-desktop-prototype", "dep:ort"]
+
+[[bin]]
+name = "offlinemask-native-prototype"
+path = "src/bin/native_inference_prototype.rs"
+required-features = ["native-inference-prototype"]
+
+[[bin]]
+name = "recognition-native-check"
+path = "src/bin/recognition_native_check.rs"
+required-features = ["native-inference-prototype"]
+
+[[bin]]
+name = "recognition-sidecar"
+path = "src/bin/recognition_sidecar.rs"
+required-features = ["native-inference-prototype"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[[bin]]
+name = "recognition-tokenizer-check"
+path = "src/bin/recognition_tokenizer_check.rs"
+required-features = ["recognition-evaluation"]
 
 [lib]
 # The `_lib` suffix may seem redundant but it is necessary
@@ -17,8 +47,17 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["protocol-asset"] }
 tauri-plugin-opener = "2"
+reqwest = { version = "0.12", default-features = false, features = ["blocking", "rustls-tls"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+zstd = { version = "0.14", default-features = false }
+fs2 = "0.4"
+tokenizers = { version = "=0.22.2", default-features = false, features = ["fancy-regex"] }
+ort = { version = "=2.0.0-rc.10", optional = true, default-features = false, features = ["std", "load-dynamic"] }
+minilm-tokenizer = { package = "offlinemask-minilm-tokenizer-prototype", path = "../scripts/minilm-native/native", optional = true }
 
 
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
