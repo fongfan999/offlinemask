@@ -1,0 +1,21 @@
+{
+  "createdAt": "2026-09-15T02:43:00.402Z",
+  "baseProtocolSha256": "5795d099f67f8997a9f2cc5f873be44a2b27d41c255181d19cbc0ae5ba806740",
+  "baseResultSha256": "0144b2421a4abc5aa4e790ca8ee50a05f6edf0b2b837ae643322e054e0c202ef",
+  "sources": {
+    "scripts/native-preprocessing/evaluate.mjs": "f2fcd935b2924bf57458fbd328bc1b1c0031d3512c76bb2d3e32e1c6f0473bd3",
+    "scripts/native-preprocessing/evidence.mjs": "809749041f53a47b128d11f6c87fb53435390af0507ae6be909626f5ecb8c275",
+    "scripts/native-preprocessing/freeze.mjs": "459685430ffa8b68371d75b63c238d011cda599e2fe71979dc2a366006a3aec2",
+    "scripts/native-preprocessing/provider.mjs": "8f54ba1df90edfffef8821e1c1c42f36289e6f2693f468fb0986c0856c777023",
+    "scripts/native-preprocessing/report.mjs": "be22273655f3bd6340068b07bab1aa4ee55a742a0554a60ee57b249bcbbc2a9c",
+    "scripts/native-preprocessing/tokenizer-server.py": "7ce718bb063ef34f2f02a9a3106e9c3ef941c6fd42afdbaa650d81c12136fb34",
+    "scripts/native-preprocessing/tokenizer.mjs": "8ae5febb1835afd6099300468a7ac8779dae9ad4a1bdb23668f3474221520a00",
+    "tests/native-preprocessing.test.mjs": "d511577bdfe9bff7eb609da91d57468e168f37d0b0f2166621dd22ca7f291d7b"
+  },
+  "runtimeVersion": "1.24.3",
+  "tokenizerVersion": "0.22.2",
+  "change": "BigMed native tokenizer supplies every count query, inference tensor ID and original UTF-16 offset. Shared window algorithm and detection policy unchanged. No production imports of this provider.",
+  "method": "Two fresh sequential Node CPU processes, same 262 observed cases. Reuse verified previous control runs because their implementation is unchanged. Report per-category full coverage and ordinary masking for both stages, all gains/losses and failures.",
+  "criteria": "Existing shared-core screening floor unchanged. No requests may fail. Repeated quality outputs must match. An observed-corpus pass alone cannot select a release model.",
+  "limits": "Developer-only Python tokenizer preparation and Node CPU inference; no packaged desktop, speed or memory qualification. No newly held-out or private input."
+}
