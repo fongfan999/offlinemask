@@ -1,0 +1,607 @@
+{
+  "checkedAt": "2026-09-17T17:23:46.904355+00:00",
+  "weightsDownloaded": false,
+  "items": [
+    {
+      "repository": "microsoft/Multilingual-MiniLM-L12-H384",
+      "kind": "models",
+      "revision": "6e8c1ec6b4ec4e3fc6eb7d2cd834fcd582b61daf",
+      "cardData": {
+        "language": [
+          "multilingual",
+          "en",
+          "ar",
+          "bg",
+          "de",
+          "el",
+          "es",
+          "fr",
+          "hi",
+          "ru",
+          "sw",
+          "th",
+          "tr",
+          "ur",
+          "vi",
+          "zh"
+        ],
+        "thumbnail": "https://huggingface.co/front/thumbnails/microsoft.png",
+        "tags": [
+          "text-classification"
+        ],
+        "license": "mit"
+      },
+      "files": {
+        "README.md": {
+          "url": "https://huggingface.co/microsoft/Multilingual-MiniLM-L12-H384/resolve/6e8c1ec6b4ec4e3fc6eb7d2cd834fcd582b61daf/README.md",
+          "sha256": "b00de73ad9d05ed170233a4d6551d931142fae681547f24152c52738c3da1145"
+        },
+        "config.json": {
+          "url": "https://huggingface.co/microsoft/Multilingual-MiniLM-L12-H384/resolve/6e8c1ec6b4ec4e3fc6eb7d2cd834fcd582b61daf/config.json",
+          "sha256": "933c5fc9b49cf83934fb2e617cea837985a1b5f10db653ecd958c5736de357de",
+          "configuration": {
+            "attention_probs_dropout_prob": 0.1,
+            "tokenizer_class": "XLMRobertaTokenizer",
+            "hidden_act": "gelu",
+            "hidden_dropout_prob": 0.1,
+            "hidden_size": 384,
+            "initializer_range": 0.02,
+            "intermediate_size": 1536,
+            "layer_norm_eps": 1e-12,
+            "max_position_embeddings": 512,
+            "model_type": "bert",
+            "num_attention_heads": 12,
+            "num_hidden_layers": 12,
+            "pad_token_id": 0,
+            "type_vocab_size": 2,
+            "vocab_size": 250037
+          }
+        },
+        "tokenizer_config.json": {
+          "url": "https://huggingface.co/microsoft/Multilingual-MiniLM-L12-H384/resolve/6e8c1ec6b4ec4e3fc6eb7d2cd834fcd582b61daf/tokenizer_config.json",
+          "sha256": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+          "configuration": {}
+        }
+      }
+    },
+    {
+      "repository": "undertheseanlp/vietnamese-ner-v1.4.0a2",
+      "kind": "models",
+      "revision": "a51e05fc09e1b1f0800dbad8ae84e86ad311debd",
+      "cardData": {
+        "license": "apache-2.0",
+        "language": "vi"
+      },
+      "files": {
+        "README.md": {
+          "url": "https://huggingface.co/undertheseanlp/vietnamese-ner-v1.4.0a2/resolve/a51e05fc09e1b1f0800dbad8ae84e86ad311debd/README.md",
+          "sha256": "b9c7ab6a2dd20d0726a9855145f68c61f5950f1c0cb81d23e71cf59eb1dc850b"
+        },
+        "config.json": {
+          "url": "https://huggingface.co/undertheseanlp/vietnamese-ner-v1.4.0a2/resolve/a51e05fc09e1b1f0800dbad8ae84e86ad311debd/config.json",
+          "sha256": "e87b7989b4ca29d050d1ac46086eaa585bdb38a77d5dc9b890d7e8656a8d1290",
+          "configuration": {
+            "_name_or_path": "vietnamese-ner-v1.4.0a2",
+            "_num_labels": 2,
+            "architectures": [
+              "BertForTokenClassification"
+            ],
+            "attention_probs_dropout_prob": 0.1,
+            "classifier_dropout": null,
+            "directionality": "bidi",
+            "hidden_act": "gelu",
+            "hidden_dropout_prob": 0.1,
+            "hidden_size": 768,
+            "id2label": {
+              "0": "B-LOC",
+              "1": "B-MISC",
+              "2": "B-ORG",
+              "3": "B-PER",
+              "4": "I-LOC",
+              "5": "I-MISC",
+              "6": "I-ORG",
+              "7": "I-PER",
+              "8": "O"
+            },
+            "initializer_range": 0.02,
+            "intermediate_size": 3072,
+            "label2id": {
+              "B-LOC": "0",
+              "B-MISC": "1",
+              "B-ORG": "2",
+              "B-PER": "3",
+              "I-LOC": "4",
+              "I-MISC": "5",
+              "I-ORG": "6",
+              "I-PER": "7",
+              "O": "8"
+            },
+            "layer_norm_eps": 1e-12,
+            "max_position_embeddings": 512,
+            "model_type": "bert",
+            "num_attention_heads": 12,
+            "num_hidden_layers": 12,
+            "output_past": true,
+            "pad_token_id": 0,
+            "pooler_fc_size": 768,
+            "pooler_num_attention_heads": 12,
+            "pooler_num_fc_layers": 3,
+            "pooler_size_per_head": 128,
+            "pooler_type": "first_token_transform",
+            "position_embedding_type": "absolute",
+            "torch_dtype": "float32",
+            "transformers_version": "4.24.0",
+            "type_vocab_size": 2,
+            "use_cache": true,
+            "vocab_size": 38168
+          }
+        },
+        "tokenizer_config.json": {
+          "url": "https://huggingface.co/undertheseanlp/vietnamese-ner-v1.4.0a2/resolve/a51e05fc09e1b1f0800dbad8ae84e86ad311debd/tokenizer_config.json",
+          "sha256": "d3e17020cd77f3fc73e219c134e83bf3e98bd450ff21c46c00acccaeaee21322",
+          "configuration": {
+            "cls_token": "[CLS]",
+            "do_basic_tokenize": true,
+            "do_lower_case": false,
+            "mask_token": "[MASK]",
+            "name_or_path": "FPTAI/vibert-base-cased",
+            "never_split": null,
+            "pad_token": "[PAD]",
+            "sep_token": "[SEP]",
+            "special_tokens_map_file": null,
+            "strip_accents": null,
+            "tokenize_chinese_chars": true,
+            "tokenizer_class": "BertTokenizer",
+            "unk_token": "[UNK]"
+          }
+        }
+      }
+    },
+    {
+      "repository": "nvidia/Nemotron-PII",
+      "kind": "datasets",
+      "revision": "b70ffaf5ff39e079776134c5bf4381f00a9fd1ed",
+      "cardData": {
+        "license": "cc-by-4.0",
+        "task_categories": [
+          "token-classification"
+        ],
+        "language": [
+          "en"
+        ],
+        "tags": [
+          "datadesigner",
+          "pii",
+          "privacy",
+          "data-masking",
+          "synthetic-data",
+          "named-entity-recognition",
+          "nvidia",
+          "nemotron",
+          "personas"
+        ],
+        "size_categories": [
+          "100K<n<1M"
+        ]
+      },
+      "files": {
+        "README.md": {
+          "url": "https://huggingface.co/datasets/nvidia/Nemotron-PII/resolve/b70ffaf5ff39e079776134c5bf4381f00a9fd1ed/README.md",
+          "sha256": "18c6215fb72c66e5c9fc833130f589e407cae906760f8977409deba0f1f5af4e"
+        }
+      }
+    },
+    {
+      "repository": "Meddies/meddies-pii",
+      "kind": "datasets",
+      "revision": "5ef42aa17e42103b8097d05c9a85046178c54627",
+      "cardData": {
+        "pretty_name": "Meddies PII",
+        "language": [
+          "vi",
+          "en",
+          "zh",
+          "ja",
+          "ko",
+          "th",
+          "fr",
+          "de",
+          "es",
+          "pt",
+          "ru",
+          "id",
+          "tl",
+          "ms",
+          "my",
+          "lo",
+          "ta"
+        ],
+        "license": "cc-by-nc-4.0",
+        "annotations_creators": [
+          "machine-generated"
+        ],
+        "language_creators": [
+          "machine-generated"
+        ],
+        "multilinguality": "multilingual",
+        "size_categories": [
+          "1M<n<10M"
+        ],
+        "source_datasets": [
+          "original"
+        ],
+        "configs": [
+          {
+            "config_name": "burmese",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "burmese/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "chinese",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "chinese/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "english",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "english/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "eval",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "eval/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "filipino",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "filipino/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "french",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "french/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "german",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "german/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "grpo-hard-train",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "grpo-hard-train/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "grpo-train",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "grpo-train/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "indonesian",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "indonesian/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "japanese",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "japanese/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "korean",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "korean/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "laos",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "laos/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "malay",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "malay/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "nvidia-health",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "nvidia-health/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "nvidia-non-health",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "nvidia-non-health/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "pii-bioes",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "pii-bioes/train-*"
+              },
+              {
+                "split": "validation",
+                "path": "pii-bioes/validation-*"
+              }
+            ]
+          },
+          {
+            "config_name": "portuguese",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "portuguese/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "russian",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "russian/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "spanish",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "spanish/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "tamil",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "tamil/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "test",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "test/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "thai",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "thai/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "train",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "train/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "vietnamese",
+            "default": true,
+            "data_files": [
+              {
+                "split": "train",
+                "path": "vietnamese/train-*"
+              }
+            ]
+          },
+          {
+            "config_name": "vietnamese-translated",
+            "data_files": [
+              {
+                "split": "train",
+                "path": "vietnamese-translated/train-*"
+              }
+            ]
+          }
+        ],
+        "viewer": true,
+        "task_categories": [
+          "token-classification",
+          "text-generation"
+        ],
+        "tags": [
+          "medical",
+          "healthcare",
+          "pii",
+          "de-identification",
+          "ner",
+          "synthetic",
+          "multilingual"
+        ],
+        "dataset_info": {
+          "config_name": "eval",
+          "features": [
+            {
+              "name": "language",
+              "dtype": "string"
+            },
+            {
+              "name": "uid",
+              "dtype": "string"
+            },
+            {
+              "name": "domain",
+              "dtype": "string"
+            },
+            {
+              "name": "document_type",
+              "dtype": "string"
+            },
+            {
+              "name": "document_description",
+              "dtype": "string"
+            },
+            {
+              "name": "document_format",
+              "dtype": "string"
+            },
+            {
+              "name": "locale",
+              "dtype": "string"
+            },
+            {
+              "name": "text",
+              "dtype": "string"
+            },
+            {
+              "name": "spans",
+              "dtype": "string"
+            },
+            {
+              "name": "raw",
+              "dtype": "string"
+            },
+            {
+              "name": "source",
+              "dtype": "string"
+            },
+            {
+              "name": "input",
+              "dtype": "string"
+            },
+            {
+              "name": "total_tokens",
+              "dtype": "int64"
+            },
+            {
+              "name": "document_label",
+              "dtype": "string"
+            },
+            {
+              "name": "document_length",
+              "dtype": "string"
+            },
+            {
+              "name": "text_format",
+              "dtype": "string"
+            },
+            {
+              "name": "edge_case",
+              "dtype": "string"
+            },
+            {
+              "name": "label",
+              "dtype": "string"
+            }
+          ],
+          "splits": [
+            {
+              "name": "train",
+              "num_bytes": 23483995,
+              "num_examples": 3758
+            }
+          ],
+          "download_size": 11048486,
+          "dataset_size": 23483995
+        }
+      },
+      "files": {
+        "README.md": {
+          "url": "https://huggingface.co/datasets/Meddies/meddies-pii/resolve/5ef42aa17e42103b8097d05c9a85046178c54627/README.md",
+          "sha256": "e5323b683756ea86917aa708b25dfda726dadb8ab22515776df5a97a41a05b73"
+        }
+      }
+    },
+    {
+      "repository": "SEACrowd/vlsp2016_ner",
+      "kind": "datasets",
+      "revision": "e0b174bff2119485bba4d82204e4c39bdca3ddf8",
+      "cardData": {
+        "license": "cc-by-nc-4.0",
+        "language": [
+          "vie"
+        ],
+        "pretty_name": "Vlsp2016 Ner",
+        "task_categories": [
+          "named-entity-recognition"
+        ],
+        "tags": [
+          "named-entity-recognition"
+        ]
+      },
+      "files": {
+        "README.md": {
+          "url": "https://huggingface.co/datasets/SEACrowd/vlsp2016_ner/resolve/e0b174bff2119485bba4d82204e4c39bdca3ddf8/README.md",
+          "sha256": "15a3f234fc96c939b8fa0931460e75045c4653b0ab4c023f103e21b8069a8930"
+        }
+      }
+    }
+  ]
+}
