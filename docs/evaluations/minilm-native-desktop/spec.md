@@ -1,0 +1,5 @@
+# Packaged native graph comparison
+
+18 September 2026. Follow the packaged WASM failure with an opt-in native graph feature. Reuse the graph, original native tokenizer, diagnostic text/windows and 20 CPU references. Use the existing verified ONNX Runtime 1.24.3 dylib from the installed Node dependency, Rust ort 2.0.0-rc.10, one CPU thread and telemetry disabled. No new model download or normal-app activation.
+
+Verify graph/runtime hashes before loading. Inference executes off the UI thread with one active job, a per-run termination option and stale-result suppression. Test cancellation after the backend reports execution has started, then await actual completion and verify recovery. No private input, logging or persistence. Keep the same precision tolerance and 5s cold/300ms warm/8s long/1GiB/250ms budgets. Measure the separate packaged macOS app with the same network-deny launch and memory methodology. Retain previous WASM evidence and explicit before-file snapshots when adding the feature; do not claim identical production source hashes.

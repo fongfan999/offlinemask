@@ -1,0 +1,253 @@
+{
+  "createdAt": "2026-09-18T07:46:17.573Z",
+  "gates": {
+    "completed": true,
+    "behavior": false,
+    "parity": true,
+    "cold": true,
+    "warm": false,
+    "long": false,
+    "tokenizerCancel": false,
+    "activeGraphCancel": true,
+    "sampledMemory": true,
+    "networkDeniedLaunch": true,
+    "preciseMemoryOwnership": false,
+    "crossPlatform": false,
+    "privacyQuality": false
+  },
+  "budgets": {
+    "coldMs": 3367,
+    "warm2kP95Ms": 485,
+    "long50kMs": 10642,
+    "tokenizerCancelAckMs": 26,
+    "tokenizerCancelDrainMs": 27,
+    "activeGraphCancelDrainMs": 8,
+    "heartbeatDelayMs": 1032,
+    "sampledFootprintBytes": 834522760
+  },
+  "report": {
+    "completed": true,
+    "metrics": [
+      {
+        "kind": "cold",
+        "durationMs": 3367,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "parity",
+        "durationMs": 0,
+        "count": 20,
+        "maxError": 1.4613723731127236e-8,
+        "passed": true
+      },
+      {
+        "kind": "boundaries",
+        "durationMs": 0,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "cancel_ack",
+        "durationMs": 26,
+        "count": 1,
+        "maxError": 0,
+        "passed": false
+      },
+      {
+        "kind": "cancel_drain",
+        "durationMs": 27,
+        "count": 1,
+        "maxError": 0,
+        "passed": false
+      },
+      {
+        "kind": "busy",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "stale",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "recovery",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 446,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 485,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 469,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 402,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 370,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 379,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 372,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 374,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 374.0000000000009,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 369.9999999999991,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "long",
+        "durationMs": 10642,
+        "count": 46,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "worker_cancel",
+        "durationMs": 8,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "recovery",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "network",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "heartbeat",
+        "durationMs": 1032,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      }
+    ]
+  },
+  "intentionalChanges": [
+    {
+      "file": "src-tauri/Cargo.toml",
+      "beforeSha256": "cce388e4f4fd4d83681d4b48f056a420922d6bfba9a5d5a47dc3f6d95a745257",
+      "afterSha256": "da2c3e13fdb413d2d262b5ed27010ca1911215c86a2abbc475704fce479806b0"
+    },
+    {
+      "file": "src-tauri/Cargo.lock",
+      "beforeSha256": "9fb657f4091385be3e02541541b7af5665eb52de4ddb90ea8521c52f4431995f",
+      "afterSha256": "9fb657f4091385be3e02541541b7af5665eb52de4ddb90ea8521c52f4431995f"
+    },
+    {
+      "file": "src-tauri/src/lib.rs",
+      "beforeSha256": "90f4295a39d43128ae7ca1ba005fb874b3e61500ced2b686aaf0997f44336fcf",
+      "afterSha256": "0647911c95812ac6667df1c838a7f4540d47c4ed4e044821235f315263bc15ce"
+    }
+  ],
+  "runtime": {
+    "name": "ONNX Runtime",
+    "version": "1.24.3",
+    "source": "Existing onnxruntime-node dependency, darwin/arm64",
+    "sha256": "76831409ce6eded92b4cb343cf422c458a60c1ea1d5f3cfa69692ab7fcc67f0f",
+    "bytes": 35937208,
+    "threads": 1,
+    "telemetry": false
+  },
+  "memory": {
+    "peakRssKiB": 718240,
+    "peakFootprintBytes": 834522760,
+    "samplePeriodMs": 200,
+    "limits": "Includes all newly observed WebKit processes during this run; conservative attribution, not precise ownership. Sampling may miss transient peaks."
+  },
+  "sourceHashes": {
+    "src-tauri/Cargo.toml": "da2c3e13fdb413d2d262b5ed27010ca1911215c86a2abbc475704fce479806b0",
+    "src-tauri/Cargo.lock": "9fb657f4091385be3e02541541b7af5665eb52de4ddb90ea8521c52f4431995f",
+    "src-tauri/src/lib.rs": "0647911c95812ac6667df1c838a7f4540d47c4ed4e044821235f315263bc15ce",
+    "src-tauri/src/minilm_native_graph.rs": "28e969ca17eb1edcf887afcace2300bc475c65ee64900e558a5676a60f4709cd",
+    "src-tauri/src/minilm_prototype.rs": "e6d7002b274f3a5f9a22a7d60a93e87253ab98907f2e0e6e10916c9f4955a11c",
+    "scripts/minilm-native-desktop/build.mjs": "17f168f5fbc0fa1bf00d47b07bbd8a3479b5b99a42bf5b524666a526410f3fea",
+    "scripts/minilm-native-desktop/run.py": "768d154d07f34a9adca84825a6ab6eb5b5616aebfa2077e0fec2e38dcdd4f523",
+    "scripts/minilm-native-desktop/report.mjs": "6f7a59a6dd2773dd21a030ddb24e9ac92f51a4b8785173efc2eb4c226f0992be",
+    "scripts/minilm-native-desktop/frontend/main.mjs": "df07765983e2bc43483008eabd508ec704ef648461ad7d2f78f02135f3800a64",
+    "scripts/minilm-native-desktop/frontend/index.html": "c76a987a5bb72c46e2abf6a06ba867ef4c4c6d080c2d7b53ace5c7d4f67c110d",
+    "docs/evaluations/minilm-native-desktop/spec.md": "9901d800680d2303932a88c32160b58d5c8cb329ad0958efc9594be8c5a7f05d"
+  },
+  "rawHashes": {
+    "report.json": "439399a3ee193fdff91ed09c422f19c590e5470ac3063a97be3d738ee3b2080c",
+    "launch.json": "755626eabfda5c4c6086c6e5be16eb8afe03c68c3f96362b319c018c4c52ac36",
+    "build-final.log": "06aaec7f90e00878bb617bed599c95088abf2306f8b5ba27b9b8a4b87b1cb1e4",
+    "clippy.log": "a5878d84e2a2d0ac30f1a6dba3c5bb899ae3be71f565452021f3e1f7bf8102ef",
+    "native-default.log": "1aa84f75a5c00f0eee17dad723fa75e83ad8e83697fc07a6c3d89244c94aa16a",
+    "frontend-build-final.log": "e4ce0baf106331864d64e0771d410caa1ce993e253f7e537fa2efded89bb7895",
+    "fixtures.json": "a8aa9092ad09247ad807e7dc77e78c1921019667b714a5f3b97321457ff1d370",
+    "network-deny.sb": "0d4debba15ea943764c139569dd8f03a5e326cf523627a7edd58699f03e7d2a5",
+    "Cargo-before.toml": "cce388e4f4fd4d83681d4b48f056a420922d6bfba9a5d5a47dc3f6d95a745257",
+    "Cargo-before.lock": "9fb657f4091385be3e02541541b7af5665eb52de4ddb90ea8521c52f4431995f",
+    "lib-before.rs": "90f4295a39d43128ae7ca1ba005fb874b3e61500ced2b686aaf0997f44336fcf"
+  },
+  "limits": "One packaged macOS arm64 synthetic run, random head. Native graph execution on blocking pool with per-run termination. Existing enum worker_cancel denotes active native graph termination in this variant. Separate identifier, no installed-pack or normal UI changes. Conservative sampled memory and network-deny main-process launch do not establish exact XPC ownership or packet capture. No training or privacy-quality claim."
+}
