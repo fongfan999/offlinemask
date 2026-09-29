@@ -1,0 +1,101 @@
+{
+  "wallStart": 1789955424961,
+  "wallEnd": 1789955510814,
+  "phase": "Completed",
+  "maxHeartbeatDelayMs": 8,
+  "parity": {
+    "checked": 398,
+    "differences": []
+  },
+  "results": [
+    {
+      "label": "prepared-8s",
+      "utf16Length": 161,
+      "detectionMs": 256,
+      "firstProcessingMs": 181,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-1",
+      "utf16Length": 161,
+      "detectionMs": 6228,
+      "firstProcessingMs": 6178,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-2",
+      "utf16Length": 161,
+      "detectionMs": 5848,
+      "firstProcessingMs": 5791,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-3",
+      "utf16Length": 161,
+      "detectionMs": 6262,
+      "firstProcessingMs": 6220,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "cancel-loading",
+      "utf16Length": 161,
+      "detectionMs": 12405,
+      "firstProcessingMs": 12346,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "cancel-warm-1",
+      "utf16Length": 161,
+      "detectionMs": 103,
+      "firstProcessingMs": 72,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "cancel-warm-2",
+      "utf16Length": 161,
+      "detectionMs": 101,
+      "firstProcessingMs": 71,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "cancel-warm-3",
+      "utf16Length": 161,
+      "detectionMs": 99,
+      "firstProcessingMs": 70,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "medium",
+      "utf16Length": 2000,
+      "detectionMs": 775,
+      "firstProcessingMs": 74,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "long",
+      "utf16Length": 10000,
+      "detectionMs": 3713,
+      "firstProcessingMs": 84,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "limit",
+      "utf16Length": 50000,
+      "detectionMs": 18777,
+      "firstProcessingMs": 280,
+      "findings": 3,
+      "addressCovered": true
+    }
+  ],
+  "evidence": "Transcribed from the completed isolated app accessibility report; synthetic fixtures only."
+}

@@ -1,0 +1,58 @@
+{
+  "recordedAt": "2026-09-21T03:11:44.651500+00:00",
+  "platform": "macOS arm64; Apple M1 Pro; 16 GiB RAM",
+  "features": [
+    "recognition-native-desktop",
+    "VITE_NATIVE_RECOGNITION=1"
+  ],
+  "runtime": "ONNX Runtime 1.24.3 / ort 2.0.0-rc.10, 4 intra-op threads",
+  "sourceSnapshot": {
+    "src-tauri/src/recognition_native.rs": "6c1b93f72431906d6bde193966aaee78ffd73c46d22cbca5e99ab3773e50ef41",
+    "src-tauri/src/models.rs": "74dba439ba77eda7cf6a941472ba106ceda54cd580681108482b9c94678a2265",
+    "src-tauri/src/lib.rs": "ba4f4b861e9a704b32ceca2eebad6e20b9e7127565e99704fd0ffcf2a88e6446",
+    "src-tauri/Cargo.toml": "7e74dfedf0e6989645fddccce1040c1dee521708147ce6ca608538cc8acd0573",
+    "src-tauri/Cargo.lock": "f0d78e9306de7466a51782bd0e99312df1168a4544c2fc84a5553b6767cdc747",
+    "src/adapters/text-detection.ts": "1d9c34f639afc4d3ba4c3e94e181293d5213b537bbe511f745d29bb82f741eb6",
+    "src/workers/detection.worker.ts": "d2f501afb96c26f9768991a41cc33ef4f181141aad15f00bbc2c54d8b15b74ad",
+    "src/core/detection/native-recognition.ts": "55e787e044a1f73da84bf0428050c2f1853ae1c08a33a6f44d51af87c55d809c",
+    "src/core/detection/recognition.ts": "724afb1f096344769af0697233adfca0606419299a19940c5d29b79e0746fe06",
+    "src/core/detection/engine.ts": "a4896503dc13a62495ececc9d00ad9d82980dd825ccc6d1b283c9cd299a5a1f0",
+    "src/core/detection/types.ts": "d2d07fbe7f7c9b1d2bd133e7e14dcff21218573f773efcb9ab29e6dd4a7e8ac7",
+    "scripts/release-pack-v1.json": "cfa171d195ef6aa7b512cd64c67b3f40135b2546d42a571998b8a48c0c1c835c",
+    "tests/native-bridge.test.mjs": "05caccc96959b40fededa2df4bc087426c045eee88abc8bcddf687af9b11b859",
+    "scripts/recognition-native-desktop-v1/index.html": "badec8e9c1b1565ba8be1b29e142ad53933ec5d6c051b414340a4bd4dd1f2477",
+    "scripts/recognition-native-desktop-v1/monitor.py": "d2e679ec90ffd11b0bac09e82a0b1fbfc35229c1079efcb4de8e4dcf6c0d0f55",
+    "scripts/recognition-native-desktop-v1/build-ui.mjs": "06868994d37e825e0a648f7f875c200e8eab576119db3e1bcfecc63bd095b507",
+    "scripts/recognition-native-desktop-v1/main.ts": "456ccafa07c5b5c60d190e7c16523d0d8820fb8321caf07dedf53a36a72c8d90",
+    "scripts/recognition-native-desktop-v1/build.mjs": "2085b66502394d517ac5152601aa0e7f8cb064d76c2b333d257c1d18c03ee3c6",
+    "scripts/recognition-native-desktop-v1/style.css": "a021757adcfd03d80e50839625c53e78a87ccd6e4ce524e18059ab1aebb00ded"
+  },
+  "builtArtifacts": {
+    "src-tauri/target/release/bundle/macos/OfflineMask Native QA.app/Contents/MacOS/offlinemask": "2120d5158857208e5577f4db63766f11c122cb8b0ed1e7bb965469e57e888686",
+    "src-tauri/target/release/bundle/macos/OfflineMask Native QA.app/Contents/Resources/native/libonnxruntime.1.24.3.dylib": "76831409ce6eded92b4cb343cf422c458a60c1ea1d5f3cfa69692ab7fcc67f0f",
+    "src-tauri/target/release/bundle/macos/OfflineMask Native UI.app/Contents/MacOS/offlinemask": "8dcf38e1a240665f15ee4eba64b5638a73ed4e32431204396b09b275ef197b66",
+    "src-tauri/target/release/bundle/macos/OfflineMask Native UI.app/Contents/Resources/native/libonnxruntime.1.24.3.dylib": "76831409ce6eded92b4cb343cf422c458a60c1ea1d5f3cfa69692ab7fcc67f0f",
+    "artifacts/recognition-native-desktop-v1/frontend/index.html": "2f335d035dcbb038b567de1bfe18e0e0940580cd692906257bd7642e9a5d9600",
+    "artifacts/recognition-native-desktop-v1/frontend/replay.json": "1244964e99fa5068b316dff9a52474658441369929b6c3755eeed065cbf1b12a",
+    "artifacts/recognition-native-desktop-v1/frontend/assets/detection.worker-BZwrM4fL.js": "32d5e04b306a30c68785dc25d9008115ad78c7758ba0213a113d236190bfde3b",
+    "artifacts/recognition-native-desktop-v1/frontend/assets/ort-wasm-simd-threaded.asyncify-DMmc6YqF.wasm": "e0c0c6d3e73d43b8a249972f8358f845b08cc16fec3c80efafdf8bed40366786",
+    "artifacts/recognition-native-desktop-v1/frontend/assets/index-D0YV-Hhb.js": "49eaad2d495cabae36076ca680066f7790ba45c10614d7cfdd20b94d9a82fa07",
+    "artifacts/recognition-native-desktop-v1/frontend/assets/index-CWCtMEH8.css": "fd5531d07b17687ba5cca43a376b299ca114daeddfdf2cb4e0fbabb1a17b7c8d",
+    "artifacts/recognition-native-desktop-v1/ui/index.html": "9d51bc1dbd98bc7893baf5196ef198e19ecbfcdf2dab164583b29c9a5a7f40e6",
+    "artifacts/recognition-native-desktop-v1/ui/runtime/ort-wasm-simd-threaded.asyncify.wasm": "e0c0c6d3e73d43b8a249972f8358f845b08cc16fec3c80efafdf8bed40366786",
+    "artifacts/recognition-native-desktop-v1/ui/assets/detection.worker-BZwrM4fL.js": "32d5e04b306a30c68785dc25d9008115ad78c7758ba0213a113d236190bfde3b",
+    "artifacts/recognition-native-desktop-v1/ui/assets/index-CVPVC7iL.css": "cfb50cdb8bafe690d335330b54a2658eb80880d4e39593a10c964a4a9cab5f3d",
+    "artifacts/recognition-native-desktop-v1/ui/assets/ort-wasm-simd-threaded.asyncify-DMmc6YqF.wasm": "e0c0c6d3e73d43b8a249972f8358f845b08cc16fec3c80efafdf8bed40366786",
+    "artifacts/recognition-native-desktop-v1/ui/assets/index-Be9lelgU.js": "6dbf0f3db0459a9f769821356ab233f0b857d0afb8126fc60dc4228d9389241b"
+  },
+  "outputs": {
+    "memory.json": "c013291a66a0d0d8506d18e11483bbd5bbd1034bdf069135a15edbde7bb52467",
+    "results.json": "5ec71dfcdf1e583b98826abddd3cb21005c0b8bb3146e9e6d10160f1ef160fbb"
+  },
+  "limitations": [
+    "Normal network environment for successful GUI tests; OS-denied launch inconclusive",
+    "Runtime in host process, no native crash containment",
+    "Synthetic replay, not fresh accuracy evidence",
+    "Benchmark preceded the test-only injectable invoke parameter; normal UI bundle includes it. Compiled frontend artifact hashes identify actual tested builds."
+  ]
+}
