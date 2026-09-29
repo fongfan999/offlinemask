@@ -1,0 +1,9 @@
+# Native MiniLM tokenizer admission
+
+18 September 2026. Developer-only continuation of the frozen repair results. Build a reusable Rust tokenizer/source-offset library and a bounded stdin harness, isolated from production Cargo and app commands. Use Hugging Face Tokenizers 0.22.2 (matching the tested Python binding), local checksum-verified tokenizer JSON, explicit grapheme-wise NFC, and original UTF-16 span mapping. Disable tokenizer HTTP features. No Python is required in the resulting executable. No new checkpoint download, app pack installation or training.
+
+Require IDs, masks and every mapped token offset to match the frozen native Python reference across all 407 full inputs and 476 windows. Separately author exact expected spans for decomposition, duplicates, astral/ZWJ emoji, compatibility forms, punctuation, controls, whitespace, unknowns and literal added-token text. Reject malformed source boundaries, unexpected zero-length source tokens, hidden truncation, inputs over 50,000 UTF-16 units and oversized/malformed protocol frames. Full diagnostic encodings may exceed model capacity; inference requests must reject more than 384 tokens rather than silently truncate.
+
+Exercise native tokenization followed by existing Gather-only WASM inference on bounded inputs, with Python slow-reference IDs and CPU outputs as comparison. Retain atol=rtol=1e-4. Record cold load and tokenization timings descriptively, not as packaged-app resource qualification. Preserve production and all previous evidence fingerprints. Retain failures; do not weaken gates or infer learned privacy quality from the random head.
+
+A successful Rust CLI demonstrates a portable native implementation suitable for later Tauri integration; it does not establish IPC/UI lifecycle, cancellation, signed app behavior, Windows/Linux compatibility or arbitrary Unicode coverage.
