@@ -1,0 +1,14 @@
+[
+  {"id":"fresh-name-transfer","group":"banking","annotated":"[[name|Đỗ Ngọc Trâm]] đề nghị kiểm tra khoản chuyển cho [[name|Bùi Đức Huy]]. Mã giao dịch: [[banking|CK-20260910-073]]."},
+  {"id":"fresh-name-contact","group":"banking","annotated":"Người liên hệ: [[name|Vũ Hải Yến]]. Email [[email|yen.synthetic@example.org]], điện thoại [[phone|0912345678]]."},
+  {"id":"fresh-apartment","group":"address","annotated":"Khách hàng [[name|Hoàng Gia Bảo]] nhận thư tại [[address|căn 1208, tòa B, 36 Nguyễn Trãi, Thanh Xuân, Hà Nội]]."},
+  {"id":"fresh-rural","group":"address","annotated":"Địa chỉ của [[name|Đinh Thị Thu]]: [[address|thôn Đông, xã Bình Minh, huyện Thanh Oai, Hà Nội]]."},
+  {"id":"fresh-nfd","group":"name","annotated":"Khách hàng [[name|Nguyễn Ngọc Hà]] cần hỗ trợ. STK: [[banking|007700112233]]."},
+  {"id":"fresh-crlf","group":"banking","annotated":"Họ tên:\r\n[[name|Trương Bảo Châu]]\r\nCCCD: [[banking|012345678901]]\r\nNgày giao dịch: 10/09/2026."},
+  {"id":"fresh-emoji","group":"name","annotated":"👨‍👩‍👧‍👦 Người gửi [[name|Tạ Minh Quân]] muốn đổi số điện thoại thành [[phone|0987654321]]."},
+  {"id":"fresh-literals","group":"name","annotated":"[CLS] Khách hàng [[name|Lý Ngọc Mai]] [SEP] cần hỗ trợ qua [[email|mai.synthetic@example.org]]."},
+  {"id":"fresh-negative-uppercase","group":"negative","annotated":"ĐỀ NGHỊ KIỂM TRA LẠI BÁO CÁO. CHƯA CÓ DỮ LIỆU KHÁCH HÀNG."},
+  {"id":"fresh-negative-unicode","group":"negative","annotated":"👨‍👩‍👧‍👦 A ▁ B · ＡＢＣ · ễ · [CLS] [UNK] [SEP] · a​b"},
+  {"id":"fresh-negative-facts","group":"negative","annotated":"Ngày 10/09/2026, có 36 yêu cầu với tổng số tiền 12.500.000 đồng."},
+  {"id":"fresh-repeated","group":"name","annotated":"[[name|Phan Đức Long]] xác nhận đã nhận thư. Hồ sơ của [[name|Phan Đức Long]] chưa có số tài khoản."}
+]
