@@ -1,0 +1,52 @@
+{
+  "models": [
+    {
+      "directory": "vietnamese-pii",
+      "repository": "OpenMed/OpenMed-PII-Vietnamese-SuperClinical-Small-44M-v1-onnx-android",
+      "revision": "665e766d817110a648d9cc38d074041702ca9675",
+      "license": "Apache-2.0",
+      "files": {
+        "model_int8.onnx": "9b95d41fc8da37ebc8d53dbeed4b186ed6a6190283ab07d5b512b53934bc5594",
+        "config.json": "d24e7a78babc8ca5449970659deaa9372b163556e68579f3dd5717a23191786e",
+        "tokenizer.json": "384255eb4e0c7c2066afc789d8f97907a023503be3fd521ac43f7abf5c96cfa9",
+        "tokenizer_config.json": "392b1747f5ec57781f7c8ff219cab4d4e9743ccb28936381d476ff49cc930f80",
+        "id2label.json": "a855c964ef7763ec51b63aad7ec43e43ae5a89f1e5f221cd2852326107ad7d95",
+        "openmed-onnx.json": "2316ace6e1eb9971a2de8caa812a0bd494c22752fd72a52a940cd6c9b33a2104",
+        "README.md": "1994efa277bd44c8421918f4968f9e79a28836d3486e1cb3d0d44fbb7b709b0b"
+      },
+      "sizes": {
+        "model_int8.onnx": 466962077,
+        "config.json": 4697,
+        "tokenizer.json": 8340141,
+        "tokenizer_config.json": 646,
+        "id2label.json": 1656,
+        "openmed-onnx.json": 12724,
+        "README.md": 5698
+      }
+    },
+    {
+      "directory": "vietnamese-pii-multilingual",
+      "repository": "OpenMed/OpenMed-PII-Vietnamese-mSuperClinical-Large-279M-v1-onnx-android",
+      "revision": "eaac31560eef579a7ae6144377109969dbd1e83a",
+      "license": "Apache-2.0",
+      "files": {
+        "model_int8.onnx": "3447b09304771ec16f991d2c8d4942ebef9c52497ea6f662f4a301698e9b557c",
+        "config.json": "062cfb1edd8e78a35fc4251f88dd08e9ba9964762b11dbdf3cd70e5721279ed7",
+        "tokenizer.json": "e34d85acb51fe7c518a3f284a80866f46aa4691b1fc29d2dfdd94f2119945a4f",
+        "tokenizer_config.json": "c6a887da972d836a1e197e3ade745c1bd64f53f4754fb8e1245105b6ccfe7fc9",
+        "id2label.json": "a855c964ef7763ec51b63aad7ec43e43ae5a89f1e5f221cd2852326107ad7d95",
+        "openmed-onnx.json": "1845fe09da9bfc1855a2bf696ec7222dec709cbf870b38c78c5f211bd536f910",
+        "README.md": "bcfe0511f918ac0eef6637e4d4497a0fa99c230dccd418fedffc48ed9d49d711"
+      },
+      "sizes": {
+        "model_int8.onnx": 916288564,
+        "config.json": 4700,
+        "tokenizer.json": 16034281,
+        "tokenizer_config.json": 3036,
+        "id2label.json": 1656,
+        "openmed-onnx.json": 12726,
+        "README.md": 5714
+      }
+    }
+  ]
+}
