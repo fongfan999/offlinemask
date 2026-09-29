@@ -1,0 +1,29 @@
+{
+  "frozenAt": "2026-09-14T16:22:06.257Z",
+  "fixtureHashes": {
+    "model-comparison.json": "6ff1c4ea7c79dd4b58e95f3da5eafd00547c954c03fa68ad07151ccf69203139",
+    "model-reliability.json": "44046c29eafb3084f4e2bdd0a13cc9c6b5998006d096516d18822ed2b684045f",
+    "address-holdout.json": "fbba167fc9c0a9f74c357e43a0008f3b6957b3e0934e7e7fb1f2395b9743387d",
+    "address-validation.json": "c273a029cc461f412f113f39ad49385cc18ab767b9b8fec2101a571ec11c6268",
+    "address-final-check.json": "fe47309e0771ef1bb03e42d7d32466513c731d2355303bc8b4d433b07b6bbd8b",
+    "model-decision.json": "02f67fd1a676d657bd0353f7054b4d1ef6a0190f46a6e83c734580361dbd8472",
+    "text-reliability-holdout.json": "c5e8e7511ac2f665e3575a017e2085b08132dd07df4a773f08d254844d8cd034",
+    "text-reliability-final.json": "a5f15490d4d21884f85a6b7ded221f0d2e71a18d4e2dc15df302edb67bd958f0",
+    "structured-values-holdout.json": "17fa23d82363762b6f2998ecf94b4ecf7fce48e89fb4556ac6485714620a6315"
+  },
+  "beforeHashes": {
+    "src/core/detection/openmed.ts": "f6594b48dcb7ccb4bd835fbe6fb4ac590d1582f1a826352d318e95db7b5c8486",
+    "src/core/detection/labelled-fields.ts": "6252afe80e889bb5db1f23eeb3927a4b17690d06033bce1111b5d8b49f39c95f",
+    "src/core/detection/engine.ts": "783ee0f1be2f4f7511a7b2cd681de67b8f6de75c5c49a1ad468f5a2a4a9bc932"
+  },
+  "afterHashes": {
+    "src/core/detection/openmed.ts": "dc1e5fb2685db67c5e659133c90cb59d991d1cb073359c403b255afed5098ce3",
+    "src/core/detection/labelled-fields.ts": "5298d383357b4ccd3b00b8aea381b8a26bd721f1f82aa5790b3000cafac540ca",
+    "src/core/detection/engine.ts": "eb7a55166243c238c922cfb55aed5167940dad4e00bbf78ed4a7390c792b3d9e",
+    "src/core/detection/structured-values.ts": "cf2ebaab7d22f3c5291b993b729625f44d552ae253643f1057edc254be79831b"
+  },
+  "scope": "Complete explicit credentials, role-labelled numeric accounts and five/six-digit postcodes. Preserve explicitly labelled valid transaction dates and VND amounts. Credentials require colon/equals; quoted values can contain spaces/punctuation. No telemetry or production data collection.",
+  "baseline": "Existing final 14 September runs on the same pre-change detector supply 238 old cases per runtime/configuration. New fresh 24 cases run before and after using isolated original source snapshot. Verify reused baseline hashes before reporting.",
+  "criteria": "Unchanged meetsScreeningFloor. Inspect full, category-only and partial coverage losses and additional ordinary masking by case. Do not tune after fresh results. No model promotion or runtime migration implied.",
+  "limitations": "Synthetic cases by the same developer, not independent real-world validation. All inference local; fetch blocked. Native and production-version WASM hosted in Node. No new latency or packaged-app claims."
+}
