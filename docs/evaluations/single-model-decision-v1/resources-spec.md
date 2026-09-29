@@ -1,0 +1,9 @@
+# Local resource probe, frozen before execution
+
+Probe the engineering candidate chosen by the frozen ranking (Underthesea INT8). Run two separate Node CPU processes sequentially on this Mac, each under macOS network-deny sandboxing. Use ONNX Runtime's CPU provider and default session/thread settings, pinned native tokenizers 0.22.2 and the same unchanged graph. Native tokenization/planning runs online within each request, with request-local count encodings only; no inference-result cache or cross-request tokenization cache.
+
+Each run: measure session/tokenizer initialization and a first 2,000-character request; ten subsequent distinct 2,000-character requests; one 50,000-character request; then exact all/six-category output parity on the twelve review examples. Include NFC mapping, native tokenizer subprocess/IPC, planning, graph inference, shared policy and preview scoring in request duration. Cold timing excludes Node process/import startup and preflight hashes. Record full process elapsed separately.
+
+Use existing engineering targets as diagnostic comparators: session-plus-first-request <=5 s, warm p95 <=300 ms, 50k <=8 s, sampled process-tree physical footprint <=1 GiB. These are not packaged-app gates. Sample the exact child process tree every 100 ms using macOS libproc; include Node and tokenizer Python memory. Also record RSS, which is a different measure. Samples can miss transient peaks. Do not measure or claim UI responsiveness, app launch, cancellation, WebKit overhead, battery or other platforms.
+
+Record the sum of pinned required INT8 graph/config/tokenizer file bytes for both candidates. It is an uncompressed asset payload estimate, not a packaged archive, installer or measured network transfer. Keep FP32 research files and evaluation Python outside this pack count. Quality rejection takes precedence over all resource results; human review remains pending.

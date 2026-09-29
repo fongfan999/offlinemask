@@ -1,0 +1,12 @@
+{
+  "createdAt": "2026-09-19T10:40:09.465Z",
+  "variant": "underthesea",
+  "files": {
+    "docs/evaluations/single-model-decision-v1/resources-spec.md": "d6dbac31005cc74d3790b83f2a0130bc3bb33112c8ef875dde4b31d9f25eec10",
+    "docs/evaluations/single-model-decision-v1/results.json": "7226af52b234c99d864cf18924e8da927be29b7e818ac9ef5fd8ddf4c47214a5",
+    "scripts/single-model-decision-v1/resources.mjs": "7fe167bd001cca557d42a628ec71fe01fe7b6d353c05500ec63af3fcc3f7c8e2",
+    "scripts/single-model-decision-v1/run-resources.py": "af045c5133fc87d39348dd6cce42601ebece3566029311de9d37991e9093ee5d",
+    "scripts/single-model-decision-v1/freeze-resources.mjs": "4cb83b18f534655488f84bcf08e121d9f56201950f226251ed5b5b64c510e2bf",
+    "artifacts/single-model-decision-v1/resource-parity.json": "d06a09c935fb6c3a5b32b405ff7296b7eb9416221eeeee05f95448f7b8fc152f"
+  }
+}

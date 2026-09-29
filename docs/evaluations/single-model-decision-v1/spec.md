@@ -1,0 +1,11 @@
+# Final bounded comparison of the two existing single-model candidates
+
+No model search, download, training, new heuristics, threshold changes or production edits. Compare pinned Underthesea INT8 and BigMed INT8 on all 362 observed synthetic cases with the latest shared policy and canonical NFC inference copies mapped back to original source graphemes. Keep every category/denominator and existing screening threshold. Do not treat an observed challenge as independent validation.
+
+Reuse the hash-verified Underthesea canonical results from contextual-repair-v1; replay them by applying the unchanged policy to its saved real model Detection arrays. Run actual BigMed native inference, first asserting raw predictions with the reconstructed model-recheck-era policy exactly reproduce the frozen pretrained-scope full/six-category outputs. Score current raw, NFC and contextual-only BigMed routes. Canonical unrestricted is the primary comparison; contextual-only is an ablation, not a route to silently change scope.
+
+Release selection requires both regression and challenge screening to pass; source/runtime and independent-review admission remain separate. If neither passes, explicitly reject both for release. Pick a resource-probe candidate by the highest aggregate own-category fully covered value count, breaking ties by fewer ordinary positions then smaller assets. This engineering ranking cannot override failed quality gates.
+
+Measure the chosen candidate's required local asset bytes and a separately frozen, isolated offline Node CPU/native-tokenizer resource probe on this Mac: cold load, ten 2,000-character requests, one 50,000-character request, process-tree RAM and exact output parity probes. Include online tokenization/planning and normalization in request timing; no inference cache or precomputed tokenization outside timing. Report runtime/harness boundaries. This does not qualify packaged Tauri, WebKit, cancellation or other hardware.
+
+Prepare twelve previously observed difficult/contrast examples for owner review, bound to fixture/output hashes. Ask for the desired sensitive spans before viewing named-model outputs. No acceptance is inferred; keep the ledger pending. No review text is sent to a service or used for training.

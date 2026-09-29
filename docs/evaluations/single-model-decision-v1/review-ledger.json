@@ -1,0 +1,105 @@
+{
+  "createdAt": "2026-09-19T10:37:28.395Z",
+  "reviewer": null,
+  "status": "PENDING",
+  "cases": [
+    {
+      "number": 1,
+      "id": "name-lowercase",
+      "file": "model-comparison.json",
+      "text": "Tôi là đỗ hoàng phúc, nhờ kiểm tra giúp lệnh chuyển tiền bị treo.",
+      "textSha256": "8c9bd0bcd1d65880f4d295337216bffefa1b9ce44ecc1bfaae97556117c557dd",
+      "reviewStatus": "PENDING"
+    },
+    {
+      "number": 2,
+      "id": "name-ethnic",
+      "file": "model-comparison.json",
+      "text": "Khách hàng H’Hen Niê đề nghị cập nhật thông tin liên hệ.",
+      "textSha256": "979ac27ffb0bc55303e7a7c6782e46b689738118b62e6c0d92a40739b909daac",
+      "reviewStatus": "PENDING"
+    },
+    {
+      "number": 3,
+      "id": "negative-upper",
+      "file": "model-comparison.json",
+      "text": "YÊU CẦU TRA SOÁT GIAO DỊCH. CHƯA CÓ THÔNG TIN KHÁCH HÀNG.",
+      "textSha256": "f976bf022c3ea07cef622223f330dce92097c1aea09070442c5f9b817451bafb",
+      "reviewStatus": "PENDING"
+    },
+    {
+      "number": 4,
+      "id": "fresh-nfd",
+      "file": "model-reliability.json",
+      "text": "Khách hàng Nguyễn Ngọc Hà cần hỗ trợ. STK: 007700112233.",
+      "textSha256": "f6d02bf30d107c346a1a8ea7e9e1de59e65389141c9deabc878a10fe84277d73",
+      "reviewStatus": "PENDING"
+    },
+    {
+      "number": 5,
+      "id": "mixed-customer",
+      "file": "model-decision.json",
+      "text": "Mã khách hàng KH847291 thuộc về Lâm Quốc Hưng, địa chỉ 15A Lê Quý Đôn, Quận 3, TP. Hồ Chí Minh.",
+      "textSha256": "61b78653d85aa710eef07e20a8f57bdf42e0187c022190128ed578e41ae8ac12",
+      "reviewStatus": "PENDING"
+    },
+    {
+      "number": 6,
+      "id": "address-slash",
+      "file": "model-decision.json",
+      "text": "Chuyển thư về 17/6 Nguyễn Văn Đậu, phường 5, Bình Thạnh, TP. Hồ Chí Minh.",
+      "textSha256": "5e546bb9bf47c3265106aebf47b475c70198f365f244d9de91c8bbc5ade1463f",
+      "reviewStatus": "PENDING"
+    },
+    {
+      "number": 7,
+      "id": "fresh-negative-unicode",
+      "file": "model-reliability.json",
+      "text": "👨‍👩‍👧‍👦 A ▁ B · ＡＢＣ · ễ · [CLS] [UNK] [SEP] · a​b",
+      "textSha256": "52e788349548f1c8c6cd71385c3dbaa289645afd328aec701e45996ba1a1b26a",
+      "reviewStatus": "PENDING"
+    },
+    {
+      "number": 8,
+      "id": "organization-extracted",
+      "file": "release-challenge-v1.json",
+      "text": "De nghi lap ho so chi tra cho Hop tac xa Nong san Suoi Mo. Tong so chung tu la 24, tong gia tri la 68 trieu dong.",
+      "textSha256": "69bf542b4d200a755a1283a127c5cb38fcc3060f56b0f977568e21ced6e6bbac",
+      "reviewStatus": "PENDING"
+    },
+    {
+      "number": 9,
+      "id": "person-short-extracted",
+      "file": "release-challenge-v1.json",
+      "text": "Người liên hệ về hồ sơ này là Tạ Uyên Chi. Vui lòng kiểm tra các chứng từ đính kèm.",
+      "textSha256": "481b53e32e7a2da03dcc73a3a6dec78ca39c1fd2bd4c0336d2a8e8b2b54711f0",
+      "reviewStatus": "PENDING"
+    },
+    {
+      "number": 10,
+      "id": "other-card",
+      "file": "model-comparison.json",
+      "text": "Thẻ thử nghiệm số 4111 1111 1111 1111, mã CVV 123. Đây là dữ liệu kiểm thử.",
+      "textSha256": "d44343c2e46b5d955f0a2ce48a20adfe977e1b1cbc3be49bf9fd897c8efaa690",
+      "reviewStatus": "PENDING"
+    },
+    {
+      "number": 11,
+      "id": "negative-titles",
+      "file": "model-decision.json",
+      "text": "Tổng Hợp Hồ Sơ Chờ Xử Lý. Hướng Dẫn Kiểm Tra Chứng Từ. Quy Trình Phê Duyệt.",
+      "textSha256": "a52025cbf69d41b70ebc3ad0b3d92165df18e5721f5390489549b7ad0b13eedf",
+      "reviewStatus": "PENDING"
+    },
+    {
+      "number": 12,
+      "id": "validation-lane",
+      "file": "address-validation.json",
+      "text": "Cư trú tại hẻm 16, số 5B Nguyễn Thị Minh Khai, Cần Thơ.",
+      "textSha256": "1aa796568a149545aea02d63768ecd7338c4abf32bc792d5defd672b2c724ee8",
+      "reviewStatus": "PENDING"
+    }
+  ],
+  "fixtureProtocolHash": "b015f53432f2cbdf59dd524190a0b1b7bbbf082d2b2a92c7bf5ca718eea93dee",
+  "outputHash": "2fe876579cde1f8fc4abb3bc9f3eb09d3025880286213f45a1d6bd9c61cc040f"
+}

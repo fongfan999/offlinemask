@@ -1,0 +1,14 @@
+{
+  "createdAt": "2026-09-19T10:44:01.663Z",
+  "hashes": {
+    "docs/evaluations/single-model-decision-v1/results.json": "7226af52b234c99d864cf18924e8da927be29b7e818ac9ef5fd8ddf4c47214a5",
+    "docs/evaluations/single-model-decision-v1/resources-results.json": "b0ea2b7c3fd7126c743a2874ca60daf607c3022ef089a2d24175e9521bbffdc8",
+    "docs/evaluations/single-model-decision-v1/review.md": "ce42955f0e38d1bff62b2ec4fcbcb8b9a881486e588ffae916e7de1220d92533",
+    "docs/evaluations/single-model-decision-v1/review-ledger.json": "8447491c54ae6739e247f3dba2391d4061226f1dab1180a5ac223c27c4a8f2d2",
+    "artifacts/single-model-decision-v1/tests.log": "ab5bf4e8cc33efdabdf9567a34e6aeef5311ba53bdc9d9a10c103732efc3a37f"
+  },
+  "tests": 151,
+  "typecheck": "passed",
+  "productionAndHistoricalFingerprints": "unchanged and verified",
+  "review": "12 pending; no approval inferred"
+}

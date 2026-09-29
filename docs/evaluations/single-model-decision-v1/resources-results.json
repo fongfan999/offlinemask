@@ -1,0 +1,54 @@
+{
+  "createdAt": "2026-09-19T10:41:50.077Z",
+  "runs": [
+    {
+      "run": "1",
+      "coldMs": 485.26066600000007,
+      "warmP95Ms": 127.09291600000006,
+      "longMs": 2948.073958,
+      "peakFootprintBytes": 714780480,
+      "peakRssBytes": 775389184,
+      "parityCases": 12,
+      "hardware": "Apple M1 Pro",
+      "physicalMemory": 17179869184,
+      "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+      "elapsedSeconds": 5.33781675004866,
+      "targets": {
+        "cold": true,
+        "warm": true,
+        "long": true,
+        "memory": true
+      },
+      "network": "(version 1) (allow default) (deny network*)"
+    },
+    {
+      "run": "2",
+      "coldMs": 360.043875,
+      "warmP95Ms": 128.983792,
+      "longMs": 3007.616833,
+      "peakFootprintBytes": 724889528,
+      "peakRssBytes": 796377088,
+      "parityCases": 12,
+      "hardware": "Apple M1 Pro",
+      "physicalMemory": 17179869184,
+      "platform": "macOS-26.6.2-arm64-arm-64bit-Mach-O",
+      "elapsedSeconds": 5.171311624988448,
+      "targets": {
+        "cold": true,
+        "warm": true,
+        "long": true,
+        "memory": true
+      },
+      "network": "(version 1) (allow default) (deny network*)"
+    }
+  ],
+  "evidence": {
+    "resources-1.json": "c94ef59f13e0946a9050025cfaba14929e5189098bb464f60ca7802aa2f92199",
+    "resources-1-monitor.json": "adb11d49586ce4d20f520f0230b5adfef4632c53c7c92746d644d6292d005906",
+    "resources-2.json": "ec13669499600def4294918d669f07ddbcd3fc71aaef2a691dced561a9c9e401",
+    "resources-2-monitor.json": "061dc510d1fdecf7f41b2658e35c43cc60482fffdbbec4d8f375fcd69da7b915"
+  },
+  "sourceHash": "f531e89f5640a5e429f8144598ed2da893974f62e28c03aa4f057d6d70959947",
+  "allDiagnosticTargetsPassed": true,
+  "limits": "Two developer-process probes with default CPU threads and online native tokenizer/IPC. Not packaged app, cold OS cache, WebKit, cancellation or cross-platform qualification. Quality rejection remains in force."
+}
