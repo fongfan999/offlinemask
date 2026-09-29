@@ -6,7 +6,7 @@
 
 **Updated:** 9 September 2026
 
-**Status:** Product name, MVP scope, and application foundation selected: Tauri 2 + Vue 3 + TypeScript + Vite. Desktop foundation and an interactive sample review prototype are implemented; format home, sidebar navigation, and persistent sample-session history are implemented; production detection, file handling, encrypted private-data persistence, and restoration remain pending. See [Decision 0001](docs/decisions/0001-desktop-stack.md).
+**Status:** Product name, MVP scope, and application foundation selected: Tauri 2 + Vue 3 + TypeScript + Vite. Desktop foundation and an interactive sample review prototype are implemented; format home, sidebar navigation, and persistent sample-session history are implemented; library-backed offline text detection and in-memory private text previews are implemented; comprehensive detection, file handling, encrypted private-data persistence, and restoration remain pending. See [text processing scope](docs/decisions/0004-text-processing.md). See [Decision 0001](docs/decisions/0001-desktop-stack.md).
 
 **Boilerplate acceptance:** On 9 September 2026, the owner accepted the current UI as a starting baseline and will provide page-by-page feedback later. Preserve the agreed simplicity, palette, navigation, and session model. See [product direction](docs/product-direction.md); production requirements below remain outstanding.
 
@@ -156,7 +156,13 @@ Use a replaceable detection layer combining patterns, format checks where applic
 
 Initial entity categories are names, phone numbers, email addresses, identity numbers, bank account identifiers, and customer codes. Detection must be described in terms of tested cases; the application must not imply that every occurrence of a category can be found automatically.
 
-For names, column labels, user selections, and dictionaries provide a baseline. Broader recognition in arbitrary Vietnamese prose may require an existing model. A rules-only implementation may satisfy the MVP only if it meets the agreed supported-workflow evaluation criteria. Model selection remains open; custom model training is not a dependency.
+For names, column labels, user selections, and dictionaries provide a baseline. Broader recognition in arbitrary Vietnamese prose may require an existing model. A rules-only implementation may satisfy the MVP only if it meets the agreed supported-workflow evaluation criteria. The current text implementation uses optional OpenMed Vietnamese PII models as a development baseline. The [11 September decision](docs/decisions/0010-vietnamese-model-selection.md) rejects both current checkpoints individually and together as the final release detector; one optional Vietnamese pack remains the product direction and no replacement checkpoint has qualified. Custom model training is not a dependency.
+
+Owner clarification on 19 September: automatic Vietnamese name, address and organization masking is required for release; manual correction supplements it and cannot substitute for it. Prioritize the highest measured complete-value detection coverage when choosing the v1 model(s), with size secondary for the optional pack. The [new comparison](docs/evaluations/quality-first-v1/README.md) selects Underthesea + BigMed + mSuperClinical for integration. It does not pass all quality checks and has not replaced the installed development pack. Preserve both the measured gains and the remaining misses/excess masking; later AI-engineering support does not establish current release readiness.
+
+Owner revision on 20 September: organization recognition may be deferred from v1 if the smaller GLiNER2-based candidate qualifies on the remaining required fields. This condition supersedes the mandatory-organization requirement above; automatic names, addresses and retained structured fields remain required. Evaluate retained scope and organization coverage separately without altering previous annotations or results. A selected reduced-scope pack must not advertise general organization recognition. No replacement has yet qualified or changed the installed pack. See [Decision 0038](docs/decisions/0038-conditional-v1-organization-deferral.md).
+
+Subsequent owner selection on 20 September: **Underthesea INT8 + mSuperClinical INT8** is the first-release model target, superseding the three-model target. Preserve its tested contextual route, including organization evidence, and shared structured-field rules. Investigate lossless compressed downloads with one-time local installation, accurate transfer/installed sizes, and resumable manual downloads. This chooses the models without declaring failed release checks passed; production integration and distribution remain unfinished. See [Decision 0040](docs/decisions/0040-v1-pair-and-compressed-download.md).
 
 Numeric length alone is insufficient to identify a bank account or identity number. Use available context, distinguish identifiers from amounts and references, and surface ambiguity. Likewise, matching or similar names do not establish that two records belong to the same person. Entity grouping requires stronger identifiers or user confirmation.
 
@@ -220,7 +226,7 @@ Effective precedence is: built-in defaults → selected packs → profile overri
 
 ### Offline contract
 
-The MVP application and its bundled processing components initiate no external network requests during supported operations. There are no account requirements, online licence checks, telemetry, cloud inference, remote assets, background update requests, or runtime model downloads. Users obtain optional packs, updates, and model resources outside the app and import them locally.
+The application and processing components initiate no external network requests during startup, masking, or review. There are no account requirements, online licence checks, telemetry, cloud inference, remote UI assets, or background update requests. Owner revision on 9 September 2026: Settings may explicitly download optional model resources, showing size, progress, pause/resume, and installation status. Downloads must never include private input or start implicitly from processing. The default installer excludes model weights. Optional settings-pack import must not initiate downloads.
 
 Installation prerequisites must be bundled or distributable through an offline installation procedure. A computer that has never been online must be able to complete the supported workflow with locally supplied resources.
 
@@ -293,7 +299,7 @@ Release evaluation must also demonstrate:
 
 | Area | Required evidence |
 | --- | --- |
-| Disconnected operation | Clean offline installation, first launch, restart, masking, pack import, export, and restoration succeed with networking disabled. Instrumentation checks attempted as well as successful external requests from the application and its bundled components; neither is accepted. |
+| Disconnected operation | Clean offline installation, first launch, restart, masking, pack import, export, and restoration succeed with networking disabled. Instrumentation checks attempted as well as successful external requests from the application and its bundled components; neither is accepted during those offline operations. Explicit Settings model downloads are tested separately. |
 | Restoration | Unchanged known aliases restore correctly across pasted-text, CSV, and supported XLSX fixtures, saved projects, and restarts. Recognisable unknown/malformed tokens, mapping conflicts, and wrong-project cases are flagged without guessed substitutions. Tests document that removed or unrecognisably rewritten aliases cannot be reliably recovered or detected. |
 | Output integrity | Originals remain unchanged. Declared workflow properties pass, or export clearly reports why they cannot be established. No silent unsupported-feature loss is accepted. |
 | Reusable configuration | A saved profile works on a structurally matching new file; reordered columns work; changed or ambiguous structures are surfaced. |
@@ -337,3 +343,9 @@ Sources support the competitive context and component evaluation only; they do n
 - [Prompt Anonymizer capabilities and language backends](https://github.com/akazah/prompt-anonymizer), [text-based CLI input](https://github.com/akazah/prompt-anonymizer/blob/main/src/prompt_anonymizer/cli.py), and [published evaluation scope](https://github.com/akazah/prompt-anonymizer/blob/main/docs/EVAL.md).
 - [Presidio detection and transformation architecture](https://github.com/data-privacy-stack/presidio/blob/main/docs/text_anonymization.md).
 - [OpenMed language support](https://github.com/maziyarpanahi/openmed/blob/master/docs/languages.md) and [offline configuration](https://github.com/maziyarpanahi/openmed/blob/master/docs/configuration.md).
+
+### Current text category scope (owner revision, 9 September 2026)
+
+Before processing, users select email, phone, labelled banking/identity codes, names, addresses, and other private information. The first three work in the lightweight installation. The latter three require the optional Vietnamese model pack and display that requirement when missing. Selected missing capabilities block processing and direct users to Settings without discarding the draft. Results record the chosen scope and disclose categories not checked. The current downloader is implemented; a user-facing local model import workflow for fully air-gapped setup remains future work.
+
+15 September implementation update: the labelled banking/identity option now also recognizes bounded passport and tax-ID values. Explicit field meaning takes priority over a conflicting phone-shaped match. Card information remains under “other.” The shared policy also preserves bounded credentials in prose and completes supported wrapped address components. These are tested improvements with documented syntactic limits, not complete financial-data coverage or a final model selection; see [Decision 0016](docs/decisions/0016-complete-values-and-field-meaning.md).

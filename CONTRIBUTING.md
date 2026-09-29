@@ -21,7 +21,7 @@ Read [product direction](docs/product-direction.md) before UI work. The current 
 
 - Use Vue Composition API with TypeScript, semantic HTML, standard CSS, and small components/modules with clear responsibilities. Keep portable transformations separate from native adapters and UI state.
 - Prefer documented platform APIs and maintained libraries over proprietary formats or custom infrastructure. Add dependencies for a demonstrated need; record their source, license compatibility, runtime cost, offline behavior, and alternatives in an architecture decision when the choice is substantial.
-- Use shared design tokens and the `.glass` surface rule. Do not add independent blur recipes, animated backdrop effects, remote fonts, or runtime asset downloads. Use the blue/white/neutral palette; purple and lavender are excluded from the current design direction.
+- Use shared design tokens and the `.glass` surface rule. Do not add independent blur recipes, animated backdrop effects, remote fonts, or automatic runtime asset downloads. Explicit user-triggered model downloads in Settings are allowed; processing and startup remain offline. Use the blue/white/neutral palette; purple and lavender are excluded from the current design direction.
 - Study current official documentation (Context7 is available in the agent workflow). Record consequential choices in `docs/decisions/`, and describe unresolved decisions honestly.
 - Keep UI copy in Vietnamese for the current prototype. User-facing labels describe behavior, not implementation internals.
 - Test transformation invariants, persistence boundaries, and failure paths. Avoid tests that simply repeat trivial component markup.
@@ -35,3 +35,7 @@ Real-input persistence needs the vault lifecycle described in the [PRD](PRD.md).
 ## Changes and review
 
 Keep changes focused. Describe the user-visible problem, final behavior, relevant validation, and known limitations. Update documentation alongside scope or architecture changes. Do not commit generated bundles, credentials, machine-specific paths, or private data. Public repository hosting, CI, release signing, licensing, and vulnerability reporting remain release setup tasks; no remote publishing is implied by this guide.
+
+## Offline evaluation boundary
+
+Do not add analytics, automatic error uploads, user-input logging, correction collection, or background update checks to improve detection. Evaluation uses explicitly authored synthetic fixtures and local developer runs. Real input and manual corrections remain in RAM and never become training/evaluation records. Synthetic results measure those fixtures only; whether their scenarios represent banking employees' actual documents remains an unverified assumption. New detection claims require versioned, independently reviewable evidence, not inferred field accuracy from a green test suite.
