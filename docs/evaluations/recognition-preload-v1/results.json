@@ -1,0 +1,42 @@
+{
+  "source": "Packaged macOS WebKit/WASM, Apple M1 Pro 16 GiB, synthetic-only accessibility output",
+  "wallStart": 1789925047688,
+  "wallEnd": 1789925062167,
+  "phase": "Completed",
+  "maxHeartbeatDelayMs": 595,
+  "preparationLeadMs": 8007,
+  "results": [
+    {
+      "label": "after-eight-seconds",
+      "utf16Length": 161,
+      "detectionMs": 4418,
+      "firstProcessingMs": 3995,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "warm-short-1",
+      "utf16Length": 161,
+      "detectionMs": 673,
+      "firstProcessingMs": 263,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "warm-short-2",
+      "utf16Length": 161,
+      "detectionMs": 662,
+      "firstProcessingMs": 288,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "warm-short-3",
+      "utf16Length": 161,
+      "detectionMs": 704,
+      "firstProcessingMs": 264,
+      "findings": 3,
+      "addressCovered": true
+    }
+  ]
+}
