@@ -51,3 +51,14 @@ The owner requested keeping large generated JSON results local while committing 
 | `docs/evaluations/single-model-owner-review-v2/completed.json` | 46925 | `46ecf03a9e6ab66ae3e1f644429bc336a9ec189b90adbf5f1a6a0823bec2e643` |
 | `docs/evaluations/structured-gaps-v1/local-engine.json` | 678284 | `30a00f0401ec5b1bc1da48efb1fc5e8c835e6a61957ad1c377dbc0313fe26df6` |
 | `docs/evaluations/structured-gaps-v1/results.json` | 150584 | `5a5abbbe5662d20bcb483cbea2612f7cdbdbcd2f4c6497217b95a1cb4d5a9447` |
+
+## Generated preview dumps
+
+These large rendered previews are also retained locally; the concise reports remain versioned.
+
+| Local path | Bytes | SHA-256 |
+| --- | ---: | --- |
+| `docs/evaluations/pretrained-search-v1/compatible/previews.md` | 180864 | `5e1966ba830599a009ed8bf3d6845b783be5b3a169f347aec9152a36a08227af` |
+| `docs/evaluations/pretrained-search-v1/previews.md` | 179344 | `0e23fe960541dd50800cd84307e649b4b15c1335beb3fd2a9c94cf881e287919` |
+| `docs/evaluations/pretrained-search-v1/schema/previews.md` | 180864 | `5e1966ba830599a009ed8bf3d6845b783be5b3a169f347aec9152a36a08227af` |
+| `docs/evaluations/quality-first-v1/previews.md` | 177905 | `3158e747f88de23eb0b2ae7f6056f34fb4c61415a0fc799240e7afc7f3371703` |

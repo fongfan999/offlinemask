@@ -85,3 +85,9 @@ __pycache__/
 /docs/evaluations/single-model-owner-review-v2/completed.json
 /docs/evaluations/structured-gaps-v1/local-engine.json
 /docs/evaluations/structured-gaps-v1/results.json
+
+# Large generated preview dumps from the same evaluations.
+/docs/evaluations/pretrained-search-v1/compatible/previews.md
+/docs/evaluations/pretrained-search-v1/previews.md
+/docs/evaluations/pretrained-search-v1/schema/previews.md
+/docs/evaluations/quality-first-v1/previews.md
