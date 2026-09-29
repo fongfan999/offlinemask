@@ -1,0 +1,7 @@
+{
+  "url": "https://raw.githubusercontent.com/microsoft/unilm/0e31c7c09737df491e7ff74ded19614b884c52b4/LICENSE",
+  "revision": "0e31c7c09737df491e7ff74ded19614b884c52b4",
+  "sha256": "904dc4d8749877f1dba1cda48200d2462dccbeb7c134d5e4ef6fa75e0198c8fe",
+  "bytes": 1104,
+  "scope": "Publisher upstream code license accompanying MIT model metadata; not full training-data redistribution review."
+}

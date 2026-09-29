@@ -1,0 +1,13 @@
+# MiniLM technical admission probe
+
+18 September 2026. Declared before export and runtime measurement. One pinned Microsoft multilingual MiniLM base, source revision `6e8c1ec6b4ec4e3fc6eb7d2cd834fcd582b61daf`, with a reproducible random 39-label token-classification head (seed 9182026). Zero training steps; never report accuracy from these predictions.
+
+Download only the five pinned source assets listed in the source manifest, validate LFS SHA-256 or Git blob hashes, and keep them under ignored developer artifacts. No app pack installation. The source weight uses PyTorch state-dict loading with `weights_only=True`; no remote code is executed. Libraries live in a separate Python environment. Export and inference use local assets with offline environment flags.
+
+Check slow SentencePiece versus converted fast-tokenizer IDs on 362 observed regressions, 29 development examples and 16 adversarial/length probes. Verify JavaScript tokenizer IDs and attention masks against the same reference before using native offsets. Inspect original UTF-16 coverage, whitespace/normalization, special-token lookalikes, NFD marks, unknown tokens and emoji. Exercise the unchanged 384-token shared window planner. Unknown or mismatched offsets block admission; they must not be hidden as low quality or repaired by locating the wrong repeated substring.
+
+Export FP32 ONNX opset 18 and compress MatMul plus Gather weights using the installed ONNX Runtime quantizer. Confirm the large word-embedding initializer is compressed and include tokenizer/configuration and notices in the complete pack measurement. Proposed pack ceiling is 300,000,000 bytes. No trimming vocabulary or removing supported text to make the size pass.
+
+Use 20 bounded operator/fidelity inputs, including empty text and a 384-token limit. Require FP32 output agreement with PyTorch at `rtol=1e-4, atol=1e-4`. Record compressed maximum absolute error, RMSE and random-head argmax changes descriptively; there is no privacy quality threshold for an untrained head. Compare the same compressed graph across Python CPU, installed Node CPU and production-version WebAssembly hosted in Node. Runtime cross-check tolerance is `rtol=1e-4, atol=1e-4`; record any exception. These measurements do not qualify macOS WebKit, other packaged OS runtimes, memory, cancellation or real-world masking.
+
+An export/size pass with missing JavaScript positions or packaged-runtime evidence is partial technical progress, not training/release admission. If a gate fails, record a concrete bounded blocker and retain outputs and source fingerprints. Do not change the installed detector, silently swap runtime, train, or weaken an observed gate.

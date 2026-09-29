@@ -1,0 +1,37 @@
+{
+  "repository": "microsoft/Multilingual-MiniLM-L12-H384",
+  "revision": "6e8c1ec6b4ec4e3fc6eb7d2cd834fcd582b61daf",
+  "licenseDeclaration": "mit",
+  "files": {
+    "config.json": {
+      "rfilename": "config.json",
+      "blobId": "fb6422b18e057892f2e3382ba03de3d2367a9b3b",
+      "size": 430
+    },
+    "pytorch_model.bin": {
+      "rfilename": "pytorch_model.bin",
+      "blobId": "c8645f96ef0760bc5e5a1ced06d57807d5f5ba27",
+      "size": 470657952,
+      "lfs": {
+        "sha256": "cce170910f4d4f3b45be025508f51ef1ad6a1de69f2d46dce7e4603ad31aaaeb",
+        "size": 470657952,
+        "pointerSize": 134
+      }
+    },
+    "sentencepiece.bpe.model": {
+      "rfilename": "sentencepiece.bpe.model",
+      "blobId": "db9af13bf09fd3028ca32be90d3fb66d5e470399",
+      "size": 5069051
+    },
+    "special_tokens_map.json": {
+      "rfilename": "special_tokens_map.json",
+      "blobId": "6cd1d9021e10d47aed59399af6b0e30312b46ca4",
+      "size": 150
+    },
+    "tokenizer_config.json": {
+      "rfilename": "tokenizer_config.json",
+      "blobId": "9e26dfeeb6e641a33dae4961196235bdb965b21b",
+      "size": 2
+    }
+  }
+}
