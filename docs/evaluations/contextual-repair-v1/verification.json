@@ -1,0 +1,12 @@
+{
+  "createdAt": "2026-09-19T10:31:57.883Z",
+  "hashes": {
+    "docs/evaluations/contextual-repair-v1/protocol.json": "0f64510cdc0b618d5e7b1631839537653ed17b0cab5fd1fedd754cca76ee65d9",
+    "docs/evaluations/contextual-repair-v1/results.json": "d02a3cfa28e9641b7747ed40c8bf54030c64c8186db47b2d8fee12671d4d768e",
+    "docs/evaluations/contextual-repair-v1/token-examples.json": "1d7ba595b3c5ecf82600c3c59d2331cad23e4663d465910ea5d35ad45e9335c7",
+    "artifacts/contextual-repair-v1/tests.log": "05fa39124c113b953d2a97de6eda80531537a384f4566297808b2689ffb699f5"
+  },
+  "tests": 151,
+  "typecheck": "passed",
+  "historicalAndCurrentFingerprints": "verified"
+}

@@ -1,0 +1,8 @@
+# Compact contextual diagnosis and bounded repairs
+
+Keep all pinned weights, categories, thresholds and corpus annotations unchanged. Use all 362 observed cases; no training, downloads or final-validation claim.
+
+1. Test NFC composition before Underthesea tokenization/inference, mapping every model span back to complete source graphemes before applying the existing policy to the original text. Do not case-fold, strip accents, normalize compatibility characters, or modify user input. Keep native/JS token-ID agreement checks. Preserve raw tokens, aligned offsets and label scores for remaining error cases to distinguish prediction errors from offset failures.
+2. Repair two observed address boundary omissions only: explicit `số <house number> <proper street>` components and the `chuyển thư về/đến/tới` address context. Keep address-model evidence and bounded contiguous components mandatory. Negative contrasts must retain unrelated numbers, prose and line/paragraph boundaries.
+3. Compare frozen prior policy, address repair alone, NFC alone, and NFC plus repair using real model detections. Baseline full and all six category previews must reproduce previous saved evidence exactly. Run the current pair for address-policy regressions; do not normalize or change that installed pack.
+4. Report full/own-category/partial gains and losses and newly masked ordinary positions. Keep existing misses, false positives and screening thresholds. Qualify the NFC adapter as candidate engineering only; shipping native offset integration remains separate. Developer-authored Unicode/address probes are tests, not independent human review.
