@@ -1,0 +1,351 @@
+{
+  "checkedOn": "2026-09-19",
+  "source": "Manual Hugging Face API metadata retrieval; three candidates; no app network change",
+  "candidates": [
+    {
+      "repository": "GreenNode/gliner-pii-base-v1.0-tuned",
+      "revision": "85cf26b39f2a02d9af9af483ac66b2194bf14c9f",
+      "card": {
+        "license": "apache-2.0",
+        "language": [
+          "vi",
+          "en"
+        ],
+        "library_name": "gliner",
+        "pipeline_tag": "token-classification",
+        "tags": [
+          "NER",
+          "GLiNER",
+          "information extraction",
+          "PII",
+          "PHI",
+          "PCI",
+          "entity recognition",
+          "multilingual"
+        ]
+      },
+      "files": [
+        {
+          "rfilename": ".gitattributes",
+          "blobId": "23f53263b8f1cb3371cb50376763a6705891b6e3",
+          "size": 1932
+        },
+        {
+          "rfilename": "README.md",
+          "blobId": "b3db2e55beec1839bd1ad8d2b43f5d283a761ca9",
+          "size": 14585
+        },
+        {
+          "rfilename": "added_tokens.json",
+          "blobId": "7546b399c0c104e8eb33438f622def928f3707b5",
+          "size": 65
+        },
+        {
+          "rfilename": "count.json",
+          "blobId": "b438042e22cf75dfb6b718749bd7639ffcc8fcac",
+          "size": 1215
+        },
+        {
+          "rfilename": "count_synthetic.json",
+          "blobId": "2f1ab0c5140897fb6a2bc2d903a60c0042aafcc7",
+          "size": 665
+        },
+        {
+          "rfilename": "count_test.json",
+          "blobId": "011182ea4bef70ffbf63b21a4c9016dd7073ccf1",
+          "size": 1158
+        },
+        {
+          "rfilename": "count_test_synthetic.json",
+          "blobId": "9947ce56911654020654c2b823a7c41182f79c93",
+          "size": 629
+        },
+        {
+          "rfilename": "count_test_vietmed.json",
+          "blobId": "49bff7b06dae7d82807e0fa036a9d7cab9552cba",
+          "size": 408
+        },
+        {
+          "rfilename": "count_test_vlsp_2021.json",
+          "blobId": "96ffbbcba0d77b1aba059a3cd53ca5e39e974dbe",
+          "size": 314
+        },
+        {
+          "rfilename": "count_train_synthetic.json",
+          "blobId": "2f1ab0c5140897fb6a2bc2d903a60c0042aafcc7",
+          "size": 665
+        },
+        {
+          "rfilename": "count_train_vietmed.json",
+          "blobId": "ba4fef9577cbdf846d9ac816c052741cc14d2930",
+          "size": 420
+        },
+        {
+          "rfilename": "count_train_vlsp_2021.json",
+          "blobId": "9737bcf891c5ab09ea28ead676eedb154e4d6d07",
+          "size": 324
+        },
+        {
+          "rfilename": "count_vietmed.json",
+          "blobId": "3b7a23e9657960fa7c565420502cdb828c0d3b9d",
+          "size": 420
+        },
+        {
+          "rfilename": "count_vlsp_2021.json",
+          "blobId": "6a4e1351e224a272ab8ffc75b9450d1e2a50699d",
+          "size": 324
+        },
+        {
+          "rfilename": "gliner_config.json",
+          "blobId": "6bc3529a56490560200d49d65961ba6afa248062",
+          "size": 3902
+        },
+        {
+          "rfilename": "hist_ner_type_test_synthetic.png",
+          "blobId": "7bd9c48990048f0b22778b40389f55bb257de40f",
+          "size": 315388,
+          "lfs": {
+            "sha256": "38a2cddc2dd4e14083268063378134b7e1799ff4212f11eb8c8661d4dd141709",
+            "size": 315388,
+            "pointerSize": 131
+          }
+        },
+        {
+          "rfilename": "hist_ner_type_test_vietmed.png",
+          "blobId": "65c25e7865ba947d3f8495903576d3d53c973c06",
+          "size": 231042,
+          "lfs": {
+            "sha256": "f6446d433e941edaca372e535d3bcf0c010e58aa320b3fcfc3ffbef377158ffc",
+            "size": 231042,
+            "pointerSize": 131
+          }
+        },
+        {
+          "rfilename": "hist_ner_type_test_vlsp_2021.png",
+          "blobId": "e44fc642b9cad428bfa4b751bc7828d3e82a1561",
+          "size": 196870,
+          "lfs": {
+            "sha256": "7b98fb8ad721a216eba677c9b0550e98ab45ee889a26ccdc3695653daaf6f3dc",
+            "size": 196870,
+            "pointerSize": 131
+          }
+        },
+        {
+          "rfilename": "hist_ner_type_train_synthetic.png",
+          "blobId": "f4359dd18010488e231c458188cd0d002378efc0",
+          "size": 345116,
+          "lfs": {
+            "sha256": "fe6395eff52ff3a41bf146ab39d3f822b9b612e5ea6a0f0a7ba76a3a0f7c81d2",
+            "size": 345116,
+            "pointerSize": 131
+          }
+        },
+        {
+          "rfilename": "hist_ner_type_train_vietmed.png",
+          "blobId": "5420446c4c775a8b221f4b103bd6d21c0eece373",
+          "size": 237386,
+          "lfs": {
+            "sha256": "888069ea858d556a2649f552de589cafd09a5edb5c3eee62c4e9cce2bae49123",
+            "size": 237386,
+            "pointerSize": 131
+          }
+        },
+        {
+          "rfilename": "hist_ner_type_train_vlsp_2021.png",
+          "blobId": "eb4239b7285e6dc028fee7b11f3b17dc9ee340f1",
+          "size": 204923,
+          "lfs": {
+            "sha256": "62b23bef8664678e61ff1f1e8f034eb1b341849cc22e620d6db2cab15e23ffe6",
+            "size": 204923,
+            "pointerSize": 131
+          }
+        },
+        {
+          "rfilename": "pytorch_model.bin",
+          "blobId": "7fd0383bdb499a17b12f4bf3873ec0ac64667aec",
+          "size": 664140326,
+          "lfs": {
+            "sha256": "dbedb6b3e99637a89554dca1ad8ee732c91cee620b949338a7107105894baa77",
+            "size": 664140326,
+            "pointerSize": 134
+          }
+        },
+        {
+          "rfilename": "special_tokens_map.json",
+          "blobId": "83fb22de184abab1b193b1f6001e3015e865e50b",
+          "size": 970
+        },
+        {
+          "rfilename": "spm.model",
+          "blobId": "b1b95e5b0fef33623979511f423eaeee465c46f0",
+          "size": 2464616,
+          "lfs": {
+            "sha256": "c679fbf93643d19aab7ee10c0b99e460bdbc02fedf34b92b05af343b4af586fd",
+            "size": 2464616,
+            "pointerSize": 132
+          }
+        },
+        {
+          "rfilename": "tokenizer.json",
+          "blobId": "cd30ba5f38bc40c120dbfdc520bc6ada0764d32b",
+          "size": 8649387
+        },
+        {
+          "rfilename": "tokenizer_config.json",
+          "blobId": "884832de0f31b98b02e6213332059b6cfd687ad7",
+          "size": 1691
+        }
+      ]
+    },
+    {
+      "repository": "AITeamUIT/gliner2-pii500k-final-model",
+      "revision": "e15225965c361fc4ec6e5681eaec5312c63b71a8",
+      "card": {
+        "language": [
+          "en",
+          "de",
+          "vi"
+        ],
+        "license": "apache-2.0",
+        "library_name": "gliner2",
+        "tags": [
+          "ner",
+          "pii",
+          "information-extraction",
+          "gliner"
+        ],
+        "datasets": [
+          "quynong/ontonotes5"
+        ]
+      },
+      "files": [
+        {
+          "rfilename": ".gitattributes",
+          "blobId": "52373fe24473b1aa44333d318f578ae6bf04b49b",
+          "size": 1570
+        },
+        {
+          "rfilename": "README.md",
+          "blobId": "8e012175e31b51f7f37b2eb680f15dd6ef611237",
+          "size": 4068
+        },
+        {
+          "rfilename": "config.json",
+          "blobId": "07dd08a0dcf300daf05475a1400975b0b4cdfc0b",
+          "size": 581
+        },
+        {
+          "rfilename": "encoder_config/config.json",
+          "blobId": "f6716bd4ec807af19355c70a05692132ac2c3795",
+          "size": 895
+        },
+        {
+          "rfilename": "model.safetensors",
+          "blobId": "18091d7230f46293fa204a5dac39342568970370",
+          "size": 1228425216,
+          "lfs": {
+            "sha256": "c0f23df3ac5c1e955fcc2cb8a53af6ac123793a16fadbbe4f90476cc8a7029c9",
+            "size": 1228425216,
+            "pointerSize": 135
+          }
+        },
+        {
+          "rfilename": "tokenizer.json",
+          "blobId": "e8c0e75810c88045733d4cfa6ca62c5a6a401287",
+          "size": 16020604,
+          "lfs": {
+            "sha256": "f6df10ec83bea993035b2dd7c39345a3d4fcf23421c2adb6cb4ffc1e6d1bc4b5",
+            "size": 16020604,
+            "pointerSize": 133
+          }
+        },
+        {
+          "rfilename": "tokenizer_config.json",
+          "blobId": "e6fc765a4494008cc8f8217e66b0e0d425c91e74",
+          "size": 712
+        }
+      ]
+    },
+    {
+      "repository": "NlpHUST/ner-vietnamese-electra-base",
+      "revision": "0292941f879af923edf4acf5b082b41f7492b352",
+      "card": {
+        "language": [
+          "vi"
+        ],
+        "tags": [
+          "named-entity-recognition"
+        ],
+        "widget": [
+          {
+            "text": "Liên quan vụ việc CSGT bị tố đánh dân, trúng một cháu nhỏ đang ngủ, đang lan truyền trên mạng xã hội, Đại tá Nguyễn Văn Tảo, Phó Giám đốc Công an tỉnh Tiền Giang vừa có cuộc họp cùng Chỉ huy Công an huyện Châu Thành và một số đơn vị nghiệp vụ cấp tỉnh để chỉ đạo làm rõ thông tin."
+          }
+        ],
+        "base_model": "NlpHUST/electra-base-vn",
+        "model-index": [
+          {
+            "name": "ner-vietnamese-electra-base",
+            "results": []
+          }
+        ]
+      },
+      "files": [
+        {
+          "rfilename": ".gitattributes",
+          "blobId": "e2e68308705c59d0e047f13c1116ed223f9b7fec",
+          "size": 1434
+        },
+        {
+          "rfilename": "README.md",
+          "blobId": "ae3088c5c7dfec7a0dcb9e6eef71af3db960f826",
+          "size": 3058
+        },
+        {
+          "rfilename": "config.json",
+          "blobId": "96d7f0b0d0e9f66d3681db5994d5dd4de729ade2",
+          "size": 1269
+        },
+        {
+          "rfilename": "model.safetensors",
+          "blobId": "0617aac0e81834c2a2a290a0e675072564fa647b",
+          "size": 532322816,
+          "lfs": {
+            "sha256": "5363ed20469a122dd0360e7b3029861f6f8151d52a3b56675dad8e8625765a37",
+            "size": 532322816,
+            "pointerSize": 134
+          }
+        },
+        {
+          "rfilename": "pytorch_model.bin",
+          "blobId": "9a9341710e340363ab2f4ed6d2a9f2427bc7a34f",
+          "size": 532365681,
+          "lfs": {
+            "sha256": "88bc614905a1f337a3b97190636dff75420d66b6b71a76c382ea5cfa8e0a381e",
+            "size": 532365681,
+            "pointerSize": 134
+          }
+        },
+        {
+          "rfilename": "special_tokens_map.json",
+          "blobId": "a8b3208c2884c4efb86e49300fdd3dc877220cdf",
+          "size": 125
+        },
+        {
+          "rfilename": "tokenizer.json",
+          "blobId": "4f74aa492312463e6139928a5d87567a6b7006ff",
+          "size": 1395122
+        },
+        {
+          "rfilename": "tokenizer_config.json",
+          "blobId": "9ae0b095671e0964a52de88f88808f45286c477f",
+          "size": 383
+        },
+        {
+          "rfilename": "vocab.txt",
+          "blobId": "6a4182f8fd41b425afca4be287c03ae9122066bb",
+          "size": 411336
+        }
+      ]
+    }
+  ]
+}
