@@ -1,0 +1,18 @@
+[
+ {"id":"validation-building","group":"address","annotated":"Nơi nhận thư: [[address|căn hộ A603, tầng 6, tòa A, 112 Phan Đăng Lưu, phường Hòa Cường, Đà Nẵng]]."},
+ {"id":"validation-hamlet","group":"address","annotated":"Địa chỉ: [[address|thôn Xuân Lâm, xã Hương Lâm, huyện Hiệp Hòa, Bắc Giang]]."},
+ {"id":"validation-ward","group":"address","annotated":"Địa chỉ nhận thẻ: [[address|45C Nguyễn Công Trứ, P. 6, Q. 1, TP. Hồ Chí Minh]]."},
+ {"id":"validation-floor-contact","group":"address","annotated":"Địa chỉ: [[address|phòng 308, tầng 3, tòa D, 61 Trần Duy Hưng, Hà Nội]]; liên hệ [[phone|0987654321]]."},
+ {"id":"validation-lane","group":"address","annotated":"Cư trú tại [[address|hẻm 16, số 5B Nguyễn Thị Minh Khai, Cần Thơ]]."},
+ {"id":"validation-newlines","group":"address","annotated":"Địa chỉ:\n[[address|34 Nguyễn Văn Linh\nphường An Khánh, Cần Thơ]]\nNgày gửi 12/09/2026."},
+ {"id":"validation-nbsp","group":"address","annotated":"Địa chỉ: [[address|65 Lê Hồng Phong, phường Phước Hải, Nha Trang]]."},
+ {"id":"validation-short-city","group":"address","annotated":"Từ [[address|Đà Lạt]] chuyển đến [[address|Huế]]."},
+ {"id":"validation-leading-verb","group":"address","annotated":"Gửi [[address|Hà Nội]], nhận lúc 8 giờ."},
+ {"id":"validation-leading-preposition","group":"address","annotated":"Tại [[address|Quy Nhơn]], đã hoàn thành 72 giao dịch."},
+ {"id":"validation-city-list","group":"address","annotated":"Khu vực: [[address|Bắc Ninh]], [[address|Hưng Yên]]. Tổng cộng 25 hồ sơ."},
+ {"id":"validation-number-facts","group":"negative","annotated":"Có 31 phòng học, mỗi phòng có 24 chỗ. Số tiền: 750.000 đồng."},
+ {"id":"validation-blank","group":"negative","annotated":"Địa chỉ nhận thư chưa được xác nhận. Cần bổ sung trước ngày 12/09/2026."},
+ {"id":"validation-building-prose","group":"negative","annotated":"Tòa nhà có 12 tầng, 2 thang máy. Phòng họp nằm ở tầng 4."},
+ {"id":"validation-fields","group":"negative","annotated":"Tên đường: chưa có. Phường: chưa có. Số tài khoản: chưa có."},
+ {"id":"validation-titlecase-prose","group":"address","annotated":"Báo Cáo Tại [[address|Hà Nội]]. Kết quả đang được kiểm tra."}
+]
