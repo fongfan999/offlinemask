@@ -1,0 +1,495 @@
+[
+  {
+    "id": "rv01",
+    "group": "sensitive",
+    "text": "Phiếu được chuyển cho tống quỳnh lam để bổ sung chữ ký.",
+    "entities": [
+      {
+        "category": "name",
+        "start": 22,
+        "end": 36,
+        "value": "tống quỳnh lam",
+        "type": "person"
+      }
+    ],
+    "number": 1,
+    "scenario": "lowercase-person",
+    "sourceSha256": "7b9d27029907e2fa6131f932853c8d86fc7324c423cce44c719ea2bfb5e4ee50",
+    "annotationSha256": "77830c0eb4243fc3bbfeffc1b4314a001afbb3c12697334cc3f282aa35e1e4f1",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv02",
+    "group": "sensitive",
+    "text": "Nguoi nhan ket qua la dinh bao khue, vui long giu lai ban sao.",
+    "entities": [
+      {
+        "category": "name",
+        "start": 22,
+        "end": 35,
+        "value": "dinh bao khue",
+        "type": "person"
+      }
+    ],
+    "number": 2,
+    "scenario": "unaccented-person",
+    "sourceSha256": "e3df179aecf39c76efff1217485c7d2f2280a8c4a5f6f4f20d1ec34e209bcf63",
+    "annotationSha256": "0ed3cb3e7a4eda52fb3abdce5e5b958722c897e869d79f5ed9a7de7191ee6c57",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv03",
+    "group": "sensitive",
+    "text": "MAI THIÊN TRÚC đã nhận đủ chứng từ. HỒ SƠ ĐÃ ĐÓNG.",
+    "entities": [
+      {
+        "category": "name",
+        "start": 0,
+        "end": 14,
+        "value": "MAI THIÊN TRÚC",
+        "type": "person"
+      }
+    ],
+    "number": 3,
+    "scenario": "uppercase-person",
+    "sourceSha256": "78cbefa5885f5c6a151bf3548e8647e22776962b0991fb0e1f619e6b0f915ac6",
+    "annotationSha256": "aa9ad8f51153f6de380080e63aa95d198fc93f19d0bfd6ebb0099512f36a6b64",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv04",
+    "group": "sensitive",
+    "text": "Người được ủy quyền là H’Bliên Ktul; thời hạn ủy quyền còn 14 ngày.",
+    "entities": [
+      {
+        "category": "name",
+        "start": 23,
+        "end": 35,
+        "value": "H’Bliên Ktul",
+        "type": "person"
+      }
+    ],
+    "number": 4,
+    "scenario": "apostrophe-person",
+    "sourceSha256": "63669e86a917fd62859cfadc64cb505e9268df3963decb1d48554da14417ae35",
+    "annotationSha256": "18a61220e91d3f76fad9cc1827d1bcfbcafde5df5f72afe0717c451a8b8d21b9",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv05",
+    "group": "sensitive",
+    "text": "📎 Bản bổ sung do Lã Diệu San nộp hôm qua đã được tiếp nhận.",
+    "entities": [
+      {
+        "category": "name",
+        "start": 21,
+        "end": 35,
+        "value": "Lã Diệu San",
+        "type": "person"
+      }
+    ],
+    "number": 5,
+    "scenario": "decomposed-person",
+    "sourceSha256": "0a459f5b061dfe01eb4f11625aa00bbeb1f70e4bb748598c010cbc3d0405bd94",
+    "annotationSha256": "a9325eea83dd85f5511fcf7d62d3732b6d6f2fee75fdfc291ebebb1aaaa0f84f",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv06",
+    "group": "sensitive",
+    "text": "Vũ Tường Vi ký vào ô người nhận. Bản lưu cũng ghi người nhận là Vũ Tường Vi.",
+    "entities": [
+      {
+        "category": "name",
+        "start": 0,
+        "end": 11,
+        "value": "Vũ Tường Vi",
+        "type": "person"
+      },
+      {
+        "category": "name",
+        "start": 64,
+        "end": 75,
+        "value": "Vũ Tường Vi",
+        "type": "person"
+      }
+    ],
+    "number": 6,
+    "scenario": "repeated-person",
+    "sourceSha256": "0335090f4860e7f03cb1148404078edec1ef8b6f8b623811a4862f090759208f",
+    "annotationSha256": "4d8a121ef3405298027dfc0a9f4e973bdfb1cff950d2aff898317c1034e25dee",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv07",
+    "group": "sensitive",
+    "text": "Nơi giao bản sao là 43/12 Đường Sương Nguyệt, phường Mộc Bình, thành phố Đà Lạt; không giao sau 18 giờ.",
+    "entities": [
+      {
+        "category": "address",
+        "start": 20,
+        "end": 79,
+        "value": "43/12 Đường Sương Nguyệt, phường Mộc Bình, thành phố Đà Lạt",
+        "type": "address"
+      }
+    ],
+    "number": 7,
+    "scenario": "slash-address",
+    "sourceSha256": "394c067d8fd64e33917be414826f5cc34e3f41cdc3a02cc02fc98a48eec5266e",
+    "annotationSha256": "6aadcaf7b9d868ad95b7dfc3d4a13fd3437c4a00a39ab946783445290edb58ed",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv08",
+    "group": "sensitive",
+    "text": "Gửi thông báo đến 72 đường cẩm vân, phường an lộc, thành phố cần thơ. Phí gửi là 25.000 đồng.",
+    "entities": [
+      {
+        "category": "address",
+        "start": 18,
+        "end": 68,
+        "value": "72 đường cẩm vân, phường an lộc, thành phố cần thơ",
+        "type": "address"
+      }
+    ],
+    "number": 8,
+    "scenario": "lowercase-address",
+    "sourceSha256": "d094f73c47dd0b4cca71c1af9d14963ab1d2f5c0e043e5ccd7992b08450f2bfc",
+    "annotationSha256": "c0b252e29f78b2556ad2362181886d0e32927926eb2c86ff59f96c14f9935809",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv09",
+    "group": "sensitive",
+    "text": "Địa chỉ: thôn Bến Sậy, xã Trúc Yên, huyện Phú Sơn, tỉnh Quảng Trị. Tổng số bưu kiện: 2.",
+    "entities": [
+      {
+        "category": "address",
+        "start": 9,
+        "end": 65,
+        "value": "thôn Bến Sậy, xã Trúc Yên, huyện Phú Sơn, tỉnh Quảng Trị",
+        "type": "address"
+      }
+    ],
+    "number": 9,
+    "scenario": "rural-address",
+    "sourceSha256": "bd26d8ae675fdf9800b144667b8563b9beba239e29ea262dfb4cb08e8ecbf1de",
+    "annotationSha256": "3b441e4258dec71f810531cb31cd23c010b4393fe27d6883255b767c4abb0ced",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv10",
+    "group": "sensitive",
+    "text": "Nơi ở hiện tại: căn 703, tòa C,\n58 Đường Hạ Miên, phường Bình Vân, thành phố Huế.\nNgày hẹn: 22/10/2026.",
+    "entities": [
+      {
+        "category": "address",
+        "start": 16,
+        "end": 80,
+        "value": "căn 703, tòa C,\n58 Đường Hạ Miên, phường Bình Vân, thành phố Huế",
+        "type": "address"
+      }
+    ],
+    "number": 10,
+    "scenario": "wrapped-address",
+    "sourceSha256": "8d2516f79848bb1f17007247c51de8bfe4366ff21f50866a5e32cfef41e6ee21",
+    "annotationSha256": "728ec8bb35ebe8dee088497029d859ccc30d63c21d2436b2a5812f514cccc4e1",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv11",
+    "group": "sensitive",
+    "text": "Bên nhận thanh toán là Công ty TNHH Gốm Lam Khê. Số tiền đợt này là 18.400.000 đồng.",
+    "entities": [
+      {
+        "category": "other",
+        "start": 23,
+        "end": 47,
+        "value": "Công ty TNHH Gốm Lam Khê",
+        "type": "organization"
+      }
+    ],
+    "number": 11,
+    "scenario": "legal-organization",
+    "sourceSha256": "f8d3d06582b7987c380542a22d785fdf01cabcb36cbb78717ad5a3f02a920a90",
+    "annotationSha256": "c55d6331f9c255533ec684396e9dbb279bd4293429579c3437d0e71b09cfdc50",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv12",
+    "group": "sensitive",
+    "text": "Ho so do Hop tac xa Nong nghiep Ben Lau gui den. Can doi chieu 7 chung tu.",
+    "entities": [
+      {
+        "category": "other",
+        "start": 9,
+        "end": 39,
+        "value": "Hop tac xa Nong nghiep Ben Lau",
+        "type": "organization"
+      }
+    ],
+    "number": 12,
+    "scenario": "unaccented-organization",
+    "sourceSha256": "2b84f1be728e7bd43cdb0f936b3a1881e318d7639f0ce56a8799b07aad79f9a5",
+    "annotationSha256": "647d1dcf2e95236a35b88b650b6f10c6a680874b41b7e04ea2cdb3e040b4fc66",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv13",
+    "group": "sensitive",
+    "text": "Công ty Cổ phần Dịch vụ Tín Thảo đề nghị cấp lại bản xác nhận. Đây là yêu cầu đã được phê duyệt.",
+    "entities": [
+      {
+        "category": "other",
+        "start": 0,
+        "end": 32,
+        "value": "Công ty Cổ phần Dịch vụ Tín Thảo",
+        "type": "organization"
+      }
+    ],
+    "number": 13,
+    "scenario": "organization-with-business-words",
+    "sourceSha256": "a06d3bc2ba307e2586522aba62eb0c46a339d0cb92dccea4474fc12462d2947a",
+    "annotationSha256": "76f35125c022c5d21b83f2a974cb56a06186a1874fee0a8eef38095fe9f276ac",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv14",
+    "group": "sensitive",
+    "text": "Mã khách hàng KH926504 thuộc về Nghiêm Hạ Vy, người đại diện của Công ty TNHH Dệt Mây Sớm.",
+    "entities": [
+      {
+        "category": "banking",
+        "start": 14,
+        "end": 22,
+        "value": "KH926504",
+        "type": "customer"
+      },
+      {
+        "category": "name",
+        "start": 32,
+        "end": 44,
+        "value": "Nghiêm Hạ Vy",
+        "type": "person"
+      },
+      {
+        "category": "other",
+        "start": 65,
+        "end": 89,
+        "value": "Công ty TNHH Dệt Mây Sớm",
+        "type": "organization"
+      }
+    ],
+    "number": 14,
+    "scenario": "person-organization-id",
+    "sourceSha256": "37f5fb3c89fd132f50008b6b31ba4b73f4c59043f526a7006ff8794c76ef8013",
+    "annotationSha256": "526439c9ba91cbfa259776469b1224cdb9f5a7d8cb78b04c00df50fb4b964b06",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv15",
+    "group": "sensitive",
+    "text": "Gửi biên nhận tới biennhan.rv15@example.org hoặc gọi 0907842615. Hồ sơ có 6 trang.",
+    "entities": [
+      {
+        "category": "email",
+        "start": 18,
+        "end": 43,
+        "value": "biennhan.rv15@example.org",
+        "type": "email"
+      },
+      {
+        "category": "phone",
+        "start": 53,
+        "end": 63,
+        "value": "0907842615",
+        "type": "phone"
+      }
+    ],
+    "number": 15,
+    "scenario": "contact-values",
+    "sourceSha256": "064065b219ecbbcd13d0b97195c4d4b8f5b1ddf77a64ef895848150aac4295eb",
+    "annotationSha256": "aa054506561fb9771bd35e8f9bd648cb2054f14a077c4785478a7672733c26f3",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv16",
+    "group": "sensitive",
+    "text": "STK: 003806152947. CCCD: 079206184352. Hộ chiếu: D6827419. Ngày tiếp nhận: 23/10/2026.",
+    "entities": [
+      {
+        "category": "banking",
+        "start": 5,
+        "end": 17,
+        "value": "003806152947",
+        "type": "account"
+      },
+      {
+        "category": "banking",
+        "start": 25,
+        "end": 37,
+        "value": "079206184352",
+        "type": "identity"
+      },
+      {
+        "category": "banking",
+        "start": 49,
+        "end": 57,
+        "value": "D6827419",
+        "type": "passport"
+      }
+    ],
+    "number": 16,
+    "scenario": "labelled-identifiers",
+    "sourceSha256": "ef66accdac650e28cc0cef89b48876416f9f87457acdbc99f482f53fe0b56553",
+    "annotationSha256": "446ee6ae80700db16cc2434ece90fae778ea109edac2016ba3ce63376f3d2ce9",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv17",
+    "group": "sensitive",
+    "text": "Số thẻ thử nghiệm: 4532 7810 9462 5038, CVV: 706, PIN: 5938. Mã PIN phải có 4 chữ số.",
+    "entities": [
+      {
+        "category": "other",
+        "start": 19,
+        "end": 38,
+        "value": "4532 7810 9462 5038",
+        "type": "card"
+      },
+      {
+        "category": "other",
+        "start": 45,
+        "end": 48,
+        "value": "706",
+        "type": "cvv"
+      },
+      {
+        "category": "other",
+        "start": 55,
+        "end": 59,
+        "value": "5938",
+        "type": "pin"
+      }
+    ],
+    "number": 17,
+    "scenario": "card-security",
+    "sourceSha256": "05446c6866da7cd653095e4d74888394165d93b09df9e5f1c38c9301d20ecb6b",
+    "annotationSha256": "d2581ed658f2ce1b922819b3489c093b105cef8d5297daababf6fe68ad41e6ff",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv18",
+    "group": "sensitive",
+    "text": "Tên đăng nhập: nv_kho_592. Mật khẩu: \"DemoOnly!rv18; x=7\". API key: \"test_rv18_7Zp4q9Ln\".",
+    "entities": [
+      {
+        "category": "other",
+        "start": 15,
+        "end": 25,
+        "value": "nv_kho_592",
+        "type": "username"
+      },
+      {
+        "category": "other",
+        "start": 38,
+        "end": 56,
+        "value": "DemoOnly!rv18; x=7",
+        "type": "password"
+      },
+      {
+        "category": "other",
+        "start": 69,
+        "end": 87,
+        "value": "test_rv18_7Zp4q9Ln",
+        "type": "apikey"
+      }
+    ],
+    "number": 18,
+    "scenario": "opaque-credentials",
+    "sourceSha256": "0384ed63665430c752f53ffc64cc63cea651f9c436d7c5b049e971e36900d1ec",
+    "annotationSha256": "0cf6524417c712c1a1e8b7e1b77c5e820afe2d75fac1d48fb0c80438daf02814",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv19",
+    "group": "sensitive",
+    "text": "Ngày sinh: 16 tháng 7 năm 1993. IP đăng nhập: 198.51.100.173. Ngày giao dịch: 24/10/2026; số tiền: 740.000 đồng.",
+    "entities": [
+      {
+        "category": "other",
+        "start": 11,
+        "end": 30,
+        "value": "16 tháng 7 năm 1993",
+        "type": "birthdate"
+      },
+      {
+        "category": "other",
+        "start": 46,
+        "end": 60,
+        "value": "198.51.100.173",
+        "type": "ip"
+      }
+    ],
+    "number": 19,
+    "scenario": "private-versus-operational-date",
+    "sourceSha256": "f2992c35d75fae69679e6edc766356043999c826b9e7edfe3c9e9fc333e23718",
+    "annotationSha256": "f713f160c34abb4f3b32feb55a92ee94659c43ad585683ccd0e5bafe61b90350",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv20",
+    "group": "negative",
+    "text": "BIÊN BẢN BÀN GIAO CHỨNG TỪ. DANH SÁCH KHOẢN PHÍ CẦN ĐIỀU CHỈNH. Không có tên hoặc mã khách hàng trong bản tổng hợp này.",
+    "entities": [],
+    "number": 20,
+    "scenario": "ordinary-uppercase-heading",
+    "sourceSha256": "982c17c3d10d384e16255114ceb52f2473fc47982ea111ab0335bcbe70503df2",
+    "annotationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv21",
+    "group": "negative",
+    "text": "Kế Hoạch Luân Chuyển Hồ Sơ. Hướng Dẫn Kiểm Đếm Bản Sao. Nội dung này dành cho mọi bộ phận.",
+    "entities": [],
+    "number": 21,
+    "scenario": "ordinary-titlecase",
+    "sourceSha256": "2cf988bce454a0f2099a98e36e0896c32f8eb7a244fb885454a073c4a1bba996",
+    "annotationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv22",
+    "group": "negative",
+    "text": "Có 76 hồ sơ và 4.820 chứng từ. Phiên bản: 3.8.6. Mã HTTP: 204. Ngày giao dịch: 25/10/2026. Số tiền: 680.000 đồng.",
+    "entities": [],
+    "number": 22,
+    "scenario": "ordinary-numeric-facts",
+    "sourceSha256": "79bbf4faf187231f14742630614a4e717cc08026f81ecfb7d3c94000e636e913",
+    "annotationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv23",
+    "group": "negative",
+    "text": "Người gửi là nhân viên trực quầy; bên nhận là bộ phận lưu trữ. Tên công ty chưa được cung cấp.",
+    "entities": [],
+    "number": 23,
+    "scenario": "ordinary-roles-not-names",
+    "sourceSha256": "3f26e75e597cf9a364da00be7cdbb3e0930751be6875db862b82673005c2affc",
+    "annotationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  },
+  {
+    "id": "rv24",
+    "group": "negative",
+    "text": "Mẫu ký tự để kiểm tra phông chữ: ễ, ộ, ắ; ký hiệu: ☐ → ✓; emoji: 🧑🏽‍💻. Không có dữ liệu khách hàng.",
+    "entities": [],
+    "number": 24,
+    "scenario": "ordinary-unicode",
+    "sourceSha256": "eda800c512bf7c42725c15be4dcd10c7da06325d73a57f42ecc8567eecb66f72",
+    "annotationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+    "provenance": "Assistant-authored synthetic example, informed by previous errors; no model run and no human approval yet."
+  }
+]
