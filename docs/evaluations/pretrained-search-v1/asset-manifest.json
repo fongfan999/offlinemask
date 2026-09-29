@@ -1,0 +1,40 @@
+{
+  "directory": "greennode",
+  "repository": "GreenNode/gliner-pii-base-v1.0-tuned",
+  "revision": "85cf26b39f2a02d9af9af483ac66b2194bf14c9f",
+  "license": "Apache-2.0",
+  "files": {
+    "pytorch_model.bin": {
+      "size": 664140326,
+      "sha256": "dbedb6b3e99637a89554dca1ad8ee732c91cee620b949338a7107105894baa77"
+    },
+    "gliner_config.json": {
+      "size": 3902,
+      "sha256": "3119af6784fc644735a900a27d9340bf0c8fe61c9f245d9b00a5448dc205bf76"
+    },
+    "tokenizer.json": {
+      "size": 8649387,
+      "sha256": "43c2f3ae73a8823c8531927bc221d0198307bf612e4a32a52197b0a1e376d2d7"
+    },
+    "tokenizer_config.json": {
+      "size": 1691,
+      "sha256": "3ec8a90d8758fbc56d50831990c3a3a65660f020c5b06534adf43b04091ffa9e"
+    },
+    "added_tokens.json": {
+      "size": 65,
+      "sha256": "c358eb74586ab438484d8acf4534f67283b33041bc5ffee6b20a4a075cdc3cd6"
+    },
+    "special_tokens_map.json": {
+      "size": 970,
+      "sha256": "b2f1b2f15f29a6b6d9d6ea4eca1675d2c231a71477f151d48f79cc83a625ba21"
+    },
+    "spm.model": {
+      "size": 2464616,
+      "sha256": "c679fbf93643d19aab7ee10c0b99e460bdbc02fedf34b92b05af343b4af586fd"
+    },
+    "README.md": {
+      "size": 14585,
+      "sha256": "ab0165296d008944ffa29dd3bacdccee06161b462ec71c99e72a9d401aeee049"
+    }
+  }
+}
