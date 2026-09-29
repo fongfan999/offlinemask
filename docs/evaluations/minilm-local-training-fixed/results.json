@@ -1,0 +1,251 @@
+{
+  "createdAt": "2026-09-18T11:42:46.065Z",
+  "hardware": {
+    "cpu": "Apple M1 Pro",
+    "ramBytes": 17179869184,
+    "macOS": "26.6.2",
+    "source": "Local sysctl and sw_vers during this run"
+  },
+  "success": true,
+  "launch": {
+    "exitCode": 0,
+    "timedOut": false,
+    "elapsedSeconds": 10.173029917001259,
+    "networkProfile": "(version 1) (allow default) (deny network*)"
+  },
+  "report": {
+    "completed": true,
+    "optimizerSteps": 0,
+    "checkpointSaved": false,
+    "corpusUsed": false,
+    "passes": [
+      {
+        "batch": 1,
+        "tokens": 384,
+        "repetition": 1,
+        "forwardBackwardMs": 625.7911249995232,
+        "loss": 3.6681342124938965,
+        "finiteGradientElements": 117520935,
+        "passWithChecksAndCleanupMs": 1271.6094169882126
+      },
+      {
+        "batch": 1,
+        "tokens": 384,
+        "repetition": 2,
+        "forwardBackwardMs": 77.01812498271465,
+        "loss": 3.6724112033843994,
+        "finiteGradientElements": 117520935,
+        "passWithChecksAndCleanupMs": 291.5505419950932
+      },
+      {
+        "batch": 1,
+        "tokens": 384,
+        "repetition": 3,
+        "forwardBackwardMs": 81.69474999886006,
+        "loss": 3.6679389476776123,
+        "finiteGradientElements": 117520935,
+        "passWithChecksAndCleanupMs": 346.72179201152176
+      },
+      {
+        "batch": 1,
+        "tokens": 384,
+        "repetition": 4,
+        "forwardBackwardMs": 74.74641699809581,
+        "loss": 3.6699934005737305,
+        "finiteGradientElements": 117520935,
+        "passWithChecksAndCleanupMs": 304.54937496688217
+      },
+      {
+        "batch": 1,
+        "tokens": 384,
+        "repetition": 5,
+        "forwardBackwardMs": 80.28862503124401,
+        "loss": 3.6686320304870605,
+        "finiteGradientElements": 117520935,
+        "passWithChecksAndCleanupMs": 299.1660000407137
+      },
+      {
+        "batch": 1,
+        "tokens": 384,
+        "repetition": 6,
+        "forwardBackwardMs": 76.24004199169576,
+        "loss": 3.668041229248047,
+        "finiteGradientElements": 117520935,
+        "passWithChecksAndCleanupMs": 265.75424999464303
+      },
+      {
+        "batch": 1,
+        "tokens": 384,
+        "repetition": 7,
+        "forwardBackwardMs": 74.02587501564994,
+        "loss": 3.6704671382904053,
+        "finiteGradientElements": 117520935,
+        "passWithChecksAndCleanupMs": 257.4052090058103
+      },
+      {
+        "batch": 1,
+        "tokens": 384,
+        "repetition": 8,
+        "forwardBackwardMs": 66.58120901556686,
+        "loss": 3.667325735092163,
+        "finiteGradientElements": 117520935,
+        "passWithChecksAndCleanupMs": 255.12279197573662
+      }
+    ],
+    "memory": [
+      {
+        "phase": "loaded-with-moment-reserve",
+        "tensorBytes": 1410259712,
+        "driverBytes": 2240167936,
+        "processPeakRssBytes": 778469376
+      },
+      {
+        "phase": "1x384-pass-1",
+        "tensorBytes": 1976441856,
+        "driverBytes": 4179394560,
+        "processPeakRssBytes": 1013792768
+      },
+      {
+        "phase": "1x384-cleaned-1",
+        "tensorBytes": 1410268928,
+        "driverBytes": 3013378048,
+        "processPeakRssBytes": 1014759424
+      },
+      {
+        "phase": "1x384-pass-2",
+        "tensorBytes": 1976441856,
+        "driverBytes": 4183588864,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-cleaned-2",
+        "tensorBytes": 1410268928,
+        "driverBytes": 3017572352,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-pass-3",
+        "tensorBytes": 1976441856,
+        "driverBytes": 4179394560,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-cleaned-3",
+        "tensorBytes": 1410268928,
+        "driverBytes": 3013378048,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-pass-4",
+        "tensorBytes": 1976441856,
+        "driverBytes": 4183588864,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-cleaned-4",
+        "tensorBytes": 1410268928,
+        "driverBytes": 3017572352,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-pass-5",
+        "tensorBytes": 1976441856,
+        "driverBytes": 4183588864,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-cleaned-5",
+        "tensorBytes": 1410268928,
+        "driverBytes": 3017572352,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-pass-6",
+        "tensorBytes": 1976441856,
+        "driverBytes": 4187783168,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-cleaned-6",
+        "tensorBytes": 1410268928,
+        "driverBytes": 3021766656,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-pass-7",
+        "tensorBytes": 1976441856,
+        "driverBytes": 4187783168,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-cleaned-7",
+        "tensorBytes": 1410268928,
+        "driverBytes": 3021766656,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-pass-8",
+        "tensorBytes": 1976441856,
+        "driverBytes": 4183588864,
+        "processPeakRssBytes": 1025310720
+      },
+      {
+        "phase": "1x384-cleaned-8",
+        "tensorBytes": 1410268928,
+        "driverBytes": 3017572352,
+        "processPeakRssBytes": 1025310720
+      }
+    ],
+    "cpuFallbackEnabled": false,
+    "environment": {
+      "python": "3.12.7",
+      "macOS": "26.6.2",
+      "machine": "arm64",
+      "torch": "2.8.0",
+      "transformers": "4.57.6"
+    },
+    "sourceRevision": "6e8c1ec6b4ec4e3fc6eb7d2cd834fcd582b61daf",
+    "sourceHashes": {
+      "config.json": "933c5fc9b49cf83934fb2e617cea837985a1b5f10db653ecd958c5736de357de",
+      "pytorch_model.bin": "cce170910f4d4f3b45be025508f51ef1ad6a1de69f2d46dce7e4603ad31aaaeb",
+      "sentencepiece.bpe.model": "cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865",
+      "special_tokens_map.json": "7638f5bbbe86ef6d604ef28ad3647dc690d6d117c81c0d63e885416be8da1150",
+      "tokenizer_config.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    "allocatorLimitBytes": 6442450944,
+    "recommendedGpuWorkingSetBytes": 12713115648,
+    "parameters": 117520935,
+    "parameterBytes": 470083740,
+    "reservedMomentBytes": 940167480,
+    "parametersUnchanged": true,
+    "parameterSha256": "99a1fdf6515be6d4c27ca9a1d601f0d818c4c8598c81e99869f3019f7301fce6",
+    "limits": "Artificial IDs/labels, FP32, eager attention, eight fixed-shape backward passes, cache cleared after every pass. Moment tensors reserve storage but do not test optimizer updates/temporaries. Phase memory snapshots can miss peaks; process RSS and driver memory overlap. No label alignment, quality, sustained training or duration qualification."
+  },
+  "previousFailureSha256": "7e45dd84d05c4660c27f63934d7cd73202eb664e01dbb1acf568eaa581bc7dda",
+  "memory": {
+    "maxObservedDriverBytes": 4187783168,
+    "maxObservedTensorBytes": 1976441856,
+    "processPeakRssBytes": 1025310720,
+    "note": "Phase snapshots, not continuous device peak. RSS/driver/tensor allocations overlap; never sum them."
+  },
+  "gates": {
+    "backwardDiagnostic": true,
+    "trainedModelQualified": false,
+    "corpusReady": false,
+    "cloudNeededEstablished": false
+  },
+  "sourceHashes": {
+    "scripts/minilm-local-training-fixed/probe.py": "2c760d0af89b00694059d9d8198299b24383609a95dc78fde089dbf7d5835d0d",
+    "scripts/minilm-local-training-fixed/run.py": "09b06308f23c9a8760fa0b35322923cf17a6a66fee6360903b07afe2698c59d5",
+    "docs/evaluations/minilm-local-training-fixed/spec.md": "aaffa8fdaca6b1b0f83377550cef44081901d02dd81a173b5dd552aa2358e3d8",
+    "docs/evaluations/minilm-admission/python-requirements.txt": "0d3df0063f7e0a1c5332e33bf07ba0bc4933ceda4c14c335dadd527d71204037",
+    "docs/evaluations/minilm-admission/download-evidence.json": "6fe0dd9f8d761150ab529fc60f8dd23e98773bf55dae484911907c6f55378dcb",
+    "scripts/minilm-local-training-fixed/report.mjs": "5a8a720e3aa2bbfb2d3345469964e4397b0e04fca3873e3c0800e077e25d2903"
+  },
+  "rawHashes": {
+    "protocol.json": "5e29ba7e6125bf1967d0569f2d3f4fb2cfdc38d1b5f81ca259209c93393627cb",
+    "launch.json": "627dfca75fb9017533a15fc482ac743a9267d9f0abcebcb41a3d9a9b2840c988",
+    "run.log": "1f7ae099337ff59be4449305f797ab701afb59df29474a3536802469ee110d1f",
+    "report.json": "ae7aecc6b656db91e52b70de4a2dd062b2c7fabd0ca457ce9393e843bd692a84"
+  }
+}
