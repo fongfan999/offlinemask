@@ -1,0 +1,45 @@
+{
+  "createdAt": "2026-09-17T14:43:52.252Z",
+  "node": "v24.10.0",
+  "onnxruntime": "1.24.3",
+  "variants": [
+    "small",
+    "large",
+    "combined",
+    "bigmed-native",
+    "underthesea",
+    "underthesea-fp32"
+  ],
+  "files": {
+    "docs/evaluations/context-fields-v1-protocol.json": "083d53f70070d082d3b99e1f70bd11bbad3f96caa4f118a2458e9fe21b30aec7",
+    "docs/evaluations/context-fields-v1-results.json": "dfdba6428922b25e5974125b4d4a233f4c80202e0b5b0af053941db7942c559c",
+    "docs/evaluations/model-recheck-v1-spec.md": "cad4ab10e84b02fe9391e36b5a75dbd58fd3346fc85e5d1ade0d4f9654eb0c6f",
+    "scripts/native-preprocessing/evaluate.mjs": "f2fcd935b2924bf57458fbd328bc1b1c0031d3512c76bb2d3e32e1c6f0473bd3",
+    "scripts/native-preprocessing/evidence.mjs": "809749041f53a47b128d11f6c87fb53435390af0507ae6be909626f5ecb8c275",
+    "scripts/native-preprocessing/freeze.mjs": "459685430ffa8b68371d75b63c238d011cda599e2fe71979dc2a366006a3aec2",
+    "scripts/native-preprocessing/provider.mjs": "8f54ba1df90edfffef8821e1c1c42f36289e6f2693f468fb0986c0856c777023",
+    "scripts/native-preprocessing/report.mjs": "be22273655f3bd6340068b07bab1aa4ee55a742a0554a60ee57b249bcbbc2a9c",
+    "scripts/native-preprocessing/tokenizer-server.py": "7ce718bb063ef34f2f02a9a3106e9c3ef941c6fd42afdbaa650d81c12136fb34",
+    "scripts/native-preprocessing/tokenizer.mjs": "8ae5febb1835afd6099300468a7ac8779dae9ad4a1bdb23668f3474221520a00",
+    "tests/native-preprocessing.test.mjs": "d511577bdfe9bff7eb609da91d57468e168f37d0b0f2166621dd22ca7f291d7b",
+    "scripts/model-recheck/common.mjs": "b80fc4420f2bf6dade51af36f6b06d4ac6c7f4ce875918ae3b326dcc89bfc2b6",
+    "scripts/model-recheck/comparison.mjs": "92462c29d55b47ac74ea38eb3ceb402a82e229dcb871e54b35f27c302551cf91",
+    "scripts/model-recheck/evaluate.mjs": "4e0d431353dfc01fe9f2b768b8de1f7158fd1517c5abf1b3aa425fd9402386fc",
+    "scripts/model-recheck/freeze.mjs": "ae8a2c5fcb4dae73511766798fa1c4f90b4cd6cdfc0cf6c45b74f8601b0ca0e5",
+    "scripts/model-recheck/report.mjs": "51d1d08c97fefa6435e6c7b1fde29d15b8565bcc4f357c0a3a369ca973dd95ef"
+  },
+  "composition": {
+    "regression": 262,
+    "challenge": 100
+  },
+  "hardware": {
+    "cpu": "Apple M1 Pro",
+    "logicalCpus": 10,
+    "memoryBytes": 17179869184,
+    "platform": "darwin",
+    "release": "25.6.0",
+    "arch": "arm64"
+  },
+  "method": "Twice per candidate in separate sequential CPU processes, fixed variant order. Current common core, pinned assets, original annotations, fetch blocked. Underthesea FP32 is a quantization reference. No candidate-specific changes.",
+  "performance": "Exploratory Node CPU measurements only, no pass/fail hardware budget. Per-case inspect latency excludes scoring. Warm short-case statistics exclude the first case and long fixtures. Setup includes provider loading and alternative tokenizer reference preparation for the corpus; it is not cold app startup. Sampled Node RSS excludes Python children and is not whole-app peak memory. Hash checks may warm the OS file cache."
+}
