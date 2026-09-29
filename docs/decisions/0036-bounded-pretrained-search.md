@@ -1,0 +1,19 @@
+# 0036 — Bounded pretrained search selects no replacement
+
+Date: 19 September 2026. Status: three candidates screened; one executed; no release promotion.
+
+The owner authorized a bounded search after completing all 24 annotation approvals. Inspect at most three materially different pretrained checkpoints, retain the agreed scope and numerical checks, and execute viable candidates locally. Do not restart custom training, request more annotation, alter expectations, or automatically substitute an overlapping ensemble.
+
+Screen GreenNode GLiNER PII, AITeamUIT GLiNER2 PII, and NlpHUST Vietnamese ELECTRA. Pin their exact upstream revisions and file metadata. NlpHUST's checkpoint has no declared license in its card or repository files: redistribution remains unresolved, so it is not downloaded. AITeamUIT publishes approximately 1.244 GB of model/runtime files with no compact graph; park it under the owner's small-download preference. This is a practical prioritization, not a newly imposed numerical size limit or a detection-quality rejection. Neither parked model has local accuracy results.
+
+GreenNode declares Vietnamese support and Apache-2.0 licensing. Its actual available checkpoint and runtime files total 675,260,957 bytes; the generic model card's smaller ONNX sizes do not describe files published in this repository. Download only this pinned checkpoint, verify all file hashes, and evaluate it as a contextual detector with the unchanged structured recognizers and shared policy. No files are added to the app or installed recognition pack.
+
+Preserve two integration diagnostics and a final supported-runtime run. The first uses the generic card's `name` label. A publisher label-inventory check identifies `person` and `company name`, prompting one explicit schema correction. A dependency audit then finds that the reused Transformers 4.57.6 exceeds GLiNER 0.2.22's declared upper bound. Repeat with Transformers 4.51.0/tokenizers 0.21.4, unchanged corrected labels and threshold. This final run produces identical source detections, previews and scores to the schema-corrected diagnostic. Do not conceal those corrections or use the incompatible first runs as the decision basis.
+
+The final configuration fails the unchanged screening checks: 275/328 values fully covered under their own options in the regression set, 119/142 in the challenge set, and 18/30 in the 24 owner-approved examples. It masks 605, 107 and 71 ordinary lexical positions respectively. In the approved batch it covers only 1/8 names and 1/4 addresses under the correct options. All 398 case executions finish without errors, including the 12 overlapping owner-reviewed examples reported separately. Source coverage, canonical-to-original offsets, all six option previews and replayed scores are verified.
+
+Reject this tested GreenNode configuration for release; do not spend this bounded evaluation on quantization or desktop packaging after the source checkpoint fails quality checks. This does not prove every GLiNER prompt, checkpoint or compressed version would fail. The evidence is observed synthetic regression evidence, not banking accuracy or an independent final holdout.
+
+The search is complete without a qualifying replacement. Keep contextual automatic detection experimental and retain the prior release rejections, including the current pair. Maintain the small app, one optional user-facing pack, local processing and manual-only downloads/updates. No telemetry, cloud inference, custom training, silent scope change, or further candidate search is implied. A production claim requires evidence that meets the current checks or an explicitly agreed narrower scope.
+
+See the [screening report](../evaluations/pretrained-search-v1/README.md), [final results](../evaluations/pretrained-search-v1/compatible/results.json), and [verification receipt](../evaluations/pretrained-search-v1/verification.json).
