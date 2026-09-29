@@ -1,0 +1,22 @@
+[
+ {"id":"final2-upper","group":"name","annotated":"Người yêu cầu: [[name|DƯƠNG HẢI YẾN]]; hồ sơ số 42."},
+ {"id":"final2-ascii","group":"name","annotated":"Ho va ten: [[name|Phan Thi Tuyet Nga]]. Xin kiểm tra chứng từ."},
+ {"id":"final2-name-prose","group":"name","annotated":"[[name|Đào Gia Khiêm]] đã nhận lại khoản phí hoàn trả."},
+ {"id":"final2-lower","group":"name","annotated":"Tên khách hàng: [[name|trần bảo châu]]; email [[email|chau.fiction@example.org]]."},
+ {"id":"final2-name-nfd","group":"name","annotated":"Người nhận: [[name|Lê Thu Huyền]]."},
+ {"id":"final2-hyphen","group":"name","annotated":"Họ tên: [[name|Võ Ngọc-Hà]]. Số tiền 350.000 đồng."},
+ {"id":"final2-address-contact","group":"address","annotated":"Địa chỉ: [[address|35 Bạch Đằng, Hải Châu, Đà Nẵng]], điện thoại [[phone|0901234567]]."},
+ {"id":"final2-address-label","group":"address","annotated":"Nơi ở: [[address|7/12 Lê Quang Định, Bình Thạnh, TP. Hồ Chí Minh]], STK [[banking|001122334455]]."},
+ {"id":"final2-address-post","group":"address","annotated":"Địa chỉ: [[address|61 Hàng Bông, Hoàn Kiếm, Hà Nội]], mã bưu chính [[address|100000]]."},
+ {"id":"final2-address-nfd","group":"address","annotated":"Địa chỉ: [[address|84 Nguyễn Trãi, Hà Đông, Hà Nội]]."},
+ {"id":"final2-address-apartment","group":"address","annotated":"Địa chỉ nhận thư: [[address|căn E208, tòa E, 39 Trung Kính, Cầu Giấy, Hà Nội]]."},
+ {"id":"final2-address-prose","group":"address","annotated":"Vui lòng gửi chứng từ về [[address|23 Võ Văn Tần, Quận 3, TP. Hồ Chí Minh]]."},
+ {"id":"final2-mixed","group":"mixed","annotated":"Họ tên: [[name|TÔ NGỌC QUYÊN]]. Địa chỉ: [[address|46 Hùng Vương, Huế]]. Email [[email|quyen.demo@example.net]]."},
+ {"id":"final2-unlabelled","group":"mixed","annotated":"[[name|Đoàn Minh Hiếu]] ở [[address|Bạc Liêu]] cần xác nhận số tiền 450.000 đồng."},
+ {"id":"final2-password","group":"other","annotated":"Tên đăng nhập: [[other|demo_kh_825]]. Mật khẩu: [[other|Synthetic!825]]."},
+ {"id":"final2-negative-empty","group":"negative","annotated":"Người yêu cầu: chưa cung cấp. Nơi ở: chưa xác định."},
+ {"id":"final2-negative-labels","group":"negative","annotated":"Họ tên: để trống; địa chỉ: N/A; email: không có."},
+ {"id":"final2-negative-prose","group":"negative","annotated":"Người nhận: cần bổ sung hồ sơ. Địa chỉ: đang cập nhật."},
+ {"id":"final2-negative-facts","group":"negative","annotated":"TỔNG HỢP CHỨNG TỪ. Ngày 16/09/2026, có 19 yêu cầu và 28.000.000 đồng."},
+ {"id":"final2-negative-room","group":"negative","annotated":"Phòng 619 có 14 ghế, tầng 5 có 11 phòng. Đang kiểm kê tài sản."}
+]
