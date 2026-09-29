@@ -1,0 +1,22 @@
+{
+  "createdAt": "2026-09-14T15:58:32.181Z",
+  "fixtureHashes": {
+    "model-comparison.json": "6ff1c4ea7c79dd4b58e95f3da5eafd00547c954c03fa68ad07151ccf69203139",
+    "model-reliability.json": "44046c29eafb3084f4e2bdd0a13cc9c6b5998006d096516d18822ed2b684045f",
+    "address-holdout.json": "fbba167fc9c0a9f74c357e43a0008f3b6957b3e0934e7e7fb1f2395b9743387d",
+    "address-validation.json": "c273a029cc461f412f113f39ad49385cc18ab767b9b8fec2101a571ec11c6268",
+    "address-final-check.json": "fe47309e0771ef1bb03e42d7d32466513c731d2355303bc8b4d433b07b6bbd8b",
+    "model-decision.json": "02f67fd1a676d657bd0353f7054b4d1ef6a0190f46a6e83c734580361dbd8472",
+    "text-reliability-holdout.json": "c5e8e7511ac2f665e3575a017e2085b08132dd07df4a773f08d254844d8cd034"
+  },
+  "implementationFiles": [
+    "src/core/detection/openmed.ts",
+    "src/core/detection/model-policy.ts",
+    "src/core/detection/address-boundaries.ts",
+    "src/core/detection/labelled-fields.ts"
+  ],
+  "scope": "Bounded explicit name/address labels, name punctuation boundaries, contact corroboration. No learning, telemetry, user data collection, updates or model downloads. Do not introduce general name gazetteers or fixture-specific substitutions.",
+  "singleCandidate": "mSuperClinical selected before these runs because it has the stronger name-only result in the previous comparison. Current pair is the regression control. No pack migration implied.",
+  "criteria": "Use unchanged meetsScreeningFloor. Fixes must not introduce new request errors; inspect lost complete entities and new ordinary masking, including category-only coverage. Evaluate old fixtures as regressions. Fresh 32-case synthetic holdout frozen before fixes, inspect only after policy and focused tests are complete. If thresholds fail, no model promotion.",
+  "limits": "Same developer authored scenarios; synthetic and not representative field accuracy. No automatic real-world feedback. Baseline copied to ignored artifacts before code edits; hashes reported. Native and WASM hosted by developer Node adapter; no fresh packaged-app claim."
+}

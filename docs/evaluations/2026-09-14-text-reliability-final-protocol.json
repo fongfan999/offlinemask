@@ -1,0 +1,12 @@
+{
+  "frozenAt": "2026-09-14T16:05:46.534Z",
+  "fixtureHash": "a5f15490d4d21884f85a6b7ded221f0d2e71a18d4e2dc15df302edb67bd958f0",
+  "implementationHashes": {
+    "src/core/detection/openmed.ts": "f6594b48dcb7ccb4bd835fbe6fb4ac590d1582f1a826352d318e95db7b5c8486",
+    "src/core/detection/model-policy.ts": "472e8bcdedf6fe6ba09259ab6c6c203a69908d0cdc8037d5f8edfb2caff68d62",
+    "src/core/detection/address-boundaries.ts": "4b548497bd5cef93e22cdbeab971f264eaaac71993de39a34b168dcbe91e4d7d",
+    "src/core/detection/labelled-fields.ts": "6252afe80e889bb5db1f23eeb3927a4b17690d06033bce1111b5d8b49f39c95f"
+  },
+  "reason": "Fresh final set after observing first holdout and correcting regressions on older fixtures. Existing holdout is now observed; do not call its final rerun fresh. No further policy tuning against this final set.",
+  "criteria": "Same meetsScreeningFloor unchanged; compare original and final single mSuperClinical and pair on native and WASM. Exact full/category coverage, partial exposure, false positives and request errors. No real user information or telemetry."
+}
