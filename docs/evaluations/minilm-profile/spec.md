@@ -1,0 +1,7 @@
+# Native MiniLM phase profiling and bounded optimization
+
+Profile the same packaged macOS graph/tokenizer path and original synthetic documents. Record native encoding and kernel time separately from frontend wall time, including residual IPC/scheduling cost; no input or output content in metric logs. Keep original 1-thread behavior as an instrumented control. Compare a bounded 2-thread variant only if kernel time dominates. Add an in-request cache (maximum 16 bounded windows) and test identical windows/IDs/offsets against the frozen reference. Never change source boundaries, model weights, tolerance or 300ms/8s/1GiB targets to obtain a pass.
+
+Classify tokenizer cancellation as active-and-acknowledged versus already-completed. Observe native active ID before issuing cancellation; bounded retries may exercise an active case, but cannot convert already-completed cases into cancellation passes. Verify late-result suppression independently. Keep graph cancellation and recovery checks. Preserve old outputs and before-source snapshots, leave normal UI and installed pack unchanged.
+
+Use a separate development identifier, cached verified assets and the same network-deny main-process launch/memory sampler. Report cold/warm/long, per-phase heartbeat delays and sampled-memory limitations. This is an untrained classifier and reused synthetic diagnostics, not privacy quality. Write separate result files for each measured variant.

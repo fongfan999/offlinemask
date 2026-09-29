@@ -1,0 +1,675 @@
+{
+  "createdAt": "2026-09-18T07:55:32.311Z",
+  "variants": [
+    {
+      "id": 100,
+      "threads": 1,
+      "cached": false,
+      "warmSamples": 10,
+      "warmP95Ms": 592,
+      "longMs": 9882,
+      "tokenizeMs": 40.696461,
+      "encodeWallMs": 539.0000000000018,
+      "kernelMs": 12653.783838,
+      "inferenceWallMs": 13629.000000000002,
+      "planningMs": 115.99999999999773,
+      "cacheHits": 0,
+      "encodeCalls": 132,
+      "heartbeatDelayMs": 989,
+      "windowParity": true,
+      "warmPass": false,
+      "longPass": false
+    },
+    {
+      "id": 101,
+      "threads": 1,
+      "cached": true,
+      "warmSamples": 10,
+      "warmP95Ms": 459,
+      "longMs": 9749,
+      "tokenizeMs": 36.907587,
+      "encodeWallMs": 298.0000000000073,
+      "kernelMs": 12566.967255,
+      "inferenceWallMs": 13286.000000000004,
+      "planningMs": 95.99999999998909,
+      "cacheHits": 11,
+      "encodeCalls": 121,
+      "heartbeatDelayMs": 1043,
+      "windowParity": true,
+      "warmPass": false,
+      "longPass": false
+    },
+    {
+      "id": 201,
+      "threads": 2,
+      "cached": true,
+      "warmSamples": 10,
+      "warmP95Ms": 277,
+      "longMs": 5525.000000000007,
+      "tokenizeMs": 38.339158999999995,
+      "encodeWallMs": 408.9999999999418,
+      "kernelMs": 6591.127042,
+      "inferenceWallMs": 7158.000000000044,
+      "planningMs": 93.00000000002548,
+      "cacheHits": 11,
+      "encodeCalls": 121,
+      "heartbeatDelayMs": 1000.0000000000036,
+      "windowParity": true,
+      "warmPass": true,
+      "longPass": true
+    }
+  ],
+  "report": {
+    "completed": true,
+    "metrics": [
+      {
+        "kind": "cold",
+        "durationMs": 2308,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "phase_heartbeat",
+        "durationMs": 987,
+        "count": 0,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "parity",
+        "durationMs": 0,
+        "count": 100,
+        "maxError": 1.4613723731127236e-8,
+        "passed": true
+      },
+      {
+        "kind": "thread_variant",
+        "durationMs": 0,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "phase_heartbeat",
+        "durationMs": 0,
+        "count": 10,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 408,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 566,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 529,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 592,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 368,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 367,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 396,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 358.0000000000009,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 362,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 455.9999999999991,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "long",
+        "durationMs": 9882,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "tokenize",
+        "durationMs": 40.696461,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "encode_wall",
+        "durationMs": 539.0000000000018,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "kernel",
+        "durationMs": 12653.783838,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "inference_wall",
+        "durationMs": 13629.000000000002,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "planning",
+        "durationMs": 115.99999999999773,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "cache",
+        "durationMs": 0,
+        "count": 100,
+        "maxError": 132,
+        "passed": true
+      },
+      {
+        "kind": "window_parity",
+        "durationMs": 0,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "thread_variant",
+        "durationMs": 0,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "phase_heartbeat",
+        "durationMs": 989,
+        "count": 100,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 458,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 446,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 459,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 353,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 375,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 360.00000000000364,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 355.99999999999636,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 366,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 372,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 386,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "long",
+        "durationMs": 9749,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "tokenize",
+        "durationMs": 36.907587,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "encode_wall",
+        "durationMs": 298.0000000000073,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "kernel",
+        "durationMs": 12566.967255,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "inference_wall",
+        "durationMs": 13286.000000000004,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "planning",
+        "durationMs": 95.99999999998909,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "cache",
+        "durationMs": 11,
+        "count": 101,
+        "maxError": 121,
+        "passed": true
+      },
+      {
+        "kind": "window_parity",
+        "durationMs": 0,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "phase_heartbeat",
+        "durationMs": 1043,
+        "count": 101,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "parity",
+        "durationMs": 0,
+        "count": 201,
+        "maxError": 1.4613723731127236e-8,
+        "passed": true
+      },
+      {
+        "kind": "thread_variant",
+        "durationMs": 0,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "phase_heartbeat",
+        "durationMs": 879,
+        "count": 20,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 201.00000000000364,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 231,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 187,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 194,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 237,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 277,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 192,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 204,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 203,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 209,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "long",
+        "durationMs": 5525.000000000007,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "tokenize",
+        "durationMs": 38.339158999999995,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "encode_wall",
+        "durationMs": 408.9999999999418,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "kernel",
+        "durationMs": 6591.127042,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "inference_wall",
+        "durationMs": 7158.000000000044,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "planning",
+        "durationMs": 93.00000000002548,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "cache",
+        "durationMs": 11,
+        "count": 201,
+        "maxError": 121,
+        "passed": true
+      },
+      {
+        "kind": "window_parity",
+        "durationMs": 0,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "phase_heartbeat",
+        "durationMs": 1000.0000000000036,
+        "count": 201,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "cancel_ack",
+        "durationMs": 2.000000000007276,
+        "count": 0,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "cancel_drain",
+        "durationMs": 11,
+        "count": 0,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "cancellation_completed",
+        "durationMs": 0,
+        "count": 0,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "recovery",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "stale",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "worker_cancel",
+        "durationMs": 1,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "recovery",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "network",
+        "durationMs": 0,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "phase_heartbeat",
+        "durationMs": 0,
+        "count": 30,
+        "maxError": 0,
+        "passed": true
+      }
+    ]
+  },
+  "memory": {
+    "peakFootprintBytes": 823856704,
+    "peakRssKiB": 811760,
+    "samplePeriodMs": 200,
+    "limits": "Includes all newly observed WebKit processes during this run; conservative attribution, not precise ownership. Sampling may miss transient peaks."
+  },
+  "gates": {
+    "completed": true,
+    "behavior": true,
+    "parity": true,
+    "sampledMemory": true,
+    "tokenizerActiveCancellation": true,
+    "graphCancellation": true,
+    "normalUiEnabled": false,
+    "privacyQuality": false
+  },
+  "preservedSnapshots": [
+    {
+      "evaluation": "minilm-desktop",
+      "path": "src-tauri/Cargo.toml",
+      "snapshot": "artifacts/minilm-native-desktop/Cargo-before.toml",
+      "sha256": "cce388e4f4fd4d83681d4b48f056a420922d6bfba9a5d5a47dc3f6d95a745257"
+    },
+    {
+      "evaluation": "minilm-desktop",
+      "path": "src-tauri/src/lib.rs",
+      "snapshot": "artifacts/minilm-native-desktop/lib-before.rs",
+      "sha256": "90f4295a39d43128ae7ca1ba005fb874b3e61500ced2b686aaf0997f44336fcf"
+    },
+    {
+      "evaluation": "minilm-desktop",
+      "path": "src-tauri/src/minilm_prototype.rs",
+      "snapshot": "artifacts/minilm-profile/tokenizer-before.rs",
+      "sha256": "e6d7002b274f3a5f9a22a7d60a93e87253ab98907f2e0e6e10916c9f4955a11c"
+    },
+    {
+      "evaluation": "minilm-native-desktop",
+      "path": "src-tauri/src/lib.rs",
+      "snapshot": "artifacts/minilm-profile/lib-before.rs",
+      "sha256": "0647911c95812ac6667df1c838a7f4540d47c4ed4e044821235f315263bc15ce"
+    },
+    {
+      "evaluation": "minilm-native-desktop",
+      "path": "src-tauri/src/minilm_native_graph.rs",
+      "snapshot": "artifacts/minilm-profile/graph-before.rs",
+      "sha256": "28e969ca17eb1edcf887afcace2300bc475c65ee64900e558a5676a60f4709cd"
+    },
+    {
+      "evaluation": "minilm-native-desktop",
+      "path": "src-tauri/src/minilm_prototype.rs",
+      "snapshot": "artifacts/minilm-profile/tokenizer-before.rs",
+      "sha256": "e6d7002b274f3a5f9a22a7d60a93e87253ab98907f2e0e6e10916c9f4955a11c"
+    }
+  ],
+  "sourceHashes": {
+    "src-tauri/src/lib.rs": "578405e91d510788e1434cecf0308883dd7f922c13691e180d2610a309293efe",
+    "src-tauri/src/minilm_prototype.rs": "3f10197d53db18d6f2f6ec4fc91b8f93c663d880c82eb3a721e66467714f8e6f",
+    "src-tauri/src/minilm_native_graph.rs": "4fb07e8c3502b6c583fce4e0c9ad0dcc598b644fd8806a548caeba7b3ca85f37",
+    "src-tauri/Cargo.toml": "da2c3e13fdb413d2d262b5ed27010ca1911215c86a2abbc475704fce479806b0",
+    "src-tauri/Cargo.lock": "9fb657f4091385be3e02541541b7af5665eb52de4ddb90ea8521c52f4431995f",
+    "scripts/minilm-profile/windows.mjs": "e5957dd7568f813e8f040013b5137e2177fa091ba97e30b46ecdf44b5f0912ee",
+    "scripts/minilm-profile/frontend/main.mjs": "f7cde40e376fac19ab23404f6ca6106c4563104ee09f51e2ef7c743921ab1e8e",
+    "scripts/minilm-profile/frontend/index.html": "c76a987a5bb72c46e2abf6a06ba867ef4c4c6d080c2d7b53ace5c7d4f67c110d",
+    "scripts/minilm-profile/build.mjs": "9446b637df642e12350cfbf084f9d9ac172b6ba6800f915046fda414a5ddf2f3",
+    "scripts/minilm-profile/run.py": "65b50f2d67befde604552ef8ce1fb08c9818217e31b0ff136f744c2522aef54d",
+    "scripts/minilm-profile/report.mjs": "9c435bbb77331e91854f5f08206f7a00680a4272f59ce74b75758c939b2fe173",
+    "tests/minilm-profile.test.mjs": "f42df8ad1d539963f84e6c481fedacdf4823869b1c3d43478264dd3d7972f204",
+    "docs/evaluations/minilm-profile/spec.md": "0106875848f9e58b131d15d939d262fc079508e8f150fb276db1e78ddf89ce18"
+  },
+  "rawHashes": {
+    "report.json": "f51022ff11931887d2fbb88986eb15309a320f22d60fd0a34ae21587b44dda40",
+    "launch.json": "49d2602347e73038b6020a813d4b6a69d0bd55d18fdc79d6845680e47d133258",
+    "lib-before.rs": "0647911c95812ac6667df1c838a7f4540d47c4ed4e044821235f315263bc15ce",
+    "tokenizer-before.rs": "e6d7002b274f3a5f9a22a7d60a93e87253ab98907f2e0e6e10916c9f4955a11c",
+    "graph-before.rs": "28e969ca17eb1edcf887afcace2300bc475c65ee64900e558a5676a60f4709cd",
+    "tests.log": "4c54a039f3dd0664e17f4d58a6e6d65edae37cac1c93b6d14f9447dac70b94ee",
+    "clippy.log": "7810b180323c294a5a945a63621e934f083207762032beddd102fb341be86868",
+    "native-default.log": "03804a8a48cbf5e487180082bd46941b66e96368d86c19782c03195aeb3c4a6f",
+    "build.log": "6bcb919edd2c8c9570bbc1e3473c6179b1971f067b853553cf5e876262523009",
+    "frontend-build.log": "1445ed2c5dcd0c900044bed982a5715e69e493605ec18fbe76bab6526165e8d2",
+    "network-deny.sb": "0d4debba15ea943764c139569dd8f03a5e326cf523627a7edd58699f03e7d2a5"
+  },
+  "limits": "Same-process ordered synthetic variants on macOS arm64, no randomization/repeated independent runs. Phase wall residuals include scheduling and IPC; not pure serialization. Network-deny applies main-process launch, not packet capture. Memory conservatively includes new WebKit processes and may miss peaks. Explicitly untrained classifier; no privacy accuracy claim."
+}
