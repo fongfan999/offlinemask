@@ -1,0 +1,447 @@
+{
+  "createdAt": "2026-09-15T01:42:41.931Z",
+  "kind": "Observed-corpus integration comparison; not held-out model selection",
+  "previousProtocol": "shared-core-protocol.json",
+  "revisionReason": "Initial BigMed Metaspace alignment failed on fresh-emoji and fresh-negative-unicode (observed historical fixture IDs). Apply native tokenizer offsets with exact JS token-ID equality to BigMed as well as Underthesea. Preserve original run and sources; no detector policy or annotation changes.",
+  "fixtures": {
+    "model-comparison.json": "6ff1c4ea7c79dd4b58e95f3da5eafd00547c954c03fa68ad07151ccf69203139",
+    "model-reliability.json": "44046c29eafb3084f4e2bdd0a13cc9c6b5998006d096516d18822ed2b684045f",
+    "address-holdout.json": "fbba167fc9c0a9f74c357e43a0008f3b6957b3e0934e7e7fb1f2395b9743387d",
+    "address-validation.json": "c273a029cc461f412f113f39ad49385cc18ab767b9b8fec2101a571ec11c6268",
+    "address-final-check.json": "fe47309e0771ef1bb03e42d7d32466513c731d2355303bc8b4d433b07b6bbd8b",
+    "model-decision.json": "02f67fd1a676d657bd0353f7054b4d1ef6a0190f46a6e83c734580361dbd8472",
+    "text-reliability-holdout.json": "c5e8e7511ac2f665e3575a017e2085b08132dd07df4a773f08d254844d8cd034",
+    "text-reliability-final.json": "a5f15490d4d21884f85a6b7ded221f0d2e71a18d4e2dc15df302edb67bd958f0",
+    "structured-values-holdout.json": "17fa23d82363762b6f2998ecf94b4ecf7fce48e89fb4556ac6485714620a6315"
+  },
+  "files": {
+    "src/core/detection/address-boundaries.ts": "4b548497bd5cef93e22cdbeab971f264eaaac71993de39a34b168dcbe91e4d7d",
+    "src/core/detection/banking.ts": "91c5cb013699d86c2c128a43493f0a882d046a88cffae767bc66e64b832e489c",
+    "src/core/detection/chunks.ts": "f827cb3f70115ec6b9e5a60e77be4d8588235f11c0911b431cc9f8259103a892",
+    "src/core/detection/contact.ts": "24613d1095299c8633f541b4e4ff95df9b410852bf0743cab6abf2786a0f0d12",
+    "src/core/detection/engine.ts": "72e5a87c86cf0aed94d8d3835e70151f0a86cb27ff6cb25e897cc6653d10dad0",
+    "src/core/detection/labelled-fields.ts": "5298d383357b4ccd3b00b8aea381b8a26bd721f1f82aa5790b3000cafac540ca",
+    "src/core/detection/model-policy.ts": "472e8bcdedf6fe6ba09259ab6c6c203a69908d0cdc8037d5f8edfb2caff68d62",
+    "src/core/detection/model-runner.ts": "9c4db93cf89d12998eebe968a42fef48faceb810d73151744ec7227a7f8ffbc6",
+    "src/core/detection/openmed.ts": "2193e8f72b8ee9bbd41aaa7bee1e7ed9e9750cae0ffdc43296dfa056aae4a870",
+    "src/core/detection/options.ts": "559a544e7c16e319c6c52aece0cdd1fe7367b54c45061fc3e8d51e0c2e5617a8",
+    "src/core/detection/policy.ts": "8e06a8f4eafa043a5ee88304660d7cfe9ed5e7f9d43b4efa35454a1c5a5c77ba",
+    "src/core/detection/source-offsets.ts": "0753a9ab9f64259f50c9371538642bdd940d54b15f9038510ed834b1f1b64249",
+    "src/core/detection/structured-values.ts": "cf2ebaab7d22f3c5291b993b729625f44d552ae253643f1057edc254be79831b",
+    "src/core/detection/token-predictions.ts": "e1e86cfdc5e0a9cca51c66f078d79a386c595573dc398985193e647b57be5f43",
+    "src/core/detection/types.ts": "b111dad6329c7f4066b3eafca9875521083c7e8fe464c09522514b3106644f55",
+    "src/core/manual-mask.ts": "bea3a12c70b93333721ac767f2dc0e024588e155225f39749c0b1e8dd2b580e4",
+    "src/core/review.ts": "6e652e04a88a6b8e3ffa9bfa9ad2bb2d4e030f90a0d40cdc664f5f1762084eb9",
+    "src/core/sessions.ts": "20601206248bb33bb95ba5a2a28ac7a79e784b09abfde89d3d37b94e6fa7b108",
+    "src/core/text.ts": "c136a115b37f956f6a43097de9d688b828b9c1f7ae6c954750e2efa1034e3559",
+    "src/core/unicode.ts": "1676fc68ad528be6f1ea29376982dcd93588338a19ea1cdbbf2af6f066ee2c48",
+    "scripts/shared-core/candidates.mjs": "130bf7b4d08c31b6696a09403f3bcbad4ed52fa2a2572f69139eb1d20a27b70a",
+    "scripts/shared-core/evaluate.mjs": "dab9120de4b0dd8e1ad27ee1c709a3f479191bb206c82c03858ec94d04a6ccbb",
+    "scripts/shared-core/evidence.mjs": "097b522eb7791956c058a9e40940055b024d63f052f33bd9ba6982f9ad329b74",
+    "scripts/shared-core/freeze.mjs": "583f876c044bd0427300942b63ed0a212d475611882ff030eea4b5bb3483db23",
+    "scripts/shared-core/metrics.mjs": "cea5f37ea2d9379a9c398179a71a42c0656a5508b5a0971c8a534064926e109f",
+    "scripts/shared-core/native-offsets.py": "a959cc5beaf8f497c02cc20519ffa36c315f62e73c29707df846cd3d56581fb9",
+    "scripts/shared-core/parity.mjs": "f72d685592f537b588d1974610a777eb60b7c11021734013b8e2a72d061541eb",
+    "scripts/shared-core/reference-offsets.mjs": "6a3bdb789ee1ff33e1c602dcafbd2b899a8d27cb28398cf2359472c7f6a9bf42",
+    "scripts/shared-core/report.mjs": "2613270b155c1216b644f47589d8bc19ffac853e8e3d60fe925b3df8d173c97e",
+    "package.json": "612b0faa1b123ba597b82e41a32cc921c4b962fa160ddb7b7df9af4015f273a2",
+    "pnpm-lock.yaml": "b56809e54b1eac12655ee69d57c5c4db3b31d9712ceeb9995fc34dbc63c40f7c",
+    "scripts/model-manifest.json": "1678299365f89122014a05a1344ab378698eb13ce6e168cfb0a66e3aeb2d5c2e",
+    "scripts/model-comparison-metrics.mjs": "8eb090bae5e61a7b9389f12bfc478edc75d22a36807bdb5dfba4af4c2670e1c9",
+    "scripts/native-prototype/wasm-provider.mjs": "d8a5c16b49f9eee74af064494a5c75a6713427f63c13b0947928ae4c1dac110b"
+  },
+  "assets": {
+    "small": [
+      {
+        "directory": "public/models/vietnamese-pii",
+        "repository": "OpenMed/OpenMed-PII-Vietnamese-SuperClinical-Small-44M-v1-onnx-android",
+        "revision": "665e766d817110a648d9cc38d074041702ca9675",
+        "files": {
+          "model_int8.onnx": {
+            "sha256": "9b95d41fc8da37ebc8d53dbeed4b186ed6a6190283ab07d5b512b53934bc5594",
+            "size": 466962077
+          },
+          "config.json": {
+            "sha256": "d24e7a78babc8ca5449970659deaa9372b163556e68579f3dd5717a23191786e",
+            "size": 4697
+          },
+          "tokenizer.json": {
+            "sha256": "384255eb4e0c7c2066afc789d8f97907a023503be3fd521ac43f7abf5c96cfa9",
+            "size": 8340141
+          },
+          "tokenizer_config.json": {
+            "sha256": "392b1747f5ec57781f7c8ff219cab4d4e9743ccb28936381d476ff49cc930f80",
+            "size": 646
+          },
+          "id2label.json": {
+            "sha256": "a855c964ef7763ec51b63aad7ec43e43ae5a89f1e5f221cd2852326107ad7d95",
+            "size": 1656
+          },
+          "openmed-onnx.json": {
+            "sha256": "2316ace6e1eb9971a2de8caa812a0bd494c22752fd72a52a940cd6c9b33a2104",
+            "size": 12724
+          },
+          "README.md": {
+            "sha256": "1994efa277bd44c8421918f4968f9e79a28836d3486e1cb3d0d44fbb7b709b0b",
+            "size": 5698
+          }
+        }
+      }
+    ],
+    "large": [
+      {
+        "directory": "public/models/vietnamese-pii-multilingual",
+        "repository": "OpenMed/OpenMed-PII-Vietnamese-mSuperClinical-Large-279M-v1-onnx-android",
+        "revision": "eaac31560eef579a7ae6144377109969dbd1e83a",
+        "files": {
+          "model_int8.onnx": {
+            "sha256": "3447b09304771ec16f991d2c8d4942ebef9c52497ea6f662f4a301698e9b557c",
+            "size": 916288564
+          },
+          "config.json": {
+            "sha256": "062cfb1edd8e78a35fc4251f88dd08e9ba9964762b11dbdf3cd70e5721279ed7",
+            "size": 4700
+          },
+          "tokenizer.json": {
+            "sha256": "e34d85acb51fe7c518a3f284a80866f46aa4691b1fc29d2dfdd94f2119945a4f",
+            "size": 16034281
+          },
+          "tokenizer_config.json": {
+            "sha256": "c6a887da972d836a1e197e3ade745c1bd64f53f4754fb8e1245105b6ccfe7fc9",
+            "size": 3036
+          },
+          "id2label.json": {
+            "sha256": "a855c964ef7763ec51b63aad7ec43e43ae5a89f1e5f221cd2852326107ad7d95",
+            "size": 1656
+          },
+          "openmed-onnx.json": {
+            "sha256": "1845fe09da9bfc1855a2bf696ec7222dec709cbf870b38c78c5f211bd536f910",
+            "size": 12726
+          },
+          "README.md": {
+            "sha256": "bcfe0511f918ac0eef6637e4d4497a0fa99c230dccd418fedffc48ed9d49d711",
+            "size": 5714
+          }
+        }
+      }
+    ],
+    "combined": [
+      {
+        "directory": "public/models/vietnamese-pii",
+        "repository": "OpenMed/OpenMed-PII-Vietnamese-SuperClinical-Small-44M-v1-onnx-android",
+        "revision": "665e766d817110a648d9cc38d074041702ca9675",
+        "files": {
+          "model_int8.onnx": {
+            "sha256": "9b95d41fc8da37ebc8d53dbeed4b186ed6a6190283ab07d5b512b53934bc5594",
+            "size": 466962077
+          },
+          "config.json": {
+            "sha256": "d24e7a78babc8ca5449970659deaa9372b163556e68579f3dd5717a23191786e",
+            "size": 4697
+          },
+          "tokenizer.json": {
+            "sha256": "384255eb4e0c7c2066afc789d8f97907a023503be3fd521ac43f7abf5c96cfa9",
+            "size": 8340141
+          },
+          "tokenizer_config.json": {
+            "sha256": "392b1747f5ec57781f7c8ff219cab4d4e9743ccb28936381d476ff49cc930f80",
+            "size": 646
+          },
+          "id2label.json": {
+            "sha256": "a855c964ef7763ec51b63aad7ec43e43ae5a89f1e5f221cd2852326107ad7d95",
+            "size": 1656
+          },
+          "openmed-onnx.json": {
+            "sha256": "2316ace6e1eb9971a2de8caa812a0bd494c22752fd72a52a940cd6c9b33a2104",
+            "size": 12724
+          },
+          "README.md": {
+            "sha256": "1994efa277bd44c8421918f4968f9e79a28836d3486e1cb3d0d44fbb7b709b0b",
+            "size": 5698
+          }
+        }
+      },
+      {
+        "directory": "public/models/vietnamese-pii-multilingual",
+        "repository": "OpenMed/OpenMed-PII-Vietnamese-mSuperClinical-Large-279M-v1-onnx-android",
+        "revision": "eaac31560eef579a7ae6144377109969dbd1e83a",
+        "files": {
+          "model_int8.onnx": {
+            "sha256": "3447b09304771ec16f991d2c8d4942ebef9c52497ea6f662f4a301698e9b557c",
+            "size": 916288564
+          },
+          "config.json": {
+            "sha256": "062cfb1edd8e78a35fc4251f88dd08e9ba9964762b11dbdf3cd70e5721279ed7",
+            "size": 4700
+          },
+          "tokenizer.json": {
+            "sha256": "e34d85acb51fe7c518a3f284a80866f46aa4691b1fc29d2dfdd94f2119945a4f",
+            "size": 16034281
+          },
+          "tokenizer_config.json": {
+            "sha256": "c6a887da972d836a1e197e3ade745c1bd64f53f4754fb8e1245105b6ccfe7fc9",
+            "size": 3036
+          },
+          "id2label.json": {
+            "sha256": "a855c964ef7763ec51b63aad7ec43e43ae5a89f1e5f221cd2852326107ad7d95",
+            "size": 1656
+          },
+          "openmed-onnx.json": {
+            "sha256": "1845fe09da9bfc1855a2bf696ec7222dec709cbf870b38c78c5f211bd536f910",
+            "size": 12726
+          },
+          "README.md": {
+            "sha256": "bcfe0511f918ac0eef6637e4d4497a0fa99c230dccd418fedffc48ed9d49d711",
+            "size": 5714
+          }
+        }
+      }
+    ],
+    "bigmed": [
+      {
+        "directory": "artifacts/alternative-models/bigmed",
+        "files": {
+          "model_int8.onnx": {
+            "size": 855541261,
+            "sha256": "15814cd5d8bf4ffc3c3a5d2628b02858c25b8c5fa235f607aa83fc5c88f48966"
+          },
+          "config.json": {
+            "size": 4536,
+            "sha256": "3fde17c7e728ec91855e2890b54999e58015c8e3d023a52b1f2c56936a1cbbd8"
+          },
+          "tokenizer.json": {
+            "size": 17098351,
+            "sha256": "a5c7f86df050d19df94f96ba5e31ae842ffa1f89bfc68a878562e900b71aa6e6"
+          },
+          "tokenizer_config.json": {
+            "size": 451,
+            "sha256": "a5604547fc8e657b71af675e65629933d32d298095651457b7c0dd92bf912f3b"
+          }
+        },
+        "downloadBytes": 872644599
+      }
+    ],
+    "underthesea": [
+      {
+        "directory": "artifacts/alternative-models/underthesea",
+        "files": {
+          "model_int8.onnx": {
+            "size": 204645861,
+            "sha256": "9e95f354972d52ddf5400957e68d5619bf6c35b534baff6bae6c551329a1d134"
+          },
+          "config.json": {
+            "size": 1188,
+            "sha256": "5f19231921de6b786e392c08e3f3c4dd9b1998eed9745c3aaf16b5757f4fac52"
+          },
+          "tokenizer.json": {
+            "size": 856917,
+            "sha256": "a89ddc07bdaf68695bd18c61f8b1de869de691e64edfb934756f0be5c86c9dd0"
+          },
+          "tokenizer_config.json": {
+            "size": 1294,
+            "sha256": "7d3cd2660d21617d4a662fed1c428da406be9b3b282f6dc35108d39fe8a196ad"
+          }
+        },
+        "downloadBytes": 205505260
+      }
+    ],
+    "underthesea-fp32": [
+      {
+        "directory": "artifacts/alternative-models/underthesea",
+        "files": {
+          "model.onnx": {
+            "size": 459292609,
+            "sha256": "1ee544f797c7cdc2e5d6c9f2af21730aba3c4ead4ba496ff1270946b6a64a4c7"
+          },
+          "config.json": {
+            "size": 1188,
+            "sha256": "5f19231921de6b786e392c08e3f3c4dd9b1998eed9745c3aaf16b5757f4fac52"
+          },
+          "tokenizer.json": {
+            "size": 856917,
+            "sha256": "a89ddc07bdaf68695bd18c61f8b1de869de691e64edfb934756f0be5c86c9dd0"
+          },
+          "tokenizer_config.json": {
+            "size": 1294,
+            "sha256": "7d3cd2660d21617d4a662fed1c428da406be9b3b282f6dc35108d39fe8a196ad"
+          }
+        },
+        "downloadBytes": 460152008
+      }
+    ]
+  },
+  "alternativeProvenance": {
+    "sources": [
+      {
+        "directory": "bigmed",
+        "repository": "OpenMed/OpenMed-PII-Vietnamese-BigMed-Large-278M-v1-onnx-android",
+        "revision": "2c996ac92e24c939755a8197c3f574c4f65874cf",
+        "license": "Apache-2.0",
+        "files": {
+          "model_int8.onnx": {
+            "size": 855541261,
+            "sha256": "15814cd5d8bf4ffc3c3a5d2628b02858c25b8c5fa235f607aa83fc5c88f48966"
+          },
+          "config.json": {
+            "size": 4536,
+            "sha256": "3fde17c7e728ec91855e2890b54999e58015c8e3d023a52b1f2c56936a1cbbd8"
+          },
+          "tokenizer.json": {
+            "size": 17098351,
+            "sha256": "a5c7f86df050d19df94f96ba5e31ae842ffa1f89bfc68a878562e900b71aa6e6"
+          },
+          "tokenizer_config.json": {
+            "size": 451,
+            "sha256": "a5604547fc8e657b71af675e65629933d32d298095651457b7c0dd92bf912f3b"
+          },
+          "id2label.json": {
+            "size": 1656,
+            "sha256": "a855c964ef7763ec51b63aad7ec43e43ae5a89f1e5f221cd2852326107ad7d95"
+          },
+          "openmed-onnx.json": {
+            "size": 11319,
+            "sha256": "712490bf064d2ff07b0958b3a3e084faacbfd904aead9518cf30417263697232"
+          },
+          "README.md": {
+            "size": 5668,
+            "sha256": "bb664079e1c0bb854578f2b779a61f6e18a7d21371b2acf37ec305858fb8edc7"
+          }
+        }
+      },
+      {
+        "directory": "underthesea-source",
+        "repository": "undertheseanlp/vietnamese-ner-v1.4.0a2",
+        "revision": "a51e05fc09e1b1f0800dbad8ae84e86ad311debd",
+        "license": "Apache-2.0",
+        "files": {
+          "pytorch_model.bin": {
+            "size": 459150385,
+            "sha256": "3f17a2fb5400ee654d11f254c3adf25a6b4a67513f3d9ca568722375ea930c68"
+          },
+          "config.json": {
+            "size": 1240,
+            "sha256": "e87b7989b4ca29d050d1ac46086eaa585bdb38a77d5dc9b890d7e8656a8d1290"
+          },
+          "tokenizer.json": {
+            "size": 856917,
+            "sha256": "a89ddc07bdaf68695bd18c61f8b1de869de691e64edfb934756f0be5c86c9dd0"
+          },
+          "tokenizer_config.json": {
+            "size": 380,
+            "sha256": "d3e17020cd77f3fc73e219c134e83bf3e98bd450ff21c46c00acccaeaee21322"
+          },
+          "special_tokens_map.json": {
+            "size": 125,
+            "sha256": "b6d346be366a7d1d48332dbc9fdf3bf8960b5d879522b7799ddba59e76237ee3"
+          },
+          "vocab.txt": {
+            "size": 254704,
+            "sha256": "e110e71f12b9085045c1b647847bed4aa272b26b658d26a39aae1d2600f8d2f6"
+          },
+          "README.md": {
+            "size": 41,
+            "sha256": "b9c7ab6a2dd20d0726a9855145f68c61f5950f1c0cb81d23e71cf59eb1dc850b"
+          }
+        }
+      }
+    ],
+    "exportScriptSha256": "fa92a39a8c3f24d99e38f33c95e2472be8e49fec09749cd9e42c96389536f0f0",
+    "conversionRequirements": "certifi==2026.7.22\ncharset-normalizer==3.5.1\ncoloredlogs==15.0.1\nfilelock==3.32.6\nflatbuffers==25.12.19\nfsspec==2026.7.0\nhf-xet==1.6.0\nhuggingface_hub==0.36.2\nhumanfriendly==10.0\nidna==3.19\nJinja2==3.1.6\nMarkupSafe==3.0.3\nml_dtypes==0.6.0\nmpmath==1.3.0\nnetworkx==3.6.1\nnumpy==2.5.3\nonnx==1.19.0\nonnxruntime==1.22.1\noptimum==2.1.0\noptimum-onnx==0.1.0\npackaging==26.3\nprotobuf==7.36.1\nPyYAML==6.0.3\nregex==2026.9.10\nrequests==2.34.2\nsafetensors==0.8.0\nsetuptools==84.0.0\nsympy==1.14.0\ntokenizers==0.22.2\ntorch==2.8.0\ntqdm==4.70.0\ntransformers==4.57.6\ntyping_extensions==4.16.0\nurllib3==2.7.0\n",
+    "variants": {
+      "bigmed": {
+        "directory": "bigmed",
+        "files": {
+          "model_int8.onnx": {
+            "size": 855541261,
+            "sha256": "15814cd5d8bf4ffc3c3a5d2628b02858c25b8c5fa235f607aa83fc5c88f48966"
+          },
+          "config.json": {
+            "size": 4536,
+            "sha256": "3fde17c7e728ec91855e2890b54999e58015c8e3d023a52b1f2c56936a1cbbd8"
+          },
+          "tokenizer.json": {
+            "size": 17098351,
+            "sha256": "a5c7f86df050d19df94f96ba5e31ae842ffa1f89bfc68a878562e900b71aa6e6"
+          },
+          "tokenizer_config.json": {
+            "size": 451,
+            "sha256": "a5604547fc8e657b71af675e65629933d32d298095651457b7c0dd92bf912f3b"
+          }
+        },
+        "downloadBytes": 872644599
+      },
+      "underthesea": {
+        "directory": "underthesea",
+        "files": {
+          "model_int8.onnx": {
+            "size": 204645861,
+            "sha256": "9e95f354972d52ddf5400957e68d5619bf6c35b534baff6bae6c551329a1d134"
+          },
+          "config.json": {
+            "size": 1188,
+            "sha256": "5f19231921de6b786e392c08e3f3c4dd9b1998eed9745c3aaf16b5757f4fac52"
+          },
+          "tokenizer.json": {
+            "size": 856917,
+            "sha256": "a89ddc07bdaf68695bd18c61f8b1de869de691e64edfb934756f0be5c86c9dd0"
+          },
+          "tokenizer_config.json": {
+            "size": 1294,
+            "sha256": "7d3cd2660d21617d4a662fed1c428da406be9b3b282f6dc35108d39fe8a196ad"
+          }
+        },
+        "downloadBytes": 205505260
+      },
+      "underthesea-fp32": {
+        "directory": "underthesea",
+        "files": {
+          "model.onnx": {
+            "size": 459292609,
+            "sha256": "1ee544f797c7cdc2e5d6c9f2af21730aba3c4ead4ba496ff1270946b6a64a4c7"
+          },
+          "config.json": {
+            "size": 1188,
+            "sha256": "5f19231921de6b786e392c08e3f3c4dd9b1998eed9745c3aaf16b5757f4fac52"
+          },
+          "tokenizer.json": {
+            "size": 856917,
+            "sha256": "a89ddc07bdaf68695bd18c61f8b1de869de691e64edfb934756f0be5c86c9dd0"
+          },
+          "tokenizer_config.json": {
+            "size": 1294,
+            "sha256": "7d3cd2660d21617d4a662fed1c428da406be9b3b282f6dc35108d39fe8a196ad"
+          }
+        },
+        "downloadBytes": 460152008
+      }
+    }
+  },
+  "baselineHashes": {
+    "src/core/detection/address-boundaries.ts": "4b548497bd5cef93e22cdbeab971f264eaaac71993de39a34b168dcbe91e4d7d",
+    "src/core/detection/banking.ts": "91c5cb013699d86c2c128a43493f0a882d046a88cffae767bc66e64b832e489c",
+    "src/core/detection/chunks.ts": "f827cb3f70115ec6b9e5a60e77be4d8588235f11c0911b431cc9f8259103a892",
+    "src/core/detection/contact.ts": "24613d1095299c8633f541b4e4ff95df9b410852bf0743cab6abf2786a0f0d12",
+    "src/core/detection/engine.ts": "eb7a55166243c238c922cfb55aed5167940dad4e00bbf78ed4a7390c792b3d9e",
+    "src/core/detection/labelled-fields.ts": "5298d383357b4ccd3b00b8aea381b8a26bd721f1f82aa5790b3000cafac540ca",
+    "src/core/detection/model-policy.ts": "472e8bcdedf6fe6ba09259ab6c6c203a69908d0cdc8037d5f8edfb2caff68d62",
+    "src/core/detection/openmed.ts": "dc1e5fb2685db67c5e659133c90cb59d991d1cb073359c403b255afed5098ce3",
+    "src/core/detection/options.ts": "559a544e7c16e319c6c52aece0cdd1fe7367b54c45061fc3e8d51e0c2e5617a8",
+    "src/core/detection/source-offsets.ts": "0753a9ab9f64259f50c9371538642bdd940d54b15f9038510ed834b1f1b64249",
+    "src/core/detection/structured-values.ts": "cf2ebaab7d22f3c5291b993b729625f44d552ae253643f1057edc254be79831b",
+    "src/core/detection/token-predictions.ts": "e1e86cfdc5e0a9cca51c66f078d79a386c595573dc398985193e647b57be5f43",
+    "src/core/detection/types.ts": "b111dad6329c7f4066b3eafca9875521083c7e8fe464c09522514b3106644f55",
+    "src/core/manual-mask.ts": "bea3a12c70b93333721ac767f2dc0e024588e155225f39749c0b1e8dd2b580e4",
+    "src/core/review.ts": "6e652e04a88a6b8e3ffa9bfa9ad2bb2d4e030f90a0d40cdc664f5f1762084eb9",
+    "src/core/sessions.ts": "20601206248bb33bb95ba5a2a28ac7a79e784b09abfde89d3d37b94e6fa7b108",
+    "src/core/text.ts": "c136a115b37f956f6a43097de9d688b828b9c1f7ae6c954750e2efa1034e3559",
+    "src/core/unicode.ts": "1676fc68ad528be6f1ea29376982dcd93588338a19ea1cdbbf2af6f066ee2c48"
+  },
+  "baselineSources": {
+    "src/core/detection/engine.ts": "import { detectBankingIdentifiers } from \"./banking.ts\";\nimport { detectContactDetails } from \"./contact.ts\";\nimport { filterDetections, requiresModels } from \"./options.ts\";\nimport type { DetectionProgress, WorkerRequest } from \"./types.ts\";\nimport { reconcileStructuredValues } from './structured-values.ts';\n\nexport function createDetectionEngine() {\n  let detector: ReturnType<typeof import(\"./openmed.ts\").loadDetector> | undefined;\n  return async ({ text, options, modelRoot }: WorkerRequest, progress: (value: DetectionProgress) => void) => {\n    if (!requiresModels(options)) {\n      return filterDetections(reconcileStructuredValues(text, [...detectBankingIdentifiers(text), ...detectContactDetails(text)]), options);\n    }\n    if (!modelRoot) throw new Error(\"Models required\");\n    progress({ stage: \"loading\", completed: 0, total: 0 });\n    // Local-only choices never import or initialize the model runtime.\n    const { loadDetector } = await import(\"./openmed.ts\");\n    detector ??= loadDetector(modelRoot);\n    const loaded = await detector;\n    return filterDetections(await loaded.detect(text, progress), options);\n  };\n}\n",
+    "src/core/detection/openmed.ts": "import { env, pipeline, type TokenClassificationPipeline } from \"@huggingface/transformers\";\nimport { decodeBioTokenSpans, type RawTokenClassificationEntity } from \"openmed\";\nimport { alignSourceTokens } from \"./source-offsets.ts\";\nimport { completeAddressBoundaries } from \"./address-boundaries.ts\";\nimport { modelChunkIterator } from \"./chunks.ts\";\nimport { mergeModelDetections, modelDetections } from \"./model-policy.ts\";\nimport { detectBankingIdentifiers } from \"./banking.ts\";\nimport { detectContactDetails } from \"./contact.ts\";\nimport type { Detection, DetectionProgress } from \"./types.ts\";\nimport manifest from \"../../../scripts/model-manifest.json\" with { type: \"json\" };\nimport { predictAllTokens } from './token-predictions.ts';\nimport { detectLabelledFields, reconcileLabelledFields } from './labelled-fields.ts';\nimport { reconcileStructuredValues } from './structured-values.ts';\n\nexport interface TokenDetector {\n  tokenizer: Pick<TokenClassificationPipeline['tokenizer'], 'encode'>;\n  predict(text: string): Promise<RawTokenClassificationEntity[]>;\n  dispose(): Promise<unknown>;\n}\nexport type InferenceProvider = (directory: string) => Promise<TokenDetector>;\n\nexport async function loadDetector(modelRoot = \"/models\", wasmPath = \"/runtime/\", device: \"wasm\" | \"cpu\" = \"wasm\",\n  modelDirectories: readonly string[] = manifest.models.map(model => model.directory), provider?: InferenceProvider) {\n  // Evaluation may select pinned checkpoints; the app uses the full manifest by default.\n  if (!modelDirectories.length || new Set(modelDirectories).size !== modelDirectories.length\n    || modelDirectories.some(directory => !manifest.models.some(model => model.directory === directory)))\n    throw new Error(\"Invalid pinned model selection\");\n  const models = manifest.models.filter(model => modelDirectories.includes(model.directory));\n  // All resources must already be installed locally. Never fall back to a Hub or CDN.\n  env.allowRemoteModels = false;\n  env.allowLocalModels = true;\n  env.localModelPath = modelRoot + \"/\";\n  env.useBrowserCache = false;\n  env.useFSCache = false;\n  env.useWasmCache = false;\n  if (env.backends.onnx.wasm) {\n    env.backends.onnx.wasm.wasmPaths = {\n      // Use the JS loader embedded by Transformers.js with its matching WASM.\n      wasm: `${wasmPath}ort-wasm-simd-threaded.asyncify.wasm`,\n    };\n    env.backends.onnx.wasm.numThreads = 1;\n    env.backends.onnx.wasm.proxy = false;\n  }\n  const classifiers: TokenDetector[] = [];\n  try {\n    for (const model of models) {\n      if (provider) {\n        classifiers.push(await provider(model.directory));\n        continue;\n      }\n      const classifier = await pipeline(\"token-classification\", model.directory, {\n        device, dtype: \"fp32\", // The published INT8 graphs have explicit filenames.\n        subfolder: \"\", model_file_name: \"model_int8\", local_files_only: true,\n      });\n      classifiers.push({ tokenizer: classifier.tokenizer,\n        predict: (text) => predictAllTokens(classifier, text, true),\n        dispose: () => classifier.dispose(),\n      });\n    }\n  } catch (error) {\n    await Promise.all(classifiers.map((classifier) => classifier.dispose()));\n    throw error;\n  }\n  return {\n    async detect(text: string, progress: (value: DetectionProgress) => void): Promise<Detection[]> {\n      const plans = [];\n      for (const classifier of classifiers) {\n        const chunks = [];\n        for (const chunk of modelChunkIterator(text, (value) => classifier.tokenizer.encode(value).length)) {\n          chunks.push(chunk);\n          // Tokenizer planning also allocates temporary data. Yield here as well\n          // as during inference, so a large request does not plan in one task.\n          await new Promise<void>((resolve) => setTimeout(resolve, 0));\n        }\n        plans.push({ classifier, chunks });\n      }\n      const total = plans.reduce((sum, plan) => sum + plan.chunks.length, 0);\n      let completed = 0;\n      const detections: Detection[] = [];\n      for (const [modelIndex, { classifier, chunks }] of plans.entries()) {\n        for (const chunk of chunks) {\n          // Preserve every prediction, including O and unknown-token source pieces.\n          const tokens = await classifier.predict(chunk.text);\n          const aligned = alignSourceTokens(chunk.text, tokens);\n          const spans = decodeBioTokenSpans(chunk.text, aligned, { threshold: 0 });\n          detections.push(...modelDetections(chunk.text, spans).map((span) => ({\n            ...span, start: span.start + chunk.start, end: span.end + chunk.start,\n            source: `OpenMed · ${models[modelIndex]!.directory === \"vietnamese-pii\" ? \"SuperClinical\" : \"mSuperClinical\"} · INT8`,\n          })));\n          progress({ stage: \"processing\", completed: ++completed, total });\n          // Let the worker event loop reclaim temporary inference allocations\n          // between chunks, even when the WASM promise resolves synchronously.\n          await new Promise<void>((resolve) => setTimeout(resolve, 0));\n        }\n      }\n      const fields = detectLabelledFields(text);\n      // Keep ambiguous model evidence outside explicit fields: blanket removal of\n      // invalid contact guesses can expose credentials misclassified by the model.\n      const contextual = mergeModelDetections(detections);\n      const completedDetections = completeAddressBoundaries(text, [...contextual, ...fields.detections]);\n      return reconcileStructuredValues(text, [...detectBankingIdentifiers(text), ...detectContactDetails(text),\n        ...reconcileLabelledFields(text, completedDetections, fields)]);\n    },\n    dispose: () => Promise.all(classifiers.map((classifier) => classifier.dispose())),\n  };\n}\n"
+  },
+  "method": "Same Node CPU runtime and common windows/policy; modelOnly and complete stages scored independently. BigMed and Underthesea native tokenizer IDs must match JS inference IDs; native offsets converted to UTF-16. No input uploads, fetch blocked.",
+  "parity": "Original and refactored pair on identical real WASM token predictions, comparing full Detection arrays, progress, all-category and category-only spans on every fixture.",
+  "criteria": "Existing screening floor plus own-category completeness for every category: 99% email/phone/banking, 95% name/address/other. Observed-set pass cannot qualify a release.",
+  "limits": "All cases already observed, synthetic and developer authored. No Excel parser, OCR, PDF output or packaged-runtime qualification. No performance ranking: reference tokenization is prepared separately."
+}
