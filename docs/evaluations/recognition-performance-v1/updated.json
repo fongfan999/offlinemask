@@ -1,0 +1,49 @@
+{
+  "source": "Packaged macOS WebKit/WASM UI benchmark, observed via accessibility",
+  "wallStart": 1789924457566,
+  "wallEnd": 1789924472637,
+  "phase": "Completed",
+  "maxHeartbeatDelayMs": 615,
+  "results": [
+    {
+      "label": "cold-short",
+      "utf16Length": 161,
+      "detectionMs": 9902,
+      "firstProcessingMs": 9462,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "warm-short-1",
+      "utf16Length": 161,
+      "detectionMs": 643,
+      "firstProcessingMs": 264,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "warm-short-2",
+      "utf16Length": 161,
+      "detectionMs": 669,
+      "firstProcessingMs": 273,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "warm-short-3",
+      "utf16Length": 161,
+      "detectionMs": 676,
+      "firstProcessingMs": 296,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "after-cancel",
+      "utf16Length": 161,
+      "detectionMs": 1721,
+      "firstProcessingMs": 1368,
+      "findings": 3,
+      "addressCovered": true
+    }
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "observation": "Web view reloaded during hard-reset load; accessibility reported Interrupted previous run. Cause not established.",
+  "wallStart": 1789924247774,
+  "phase": "after-worker-reset: loading 0/0",
+  "maxHeartbeatDelayMs": 620,
+  "results": [
+    {
+      "label": "cold-short",
+      "utf16Length": 161,
+      "detectionMs": 11389,
+      "firstProcessingMs": 10871,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "warm-short-1",
+      "utf16Length": 161,
+      "detectionMs": 647,
+      "firstProcessingMs": 269,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "warm-short-2",
+      "utf16Length": 161,
+      "detectionMs": 689,
+      "firstProcessingMs": 292,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "warm-short-3",
+      "utf16Length": 161,
+      "detectionMs": 750,
+      "firstProcessingMs": 275,
+      "findings": 3,
+      "addressCovered": true
+    }
+  ]
+}

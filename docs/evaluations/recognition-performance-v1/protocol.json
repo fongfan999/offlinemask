@@ -1,0 +1,16 @@
+{
+  "recordedAt": "2026-09-20T17:11:11.888601+00:00",
+  "baselineProtocol": "../recognition-production-v1/protocol.json",
+  "files": {
+    "src/App.vue": "d0d75af1c9f31fbd95ed75c1631425eae2cbf03ba0d6a81c99a0561bfd7e1cfb",
+    "src/adapters/text-detection.ts": "f9eee0a53c88c474cc330551d5b85c056d52c9654864ded67638c8b2b2dbf154",
+    "src/core/detection/types.ts": "2388bec2e39933cd1c9f549ecee12c973dc0bcc0e8dc45e2715ef06d69bca96e",
+    "src/core/detection/engine.ts": "83f4c9ed1f38a34748134ea00864dd3803ed2a709b019dd579f1c13abd2d8775",
+    "src/core/detection/model-runner.ts": "256e9c9e1cbac6d5dbd06e8077ea2468ba09b0fee1b3f75bdd65eaaa775eb301",
+    "src/core/detection/recognition.ts": "a778ac9c49c77153c38362dd86c46fa1c310a6b08be63692c4ac1eb048f95980",
+    "src/workers/detection.worker.ts": "558b94fff3ef4ef1e71d276c28e9d96d5c5579e8a47ff6e1ccdae9eb39a6b441",
+    "scripts/recognition-performance-v1/main.ts": "e04a8005ac1bacf5dd4e768a52ee941a1727a2a72143a824e72daf4f7530bf67",
+    "scripts/recognition-performance-v1/build.mjs": "dab55e38959e7c3bc6a829b9c7d1f2fc0fb0b8b569fd4c875e1f1d9e8a6cf17c",
+    "scripts/release-pack-v1.json": "cfa171d195ef6aa7b512cd64c67b3f40135b2546d42a571998b8a48c0c1c835c"
+  }
+}
