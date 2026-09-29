@@ -1,0 +1,34 @@
+{
+  "date": "2026-09-21",
+  "sourceHashes": {
+    "scripts/recognition-offline-v1/stage.py": "d40eabbd5eb2b226283c2d47c194093019ae0c709089ad1eb56151d8be209774",
+    "scripts/recognition-offline-v1/network-probe.c": "76a789dc4d0be2199a580d63eee026ed03337070b5f4d5f6040db0e203c44959",
+    "src-tauri/target/release/bundle/macos/OfflineMask Sidecar UI.app/Contents/MacOS/offlinemask": "c59d9c9199bfa66e7804ba07791136c8f54c19b00d4167e6f75d71625c8f09f2",
+    "src-tauri/target/release/bundle/macos/OfflineMask Sidecar UI.app/Contents/Resources/native/recognition-sidecar": "b4fde2d1145d9f116c57e8c4874acb87b7178422f3b960923751b9a9a48eaefd"
+  },
+  "clean": {
+    "hostPid": 15753,
+    "helperAbsent": true,
+    "builtInPreviewCount": 3,
+    "missingPackPrompt": true,
+    "explicitDownloadFailedSafely": true,
+    "draftRetained": true
+  },
+  "installed": {
+    "hostPid": 16150,
+    "helperPid": 16173,
+    "previewCount": 3,
+    "cancelledCharacters": 50000,
+    "draftRetainedExactly": true,
+    "retryPreviewCount": 3,
+    "noPartialSession": true
+  },
+  "cleanup": {
+    "qaProcessesClosed": true,
+    "originalUserPidsUntouched": [
+      16321,
+      29625
+    ]
+  },
+  "boundary": "IP denial for host and child processes; WebKit XPC not independently probed; shipping local-only CSP unchanged"
+}
