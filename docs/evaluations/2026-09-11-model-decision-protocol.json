@@ -1,0 +1,53 @@
+{
+  "createdAt": "2026-09-10T17:12:08.300Z",
+  "purpose": "Decide whether either single checkpoint or their combination qualifies; no tuning after seeing this fixture set.",
+  "fixtureSha256": "02f67fd1a676d657bd0353f7054b4d1ef6a0190f46a6e83c734580361dbd8472",
+  "caseCount": 56,
+  "sourceHashes": {
+    "scripts/evaluate-model-decision.mjs": "3443847acfac5bf219a990103c99c8168050febc31f9b77b0bd006e2b3a4e4ff",
+    "scripts/run-model-decision.py": "4aeef84b43c599f2ee887bd57f4d1016b829f898f0375523c5c291350ebe123c",
+    "scripts/model-comparison-metrics.mjs": "8eb090bae5e61a7b9389f12bfc478edc75d22a36807bdb5dfba4af4c2670e1c9",
+    "scripts/model-manifest.json": "1678299365f89122014a05a1344ab378698eb13ce6e168cfb0a66e3aeb2d5c2e",
+    "scripts/native-prototype/provider.mjs": "515944bd2884c00b5130221814aeb3701686a5f0a303d722cc3225ba58be0614",
+    "scripts/native-prototype/wasm-provider.mjs": "d8a5c16b49f9eee74af064494a5c75a6713427f63c13b0947928ae4c1dac110b",
+    "scripts/native-prototype/runtime-manifest.json": "7a9161d28af983ded63b56389771f91f0a76e2060644af45cae25796f985ebcc",
+    "src-tauri/src/bin/native_inference_prototype.rs": "7c2eba16d707764164c4557b45adfbd757d9c6e0c56cad8d72ca0012a5711bec",
+    "src/core/text.ts": "c136a115b37f956f6a43097de9d688b828b9c1f7ae6c954750e2efa1034e3559",
+    "src/core/unicode.ts": "1676fc68ad528be6f1ea29376982dcd93588338a19ea1cdbbf2af6f066ee2c48",
+    "src/core/detection/address-boundaries.ts": "39960b0f501d1816a35df02541fbca3333306d86bb62bfb1637890d42a1f9f9a",
+    "src/core/detection/banking.ts": "91c5cb013699d86c2c128a43493f0a882d046a88cffae767bc66e64b832e489c",
+    "src/core/detection/chunks.ts": "f827cb3f70115ec6b9e5a60e77be4d8588235f11c0911b431cc9f8259103a892",
+    "src/core/detection/contact.ts": "24613d1095299c8633f541b4e4ff95df9b410852bf0743cab6abf2786a0f0d12",
+    "src/core/detection/engine.ts": "783ee0f1be2f4f7511a7b2cd681de67b8f6de75c5c49a1ad468f5a2a4a9bc932",
+    "src/core/detection/model-policy.ts": "b0f98ecce0c643bcd8baf1c6a007854052741aac5076e1e398065dfa35d43566",
+    "src/core/detection/openmed.ts": "00f9c757fbcf5812ec581a3c4a275d8bad9addb19ee6fbc3d883f7329a5bf952",
+    "src/core/detection/options.ts": "559a544e7c16e319c6c52aece0cdd1fe7367b54c45061fc3e8d51e0c2e5617a8",
+    "src/core/detection/source-offsets.ts": "0753a9ab9f64259f50c9371538642bdd940d54b15f9038510ed834b1f1b64249",
+    "src/core/detection/token-predictions.ts": "e1e86cfdc5e0a9cca51c66f078d79a386c595573dc398985193e647b57be5f43",
+    "src/core/detection/types.ts": "b111dad6329c7f4066b3eafca9875521083c7e8fe464c09522514b3106644f55"
+  },
+  "annotations": "Synthetic names and records, invented addresses/workflows; not factual address validation or private customer data. Exhaustive for supported privacy categories. Amounts, ordinary dates, and unmarked text must remain.",
+  "limitations": "Authored by the same developer familiar with earlier failures, frozen before inference. Not independently annotated or a statistically representative population sample. Similar scenarios recur; counts are not independent trials.",
+  "screening": "Reuse meetsScreeningFloor unchanged: zero processing errors, >=95% entities fully covered, >=95% names AND addresses fully covered both with all categories and with their own category selected, >=99% complete email/phone/banking coverage, <=1% ordinary lexical characters hidden, at most one false-positive negative case. Partial names/addresses fail full coverage. These are minimum engineering screening thresholds, not a privacy guarantee.",
+  "decision": "Prefer a single model only if it passes screening on both tested runtimes and shows no request failures or lost names/addresses in length probes. Two models qualify only if all gates pass and they add >=5 percentage points of name+address selected-category complete coverage over the better single model on EACH runtime without increasing ordinary false-positive characters. If no candidate qualifies, reject all as the final release solution. Among qualified singles, prioritize worst-runtime name/address complete coverage then ordinary false positives, download bytes, native median latency and footprint. No threshold adjustments after results.",
+  "execution": "Same existing rules, source alignment, chunking, and boundary policy. Six sequential native fresh-process runs (three variants in forward then reverse order), then one WASM run per variant. Native four threads, WASM one. Compare native rounds for deterministic final spans. All fixture runs block fetch and use already downloaded local weights. WASM hosted in Node, not the packaged WebKit app. No operating-system network isolation claimed.",
+  "lengthTail": "Người yêu cầu: [[name|Ninh Thu Hà]]. Nơi nhận: [[address|căn 906, tòa F, 38 Nguyễn Chí Thanh, Đống Đa, Hà Nội]]. Email: [[email|ha.synthetic@example.net]].",
+  "lengthFiller": "Bản tổng hợp đã được đối chiếu với chứng từ. ",
+  "nativeLengths": [
+    2000,
+    10000,
+    50000
+  ],
+  "wasmLengths": [
+    2000
+  ],
+  "measurement": "Host plus native child physical footprint sampled every 500ms; include loading and length probes. Fresh processes but filesystem cache not cleared. Two native observations are directional, not population performance statistics. WASM has shorter length probes, so memory maxima across runtimes are not directly comparable.",
+  "categories": {
+    "name": 26,
+    "address": 24,
+    "email": 4,
+    "phone": 3,
+    "banking": 4,
+    "other": 11
+  }
+}
