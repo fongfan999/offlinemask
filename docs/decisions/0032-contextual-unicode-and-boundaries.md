@@ -1,0 +1,15 @@
+# 0032 — Separate canonical Unicode repair from contextual model errors
+
+Date: 19 September 2026. Status: shared address fixes applied; normalized compact adapter evaluated, development-only.
+
+Following decision 0031, inspect the pinned Underthesea INT8 candidate's actual tokens, native source offsets, labels and scores. Its shipped BertNormalizer has no NFC composition step. Decomposed Vietnamese words can become `[UNK]` tokens labelled `O`, even though the native offsets correctly locate those words. Composing only an inference copy recovers five previously missed names without changing weights. Exact source-grapheme mapping restores the original decomposed spelling and UTF-16 positions before applying shared policy.
+
+Keep the reusable normalized-source adapter in the versioned developer experiment. Do not edit the model's tokenizer artifact or install the candidate. The normalization diagnostic also causes an ordinary Unicode probe to be labelled as a person: one source grapheme, three annotated letter/mark positions, is newly masked. Preserve this regression; do not hide it with a fixture-specific exception or a score threshold. Model scores are not calibrated correctness probabilities.
+
+Apply the two bounded address fixes to shared production code: a `số <house number> <proper street>` component and explicit `chuyển thư về/đến/tới` context. Existing textual address-model evidence, contiguous components, proper-name checks and prose/paragraph stops remain required. These fixes recover three complete addresses for the current pair and two for Underthesea, with no new complete/partial/category loss or ordinary masking on the observed cases.
+
+The [evaluation](../evaluations/contextual-repair-v1.md) contains 739 case executions, exact replay of both 362-case baselines, 151 passing tests, type checking, candidate normalization ablations and token evidence. Normalized Underthesea passes the observed challenge screening (141/142 values) but still fails regression screening and has unresolved own-category errors. Do not describe that challenge subset as fresh, independent or release qualification.
+
+Remaining lower/unaccented-name omissions, ethnic-name and person/organization/location confusions, and uppercase-heading false positives have direct token-label evidence. They are not explained by a general source-offset failure. Further rules must have defensible syntax and ordinary-text contrasts; broad capitalizing, dropping low-confidence findings or merging adjacent person/location/organization tags would trade unmeasured misses for prettier totals. No such change is approved here.
+
+Keep the installed pack unchanged and custom MiniLM training deferred. Underthesea remains a development candidate, not the release default. The next selection comparison must use this corrected shared policy and include canonical input handling, the remaining contextual errors, false positives and the existing pinned single-model control. A shipping tokenizer adapter and packaged offline/resource qualification are still required if a candidate is selected.
