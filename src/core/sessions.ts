@@ -1,4 +1,7 @@
+import { detectionOptions, type DetectionOption } from "./detection/options.ts";
 import { findings, prepareCopy, type Decisions } from "./review.ts";
+import { analyzeText, maskedText, type TextAnalysis } from "./text.ts";
+import type { Detection } from "./detection/types.ts";
 
 export type Format = "text" | "excel";
 export interface SampleSession {
@@ -9,10 +12,24 @@ export interface SampleSession {
   createdAt: string;
   decisions: Decisions;
 }
+export interface TextSession {
+  id: string;
+  number: number;
+  format: "text";
+  fixture: "private-text-v1";
+  createdAt: string;
+  original: string;
+  options: DetectionOption[];
+  analysis: TextAnalysis;
+  manualMaskCount?: number;
+  reviewUndo?: { analysis: TextAnalysis; decisions: Decisions };
+  decisions: Decisions;
+}
+export type Session = SampleSession | TextSession;
 export const historyKey = "offlinemask.sample-sessions.v1";
 export function createSession(
   format: Format,
-  existing: readonly SampleSession[],
+  existing: readonly Session[],
 ): SampleSession {
   return {
     id: crypto.randomUUID(),
@@ -23,15 +40,35 @@ export function createSession(
     decisions: Object.fromEntries(findings.map((f) => [f.id, "mask"])),
   };
 }
-export function sessionTitle(session: SampleSession): string {
+export function createTextSession(text: string, existing: readonly Session[], detections: readonly Detection[], options: readonly DetectionOption[] = detectionOptions.map(option => option.id)): TextSession {
+  // Keep tokens readable while explicitly avoiding namespace reuse in this app instance.
+  // A future persistent vault must retain and enforce the namespace registry too.
+  let id: string;
+  do { id = crypto.randomUUID(); }
+  while (existing.some((session) => session.id.slice(0, 8) === id.slice(0, 8)));
+  const analysis = analyzeText(text, id.slice(0, 8), detections);
+  return {
+    id,
+    number: existing.reduce((max, s) => Math.max(max, s.number), 0) + 1,
+    format: "text",
+    fixture: "private-text-v1",
+    createdAt: new Date().toISOString(),
+    original: text,
+    options: [...options],
+    analysis,
+    decisions: Object.fromEntries(analysis.findings.map((finding) => [finding.id, "mask"])),
+  };
+}
+export function sessionTitle(session: Session): string {
+  if (session.fixture === "private-text-v1") return `Văn bản #${session.number}`;
   return `${session.format === "text" ? "Yêu cầu hỗ trợ" : "Giao dịch mẫu"} #${session.number}`;
 }
 // Store only versioned fixture references and choices. Never extend this to private
 // input: persistent originals require the encrypted vault lifecycle in the PRD.
-export function encodeSessions(sessions: readonly SampleSession[]): string {
+export function encodeSessions(sessions: readonly Session[]): string {
   return JSON.stringify({
     version: 1,
-    sessions: sessions.map((s) => ({
+    sessions: sessions.filter((s): s is SampleSession => s.fixture === "sample-v1").map((s) => ({
       id: s.id,
       number: s.number,
       format: s.format,
@@ -115,7 +152,9 @@ export function maskedRows(decisions: Decisions): string[][] {
     }),
   );
 }
-export function sessionOutput(session: SampleSession): string {
+export function sessionOutput(session: Session): string {
+  if (session.fixture === "private-text-v1")
+    return maskedText(session.original, session.analysis, session.decisions);
   return session.format === "text"
     ? prepareCopy(session.decisions)
     : [sheetHeaders, ...maskedRows(session.decisions)]
