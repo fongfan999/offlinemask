@@ -1,0 +1,36 @@
+{
+  "wallStart": 1789926454305,
+  "wallEnd": 1789926499267,
+  "phase": "Completed",
+  "maxHeartbeatDelayMs": 600,
+  "results": [
+    {
+      "label": "cold-short",
+      "detectionMs": 14299,
+      "firstProcessingMs": 13865,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-1",
+      "detectionMs": 14011,
+      "firstProcessingMs": 13603,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-2",
+      "detectionMs": 8285,
+      "firstProcessingMs": 7909,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-3",
+      "detectionMs": 8353,
+      "firstProcessingMs": 7914,
+      "findings": 3,
+      "addressCovered": true
+    }
+  ]
+}

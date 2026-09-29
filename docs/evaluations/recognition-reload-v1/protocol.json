@@ -1,0 +1,13 @@
+{
+  "files": {
+    "src/App.vue": "ff1235868a5bc97246961b0decbe9ddcff1418709c37f655218736cce58bb116",
+    "src/adapters/text-detection.ts": "74350af47dc39de08147c9cd36abd5bb693d8875650f69fb10e99e3700cab42b",
+    "src/core/detection/engine.ts": "a4896503dc13a62495ececc9d00ad9d82980dd825ccc6d1b283c9cd299a5a1f0",
+    "src/core/detection/types.ts": "80e94f766b619f7a00652d30b09d98a6b31b0e8723283512ad2482e604c2f819",
+    "src/core/detection/recognition.ts": "a778ac9c49c77153c38362dd86c46fa1c310a6b08be63692c4ac1eb048f95980",
+    "src/workers/detection.worker.ts": "db156d5ac80971605a04e8d9a123a84f5ff4a63a8af8691e17b70c8ecde1e77e",
+    "scripts/recognition-reload-v1/main.ts": "3aba5a5a38234c82410319d6086c3d11500ab300ab6bef57a71d20dc76c7cd9b",
+    "scripts/recognition-reload-v1/build.mjs": "deb06d6b8e010b3199fea9ff88f737ce023375412c0f66cdbe4cd14ea51a9c70",
+    "scripts/release-pack-v1.json": "cfa171d195ef6aa7b512cd64c67b3f40135b2546d42a571998b8a48c0c1c835c"
+  }
+}

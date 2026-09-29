@@ -1,0 +1,97 @@
+{
+  "wallStart": 1789926724303,
+  "wallEnd": 1789927068704,
+  "phase": "Completed",
+  "maxHeartbeatDelayMs": 1366,
+  "results": [
+    {
+      "label": "cold-short",
+      "utf16Length": 161,
+      "detectionMs": 11331,
+      "firstProcessingMs": 10878,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-1",
+      "utf16Length": 161,
+      "detectionMs": 11265,
+      "firstProcessingMs": 10870,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-2",
+      "utf16Length": 161,
+      "detectionMs": 6899,
+      "firstProcessingMs": 6499,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-3",
+      "utf16Length": 161,
+      "detectionMs": 7007,
+      "firstProcessingMs": 6590,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "cancel-loading",
+      "utf16Length": 161,
+      "detectionMs": 19810,
+      "firstProcessingMs": 19406,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "cancel-warm-1",
+      "utf16Length": 161,
+      "detectionMs": 1717,
+      "firstProcessingMs": 1361,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "cancel-warm-2",
+      "utf16Length": 161,
+      "detectionMs": 1726,
+      "firstProcessingMs": 1371,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "cancel-warm-3",
+      "utf16Length": 161,
+      "detectionMs": 1772,
+      "firstProcessingMs": 1371,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "medium",
+      "utf16Length": 2000,
+      "detectionMs": 8757,
+      "firstProcessingMs": 1406,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "long",
+      "utf16Length": 10000,
+      "detectionMs": 45278,
+      "firstProcessingMs": 1414,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "limit",
+      "utf16Length": 50000,
+      "detectionMs": 224585,
+      "firstProcessingMs": 1674,
+      "findings": 3,
+      "addressCovered": true
+    }
+  ],
+  "checks": "Every short result exactly matched the initial predictions; each cancelled request rejected with AbortError; every successful input retained complete address coverage."
+}

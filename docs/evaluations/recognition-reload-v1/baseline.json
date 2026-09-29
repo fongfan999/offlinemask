@@ -1,0 +1,23 @@
+{
+  "wallStart": 1789926150541,
+  "phase": "reload-2: loading 0/0",
+  "completed": false,
+  "observation": "Web-content PID 19777 exited and view restarted, showing interrupted previous run. No OS termination cause established.",
+  "maxHeartbeatDelayMs": 1020,
+  "results": [
+    {
+      "label": "cold-short",
+      "detectionMs": 15829,
+      "firstProcessingMs": 15266,
+      "findings": 3,
+      "addressCovered": true
+    },
+    {
+      "label": "reload-1",
+      "detectionMs": 17131,
+      "firstProcessingMs": 16494,
+      "findings": 3,
+      "addressCovered": true
+    }
+  ]
+}
