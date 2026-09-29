@@ -1,0 +1,14 @@
+{
+  "verifiedAt": "2026-09-19T16:26:28.297Z",
+  "modelCaseExecutions": 1592,
+  "errors": 0,
+  "recipes": 30,
+  "scoredCaseReplays": 11940,
+  "allSixOptionPreviews": "Exact match",
+  "priorCoreAndOwnerApprovals": "Unchanged",
+  "selected": "underthesea+bigmed+large:contextual",
+  "releaseGate": "NOT_PASSED",
+  "resultsSha256": "a0d569a9cdf9dab962c0834d882d6d604d75f0487e4104fa5772347b14facdec",
+  "selectionSha256": "37cae1a8b866a26ba953717216bc393c4eeb9da364ae9b4ed79fd35912d988d7",
+  "fullResultsSha256": "a6c21d1e36f3a55ccb955755c3b30b95dfe9315fb4de659d4c3682b23b012272"
+}

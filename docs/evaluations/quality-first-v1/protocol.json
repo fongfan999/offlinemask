@@ -1,0 +1,53 @@
+{
+  "frozenAt": "2026-09-19T16:16:05.423Z",
+  "variants": [
+    "underthesea",
+    "bigmed",
+    "small",
+    "large"
+  ],
+  "definitions": {
+    "small": "OpenMed SuperClinical INT8",
+    "large": "OpenMed mSuperClinical INT8",
+    "underthesea": "Underthesea INT8",
+    "bigmed": "OpenMed BigMed INT8"
+  },
+  "recipes": "All 15 nonempty subsets of four independently executed checkpoints, with all supported model findings or contextual TEN/DIA_CHI/TO_CHUC findings only. Existing shared policy applied once after union. No case-specific routing or thresholds.",
+  "ranking": "Pass unchanged regression/challenge/approved24 floors first; then complete own-category values across 386 records (500 values), descending; ordinary lexical masking ascending; fewer checkpoints; smaller asset bytes. Report all type/case results and failures. Owner12 overlay excluded from ranking.",
+  "limits": "Observed synthetic selection data; no new holdout or banking accuracy claim. Best available does not imply release requirements met.",
+  "files": {
+    "artifacts/quality-first-v1/cases.json": "347c8eff304b2520d88e0f4019fc44d7829fa3f894ac5ba7db6b65428f5b579d",
+    "scripts/quality-first-v1/prepare.mjs": "0098611800b1d94ad2b40682bb59da9f88af2b8a0e122ab1c4857416e1233b9e",
+    "scripts/quality-first-v1/evaluate.mjs": "0ff18cb5ffcddb34433480a5d0093744826554b44c194879ec7e4499c0629efd",
+    "scripts/quality-first-v1/compare.mjs": "9799e1d909351b0ee869a15c39d06f85c24fd4e56c1632eae9ce66834b9342b5",
+    "scripts/shared-core/candidates.mjs": "130bf7b4d08c31b6696a09403f3bcbad4ed52fa2a2572f69139eb1d20a27b70a",
+    "scripts/shared-core/reference-offsets.mjs": "6a3bdb789ee1ff33e1c602dcafbd2b899a8d27cb28398cf2359472c7f6a9bf42",
+    "scripts/shared-core/native-offsets.py": "a959cc5beaf8f497c02cc20519ffa36c315f62e73c29707df846cd3d56581fb9",
+    "scripts/native-preprocessing/provider.mjs": "8f54ba1df90edfffef8821e1c1c42f36289e6f2693f468fb0986c0856c777023",
+    "scripts/native-preprocessing/tokenizer.mjs": "8ae5febb1835afd6099300468a7ac8779dae9ad4a1bdb23668f3474221520a00",
+    "scripts/native-preprocessing/tokenizer-server.py": "7ce718bb063ef34f2f02a9a3106e9c3ef941c6fd42afdbaa650d81c12136fb34",
+    "scripts/contextual-repair-v1/provider.mjs": "caa17bd331019022baf1fffd8fd546dd0544b771a1f746d13af2c31b0614b06f",
+    "scripts/contextual-repair-v1/normalized-source.mjs": "813938e1c8285b371d44510b0b36bca5c1b89672ebd921547a098aaa047db87b",
+    "scripts/pretrained-scope/common.mjs": "b2e4b59e71dda509abaa215113edfc77c446ec862e1222cd40fa10736d4c1b06",
+    "scripts/shared-core/metrics.mjs": "cea5f37ea2d9379a9c398179a71a42c0656a5508b5a0971c8a534064926e109f",
+    "scripts/model-comparison-metrics.mjs": "8eb090bae5e61a7b9389f12bfc478edc75d22a36807bdb5dfba4af4c2670e1c9",
+    "docs/evaluations/shared-core-protocol-v2.json": "5795d099f67f8997a9f2cc5f873be44a2b27d41c255181d19cbc0ae5ba806740",
+    "docs/evaluations/pretrained-search-v1/compatible/results.json": "9ef093fd67e2eb9e790d846e3c8fc659b72f67d4d3d748fdcb6b5bf584123d4a",
+    "src/core/detection/address-boundaries.ts": "4f4a99a2174daa5a39ec6b750a9052d5251c342b36ed629ceea8e8fef2c686b8",
+    "src/core/detection/banking.ts": "91c5cb013699d86c2c128a43493f0a882d046a88cffae767bc66e64b832e489c",
+    "src/core/detection/chunks.ts": "f827cb3f70115ec6b9e5a60e77be4d8588235f11c0911b431cc9f8259103a892",
+    "src/core/detection/contact.ts": "24613d1095299c8633f541b4e4ff95df9b410852bf0743cab6abf2786a0f0d12",
+    "src/core/detection/context-fields.ts": "fdb06a483320e3db5ed33197c88cca016ea135e521762408a63d72e5d80b9cee",
+    "src/core/detection/engine.ts": "72e5a87c86cf0aed94d8d3835e70151f0a86cb27ff6cb25e897cc6653d10dad0",
+    "src/core/detection/labelled-fields.ts": "5298d383357b4ccd3b00b8aea381b8a26bd721f1f82aa5790b3000cafac540ca",
+    "src/core/detection/model-policy.ts": "472e8bcdedf6fe6ba09259ab6c6c203a69908d0cdc8037d5f8edfb2caff68d62",
+    "src/core/detection/model-runner.ts": "9c4db93cf89d12998eebe968a42fef48faceb810d73151744ec7227a7f8ffbc6",
+    "src/core/detection/openmed.ts": "2193e8f72b8ee9bbd41aaa7bee1e7ed9e9750cae0ffdc43296dfa056aae4a870",
+    "src/core/detection/options.ts": "ea66ec6bc0ca66d89e3dcb70d307eb991b07b8507e82e8e722d7d00a68ebe131",
+    "src/core/detection/policy.ts": "f8bf90cd79b01b87fc9577cbcba0c20c58858b4150a03a302ab79ac4fc759038",
+    "src/core/detection/source-offsets.ts": "0753a9ab9f64259f50c9371538642bdd940d54b15f9038510ed834b1f1b64249",
+    "src/core/detection/structured-values.ts": "08873bc990a0b3e083434a7b7279da3663716f67af4b459751f6017eefa672c2",
+    "src/core/detection/token-predictions.ts": "e1e86cfdc5e0a9cca51c66f078d79a386c595573dc398985193e647b57be5f43",
+    "src/core/detection/types.ts": "b111dad6329c7f4066b3eafca9875521083c7e8fe464c09522514b3106644f55"
+  }
+}
