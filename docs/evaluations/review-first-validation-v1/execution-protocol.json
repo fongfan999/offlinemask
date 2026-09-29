@@ -1,0 +1,25 @@
+{
+  "createdAt": "2026-09-19T13:52:23.394Z",
+  "cases": 24,
+  "files": {
+    "scripts/review-first-validation-v1/common.mjs": "6b9791851b72ea0ff31d76db6e68213409546bb630aa758d392192e3cf7e9fc0",
+    "scripts/review-first-validation-v1/freeze-execution.mjs": "0cd215f3c185784720f6fbcda64a5ee6c237019e29bb90f022f037c5060863bc",
+    "scripts/review-first-validation-v1/evaluate.mjs": "eaa4ec8fed2220142cde00ce7f237695d550809163f1d3f829b959e5c9380d6f",
+    "scripts/review-first-validation-v1/report.mjs": "e1a33ea87d99a8976afacdf9921a56279c1ce02076b0eb49e47629393950b8b6",
+    "docs/evaluations/single-model-decision-v1/results.json": "7226af52b234c99d864cf18924e8da927be29b7e818ac9ef5fd8ddf4c47214a5",
+    "docs/evaluations/review-first-validation-v1/approvals/01-examples-01-06.json": "c94c572403e980c7db3bcbcd65da4d019cf777edc7d25618f2b12e8e0d9d596b",
+    "docs/evaluations/review-first-validation-v1/approvals/02-examples-07-12.json": "5a94ff4d67b1514239e7bf97af38bf2f50ccd031ff0275a242b22ef65f23b0e1",
+    "docs/evaluations/review-first-validation-v1/approvals/03-examples-13-18.json": "24c5913237c03ce0bb37753adaffa3aeaa9f91a01ffc409529f66fb156d2f310",
+    "docs/evaluations/review-first-validation-v1/approvals/04-examples-19-24.json": "6caff42d89df7888780c1872cab395e0e0105494f0c15062765912071609359f",
+    "docs/evaluations/review-first-validation-v1/spec.md": "a560eb8b4c593da43e024c5831fdeb57ba0f5a55d0943d6746b9bdf63b8d618d",
+    "docs/evaluations/review-first-validation-v1/cases.json": "ca74f34e1c7d41fe92fce83c58dcb41c1cc7cbc2d28320abb1e2ddde998cdc30",
+    "docs/evaluations/review-first-validation-v1/protocol.json": "45da712e6cd6fee44c5073004a99aac1e7785f795710e40e3096caedb22418ee"
+  },
+  "variants": [
+    "underthesea",
+    "bigmed"
+  ],
+  "method": "Existing pinned adapters; canonical NFC inference copy; source restoration; unchanged shared policy; full and each six-category preview. No threshold/weight/policy changes.",
+  "approvalStatus": "All 24 confirmed before inference",
+  "priorReleaseDecision": "REJECT_BOTH_FOR_RELEASE; new batch supplements, never replaces prior evidence."
+}

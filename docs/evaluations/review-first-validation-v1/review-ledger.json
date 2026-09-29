@@ -1,0 +1,176 @@
+{
+  "createdAt": "2026-09-19T13:45:39.855Z",
+  "protocolSha256": "45da712e6cd6fee44c5073004a99aac1e7785f795710e40e3096caedb22418ee",
+  "status": "PENDING",
+  "reviewer": null,
+  "cases": [
+    {
+      "id": "rv01",
+      "number": 1,
+      "textSha256": "7b9d27029907e2fa6131f932853c8d86fc7324c423cce44c719ea2bfb5e4ee50",
+      "annotationSha256": "77830c0eb4243fc3bbfeffc1b4314a001afbb3c12697334cc3f282aa35e1e4f1",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv02",
+      "number": 2,
+      "textSha256": "e3df179aecf39c76efff1217485c7d2f2280a8c4a5f6f4f20d1ec34e209bcf63",
+      "annotationSha256": "0ed3cb3e7a4eda52fb3abdce5e5b958722c897e869d79f5ed9a7de7191ee6c57",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv03",
+      "number": 3,
+      "textSha256": "78cbefa5885f5c6a151bf3548e8647e22776962b0991fb0e1f619e6b0f915ac6",
+      "annotationSha256": "aa9ad8f51153f6de380080e63aa95d198fc93f19d0bfd6ebb0099512f36a6b64",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv04",
+      "number": 4,
+      "textSha256": "63669e86a917fd62859cfadc64cb505e9268df3963decb1d48554da14417ae35",
+      "annotationSha256": "18a61220e91d3f76fad9cc1827d1bcfbcafde5df5f72afe0717c451a8b8d21b9",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv05",
+      "number": 5,
+      "textSha256": "0a459f5b061dfe01eb4f11625aa00bbeb1f70e4bb748598c010cbc3d0405bd94",
+      "annotationSha256": "a9325eea83dd85f5511fcf7d62d3732b6d6f2fee75fdfc291ebebb1aaaa0f84f",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv06",
+      "number": 6,
+      "textSha256": "0335090f4860e7f03cb1148404078edec1ef8b6f8b623811a4862f090759208f",
+      "annotationSha256": "4d8a121ef3405298027dfc0a9f4e973bdfb1cff950d2aff898317c1034e25dee",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv07",
+      "number": 7,
+      "textSha256": "394c067d8fd64e33917be414826f5cc34e3f41cdc3a02cc02fc98a48eec5266e",
+      "annotationSha256": "6aadcaf7b9d868ad95b7dfc3d4a13fd3437c4a00a39ab946783445290edb58ed",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv08",
+      "number": 8,
+      "textSha256": "d094f73c47dd0b4cca71c1af9d14963ab1d2f5c0e043e5ccd7992b08450f2bfc",
+      "annotationSha256": "c0b252e29f78b2556ad2362181886d0e32927926eb2c86ff59f96c14f9935809",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv09",
+      "number": 9,
+      "textSha256": "bd26d8ae675fdf9800b144667b8563b9beba239e29ea262dfb4cb08e8ecbf1de",
+      "annotationSha256": "3b441e4258dec71f810531cb31cd23c010b4393fe27d6883255b767c4abb0ced",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv10",
+      "number": 10,
+      "textSha256": "8d2516f79848bb1f17007247c51de8bfe4366ff21f50866a5e32cfef41e6ee21",
+      "annotationSha256": "728ec8bb35ebe8dee088497029d859ccc30d63c21d2436b2a5812f514cccc4e1",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv11",
+      "number": 11,
+      "textSha256": "f8d3d06582b7987c380542a22d785fdf01cabcb36cbb78717ad5a3f02a920a90",
+      "annotationSha256": "c55d6331f9c255533ec684396e9dbb279bd4293429579c3437d0e71b09cfdc50",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv12",
+      "number": 12,
+      "textSha256": "2b84f1be728e7bd43cdb0f936b3a1881e318d7639f0ce56a8799b07aad79f9a5",
+      "annotationSha256": "647d1dcf2e95236a35b88b650b6f10c6a680874b41b7e04ea2cdb3e040b4fc66",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv13",
+      "number": 13,
+      "textSha256": "a06d3bc2ba307e2586522aba62eb0c46a339d0cb92dccea4474fc12462d2947a",
+      "annotationSha256": "76f35125c022c5d21b83f2a974cb56a06186a1874fee0a8eef38095fe9f276ac",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv14",
+      "number": 14,
+      "textSha256": "37f5fb3c89fd132f50008b6b31ba4b73f4c59043f526a7006ff8794c76ef8013",
+      "annotationSha256": "526439c9ba91cbfa259776469b1224cdb9f5a7d8cb78b04c00df50fb4b964b06",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv15",
+      "number": 15,
+      "textSha256": "064065b219ecbbcd13d0b97195c4d4b8f5b1ddf77a64ef895848150aac4295eb",
+      "annotationSha256": "aa054506561fb9771bd35e8f9bd648cb2054f14a077c4785478a7672733c26f3",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv16",
+      "number": 16,
+      "textSha256": "ef66accdac650e28cc0cef89b48876416f9f87457acdbc99f482f53fe0b56553",
+      "annotationSha256": "446ee6ae80700db16cc2434ece90fae778ea109edac2016ba3ce63376f3d2ce9",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv17",
+      "number": 17,
+      "textSha256": "05446c6866da7cd653095e4d74888394165d93b09df9e5f1c38c9301d20ecb6b",
+      "annotationSha256": "d2581ed658f2ce1b922819b3489c093b105cef8d5297daababf6fe68ad41e6ff",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv18",
+      "number": 18,
+      "textSha256": "0384ed63665430c752f53ffc64cc63cea651f9c436d7c5b049e971e36900d1ec",
+      "annotationSha256": "0cf6524417c712c1a1e8b7e1b77c5e820afe2d75fac1d48fb0c80438daf02814",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv19",
+      "number": 19,
+      "textSha256": "f2992c35d75fae69679e6edc766356043999c826b9e7edfe3c9e9fc333e23718",
+      "annotationSha256": "f713f160c34abb4f3b32feb55a92ee94659c43ad585683ccd0e5bafe61b90350",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv20",
+      "number": 20,
+      "textSha256": "982c17c3d10d384e16255114ceb52f2473fc47982ea111ab0335bcbe70503df2",
+      "annotationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv21",
+      "number": 21,
+      "textSha256": "2cf988bce454a0f2099a98e36e0896c32f8eb7a244fb885454a073c4a1bba996",
+      "annotationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv22",
+      "number": 22,
+      "textSha256": "79bbf4faf187231f14742630614a4e717cc08026f81ecfb7d3c94000e636e913",
+      "annotationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv23",
+      "number": 23,
+      "textSha256": "3f26e75e597cf9a364da00be7cdbb3e0930751be6875db862b82673005c2affc",
+      "annotationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "PENDING"
+    },
+    {
+      "id": "rv24",
+      "number": 24,
+      "textSha256": "eda800c512bf7c42725c15be4dcd10c7da06325d73a57f42ecc8567eecb66f72",
+      "annotationSha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "status": "PENDING"
+    }
+  ]
+}

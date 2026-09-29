@@ -1,0 +1,77 @@
+{
+  "createdAt": "2026-09-19T13:45:39.847Z",
+  "node": "v24.10.0",
+  "status": "FROZEN_PROPOSED_ANNOTATIONS_AWAITING_OWNER",
+  "files": {
+    "docs/evaluations/review-first-validation-v1/spec.md": "a560eb8b4c593da43e024c5831fdeb57ba0f5a55d0943d6746b9bdf63b8d618d",
+    "docs/evaluations/review-first-validation-v1/source.json": "16a6c6216db403b351d08a1dff71d85a59b6dcdeff29e94a81acfde25e850780",
+    "scripts/review-first-validation-v1/prepare.mjs": "64872c33e90f4eb9bd46ab73243cb7a091154baef299f48e9a5b683135366acd",
+    "scripts/model-comparison-metrics.mjs": "8eb090bae5e61a7b9389f12bfc478edc75d22a36807bdb5dfba4af4c2670e1c9"
+  },
+  "composition": {
+    "cases": 24,
+    "negativeCases": 5,
+    "values": 30,
+    "byCategory": {
+      "name": 8,
+      "address": 4,
+      "other": 12,
+      "banking": 4,
+      "email": 1,
+      "phone": 1
+    }
+  },
+  "priorEvidenceInventory": {
+    "artifacts/detector-corpus-v1/review-ledger.json": "497ffab8b65570e1a9523a04805aec4e52e803755a2e5bfe1ba1089dc1eccb2c",
+    "artifacts/detector-corpus-v1/corpus.json": "32129c43b46d5cd875c36a5302e42cc12b303adf874440b66a2fab5ffa56e16f",
+    "artifacts/detector-corpus-v1/audit.json": "2e417cc603e4a566d430c9da057e316258b704dc77f98f6d310ce99d46c6092c",
+    "artifacts/detector-corpus-v1/evidence.json": "3bf2ac660820ee47202485748d5c4772685e7d8abf66a79ee1b078f676113e3d",
+    "artifacts/detector-corpus-v2/review-ledger.json": "eb35eed9064fb77ecf79f0f7fc20f9be5f63961b212be1cf6d36742640d02c6d",
+    "artifacts/detector-corpus-v2/corpus.json": "9e346bf1556f8af223d3515554b089dcbbbf6392bc3d9d2c5133bb2fe334d81c",
+    "artifacts/detector-corpus-v2/audit.json": "07c99f9d22878811ab217fedb963cbe09c283cc8a0655b14830a9bf3e115baec",
+    "artifacts/detector-corpus-v2/evidence.json": "7afb6c3e283ead5100a4a0d0f9e7dc5403aec0bb78adf2e8c5c03e6bf80de678",
+    "docs/evaluations/single-model-owner-review-v1/receipt.json": "3a6fb9299080871cca2ddacdb1d9f6f3eaacb4d83488d0b408ad77d587d58b78",
+    "docs/evaluations/single-model-owner-review-v1/verification.json": "d56deeb3b8fad9eac675be59042d9a14cda1899447ce2e0b93d8563d23aea5b4",
+    "docs/evaluations/single-model-owner-review-v1/completed.json": "bdc0c25e5c7e8eac96e06fcfd5310f6bee51031a151602aad5160e263a0d0c45",
+    "docs/evaluations/single-model-owner-review-v1/reviewed-cases.json": "f4bdd91b004932e34381e3fcbe2ac666f91d592ed2e8cecfe574ea8f6fc41c87",
+    "docs/evaluations/single-model-owner-review-v2/verification.json": "be358ca41e11347bebf189223a263aa29411f3722bf806d1b025d98a11b28cb6",
+    "docs/evaluations/single-model-owner-review-v2/completed.json": "46ecf03a9e6ab66ae3e1f644429bc336a9ec189b90adbf5f1a6a0823bec2e643",
+    "docs/evaluations/single-model-owner-review-v2/reviewed-cases.json": "eef15b8b7844648ee0870d9221e9068de3d56e140b8b6e1764ad02a209a03b28",
+    "tests/fixtures/text-model.json": "54a03f69b70ec79ed0ba12e88a38be5851e170e3af22e903c19421a46306afbc",
+    "tests/fixtures/detector-feasibility/development-seed.json": "c2cf83fe61068c0da73c24c080047232c2a77ec658e5869cd7a43781d0fd9850",
+    "tests/fixtures/text-reliability-final.json": "a5f15490d4d21884f85a6b7ded221f0d2e71a18d4e2dc15df302edb67bd958f0",
+    "tests/fixtures/model-decision.json": "02f67fd1a676d657bd0353f7054b4d1ef6a0190f46a6e83c734580361dbd8472",
+    "tests/fixtures/structured-values-holdout.json": "17fa23d82363762b6f2998ecf94b4ecf7fce48e89fb4556ac6485714620a6315",
+    "tests/fixtures/address-holdout.json": "fbba167fc9c0a9f74c357e43a0008f3b6957b3e0934e7e7fb1f2395b9743387d",
+    "tests/fixtures/address-validation.json": "c273a029cc461f412f113f39ad49385cc18ab767b9b8fec2101a571ec11c6268",
+    "tests/fixtures/release-challenge-v1.json": "85ac6f349139d13ebb028670d50bcdf7b0e5b2a45982a1411235a1e7716235d8",
+    "tests/fixtures/model-reliability.json": "44046c29eafb3084f4e2bdd0a13cc9c6b5998006d096516d18822ed2b684045f",
+    "tests/fixtures/model-comparison.json": "6ff1c4ea7c79dd4b58e95f3da5eafd00547c954c03fa68ad07151ccf69203139",
+    "tests/fixtures/text-reliability-holdout.json": "c5e8e7511ac2f665e3575a017e2085b08132dd07df4a773f08d254844d8cd034",
+    "tests/fixtures/address-final-check.json": "fe47309e0771ef1bb03e42d7d32466513c731d2355303bc8b4d433b07b6bbd8b"
+  },
+  "collisions": [
+    {
+      "id": "rv17",
+      "type": "cvv",
+      "value": "706",
+      "files": [
+        "artifacts/detector-corpus-v1/audit.json",
+        "artifacts/detector-corpus-v1/evidence.json",
+        "artifacts/detector-corpus-v2/audit.json",
+        "artifacts/detector-corpus-v2/evidence.json"
+      ]
+    },
+    {
+      "id": "rv17",
+      "type": "pin",
+      "value": "5938",
+      "files": [
+        "artifacts/detector-corpus-v2/corpus.json"
+      ]
+    }
+  ],
+  "modelRuns": 0,
+  "limits": "Exact NFC case-insensitive text/value scan only; not semantic or statistical independence. Short code collisions are disclosed. Prior assistant exposure and targeted authorship preclude independent-holdout claims.",
+  "casesSha256": "ca74f34e1c7d41fe92fce83c58dcb41c1cc7cbc2d28320abb1e2ddde998cdc30"
+}

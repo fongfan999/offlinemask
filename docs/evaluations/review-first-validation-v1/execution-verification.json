@@ -1,0 +1,17 @@
+{
+  "verifiedAt": "2026-09-19T13:54:41.309Z",
+  "files": {
+    "execution-protocol.json": "4aa35c0897bc94f8095cf2ebcc8f88a2bdd68d985b1a98bc64b5dc48a245f0cc",
+    "results.json": "544b0d6144aa3abf1b6ec5a027cb73a11339431e62d7e7cc5b0e1b298dd2ba76",
+    "comparison.md": "e40496585d9c742d523ba27f5258176e7c47333e107b2f5cb03240a5a33f8c1f"
+  },
+  "verifierSha256": "360e9fc77841e93342461207ddf3fb4a156c2c831b5e1e3e79678844c0619edc",
+  "approvedCases": 24,
+  "caseExecutions": 48,
+  "errors": 0,
+  "replayedFullAndSixCategoryResults": 48,
+  "historicalAndProductionSources": "Verified unchanged",
+  "releaseDecision": "REJECT_BOTH_FOR_RELEASE",
+  "method": "Re-score saved real model detections with unchanged policy and assert exact serialized result identity; no new inference.",
+  "verificationNote": "Initial inline replay check differed only on optional undefined properties omitted by JSON. Final verifier uses identical serialization; no data, scores or outputs changed."
+}
