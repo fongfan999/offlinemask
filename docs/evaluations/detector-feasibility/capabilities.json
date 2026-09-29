@@ -1,0 +1,129 @@
+{
+  "version": 1,
+  "status": "development-target-not-production-claim",
+  "types": {
+    "person": {
+      "category": "name",
+      "path": "contextual",
+      "critical": false
+    },
+    "address": {
+      "category": "address",
+      "path": "contextual",
+      "critical": false
+    },
+    "organization": {
+      "category": "other",
+      "path": "contextual",
+      "critical": false
+    },
+    "birthdate": {
+      "category": "other",
+      "path": "hybrid",
+      "critical": false
+    },
+    "email": {
+      "category": "email",
+      "path": "local",
+      "critical": true
+    },
+    "phone": {
+      "category": "phone",
+      "path": "local",
+      "critical": true
+    },
+    "account": {
+      "category": "banking",
+      "path": "labelled-local",
+      "critical": true
+    },
+    "identity": {
+      "category": "banking",
+      "path": "labelled-local",
+      "critical": true
+    },
+    "passport": {
+      "category": "banking",
+      "path": "labelled-local",
+      "critical": true
+    },
+    "tax": {
+      "category": "banking",
+      "path": "labelled-local",
+      "critical": true
+    },
+    "transaction": {
+      "category": "banking",
+      "path": "labelled-local",
+      "critical": true
+    },
+    "customer": {
+      "category": "banking",
+      "path": "labelled-local",
+      "critical": true
+    },
+    "card": {
+      "category": "other",
+      "path": "hybrid-gap",
+      "critical": true
+    },
+    "cvv": {
+      "category": "other",
+      "path": "hybrid-gap",
+      "critical": true
+    },
+    "pin": {
+      "category": "other",
+      "path": "hybrid-gap",
+      "critical": true
+    },
+    "username": {
+      "category": "other",
+      "path": "hybrid",
+      "critical": false
+    },
+    "password": {
+      "category": "other",
+      "path": "hybrid",
+      "critical": true
+    },
+    "apikey": {
+      "category": "other",
+      "path": "hybrid",
+      "critical": true
+    },
+    "ip": {
+      "category": "other",
+      "path": "hybrid-gap",
+      "critical": false
+    }
+  },
+  "proposedBudgets": {
+    "packBytes": 300000000,
+    "reference": "Apple M1 Pro 16 GiB CPU; Windows 8 GiB qualification pending",
+    "coldReadyMs": 5000,
+    "shortTextCharacters": 2000,
+    "shortP95Ms": 300,
+    "maxTextCharacters": 50000,
+    "maxTextMs": 8000,
+    "processTreePeakBytes": 1073741824,
+    "cancelAcknowledgementMs": 250
+  },
+  "requiredForPilot": {
+    "trainFamilies": 200,
+    "developmentFamilies": 80,
+    "negativeFractionMin": 0.3,
+    "perTypeFamilies": 20
+  },
+  "requiredForFinal": {
+    "families": 300,
+    "negativeFamilies": 100,
+    "perTypeFamilies": 30,
+    "independentAnnotationReview": true
+  },
+  "corpus": {
+    "sourceKind": "authored-synthetic",
+    "publicationLicense": "not-granted",
+    "validationSeenByTraining": false
+  }
+}

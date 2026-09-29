@@ -1,0 +1,304 @@
+{
+  "createdAt": "2026-09-17T17:29:58.927Z",
+  "node": "v24.10.0",
+  "files": {
+    "scripts/detector-feasibility/corpus.mjs": "9395fcd7ca172b5bbb52e9e51067727e2d0b713dc08627a23acc46a346765320",
+    "scripts/detector-feasibility/audit.mjs": "149112093eb13b804d70d5bcf56e71394fa53132eeb9ccf0f5a7e57185dcf969",
+    "tests/detector-feasibility.test.mjs": "5172346cfb57ee5c0fbf0143b9d078d38c67e1ca04025d415ff3b33778f6c3ee",
+    "tests/fixtures/detector-feasibility/development-seed.json": "c2cf83fe61068c0da73c24c080047232c2a77ec658e5869cd7a43781d0fd9850",
+    "docs/evaluations/detector-feasibility/capabilities.json": "abdf8e6c1f6fd9c35646a98e5393009acb15d527815b8ce2e6a55a8a469ff2e1",
+    "docs/evaluations/detector-feasibility/source-screen.json": "1c77814be7b59d19bf8403f5c1a84159a639f291acd541335fc0a682ed097949",
+    "docs/evaluations/detector-feasibility.md": "edeb7c465899ece2d7ca4b4414672e4146bfc8937277a0d5bca90ce166566748"
+  },
+  "audit": {
+    "validStructure": true,
+    "pilotReady": false,
+    "finalValidationReady": false,
+    "finalValidationNote": "Final admission additionally needs independent review, disjoint semantic scenarios/values, frozen provenance, candidate identity and a one-use final evaluation protocol; this audit does not certify these.",
+    "composition": {
+      "train": {
+        "records": 0,
+        "families": 0,
+        "negativeFamilies": 0,
+        "unreviewed": 0,
+        "independentlyReviewed": 0,
+        "typeFamilies": {
+          "person": 0,
+          "address": 0,
+          "organization": 0,
+          "birthdate": 0,
+          "email": 0,
+          "phone": 0,
+          "account": 0,
+          "identity": 0,
+          "passport": 0,
+          "tax": 0,
+          "transaction": 0,
+          "customer": 0,
+          "card": 0,
+          "cvv": 0,
+          "pin": 0,
+          "username": 0,
+          "password": 0,
+          "apikey": 0,
+          "ip": 0
+        }
+      },
+      "development": {
+        "records": 29,
+        "families": 28,
+        "negativeFamilies": 9,
+        "unreviewed": 0,
+        "independentlyReviewed": 0,
+        "typeFamilies": {
+          "person": 1,
+          "address": 1,
+          "organization": 1,
+          "birthdate": 1,
+          "email": 1,
+          "phone": 1,
+          "account": 1,
+          "identity": 1,
+          "passport": 1,
+          "tax": 1,
+          "transaction": 1,
+          "customer": 1,
+          "card": 1,
+          "cvv": 1,
+          "pin": 1,
+          "username": 1,
+          "password": 1,
+          "apikey": 1,
+          "ip": 1
+        }
+      },
+      "final": {
+        "records": 0,
+        "families": 0,
+        "negativeFamilies": 0,
+        "unreviewed": 0,
+        "independentlyReviewed": 0,
+        "typeFamilies": {
+          "person": 0,
+          "address": 0,
+          "organization": 0,
+          "birthdate": 0,
+          "email": 0,
+          "phone": 0,
+          "account": 0,
+          "identity": 0,
+          "passport": 0,
+          "tax": 0,
+          "transaction": 0,
+          "customer": 0,
+          "card": 0,
+          "cvv": 0,
+          "pin": 0,
+          "username": 0,
+          "password": 0,
+          "apikey": 0,
+          "ip": 0
+        }
+      }
+    },
+    "blockers": [
+      "train: requires 200 families, has 0",
+      "train: insufficient ordinary-negative families",
+      "train/person: requires 20 families, has 0",
+      "train/address: requires 20 families, has 0",
+      "train/organization: requires 20 families, has 0",
+      "train/birthdate: requires 20 families, has 0",
+      "train/email: requires 20 families, has 0",
+      "train/phone: requires 20 families, has 0",
+      "train/account: requires 20 families, has 0",
+      "train/identity: requires 20 families, has 0",
+      "train/passport: requires 20 families, has 0",
+      "train/tax: requires 20 families, has 0",
+      "train/transaction: requires 20 families, has 0",
+      "train/customer: requires 20 families, has 0",
+      "train/card: requires 20 families, has 0",
+      "train/cvv: requires 20 families, has 0",
+      "train/pin: requires 20 families, has 0",
+      "train/username: requires 20 families, has 0",
+      "train/password: requires 20 families, has 0",
+      "train/apikey: requires 20 families, has 0",
+      "train/ip: requires 20 families, has 0",
+      "development: requires 80 families, has 28",
+      "development/person: requires 20 families, has 1",
+      "development/address: requires 20 families, has 1",
+      "development/organization: requires 20 families, has 1",
+      "development/birthdate: requires 20 families, has 1",
+      "development/email: requires 20 families, has 1",
+      "development/phone: requires 20 families, has 1",
+      "development/account: requires 20 families, has 1",
+      "development/identity: requires 20 families, has 1",
+      "development/passport: requires 20 families, has 1",
+      "development/tax: requires 20 families, has 1",
+      "development/transaction: requires 20 families, has 1",
+      "development/customer: requires 20 families, has 1",
+      "development/card: requires 20 families, has 1",
+      "development/cvv: requires 20 families, has 1",
+      "development/pin: requires 20 families, has 1",
+      "development/username: requires 20 families, has 1",
+      "development/password: requires 20 families, has 1",
+      "development/apikey: requires 20 families, has 1",
+      "development/ip: requires 20 families, has 1"
+    ],
+    "fingerprints": [
+      {
+        "id": "seed-person",
+        "split": "development",
+        "textSha256": "39d4b17413521a399c43bfaff1faf985165a3ddb11a383c5daf09c9acda8cc2b"
+      },
+      {
+        "id": "seed-address",
+        "split": "development",
+        "textSha256": "6a8f87506fb750809f9f649adb3193cac37489a818dcedd5682890522bfbcb64"
+      },
+      {
+        "id": "seed-organization",
+        "split": "development",
+        "textSha256": "3ca8082e13347f5d1d175866a973cb4c5961a0650b6b64be1f28a05262563f0d"
+      },
+      {
+        "id": "seed-birthdate",
+        "split": "development",
+        "textSha256": "d004ddb9e76f7db3b8764674ed0470562749d1211d2b9a32076e90fb356020b0"
+      },
+      {
+        "id": "seed-email",
+        "split": "development",
+        "textSha256": "fe18691c58a7153f4ea502b383ff366db20da8c196c70ce2f4dfdcc1f5ed94f7"
+      },
+      {
+        "id": "seed-phone",
+        "split": "development",
+        "textSha256": "a7cbf94e0333892d6a6c24c1ff935c57d7678235b77e086dc66e4d8ca1af7958"
+      },
+      {
+        "id": "seed-account",
+        "split": "development",
+        "textSha256": "2b72761631d2cd553c78bf21267fc8b1281a1f1adae961cbed6b2ffb73fa66da"
+      },
+      {
+        "id": "seed-identity",
+        "split": "development",
+        "textSha256": "9177e00c93d109896660ed6fe428b53572021a7ad5d249664918a28f765e9c82"
+      },
+      {
+        "id": "seed-passport",
+        "split": "development",
+        "textSha256": "0a9d4699fde886c50867bacb2784f853ab6a638b8926af627f7addd01b67b8d4"
+      },
+      {
+        "id": "seed-tax",
+        "split": "development",
+        "textSha256": "66befe7c4eb0b31e0733e5f331e725c96036b229e71ab82edbe64e2396cde459"
+      },
+      {
+        "id": "seed-transaction",
+        "split": "development",
+        "textSha256": "b2f612ba4cc8ddc6b9c8c073931bc987f6426c070a0a9fa8a14ab307b62e97e1"
+      },
+      {
+        "id": "seed-customer",
+        "split": "development",
+        "textSha256": "b4a482f6659bedcb05da4c9444af41ee5af03115fde9f5cc62f2f459703ab4f0"
+      },
+      {
+        "id": "seed-card",
+        "split": "development",
+        "textSha256": "e4f21b2bfacfa0346a1a3cb8374e4712591ce3fabbfceb3ecf84bd1d16d554c6"
+      },
+      {
+        "id": "seed-cvv",
+        "split": "development",
+        "textSha256": "f71358e21e324ac2ed7344081c679770a059eb5d4ee7cc2489f0cbf6d344e2af"
+      },
+      {
+        "id": "seed-pin",
+        "split": "development",
+        "textSha256": "a00a3c76527539acc2f1f88c53c9ff71a74e250e3543e7d791b3fe2e7c25045f"
+      },
+      {
+        "id": "seed-username",
+        "split": "development",
+        "textSha256": "d6cfaa1b90e47ba433a4345979b98aca8eec1b0a93389ac8dc55aae2230ed15a"
+      },
+      {
+        "id": "seed-password",
+        "split": "development",
+        "textSha256": "e5b7ee66c9640679ff3a71ae280eaa243881f1a7c17a71f62caca74b29a544f0"
+      },
+      {
+        "id": "seed-apikey",
+        "split": "development",
+        "textSha256": "4cc19574df71f6b415f412f8dc0275c16ae6e601930cab2a75959a76fd72fe34"
+      },
+      {
+        "id": "seed-ip",
+        "split": "development",
+        "textSha256": "ee03dab0be00e9c8a0240beeb1a1a02bfd56b8ee20977ecb144e14cc4db45999"
+      },
+      {
+        "id": "seed-negative-headings",
+        "split": "development",
+        "textSha256": "bb7e7a43cd38a40dcbf6eb196bf18f37cf542e0b88a84ada7081f34b7462784b"
+      },
+      {
+        "id": "seed-negative-numbers",
+        "split": "development",
+        "textSha256": "f583ab67061f6c97e3494b91f9eb68d508ddfb5b75702e907bd394e126f988fc"
+      },
+      {
+        "id": "seed-negative-instructions",
+        "split": "development",
+        "textSha256": "313e261971bc0737ab23c8f3ac04192aee6157082559e6202e7a0baf476784ef"
+      },
+      {
+        "id": "seed-negative-location",
+        "split": "development",
+        "textSha256": "85d2550ed3962f4dddbdea2b9d498603171a0f7f05e08be73ea3c2fcb6218fab"
+      },
+      {
+        "id": "seed-negative-tech",
+        "split": "development",
+        "textSha256": "a7c402f4119ddf8d8faa2a035505acfc309ea6d3780f8f055037b9092ec87770"
+      },
+      {
+        "id": "seed-negative-company",
+        "split": "development",
+        "textSha256": "3f7ece2314aac97c4a63a48bfba6258af9420107d75a626f5d6070d99ac3e94a"
+      },
+      {
+        "id": "seed-negative-scope",
+        "split": "development",
+        "textSha256": "8805350dfe8b0cd181aab8ad2e86a80746dfcf823e83bb66617d9a7241c2b37b"
+      },
+      {
+        "id": "seed-negative-product",
+        "split": "development",
+        "textSha256": "6e21aca99991cf537031a88e7268c85f5139e56c7bc7521cc587a2c0fa12f8b2"
+      },
+      {
+        "id": "seed-negative-ambiguous",
+        "split": "development",
+        "textSha256": "ec7b84c23aeae6baf3c62d15876790069d40e079e8a3f0d1494b9a6fccd2e53b"
+      },
+      {
+        "id": "seed-person-nfd",
+        "split": "development",
+        "textSha256": "b7cdcfe3c75cc6264c0850d8a9bf1055b8d761ab27a5d0d2e92b283ec558ed3e"
+      }
+    ]
+  },
+  "verification": {
+    "unitTestsPassed": 115,
+    "productionFingerprintUnchanged": true,
+    "weightsDownloaded": false,
+    "datasetRowsImported": false,
+    "trainingRun": false,
+    "candidateAdmitted": false
+  },
+  "limits": "Authored development examples, author review only. Structural checks do not establish semantic accuracy or final split independence. Proposed budgets are unmeasured. Source metadata inspection used the Internet manually; app runtime unchanged."
+}
