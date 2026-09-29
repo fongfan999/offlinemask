@@ -29,5 +29,10 @@ src-tauri/target/
 src-tauri/gen/
 *.tsbuildinfo
 
-# Local native packaging and verification outputs.
+# Reproducible, checksum-verified model/runtime assets (scripts/model-manifest.json).
+public/models/
+public/runtime/
+
+dist-desktop/
 artifacts/
+__pycache__/

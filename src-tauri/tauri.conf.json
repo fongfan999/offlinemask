@@ -6,8 +6,8 @@
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
-    "beforeBuildCommand": "pnpm build",
-    "frontendDist": "../dist"
+    "beforeBuildCommand": "pnpm build && node scripts/prepare-desktop.mjs",
+    "frontendDist": "../dist-desktop"
   },
   "app": {
     "windows": [
@@ -24,8 +24,14 @@
       "capabilities": [
         "default"
       ],
-      "csp": "default-src 'self'; connect-src ipc: http://ipc.localhost; img-src 'self' data:; style-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'",
-      "devCsp": "default-src 'self'; connect-src ipc: http://ipc.localhost http://localhost:1420 ws://localhost:1420; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'"
+      "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self' asset: http://asset.localhost https://asset.localhost ipc: http://ipc.localhost; img-src 'self' data:; style-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'",
+      "devCsp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self' asset: http://asset.localhost https://asset.localhost ipc: http://ipc.localhost http://localhost:1420 ws://localhost:1420; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'",
+      "assetProtocol": {
+        "enable": true,
+        "scope": [
+          "$APPLOCALDATA/models/**"
+        ]
+      }
     }
   },
   "bundle": {

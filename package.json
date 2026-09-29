@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "pnpm typecheck && vite build",
+    "build": "node scripts/prepare-runtime.mjs && pnpm typecheck && vite build && node scripts/prepare-assets.mjs",
     "preview": "vite preview",
     "tauri": "tauri",
     "typecheck": "vue-tsc --noEmit && tsc --noEmit -p tsconfig.node.json",
@@ -13,6 +13,10 @@
     "desktop:dev": "tauri dev",
     "desktop:build": "node scripts/build-desktop.mjs",
     "test": "node --test tests/*.test.mjs",
+    "models:download": "node scripts/prepare-models.mjs --download",
+    "models:check": "node scripts/prepare-models.mjs",
+    "test:models": "pnpm models:check && node scripts/evaluate-model.mjs",
+    "compare:models": "pnpm models:check && node scripts/compare-models.mjs",
     "desktop:build:native": "pnpm typecheck && node scripts/prepare-native-desktop.mjs && tauri build --features recognition-native-release --config artifacts/native-desktop/tauri.conf.json && node scripts/verify-native-desktop.mjs"
   },
   "dependencies": {

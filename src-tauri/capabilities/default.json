@@ -1,13 +1,19 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Read the app version and open the product homepage in the default browser.",
-  "windows": ["main"],
+  "description": "Read app version and open the product homepage. Model downloads accept no URLs; the local tokenizer receives transient text and never persists or transmits it.",
+  "windows": [
+    "main"
+  ],
   "permissions": [
     "core:app:allow-version",
     {
       "identifier": "opener:allow-open-url",
-      "allow": [{ "url": "https://offlinemask.com/" }]
+      "allow": [
+        {
+          "url": "https://offlinemask.com/"
+        }
+      ]
     }
   ]
 }
