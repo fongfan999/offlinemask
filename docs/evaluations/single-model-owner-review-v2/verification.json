@@ -1,0 +1,53 @@
+{
+  "verifiedAt": "2026-09-19T13:41:23.777Z",
+  "hashes": {
+    "completed.json": "46ecf03a9e6ab66ae3e1f644429bc336a9ec189b90adbf5f1a6a0823bec2e643",
+    "reviewed-cases.json": "eef15b8b7844648ee0870d9221e9068de3d56e140b8b6e1764ad02a209a03b28"
+  },
+  "previousEvidence": "Verified unchanged",
+  "newInferenceRuns": 0,
+  "correctedCase": 8,
+  "remainingScopeQuestions": [],
+  "summary": {
+    "A": {
+      "model": "underthesea",
+      "reviewedCases": 12,
+      "acceptableCases": [
+        4,
+        6,
+        9,
+        10,
+        12
+      ],
+      "unacceptableCases": [
+        1,
+        2,
+        3,
+        5,
+        7,
+        8,
+        11
+      ]
+    },
+    "B": {
+      "model": "bigmed",
+      "reviewedCases": 12,
+      "acceptableCases": [
+        2,
+        3,
+        4,
+        6,
+        7,
+        9,
+        10,
+        11,
+        12
+      ],
+      "unacceptableCases": [
+        1,
+        5,
+        8
+      ]
+    }
+  }
+}

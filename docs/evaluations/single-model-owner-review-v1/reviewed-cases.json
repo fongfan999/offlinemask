@@ -1,0 +1,266 @@
+{
+  "reviewSha256": "bdc0c25e5c7e8eac96e06fcfd5310f6bee51031a151602aad5160e263a0d0c45",
+  "scope": "Separate observed owner-reviewed regression overlay; preserves old annotations/results. Not a training corpus or general organization policy.",
+  "cases": [
+    {
+      "id": "name-lowercase",
+      "file": "model-comparison.json",
+      "text": "Tôi là đỗ hoàng phúc, nhờ kiểm tra giúp lệnh chuyển tiền bị treo.",
+      "entities": [
+        {
+          "start": 7,
+          "end": 20,
+          "category": "name",
+          "value": "đỗ hoàng phúc"
+        }
+      ],
+      "group": "owner-reviewed-observed",
+      "number": 1,
+      "provenance": {
+        "source": "Owner conversation review and customer-ID clarification",
+        "originalTextSha256": "8c9bd0bcd1d65880f4d295337216bffefa1b9ce44ecc1bfaae97556117c557dd",
+        "reviewStatus": "EXPECTATIONS_RECORDED",
+        "independentHoldout": false,
+        "categoryAssignment": "Existing category mapping applied by assistant; no global scope change inferred."
+      }
+    },
+    {
+      "id": "name-ethnic",
+      "file": "model-comparison.json",
+      "text": "Khách hàng H’Hen Niê đề nghị cập nhật thông tin liên hệ.",
+      "entities": [
+        {
+          "start": 11,
+          "end": 20,
+          "category": "name",
+          "value": "H’Hen Niê"
+        }
+      ],
+      "group": "owner-reviewed-observed",
+      "number": 2,
+      "provenance": {
+        "source": "Owner conversation review and customer-ID clarification",
+        "originalTextSha256": "979ac27ffb0bc55303e7a7c6782e46b689738118b62e6c0d92a40739b909daac",
+        "reviewStatus": "EXPECTATIONS_RECORDED",
+        "independentHoldout": false,
+        "categoryAssignment": "Existing category mapping applied by assistant; no global scope change inferred."
+      }
+    },
+    {
+      "id": "negative-upper",
+      "file": "model-comparison.json",
+      "text": "YÊU CẦU TRA SOÁT GIAO DỊCH. CHƯA CÓ THÔNG TIN KHÁCH HÀNG.",
+      "entities": [],
+      "group": "owner-reviewed-observed",
+      "number": 3,
+      "provenance": {
+        "source": "Owner conversation review and customer-ID clarification",
+        "originalTextSha256": "f976bf022c3ea07cef622223f330dce92097c1aea09070442c5f9b817451bafb",
+        "reviewStatus": "EXPECTATIONS_RECORDED",
+        "independentHoldout": false,
+        "categoryAssignment": "Existing category mapping applied by assistant; no global scope change inferred."
+      }
+    },
+    {
+      "id": "fresh-nfd",
+      "file": "model-reliability.json",
+      "text": "Khách hàng Nguyễn Ngọc Hà cần hỗ trợ. STK: 007700112233.",
+      "entities": [
+        {
+          "start": 11,
+          "end": 29,
+          "category": "name",
+          "value": "Nguyễn Ngọc Hà"
+        },
+        {
+          "start": 47,
+          "end": 59,
+          "category": "banking",
+          "value": "007700112233"
+        }
+      ],
+      "group": "owner-reviewed-observed",
+      "number": 4,
+      "provenance": {
+        "source": "Owner conversation review and customer-ID clarification",
+        "originalTextSha256": "f6d02bf30d107c346a1a8ea7e9e1de59e65389141c9deabc878a10fe84277d73",
+        "reviewStatus": "EXPECTATIONS_RECORDED",
+        "independentHoldout": false,
+        "categoryAssignment": "Existing category mapping applied by assistant; no global scope change inferred."
+      }
+    },
+    {
+      "id": "mixed-customer",
+      "file": "model-decision.json",
+      "text": "Mã khách hàng KH847291 thuộc về Lâm Quốc Hưng, địa chỉ 15A Lê Quý Đôn, Quận 3, TP. Hồ Chí Minh.",
+      "entities": [
+        {
+          "start": 14,
+          "end": 22,
+          "value": "KH847291",
+          "category": "banking"
+        },
+        {
+          "start": 32,
+          "end": 45,
+          "category": "name",
+          "value": "Lâm Quốc Hưng"
+        },
+        {
+          "start": 55,
+          "end": 94,
+          "category": "address",
+          "value": "15A Lê Quý Đôn, Quận 3, TP. Hồ Chí Minh"
+        }
+      ],
+      "group": "owner-reviewed-observed",
+      "number": 5,
+      "provenance": {
+        "source": "Owner conversation review and customer-ID clarification",
+        "originalTextSha256": "61b78653d85aa710eef07e20a8f57bdf42e0187c022190128ed578e41ae8ac12",
+        "reviewStatus": "EXPECTATIONS_RECORDED",
+        "independentHoldout": false,
+        "categoryAssignment": "Existing category mapping applied by assistant; no global scope change inferred."
+      }
+    },
+    {
+      "id": "address-slash",
+      "file": "model-decision.json",
+      "text": "Chuyển thư về 17/6 Nguyễn Văn Đậu, phường 5, Bình Thạnh, TP. Hồ Chí Minh.",
+      "entities": [
+        {
+          "start": 14,
+          "end": 72,
+          "category": "address",
+          "value": "17/6 Nguyễn Văn Đậu, phường 5, Bình Thạnh, TP. Hồ Chí Minh"
+        }
+      ],
+      "group": "owner-reviewed-observed",
+      "number": 6,
+      "provenance": {
+        "source": "Owner conversation review and customer-ID clarification",
+        "originalTextSha256": "5e546bb9bf47c3265106aebf47b475c70198f365f244d9de91c8bbc5ade1463f",
+        "reviewStatus": "EXPECTATIONS_RECORDED",
+        "independentHoldout": false,
+        "categoryAssignment": "Existing category mapping applied by assistant; no global scope change inferred."
+      }
+    },
+    {
+      "id": "fresh-negative-unicode",
+      "file": "model-reliability.json",
+      "text": "👨‍👩‍👧‍👦 A ▁ B · ＡＢＣ · ễ · [CLS] [UNK] [SEP] · a​b",
+      "entities": [],
+      "group": "owner-reviewed-observed",
+      "number": 7,
+      "provenance": {
+        "source": "Owner conversation review and customer-ID clarification",
+        "originalTextSha256": "52e788349548f1c8c6cd71385c3dbaa289645afd328aec701e45996ba1a1b26a",
+        "reviewStatus": "EXPECTATIONS_RECORDED",
+        "independentHoldout": false,
+        "categoryAssignment": "Existing category mapping applied by assistant; no global scope change inferred."
+      }
+    },
+    {
+      "id": "organization-extracted",
+      "file": "release-challenge-v1.json",
+      "text": "De nghi lap ho so chi tra cho Hop tac xa Nong san Suoi Mo. Tong so chung tu la 24, tong gia tri la 68 trieu dong.",
+      "entities": [],
+      "group": "owner-reviewed-observed",
+      "number": 8,
+      "provenance": {
+        "source": "Owner conversation review and customer-ID clarification",
+        "originalTextSha256": "69bf542b4d200a755a1283a127c5cb38fcc3060f56b0f977568e21ced6e6bbac",
+        "reviewStatus": "EXPECTATIONS_RECORDED",
+        "independentHoldout": false,
+        "categoryAssignment": "Existing category mapping applied by assistant; no global scope change inferred."
+      }
+    },
+    {
+      "id": "person-short-extracted",
+      "file": "release-challenge-v1.json",
+      "text": "Người liên hệ về hồ sơ này là Tạ Uyên Chi. Vui lòng kiểm tra các chứng từ đính kèm.",
+      "entities": [
+        {
+          "start": 43,
+          "end": 56,
+          "category": "name",
+          "value": "Tạ Uyên Chi"
+        }
+      ],
+      "group": "owner-reviewed-observed",
+      "number": 9,
+      "provenance": {
+        "source": "Owner conversation review and customer-ID clarification",
+        "originalTextSha256": "481b53e32e7a2da03dcc73a3a6dec78ca39c1fd2bd4c0336d2a8e8b2b54711f0",
+        "reviewStatus": "EXPECTATIONS_RECORDED",
+        "independentHoldout": false,
+        "categoryAssignment": "Existing category mapping applied by assistant; no global scope change inferred."
+      }
+    },
+    {
+      "id": "other-card",
+      "file": "model-comparison.json",
+      "text": "Thẻ thử nghiệm số 4111 1111 1111 1111, mã CVV 123. Đây là dữ liệu kiểm thử.",
+      "entities": [
+        {
+          "start": 18,
+          "end": 37,
+          "category": "other",
+          "value": "4111 1111 1111 1111"
+        },
+        {
+          "start": 46,
+          "end": 49,
+          "category": "other",
+          "value": "123"
+        }
+      ],
+      "group": "owner-reviewed-observed",
+      "number": 10,
+      "provenance": {
+        "source": "Owner conversation review and customer-ID clarification",
+        "originalTextSha256": "d44343c2e46b5d955f0a2ce48a20adfe977e1b1cbc3be49bf9fd897c8efaa690",
+        "reviewStatus": "EXPECTATIONS_RECORDED",
+        "independentHoldout": false,
+        "categoryAssignment": "Existing category mapping applied by assistant; no global scope change inferred."
+      }
+    },
+    {
+      "id": "negative-titles",
+      "file": "model-decision.json",
+      "text": "Tổng Hợp Hồ Sơ Chờ Xử Lý. Hướng Dẫn Kiểm Tra Chứng Từ. Quy Trình Phê Duyệt.",
+      "entities": [],
+      "group": "owner-reviewed-observed",
+      "number": 11,
+      "provenance": {
+        "source": "Owner conversation review and customer-ID clarification",
+        "originalTextSha256": "a52025cbf69d41b70ebc3ad0b3d92165df18e5721f5390489549b7ad0b13eedf",
+        "reviewStatus": "EXPECTATIONS_RECORDED",
+        "independentHoldout": false,
+        "categoryAssignment": "Existing category mapping applied by assistant; no global scope change inferred."
+      }
+    },
+    {
+      "id": "validation-lane",
+      "file": "address-validation.json",
+      "text": "Cư trú tại hẻm 16, số 5B Nguyễn Thị Minh Khai, Cần Thơ.",
+      "entities": [
+        {
+          "start": 11,
+          "end": 54,
+          "category": "address",
+          "value": "hẻm 16, số 5B Nguyễn Thị Minh Khai, Cần Thơ"
+        }
+      ],
+      "group": "owner-reviewed-observed",
+      "number": 12,
+      "provenance": {
+        "source": "Owner conversation review and customer-ID clarification",
+        "originalTextSha256": "1aa796568a149545aea02d63768ecd7338c4abf32bc792d5defd672b2c724ee8",
+        "reviewStatus": "EXPECTATIONS_RECORDED",
+        "independentHoldout": false,
+        "categoryAssignment": "Existing category mapping applied by assistant; no global scope change inferred."
+      }
+    }
+  ]
+}

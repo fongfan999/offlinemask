@@ -1,0 +1,12 @@
+1. Cần ẩn: đỗ hoàng phúc; A: "đỗ hoàng phúc → TEN; B: "đỗ hoàng phúc → TEN
+2. Cần ẩn: H’Hen Niê; A: Ẩn thừa; B: chuẩn
+3. Cần ẩn: không có thông tin nào cần ẩn; A: Ẩn thừa; B: chuẩn
+4. Cần ẩn: Nguyễn Ngọc Hà và 007700112233; A: chuẩn; B: chuẩn
+5. Cần ẩn: Lâm Quốc Hưng và 15A Lê Quý Đôn, Quận 3, TP. Hồ Chí Minh; A: ẩn thừa và sai; B: Ẩn thừa và sai
+6. Cần ẩn: 17/6 Nguyễn Văn Đậu, phường 5, Bình Thạnh, TP. Hồ Chí Minh; A: chuẩn; B: chuẩn
+7. Cần ẩn: không cần ẩn; A: ẩn thừa; B: chuẩn
+8. Cần ẩn: không cần. A: ẩn thừa; B: ẩn thừa
+9. Cần ẩn: Tạ Uyên Chi; A: chuẩn, B: chuẩn
+10. Cần ẩn: 4111 1111 1111 1111 và 123; A: chuẩn; B: chuẩn
+11. Cần ẩn: không cần; A: ẩn thừa; B: chuẩn
+12. Cần ẩn: hẻm 16, số 5B Nguyễn Thị Minh Khai, Cần Thơ; A: chuẩn; B: chuẩn

@@ -1,0 +1,15 @@
+{
+  "verifiedAt": "2026-09-19T10:53:51.307Z",
+  "hashes": {
+    "response.txt": "e80f434d361f9862b1bc120cc40b79d553019a8546e193232d458fea7408de4b",
+    "receipt.json": "3a6fb9299080871cca2ddacdb1d9f6f3eaacb4d83488d0b408ad77d587d58b78",
+    "completed.json": "bdc0c25e5c7e8eac96e06fcfd5310f6bee51031a151602aad5160e263a0d0c45",
+    "reviewed-cases.json": "f4bdd91b004932e34381e3fcbe2ac666f91d592ed2e8cecfe574ea8f6fc41c87"
+  },
+  "verifierSha256": "1acf58491412a6cc691621e01315bbaafe6f41f915a079819e7b446c15531af4",
+  "cases": 12,
+  "categoryAndFullOutputReplays": 24,
+  "productionAndHistoricalEvidence": "Verified unchanged",
+  "newInferenceRuns": 0,
+  "reviewStatus": "All 12 responses recorded, customer ID clarified"
+}
