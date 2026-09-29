@@ -1,0 +1,24 @@
+{
+  "createdAt": "2026-09-15T03:06:50.580Z",
+  "parentProtocolSha256": "d8c57d96ea99890a0a6285a6549d8f1779ac86d070ff000498b4b4dafb28039f",
+  "sourceSha256": "3099c8bda8c8368a665cd01595497432ae5f7aaee259e28ebb2a609c6b058c2b",
+  "scopes": {
+    "combined": [
+      "email",
+      "phone",
+      "banking"
+    ],
+    "email": [
+      "email"
+    ],
+    "phone": [
+      "phone"
+    ],
+    "banking": [
+      "banking"
+    ]
+  },
+  "reason": "Separate evaluation of actual no-pack category selections. The model comparison scores selected categories by filtering each candidate complete detector; that is not the app model-free path.",
+  "method": "Same 100 synthetic cases, two passes, no modelRoot, fetch blocked and any model loading progress fails. All unselected categories must remain unmasked. Counts describe cases and occurrences, not independent records.",
+  "criteria": "Every expected local critical value fully covered in its selected scope, zero failures, at most 1% ordinary lexical masking on short cases, at most one affected original all-ordinary negative case. Diagnostic audit; no thresholds or production code changed."
+}
