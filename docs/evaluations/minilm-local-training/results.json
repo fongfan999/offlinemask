@@ -1,0 +1,154 @@
+{
+  "createdAt": "2026-09-18T11:42:15.319Z",
+  "hardware": {
+    "cpu": "Apple M1 Pro",
+    "ramBytes": 17179869184,
+    "macOS": "26.6.2",
+    "source": "Local sysctl and sw_vers during this run"
+  },
+  "success": false,
+  "launch": {
+    "exitCode": 1,
+    "timedOut": false,
+    "elapsedSeconds": 41.21566916699521,
+    "networkProfile": "(version 1) (allow default) (deny network*)"
+  },
+  "report": {
+    "completed": false,
+    "optimizerSteps": 0,
+    "checkpointSaved": false,
+    "corpusUsed": false,
+    "passes": [
+      {
+        "batch": 1,
+        "tokens": 128,
+        "repetition": 1,
+        "forwardBackwardMs": 4580.784583988134,
+        "loss": 3.665447473526001,
+        "finiteGradientElements": 117520935
+      },
+      {
+        "batch": 1,
+        "tokens": 128,
+        "repetition": 2,
+        "forwardBackwardMs": 49.62120903655887,
+        "loss": 3.668383836746216,
+        "finiteGradientElements": 117520935
+      },
+      {
+        "batch": 1,
+        "tokens": 384,
+        "repetition": 1,
+        "forwardBackwardMs": 774.7208750224672,
+        "loss": 3.6679389476776123,
+        "finiteGradientElements": 117520935
+      },
+      {
+        "batch": 1,
+        "tokens": 384,
+        "repetition": 2,
+        "forwardBackwardMs": 65.89170801453292,
+        "loss": 3.6699934005737305,
+        "finiteGradientElements": 117520935
+      },
+      {
+        "batch": 2,
+        "tokens": 384,
+        "repetition": 1,
+        "forwardBackwardMs": 1972.095042001456,
+        "loss": 3.6687283515930176,
+        "finiteGradientElements": 117520935
+      }
+    ],
+    "memory": [
+      {
+        "phase": "loaded-with-moment-reserve",
+        "tensorBytes": 1410259712,
+        "driverBytes": 2240167936,
+        "processPeakRssBytes": 652378112
+      },
+      {
+        "phase": "1x128-pass-1",
+        "tensorBytes": 1920662016,
+        "driverBytes": 4191977472,
+        "processPeakRssBytes": 901103616
+      },
+      {
+        "phase": "1x128-pass-2",
+        "tensorBytes": 1919876096,
+        "driverBytes": 4191977472,
+        "processPeakRssBytes": 901103616
+      },
+      {
+        "phase": "1x384-pass-1",
+        "tensorBytes": 1916254208,
+        "driverBytes": 4602118144,
+        "processPeakRssBytes": 1228324864
+      },
+      {
+        "phase": "1x384-pass-2",
+        "tensorBytes": 1919793152,
+        "driverBytes": 4602118144,
+        "processPeakRssBytes": 1228324864
+      },
+      {
+        "phase": "2x384-pass-1",
+        "tensorBytes": 2024251904,
+        "driverBytes": 6061129728,
+        "processPeakRssBytes": 1230520320
+      }
+    ],
+    "cpuFallbackEnabled": false,
+    "environment": {
+      "python": "3.12.7",
+      "macOS": "26.6.2",
+      "machine": "arm64",
+      "torch": "2.8.0",
+      "transformers": "4.57.6"
+    },
+    "sourceRevision": "6e8c1ec6b4ec4e3fc6eb7d2cd834fcd582b61daf",
+    "sourceHashes": {
+      "config.json": "933c5fc9b49cf83934fb2e617cea837985a1b5f10db653ecd958c5736de357de",
+      "pytorch_model.bin": "cce170910f4d4f3b45be025508f51ef1ad6a1de69f2d46dce7e4603ad31aaaeb",
+      "sentencepiece.bpe.model": "cfc8146abe2a0488e9e2a0c56de7952f7c11ab059eca145a0a727afce0db2865",
+      "special_tokens_map.json": "7638f5bbbe86ef6d604ef28ad3647dc690d6d117c81c0d63e885416be8da1150",
+      "tokenizer_config.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a"
+    },
+    "allocatorLimitBytes": 6442450944,
+    "recommendedGpuWorkingSetBytes": 12713115648,
+    "parameters": 117520935,
+    "parameterBytes": 470083740,
+    "reservedMomentBytes": 940167480,
+    "failure": {
+      "type": "RuntimeError",
+      "message": "MPS backend out of memory (MPS allocated: 4.20 GiB, other allocations: 1.46 GiB, max allowed: 6.00 GiB). Tried to allocate 366.27 MiB on private pool. Use PYTORCH_MPS_HIGH_WATERMARK_RATIO=0.0 to disable upper limit for memory allocations (may cause system failure)."
+    },
+    "limits": "Artificial IDs/labels, FP32, eager attention, six backward passes only. Moment tensors reserve storage but do not test optimizer updates/temporaries. Phase memory snapshots can miss peaks; process RSS and driver memory overlap. No label alignment, quality, sustained training or duration qualification."
+  },
+  "memory": {
+    "maxObservedDriverBytes": 6061129728,
+    "maxObservedTensorBytes": 2024251904,
+    "processPeakRssBytes": 1230520320,
+    "note": "Phase snapshots, not continuous device peak. RSS/driver/tensor allocations overlap; never sum them."
+  },
+  "gates": {
+    "backwardDiagnostic": false,
+    "trainedModelQualified": false,
+    "corpusReady": false,
+    "cloudNeededEstablished": false
+  },
+  "sourceHashes": {
+    "scripts/minilm-local-training/probe.py": "daba28fe16d046176d654cf7bf6c40a58ebb89b1e9876d53c365f9db4f0a9780",
+    "scripts/minilm-local-training/run.py": "59920d453d6c6cbcfad0764fb3b3ee5723e8896a8eb7acf7bf2608aa0ecc1eed",
+    "docs/evaluations/minilm-local-training/spec.md": "6639e83cbd5a34fcb5bb4e95517e75094a90c99b9d6d5ec159c5ce84aaf06070",
+    "docs/evaluations/minilm-admission/python-requirements.txt": "0d3df0063f7e0a1c5332e33bf07ba0bc4933ceda4c14c335dadd527d71204037",
+    "docs/evaluations/minilm-admission/download-evidence.json": "6fe0dd9f8d761150ab529fc60f8dd23e98773bf55dae484911907c6f55378dcb",
+    "scripts/minilm-local-training/report.mjs": "e04a80a4b12c4ef92e253fcee00a5e9cc2dec6748bc02e46e706911ba287a5e9"
+  },
+  "rawHashes": {
+    "protocol.json": "41081fed01021fbb2f8a71c6143838bc5763c49b1c3381155e20370391a7c5e2",
+    "launch.json": "b32cc42870309c82d600328ed418a9ef9a71ce9771cf83178f4ae426fa680d5f",
+    "run.log": "dc43dc48fcf37b3ed986720f34a8cfddb4e1e526f2b511d37ccc561e59ae654d",
+    "report.json": "b5e221a252fa3132d2c423cf3e6d77b6b2ed4c071221f3968eb82f59f99e4547"
+  }
+}
