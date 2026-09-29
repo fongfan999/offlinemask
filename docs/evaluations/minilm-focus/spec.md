@@ -1,0 +1,3 @@
+# Focused-window responsiveness follow-up
+
+The completed phase profile meets speed/memory targets at two threads but reports almost exactly 1s timer delays in every processing variant. This may reflect background timer scheduling; do not declare a cause without evidence. Run the same two-thread graph in a separate packaged foreground window, starting through its visible button. Measure interval and animation-frame delays only during verified focus/visibility and record focus loss explicitly. Repeat 20 CPU-reference checks and the same 10 warm/one long synthetic processing cases. No artificial yielding inside inference or relaxation of targets. A focus-loss run cannot qualify foreground responsiveness. Preserve the earlier timer observations.

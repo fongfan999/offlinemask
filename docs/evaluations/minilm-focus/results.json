@@ -1,0 +1,183 @@
+{
+  "createdAt": "2026-09-18T08:40:29.266Z",
+  "configuration": {
+    "threads": 2,
+    "requestLocalCache": true,
+    "platform": "macOS arm64",
+    "cpu": "Apple M1 Pro",
+    "ramGiB": 16
+  },
+  "launch": {
+    "method": "Native UI launch, then visible Run focused check button",
+    "networkDenyProfile": false,
+    "memorySampled": false
+  },
+  "unsuccessfulLaunch": {
+    "timeout": true,
+    "exitCode": -15,
+    "reason": "UI automation could not attach to the shell-launched window; processing was not started.",
+    "qualifiesProcessingMemory": false
+  },
+  "measurements": {
+    "coldMs": 2449.999999999999,
+    "warmP95Ms": 205,
+    "warmSortedMs": [
+      192.99999999999815,
+      193.00000000000185,
+      195,
+      195.99999999999815,
+      196,
+      197,
+      197,
+      197,
+      197.00000000000185,
+      205
+    ],
+    "longMs": 5224,
+    "longWindows": 46,
+    "timerDelayMs": 4,
+    "timerTicks": 192,
+    "frameIntervalMs": 34,
+    "frames": 541,
+    "focusVisibilityLosses": 0,
+    "parityCases": 20,
+    "parityMaxError": 1.4613723731127236e-8
+  },
+  "gates": {
+    "focusedRunCompleted": true,
+    "cpuReferenceParity": true,
+    "measuredWarmBudget": true,
+    "measuredLongBudget": true,
+    "fullMaskingPipelineQualified": false,
+    "privacyQualityQualified": false,
+    "normalUiEnabled": false
+  },
+  "report": {
+    "completed": true,
+    "metrics": [
+      {
+        "kind": "cold",
+        "durationMs": 2449.999999999999,
+        "count": 1,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "parity",
+        "durationMs": 0,
+        "count": 20,
+        "maxError": 1.4613723731127236e-8,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 197,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 197,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 193.00000000000185,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 195.99999999999815,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 205,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 197,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 196,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 195,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 197.00000000000185,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "warm",
+        "durationMs": 192.99999999999815,
+        "count": 2,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "long",
+        "durationMs": 5224,
+        "count": 46,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "heartbeat",
+        "durationMs": 4,
+        "count": 192,
+        "maxError": 0,
+        "passed": true
+      },
+      {
+        "kind": "phase_heartbeat",
+        "durationMs": 34,
+        "count": 541,
+        "maxError": 0,
+        "passed": true
+      }
+    ]
+  },
+  "sourceHashes": {
+    "scripts/minilm-focus/build.mjs": "e83c98fd3ebb7ab40f069f71caadb80b0736eeba1d6dd899d652901de8630f38",
+    "scripts/minilm-focus/run.py": "12124a6e38843835ea90cfef8166a11b2369948a674b96af6eae6a1d9bc22ca2",
+    "scripts/minilm-focus/report.mjs": "930d5ea081f667fc16f9a7e81da40a5eb9646149d0aa7bcbfa2a84b673585164",
+    "scripts/minilm-focus/frontend/main.mjs": "4eebfe13c97f58abe58b17d84824d5059822782a33834ffb1680c8e428d68981",
+    "scripts/minilm-focus/frontend/index.html": "6d06d3e8f341547930a5f52b2025644928aa57791320106f29fce82fd5cbc4d8",
+    "docs/evaluations/minilm-focus/spec.md": "ecc794a37478a2165af9c4b374bf34ba98222540495ba62d30827d2c8a1f6656",
+    "docs/evaluations/minilm-profile/results.json": "685af5aee9806bf0008ea8f9480c65585c0f6467bc1850fd0bdcd03a101c8846"
+  },
+  "rawHashes": {
+    "foreground-report.json": "00bba52500d71c2d9a08a686d058209ba5b8ecb5d29a88b9141c5238b22ed853",
+    "launch.json": "1a6dda711c907774cacd03a86263ce5491d9dcb648da8283be06ef369b549cae",
+    "build.log": "a6865f03aa6ac95c2750efe8fba9276b49ff75680ced38e71af68de4ba74709f",
+    "frontend-build.log": "6005b5d82886698547ba9d223f267fd4e84352eebfdf8f94ad38b133a500e799",
+    "fixtures.json": "a8aa9092ad09247ad807e7dc77e78c1921019667b714a5f3b97321457ff1d370",
+    "tauri.conf.json": "fc348fcd74b34582dc5c4f769188c05abc66211f7d5f1119c62f0566ae1a4ba9"
+  },
+  "limits": "One focused synthetic run; same untrained graph. Timings include native tokenization, planning, IPC and inference, not final entity decoding/shared masking policy. Cold excludes OS launch and page load. No memory sampling or network-deny launch in this successful run; those are separate profile evidence. Earlier one-second background gaps remain unexplained, though consistent with background scheduling. No cross-platform or repeated-use qualification."
+}
