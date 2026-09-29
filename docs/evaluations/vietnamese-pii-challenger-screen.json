@@ -1,0 +1,193 @@
+{
+  "checkedAt": "2026-09-15T02:43:35.178175+00:00",
+  "repository": "Phuc2005/pii-phobert-base-ner",
+  "revision": "fc4d654b9906dafb34ea670b9b14c2360e4d3be3",
+  "declaredLicense": "apache-2.0",
+  "architecture": [
+    "RobertaForTokenClassification"
+  ],
+  "parameters": {
+    "parameters": {
+      "F32": 134491501
+    },
+    "total": 134491501
+  },
+  "labels": [
+    "ACCOUNTNAME",
+    "ACCOUNTNUMBER",
+    "AGE",
+    "AMOUNT",
+    "BIC",
+    "BITCOINADDRESS",
+    "BUILDINGNUMBER",
+    "CCCD",
+    "CITY",
+    "COMPANYNAME",
+    "COUNTY",
+    "CREDITCARDCVV",
+    "CREDITCARDISSUER",
+    "CREDITCARDNUMBER",
+    "CURRENCY",
+    "CURRENCYCODE",
+    "CURRENCYNAME",
+    "CURRENCYSYMBOL",
+    "DATE",
+    "DOB",
+    "EMAIL",
+    "ETHEREUMADDRESS",
+    "EYECOLOR",
+    "FIRSTNAME",
+    "GENDER",
+    "HEIGHT",
+    "IBAN",
+    "IPADDRESS",
+    "JOBAREA",
+    "JOBTITLE",
+    "JOBTYPE",
+    "LASTNAME",
+    "LITECOINADDRESS",
+    "MAC",
+    "MASKEDNUMBER",
+    "MIDDLENAME",
+    "NEARBYGPSCOORDINATE",
+    "ORDINALDIRECTION",
+    "PASSWORD",
+    "PHONEIMEI",
+    "PHONENUMBER",
+    "PIN",
+    "PREFIX",
+    "SECONDARYADDRESS",
+    "SEX",
+    "STATE",
+    "STREET",
+    "TIME",
+    "URL",
+    "USERAGENT",
+    "USERNAME",
+    "VEHICLEVIN",
+    "VEHICLEVRM",
+    "ZIPCODE"
+  ],
+  "bioLabelCount": 109,
+  "maxPositionEmbeddings": 258,
+  "tokenizerClass": "PhobertTokenizer",
+  "publishedFiles": [
+    {
+      "type": "file",
+      "oid": "a6344aac8c09253b3b630fb776ae94478aa0275b",
+      "size": 1519,
+      "path": ".gitattributes"
+    },
+    {
+      "type": "file",
+      "oid": "2255f5005ce6cdfa1e0cf5de29b049728e6fd402",
+      "size": 1216,
+      "path": "README.md"
+    },
+    {
+      "type": "file",
+      "oid": "1f6ddcea4cb4f94f751b1315127d0d24ac2a17c8",
+      "size": 22,
+      "path": "added_tokens.json"
+    },
+    {
+      "type": "file",
+      "oid": "b9a70c1a314ef0c6d97dffd98b34a1c60b988a6e",
+      "size": 1135173,
+      "path": "bpe.codes"
+    },
+    {
+      "type": "file",
+      "oid": "cbebfe1e82e23a20b0df8ff48a7d99cfedf7833d",
+      "size": 5957,
+      "path": "config.json"
+    },
+    {
+      "type": "file",
+      "oid": "73c14bda3fd04aca6956af2c9c4d0cb74cd95727",
+      "size": 537989916,
+      "lfs": {
+        "oid": "9b1662171d3861ee92f9e4ab5c91df7996fbab7e2bf9a6463512f941176e1d5a",
+        "size": 537989916,
+        "pointerSize": 134
+      },
+      "xetHash": "c3410fd93311f81acbdf6d44232d7537497bbf420fdf72ee64f5e123b4b264de",
+      "path": "model.safetensors"
+    },
+    {
+      "type": "file",
+      "oid": "9af6538234e1e3d07c4ee8eea7608f0b3526e867",
+      "size": 1213,
+      "path": "tokenizer_config.json"
+    },
+    {
+      "type": "file",
+      "oid": "4ec2ff884e4e44a655e382c8fe3769cfef3a7644",
+      "size": 5201,
+      "lfs": {
+        "oid": "d1de77a9b59b64b3139cc94772915c8320559f2b5d5ba4aed2819928e0cb5aa2",
+        "size": 5201,
+        "pointerSize": 129
+      },
+      "xetHash": "b191166150260166a92be3e8bfe6ebfc56a08234e03ae96f9d151478ee3db293",
+      "path": "training_args.bin"
+    },
+    {
+      "type": "file",
+      "oid": "33b31f7c577482ac5d4713b0fc2c1a02ef1d8ba0",
+      "size": 205,
+      "path": "upload.py"
+    },
+    {
+      "type": "file",
+      "oid": "0dbdec11459dd9d1f6e985bf6c58dbcf6adaeabd",
+      "size": 895321,
+      "path": "vocab.txt"
+    }
+  ],
+  "readMetadata": {
+    "tokenizer_config.json": {
+      "bytes": 1213,
+      "sha256": "1e3cb891e2fec2c25b3b7d1b1055407c763040ee2ceff2364ed8973c77a83566"
+    },
+    "config.json": {
+      "bytes": 5957,
+      "sha256": "1192d6104c1b5cbd3e0687700c0ae13e81eb4f535cdc8495aa055014bbc420c2"
+    },
+    "demo-metadata.json": {
+      "bytes": 1373,
+      "sha256": "c8e5e933efbd6e72a8e1f902e03364a79ea8921ad000cb4147427c34fad40672"
+    },
+    "demo-requirements.txt": {
+      "bytes": 74,
+      "sha256": "47dd9e3fd772512700901c1eb28ef3aa900e5f03b3b69e3b5e53b7abae1f51f6"
+    },
+    "demo-README.md": {
+      "bytes": 266,
+      "sha256": "53d0f2ee41a7d84b69d508d9e89184947f31b6730b6ce14d9b5b9f6e3a4f03ac"
+    },
+    "demo-app.py": {
+      "bytes": 14931,
+      "sha256": "acb9df4c971d8d0608b5c62523fcc8d64dcd099cceef198618416e2d8642639d"
+    },
+    "README.md": {
+      "bytes": 1216,
+      "sha256": "18a3d24a6ef3fc30061a089a4b6235c1ce240efedc169ba683e9bfb1487e7455"
+    },
+    "hub-metadata.json": {
+      "bytes": 1843,
+      "sha256": "fe29c9ef0a510cbea7a28ad13ea3a4dd4ceb7fa482c92d5471d34fa13a2fbf79"
+    },
+    "tree.json": {
+      "bytes": 1776,
+      "sha256": "5866fc9247ad77bd047fce2122b4c64f0174ef6b4ff047873d0b589bf6284b60"
+    }
+  },
+  "weightDownloaded": false,
+  "decision": "Not admitted to scored comparison yet: reproducible fine-tuning preprocessing and source-offset mapping remain unspecified; local export/runtime and training-data provenance unverified. This is an eligibility hold, not a quality rejection.",
+  "demo": {
+    "repository": "Phuc2005/pii-demo-ner",
+    "revision": "2856cc2db64158264a80efc8ad3a30e8ed5017d9",
+    "finding": "Published demo instantiates pii-xlm-r-base-ner only; it does not establish PhoBERT preprocessing or evaluation."
+  }
+}
