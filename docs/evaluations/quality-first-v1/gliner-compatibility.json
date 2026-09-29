@@ -1,0 +1,16 @@
+{
+  "candidate": "AITeamUIT/gliner2-pii500k-final-model",
+  "revision": "e15225965c361fc4ec6e5681eaec5312c63b71a8",
+  "runtime": "gliner2 2.0.0 / transformers 4.57.6 / torch 2.8.0",
+  "method": "Instantiate stock model on meta device; compare every tensor key and shape with published safetensors header. No weights loaded or inference executed.",
+  "unexpected": [
+    "span_scorer.null_bias",
+    "span_scorer.u_null"
+  ],
+  "missing": [],
+  "mismatched": {},
+  "compatible": false,
+  "decision": "BLOCKED_MISSING_MATCHING_RUNTIME",
+  "publishedHeaderSha256": "b4bda6c0e3fbbe845154001ae52f458b73a603a5a45068b6116d4ef765c47b86",
+  "limits": "Metadata compatibility only. No accuracy conclusion; do not discard unknown trained parameters or fabricate their computation."
+}
