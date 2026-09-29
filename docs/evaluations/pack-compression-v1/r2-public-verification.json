@@ -1,0 +1,136 @@
+{
+  "verifiedAt": "2026-09-20T06:02:50.863Z",
+  "base": "https://pub-5b0280497d774b8f99417b3438d8bce8.r2.dev",
+  "method": "Full public HTTPS downloads: exact byte lengths and SHA-256; nonzero-offset Range requests.",
+  "totalBytes": 712209431,
+  "objects": [
+    {
+      "key": "bbe0438a69eaac999e4027aa2ec791492e538b0ec171efe6a8918de8d18bbb3e.zst",
+      "bytes": 158225764,
+      "sha256": "bbe0438a69eaac999e4027aa2ec791492e538b0ec171efe6a8918de8d18bbb3e",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "80766b35d434d1bf5840ec518a79a59ae5ae54d01c0ec743418b7f93a95aae4b.zst",
+      "bytes": 542,
+      "sha256": "80766b35d434d1bf5840ec518a79a59ae5ae54d01c0ec743418b7f93a95aae4b",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "6d429a82df02c80ee9be90148cc07863dae9ca63a82c770c17bb6ea8540e403e.zst",
+      "bytes": 250316,
+      "sha256": "6d429a82df02c80ee9be90148cc07863dae9ca63a82c770c17bb6ea8540e403e",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "b382e82399cf61b28dc0a3a5606b0f5ea2a5e073a10165a7c8b9a2be52166731.zst",
+      "bytes": 366,
+      "sha256": "b382e82399cf61b28dc0a3a5606b0f5ea2a5e073a10165a7c8b9a2be52166731",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "75328f6c10d15ad144e911fb8e39b9b59cf50b2d1bf72a88ef0f281642745e3f.zst",
+      "bytes": 268435456,
+      "sha256": "75328f6c10d15ad144e911fb8e39b9b59cf50b2d1bf72a88ef0f281642745e3f",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "1fdbd5ec2c2e33284d2337f7b42bf3d2ca71d0a95cd828a704f75d52773ff65b.zst",
+      "bytes": 268435456,
+      "sha256": "1fdbd5ec2c2e33284d2337f7b42bf3d2ca71d0a95cd828a704f75d52773ff65b",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "c0d57eee780face26f18c820f41f2824bc7b41f654059293fdff39e1f061021a.zst",
+      "bytes": 14161531,
+      "sha256": "c0d57eee780face26f18c820f41f2824bc7b41f654059293fdff39e1f061021a",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "759d333f01be6d510b4a0d33f6bc09976fee45fc96db30b181ebbc5587cca867.zst",
+      "bytes": 1660,
+      "sha256": "759d333f01be6d510b4a0d33f6bc09976fee45fc96db30b181ebbc5587cca867",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "c3a98f68dbbae517d61b085a508d21ebb0df477411cae92cf469520c0d315952.zst",
+      "bytes": 2674549,
+      "sha256": "c3a98f68dbbae517d61b085a508d21ebb0df477411cae92cf469520c0d315952",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "ca91fa68509884b8032e4985a39bc9c3b551af7c54f3c21f8f2e429a45af126c.zst",
+      "bytes": 531,
+      "sha256": "ca91fa68509884b8032e4985a39bc9c3b551af7c54f3c21f8f2e429a45af126c",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "c28cbf964449465a3db55ae54bb80bcda2a371e6ff856b0584c49bd2bb754223.zst",
+      "bytes": 562,
+      "sha256": "c28cbf964449465a3db55ae54bb80bcda2a371e6ff856b0584c49bd2bb754223",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "05715325e676ac9d57e04f91eaaae50965ad49633cc0fb4d02e7078d23e2ccb5.zst",
+      "bytes": 1479,
+      "sha256": "05715325e676ac9d57e04f91eaaae50965ad49633cc0fb4d02e7078d23e2ccb5",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "df6933425d195ae3459c5ad6e1900835645044b05ead513fcedb5b7af1900996.zst",
+      "bytes": 2698,
+      "sha256": "df6933425d195ae3459c5ad6e1900835645044b05ead513fcedb5b7af1900996",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "LICENSE-Apache-2.0.txt",
+      "bytes": 11357,
+      "sha256": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "NOTICE-vietnamese-pii-v1.txt",
+      "bytes": 641,
+      "sha256": "13baf3304478607dfc01ab51f9474c0d34b171040bb3829e778279a06db6b01a",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    },
+    {
+      "key": "vietnamese-pii-v1.json",
+      "bytes": 6523,
+      "sha256": "cfa171d195ef6aa7b512cd64c67b3f40135b2546d42a571998b8a48c0c1c835c",
+      "status": 200,
+      "rangeStatus": 206,
+      "verified": true
+    }
+  ]
+}
