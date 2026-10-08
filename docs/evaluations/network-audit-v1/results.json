@@ -1,0 +1,56 @@
+{
+  "date": "2026-10-08",
+  "os": "macOS 26.6.2 (25G83)",
+  "bundle": "artifacts/native-desktop/OfflineMask Fully Signed QA.app",
+  "hostSha256": "2ce45200d77596797da74d3d9887cbd16c1bf2d196744671e6218a8be9ff8036",
+  "runtimeSha256": "292aaf46a0d0155ca9372a437712ad45dbdd583b26c56afe769ec3842d2e064a",
+  "helperSha256": "f25ccdcf3947f8eebac2690d14992cec6d6506d260532099c232da71a4da2b12",
+  "signatureVerified": true,
+  "firstRunPids": {
+    "host": 96239,
+    "gpu": 96250,
+    "networking": 96251,
+    "webcontent": 96254,
+    "helper": 96304
+  },
+  "restartPids": {
+    "host": 97760,
+    "gpu": 97765,
+    "networking": 97766,
+    "webcontent": 97767,
+    "helper": 97800
+  },
+  "captures": {
+    "masking-nettop.csv": {
+      "localPath": "artifacts/network-audit-v1/masking-nettop.csv",
+      "sha256": "bd7029dbf3ea63fd3fb7da01ce7592c41222320798387f78ba959654427a1197",
+      "samples": 240,
+      "processRows": []
+    },
+    "restart-nettop.csv": {
+      "localPath": "artifacts/network-audit-v1/restart-nettop.csv",
+      "sha256": "370c868f046d9675e1b412022207dc1cbcbb9542577ccb721023902add8f4cd4",
+      "samples": 45,
+      "processRows": []
+    },
+    "nettop-control.csv": {
+      "localPath": "artifacts/network-audit-v1/nettop-control.csv",
+      "sha256": "8b3bf4ca5458fba7e5bafb67693f85da93fee216861fcad3d20ab21819f5fbb2",
+      "samples": 12,
+      "processRows": [
+        "curl.96790,0,0,",
+        "curl.96790,0,0,",
+        "curl.96790,0,0,",
+        "curl.96844,2845,623,",
+        "curl.96844,14612,623,",
+        "curl.96844,14612,623,"
+      ]
+    }
+  },
+  "limitations": [
+    "Socket samples are not syscall tracing; very short-lived or pre-socket denied attempts may be missed.",
+    "WebKit association inferred from before/after process inventory and shutdown, not privileged responsibility inspection.",
+    "PKTAP creation denied; sudo noninteractive authentication unavailable.",
+    "Existing QA artifact tested, not a newly built public DMG."
+  ]
+}

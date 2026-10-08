@@ -1,5 +1,7 @@
 # Packaged native UI under IP denial — 21 September 2026
 
+Follow-up: [8 October network observations](../network-audit-v1/README.md) cover masking/recovery and restart with per-process socket monitoring, including observed WebKit processes. No network entries appeared; privileged attempted-request tracing remains incomplete. This does not change the scope of the denial tests below.
+
 The unchanged Sidecar UI executable was copied into a disposable QA bundle. A LaunchServices wrapper applies `sandbox-exec` IPv4/IPv6 inbound/outbound IP denial before executing it. Unlike earlier direct executable launches, this produces an attachable, working GUI. `scripts/recognition-offline-v1/stage.py` reproduces the wrapper; it refuses normal user bundles. The wrapper changes only the outer bundle identity: the compiled Tauri QA data identity remains `dev.offlinemask.recognition.sidecarui20260921`.
 
 Before exec, a small C launcher asserts `EPERM` on TCP and UDP socket connections for IPv4 and IPv6 loopback. The process keeps its PID and sandbox on exec; native helper children inherit that sandbox. The recorded probes are in the adjacent JSON files. Local IPC remains permitted. WebKit's separately managed XPC processes were not independently sandbox-probed: this is host/helper IP denial with the shipping local-only frontend CSP, not an assertion that every OS service had its network disabled. User/global networking was unchanged.
