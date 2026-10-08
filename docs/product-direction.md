@@ -35,7 +35,7 @@ The current interface is accepted as the boilerplate baseline. This does not mea
 - **Home and navigation:** provide Text and Excel choices on the home page and left sidebar. Other file formats should be visibly coming soon until implemented.
 - **Sessions:** each masking/redaction conversion should create a distinct session, comparable to conversation history in chat apps. Users must be able to return to earlier conversions and their choices. Starting a new conversion must not overwrite an earlier one.
 - **Tooling and documentation:** use mise for tool versions. Study current official library/framework documentation with Context7 when doing library-specific work. Record scaffold provenance, consequential dependency choices, and implementation limits.
-- **Open source:** the project is intended to be open source. Favor standard, maintainable patterns, reproducible setup, shared styling, clear contribution guidance, and documented dependencies. License selection remains pending; the owner has not selected one.
+- **Source availability:** on 8 October 2026, the owner selected the O’Saasy License Agreement, superseding the earlier pending-license direction. Favor standard, maintainable patterns, reproducible setup, shared styling, clear contribution guidance, and documented dependencies. See [Decision 0050](decisions/0050-osaasy-license.md) for remaining publication work.
 
 ## Accepted prototype versus unfinished product
 

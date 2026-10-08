@@ -16,7 +16,7 @@ The home page offers **real text processing and an Excel sample workspace**, wit
 
 The interface uses standard CSS glass surfaces with shared tokens and a blue/white palette. No glass library or remote UI assets are required. Text detection uses contact-parsing libraries and optional Vietnamese models downloaded through Settings, with documented gaps; it is not comprehensive detection. File adapters, encrypted storage, and restoration remain unimplemented.
 
-OfflineMask is **intended to be open source**. The owner must select a license before publication; no license has been granted yet. See [contribution guidance](CONTRIBUTING.md) and the [workspace/design decision](docs/decisions/0002-workspace-and-glass.md).
+The owner has selected the **O’Saasy License Agreement** for source-available publication. The final license file and copyright attribution remain pending. Third-party code and recognition resources retain their own licenses. See the [license decision](docs/decisions/0050-osaasy-license.md) and [contribution guidance](CONTRIBUTING.md).
 
 See the [review design notes](docs/review-design.md) for interaction choices and verification.
 

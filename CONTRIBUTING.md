@@ -1,6 +1,6 @@
 # Contributing to OfflineMask
 
-OfflineMask is intended to be open source. The project owner has not yet selected a license; do not assume this repository currently grants open-source reuse or redistribution rights. License selection, copyright ownership, and a private vulnerability-reporting contact must be settled before the public release.
+The project owner has selected the O’Saasy License Agreement for source-available publication; see the [license decision](docs/decisions/0050-osaasy-license.md). The final license file, copyright ownership/attribution, third-party redistribution review, and a private vulnerability-reporting contact remain required before public release. Do not interpret this recorded choice as a completed license grant.
 
 ## Local setup
 
