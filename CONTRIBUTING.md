@@ -1,6 +1,6 @@
 # Contributing to OfflineMask
 
-The project owner has selected the O’Saasy License Agreement for source-available publication; see the [license decision](docs/decisions/0050-osaasy-license.md). The final license file, copyright ownership/attribution, third-party redistribution review, and a private vulnerability-reporting contact remain required before public release. Do not interpret this recorded choice as a completed license grant.
+OfflineMask is source available under the [O’Saasy License Agreement](LICENSE.md), with copyright attributed to Phong Phan; see the [license decision](docs/decisions/0050-osaasy-license.md). Third-party redistribution review and a private vulnerability-reporting contact remain required before public release.
 
 ## Local setup
 
