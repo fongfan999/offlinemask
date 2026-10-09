@@ -5,7 +5,14 @@ pub fn run() {
             .path()
             .app_local_data_dir()?
             .join("models/vietnamese-pii-v1");
-        app.manage(models::Models::new(root));
+        let handle = app.handle().clone();
+        app.manage(models::Models::with_notifier(
+            root,
+            Box::new(move |status| {
+                // Status only: byte counts, stage and the local pack root.
+                let _ = handle.emit(models::STATUS_EVENT, status.clone());
+            }),
+        ));
         #[cfg(feature = "minilm-desktop-prototype")]
         app.manage(minilm_prototype::Prototype::new(
             app.path()
@@ -106,7 +113,7 @@ mod minilm_prototype;
 mod model_pack;
 mod models;
 mod recognition_tokenizer;
-use tauri::Manager;
+use tauri::{Emitter, Manager};
 
 #[cfg(all(
     feature = "recognition-native-desktop",

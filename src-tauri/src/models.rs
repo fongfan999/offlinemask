@@ -9,10 +9,23 @@ use std::{
     path::{Path, PathBuf},
     sync::{
         atomic::{AtomicBool, Ordering},
-        Arc, Mutex,
+        Arc, Mutex, MutexGuard, PoisonError,
     },
-    time::Duration,
+    time::{Duration, Instant},
 };
+
+/// Frontend event carrying every `ModelStatus` change.
+pub const STATUS_EVENT: &str = "model-status";
+/// Progress pushes are coalesced to this interval; stage changes are immediate.
+const PROGRESS_INTERVAL: Duration = Duration::from_millis(200);
+/// Each range request covers this many bytes. Together with `REQUEST_TIMEOUT`
+/// it bounds the slowest connection that can still complete a chunk
+/// (about 140 kbit/s); the blocking client has no per-read idle timeout.
+const CHUNK_BYTES: u64 = 2 * 1024 * 1024;
+const CONNECT_TIMEOUT: Duration = Duration::from_secs(15);
+const REQUEST_TIMEOUT: Duration = Duration::from_secs(120);
+
+pub type Notifier = Box<dyn Fn(&ModelStatus) + Send + Sync>;
 
 fn pack() -> Pack {
     let pack: Pack = serde_json::from_str(include_str!("../../scripts/release-pack-v1.json"))
@@ -37,6 +50,8 @@ struct Inner {
     status: Mutex<ModelStatus>,
     cancel: AtomicBool,
     tokenizer: Mutex<Option<RecognitionTokenizer>>,
+    notify: Notifier,
+    published: Mutex<Option<Instant>>,
 }
 #[derive(Clone)]
 pub struct Models(Arc<Inner>);
@@ -65,14 +80,21 @@ pub(crate) fn valid(path: &Path, bytes: u64, expected: &str, cancel: &AtomicBool
 impl Models {
     #[cfg(feature = "recognition-native-desktop")]
     pub(crate) fn ready_root(&self) -> Result<PathBuf, &'static str> {
-        let status = self.0.status.lock().map_err(|_| "unavailable")?;
+        let status = self.status();
         if status.stage != "ready" {
             return Err("unavailable");
         }
         Ok(PathBuf::from(status.root.as_ref().ok_or("unavailable")?))
     }
 
+    /// Status without pushes, for tests.
+    #[cfg(test)]
     pub fn new(root: PathBuf) -> Self {
+        Self::with_notifier(root, Box::new(|_| {}))
+    }
+
+    /// `notify` receives each status change; the app forwards it as `STATUS_EVENT`.
+    pub fn with_notifier(root: PathBuf, notify: Notifier) -> Self {
         let pack = pack();
         let total = pack.download_bytes();
         let installed_bytes = pack.installed_bytes();
@@ -90,6 +112,8 @@ impl Models {
             }),
             cancel: AtomicBool::new(false),
             tokenizer: Mutex::new(None),
+            notify,
+            published: Mutex::new(None),
         }));
         let check = manager.clone();
         std::thread::spawn(move || {
@@ -97,7 +121,7 @@ impl Models {
                 check.finish(Ok(root));
             } else {
                 let downloaded = check.0.pack.cached_bytes(&check.0.root, &check.0.cancel);
-                check.0.status.lock().unwrap().downloaded = downloaded;
+                check.status().downloaded = downloaded;
                 check.finish(Err(if downloaded > 0 {
                     "cancelled"
                 } else {
@@ -108,8 +132,27 @@ impl Models {
         });
         manager
     }
+    /// The status is plain data, so a panic elsewhere never makes it unreadable.
+    fn status(&self) -> MutexGuard<'_, ModelStatus> {
+        self.0.status.lock().unwrap_or_else(PoisonError::into_inner)
+    }
+    /// Push the current status. Progress is coalesced; `force` bypasses the interval.
+    fn publish(&self, force: bool) {
+        let snapshot = self.status().clone();
+        let mut published = self
+            .0
+            .published
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
+        let now = Instant::now();
+        if force || published.is_none_or(|last| now.duration_since(last) >= PROGRESS_INTERVAL) {
+            *published = Some(now);
+            drop(published);
+            (self.0.notify)(&snapshot);
+        }
+    }
     fn finish(&self, result: Result<PathBuf, String>) {
-        let mut status = self.0.status.lock().unwrap();
+        let mut status = self.status();
         match result {
             Ok(root) => {
                 status.stage = "ready".into();
@@ -135,28 +178,34 @@ impl Models {
                 status.root = None;
             }
         }
+        drop(status);
+        self.publish(true);
     }
     fn download(&self) -> Result<PathBuf, String> {
         let client = Client::builder()
             .https_only(true)
-            .connect_timeout(Duration::from_secs(15))
-            .timeout(Duration::from_secs(60))
+            .connect_timeout(CONNECT_TIMEOUT)
+            .timeout(REQUEST_TIMEOUT)
             .redirect(reqwest::redirect::Policy::limited(10))
             .build()
             .map_err(|_| "network")?;
         self.0
             .pack
             .install(&self.0.root, &client, &self.0.cancel, |event| {
-                let mut status = self.0.status.lock().unwrap();
+                let mut status = self.status();
+                let mut stage_changed = false;
                 match event {
                     Progress::Download(bytes) => status.downloaded = bytes,
                     Progress::Install(bytes) => {
-                        if status.stage != "cancelling" {
+                        if status.stage != "cancelling" && status.stage != "installing" {
                             status.stage = "installing".into();
+                            stage_changed = true;
                         }
                         status.installed = bytes;
                     }
                 }
+                drop(status);
+                self.publish(stage_changed);
             })
     }
 }
@@ -191,15 +240,9 @@ pub(crate) fn fetch_asset(
         if cancel.load(Ordering::Relaxed) {
             return Err("cancelled".into());
         }
-        let end = (offset + 8 * 1024 * 1024 - 1).min(bytes - 1);
+        let end = (offset + CHUNK_BYTES - 1).min(bytes - 1);
         let mut response = client
-            .get({
-                let mut request_url = reqwest::Url::parse(url).map_err(|_| "network")?;
-                request_url
-                    .query_pairs_mut()
-                    .append_pair("offset", &offset.to_string());
-                request_url
-            })
+            .get(url)
             .header(RANGE, format!("bytes={offset}-{end}"))
             .send()
             .map_err(|_| "network")?;
@@ -268,13 +311,18 @@ pub async fn recognition_encode(
     let manager = models.inner().clone();
     tauri::async_runtime::spawn_blocking(move || {
         let root = {
-            let status = manager.0.status.lock().map_err(|_| "unavailable")?;
+            let status = manager.status();
             if status.stage != "ready" {
                 return Err("unavailable".into());
             }
             PathBuf::from(status.root.as_ref().ok_or("unavailable")?)
         };
-        let mut tokenizer = manager.0.tokenizer.lock().map_err(|_| "unavailable")?;
+        // A poisoned slot only ever holds a complete tokenizer or nothing.
+        let mut tokenizer = manager
+            .0
+            .tokenizer
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
         if tokenizer.is_none() {
             *tokenizer = Some(RecognitionTokenizer::load(&root).map_err(str::to_owned)?);
         }
@@ -290,12 +338,12 @@ pub async fn recognition_encode(
 
 #[tauri::command]
 pub fn model_status(models: tauri::State<'_, Models>) -> ModelStatus {
-    models.0.status.lock().unwrap().clone()
+    models.status().clone()
 }
 #[tauri::command]
 pub fn download_models(models: tauri::State<'_, Models>) -> Result<(), String> {
     {
-        let mut status = models.0.status.lock().unwrap();
+        let mut status = models.status();
         if matches!(
             status.stage.as_str(),
             "checking" | "downloading" | "installing" | "cancelling" | "ready"
@@ -310,6 +358,7 @@ pub fn download_models(models: tauri::State<'_, Models>) -> Result<(), String> {
         status.error = None;
         models.0.cancel.store(false, Ordering::Relaxed);
     }
+    models.publish(true);
     let manager = models.inner().clone();
     std::thread::spawn(move || {
         let result = manager.download();
@@ -325,11 +374,14 @@ pub fn download_models(models: tauri::State<'_, Models>) -> Result<(), String> {
 }
 #[tauri::command]
 pub fn cancel_model_download(models: tauri::State<'_, Models>) {
-    let mut status = models.0.status.lock().unwrap();
-    if matches!(status.stage.as_str(), "downloading" | "installing") {
-        models.0.cancel.store(true, Ordering::Relaxed);
-        status.stage = "cancelling".into();
+    let mut status = models.status();
+    if !matches!(status.stage.as_str(), "downloading" | "installing") {
+        return;
     }
+    models.0.cancel.store(true, Ordering::Relaxed);
+    status.stage = "cancelling".into();
+    drop(status);
+    models.publish(true);
 }
 
 #[cfg(test)]
@@ -491,7 +543,7 @@ mod tests {
         let manager = Models::new(fixture.0.clone());
         let deadline = std::time::Instant::now() + Duration::from_secs(3);
         loop {
-            let status = manager.0.status.lock().unwrap().clone();
+            let status = manager.status().clone();
             if status.stage != "checking" {
                 assert_eq!(status.stage, "missing");
                 assert!(status.root.is_none());
@@ -500,5 +552,42 @@ mod tests {
             assert!(std::time::Instant::now() < deadline);
             std::thread::yield_now();
         }
+    }
+    #[test]
+    fn stage_changes_reach_the_notifier() {
+        let fixture = Fixture::new();
+        let (sender, receiver) = std::sync::mpsc::channel::<String>();
+        let manager = Models::with_notifier(
+            fixture.0.clone(),
+            Box::new(move |status| {
+                let _ = sender.send(status.stage.clone());
+            }),
+        );
+        let stage = receiver.recv_timeout(Duration::from_secs(3)).unwrap();
+        assert_eq!(stage, "missing");
+        assert_eq!(manager.status().stage, "missing");
+    }
+    #[test]
+    fn progress_pushes_are_coalesced_but_forced_pushes_are_not() {
+        let fixture = Fixture::new();
+        let count = Arc::new(std::sync::atomic::AtomicUsize::new(0));
+        let seen = Arc::clone(&count);
+        let manager = Models::with_notifier(
+            fixture.0.clone(),
+            Box::new(move |_| {
+                seen.fetch_add(1, Ordering::Relaxed);
+            }),
+        );
+        let deadline = std::time::Instant::now() + Duration::from_secs(3);
+        while manager.status().stage == "checking" {
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        let after_check = count.load(Ordering::Relaxed);
+        manager.publish(false);
+        manager.publish(false);
+        assert_eq!(count.load(Ordering::Relaxed), after_check);
+        manager.publish(true);
+        assert_eq!(count.load(Ordering::Relaxed), after_check + 1);
     }
 }

@@ -1,12 +1,11 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Read app version and open the product homepage. Model downloads accept no URLs; the local tokenizer receives transient text and never persists or transmits it.",
-  "windows": [
-    "main"
-  ],
+  "description": "Receive recognition-pack status events and open the product homepage. Model downloads accept no URLs; the local tokenizer receives transient text and never persists or transmits it.",
+  "windows": ["main"],
   "permissions": [
-    "core:app:allow-version",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
     {
       "identifier": "opener:allow-open-url",
       "allow": [
