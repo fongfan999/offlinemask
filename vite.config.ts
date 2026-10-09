@@ -4,9 +4,23 @@ import process from "node:process";
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
+// onnxruntime-web references its WASM binary relative to the detection worker.
+// Emit that single copy at the stable `/runtime/` path the detector already
+// loads, instead of shipping a second hashed copy next to the worker chunk.
+const assetFileNames = (asset: { names?: string[]; name?: string }) =>
+  (asset.names?.[0] ?? asset.name ?? "").endsWith(".wasm")
+    ? "runtime/[name][extname]"
+    : "assets/[name]-[hash][extname]";
+
 export default defineConfig(() => ({
   plugins: [vue()],
-  build: { copyPublicDir: false },
+  build: {
+    copyPublicDir: false,
+    rollupOptions: { output: { assetFileNames } },
+  },
+  worker: {
+    rollupOptions: { output: { assetFileNames } },
+  },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
   //
