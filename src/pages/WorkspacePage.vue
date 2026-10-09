@@ -195,11 +195,13 @@ defineExpose({
       <h1 ref="heading" tabindex="-1">{{ title }}</h1>
       <p>
         {{
-          session
-            ? "Đọc lại kết quả, rồi sao chép khi bạn thấy phù hợp."
-            : format === "text"
-              ? "Nhập hoặc dán văn bản để ẩn thông tin bằng bí danh."
-              : "Một lần nhấn. Thông tin riêng tư được thay bằng bí danh."
+          privateSession
+            ? "Đọc lại bản đã ẩn, sao chép sang AI, rồi dán phản hồi bên dưới để khôi phục."
+            : session
+              ? "Đọc lại kết quả, rồi sao chép khi bạn thấy phù hợp."
+              : format === "text"
+                ? "Nhập hoặc dán văn bản để ẩn thông tin bằng bí danh."
+                : "Một lần nhấn. Thông tin riêng tư được thay bằng bí danh."
         }}
       </p>
     </div>
