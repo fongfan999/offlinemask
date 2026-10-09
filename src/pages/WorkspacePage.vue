@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
+import RestorePanel from "../components/RestorePanel.vue";
 import { formatModelBytes } from "../adapters/models.ts";
 import { packKey, runKey, sessionsKey, useProvided, type Page } from "../composables/context.ts";
 import { reviewHint, useTextReview, type ReviewView } from "../composables/useTextReview.ts";
@@ -139,6 +140,13 @@ function selectView(nextView: ReviewView) {
   view.value = nextView;
   manualCopy.value = false;
 }
+const primaryDisabled = computed(
+  () =>
+    props.format === "text" &&
+    (processing.value ||
+      !selectedOptions.value.length ||
+      (!missingSelectedModels.value && !!draftError.value)),
+);
 function primaryAction() {
   if (props.format === "text" && missingSelectedModels.value) {
     emit("navigate", "settings");
@@ -146,6 +154,10 @@ function primaryAction() {
   }
   clearFeedback();
   emit("mask");
+}
+/** ⌘/Ctrl+Enter inside the draft does what the primary button does. */
+function submitShortcut() {
+  if (!primaryDisabled.value) primaryAction();
 }
 async function copy() {
   selectedText.value = null;
@@ -285,6 +297,8 @@ defineExpose({
         aria-describedby="text-input-hint"
         :aria-invalid="draft.length > maxTextLength"
         @input="processingError = ''"
+        @keydown.meta.enter.prevent="submitShortcut"
+        @keydown.ctrl.enter.prevent="submitShortcut"
       ></textarea>
       <p
         id="text-input-hint"
@@ -410,10 +424,8 @@ defineExpose({
       <button
         v-if="!session"
         class="primary-action"
-        :disabled="
-          format === 'text' &&
-          (processing || !selectedOptions.length || (!missingSelectedModels && !!draftError))
-        "
+        :disabled="primaryDisabled"
+        :title="format === 'text' ? '⌘/Ctrl + Enter' : undefined"
         @click="primaryAction"
       >
         <AppIcon name="sparkle" :size="17" />{{
@@ -430,6 +442,11 @@ defineExpose({
       </button>
     </footer>
   </section>
+  <RestorePanel
+    v-if="session?.fixture === 'private-text-v1'"
+    :session-id="session.id"
+    :analysis="session.analysis"
+  />
   <p v-if="processingError" class="storage-error" role="alert">{{ processingError }}</p>
   <p v-if="session || copyStatus" class="feedback" role="status">
     {{
