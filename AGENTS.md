@@ -3,7 +3,7 @@
 Read [docs/product-direction.md](docs/product-direction.md) before product or UI work. It records the owner's accepted boilerplate and feedback; preserve that baseline and apply subsequent feedback page by page. Read [CONTRIBUTING.md](CONTRIBUTING.md) for engineering conventions and the [PRD](PRD.md) for feature scope.
 
 - Keep the experience straightforward, with secondary controls revealed only when needed.
-- Use blue/white/neutral glass styling; do not reintroduce purple/lavender or a dark-green primary palette.
+- Use the owner's personal brand theme (warm paper, ink, cobalt accent; light and dark via shared tokens in `src/style.css`); do not reintroduce purple/lavender or a dark-green primary palette.
 - Preserve Text/Excel entry points and reopenable conversion sessions in the left sidebar.
 - Use mise-managed versions and `mise exec --` when running project tools. Keep both dependency lockfiles.
 - Follow standard Vue/TypeScript patterns and shared CSS tokens. The project is intended to be open source; document substantial choices and dependency provenance.

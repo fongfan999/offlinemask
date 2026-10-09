@@ -30,8 +30,8 @@ The current interface is accepted as the boilerplate baseline. This does not mea
 ## Requirements to carry forward
 
 - **Straightforward use:** the earlier dense three-panel review experience felt overwhelming. Keep the primary workflow obvious and secondary controls tucked away until needed. Do not add dashboards, review gates, dialogs, or technical controls without a clear user need.
-- **Visual direction:** restrained, high-end liquid glass with readable text and a blue, white, and neutral palette. The owner explicitly dislikes purple/lavender. The earlier dark-green choice was not grounded in the owner's preference; do not restore it as the primary color.
-- **Glass implementation:** consistency and speed matter. The current approach uses shared CSS tokens and one glass surface rule, with fallbacks. No dedicated glass library was requested or installed. Evaluate dependencies against demonstrated needs and measured behavior; do not claim that a library or CSS alone guarantees performance.
+- **Visual direction:** since 9 October 2026 the owner's personal brand theme replaces the earlier blue/white liquid glass: warm paper, ink, one cobalt accent, mono eyebrows, italic-serif emphasis, light and dark following the system. See the dated section below and [Decision 0052](decisions/0052-brand-theme-and-restoration.md). The owner explicitly dislikes purple/lavender. The earlier dark-green choice was not grounded in the owner's preference; do not restore it as the primary color.
+- **Surface implementation (historical glass note):** consistency and speed matter. The current approach uses shared CSS tokens and one glass surface rule, with fallbacks. No dedicated glass library was requested or installed. Evaluate dependencies against demonstrated needs and measured behavior; do not claim that a library or CSS alone guarantees performance.
 - **Home and navigation:** provide Text and Excel choices on the home page and left sidebar. Other file formats should be visibly coming soon until implemented.
 - **Sessions:** each masking/redaction conversion should create a distinct session, comparable to conversation history in chat apps. Users must be able to return to earlier conversions and their choices. Starting a new conversion must not overwrite an earlier one.
 - **Tooling and documentation:** use mise for tool versions. Study current official library/framework documentation with Context7 when doing library-specific work. Record scaffold provenance, consequential dependency choices, and implementation limits.
@@ -208,3 +208,15 @@ Keep the selected recognition pair fixed while qualifying a separate native help
 The owner reviewed the whole project and asked for every finding to be applied: "everything, as long as we won't break the app, the app is simply to mask PII data." The frontend shell was split into composables and page components, pack status is pushed from the native layer instead of polled, the duplicated runtime binary was removed from the bundle, the native download tolerates slow connections, and Prettier/ESLint/CI were added. Markup, CSS classes, copy and the accepted glass styling are unchanged.
 
 Two small behavior changes are intentional: a detection run keeps going while the user navigates and its session appears in the sidebar when done, and an open session offers "Xóa phiên" beside "Phiên mới" so private text can be dropped without quitting. Fingerprinted detection sources and frozen evaluation scripts were left untouched. See [Decision 0051](decisions/0051-shell-refactor-and-tooling.md) for details and the checks that remain for a packaged run.
+
+## 9 October — Personal brand theme and in-session restoration
+
+The owner asked for product improvements at the assistant's discretion and for the app theme to follow their personal brand at wotdafong.dev ("Wot Da Fong?"). The theme now uses that brand's tokens: warm paper, ink, one cobalt accent, mono uppercase eyebrows, an italic-serif second line in the hero, pill buttons, flat sheets with a hard offset shadow, and a dark scheme that follows the system. Layout, copy and the six detection choices are unchanged; the `.glass` class name stays as the sheet rule. The homepage's AI panel is drawn as the brand's tilted sticky note. The personal **P?!** mark is Phong Phan's own and is not used as the product logo.
+
+Product changes in the same pass:
+
+- **Khôi phục bản gốc từ phản hồi của AI.** An open private text session has a collapsed panel where the AI's reply is pasted; exact aliases of that session are replaced with the original values on the device and the result can be copied. Alias-shaped tokens from another session are listed and left untouched; nothing is guessed (PRD FR-09). This is RAM-only restoration within the session, not the encrypted vault; closing the app still clears everything.
+- **Recognisable sessions.** Private sessions are listed by the first line of their masked copy instead of "Văn bản #1"; the number, time and "Tạm thời" move to the subtitle. Sample sessions keep their names.
+- **⌘/Ctrl + Enter** in the draft runs the primary action.
+
+This supersedes the earlier blue/white glass acceptance for presentation only. Detection behavior, offline boundaries and manual-only downloads are unchanged.

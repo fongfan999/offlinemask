@@ -30,7 +30,8 @@ Use the commands in the [README](../README.md). `mise exec --` ensures the proje
 - `src/App.vue`: shell only. Owns navigation and focus hand-off, and provides the three shared stores below to its pages.
 - `src/composables/`: `useRecognitionPack` (optional pack status and actions), `useSessions` (sidebar list and sample-only persistence), `useMaskingRun` (draft, category choices, one in-flight run), `useTextReview` (manual selection, hide, undo). Plain factories with injected dependencies; see [Decision 0051](decisions/0051-shell-refactor-and-tooling.md).
 - `src/pages/`: `HomePage`, `SettingsPage` and `WorkspacePage` (real text entry and table samples, explicit masking, original/masked views, individual choices, copying, session removal).
-- `src/components/AppSidebar.vue`: navigation, session history, settings entry, website link and version.
+- `src/components/AppSidebar.vue`: navigation, session history (private sessions titled by their masked first line via `src/core/session-preview.ts`), settings entry, website link and version.
+- `src/components/RestorePanel.vue` and `src/core/restore.ts`: in-session restoration of exact aliases from a pasted AI reply; unknown alias-shaped tokens are reported, never guessed.
 - `src/components/AppIcon.vue`: local SVG icons.
 - `src/core/review.ts`: portable fixture types, explicit decisions, tokenization, sample alias replacements, and the final-copy gate.
 - `src/core/text.ts`: provider-span validation, overlap policy, aliases, and exact transformations.
@@ -39,9 +40,10 @@ Use the commands in the [README](../README.md). `mise exec --` ensures the proje
 - `src/core/sessions.ts`: private in-memory text sessions, versioned sample records, sample-only persistence, and synthetic table transformations.
 - `tests/sessions.test.mjs`: history round trips, independent choices, serialization boundaries, invalid history, and table preservation.
 - `tests/composables.test.mjs`: store persistence boundary, pushed status with polling fallback, run cancellation/failure paths, manual review hide/undo.
+- `tests/restore.test.mjs`: exact-alias restoration, unknown/rewritten alias reporting, manual corrections, sidebar previews.
 - `tests/review.test.mjs`: built-in Node test runner coverage for review gating, exact preservation, and consistent aliases.
 - `src/adapters/desktop.ts` and `src/adapters/models.ts`: the only frontend modules importing Tauri APIs: the product website opener, and the pack status/download commands plus the `model-status` event subscription.
-- `src/style.css`: local styles using system fonts, with keyboard focus and narrow-window layouts.
+- `src/style.css`: the brand theme tokens (paper/ink/cobalt, light and dark), system fonts, keyboard focus and narrow-window layouts.
 - `src-tauri/src/`: minimal Rust application entry points; no private-data commands or storage.
 - `src-tauri/capabilities/default.json`: grants status event listening and opening the fixed product website to the main window.
 - `src-tauri/tauri.conf.json`: desktop window, development hooks, local assets, and content security policy.
