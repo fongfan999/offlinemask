@@ -44,13 +44,14 @@ Use the commands in the [README](../README.md). `mise exec --` ensures the proje
 - `tests/review.test.mjs`: built-in Node test runner coverage for review gating, exact preservation, and consistent aliases.
 - `src/adapters/desktop.ts` and `src/adapters/models.ts`: the only frontend modules importing Tauri APIs: the product website opener, and the pack status/download commands plus the `model-status` event subscription.
 - `src/style.css`: the brand theme tokens (paper/ink/cobalt, light and dark), system fonts, keyboard focus and narrow-window layouts.
+- `brand/`: the product mark (`[—]`) as SVG in ink/paper/mono variants plus the app-icon tile; `pnpm tauri icon brand/tile-cobalt.svg` regenerates `src-tauri/icons/`. Rules in `brand/README.md`.
 - `src-tauri/src/`: minimal Rust application entry points; no private-data commands or storage.
 - `src-tauri/capabilities/default.json`: grants status event listening and opening the fixed product website to the main window.
 - `src-tauri/tauri.conf.json`: desktop window, development hooks, local assets, and content security policy.
 
 Add feature modules and workers when their first implementation exists, following [Decision 0001](decisions/0001-desktop-stack.md). Text libraries and model packaging are documented in [Decision 0005](decisions/0005-library-text-detection.md). File parsers and vault technology remain open decisions.
 
-The development bundle identifier is `dev.offlinemask.desktop`. Review ownership and release identity before distributing signed builds. The scaffold's Tauri application icons are retained as placeholders.
+The development bundle identifier is `dev.offlinemask.desktop`. Review ownership and release identity before distributing signed builds. The Tauri application icons are generated from `brand/tile-cobalt.svg`.
 
 ## Documentation studied and applied
 

@@ -220,3 +220,9 @@ Product changes in the same pass:
 - **⌘/Ctrl + Enter** in the draft runs the primary action.
 
 This supersedes the earlier blue/white glass acceptance for presentation only. Detection behavior, offline boundaries and manual-only downloads are unchanged.
+
+## 9 October — Product mark and copy
+
+The owner asked for a logo and allowed copy changes. The mark is **an alias**: two inked brackets around a cobalt dash, `[—]`, the shape the product produces when it hides a value. It replaces the scaffold shield everywhere: sidebar tile, hero tile, favicon and the generated platform icons (`brand/tile-cobalt.svg` → `pnpm tauri icon`). The wordmark sets **Offline** in ink and **Mask** in cobalt. Rules and files are in [brand/README.md](../brand/README.md); the personal P?! mark stays Phong Phan's and is not the app logo.
+
+Copy: the hero subline now names what gets hidden ("Tên, số tài khoản, số điện thoại… được thay bằng bí danh ngay trên máy bạn. Không cần Internet."), and an open private session's subtitle walks the loop ("Đọc lại bản đã ẩn, sao chép sang AI, rồi dán phản hồi bên dưới để khôi phục."). The page description meta follows the hero. All other copy is unchanged. See [Decision 0053](decisions/0053-product-mark.md).
