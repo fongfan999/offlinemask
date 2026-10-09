@@ -15,3 +15,7 @@ The completed focused packaged run measured **1.721 seconds** for the short retr
 A forced-reset run caused the WebKit view to reload while loading the models again. The cause is unproven and the failed run is preserved. Cooperative cancellation is measured separately from this forced-reset scenario. Cold startup, repeated hard-reset/load reliability, large-document timings, and Windows/Linux qualification remain open; do not call the whole text feature release-ready from these results.
 
 Evidence and reproduction: [recognition runtime measurements](../evaluations/recognition-performance-v1/README.md).
+
+## Update — 9 October 2026
+
+[Decision 0051](0051-shell-refactor-and-tooling.md) supersedes the navigation clause above: navigating away no longer cancels a run or terminates the worker; the run finishes and its session appears in the sidebar. Explicit cancellation and unmount keep the behavior recorded here.

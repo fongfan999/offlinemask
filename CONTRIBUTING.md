@@ -8,6 +8,7 @@ Use the pinned tools in `mise.toml`; do not depend on globally installed Node, p
 
 ```sh
 mise exec -- pnpm install --frozen-lockfile
+mise exec -- pnpm lint
 mise exec -- pnpm build
 mise exec -- pnpm test
 mise exec -- pnpm check:native
@@ -21,6 +22,7 @@ Read [product direction](docs/product-direction.md) before UI work. The current 
 
 - Use Vue Composition API with TypeScript, semantic HTML, standard CSS, and small components/modules with clear responsibilities. Keep portable transformations separate from native adapters and UI state.
 - Prefer documented platform APIs and maintained libraries over proprietary formats or custom infrastructure. Add dependencies for a demonstrated need; record their source, license compatibility, runtime cost, offline behavior, and alternatives in an architecture decision when the choice is substantial.
+- Run `pnpm lint` (ESLint plus Prettier) before submitting; `pnpm format` rewrites. Fingerprinted detection sources under `src/core/` and the frozen experiments under `scripts/` are excluded from formatting on purpose; see `.prettierignore` and [scripts/README.md](scripts/README.md). The CI workflow in `.github/workflows/ci.yml` runs the same commands.
 - Use shared design tokens and the `.glass` surface rule. Do not add independent blur recipes, animated backdrop effects, remote fonts, or automatic runtime asset downloads. Explicit user-triggered model downloads in Settings are allowed; processing and startup remain offline. Use the blue/white/neutral palette; purple and lavender are excluded from the current design direction.
 - Study current official documentation (Context7 is available in the agent workflow). Record consequential choices in `docs/decisions/`, and describe unresolved decisions honestly.
 - Keep UI copy in Vietnamese for the current prototype. User-facing labels describe behavior, not implementation internals.

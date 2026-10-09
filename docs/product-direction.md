@@ -202,3 +202,9 @@ The selected pair now has an isolated native desktop test path. It matched all 3
 ## 21 September — Native failure containment
 
 Keep the selected recognition pair fixed while qualifying a separate native helper process. The opt-in packaged helper matched all 398 saved previews and recovered from deliberately stopped/killed helpers without losing drafts or existing sessions. Automatic internet activity and silent document retries remain excluded. Keep the default backend unchanged until offline GUI and distribution/platform qualification are complete. See [Decision 0048](decisions/0048-isolate-native-recognition.md).
+
+## 9 October — Structural refactor without visual change
+
+The owner reviewed the whole project and asked for every finding to be applied: "everything, as long as we won't break the app, the app is simply to mask PII data." The frontend shell was split into composables and page components, pack status is pushed from the native layer instead of polled, the duplicated runtime binary was removed from the bundle, the native download tolerates slow connections, and Prettier/ESLint/CI were added. Markup, CSS classes, copy and the accepted glass styling are unchanged.
+
+Two small behavior changes are intentional: a detection run keeps going while the user navigates and its session appears in the sidebar when done, and an open session offers "Xóa phiên" beside "Phiên mới" so private text can be dropped without quitting. Fingerprinted detection sources and frozen evaluation scripts were left untouched. See [Decision 0051](decisions/0051-shell-refactor-and-tooling.md) for details and the checks that remain for a packaged run.

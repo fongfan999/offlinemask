@@ -43,6 +43,7 @@ With mise activated in your shell, you can use `pnpm desktop:dev` directly. `mis
 | --- | --- |
 | `mise exec -- pnpm dev` | Browser preview at localhost:1420; no native APIs. |
 | `mise exec -- pnpm typecheck` | Check Vue, TypeScript, and Vite configuration. |
+| `mise exec -- pnpm lint` | ESLint and Prettier checks for the frontend, tests, and build scripts; `pnpm format` rewrites. |
 | `mise exec -- pnpm test` | Check text detection, transformations, session isolation, storage boundaries, and sample review. |
 | `mise exec -- pnpm models:download` | Optional developer download of pinned model assets for model evaluations. |
 | `mise exec -- pnpm models:check` | Verify local model hashes; no downloads. |

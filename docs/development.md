@@ -27,7 +27,10 @@ Use the commands in the [README](../README.md). `mise exec --` ensures the proje
 
 ## Structure and boundaries
 
-- `src/App.vue`: format home, sidebar history, real text entry and table samples, explicit masking, original/masked views, individual choices, and copying.
+- `src/App.vue`: shell only. Owns navigation and focus hand-off, and provides the three shared stores below to its pages.
+- `src/composables/`: `useRecognitionPack` (optional pack status and actions), `useSessions` (sidebar list and sample-only persistence), `useMaskingRun` (draft, category choices, one in-flight run), `useTextReview` (manual selection, hide, undo). Plain factories with injected dependencies; see [Decision 0051](decisions/0051-shell-refactor-and-tooling.md).
+- `src/pages/`: `HomePage`, `SettingsPage` and `WorkspacePage` (real text entry and table samples, explicit masking, original/masked views, individual choices, copying, session removal).
+- `src/components/AppSidebar.vue`: navigation, session history, settings entry, website link and version.
 - `src/components/AppIcon.vue`: local SVG icons.
 - `src/core/review.ts`: portable fixture types, explicit decisions, tokenization, sample alias replacements, and the final-copy gate.
 - `src/core/text.ts`: provider-span validation, overlap policy, aliases, and exact transformations.
@@ -35,11 +38,12 @@ Use the commands in the [README](../README.md). `mise exec --` ensures the proje
 - `src/workers/detection.worker.ts` and `src/adapters/text-detection.ts`: cancellable local inference.
 - `src/core/sessions.ts`: private in-memory text sessions, versioned sample records, sample-only persistence, and synthetic table transformations.
 - `tests/sessions.test.mjs`: history round trips, independent choices, serialization boundaries, invalid history, and table preservation.
+- `tests/composables.test.mjs`: store persistence boundary, pushed status with polling fallback, run cancellation/failure paths, manual review hide/undo.
 - `tests/review.test.mjs`: built-in Node test runner coverage for review gating, exact preservation, and consistent aliases.
-- `src/adapters/desktop.ts`: the only frontend module importing Tauri APIs. It provides native version detection for future features; the simplified interface does not call it.
+- `src/adapters/desktop.ts` and `src/adapters/models.ts`: the only frontend modules importing Tauri APIs: the product website opener, and the pack status/download commands plus the `model-status` event subscription.
 - `src/style.css`: local styles using system fonts, with keyboard focus and narrow-window layouts.
 - `src-tauri/src/`: minimal Rust application entry points; no private-data commands or storage.
-- `src-tauri/capabilities/default.json`: grants version/resource-path resolution and opening the fixed product website to the main window.
+- `src-tauri/capabilities/default.json`: grants status event listening and opening the fixed product website to the main window.
 - `src-tauri/tauri.conf.json`: desktop window, development hooks, local assets, and content security policy.
 
 Add feature modules and workers when their first implementation exists, following [Decision 0001](decisions/0001-desktop-stack.md). Text libraries and model packaging are documented in [Decision 0005](decisions/0005-library-text-detection.md). File parsers and vault technology remain open decisions.
@@ -88,7 +92,7 @@ Windows and Linux have not been built or tested here. The UI checks do not certi
 
 Normal builds prepare local WASM but neither require nor include model weights, even when `public/models/` exists. Vite public copying is disabled; `prepare-assets.mjs` copies only non-model assets. The desktop embeds the staged frontend and has no model resource mapping.
 
-The native `models` module downloads only compile-time manifest URLs on an explicit Settings action. Its reqwest client runs on a background thread; the frontend polls small status objects. Pinned byte counts and SHA-256 digests gate activation. The model root is `<app_local_data_dir>/models/vietnamese-pii-v1`; partial files resume after cancellation or restart. Tauri asset protocol can read only the model subtree. Runtime inference disallows remote models and has no remote CSP allowance.
+The native `models` module downloads only compile-time manifest URLs on an explicit Settings action. Its reqwest client runs on a background thread and pushes small status objects to the frontend as `model-status` events, coalescing progress to one push per 200 ms; the frontend reads the status once on start and after each action. Pinned byte counts and SHA-256 digests gate activation. The model root is `<app_local_data_dir>/models/vietnamese-pii-v1`; partial files resume after cancellation or restart. Tauri asset protocol can read only the model subtree. Runtime inference disallows remote models and has no remote CSP allowance.
 
 Once the installed shipping pack reports ready, the app prepares it in the background using the same worker and loading promise as masking. This is local initialization, not a download or update check. Preparation receives no source text and runs no inference. The developer-only [preload benchmark](evaluations/recognition-preload-v1/README.md) measures a request eight seconds into preparation; production collects no timings.
 
