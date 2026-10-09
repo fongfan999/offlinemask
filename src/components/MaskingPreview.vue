@@ -48,32 +48,47 @@ import AppIcon from "./AppIcon.vue";
 .preview-document {
   align-self: stretch;
   padding: 18px 20px;
-  border-radius: 16px;
+  border-radius: 8px;
   text-align: left;
+}
+/* The AI panel is the notebook's sticky note: cobalt paper, slightly tilted. */
+.preview-ai {
+  background: var(--note);
+  color: var(--note-ink);
+  border-color: transparent;
+  transform: rotate(2deg);
+}
+.preview-ai .preview-label {
+  color: inherit;
+  opacity: 0.8;
 }
 .preview-ai strong {
   display: block;
   margin-top: 18px;
-  font-size: 12px;
-  line-height: 1.5;
-  font-weight: 550;
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  line-height: 1.4;
+  font-weight: 400;
 }
 .preview-ai > small {
   display: block;
   margin-top: 8px;
   font-size: 11px;
   line-height: 1.6;
-  color: var(--muted);
+  opacity: 0.8;
 }
 .preview-result {
-  border-color: #c4dfee;
+  border-color: var(--line-strong);
 }
 .preview-label {
   display: flex;
   align-items: center;
   gap: 7px;
   color: var(--muted);
-  font-size: 11px;
+  font: 10px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 .preview-line {
   height: 4px;
@@ -92,17 +107,17 @@ import AppIcon from "./AppIcon.vue";
   overflow-wrap: anywhere;
 }
 .original-value {
-  background: #e8edf2;
+  background: var(--paper-sunk);
   color: var(--ink);
 }
 .alias-value {
-  color: var(--blue);
-  background: #dceef9;
-  font-family: ui-monospace, monospace;
+  color: var(--accent);
+  background: var(--accent-soft);
+  font-family: var(--mono);
 }
 .preview-amount {
   margin-top: 10px;
-  font-size: 12px;
+  font: 12px var(--mono);
   color: var(--muted);
   font-variant-numeric: tabular-nums;
 }
@@ -110,7 +125,7 @@ import AppIcon from "./AppIcon.vue";
   display: grid;
   justify-items: center;
   gap: 7px;
-  color: var(--blue);
+  color: var(--accent);
 }
 @media (max-height: 780px) and (min-width: 761px) {
   .masking-preview {
@@ -130,10 +145,14 @@ import AppIcon from "./AppIcon.vue";
     grid-column: 3;
   }
 }
+@media (prefers-reduced-motion: reduce) {
+  .preview-ai {
+    transform: none;
+  }
+}
 @media (max-width: 440px) {
   .preview-document {
     padding: 14px 10px;
-    border-radius: 12px;
   }
   .preview-value {
     padding: 5px;
