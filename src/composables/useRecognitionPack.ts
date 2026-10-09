@@ -1,0 +1,97 @@
+import { computed, ref } from "vue";
+import {
+  browserModelStatus,
+  cancelModelDownload,
+  downloadModels,
+  modelStatus,
+  subscribeModelStatus,
+  type ModelStatus,
+} from "../adapters/models.ts";
+
+export interface PackAdapter {
+  status(): Promise<ModelStatus>;
+  subscribe(listener: (status: ModelStatus) => void): Promise<() => void>;
+  download(): Promise<void>;
+  cancel(): Promise<void>;
+}
+
+export const nativePackAdapter: PackAdapter = {
+  status: modelStatus,
+  subscribe: subscribeModelStatus,
+  download: downloadModels,
+  cancel: cancelModelDownload,
+};
+
+export const packCheckError = "Chưa kiểm tra được gói nhận diện. Hãy mở lại ứng dụng để thử lại.";
+export const packActionError = "Chưa thực hiện được thao tác. Vui lòng thử lại.";
+const preparingStages: ReadonlySet<ModelStatus["stage"]> = new Set(["downloading", "installing"]);
+
+/** Optional recognition pack state. Status arrives by native push; one explicit
+ * read covers the initial state and the moment after each user action.
+ */
+export function useRecognitionPack(
+  adapter: PackAdapter = nativePackAdapter,
+  fallbackPollMs = 2000,
+) {
+  const status = ref<ModelStatus>({ ...browserModelStatus(), stage: "checking" });
+  const busy = ref(false);
+  const error = ref("");
+  const ready = computed(() => status.value.stage === "ready");
+  const preparing = computed(() => preparingStages.has(status.value.stage));
+  const readyRoot = computed(() => (ready.value ? status.value.root : null));
+  let unsubscribe: (() => void) | undefined;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  let state: "idle" | "started" | "stopped" = "idle";
+
+  function apply(next: ModelStatus) {
+    status.value = next;
+    error.value = "";
+  }
+  async function refresh() {
+    try {
+      apply(await adapter.status());
+    } catch {
+      error.value = packCheckError;
+    }
+  }
+  async function poll() {
+    await refresh();
+    if (state === "started") timer = setTimeout(poll, fallbackPollMs);
+  }
+  async function start() {
+    if (state !== "idle") return;
+    state = "started";
+    try {
+      const stop = await adapter.subscribe(apply);
+      if (state !== "started") {
+        stop();
+        return;
+      }
+      unsubscribe = stop;
+      await refresh();
+    } catch {
+      // Without pushes, slow polling keeps the UI from sticking at "checking".
+      if (state === "started") await poll();
+    }
+  }
+  function stop() {
+    state = "stopped";
+    clearTimeout(timer);
+    unsubscribe?.();
+    unsubscribe = undefined;
+  }
+  async function run(action: "download" | "pause") {
+    if (busy.value) return;
+    busy.value = true;
+    try {
+      if (action === "download") await adapter.download();
+      else await adapter.cancel();
+      await refresh();
+    } catch {
+      error.value = packActionError;
+    } finally {
+      busy.value = false;
+    }
+  }
+  return { status, busy, error, ready, preparing, readyRoot, refresh, start, stop, run };
+}
