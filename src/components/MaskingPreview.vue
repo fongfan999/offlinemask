@@ -3,7 +3,10 @@ import AppIcon from "./AppIcon.vue";
 </script>
 
 <template>
-  <figure class="masking-preview" aria-label="Quy trình: thay thông tin riêng tư bằng bí danh, rồi sao chép sang AI">
+  <figure
+    class="masking-preview"
+    aria-label="Quy trình: thay thông tin riêng tư bằng bí danh, rồi sao chép sang AI"
+  >
     <div class="preview-flow">
       <div class="preview-document glass">
         <div class="preview-label"><AppIcon name="file" :size="14" />Bản gốc</div>
@@ -136,6 +139,5 @@ import AppIcon from "./AppIcon.vue";
     padding: 5px;
     font-size: 10px;
   }
-
 }
 </style>

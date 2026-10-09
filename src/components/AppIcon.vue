@@ -1,7 +1,8 @@
 <script setup lang="ts">
 defineProps<{ name: string; size?: number }>();
 const paths: Record<string, string> = {
-  settings: "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1Z",
+  settings:
+    "M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8Z M9 3h6l1 3 3 1 2 5-2 5-3 1-1 3H9l-1-3-3-1-2-5 2-5 3-1Z",
   download: "M12 3v12 M7 10l5 5 5-5 M4 16v5h16v-5",
   home: "m3 10 9-7 9 7v11h-6v-7H9v7H3Z",
   plus: "M12 5v14 M5 12h14",

@@ -25,16 +25,20 @@ test("native website clicks prevent webview navigation and open only the homepag
   assert.equal(event.defaultPrevented, true);
   await opening;
   assert.equal(productWebsite, "https://offlinemask.com/");
-  assert.deepEqual(calls, [{
-    command: "plugin:opener|open_url",
-    args: { url: productWebsite, with: undefined },
-  }]);
+  assert.deepEqual(calls, [
+    {
+      command: "plugin:opener|open_url",
+      args: { url: productWebsite, with: undefined },
+    },
+  ]);
 });
 
 test("native opener failure reaches the UI without navigating away from the app", async () => {
   globalThis.window = {};
   globalThis.isTauri = true;
-  mockIPC(() => { throw new Error("Browser unavailable"); });
+  mockIPC(() => {
+    throw new Error("Browser unavailable");
+  });
   const event = new Event("click", { cancelable: true });
   await assert.rejects(openProductWebsite(event), /Browser unavailable/);
   assert.equal(event.defaultPrevented, true);

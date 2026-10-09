@@ -12,14 +12,27 @@ import ComingSoonBadge from "./ComingSoonBadge.vue";
       </div>
       <!-- One future, explicitly initiated check for all supported update types.
            Do not attach update requests to mounting, polling, or navigation. -->
-      <button class="quiet-button" disabled aria-describedby="updates-policy updates-scope">Kiểm tra cập nhật</button>
+      <button class="quiet-button" disabled aria-describedby="updates-policy updates-scope">
+        Kiểm tra cập nhật
+      </button>
     </div>
     <details class="offline-install">
       <summary>Cài từ tệp <ComingSoonBadge /></summary>
       <div class="settings-tool-row">
-        <p id="offline-install-hint">Tải gói trên <span class="placeholder-link" role="link" aria-disabled="true" aria-label="offlinemask.com — trang tải gói sắp có">offlinemask.com</span>, rồi chọn tệp để cài.</p>
+        <p id="offline-install-hint">
+          Tải gói trên
+          <span
+            class="placeholder-link"
+            role="link"
+            aria-disabled="true"
+            aria-label="offlinemask.com — trang tải gói sắp có"
+            >offlinemask.com</span
+          >, rồi chọn tệp để cài.
+        </p>
         <!-- The download page and file installer are placeholders until available. -->
-        <button class="quiet-button" disabled aria-describedby="offline-install-hint">Chọn tệp</button>
+        <button class="quiet-button" disabled aria-describedby="offline-install-hint">
+          Chọn tệp
+        </button>
       </div>
     </details>
   </section>

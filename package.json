@@ -17,7 +17,9 @@
     "models:check": "node scripts/prepare-models.mjs",
     "test:models": "pnpm models:check && node scripts/evaluate-model.mjs",
     "compare:models": "pnpm models:check && node scripts/compare-models.mjs",
-    "desktop:build:native": "pnpm typecheck && node scripts/prepare-native-desktop.mjs && tauri build --features recognition-native-release --config artifacts/native-desktop/tauri.conf.json && node scripts/verify-native-desktop.mjs"
+    "desktop:build:native": "pnpm typecheck && node scripts/prepare-native-desktop.mjs && tauri build --features recognition-native-release --config artifacts/native-desktop/tauri.conf.json && node scripts/verify-native-desktop.mjs",
+    "lint": "eslint . && prettier --check .",
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@huggingface/transformers": "4.2.0",
@@ -30,10 +32,17 @@
     "vue": "^3.5.13"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@tauri-apps/cli": "^2",
     "@types/node": "^24",
     "@vitejs/plugin-vue": "^6.0.7",
+    "eslint": "^10.12.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.11.1",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.9",
     "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.1",
     "vite": "^8.0.16",
     "vue-tsc": "^3.3.5"
   },

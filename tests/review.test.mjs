@@ -22,9 +22,7 @@ test("review is gated until each known finding has an explicit decision", () => 
 });
 
 test("repeated names use one alias while unmarked content stays unchanged", () => {
-  const decisions = Object.fromEntries(
-    findings.map((item) => [item.id, "mask"]),
-  );
+  const decisions = Object.fromEntries(findings.map((item) => [item.id, "mask"]));
   const output = prepareCopy(decisions);
   assert.equal(output.split("[TEN_DEMO_01]").length - 1, 2);
   for (const finding of findings) assert.ok(!output.includes(finding.value));
@@ -39,9 +37,7 @@ test("repeated names use one alias while unmarked content stays unchanged", () =
 });
 
 test("keep decisions preserve exact text including leading zeros", () => {
-  const decisions = Object.fromEntries(
-    findings.map((item) => [item.id, "keep"]),
-  );
+  const decisions = Object.fromEntries(findings.map((item) => [item.id, "keep"]));
   assert.equal(prepareCopy(decisions), sampleText);
   decisions.name = "mask";
   const output = prepareCopy(decisions);
