@@ -17,10 +17,13 @@ defineExpose({
 <template>
   <div class="introduction">
     <span class="hero-logo brand-mark" aria-hidden="true">
-      <AppIcon name="shield" :size="28" />
+      <AppIcon name="mask" :size="26" />
     </span>
     <h1 ref="heading" tabindex="-1">Ẩn thông tin nhạy cảm<span>trước khi chia sẻ với AI.</span></h1>
-    <p>Thay thông tin riêng tư bằng bí danh. Không cần Internet.</p>
+    <p>
+      Tên, số tài khoản, số điện thoại… được thay bằng bí danh ngay trên máy bạn. Không cần
+      Internet.
+    </p>
     <MaskingPreview />
   </div>
   <section class="format-grid" aria-labelledby="format-heading">

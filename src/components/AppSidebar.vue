@@ -55,7 +55,8 @@ defineExpose({
       aria-label="OfflineMask — Trang chủ"
       @click="emit('navigate', 'home')"
     >
-      <span class="brand-mark"><AppIcon name="shield" :size="22" /></span>OfflineMask
+      <span class="brand-mark"><AppIcon name="mask" :size="20" /></span
+      ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
     </button>
     <nav aria-label="Định dạng">
       <button

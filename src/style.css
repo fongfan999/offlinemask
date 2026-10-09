@@ -169,6 +169,13 @@ p {
 .brand:hover .brand-mark {
   rotate: -4deg;
 }
+/* Wordmark: "Offline" in ink, "Mask" in cobalt — the hidden part is the accent. */
+.brand-name {
+  white-space: nowrap;
+}
+.brand-accent {
+  color: var(--accent);
+}
 nav {
   display: grid;
   gap: 4px;

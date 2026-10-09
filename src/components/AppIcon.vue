@@ -10,6 +10,8 @@ const paths: Record<string, string> = {
   text: "M4 5h16 M12 5v15 M8 20h8",
   table: "M3 3h18v18H3Z M3 9h18 M9 9v12 M3 15h18",
   shield: "M12 3 4 6v6c0 5 8 9 8 9s8-4 8-9V6l-8-3Z M8.5 12l2.5 2.5 4.5-5",
+  // The product mark: an alias — brackets around a hidden value.
+  mask: "M9.5 5.5h-3v13h3 M14.5 5.5h3v13h-3 M9.8 12.3l4.4-.4",
   file: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z M14 2v6h6 M8 13h8 M8 17h5",
   arrow: "M5 12h14 M13 6l6 6-6 6",
   external: "M14 3h7v7 M21 3l-11 11 M10 3H3v18h18v-7",

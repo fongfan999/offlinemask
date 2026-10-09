@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="48" height="48" role="img" aria-label="OfflineMask">
+  <title>OfflineMask mark, single colour on dark</title>
+  <g fill="#fff">
+    <path d="M19.6 9.3C16.2 9 13.4 9.2 11.8 10 10.7 10.5 10.2 11.5 10.2 12.8v22.4c0 1.3.5 2.3 1.6 2.8 1.6.8 4.4 1 7.8.7l-.4-2.6c-2.3.1-4 0-4.9-.3-.4-.1-.5-.3-.5-.8V13c0-.5.1-.7.5-.8.9-.3 2.6-.4 4.9-.3z"/>
+    <path transform="matrix(-1 0 0 1 48 0)" d="M19.6 9.3C16.2 9 13.4 9.2 11.8 10 10.7 10.5 10.2 11.5 10.2 12.8v22.4c0 1.3.5 2.3 1.6 2.8 1.6.8 4.4 1 7.8.7l-.4-2.6c-2.3.1-4 0-4.9-.3-.4-.1-.5-.3-.5-.8V13c0-.5.1-.7.5-.8.9-.3 2.6-.4 4.9-.3z"/>
+    <rect x="18.2" y="22" width="11.6" height="4" rx="2" transform="rotate(-4 24 24)"/>
+  </g>
+</svg>
