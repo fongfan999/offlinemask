@@ -3,6 +3,7 @@ import { ref, useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
 import { openProductWebsite, productWebsite } from "../adapters/desktop.ts";
 import type { Page } from "../composables/context.ts";
+import { sessionPreview } from "../core/session-preview.ts";
 import { sessionTitle, type Session } from "../core/sessions.ts";
 
 defineProps<{
@@ -89,9 +90,10 @@ defineExpose({
         @click="emit('navigate', session.format, session.id)"
       >
         <AppIcon :name="session.format === 'text' ? 'file' : 'table'" :size="16" /><span
-          ><strong>{{ sessionTitle(session) }}</strong
+          ><strong>{{ sessionPreview(session) }}</strong
           ><small
-            >{{ dateLabel(session.createdAt)
+            >{{ session.fixture === "private-text-v1" ? `${sessionTitle(session)} · ` : ""
+            }}{{ dateLabel(session.createdAt)
             }}{{ session.fixture === "private-text-v1" ? " · Tạm thời" : " · Mẫu" }}</small
           ></span
         >
