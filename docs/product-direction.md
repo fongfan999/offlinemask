@@ -226,3 +226,9 @@ This supersedes the earlier blue/white glass acceptance for presentation only. D
 The owner asked for a logo and allowed copy changes. The mark is **an alias**: two inked brackets around a cobalt dash, `[—]`, the shape the product produces when it hides a value. It replaces the scaffold shield everywhere: sidebar tile, hero tile, favicon and the generated platform icons (`brand/tile-cobalt.svg` → `pnpm tauri icon`). The wordmark sets **Offline** in ink and **Mask** in cobalt. Rules and files are in [brand/README.md](../brand/README.md); the personal P?! mark stays Phong Phan's and is not the app logo.
 
 Copy: the hero subline now names what gets hidden ("Tên, số tài khoản, số điện thoại… được thay bằng bí danh ngay trên máy bạn. Không cần Internet."), and an open private session's subtitle walks the loop ("Đọc lại bản đã ẩn, sao chép sang AI, rồi dán phản hồi bên dưới để khôi phục."). The page description meta follows the hero. All other copy is unchanged. See [Decision 0053](decisions/0053-product-mark.md).
+
+## 9 October — Name decision: keep OfflineMask
+
+The owner asked for a shorter, international, more memorable name. About a hundred candidates were explored across three rounds (short real words, coined compounds, alias/restore/offline concepts) and checked against the .com/.app/.dev registries: every short real word was registered, and the coined names traded clarity for sound. The owner decided to keep **OfflineMask**: "offline" carries the trust promise in one word, "mask" is understood everywhere including Vietnam, and the personality lives in the `[—]` mark and the two-tone wordmark rather than the name. Do not reopen naming without new reasons.
+
+At check time offlinemask.com, .app, .dev and .io were all unregistered. Registering them is the owner's task and should happen before the website or any public mention.
