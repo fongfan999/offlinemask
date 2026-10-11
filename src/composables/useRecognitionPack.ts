@@ -5,6 +5,7 @@ import {
   downloadModels,
   modelStatus,
   subscribeModelStatus,
+  uninstallModels,
   type ModelStatus,
 } from "../adapters/models.ts";
 
@@ -13,6 +14,7 @@ export interface PackAdapter {
   subscribe(listener: (status: ModelStatus) => void): Promise<() => void>;
   download(): Promise<void>;
   cancel(): Promise<void>;
+  uninstall(): Promise<void>;
 }
 
 export const nativePackAdapter: PackAdapter = {
@@ -20,6 +22,7 @@ export const nativePackAdapter: PackAdapter = {
   subscribe: subscribeModelStatus,
   download: downloadModels,
   cancel: cancelModelDownload,
+  uninstall: uninstallModels,
 };
 
 export const packCheckError = "Chưa kiểm tra được gói nhận diện. Hãy mở lại ứng dụng để thử lại.";
@@ -80,12 +83,13 @@ export function useRecognitionPack(
     unsubscribe?.();
     unsubscribe = undefined;
   }
-  async function run(action: "download" | "pause") {
+  async function run(action: "download" | "pause" | "uninstall") {
     if (busy.value) return;
     busy.value = true;
     try {
       if (action === "download") await adapter.download();
-      else await adapter.cancel();
+      else if (action === "pause") await adapter.cancel();
+      else await adapter.uninstall();
       await refresh();
     } catch {
       error.value = packActionError;

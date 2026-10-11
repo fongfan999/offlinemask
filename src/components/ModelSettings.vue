@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
 import { formatModelBytes as sizes, type ModelStatus } from "../adapters/models";
 import { recognitionPack } from "../core/detection/pack.ts";
@@ -8,8 +8,21 @@ const props = defineProps<{
   desktop: boolean;
   busy: boolean;
   error: string;
+  /** A masking run may be using the pack; uninstalling waits for it. */
+  processing: boolean;
 }>();
-defineEmits<{ download: []; pause: [] }>();
+const emit = defineEmits<{ download: []; pause: []; uninstall: [] }>();
+const confirmingUninstall = ref(false);
+watch(
+  () => props.status.stage,
+  (stage) => {
+    if (stage !== "ready") confirmingUninstall.value = false;
+  },
+);
+function uninstall() {
+  confirmingUninstall.value = false;
+  emit("uninstall");
+}
 const installing = computed(
   () =>
     props.status.stage === "installing" ||
@@ -136,6 +149,30 @@ const errorMessage = computed(() => {
     <details class="model-details">
       <summary>Thông tin gói</summary>
       <p>{{ recognitionPack.attribution }}</p>
+      <div v-if="status.stage === 'ready'" class="model-uninstall">
+        <template v-if="confirmingUninstall">
+          <p>
+            Gỡ gói sẽ xoá {{ sizes(status.installedBytes) }} khỏi máy. Để nhận diện họ tên và địa
+            chỉ lại, bạn cần tải lại {{ sizes(status.total) }}.
+          </p>
+          <div class="model-uninstall-actions">
+            <button class="quiet-button danger-button" :disabled="busy" @click="uninstall">
+              Gỡ gói
+            </button>
+            <button class="quiet-button" @click="confirmingUninstall = false">Huỷ</button>
+          </div>
+        </template>
+        <template v-else>
+          <button
+            class="quiet-button"
+            :disabled="busy || processing"
+            @click="confirmingUninstall = true"
+          >
+            Gỡ gói nhận diện
+          </button>
+          <p v-if="processing">Chờ lượt xử lý hiện tại xong để gỡ gói.</p>
+        </template>
+      </div>
     </details>
   </section>
 </template>

@@ -63,3 +63,4 @@ export async function subscribeModelStatus(
 
 export const downloadModels = () => invoke<void>("download_models");
 export const cancelModelDownload = () => invoke<void>("cancel_model_download");
+export const uninstallModels = () => invoke<void>("uninstall_models");

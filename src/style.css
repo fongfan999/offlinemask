@@ -1343,6 +1343,22 @@ td.alias {
 .model-details p {
   margin-top: 12px;
 }
+.model-uninstall {
+  margin-top: 16px;
+}
+.model-uninstall-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+.quiet-button.danger-button {
+  color: var(--error);
+  border-color: color-mix(in srgb, var(--error) 35%, transparent);
+}
+.quiet-button.danger-button:not(:disabled):hover {
+  background: var(--error-soft);
+  border-color: var(--error);
+}
 .model-error {
   margin: 16px 0;
   color: var(--error);

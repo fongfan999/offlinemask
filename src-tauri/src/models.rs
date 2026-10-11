@@ -122,21 +122,53 @@ impl Models {
             published: Mutex::new(None),
         }));
         let check = manager.clone();
-        std::thread::spawn(move || {
-            if let Some(root) = check.0.pack.discovered_root(&check.0.root, &check.0.cancel) {
-                check.finish(Ok(root));
-            } else {
-                let downloaded = check.0.pack.cached_bytes(&check.0.root);
-                check.status().downloaded = downloaded;
-                check.finish(Err(if downloaded > 0 {
-                    "cancelled"
-                } else {
-                    "missing"
-                }
-                .into()));
-            }
-        });
+        std::thread::spawn(move || check.check());
         manager
+    }
+    /// Report what is on disk: a usable pack, a resumable download or nothing.
+    fn check(&self) {
+        if let Some(root) = self.0.pack.discovered_root(&self.0.root, &self.0.cancel) {
+            self.finish(Ok(root));
+        } else {
+            let downloaded = self.0.pack.cached_bytes(&self.0.root);
+            self.status().downloaded = downloaded;
+            self.finish(Err(if downloaded > 0 {
+                "cancelled"
+            } else {
+                "missing"
+            }
+            .into()));
+        }
+    }
+    /// Remove every installed version, the legacy layout and any cached download.
+    fn uninstall(&self) -> Result<(), String> {
+        let mut status = self.status();
+        if status.stage != "ready" {
+            return Err("busy".into());
+        }
+        // Held across removal so a download cannot start into a half-removed directory.
+        self.0
+            .tokenizers
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .clear();
+        let removed = match fs::remove_dir_all(&self.0.root) {
+            Err(error) if error.kind() != std::io::ErrorKind::NotFound => Err("storage"),
+            _ => Ok(()),
+        };
+        status.stage = "checking".into();
+        status.root = None;
+        status.error = None;
+        drop(status);
+        if removed.is_ok() {
+            self.finish(Err("missing".into()));
+        } else {
+            // Report whatever survived, without hashing on the command thread.
+            self.publish(true);
+            let check = self.clone();
+            std::thread::spawn(move || check.check());
+        }
+        removed.map_err(str::to_owned)
     }
     /// The status is plain data, so a panic elsewhere never makes it unreadable.
     fn status(&self) -> MutexGuard<'_, ModelStatus> {
@@ -168,6 +200,10 @@ impl Models {
                 status.error = None;
             }
             Err(reason) => {
+                if reason == "missing" {
+                    status.downloaded = 0;
+                    status.installed = 0;
+                }
                 status.stage = if reason == "cancelled" {
                     "paused"
                 } else if reason == "missing" {
@@ -401,6 +437,10 @@ pub fn cancel_model_download(models: tauri::State<'_, Models>) {
     drop(status);
     models.publish(true);
 }
+#[tauri::command]
+pub fn uninstall_models(models: tauri::State<'_, Models>) -> Result<(), String> {
+    models.uninstall()
+}
 
 #[cfg(test)]
 mod tests {
@@ -570,6 +610,32 @@ mod tests {
             assert!(std::time::Instant::now() < deadline);
             std::thread::yield_now();
         }
+    }
+    #[test]
+    fn uninstall_removes_only_a_ready_pack_and_reports_missing() {
+        let fixture = Fixture::new();
+        let manager = Models::new(fixture.0.join("pack"));
+        let deadline = std::time::Instant::now() + Duration::from_secs(3);
+        while manager.status().stage == "checking" {
+            assert!(std::time::Instant::now() < deadline);
+            std::thread::yield_now();
+        }
+        assert_eq!(manager.uninstall(), Err("busy".into()));
+        fs::create_dir_all(fixture.0.join("pack/packs/version")).unwrap();
+        fs::write(fixture.0.join("pack/packs/version/model.onnx"), b"model").unwrap();
+        fs::write(fixture.0.join("keep"), b"other app data").unwrap();
+        {
+            let mut status = manager.status();
+            status.stage = "ready".into();
+            status.root = Some("root".into());
+        }
+        assert_eq!(manager.uninstall(), Ok(()));
+        let status = manager.status().clone();
+        assert_eq!(status.stage, "missing");
+        assert!(status.root.is_none());
+        assert_eq!(status.downloaded, 0);
+        assert!(!fixture.0.join("pack").exists());
+        assert!(fixture.0.join("keep").exists());
     }
     #[test]
     fn stage_changes_reach_the_notifier() {

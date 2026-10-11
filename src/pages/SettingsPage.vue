@@ -3,9 +3,10 @@ import { useTemplateRef } from "vue";
 import ModelSettings from "../components/ModelSettings.vue";
 import SettingsTools from "../components/SettingsTools.vue";
 import { desktopModels } from "../adapters/models.ts";
-import { packKey, useProvided } from "../composables/context.ts";
+import { packKey, runKey, useProvided } from "../composables/context.ts";
 
 const { status, busy, error, run } = useProvided(packKey);
+const { processing } = useProvided(runKey);
 const heading = useTemplateRef<HTMLHeadingElement>("heading");
 defineExpose({
   focusHeading() {
@@ -21,8 +22,10 @@ defineExpose({
     :desktop="desktopModels"
     :busy="busy"
     :error="error"
+    :processing="processing"
     @download="run('download')"
     @pause="run('pause')"
+    @uninstall="run('uninstall')"
   />
   <SettingsTools />
 </template>

@@ -54,6 +54,8 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     pack.readyRoot,
     (root) => {
       if (!root) {
+        // An uninstalled pack must not stay loaded in the detector.
+        if (preparedRoot) cancel();
         preparedRoot = null;
         return;
       }

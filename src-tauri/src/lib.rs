@@ -41,7 +41,8 @@ pub fn run() {
         models::recognition_encode,
         models::model_status,
         models::download_models,
-        models::cancel_model_download
+        models::cancel_model_download,
+        models::uninstall_models
     ]);
     #[cfg(all(
         feature = "minilm-desktop-prototype",
@@ -52,6 +53,7 @@ pub fn run() {
         models::model_status,
         models::download_models,
         models::cancel_model_download,
+        models::uninstall_models,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -65,6 +67,7 @@ pub fn run() {
         models::model_status,
         models::download_models,
         models::cancel_model_download,
+        models::uninstall_models,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -82,6 +85,7 @@ pub fn run() {
         models::model_status,
         models::download_models,
         models::cancel_model_download,
+        models::uninstall_models,
         recognition_native::recognition_native_load,
         recognition_native::recognition_native_run,
         recognition_native::recognition_native_release

@@ -49,6 +49,7 @@ function fakeAdapter(overrides = {}) {
     },
     download: async () => calls.push("download"),
     cancel: async () => calls.push("cancel"),
+    uninstall: async () => calls.push("uninstall"),
     ...overrides,
   };
 }
@@ -137,6 +138,9 @@ test("pack: pushes replace polling and actions refresh once", async () => {
   assert.equal(pack.readyRoot.value, "asset://root");
   await pack.run("pause");
   assert.deepEqual(adapter.calls.slice(2), ["cancel", "status"]);
+  await pack.run("uninstall");
+  assert.deepEqual(adapter.calls.slice(4), ["uninstall", "status"]);
+  assert.equal(pack.readyRoot.value, null);
   pack.stop();
   assert.equal(adapter.calls.at(-1), "unsubscribe");
   await pack.start();
@@ -272,10 +276,12 @@ test("run: a ready pack is prepared once and selects every category unless the u
   readyRoot.value = null;
   ready.value = false;
   await nextTick();
+  // An uninstalled pack is released rather than kept loaded.
+  assert.deepEqual(detector.calls.at(-1), ["cancel", false]);
   readyRoot.value = "asset://pack";
   ready.value = true;
   await nextTick();
-  assert.equal(detector.calls.length, 2);
+  assert.equal(detector.calls.length, 3);
 
   const edited = useMaskingRun({
     detector: fakeDetector(),
