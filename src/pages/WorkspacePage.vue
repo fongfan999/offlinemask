@@ -200,8 +200,8 @@ defineExpose({
             : session
               ? "Đọc lại kết quả, rồi sao chép khi bạn thấy phù hợp."
               : format === "text"
-                ? "Nhập hoặc dán văn bản để ẩn thông tin bằng bí danh."
-                : "Một lần nhấn. Thông tin riêng tư được thay bằng bí danh."
+                ? "Nhập hoặc dán văn bản để ẩn thông tin bằng mã thay thế."
+                : "Một lần nhấn. Thông tin riêng tư được thay bằng mã thay thế."
         }}
       </p>
     </div>

@@ -413,6 +413,50 @@ h1 {
   line-height: 1.8;
   margin-top: 10px;
 }
+/* One-time pack download, said on the home page before the first click. */
+.pack-notice {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--note-ink);
+}
+.pack-notice > svg {
+  flex-shrink: 0;
+}
+.pack-notice p {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.5;
+}
+.pack-notice p span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+}
+.pack-notice .quiet-button {
+  padding: 7px 10px;
+  background: none;
+  border-color: transparent;
+  color: inherit;
+}
+.pack-notice.pack-ready {
+  justify-content: center;
+  padding: 8px 14px;
+  border: 1px solid var(--line);
+  background: none;
+  color: var(--muted);
+}
+.pack-notice.pack-ready > svg {
+  color: var(--accent);
+}
+.pack-notice.pack-ready p {
+  flex: initial;
+  font-size: 13px;
+}
 .coming-soon {
   display: flex;
   justify-content: center;
@@ -990,6 +1034,12 @@ td.alias {
 @media (max-width: 440px) {
   .format-grid {
     grid-template-columns: 1fr;
+  }
+  .pack-notice {
+    flex-wrap: wrap;
+  }
+  .pack-notice .quiet-button {
+    margin-left: 28px;
   }
   .format-description br {
     display: none;

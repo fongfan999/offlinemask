@@ -22,7 +22,8 @@ export const findings: readonly Finding[] = [
     label: "Họ và tên",
     value: "Nguyễn Minh Anh",
     alias: "[TEN_DEMO_01]",
-    reason: "Tên xuất hiện sau “Tôi là” và trong phần chữ ký. Hai vị trí dùng chung một bí danh.",
+    reason:
+      "Tên xuất hiện sau “Tôi là” và trong phần chữ ký. Hai vị trí dùng chung một mã thay thế.",
     source: "Ngữ cảnh và chữ ký · mẫu minh họa",
   },
   {
@@ -56,7 +57,7 @@ export const findings: readonly Finding[] = [
     label: "Email",
     value: "minh.anh@example.com",
     alias: "[EMAIL_DEMO_01]",
-    reason: "Địa chỉ email trong phần thông tin liên hệ. Bí danh thay thế toàn bộ địa chỉ.",
+    reason: "Địa chỉ email trong phần thông tin liên hệ. Mã thay thế thay thế toàn bộ địa chỉ.",
     source: "Địa chỉ email · mẫu minh họa",
   },
 ];

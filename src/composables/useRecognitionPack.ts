@@ -29,6 +29,15 @@ export const packCheckError = "Chưa kiểm tra được gói nhận diện. Hã
 export const packActionError = "Chưa thực hiện được thao tác. Vui lòng thử lại.";
 const preparingStages: ReadonlySet<ModelStatus["stage"]> = new Set(["downloading", "installing"]);
 
+/** Whole-number progress of the stage in flight: transfer while downloading, extraction once installing. */
+export function packProgress(status: ModelStatus): number {
+  const installing =
+    status.stage === "installing" || (status.stage === "cancelling" && status.installed > 0);
+  const done = installing ? status.installed : status.downloaded;
+  const total = installing ? status.installedBytes : status.total;
+  return Math.min(100, Math.floor((done / Math.max(1, total)) * 100));
+}
+
 /** Optional recognition pack state. Status arrives by native push; one explicit
  * read covers the initial state and the moment after each user action.
  */

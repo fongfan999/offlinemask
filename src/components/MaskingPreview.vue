@@ -5,33 +5,38 @@ import AppIcon from "./AppIcon.vue";
 <template>
   <figure
     class="masking-preview"
-    aria-label="Quy trình: thay thông tin riêng tư bằng bí danh, rồi sao chép sang AI"
+    aria-label="Bốn bước: dán văn bản, bấm Ẩn thông tin, sao chép sang AI, rồi dán câu trả lời để đọc lại tên thật"
   >
     <div class="preview-flow">
       <div class="preview-document glass">
+        <div class="preview-step"><b>1</b>Dán văn bản</div>
         <div class="preview-label"><AppIcon name="file" :size="14" />Bản gốc</div>
-        <div class="preview-line"></div>
-        <div class="preview-value original-value">Phan Thái Phong</div>
+        <div class="preview-value original-value">Phong Phan</div>
         <div class="preview-amount">2.500.000 ₫</div>
       </div>
       <div class="preview-connector" aria-hidden="true">
-        <AppIcon name="arrow" :size="18" />
+        <AppIcon name="arrow" :size="22" />
       </div>
       <div class="preview-document preview-result glass">
+        <div class="preview-step"><b>2</b>Bấm Ẩn thông tin</div>
         <div class="preview-label"><AppIcon name="check" :size="14" />Bản đã ẩn</div>
-        <div class="preview-line"></div>
         <div class="preview-value alias-value">[TEN_DEMO_01]</div>
         <div class="preview-amount">2.500.000 ₫</div>
       </div>
       <div class="preview-connector ai-connector" aria-hidden="true">
-        <AppIcon name="arrow" :size="18" />
+        <AppIcon name="arrow" :size="22" />
       </div>
       <div class="preview-document preview-ai glass">
+        <div class="preview-step"><b>3</b>Sao chép sang AI</div>
         <div class="preview-label"><AppIcon name="sparkle" :size="14" />AI của bạn</div>
-        <strong>Sao chép sang AI</strong>
-        <small>ChatGPT, Gemini, Claude,<br />Perplexity…</small>
+        <strong>Hỏi AI như bình thường</strong>
+        <small>ChatGPT, Gemini, Claude, Perplexity…</small>
       </div>
     </div>
+    <figcaption class="preview-return">
+      <span class="preview-step"><b>4</b>Dán câu trả lời của AI vào lại</span>
+      <span>Tên thật hiện ra như cũ, vẫn chỉ trên máy bạn.</span>
+    </figcaption>
   </figure>
 </template>
 
@@ -47,7 +52,7 @@ import AppIcon from "./AppIcon.vue";
 }
 .preview-document {
   align-self: stretch;
-  padding: 18px 20px;
+  padding: 16px 18px 18px;
   border-radius: 8px;
   text-align: left;
 }
@@ -62,9 +67,13 @@ import AppIcon from "./AppIcon.vue";
   color: inherit;
   opacity: 0.8;
 }
+.preview-ai .preview-step b {
+  background: var(--note-ink);
+  color: var(--note);
+}
 .preview-ai strong {
   display: block;
-  margin-top: 18px;
+  margin-top: 14px;
   font-family: var(--serif);
   font-style: italic;
   font-size: 15px;
@@ -81,28 +90,46 @@ import AppIcon from "./AppIcon.vue";
 .preview-result {
   border-color: var(--line-strong);
 }
+/* Each panel opens with the action the reader takes; the eyebrow names what they see. */
+.preview-step {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--ink);
+}
+.preview-ai .preview-step {
+  color: inherit;
+}
+.preview-step b {
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: 600 11px var(--mono);
+}
 .preview-label {
   display: flex;
   align-items: center;
   gap: 7px;
+  margin: 16px 0 10px;
   color: var(--muted);
-  font: 10px var(--mono);
-  letter-spacing: 0.1em;
+  font: 12px var(--mono);
+  letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-.preview-line {
-  height: 4px;
-  width: 62%;
-  margin: 17px 0 12px;
-  border-radius: 2px;
-  background: var(--line);
 }
 .preview-value {
   width: fit-content;
   max-width: 100%;
   padding: 5px 7px;
   border-radius: 5px;
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.4;
   overflow-wrap: anywhere;
 }
@@ -125,7 +152,18 @@ import AppIcon from "./AppIcon.vue";
   display: grid;
   justify-items: center;
   gap: 7px;
-  color: var(--accent);
+  color: var(--accent-strong);
+}
+.preview-return {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px 12px;
+  margin-top: 18px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted);
 }
 @media (max-height: 780px) and (min-width: 761px) {
   .masking-preview {
@@ -154,9 +192,12 @@ import AppIcon from "./AppIcon.vue";
   .preview-document {
     padding: 14px 10px;
   }
+  .preview-step {
+    font-size: 12px;
+  }
   .preview-value {
     padding: 5px;
-    font-size: 10px;
+    font-size: 11px;
   }
 }
 </style>

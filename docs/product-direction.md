@@ -11,7 +11,7 @@ On 9 September 2026, after the homepage refinements below, the owner confirmed:
 The current homepage is accepted. Preserve this design for subsequent page work:
 
 - Existing shield branding and a concise hero explaining local masking before sharing with AI.
-- Original → masked copy → manual copying to AI illustration, with matching arrows. Use the owner-approved public name “Phan Thái Phong” and a fictional amount; omit the restoration note and visible example caption.
+- Original → masked copy → manual copying to AI illustration, with matching arrows. Use the owner-approved public name “Phong Phan” (since 11 October 2026, matching wotdafong.dev; earlier “Phan Thái Phong”) and a fictional amount; omit the restoration note and visible example caption.
 - A prominent “Chọn nội dung để bắt đầu” heading above Văn bản and Bảng tính cards; group Excel and CSV under Bảng tính.
 - A quiet, non-interactive “Định dạng sắp có” list for PDF, Word, and images.
 - Reopenable sessions in the sidebar, with the website link and version `1.0.0` anchored below history. Omit the creator credit and redundant new-session button.
@@ -226,6 +226,17 @@ This supersedes the earlier blue/white glass acceptance for presentation only. D
 The owner asked for a logo and allowed copy changes. The mark is **an alias**: two inked brackets around a cobalt dash, `[—]`, the shape the product produces when it hides a value. It replaces the scaffold shield everywhere: sidebar tile, hero tile, favicon and the generated platform icons (`brand/tile-cobalt.svg` → `pnpm tauri icon`). The wordmark sets **Offline** in ink and **Mask** in cobalt. Rules and files are in [brand/README.md](../brand/README.md); the personal P?! mark stays Phong Phan's and is not the app logo.
 
 Copy: the hero subline now names what gets hidden ("Tên, số tài khoản, số điện thoại… được thay bằng bí danh ngay trên máy bạn. Không cần Internet."), and an open private session's subtitle walks the loop ("Đọc lại bản đã ẩn, sao chép sang AI, rồi dán phản hồi bên dưới để khôi phục."). The page description meta follows the hero. All other copy is unchanged. See [Decision 0053](decisions/0053-product-mark.md).
+
+## 11 October — Home page for the text-first release
+
+The owner is releasing the text workflow first and asked for a home page that anyone, including children and low-tech users, understands and uses without help. Agreed and applied, see [Decision 0058](decisions/0058-home-page-first-run-clarity.md):
+
+- The home page tells the truth about the first run: a strip under the format cards shows the one-time 712 MB download with a `Tải về` button, progress, resume or retry, or a quiet ready line. The hero's offline sentence reads "Tải một lần, sau đó không cần Internet." until the pack is installed.
+- The illustration is now four numbered steps: dán văn bản, bấm Ẩn thông tin, sao chép sang AI, dán câu trả lời của AI vào lại. Labels are larger and the arrows stronger.
+- "Bí danh" is replaced by "mã thay thế" everywhere the user reads it. The Văn bản card lists "Email, tin nhắn, hợp đồng, CV".
+- The illustration's sample name is "Phong Phan", the form used on the owner's blog wotdafong.dev, replacing "Phan Thái Phong".
+
+Still the owner's decision, not applied: a single primary Văn bản card while only text ships, and hiding or relabelling the sample sessions on a fresh install. The accepted layout, the two cards and the coming-soon row are otherwise unchanged.
 
 ## 9 October — Name decision: keep OfflineMask
 

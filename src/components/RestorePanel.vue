@@ -34,15 +34,15 @@ const status = computed(() => {
   const current = result.value;
   if (!current) return "";
   if (!current.restored && !current.unknown.length)
-    return "Không tìm thấy bí danh của phiên này trong nội dung đã dán.";
+    return "Không tìm thấy mã thay thế của phiên này trong nội dung đã dán.";
   return current.restored === 1
-    ? "Đã khôi phục 1 bí danh."
-    : `Đã khôi phục ${current.restored.toLocaleString("vi-VN")} bí danh.`;
+    ? "Đã khôi phục 1 mã thay thế."
+    : `Đã khôi phục ${current.restored.toLocaleString("vi-VN")} mã thay thế.`;
 });
 const unknownNote = computed(() => {
   const unknown = result.value?.unknown ?? [];
   if (!unknown.length) return "";
-  return `${unknown.length === 1 ? "1 bí danh" : `${unknown.length} bí danh`} không thuộc phiên này được giữ nguyên: ${unknown.join(", ")}.`;
+  return `${unknown.length === 1 ? "1 mã thay thế" : `${unknown.length} mã thay thế`} không thuộc phiên này được giữ nguyên: ${unknown.join(", ")}.`;
 });
 
 function restore() {
@@ -75,11 +75,11 @@ async function copy() {
     <summary>
       <AppIcon name="undo" :size="16" />Khôi phục bản gốc từ phản hồi của AI
       <span class="restore-hint"
-        >Bí danh trong phiên này được thay lại bằng thông tin thật, trên máy bạn.</span
+        >Mã thay thế trong phiên này được thay lại bằng thông tin thật, trên máy bạn.</span
       >
     </summary>
     <div class="restore-body">
-      <label class="sr-only" for="restore-input">Phản hồi của AI chứa bí danh</label>
+      <label class="sr-only" for="restore-input">Phản hồi của AI chứa mã thay thế</label>
       <textarea
         id="restore-input"
         v-model="reply"
