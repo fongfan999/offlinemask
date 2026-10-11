@@ -99,3 +99,37 @@ These do not reopen the selected desktop stack or block scaffolding:
 - Exact OS/CPU release matrix and performance budgets. Broader compatibility is an objective, not a promise that every old OS or dependency combination is supported.
 
 Revisit the shell only if implementation evidence exposes a material unmet requirement. Keep the [PRD](../../PRD.md) as the source of product acceptance criteria.
+
+## Appendix: scaffold-time records
+
+Moved here from `docs/development.md` on 11 October 2026; they describe the initial scaffold only.
+
+### Documentation studied and applied
+
+Context7 was used to resolve and query the official Tauri documentation, Vue documentation, pnpm documentation, and mise documentation. Current official pages supplemented details absent from those results.
+
+| Documentation | Application to this scaffold |
+| --- | --- |
+| [Tauri prerequisites](https://v2.tauri.app/start/prerequisites/) | macOS desktop uses Command Line Tools and Rust; mobile SDKs were not installed. |
+| [Tauri project creation](https://v2.tauri.app/start/create-project/) | Official Vue/TypeScript scaffold using pnpm. |
+| [Tauri Vite integration](https://v2.tauri.app/start/frontend/vite/) | Fixed port 1420, matching `devUrl`, build hooks, and ignored Rust watch directory. |
+| [Vue TypeScript overview](https://vuejs.org/guide/typescript/overview.html) | Composition API with `script setup`; explicit vue-tsc checks because Vite only transpiles. |
+| [Vite getting started](https://vite.dev/guide/) | Supported Node LTS and a production frontend build. |
+| [Tauri capabilities](https://v2.tauri.app/security/capabilities/) | Main-window capability with one metadata permission; template opener removed. |
+| [Tauri CSP](https://v2.tauri.app/security/csp/) | Explicit production policy allowing local assets and IPC; development policy additionally allows local Vite traffic. |
+| [pnpm install](https://pnpm.io/cli/install) | Frozen lockfile installs and an exact package-manager pin. |
+| [mise Node cookbook](https://mise.jdx.dev/mise-cookbook/nodejs.html) and [Rust support](https://mise.jdx.dev/lang/rust.html) | Project tool pins and rustup-backed toolchain management. |
+
+### Original scaffold verification
+
+Verified on macOS 26.6.2 / Apple Silicon:
+
+- `mise exec -- pnpm install --frozen-lockfile` passed without changing dependency resolution.
+- `mise exec -- pnpm build` passed both Vue/app and Vite-config type checking, then generated production assets.
+- `mise exec -- pnpm check:native` passed rustfmt and Clippy with warnings denied.
+- `mise exec -- pnpm desktop:dev` started Vite, compiled the debug target, and launched `target/debug/offlinemask`. The temporary development process was stopped after verification.
+- `mise exec -- pnpm tauri build --bundles app -- --locked` produced `src-tauri/target/release/bundle/macos/OfflineMask.app`.
+- The bundled app launched from local assets with the development server stopped. The footer showed native version `0.1.0`, verifying IPC under the production CSP and capability configuration.
+- Browser UI checks passed sample loading, clearing, Vietnamese text input, leading-zero retention, and resetting text on reload. The packaged app passed sample loading and clearing with Vietnamese text rendered correctly.
+
+Windows and Linux have not been built or tested here. The UI checks do not certify Vietnamese IME composition, grapheme counting, file processing, or complete offline installation.

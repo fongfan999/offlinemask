@@ -17,7 +17,7 @@ The current homepage is accepted. Preserve this design for subsequent page work:
 - Reopenable sessions in the sidebar, with the website link and version `1.0.0` anchored below history. Omit the creator credit and redundant new-session button.
 - Responsive glass styling and a restrained keyboard-only focus indicator.
 
-This acceptance covers the homepage presentation, not completion of production import, detection, encrypted history, or restoration. Restoration remains required MVP scope. The website landing page will be built separately later. Verification is recorded in [review design notes](review-design.md).
+This acceptance covers the homepage presentation, not completion of production import, detection, encrypted history, or restoration. Restoration remains required MVP scope. The website landing page will be built separately later. Verification of each later change is recorded in its decision under `decisions/`.
 
 The dated feedback sections below preserve design history; this accepted state supersedes earlier conflicting presentation choices.
 
@@ -34,6 +34,7 @@ The current interface is accepted as the boilerplate baseline. This does not mea
 - **Surface implementation (historical glass note):** consistency and speed matter. The current approach uses shared CSS tokens and one glass surface rule, with fallbacks. No dedicated glass library was requested or installed. Evaluate dependencies against demonstrated needs and measured behavior; do not claim that a library or CSS alone guarantees performance.
 - **Home and navigation:** provide Text and Excel choices on the home page and left sidebar. Other file formats should be visibly coming soon until implemented.
 - **Sessions:** each masking/redaction conversion should create a distinct session, comparable to conversation history in chat apps. Users must be able to return to earlier conversions and their choices. Starting a new conversion must not overwrite an earlier one.
+- **Accessibility and controls:** native buttons, labelled text fields and checkboxes, pressed/expanded states, a visible keyboard focus indicator and live copy feedback. Small-window navigation moves focus into the sidebar, makes the background inert and restores the trigger's focus on Escape; choosing a destination closes the drawer and focuses the page heading. Wide tables scroll inside their panel.
 - **Tooling and documentation:** use mise for tool versions. Study current official library/framework documentation with Context7 when doing library-specific work. Record scaffold provenance, consequential dependency choices, and implementation limits.
 - **Source availability:** on 8 October 2026, the owner selected the O’Saasy License Agreement, superseding the earlier pending-license direction. Favor standard, maintainable patterns, reproducible setup, shared styling, clear contribution guidance, and documented dependencies. See [Decision 0050](decisions/0050-osaasy-license.md) for remaining publication work.
 
@@ -47,7 +48,7 @@ Broader detection validation, Excel/file adapters, encrypted private history, re
 
 - [PRD](../PRD.md): product requirements and remaining MVP work.
 - [Workspace and glass decision](decisions/0002-workspace-and-glass.md): current implementation rationale and storage boundary.
-- [Review design notes](review-design.md): actual interaction and verification evidence.
+- [Decisions](decisions/): rationale and verification for each change, numbered in order.
 - [Contribution guide](../CONTRIBUTING.md): reproducible setup and engineering conventions.
 
 Future page feedback should record the page, requested change, and any shared decision it supersedes. Do not invent page requirements before that feedback arrives.
@@ -67,7 +68,7 @@ The accepted glass styling, Text/Excel entry points, and independent, reopenable
 
 The owner rejected the generic character illustration and requested a clearer presentation of the product’s core feature. Replace it with an original before/after document illustration: a synthetic name becomes an alias while the amount stays readable. The headline connects masking to sharing with AI; one sentence explains aliases and offline use. Keep the illustration visibly labelled as an example, with sample-only capability limits still in the editor. Do not advertise unfinished restoration or imply automatic AI submission, guaranteed anonymity, or general file compatibility.
 
-The visual is implemented as static HTML/CSS with existing icons, preserving the blue/white glass palette and Text/Excel cards. No third-party illustration or new dependency is needed. See [artwork notes](third-party-assets.md).
+The visual is implemented as static HTML/CSS with existing icons, preserving the blue/white glass palette and Text/Excel cards. No third-party illustration or new dependency is needed; the briefly evaluated unDraw image is not part of the bundle.
 
 ## Format selection polish — 9 September 2026
 
@@ -133,113 +134,25 @@ At the owner's request, explain the manual update policy once in Settings: Offli
 
 The owner asked to prioritize reliability and trust. Preserve the current pack while strengthening verified source positions. Add one contextual manual action to text review: select missed text in either view, then “Ẩn phần đã chọn.” Keep the hint short, reveal the button only for a meaningful selection, and offer undo for the last correction. Corrections affect the selected occurrence and remain in the temporary session. Do not imply that manual correction or a passing integration test establishes complete detection. See [Decision 0007](decisions/0007-text-positioning-and-manual-review.md).
 
-## Vietnamese pack selection — 11 September 2026
+## Later direction — 11 September to 11 October 2026
 
-The owner confirmed that users should see one Vietnamese recognition pack and challenged the two-model implementation as a final solution. The requested comparison is complete: both current checkpoints individually and together fail the existing reliability criteria on fresh synthetic cases with native and WASM execution. See [Decision 0010](decisions/0010-vietnamese-model-selection.md). Keep the simple optional-pack experience and manual-only updates. Prefer a single primary detector supported by local rules, but do not present either current checkpoint or their pair as release-selected. The existing development installation remains intact; no replacement model or native production migration is approved by this evaluation.
+From here on every change has its own decision with rationale and verification, so this log keeps only the owner's direction and where the details live.
 
-The owner subsequently emphasized that this detector is the foundation for Excel, images, PDFs and future formats, and requested deeper model selection before calling the foundation complete. Preserve that priority. The [shared-core audit and proposed evaluation](evaluations/shared-detection-core-plan.md) separates model quality, common processing policy and format extraction/source mapping. This is a proposed evaluation sequence, not approval of a replacement checkpoint or an implemented file workflow.
-
-## No tracking for detection improvement — 14 September 2026
-
-The owner reiterated that OfflineMask must not track users or collect content to improve detection. No analytics, correction uploads, automatic crash reports containing input, or background network feedback should be added. All current quality evaluations use synthetic developer fixtures processed locally. Those measurements are reproducible evidence about the fixtures, while actual usage patterns and real-world accuracy remain assumptions. Preserve manual-only downloads and future general update checks, and keep private input and corrections out of persistence and evaluation datasets.
-
-## Shared detection reliability — 15 September 2026
-
-The owner asked us to implement the strongest practical reliability improvements after the broader challenge. Preserve the six choices and current layout. Add bounded labelled passport/tax recognition to the existing banking option and reflect it in its secondary tooltip; keep card information under “other.” Improve complete credentials and address boundaries in the shared policy without adding user-facing technical controls, changing the pack, or collecting data. [Decision 0016](decisions/0016-complete-values-and-field-meaning.md) records the supported bounds and evaluation. Passing development regressions does not finalize the contextual model or qualify future file formats.
-
-## Contextual field reliability — 17 September 2026
-
-The owner approved the next targeted shared-core improvements: IPv6, written birth dates, organization boundaries and less masking of ordinary text. Keep these changes under the existing categories and pack requirements. Use a small IP parser and bounded field semantics; do not expand the UI or infer a final model decision from improved observed fixtures. [Decision 0017](decisions/0017-contextual-fields.md) records the implementation, evidence and remaining release work.
-
-## Organization scope confirmation — 19 September 2026
-
-The owner corrected the earlier case-review response and explicitly confirmed that organization names should be hidden. Preserve organizations within the existing contextual “Thông tin riêng tư khác” scope and respect the user's selected categories. Do not implement the assistant's earlier suggestion to leave organizations visible by default or introduce a separate organization choice based on that suggestion. The full organization name, including its legal prefix when part of the name, is expected in reviewed example 8. Customer identifiers remain in scope as separately confirmed. See the [corrected review](evaluations/single-model-owner-review-v2.md); model qualification remains unresolved.
-
-## Quality-first v1 model selection — 19 September 2026
-
-The owner reaffirmed automatic name, address and organization detection as a release requirement; a manual-only or assisted beta cannot replace it. Choose the model(s) with the strongest measured detection coverage for v1, with specialist AI engineering expected later. A larger optional recognition pack is acceptable to investigate; the default installer stays small, one Vietnamese pack remains the UI, and all downloads/updates are manual. Do not infer permission for cloud processing, telemetry, custom training, altered labels or reduced quality claims.
-
-The new [coverage-first comparison](evaluations/quality-first-v1/README.md) selects Underthesea + BigMed + mSuperClinical as the integration target, with model findings restricted to contextual categories and structured fields handled by shared rules. This is a measured candidate selection, not owner approval of its remaining misses/excess masking, desktop integration, or public release. The existing app pack remains unchanged until the selected assets and runtime are integrated and verified. [Decision 0037](decisions/0037-quality-first-v1-candidate.md) preserves the exact tradeoffs and remaining checks.
-
-## Conditional organization deferral — 20 September 2026
-
-The owner is willing to defer automatic organization recognition from v1 if the smaller GLiNER2-based candidate performs well on the remaining required fields. This supersedes the earlier mandatory-organization release requirement for that evaluation. Names, addresses, customer identifiers and the other retained capabilities still require qualification. Preserve organization annotations and report those results separately; do not rewrite earlier evidence or claim that excluding a category improves full-scope accuracy. If selected, describe the reduced supported scope clearly and retain manual selection. This is conditional scope approval, not model selection or a change to the installed pack. See [Decision 0038](decisions/0038-conditional-v1-organization-deferral.md).
-
-The subsequent [smaller GLiNER2 evaluation](evaluations/gliner2-compact-v1/README.md) completes local testing of the ~670 MB PII Engineer INT8 candidate. It runs successfully with the tested compatible runtime, but misses retained name/location requirements and fails unnecessary-masking checks even when organizations are excluded. [Decision 0039](decisions/0039-gliner2-compact-evaluation.md) records that this configuration is not selected to replace the pack. Preserve the smaller-download goal; this result does not automatically reapprove the 2.01 GB ensemble or narrow address/location scope.
-
-## Owner-selected v1 pair and compressed downloads — 20 September 2026
-
-The owner selected **Underthesea INT8 + mSuperClinical INT8** for v1 and requested smaller downloads that install locally. This replaces the earlier three-model integration target; keep one optional Vietnamese recognition pack. Measure lossless compression of the exact tested files before promising transfer savings, and show actual download and installed sizes. Use a simple download/install/ready flow with resumable transfers and one-time verified extraction. Preserve the pair's existing organization behavior, shared rules and offline/manual-update boundary. Model selection does not mark failed quality checks as passed or mean the production manifest has changed. See [Decision 0040](decisions/0040-v1-pair-and-compressed-download.md).
-
-## Compressed optional pack — 20 September 2026
-
-Show transfer size and installed size separately when they differ. Downloading and installing are distinct progress stages; only the complete, verified pack is ready. Preserve pause/resume and the one-pack interface. Public R2 assets and the native installer are recorded in [Decision 0041](decisions/0041-compressed-pack-installer-and-r2.md). The 712 MB selected-pair size must not be shown for the still-active legacy model manifest; switch the inference adapter and pack together after validation.
-
-## Selected pair connected — 20 September 2026
-
-[Decision 0042](decisions/0042-production-recognition-pair.md) connects the production detector to the selected Underthesea + mSuperClinical pack. Settings now shows the verified 712 MB transfer and 1.14 GB installed size. Preserve one recognition pack, explicit downloading, original text and manual review. Integration parity does not imply perfect detection or an independently validated banking accuracy rate.
-
-## 21 September — Text cancellation recovery
-
-Explicit cancellation after processing starts now keeps the loaded recognition pack available for retry, with request-ID isolation and a five-second hard-stop fallback. Loading cancellation and navigation/unmount retain hard termination. No model or masking-policy change, telemetry, or persistent private-input storage was added. The packaged Mac trial measured a 1.721-second retry versus an earlier 11.680-second hard reset/reload. Cold startup and an observed WebKit reload during a forced-reset test remain qualification work; see [Decision 0043](decisions/0043-cancellation-recovery.md).
-
-## 21 September — Prepare installed recognition in the background
-
-At the owner's request, start loading the verified installed pack as soon as it is ready, including after a manually requested installation. Masking joins that same load, so time spent typing or navigating reduces the remaining wait. Do not download missing packs, check updates, send input, or run document inference during preparation. Keep the UI unchanged and avoid repeated automatic load retries after failure. See [Decision 0044](decisions/0044-background-recognition-loading.md).
-
-## 21 September — Serialized model release and reload
-
-Resetting now explicitly disposes model sessions before a queued request reloads them in the same worker. Closing the app still destroys its worker immediately. This follows a reproduced web-view restart during repeated replacement-worker loads. Six subsequent normal reloads across two packaged trials completed; the full stress run also passed cancellation and the 50,000-character limit. Do not imply release readiness: sampled memory reached about 5.1 GiB and the longest synthetic case took 224.6 seconds. See [Decision 0045](decisions/0045-release-model-sessions-before-reload.md).
-
-## 21 September — Selected-pair native runtime comparison
-
-Keep the selected models and one-pack experience fixed while qualifying native inference to address desktop runtime cost. The developer comparison matched all 398 saved outcomes and reduced the identical long fixture from 224.6 seconds in the earlier packaged WASM run to 23.9 seconds in the native harness. This is not yet a packaged native result or a production backend switch. Memory and desktop lifecycle still require qualification; see [Decision 0046](decisions/0046-selected-pair-native-runtime.md).
-
-## 21 September — Packaged native runtime qualification
-
-The selected pair now has an isolated native desktop test path. It matched all 398 saved previews, completed the longest synthetic text in 18.8 seconds, and returned a short result in 256 ms after eight seconds of background preparation. The normal text/preview UI smoke checks passed. Keep the production backend unchanged while native crash/hang recovery, full offline GUI validation and distribution/platform qualification remain open. See [Decision 0047](decisions/0047-packaged-native-recognition.md). This changes runtime evidence, not model selection or accuracy claims.
-
-## 21 September — Native failure containment
-
-Keep the selected recognition pair fixed while qualifying a separate native helper process. The opt-in packaged helper matched all 398 saved previews and recovered from deliberately stopped/killed helpers without losing drafts or existing sessions. Automatic internet activity and silent document retries remain excluded. Keep the default backend unchanged until offline GUI and distribution/platform qualification are complete. See [Decision 0048](decisions/0048-isolate-native-recognition.md).
-
-## 9 October — Structural refactor without visual change
-
-The owner reviewed the whole project and asked for every finding to be applied: "everything, as long as we won't break the app, the app is simply to mask PII data." The frontend shell was split into composables and page components, pack status is pushed from the native layer instead of polled, the duplicated runtime binary was removed from the bundle, the native download tolerates slow connections, and Prettier/ESLint/CI were added. Markup, CSS classes, copy and the accepted glass styling are unchanged.
-
-Two small behavior changes are intentional: a detection run keeps going while the user navigates and its session appears in the sidebar when done, and an open session offers "Xóa phiên" beside "Phiên mới" so private text can be dropped without quitting. Fingerprinted detection sources and frozen evaluation scripts were left untouched. See [Decision 0051](decisions/0051-shell-refactor-and-tooling.md) for details and the checks that remain for a packaged run.
-
-## 9 October — Personal brand theme and in-session restoration
-
-The owner asked for product improvements at the assistant's discretion and for the app theme to follow their personal brand at wotdafong.dev ("Wot Da Fong?"). The theme now uses that brand's tokens: warm paper, ink, one cobalt accent, mono uppercase eyebrows, an italic-serif second line in the hero, pill buttons, flat sheets with a hard offset shadow, and a dark scheme that follows the system. Layout, copy and the six detection choices are unchanged; the `.glass` class name stays as the sheet rule. The homepage's AI panel is drawn as the brand's tilted sticky note. The personal **P?!** mark is Phong Phan's own and is not used as the product logo.
-
-Product changes in the same pass:
-
-- **Khôi phục bản gốc từ phản hồi của AI.** An open private text session has a collapsed panel where the AI's reply is pasted; exact aliases of that session are replaced with the original values on the device and the result can be copied. Alias-shaped tokens from another session are listed and left untouched; nothing is guessed (PRD FR-09). This is RAM-only restoration within the session, not the encrypted vault; closing the app still clears everything.
-- **Recognisable sessions.** Private sessions are listed by the first line of their masked copy instead of "Văn bản #1"; the number, time and "Tạm thời" move to the subtitle. Sample sessions keep their names.
-- **⌘/Ctrl + Enter** in the draft runs the primary action.
-
-This supersedes the earlier blue/white glass acceptance for presentation only. Detection behavior, offline boundaries and manual-only downloads are unchanged.
-
-## 9 October — Product mark and copy
-
-The owner asked for a logo and allowed copy changes. The mark is **an alias**: two inked brackets around a cobalt dash, `[—]`, the shape the product produces when it hides a value. It replaces the scaffold shield everywhere: sidebar tile, hero tile, favicon and the generated platform icons (`brand/tile-cobalt.svg` → `pnpm tauri icon`). The wordmark sets **Offline** in ink and **Mask** in cobalt. Rules and files are in [brand/README.md](../brand/README.md); the personal P?! mark stays Phong Phan's and is not the app logo.
-
-Copy: the hero subline now names what gets hidden ("Tên, số tài khoản, số điện thoại… được thay bằng bí danh ngay trên máy bạn. Không cần Internet."), and an open private session's subtitle walks the loop ("Đọc lại bản đã ẩn, sao chép sang AI, rồi dán phản hồi bên dưới để khôi phục."). The page description meta follows the hero. All other copy is unchanged. See [Decision 0053](decisions/0053-product-mark.md).
-
-## 11 October — Home page for the text-first release
-
-The owner is releasing the text workflow first and asked for a home page that anyone, including children and low-tech users, understands and uses without help. Agreed and applied, see [Decision 0058](decisions/0058-home-page-first-run-clarity.md):
-
-- The home page tells the truth about the first run: a strip under the format cards shows the one-time 712 MB download with a `Tải về` button, progress, resume or retry, or a quiet ready line. The hero's offline sentence reads "Tải một lần, sau đó không cần Internet." until the pack is installed.
-- The illustration is now four numbered steps: dán văn bản, bấm Ẩn thông tin, sao chép sang AI, dán câu trả lời của AI vào lại. Labels are larger and the arrows stronger.
-- "Bí danh" is replaced by "mã thay thế" everywhere the user reads it. The Văn bản card lists "Email, tin nhắn, hợp đồng, CV".
-- The illustration's sample name is "Phong Phan", the form used on the owner's blog wotdafong.dev, replacing "Phan Thái Phong".
-
-Still the owner's decision, not applied: a single primary Văn bản card while only text ships, and hiding or relabelling the sample sessions on a fresh install. The accepted layout, the two cards and the coming-soon row are otherwise unchanged.
-
-## 9 October — Name decision: keep OfflineMask
-
-The owner asked for a shorter, international, more memorable name. About a hundred candidates were explored across three rounds (short real words, coined compounds, alias/restore/offline concepts) and checked against the .com/.app/.dev registries: every short real word was registered, and the coined names traded clarity for sound. The owner decided to keep **OfflineMask**: "offline" carries the trust promise in one word, "mask" is understood everywhere including Vietnam, and the personality lives in the `[—]` mark and the two-tone wordmark rather than the name. Do not reopen naming without new reasons.
-
-At check time offlinemask.com, .app, .dev and .io were all unregistered. Registering them is the owner's task and should happen before the website or any public mention.
+| Date | Direction | Record |
+| --- | --- | --- |
+| 11 Sep | Users see one Vietnamese recognition pack. Neither current checkpoint nor the pair is release-selected; the detector is the foundation for future formats, so model selection comes before calling it complete. Manual-only updates stay. | [0010](decisions/0010-vietnamese-model-selection.md), [shared-core plan](evaluations/shared-detection-core-plan.md) |
+| 14 Sep | No tracking to improve detection: no analytics, correction uploads, crash reports containing input or background network feedback. Evaluations use synthetic developer fixtures only; private input and corrections never become persisted or evaluation data. | [CONTRIBUTING](../CONTRIBUTING.md#privacy-and-sample-data) |
+| 15 Sep | Strongest practical shared-rule improvements: labelled passport/tax identifiers under the banking choice (reflected in its tooltip), card details under “other”, complete credentials and address boundaries. No new user-facing controls, no pack change, no data collection. | [0016](decisions/0016-complete-values-and-field-meaning.md) |
+| 17 Sep | IPv6, written birth dates, organization boundaries and less masking of ordinary text, under the existing categories and pack requirement. | [0017](decisions/0017-contextual-fields.md) |
+| 19 Sep | Organization names are hidden under “Thông tin riêng tư khác”, including a legal prefix that is part of the name. No separate organization choice; customer identifiers stay in scope. | [owner review v2](evaluations/single-model-owner-review-v2.md) |
+| 19 Sep | Automatic name, address and organization detection is a release requirement; choose the strongest measured coverage. A larger optional pack is acceptable; the installer stays small; no cloud processing, telemetry, custom training or altered labels. | [0037](decisions/0037-quality-first-v1-candidate.md) |
+| 20 Sep | Organization detection could be deferred from v1 if the compact GLiNER2 candidate passed the remaining fields. It did not; the deferral lapsed. | [0038](decisions/0038-conditional-v1-organization-deferral.md), [0039](decisions/0039-gliner2-compact-evaluation.md) |
+| 20 Sep | Underthesea INT8 + mSuperClinical INT8 selected for v1 as one optional pack. Show transfer and installed sizes separately; download, install and ready are distinct stages with pause/resume; only the verified pack is ready. Selection does not mark failed quality checks as passed. | [0040](decisions/0040-v1-pair-and-compressed-download.md), [0041](decisions/0041-compressed-pack-installer-and-r2.md), [0042](decisions/0042-production-recognition-pair.md) |
+| 21 Sep | Cancelling after processing starts keeps the loaded pack for retry; the installed pack is prepared in the background without any network use; model sessions are released before a reload. Memory and long-text latency remain release work. | [0043](decisions/0043-cancellation-recovery.md), [0044](decisions/0044-background-recognition-loading.md), [0045](decisions/0045-release-model-sessions-before-reload.md) |
+| 21 Sep | Native inference qualified in isolation (same 398 synthetic outcomes, markedly faster) and contained in a helper process that survives crashes. Models and the one-pack experience stay fixed; the default backend changes only after offline GUI and platform qualification. | [0046](decisions/0046-selected-pair-native-runtime.md), [0047](decisions/0047-packaged-native-recognition.md), [0048](decisions/0048-isolate-native-recognition.md) |
+| 9 Oct | Apply the whole project review “as long as we won't break the app”: shell split into composables and pages, pushed pack status, tooling and CI. A run continues while the user navigates; “Xóa phiên” sits beside “Phiên mới”. Markup, copy and styling unchanged. | [0051](decisions/0051-shell-refactor-and-tooling.md) |
+| 9 Oct | The theme follows the owner's personal brand (wotdafong.dev): warm paper, ink, one cobalt accent, mono eyebrows, italic-serif emphasis, flat sheets, system light/dark. In-session restoration of the AI reply, sessions titled by their first masked line, ⌘/Ctrl + Enter. The personal P?! mark is not the product logo. | [0052](decisions/0052-brand-theme-and-restoration.md) |
+| 9 Oct | The product mark is an alias, `[—]`; the wordmark sets Offline in ink and Mask in cobalt. Hero and open-session copy name what is hidden and walk the loop. | [0053](decisions/0053-product-mark.md), [brand/README](../brand/README.md) |
+| 9 Oct | Keep the name **OfflineMask** after exploring about a hundred alternatives: “offline” carries the trust promise, “mask” is understood everywhere, the personality lives in the mark. Do not reopen naming without new reasons. offlinemask.com, .app, .dev and .io were unregistered at check time; registering them is the owner's task before any public mention. | this entry |
+| 11 Oct | The repository is prepared for public contribution and the models become data: everything about them lives in `packs/<id>.json`, gated by `pnpm test` and `pnpm test:models`. | [0054](decisions/0054-replaceable-recognition-packs.md), [packs/README](../packs/README.md) |
+| 11 Oct | Text ships first, and the home page must be usable without help: an honest first-run strip for the one-time 712 MB download, four numbered steps, “mã thay thế” instead of “bí danh”, the sample name “Phong Phan”. Still open for the owner: a single Văn bản card while only text ships, and what a fresh install shows for sample sessions. | [0058](decisions/0058-home-page-first-run-clarity.md) |

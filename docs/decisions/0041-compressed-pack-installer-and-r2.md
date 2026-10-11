@@ -8,7 +8,7 @@ The owner authorized publishing the selected Underthesea INT8 + mSuperClinical I
 
 The pack transfers **712,190,910 bytes** and restores **1,137,855,937 bytes** of graph/tokenizer/configuration files. Compression does not change model quality, memory use or installed graph size. Public metadata/license/notice objects add a small separate overhead. See [public verification receipt](../evaluations/pack-compression-v1/r2-public-verification.json) for exact published bytes, hashes and verification time.
 
-The [pinned catalog](../../scripts/release-pack-v1.json) uses the owner-provided `https://pub-5b0280497d774b8f99417b3438d8bce8.r2.dev` base. Each compressed object has a SHA-256 name, length and hash; split streams also pin their combined hash. No private text, corrections, evaluation examples, account credentials or telemetry were uploaded.
+The [pinned catalog](../../packs/vietnamese-pii-v1.json) (then `scripts/release-pack-v1.json`) uses the owner-provided `https://pub-5b0280497d774b8f99417b3438d8bce8.r2.dev` base. Each compressed object has a SHA-256 name, length and hash; split streams also pin their combined hash. No private text, corrections, evaluation examples, account credentials or telemetry were uploaded.
 
 ## Installation contract
 

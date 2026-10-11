@@ -26,7 +26,7 @@ Current Tauri managed-state/command/path and reqwest blocking-client documentati
 
 Model removal, model import UI, alternative language packs, and automatic updates are not implemented. A fully offline computer can use the built-in categories; optional models need the explicit initial download or a provisioned app-local model directory. Pause can wait for an in-flight network read to return (bounded by the request timeout). Interrupted files consume disk space so they can resume. Recognition remains approximate and must be reviewed.
 
-Fast tests cover local-only routing, filtering before masking, category isolation across sessions, and exclusion from persisted sample history. Native loopback tests cover partial resume, rejecting full responses during resume, corrupt files, cancellation, and missing installations. Packaged macOS smoke results are recorded in `docs/review-design.md`.
+Fast tests cover local-only routing, filtering before masking, category isolation across sessions, and exclusion from persisted sample history. Native loopback tests cover partial resume, rejecting full responses during resume, corrupt files, cancellation, and missing installations. Packaged macOS smoke results were recorded in `docs/review-design.md` at the time (retired on 11 October 2026; see git history).
 
 ## Follow-up direction — 2026-09-10
 
