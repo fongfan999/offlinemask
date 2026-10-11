@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watch } from "vue";
+import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
 import { restoreAliases, type Restoration } from "../core/restore.ts";
 import type { TextAnalysis } from "../core/text.ts";
@@ -12,6 +12,17 @@ const copied = ref(false);
 const copyStatus = ref("");
 const open = ref(false);
 const output = useTemplateRef<HTMLTextAreaElement>("output");
+const panel = useTemplateRef<HTMLDetailsElement>("panel");
+
+/** After the masked copy is on the clipboard, the next step opens and comes into view. */
+defineExpose({
+  async reveal() {
+    open.value = true;
+    await nextTick();
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    panel.value?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "nearest" });
+  },
+});
 
 // Pasted replies and results belong to one session and never outlive it.
 watch(
@@ -68,14 +79,16 @@ async function copy() {
 
 <template>
   <details
+    ref="panel"
     class="restore glass"
     :open="open"
     @toggle="open = ($event.target as HTMLDetailsElement).open"
   >
     <summary>
-      <AppIcon name="undo" :size="16" />Khôi phục bản gốc từ phản hồi của AI
+      <span class="step-number" aria-hidden="true">4</span>Dán câu trả lời của AI để đọc lại tên
+      thật
       <span class="restore-hint"
-        >Mã thay thế trong phiên này được thay lại bằng thông tin thật, trên máy bạn.</span
+        >Mã thay thế trong phiên này được đổi lại thành thông tin thật, ngay trên máy bạn.</span
       >
     </summary>
     <div class="restore-body">

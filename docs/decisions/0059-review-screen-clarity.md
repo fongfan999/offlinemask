@@ -1,0 +1,18 @@
+# 0059 — Review screen: warn about unchecked names, number the next steps, shorter aliases
+
+Date: 11 October 2026. Status: accepted by the owner for the text-first release.
+
+## Problem
+
+After masking, the review screen showed a big "Đã ẩn 4 mục thông tin" tick and a bright copy button while a person's name stood in clear text twice, because the name option had not been checked (it needs the recognition pack). The only warning was a grey footnote. The restore step was a collapsed panel below the fold even though the subtitle pointed to it. Aliases such as `[STK_1_dcac5231]` carried eight hex characters that mean nothing to the reader.
+
+## Decisions
+
+- **Unchecked categories are a warning, not a footnote.** `WorkspacePage.vue` shows a `review-warning` block between the text and the summary. When the name option was not checked, `possibleNames` (`src/core/name-hints.ts`) scans the masked copy for title-case runs of two to four words and the title names them: "Có thể còn tên người chưa được ẩn: Nguyễn Minh Anh." It is a hint to look again, not a detection, which is why the copy says "có thể"; place names and titles match too. The body says what to do: highlight to hide, or download the pack when the missing categories need it, with a `Tải về` button (or "Xem tiến độ" while it downloads). The summary reads "Đã ẩn 4 mục · 3 loại chưa kiểm tra" so the tick no longer reads as "all done".
+- **The next step is visible.** The copy button is "3 Sao chép để gửi AI"; after a successful copy the status says where to paste and the restore panel opens and scrolls into view as "4 Dán câu trả lời của AI để đọc lại tên thật". The step numbers share the `.step-number` rule with the home illustration. The clipboard fallback (no clipboard permission) keeps its focus-and-select behaviour and does not scroll.
+- **Four-character alias scope.** `aliasScope(sessionId)` in `sessions.ts` takes the first four hex characters of the session id; creation still retries clashes within the app instance. `analyzeText`, `addManualMask` and `restoreAliases` accept four to eight characters, so older eight-character aliases pasted back from an AI still match. This supersedes the eight-character prefix in [decision 0004](0004-text-processing.md). Cross-instance uniqueness was never guaranteed and restore still only replaces exact aliases of the open session; a four-character scope raises the chance that an alias from another instance with the same type, number and scope is treated as this session's, from about one in four billion to one in sixty-five thousand, which the owner accepted for readability.
+- **Plain words.** The heading is the session's first line, with "Văn bản #n" moved into the subtitle. The tab is "Bản đã ẩn". The hint under the text reads "Thấy tên hay số nào còn sót? Bôi đen là ẩn ngay." with a pen icon in ink rather than muted grey. The footer note is a lock icon with "Chỉ lưu trong lúc mở ứng dụng.", the same fact as "Đóng ứng dụng sẽ xóa phiên này." said calmly.
+
+## Verification
+
+`pnpm lint`, `pnpm typecheck` and `pnpm test` (198 tests, including new `name-hints` cases and the four-character restore cases) passed. On the running `tauri dev` server viewed in the in-app browser, the sample text masked with only the local options showed the heading, the `[STK_1_a93b]` alias shape, the name warning with the download button, the amended summary and the numbered copy and restore steps in both schemes. The browser pane has no clipboard permission, so the automatic reveal after a successful copy was not exercised there; it runs in the packaged app, where clipboard writes succeed.

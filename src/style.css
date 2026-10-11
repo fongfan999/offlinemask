@@ -629,6 +629,58 @@ h1 {
   line-height: 1.7;
   color: var(--muted);
 }
+/* Step numbers tie the home page's four steps to the review screen. */
+.step-number {
+  flex-shrink: 0;
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: 600 11px var(--mono);
+}
+.primary-action .step-number {
+  background: var(--on-accent);
+  color: var(--accent);
+}
+/* What this run did not check, said before the copy button rather than in a footnote. */
+.review-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 14px 24px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--error-soft);
+  color: var(--ink);
+}
+.review-warning > svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--error);
+}
+.review-warning p {
+  flex: 1;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.review-warning strong {
+  display: block;
+  font-weight: 600;
+}
+.review-warning span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.review-warning .quiet-button {
+  padding: 7px 10px;
+  background: var(--paper-raised);
+}
 .card-footer {
   display: flex;
   justify-content: flex-end;
@@ -1273,14 +1325,6 @@ td.alias {
 #text-input {
   height: clamp(220px, 27vh, 300px);
 }
-.scope-note {
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
-.scope-note svg {
-  margin-top: 2px;
-}
 .model-settings {
   padding: 28px;
 }
@@ -1425,6 +1469,12 @@ td.alias {
   .model-requirement {
     flex-wrap: wrap;
   }
+  .review-warning {
+    flex-wrap: wrap;
+  }
+  .review-warning .quiet-button {
+    margin-left: 30px;
+  }
   .model-requirement p {
     min-width: 190px;
   }
@@ -1515,9 +1565,16 @@ td.alias {
   min-height: 36px;
 }
 .manual-review p {
+  display: flex;
+  align-items: center;
+  gap: 7px;
   margin: 0;
-  color: var(--muted);
+  color: var(--ink);
   font-size: 13px;
+}
+.manual-review p > svg {
+  flex-shrink: 0;
+  color: var(--accent);
 }
 .manual-review-actions {
   display: flex;

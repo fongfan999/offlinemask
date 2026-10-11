@@ -31,7 +31,7 @@ export function analyzeText(
 ): TextAnalysis {
   const error = validateText(text);
   if (error) throw new Error(error);
-  if (!/^[a-f0-9]{8}$/i.test(scope)) throw new Error("Invalid alias scope");
+  if (!/^[a-f0-9]{4,8}$/i.test(scope)) throw new Error("Invalid alias scope");
   for (const detection of detections) {
     if (
       !Number.isInteger(detection.start) ||

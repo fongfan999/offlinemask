@@ -9,7 +9,7 @@ import AppIcon from "./AppIcon.vue";
   >
     <div class="preview-flow">
       <div class="preview-document glass">
-        <div class="preview-step"><b>1</b>Dán văn bản</div>
+        <div class="preview-step"><span class="step-number">1</span>Dán văn bản</div>
         <div class="preview-label"><AppIcon name="file" :size="14" />Bản gốc</div>
         <div class="preview-value original-value">Phong Phan</div>
         <div class="preview-amount">2.500.000 ₫</div>
@@ -18,7 +18,7 @@ import AppIcon from "./AppIcon.vue";
         <AppIcon name="arrow" :size="22" />
       </div>
       <div class="preview-document preview-result glass">
-        <div class="preview-step"><b>2</b>Bấm Ẩn thông tin</div>
+        <div class="preview-step"><span class="step-number">2</span>Bấm Ẩn thông tin</div>
         <div class="preview-label"><AppIcon name="check" :size="14" />Bản đã ẩn</div>
         <div class="preview-value alias-value">[TEN_DEMO_01]</div>
         <div class="preview-amount">2.500.000 ₫</div>
@@ -27,14 +27,16 @@ import AppIcon from "./AppIcon.vue";
         <AppIcon name="arrow" :size="22" />
       </div>
       <div class="preview-document preview-ai glass">
-        <div class="preview-step"><b>3</b>Sao chép sang AI</div>
+        <div class="preview-step"><span class="step-number">3</span>Sao chép sang AI</div>
         <div class="preview-label"><AppIcon name="sparkle" :size="14" />AI của bạn</div>
         <strong>Hỏi AI như bình thường</strong>
         <small>ChatGPT, Gemini, Claude, Perplexity…</small>
       </div>
     </div>
     <figcaption class="preview-return">
-      <span class="preview-step"><b>4</b>Dán câu trả lời của AI vào lại</span>
+      <span class="preview-step"
+        ><span class="step-number">4</span>Dán câu trả lời của AI vào lại</span
+      >
       <span>Tên thật hiện ra như cũ, vẫn chỉ trên máy bạn.</span>
     </figcaption>
   </figure>
@@ -66,10 +68,6 @@ import AppIcon from "./AppIcon.vue";
 .preview-ai .preview-label {
   color: inherit;
   opacity: 0.8;
-}
-.preview-ai .preview-step b {
-  background: var(--note-ink);
-  color: var(--note);
 }
 .preview-ai strong {
   display: block;
@@ -103,16 +101,9 @@ import AppIcon from "./AppIcon.vue";
 .preview-ai .preview-step {
   color: inherit;
 }
-.preview-step b {
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--on-accent);
-  font: 600 11px var(--mono);
+.preview-ai .step-number {
+  background: var(--note-ink);
+  color: var(--note);
 }
 .preview-label {
   display: flex;

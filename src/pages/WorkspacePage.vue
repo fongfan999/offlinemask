@@ -2,11 +2,13 @@
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import RestorePanel from "../components/RestorePanel.vue";
-import { formatModelBytes } from "../adapters/models.ts";
+import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import { packKey, runKey, sessionsKey, useProvided, type Page } from "../composables/context.ts";
 import { reviewHint, useTextReview, type ReviewView } from "../composables/useTextReview.ts";
 import { detectionOptions } from "../core/detection/options.ts";
+import { possibleNames } from "../core/name-hints.ts";
 import { findings, sampleText } from "../core/review.ts";
+import { sessionPreview } from "../core/session-preview.ts";
 import {
   maskedRows,
   sessionOutput,
@@ -25,7 +27,8 @@ const emit = defineEmits<{
   remove: [id: string];
 }>();
 
-const { status: models, ready: modelsReady, preparing } = useProvided(packKey);
+const pack = useProvided(packKey);
+const { status: models, ready: modelsReady, preparing } = pack;
 const {
   draft,
   selectedOptions,
@@ -46,6 +49,7 @@ const copyStatus = ref("");
 const manualCopy = ref(false);
 const content = useTemplateRef<HTMLTextAreaElement>("content");
 const copyButton = useTemplateRef<HTMLButtonElement>("copyButton");
+const restorePanel = useTemplateRef<InstanceType<typeof RestorePanel>>("restorePanel");
 const heading = useTemplateRef<HTMLHeadingElement>("heading");
 
 const session = computed(() => props.session);
@@ -70,21 +74,67 @@ const maskCount = computed(() =>
         .length
     : 0,
 );
-const uncheckedCategories = computed(() => {
+/** Categories this run did not check. Names left in clear text are the one way the
+ * product fails silently, so that case is called out above the copy button, with a
+ * cheap local hint at what may still be a name and the way to fix it.
+ */
+const unchecked = computed(() => {
   const current = session.value;
-  return current?.fixture === "private-text-v1"
-    ? detectionOptions
-        .filter((option) => !current.options.includes(option.id))
-        .map((option) => option.label)
-        .join(", ")
-    : "";
+  if (current?.fixture !== "private-text-v1") return null;
+  const options = detectionOptions.filter((option) => !current.options.includes(option.id));
+  if (!options.length) return null;
+  const nameUnchecked = options.some((option) => option.id === "name");
+  return {
+    count: options.length,
+    labels: options.map((option) => option.label).join(", "),
+    nameUnchecked,
+    names: nameUnchecked ? possibleNames(output.value) : [],
+    needsPack: options.some((option) => option.model) && !modelsReady.value,
+  };
 });
+const warning = computed(() => {
+  const current = unchecked.value;
+  if (!current) return null;
+  const title = current.names.length
+    ? `Có thể còn tên người chưa được ẩn: ${current.names.join(", ")}.`
+    : current.nameUnchecked
+      ? "Tên người chưa được kiểm tra."
+      : `Chưa kiểm tra: ${current.labels}.`;
+  const body = [
+    current.nameUnchecked && current.count > 1 ? `Chưa kiểm tra: ${current.labels}.` : "",
+    current.needsPack
+      ? `Bôi đen phần còn sót để ẩn ngay, hoặc tải gói nhận diện (${formatModelBytes(models.value.total)}, một lần) để ẩn tự động.`
+      : "Bôi đen phần còn sót để ẩn ngay. Lần sau hãy chọn thêm các mục này trước khi ẩn.",
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return {
+    title,
+    body,
+    action: current.needsPack ? (preparing.value ? "progress" : "download") : null,
+  };
+});
+function warningAction() {
+  if (warning.value?.action === "download") void pack.run("download");
+  else emit("navigate", "settings");
+}
 const title = computed(() =>
   session.value
-    ? sessionTitle(session.value)
+    ? privateSession.value
+      ? sessionPreview(session.value)
+      : sessionTitle(session.value)
     : props.format === "text"
       ? "Ẩn thông tin trong văn bản."
       : "Ẩn thông tin trong bảng tính.",
+);
+const subtitle = computed(() =>
+  session.value
+    ? privateSession.value
+      ? `${sessionTitle(session.value)} · Đọc lại bản đã ẩn, bấm Sao chép để gửi AI, rồi dán câu trả lời ở bước 4.`
+      : "Đọc lại kết quả, rồi sao chép khi bạn thấy phù hợp."
+    : props.format === "text"
+      ? "Nhập hoặc dán văn bản để ẩn thông tin bằng mã thay thế."
+      : "Một lần nhấn. Thông tin riêng tư được thay bằng mã thay thế.",
 );
 /** A text run keeps going in the background; the sample table never waits. */
 const textProcessing = computed(() => props.format === "text" && processing.value);
@@ -167,7 +217,10 @@ async function copy() {
     await navigator.clipboard.writeText(text);
     if (session.value?.id !== sessionId || output.value !== text) return;
     copied.value = true;
-    copyStatus.value = "Đã sao chép. Bạn có thể dán vào nơi mình chọn.";
+    copyStatus.value = privateSession.value
+      ? "Đã sao chép. Dán vào ChatGPT, Gemini hoặc Claude. Khi có câu trả lời, dán vào bước 4 bên dưới."
+      : "Đã sao chép. Bạn có thể dán vào nơi mình chọn.";
+    if (privateSession.value) void restorePanel.value?.reveal();
   } catch {
     if (session.value?.id !== sessionId || output.value !== text) return;
     view.value = "masked";
@@ -193,17 +246,7 @@ defineExpose({
     <div>
       <span v-if="format === 'excel' && !session" class="eyebrow">THỬ VỚI DỮ LIỆU MẪU</span>
       <h1 ref="heading" tabindex="-1">{{ title }}</h1>
-      <p>
-        {{
-          privateSession
-            ? "Đọc lại bản đã ẩn, sao chép sang AI, rồi dán phản hồi bên dưới để khôi phục."
-            : session
-              ? "Đọc lại kết quả, rồi sao chép khi bạn thấy phù hợp."
-              : format === "text"
-                ? "Nhập hoặc dán văn bản để ẩn thông tin bằng mã thay thế."
-                : "Một lần nhấn. Thông tin riêng tư được thay bằng mã thay thế."
-        }}
-      </p>
+      <p>{{ subtitle }}</p>
     </div>
     <div v-if="session" class="editor-actions">
       <button class="quiet-button" @click="emit('remove', session.id)">
@@ -222,8 +265,7 @@ defineExpose({
   >
     <header class="card-header">
       <div v-if="session" class="view-switch" aria-label="Chọn bản văn bản">
-        <button :aria-pressed="view === 'masked'" @click="selectView('masked')">
-          Bản đã ẩn thông tin</button
+        <button :aria-pressed="view === 'masked'" @click="selectView('masked')">Bản đã ẩn</button
         ><button :aria-pressed="view === 'original'" @click="selectView('original')">
           Bản gốc
         </button>
@@ -317,7 +359,7 @@ defineExpose({
     </template>
     <template v-else-if="format === 'text' || manualCopy"
       ><label class="sr-only" for="document-content">{{
-        session && view === "masked" ? "Bản đã ẩn thông tin" : "Bản gốc"
+        session && view === "masked" ? "Bản đã ẩn" : "Bản gốc"
       }}</label
       ><textarea
         id="document-content"
@@ -366,7 +408,9 @@ defineExpose({
       </div>
     </div>
     <div v-if="privateSession" class="manual-review">
-      <p id="manual-review-hint" role="status">{{ reviewStatus || reviewHint }}</p>
+      <p id="manual-review-hint" role="status">
+        <AppIcon v-if="!reviewStatus" name="compose" :size="14" />{{ reviewStatus || reviewHint }}
+      </p>
       <div class="manual-review-actions">
         <button v-if="selectedText" class="quiet-button" @click="hideSelection">
           Ẩn phần đã chọn
@@ -380,9 +424,22 @@ defineExpose({
         </button>
       </div>
     </div>
-    <p v-if="uncheckedCategories" class="detection-note scope-note">
-      <AppIcon name="info" :size="16" /><span>Chưa kiểm tra: {{ uncheckedCategories }}.</span>
-    </p>
+    <div v-if="warning" class="review-warning" role="status">
+      <AppIcon name="info" :size="18" />
+      <p>
+        <strong>{{ warning.title }}</strong
+        ><span>{{ warning.body }}</span>
+      </p>
+      <button
+        v-if="warning.action"
+        class="quiet-button"
+        :disabled="pack.busy.value || (warning.action === 'download' && !desktopModels)"
+        @click="warningAction"
+      >
+        {{ warning.action === "download" ? "Tải về" : "Xem tiến độ"
+        }}<AppIcon name="chevron" :size="12" />
+      </button>
+    </div>
     <p v-if="session && !activeFindings.length" class="detection-note" role="status">
       Chưa phát hiện thông tin cần ẩn. Bản xem trước giữ nguyên nội dung; hãy kiểm tra lại trước khi
       chia sẻ.
@@ -394,7 +451,10 @@ defineExpose({
         aria-controls="change-list"
         @click="changesOpen = !changesOpen"
       >
-        <span><AppIcon name="check" :size="15" />Đã ẩn {{ maskCount }} mục thông tin</span
+        <span
+          ><AppIcon name="check" :size="15" />Đã ẩn {{ maskCount }} mục{{
+            unchecked ? ` · ${unchecked.count} loại chưa kiểm tra` : " thông tin"
+          }}</span
         ><span
           >{{ changesOpen ? "Thu gọn" : "Xem thay đổi" }}<AppIcon name="chevron" :size="12"
         /></span>
@@ -419,9 +479,11 @@ defineExpose({
     </div>
     <p v-if="textProcessing" class="detection-note" role="status">{{ processingStatus }}</p>
     <footer class="card-footer">
-      <span v-if="session" class="action-hint">{{
-        privateSession ? "Đóng ứng dụng sẽ xóa phiên này." : "Phiên mẫu"
-      }}</span>
+      <span v-if="session" class="action-hint"
+        ><AppIcon v-if="privateSession" name="lock" :size="13" />{{
+          privateSession ? "Chỉ lưu trong lúc mở ứng dụng." : "Phiên mẫu"
+        }}</span
+      >
       <button v-if="textProcessing" class="quiet-button" @click="cancel(true)">Hủy xử lý</button>
       <button
         v-if="!session"
@@ -438,14 +500,20 @@ defineExpose({
               : "Ẩn thông tin"
         }}<AppIcon name="arrow" :size="16" /></button
       ><button v-else ref="copyButton" class="primary-action" @click="copy">
-        <AppIcon :name="copied ? 'check' : 'copy'" :size="17" />{{
-          copied ? "Đã sao chép" : "Sao chép kết quả"
+        <AppIcon v-if="copied" name="check" :size="17" /><span
+          v-else-if="privateSession"
+          class="step-number"
+          aria-hidden="true"
+          >3</span
+        ><AppIcon v-else name="copy" :size="17" />{{
+          copied ? "Đã sao chép" : "Sao chép để gửi AI"
         }}
       </button>
     </footer>
   </section>
   <RestorePanel
     v-if="session?.fixture === 'private-text-v1'"
+    ref="restorePanel"
     :session-id="session.id"
     :analysis="session.analysis"
   />

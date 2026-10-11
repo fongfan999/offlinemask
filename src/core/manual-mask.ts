@@ -88,7 +88,7 @@ export function addManualMask(
     !Number.isSafeInteger(after) ||
     after < 0 ||
     after >= Number.MAX_SAFE_INTEGER ||
-    !/^[a-f0-9]{8}$/i.test(scope) ||
+    !/^[a-f0-9]{4,8}$/i.test(scope) ||
     !Number.isInteger(start) ||
     !Number.isInteger(end) ||
     start < 0 ||

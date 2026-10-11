@@ -6,7 +6,7 @@ import { restoreAliases } from "../src/core/restore.ts";
 import { createTextSession } from "../src/core/sessions.ts";
 import { sessionPreview } from "../src/core/session-preview.ts";
 
-const scope = "4aae5744";
+const scope = "4aae";
 const detection = (start, end, type) => ({
   start,
   end,
@@ -33,23 +33,23 @@ test("exact session aliases restore in place and nothing else changes", () => {
 test("aliases from another session or a rewritten alias are reported, never guessed", () => {
   const text = "Khách 0901234567";
   const analysis = analyzeText(text, scope, [detection(6, 16, "SDT")]);
-  const reply = `[SDT_1_${scope}] và [SDT_1_deadbeef] và [SDT_2_${scope}] và [sdt_1_${scope}] và [SDT_1_${scope}`;
+  const reply = `[SDT_1_${scope}] và [SDT_1_dead] và [SDT_2_${scope}] và [sdt_1_${scope}] và [SDT_1_${scope}`;
   const result = restoreAliases(reply, analysis);
   assert.equal(result.restored, 1);
-  assert.deepEqual(result.unknown, ["[SDT_1_deadbeef]", `[SDT_2_${scope}]`]);
+  assert.deepEqual(result.unknown, ["[SDT_1_dead]", `[SDT_2_${scope}]`]);
   assert.equal(
     result.text,
-    `0901234567 và [SDT_1_deadbeef] và [SDT_2_${scope}] và [sdt_1_${scope}] và [SDT_1_${scope}`,
+    `0901234567 và [SDT_1_dead] và [SDT_2_${scope}] và [sdt_1_${scope}] và [SDT_1_${scope}`,
   );
 });
 
 test("manual corrections restore too, and a session without findings leaves text alone", () => {
   const text = "Tên: Nguyễn Văn A";
   const empty = analyzeText(text, scope, []);
-  assert.deepEqual(restoreAliases("Không có gì [TEN_1_4aae5744]", empty), {
-    text: "Không có gì [TEN_1_4aae5744]",
+  assert.deepEqual(restoreAliases("Không có gì [TEN_1_4aae]", empty), {
+    text: "Không có gì [TEN_1_4aae]",
     restored: 0,
-    unknown: ["[TEN_1_4aae5744]"],
+    unknown: ["[TEN_1_4aae]"],
   });
   const manual = addManualMask(text, empty, {}, scope, { start: 5, end: 17 });
   const result = restoreAliases(`Người: [AN_THEM_1_${scope}].`, manual.analysis);

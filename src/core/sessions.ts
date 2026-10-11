@@ -37,6 +37,14 @@ export function createSession(format: Format, existing: readonly Session[]): Sam
     decisions: Object.fromEntries(findings.map((f) => [f.id, "mask"])),
   };
 }
+/** Alias scope: four hex characters of the session id, enough to tell sessions in
+ * one app instance apart (creation retries clashes) while keeping `[STK_1_dcac]` readable.
+ */
+export const aliasScopeLength = 4;
+export function aliasScope(sessionId: string): string {
+  return sessionId.slice(0, aliasScopeLength);
+}
+
 export function createTextSession(
   text: string,
   existing: readonly Session[],
@@ -48,8 +56,8 @@ export function createTextSession(
   let id: string;
   do {
     id = crypto.randomUUID();
-  } while (existing.some((session) => session.id.slice(0, 8) === id.slice(0, 8)));
-  const analysis = analyzeText(text, id.slice(0, 8), detections);
+  } while (existing.some((session) => aliasScope(session.id) === aliasScope(id)));
+  const analysis = analyzeText(text, aliasScope(id), detections);
   return {
     id,
     number: existing.reduce((max, s) => Math.max(max, s.number), 0) + 1,

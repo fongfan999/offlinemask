@@ -1,7 +1,12 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { addManualMask, previewSelection } from "../src/core/manual-mask.ts";
-import { createTextSession, encodeSessions, sessionOutput } from "../src/core/sessions.ts";
+import {
+  aliasScope,
+  createTextSession,
+  encodeSessions,
+  sessionOutput,
+} from "../src/core/sessions.ts";
 
 function session(text, value) {
   const start = text.indexOf(value);
@@ -28,7 +33,7 @@ function hide(s, start, end, masked = true) {
   assert.ok(range);
   Object.assign(
     s,
-    addManualMask(s.original, s.analysis, s.decisions, s.id.slice(0, 8), range, s.manualMaskCount),
+    addManualMask(s.original, s.analysis, s.decisions, aliasScope(s.id), range, s.manualMaskCount),
   );
 }
 
@@ -88,7 +93,7 @@ test("empty, whitespace, malformed or already hidden selections do not create fi
   ])
     assert.equal(previewSelection(s.original, s.analysis, s.decisions, true, start, end), null);
   assert.throws(() =>
-    addManualMask(s.original, s.analysis, s.decisions, s.id.slice(0, 8), { start: 0, end: 1 }),
+    addManualMask(s.original, s.analysis, s.decisions, aliasScope(s.id), { start: 0, end: 1 }),
   );
 });
 

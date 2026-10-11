@@ -1,8 +1,8 @@
 import { nextTick, ref, type Ref } from "vue";
 import { addManualMask, previewSelection, type SourceSelection } from "../core/manual-mask.ts";
-import type { Session, TextSession } from "../core/sessions.ts";
+import { aliasScope, type Session, type TextSession } from "../core/sessions.ts";
 
-export const reviewHint = "Bôi đen phần còn sót để ẩn thêm.";
+export const reviewHint = "Thấy tên hay số nào còn sót? Bôi đen là ẩn ngay.";
 export const hiddenMessage = "Đã ẩn phần đã chọn.";
 export const undoneMessage = "Đã hoàn tác lần ẩn thêm vừa rồi.";
 
@@ -78,7 +78,7 @@ export function useTextReview(options: TextReviewOptions) {
       session.original,
       session.analysis,
       session.decisions,
-      session.id.slice(0, 8),
+      aliasScope(session.id),
       selection.range,
       session.manualMaskCount,
     );

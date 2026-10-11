@@ -1,7 +1,8 @@
 import type { TextAnalysis } from "./text.ts";
 
-/** Anything shaped like one of this app's aliases: `[TYPE_n_scope]` or `[AN_THEM_n_scope]`. */
-const aliasShape = /\[[A-Z][A-Z_]*_\d+_[a-f0-9]{8}\]/g;
+/** Anything shaped like one of this app's aliases: `[TYPE_n_scope]` or `[AN_THEM_n_scope]`.
+ * Scopes are four hex characters since decision 0059; eight-character ones from earlier builds still match. */
+const aliasShape = /\[[A-Z][A-Z_]*_\d+_[a-f0-9]{4,8}\]/g;
 
 export interface Restoration {
   text: string;
