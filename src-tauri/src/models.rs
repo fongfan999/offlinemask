@@ -126,7 +126,7 @@ impl Models {
             if let Some(root) = check.0.pack.discovered_root(&check.0.root, &check.0.cancel) {
                 check.finish(Ok(root));
             } else {
-                let downloaded = check.0.pack.cached_bytes(&check.0.root, &check.0.cancel);
+                let downloaded = check.0.pack.cached_bytes(&check.0.root);
                 check.status().downloaded = downloaded;
                 check.finish(Err(if downloaded > 0 {
                     "cancelled"

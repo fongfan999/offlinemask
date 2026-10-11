@@ -10,7 +10,13 @@ use std::{
     io::{Read, Write},
     path::{Path, PathBuf},
     sync::atomic::{AtomicBool, Ordering},
+    time::UNIX_EPOCH,
 };
+
+/// Written into a pack root after every file hashed correctly. It records each
+/// asset's digest, size and modification time, so later launches can trust an
+/// unchanged install without reading 1 GB again; any change forces a full check.
+const VERIFIED_STAMP: &str = ".verified";
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -223,15 +229,47 @@ impl Pack {
     fn cache_root(&self, base: &Path) -> PathBuf {
         base.join("downloads").join(self.fingerprint())
     }
+    /// Metadata of every asset in `root`, or `None` when any is missing or the wrong size.
+    fn stamp(&self, root: &Path) -> Option<String> {
+        let mut stamp = String::new();
+        for a in &self.assets {
+            let metadata = fs::metadata(root.join(&a.directory).join(&a.name)).ok()?;
+            if metadata.len() != a.bytes {
+                return None;
+            }
+            let modified = metadata.modified().ok()?.duration_since(UNIX_EPOCH).ok()?;
+            stamp += &format!(
+                "{} {}/{} {} {}\n",
+                a.sha256,
+                a.directory,
+                a.name,
+                a.bytes,
+                modified.as_nanos()
+            );
+        }
+        Some(stamp)
+    }
     pub fn installed(&self, root: &Path, cancel: &AtomicBool) -> bool {
-        self.assets.iter().all(|a| {
+        let Some(stamp) = self.stamp(root) else {
+            return false;
+        };
+        let marker = root.join(VERIFIED_STAMP);
+        if fs::read_to_string(&marker).is_ok_and(|recorded| recorded == stamp) {
+            return true;
+        }
+        let verified = self.assets.iter().all(|a| {
             valid(
                 &root.join(&a.directory).join(&a.name),
                 a.bytes,
                 &a.sha256,
                 cancel,
             )
-        })
+        });
+        if verified {
+            // Best effort: without the stamp the next launch simply hashes again.
+            let _ = fs::write(marker, stamp);
+        }
+        verified
     }
     pub fn discovered_root(&self, base: &Path, cancel: &AtomicBool) -> Option<PathBuf> {
         let root = self.release_root(base);
@@ -245,31 +283,30 @@ impl Pack {
             None
         }
     }
-    pub fn cached_bytes(&self, base: &Path, cancel: &AtomicBool) -> u64 {
+    /// Bytes already in the download cache, for progress display only. Sizes are
+    /// enough here: `install` verifies every cached file's digest before using it.
+    pub fn cached_bytes(&self, base: &Path) -> u64 {
+        let cache = self.cache_root(base);
+        let present = |digest: &str, bytes: u64| {
+            let path = cache.join(digest);
+            if fs::metadata(&path).is_ok_and(|m| m.len() == bytes) {
+                bytes
+            } else {
+                fs::metadata(partial_path(&path)).map_or(0, |m| m.len().min(bytes))
+            }
+        };
         self.assets
             .iter()
             .map(|a| {
-                let p = self.cache_root(base).join(&a.transport.sha256);
-                if valid(&p, a.transport.bytes, &a.transport.sha256, cancel) {
-                    a.transport.bytes
+                let complete = present(&a.transport.sha256, a.transport.bytes);
+                if complete == a.transport.bytes || a.transport.parts.is_empty() {
+                    complete
                 } else {
-                    if a.transport.parts.is_empty() {
-                        fs::metadata(partial_path(&p)).map_or(0, |m| m.len().min(a.transport.bytes))
-                    } else {
-                        a.transport
-                            .parts
-                            .iter()
-                            .map(|part| {
-                                let path = self.cache_root(base).join(&part.sha256);
-                                if valid(&path, part.bytes, &part.sha256, cancel) {
-                                    part.bytes
-                                } else {
-                                    fs::metadata(partial_path(&path))
-                                        .map_or(0, |m| m.len().min(part.bytes))
-                                }
-                            })
-                            .sum()
-                    }
+                    a.transport
+                        .parts
+                        .iter()
+                        .map(|part| present(&part.sha256, part.bytes))
+                        .sum()
                 }
             })
             .sum()
@@ -631,7 +668,7 @@ mod tests {
         assert!(!pack.release_root(&f.0).exists());
         assert!(pack.cache_root(&f.0).join(&a.transport.sha256).exists());
         cancel.store(false, Ordering::Relaxed);
-        assert_eq!(pack.cached_bytes(&f.0, &cancel), pack.download_bytes());
+        assert_eq!(pack.cached_bytes(&f.0), pack.download_bytes());
         let root = pack.install(&f.0, &Client::new(), &cancel, |_| {}).unwrap();
         assert!(pack.installed(&root, &cancel));
     }
@@ -776,6 +813,36 @@ mod tests {
             pack.install(&f.0, &Client::new(), &AtomicBool::new(false), |_| {}),
             Ok(f.0.clone())
         );
+    }
+    #[test]
+    fn verified_install_is_trusted_until_its_files_change() {
+        let f = Fixture::new();
+        let (a, _) = asset(b"model", "model.onnx");
+        let file = f.0.join("test-model/model.onnx");
+        fs::create_dir(f.0.join("test-model")).unwrap();
+        fs::write(&file, b"model").unwrap();
+        let pack = pack(vec![a]);
+        let cancel = AtomicBool::new(false);
+        assert!(pack.installed(&f.0, &cancel));
+        assert!(f.0.join(VERIFIED_STAMP).exists());
+        let modified = fs::metadata(&file).unwrap().modified().unwrap();
+        // Same size and time: the stamp answers without hashing.
+        fs::write(&file, b"MODEL").unwrap();
+        File::options()
+            .write(true)
+            .open(&file)
+            .unwrap()
+            .set_modified(modified)
+            .unwrap();
+        assert!(pack.installed(&f.0, &cancel));
+        // A changed time forces the full check, which rejects the content.
+        File::options()
+            .write(true)
+            .open(&file)
+            .unwrap()
+            .set_modified(modified + std::time::Duration::from_secs(1))
+            .unwrap();
+        assert!(!pack.installed(&f.0, &cancel));
     }
     #[test]
     #[ignore = "downloads 712 MB from the owner-authorized public R2 bucket; explicit developer check"]

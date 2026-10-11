@@ -1278,6 +1278,11 @@ td.alias {
 .download-size {
   margin-right: auto;
 }
+.model-checking {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
 .download-size strong {
   display: block;
   font-size: 22px;

@@ -27,9 +27,8 @@ const progress = computed(() =>
 const downloading = computed(() =>
   ["downloading", "installing", "cancelling"].includes(props.status.stage),
 );
-const labels = {
-  checking: "Đang kiểm tra",
-  missing: "Chưa tải",
+// No badge while the launch check looks for the pack, nor before it is downloaded.
+const labels: Partial<Record<ModelStatus["stage"], string>> = {
   downloading: "Đang tải",
   installing: "Đang cài đặt",
   cancelling: "Đang tạm dừng",
@@ -52,7 +51,7 @@ const errorMessage = computed(() => {
     <div class="model-card-heading">
       <h2 id="model-title">{{ recognitionPack.name }}</h2>
       <span
-        v-if="status.stage !== 'missing'"
+        v-if="labels[status.stage]"
         class="model-badge"
         :class="{ installed: status.stage === 'ready' }"
         >{{ labels[status.stage] }}</span
@@ -94,7 +93,10 @@ const errorMessage = computed(() => {
     <p v-if="!desktop" class="model-description">
       Mở ứng dụng OfflineMask trên máy tính để tải gói nhận diện.
     </p>
-    <div class="model-download-actions">
+    <p v-if="status.stage === 'checking'" class="model-checking" role="status">
+      Đang tìm gói trên máy…
+    </p>
+    <div v-else class="model-download-actions">
       <div
         v-if="!downloading && status.stage !== 'paused' && status.stage !== 'error'"
         class="download-size"
@@ -119,17 +121,15 @@ const errorMessage = computed(() => {
       <button
         v-else-if="status.stage !== 'ready'"
         class="primary-action"
-        :disabled="!desktop || busy || status.stage === 'checking'"
+        :disabled="!desktop || busy"
         @click="$emit('download')"
       >
         <AppIcon name="download" :size="17" />{{
-          status.stage === "checking"
-            ? "Đang kiểm tra…"
-            : status.stage === "paused"
-              ? "Tiếp tục tải"
-              : status.stage === "error"
-                ? "Thử lại"
-                : "Tải về"
+          status.stage === "paused"
+            ? "Tiếp tục tải"
+            : status.stage === "error"
+              ? "Thử lại"
+              : "Tải về"
         }}
       </button>
     </div>
