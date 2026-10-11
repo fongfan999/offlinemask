@@ -5,6 +5,7 @@ import { combinedModelSource } from "./model-policy.ts";
 import { recognitionPack, type PackDefinition, type PackModel } from "./pack.ts";
 import { predictAllTokens } from "./token-predictions.ts";
 import { applyDetectionPolicy } from "./policy.ts";
+import { createRangedFetch } from "./ranged-fetch.ts";
 import {
   recognitionSource,
   attachRecognitionOffsets,
@@ -31,6 +32,8 @@ export function configureLocalModels(root: string) {
   env.useFSCache = false;
   env.useBrowserCache = false;
   env.useWasmCache = false;
+  // Pack files arrive in ranges so the desktop host never copies a whole model in one call.
+  env.fetch = createRangedFetch({ shouldRange: (url) => url.startsWith(root) });
 }
 
 /** The default runtime: the pinned ONNX Runtime WASM build inside the detection worker. */

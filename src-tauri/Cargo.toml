@@ -60,6 +60,11 @@ ort = { version = "=2.0.0-rc.10", optional = true, default-features = false, fea
 minilm-tokenizer = { package = "offlinemask-minilm-tokenizer-prototype", path = "../scripts/minilm-native/native", optional = true }
 
 
+# A freshly installed pack is verified by hashing 1.1 GB once. Unoptimized
+# SHA-256 took over 30 s on an M1 Pro in `tauri dev`; optimize just that crate.
+[profile.dev.package.sha2]
+opt-level = 3
+
 # Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
 [profile.release]
 codegen-units = 1
