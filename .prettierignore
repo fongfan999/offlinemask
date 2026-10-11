@@ -8,12 +8,9 @@ src-tauri/target/
 src-tauri/gen/
 pnpm-lock.yaml
 
-# Frozen sources. Evaluation protocols under docs/evaluations/ pin SHA-256
-# fingerprints of these files; reformatting would invalidate recorded evidence
-# without changing behavior. Format them only inside a new versioned experiment.
-src/core/
-src/workers/
-src/adapters/text-detection.ts
+# Frozen evaluation experiments. The protocols under docs/evaluations/ pin
+# SHA-256 fingerprints of these scripts; reformatting would invalidate recorded
+# evidence without changing behavior. Start a new versioned experiment instead.
 scripts/
 !scripts/prepare-*.mjs
 !scripts/build-*.mjs

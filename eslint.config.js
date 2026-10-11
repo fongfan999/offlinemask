@@ -40,9 +40,9 @@ export default [
     },
   },
   {
-    // Frozen, fingerprinted detection sources (see .prettierignore). Their regex
-    // literals escape `/` and `[` inside character classes; leave them as recorded.
-    files: ["src/core/**"],
+    // The detection rules escape `/` and `[` inside regex character classes for
+    // readability; the escapes are harmless and the patterns are test-covered.
+    files: ["src/core/detection/**"],
     rules: { "no-useless-escape": "off" },
   },
   {

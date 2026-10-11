@@ -3,7 +3,7 @@
  * In WebKit, full-document segmentation can create large temporary allocations.
  */
 export function* textGraphemes(text: string): Generator<{ segment: string; index: number }> {
-  const segmenter = new Intl.Segmenter('vi', { granularity: 'grapheme' });
+  const segmenter = new Intl.Segmenter("vi", { granularity: "grapheme" });
   let start = 0;
   let end = 0;
   while (start < text.length) {
@@ -16,7 +16,10 @@ export function* textGraphemes(text: string): Generator<{ segment: string; index
       last = { segment, index: start + index };
     }
     if (!last) break;
-    if (end === text.length) { yield last; break; }
+    if (end === text.length) {
+      yield last;
+      break;
+    }
     // Keep the whole last cluster, including combining marks, ZWJ sequences,
     // regional-indicator pairs and CR, to retain segmentation context.
     start = last.index;

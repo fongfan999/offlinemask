@@ -27,10 +27,7 @@ export interface TextSession {
 }
 export type Session = SampleSession | TextSession;
 export const historyKey = "offlinemask.sample-sessions.v1";
-export function createSession(
-  format: Format,
-  existing: readonly Session[],
-): SampleSession {
+export function createSession(format: Format, existing: readonly Session[]): SampleSession {
   return {
     id: crypto.randomUUID(),
     number: existing.reduce((max, s) => Math.max(max, s.number), 0) + 1,
@@ -40,12 +37,18 @@ export function createSession(
     decisions: Object.fromEntries(findings.map((f) => [f.id, "mask"])),
   };
 }
-export function createTextSession(text: string, existing: readonly Session[], detections: readonly Detection[], options: readonly DetectionOption[] = detectionOptions.map(option => option.id)): TextSession {
+export function createTextSession(
+  text: string,
+  existing: readonly Session[],
+  detections: readonly Detection[],
+  options: readonly DetectionOption[] = detectionOptions.map((option) => option.id),
+): TextSession {
   // Keep tokens readable while explicitly avoiding namespace reuse in this app instance.
   // A future persistent vault must retain and enforce the namespace registry too.
   let id: string;
-  do { id = crypto.randomUUID(); }
-  while (existing.some((session) => session.id.slice(0, 8) === id.slice(0, 8)));
+  do {
+    id = crypto.randomUUID();
+  } while (existing.some((session) => session.id.slice(0, 8) === id.slice(0, 8)));
   const analysis = analyzeText(text, id.slice(0, 8), detections);
   return {
     id,
@@ -68,23 +71,22 @@ export function sessionTitle(session: Session): string {
 export function encodeSessions(sessions: readonly Session[]): string {
   return JSON.stringify({
     version: 1,
-    sessions: sessions.filter((s): s is SampleSession => s.fixture === "sample-v1").map((s) => ({
-      id: s.id,
-      number: s.number,
-      format: s.format,
-      fixture: s.fixture,
-      createdAt: s.createdAt,
-      decisions: Object.fromEntries(
-        findings.map((f) => [f.id, s.decisions[f.id]]),
-      ),
-    })),
+    sessions: sessions
+      .filter((s): s is SampleSession => s.fixture === "sample-v1")
+      .map((s) => ({
+        id: s.id,
+        number: s.number,
+        format: s.format,
+        fixture: s.fixture,
+        createdAt: s.createdAt,
+        decisions: Object.fromEntries(findings.map((f) => [f.id, s.decisions[f.id]])),
+      })),
   });
 }
 export function decodeSessions(raw: string | null): SampleSession[] {
   if (!raw) return [];
   const data = JSON.parse(raw);
-  if (data.version !== 1 || !Array.isArray(data.sessions))
-    throw new Error("Unsupported history");
+  if (data.version !== 1 || !Array.isArray(data.sessions)) throw new Error("Unsupported history");
   const ids = new Set<string>();
   return data.sessions.map((s: SampleSession) => {
     if (
@@ -109,9 +111,7 @@ export function decodeSessions(raw: string | null): SampleSession[] {
       format: s.format,
       fixture: s.fixture,
       createdAt: s.createdAt,
-      decisions: Object.fromEntries(
-        findings.map((f) => [f.id, s.decisions[f.id]!]),
-      ),
+      decisions: Object.fromEntries(findings.map((f) => [f.id, s.decisions[f.id]!])),
     };
   });
 }
@@ -146,9 +146,7 @@ export function maskedRows(decisions: Decisions): string[][] {
   return sheetRows.map((row) =>
     row.map((value) => {
       const finding = findings.find((f) => f.value === value);
-      return finding && decisions[finding.id] === "mask"
-        ? finding.alias
-        : value;
+      return finding && decisions[finding.id] === "mask" ? finding.alias : value;
     }),
   );
 }
@@ -157,7 +155,5 @@ export function sessionOutput(session: Session): string {
     return maskedText(session.original, session.analysis, session.decisions);
   return session.format === "text"
     ? prepareCopy(session.decisions)
-    : [sheetHeaders, ...maskedRows(session.decisions)]
-        .map((row) => row.join("\t"))
-        .join("\n");
+    : [sheetHeaders, ...maskedRows(session.decisions)].map((row) => row.join("\t")).join("\n");
 }

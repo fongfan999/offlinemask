@@ -1,10 +1,14 @@
 import { graphemeBoundaries } from "../unicode.ts";
 
 /** Token-bounded windows with source overlap; never rely on pipeline truncation. */
-export function* modelChunkIterator(text: string, tokenCount: (text: string) => number): Generator<{ text: string; start: number }> {
+export function* modelChunkIterator(
+  text: string,
+  tokenCount: (text: string) => number,
+): Generator<{ text: string; start: number }> {
   const boundaries = graphemeBoundaries(text);
   function boundaryAt(offset: number, roundUp: boolean) {
-    let low = 0, high = boundaries.length - 1;
+    let low = 0,
+      high = boundaries.length - 1;
     while (low < high) {
       const middle = Math.floor((low + high) / 2);
       if (boundaries[middle]! < offset) low = middle + 1;
@@ -29,7 +33,6 @@ export function* modelChunkIterator(text: string, tokenCount: (text: string) => 
     if (end < text.length) {
       const boundary = text.lastIndexOf(" ", end);
       if (boundary > start + (end - start) / 2) end = boundary;
-
     }
     end = boundaryAt(end, false);
     if (end <= start || tokenCount(text.slice(start, end)) > 384)

@@ -1,4 +1,5 @@
-//! Pinned Underthesea source alignment. No input logging, persistence, or network.
+//! Exact source offsets from a pinned Hugging Face `tokenizer.json`.
+//! No input logging, persistence, or network.
 use serde::Serialize;
 use sha2::{Digest, Sha256};
 use std::{io::Read, path::Path};
@@ -9,26 +10,24 @@ pub struct Encoded {
     pub ids: Vec<u32>,
     pub offsets: Vec<[usize; 2]>,
 }
+/// Tokenizer files larger than this are not a pinned pack asset.
+const TOKENIZER_LIMIT: u64 = 64 * 1024 * 1024;
 pub struct RecognitionTokenizer(Tokenizer);
 impl RecognitionTokenizer {
-    pub fn load(root: &Path) -> Result<Self, &'static str> {
-        let catalog: serde_json::Value =
-            serde_json::from_str(include_str!("../../scripts/release-pack-v1.json"))
-                .map_err(|_| "asset")?;
-        let asset = catalog["assets"]
-            .as_array()
-            .ok_or("asset")?
-            .iter()
-            .find(|a| a["directory"] == "underthesea" && a["name"] == "tokenizer.json")
-            .ok_or("asset")?;
+    /// Load `tokenizer.json` only when it has exactly the pinned size and SHA-256.
+    pub fn load(
+        path: &Path,
+        expected_bytes: u64,
+        expected_sha256: &str,
+    ) -> Result<Self, &'static str> {
         let mut bytes = Vec::new();
-        std::fs::File::open(root.join("underthesea/tokenizer.json"))
+        std::fs::File::open(path)
             .map_err(|_| "asset")?
-            .take(2_000_001)
+            .take(TOKENIZER_LIMIT + 1)
             .read_to_end(&mut bytes)
             .map_err(|_| "asset")?;
-        if bytes.len() as u64 != asset["bytes"].as_u64().ok_or("asset")?
-            || format!("{:x}", Sha256::digest(&bytes)) != asset["sha256"].as_str().ok_or("asset")?
+        if bytes.len() as u64 != expected_bytes
+            || format!("{:x}", Sha256::digest(&bytes)) != expected_sha256
         {
             return Err("asset");
         }

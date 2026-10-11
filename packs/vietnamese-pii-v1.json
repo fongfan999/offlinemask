@@ -1,4 +1,26 @@
 {
+  "id": "vietnamese-pii-v1",
+  "name": "Gói nhận diện tiếng Việt",
+  "attribution": "Underthesea + OpenMed · Nguồn: Hugging Face · Giấy phép Apache 2.0.",
+  "models": [
+    {
+      "directory": "underthesea",
+      "source": "Underthesea · INT8",
+      "graph": "model_int8",
+      "offsets": "native",
+      "labels": {
+        "PER": "PERSON",
+        "LOC": "LOCATION",
+        "ORG": "ORGANIZATION"
+      }
+    },
+    {
+      "directory": "vietnamese-pii-multilingual",
+      "source": "OpenMed · mSuperClinical · INT8",
+      "graph": "model_int8",
+      "offsets": "sequential"
+    }
+  ],
   "assets": [
     {
       "directory": "underthesea",

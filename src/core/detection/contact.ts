@@ -8,11 +8,20 @@ export function detectContactDetails(text: string): Detection[] {
   const emails: Detection[] = (links.match(text) ?? [])
     .filter((match) => match.schema === "mailto:")
     .map((match) => ({
-      start: match.index, end: match.lastIndex, type: "EMAIL", label: "Email", priority: 110,
-      source: "linkify-it", reason: "Địa chỉ email được nhận diện đầy đủ, bao gồm tên miền.",
+      start: match.index,
+      end: match.lastIndex,
+      type: "EMAIL",
+      label: "Email",
+      priority: 110,
+      source: "linkify-it",
+      reason: "Địa chỉ email được nhận diện đầy đủ, bao gồm tên miền.",
     }));
   const phones: Detection[] = findPhoneNumbersInText(text, "VN").map((match) => ({
-    start: match.startsAt, end: match.endsAt, type: "SDT", label: "Số điện thoại", priority: 90,
+    start: match.startsAt,
+    end: match.endsAt,
+    type: "SDT",
+    label: "Số điện thoại",
+    priority: 90,
     source: "libphonenumber-js · metadata đầy đủ",
     reason: "Số được đối chiếu với định dạng điện thoại; không xác nhận chủ sở hữu.",
   }));

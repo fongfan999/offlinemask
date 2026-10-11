@@ -9,13 +9,18 @@ export interface Detection {
   priority: number;
 }
 
-export type DetectionProgress = { stage: "loading" | "processing"; completed: number; total: number };
+export type DetectionProgress = {
+  stage: "loading" | "processing";
+  completed: number;
+  total: number;
+};
 export type WorkerRequest = { text: string; modelRoot?: string; options: DetectionOption[] };
 export type WorkerResponse = { runId: number } & (
   | { type: "native"; id: number; request: import("./native-recognition.ts").NativeCall }
-  | { type: "encode"; id: number; text: string }
+  | { type: "encode"; id: number; text: string; model: string }
   | { type: "progress"; progress: DetectionProgress }
   | { type: "result"; detections: Detection[] }
   | { type: "error" }
   | { type: "cancelled" }
-  | { type: "reset" });
+  | { type: "reset" }
+);

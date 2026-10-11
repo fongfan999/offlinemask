@@ -24,14 +24,24 @@ export function validateText(text: string): string {
 }
 
 /** Policy and exact-span transformation; detection belongs to external providers. */
-export function analyzeText(text: string, scope: string, detections: readonly Detection[]): TextAnalysis {
+export function analyzeText(
+  text: string,
+  scope: string,
+  detections: readonly Detection[],
+): TextAnalysis {
   const error = validateText(text);
   if (error) throw new Error(error);
   if (!/^[a-f0-9]{8}$/i.test(scope)) throw new Error("Invalid alias scope");
   for (const detection of detections) {
-    if (!Number.isInteger(detection.start) || !Number.isInteger(detection.end)
-      || detection.start < 0 || detection.end <= detection.start || detection.end > text.length
-      || !/^[A-Z_]+$/.test(detection.type)) throw new Error("Invalid detector span");
+    if (
+      !Number.isInteger(detection.start) ||
+      !Number.isInteger(detection.end) ||
+      detection.start < 0 ||
+      detection.end <= detection.start ||
+      detection.end > text.length ||
+      !/^[A-Z_]+$/.test(detection.type)
+    )
+      throw new Error("Invalid detector span");
   }
   const entries: Finding[] = [];
   const counters = new Map<string, number>();
@@ -45,8 +55,9 @@ export function analyzeText(text: string, scope: string, detections: readonly De
     return true;
   }
   // Explicit banking labels outrank model guesses; otherwise prefer complete spans.
-  const ordered = [...detections].sort((a, b) =>
-    b.priority - a.priority || (b.end - b.start) - (a.end - a.start) || a.start - b.start);
+  const ordered = [...detections].sort(
+    (a, b) => b.priority - a.priority || b.end - b.start - (a.end - a.start) || a.start - b.start,
+  );
   for (const detection of ordered) {
     if (occupied.subarray(detection.start, detection.end).some(Boolean)) continue;
     const value = text.slice(detection.start, detection.end);
@@ -55,17 +66,22 @@ export function analyzeText(text: string, scope: string, detections: readonly De
     if (!finding) {
       let count = counters.get(detection.type) ?? 0;
       let alias: string;
-      do { alias = "[" + detection.type + "_" + (++count) + "_" + scope + "]"; }
-      while (text.includes(alias));
+      do {
+        alias = "[" + detection.type + "_" + ++count + "_" + scope + "]";
+      } while (text.includes(alias));
       counters.set(detection.type, count);
       finding = {
-        id: detection.type + "_" + count, label: detection.label, value, alias,
-        reason: detection.reason, source: detection.source,
+        id: detection.type + "_" + count,
+        label: detection.label,
+        value,
+        alias,
+        reason: detection.reason,
+        source: detection.source,
       };
       byValue.set(key, finding);
       entries.push(finding);
     }
-    accept({start: detection.start, end: detection.end, findingId: finding.id});
+    accept({ start: detection.start, end: detection.end, findingId: finding.id });
   }
   // Consistent exact values, without overwriting another provider's explicit span.
   for (const finding of entries) {
@@ -106,8 +122,10 @@ export function maskedText(text: string, analysis: TextAnalysis, decisions: Deci
   const entries = new Map(analysis.findings.map((finding) => [finding.id, finding]));
   if (analysis.findings.some(({ id }) => !["mask", "keep"].includes(decisions[id] ?? "")))
     throw new Error("Missing masking decision");
-  return textParts(text, analysis.spans).map((part) => {
-    const finding = part.findingId ? entries.get(part.findingId) : undefined;
-    return finding && decisions[finding.id] === "mask" ? finding.alias : part.text;
-  }).join("");
+  return textParts(text, analysis.spans)
+    .map((part) => {
+      const finding = part.findingId ? entries.get(part.findingId) : undefined;
+      return finding && decisions[finding.id] === "mask" ? finding.alias : part.text;
+    })
+    .join("");
 }

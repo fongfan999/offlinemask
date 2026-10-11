@@ -1,10 +1,12 @@
 # Contributing to OfflineMask
 
-OfflineMask is source available under the [O’Saasy License Agreement](LICENSE.md), with copyright attributed to Phong Phan; see the [license decision](docs/decisions/0050-osaasy-license.md). Third-party redistribution review and a private vulnerability-reporting contact remain required before public release.
+Thank you for helping. OfflineMask is source available under the [O’Saasy License Agreement](LICENSE.md); by contributing you agree that your contribution is licensed under the same terms. Security problems go through [SECURITY.md](SECURITY.md), not public issues.
 
 ## Local setup
 
-Use the pinned tools in `mise.toml`; do not depend on globally installed Node, pnpm, or Rust versions. Follow [README setup](README.md#development-with-mise) and [development notes](docs/development.md). Commit both dependency lockfiles. The app's offline runtime requirement is separate from downloading build dependencies.
+Use the pinned tools in `mise.toml`; do not rely on globally installed Node, pnpm or Rust. Follow the [README setup](README.md#getting-started) and the [development notes](docs/development.md). Commit both lockfiles (`pnpm-lock.yaml`, `src-tauri/Cargo.lock`). Downloading build dependencies needs the network; the application's offline requirement is separate.
+
+Before opening a pull request, run:
 
 ```sh
 mise exec -- pnpm install --frozen-lockfile
@@ -12,32 +14,34 @@ mise exec -- pnpm lint
 mise exec -- pnpm build
 mise exec -- pnpm test
 mise exec -- pnpm check:native
+mise exec -- cargo test --manifest-path src-tauri/Cargo.toml --locked
 ```
 
-Run native checks when changing Rust or native configuration. For UI changes, verify relevant keyboard interactions and narrow windows in a browser, then smoke-test the packaged desktop application. Record actual platforms and limitations; do not claim cross-platform support from one macOS build.
+Run the native checks whenever `src-tauri/` or native configuration changes. For UI changes, verify keyboard interaction and narrow windows in the browser preview, then smoke-test the packaged desktop app. Record which platforms you actually tested; a macOS build does not establish Windows or Linux support.
 
-## Implementation conventions
+## Changing the models
 
-Read [product direction](docs/product-direction.md) before UI work. The current UI is accepted as the boilerplate baseline; apply later owner feedback page by page rather than initiating an unsolicited broad redesign.
+The recognition models are described by one file under `packs/`. Read [packs/README.md](packs/README.md): it lists the model contract, the step-by-step replacement procedure and the two gates every pack must pass, `pnpm test` (code and pack contract, no model files) and `pnpm test:models` (the real models against the committed synthetic fixtures, offline). A green run is a regression check; detection quality claims need an evaluation recorded under `docs/evaluations/` and a decision under `docs/decisions/`.
 
-- Use Vue Composition API with TypeScript, semantic HTML, standard CSS, and small components/modules with clear responsibilities. Keep portable transformations separate from native adapters and UI state.
-- Prefer documented platform APIs and maintained libraries over proprietary formats or custom infrastructure. Add dependencies for a demonstrated need; record their source, license compatibility, runtime cost, offline behavior, and alternatives in an architecture decision when the choice is substantial.
-- Run `pnpm lint` (ESLint plus Prettier) before submitting; `pnpm format` rewrites. Fingerprinted detection sources under `src/core/` and the frozen experiments under `scripts/` are excluded from formatting on purpose; see `.prettierignore` and [scripts/README.md](scripts/README.md). The CI workflow in `.github/workflows/ci.yml` runs the same commands.
-- Use the shared design tokens (paper, ink, cobalt accent, with dark-scheme values) and the `.glass` sheet rule. Do not add independent surface recipes, animated backdrop effects, remote fonts, or automatic runtime asset downloads. Explicit user-triggered model downloads in Settings are allowed; processing and startup remain offline. Follow the brand palette recorded in product direction; purple and lavender are excluded.
-- Study current official documentation (Context7 is available in the agent workflow). Record consequential choices in `docs/decisions/`, and describe unresolved decisions honestly.
-- Keep UI copy in Vietnamese for the current prototype. User-facing labels describe behavior, not implementation internals.
-- Test transformation invariants, persistence boundaries, and failure paths. Avoid tests that simply repeat trivial component markup.
+## Conventions
+
+Read [product direction](docs/product-direction.md) before UI work; it records the accepted baseline and the owner's page-by-page feedback. Apply new feedback to the page it concerns rather than starting a broad redesign.
+
+- Vue Composition API with TypeScript, semantic HTML, standard CSS, and small modules with one responsibility. Portable logic lives in `src/core/` with no Vue or Tauri imports; `src/adapters/` is the only place that calls Tauri.
+- Prefer documented platform APIs and maintained libraries. Add a dependency for a demonstrated need and record its source, license, runtime cost and offline behaviour in a decision when the choice is substantial.
+- `pnpm lint` runs ESLint and Prettier over `src/`, `tests/` and the build scripts; `pnpm format` rewrites. The frozen experiments under `scripts/` subdirectories, `tests/fixtures/` and `docs/evaluations/` are deliberately excluded (see [scripts/README.md](scripts/README.md)). CI runs the same commands.
+- Use the shared design tokens in `src/style.css` (paper, ink, cobalt accent, light and dark) and the `.glass` sheet rule. No remote fonts, animated backdrops, independent surface recipes, or automatic runtime downloads. Explicit user-triggered pack downloads in Settings are the one allowed network action.
+- UI copy is Vietnamese. Labels describe behaviour, not implementation.
+- Test invariants, persistence boundaries and failure paths rather than component markup. Fixtures are synthetic.
+- Record consequential choices in `docs/decisions/` as a new numbered file; do not rewrite earlier decisions or evaluation protocols.
+- Use current official documentation for library-specific work (Context7 is available to agents) and note what was consulted.
 
 ## Privacy and sample data
 
-Only synthetic fixtures belong in source control, screenshots, tests, logs, and public issues. Do not submit real customer files or identifiers. The current history serializes only versioned sample references and mask/keep choices; it is not an encrypted vault. Never extend that storage path to user text, workbook contents, private mappings, or custom titles derived from private data.
+Only synthetic fixtures belong in source control, tests, screenshots, logs and issues. Never submit real customer files or identifiers. The persisted history holds versioned sample references and mask/keep choices only; it is not an encrypted vault. Do not extend that storage to user text, workbook contents, private mappings or titles derived from private data. Real-input persistence needs the vault lifecycle described in the [PRD](PRD.md).
 
-Real-input persistence needs the vault lifecycle described in the [PRD](PRD.md). File support needs a documented compatibility matrix and fixtures. A preview table is not an XLSX parser or writer. Preserve these distinctions in code, documentation, and release notes.
+Do not add analytics, automatic error uploads, input logging, correction collection or background update checks to improve detection. Evaluation uses explicitly authored synthetic fixtures run locally by developers. Synthetic results measure those fixtures; whether they represent real documents is an unverified assumption, and a green suite is not an accuracy claim.
 
 ## Changes and review
 
-Keep changes focused. Describe the user-visible problem, final behavior, relevant validation, and known limitations. Update documentation alongside scope or architecture changes. Do not commit generated bundles, credentials, machine-specific paths, or private data. Public repository hosting, CI, release signing, licensing, and vulnerability reporting remain release setup tasks; no remote publishing is implied by this guide.
-
-## Offline evaluation boundary
-
-Do not add analytics, automatic error uploads, user-input logging, correction collection, or background update checks to improve detection. Evaluation uses explicitly authored synthetic fixtures and local developer runs. Real input and manual corrections remain in RAM and never become training/evaluation records. Synthetic results measure those fixtures only; whether their scenarios represent banking employees' actual documents remains an unverified assumption. New detection claims require versioned, independently reviewable evidence, not inferred field accuracy from a green test suite.
+Keep changes focused. Describe the user-visible problem, the final behaviour, what you verified and the known limitations. Update documentation with scope or architecture changes. Do not commit generated bundles, credentials, machine-specific paths or private data. Release signing, notarization and distribution are maintainer tasks; see [docs/release/macos-arm64.md](docs/release/macos-arm64.md).

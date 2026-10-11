@@ -1,6 +1,6 @@
 import { convertFileSrc, invoke, isTauri } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
-import pack from "../../scripts/release-pack-v1.json" with { type: "json" };
+import { packInstalledBytes, packTransportBytes } from "../core/detection/pack.ts";
 
 export interface ModelStatus {
   stage:
@@ -20,8 +20,8 @@ export interface ModelStatus {
   root: string | null;
 }
 
-export const installedModelBytes = pack.assets.reduce((sum, asset) => sum + asset.bytes, 0);
-export const totalModelBytes = pack.assets.reduce((sum, asset) => sum + asset.transport.bytes, 0);
+export const installedModelBytes = packInstalledBytes();
+export const totalModelBytes = packTransportBytes();
 export const formatModelBytes = (bytes: number) =>
   bytes >= 1e9
     ? `${(bytes / 1e9).toLocaleString("vi-VN", { maximumFractionDigits: 2 })} GB`

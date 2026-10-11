@@ -10,17 +10,6 @@ use std::{
 use tauri::State;
 type Reply<T> = Result<T, &'static str>;
 #[derive(Deserialize)]
-struct Catalog {
-    assets: Vec<Asset>,
-}
-#[derive(Deserialize)]
-struct Asset {
-    directory: String,
-    name: String,
-    bytes: u64,
-    sha256: String,
-}
-#[derive(Deserialize)]
 struct Config {
     vocab_size: i64,
     id2label: BTreeMap<String, String>,
@@ -78,12 +67,11 @@ pub async fn recognition_native_load(
             .with_telemetry(false)
             .commit()
             .map_err(|_| "runtime")?;
-        let catalog: Catalog =
-            serde_json::from_str(include_str!("../../scripts/release-pack-v1.json"))
-                .map_err(|_| "asset")?;
+        let pack = crate::models::pack();
         let mut sessions = Vec::new();
-        for directory in ["underthesea", "vietnamese-pii-multilingual"] {
-            for asset in catalog.assets.iter().filter(|a| a.directory == directory) {
+        for model in &pack.models {
+            let directory = &model.directory;
+            for asset in pack.assets.iter().filter(|a| &a.directory == directory) {
                 if !crate::models::valid(
                     &root.join(directory).join(&asset.name),
                     asset.bytes,
@@ -104,7 +92,7 @@ pub async fn recognition_native_load(
                 .map_err(|_| "runtime")?
                 .with_intra_threads(4)
                 .map_err(|_| "runtime")?
-                .commit_from_file(root.join(directory).join("model_int8.onnx"))
+                .commit_from_file(root.join(directory).join(format!("{}.onnx", model.graph)))
                 .map_err(|_| "runtime")?;
             sessions.push((session, config));
         }
@@ -131,7 +119,7 @@ pub async fn recognition_native_run(
     model: usize,
     ids: Vec<i64>,
 ) -> Reply<Logits> {
-    if model > 1 || !(2..=384).contains(&ids.len()) {
+    if !(2..=384).contains(&ids.len()) {
         return Err("input");
     }
     let shared = Arc::clone(&state.inner);

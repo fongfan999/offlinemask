@@ -1,9 +1,9 @@
-import { decodeBioTokenSpans, type RawTokenClassificationEntity } from 'openmed';
-import { modelChunkIterator } from './chunks.ts';
-import { alignSourceTokens } from './source-offsets.ts';
-import { modelDetections } from './model-policy.ts';
-import { applyDetectionPolicy } from './policy.ts';
-import type { Detection, DetectionProgress } from './types.ts';
+import { decodeBioTokenSpans, type RawTokenClassificationEntity } from "openmed";
+import { modelChunkIterator } from "./chunks.ts";
+import { alignSourceTokens } from "./source-offsets.ts";
+import { modelDetections } from "./model-policy.ts";
+import { applyDetectionPolicy } from "./policy.ts";
+import type { Detection, DetectionProgress } from "./types.ts";
 
 /** A provider owns inference and tokenizer-specific alignment. No pack identity
  * or file-format assumptions belong in the shared runner.
@@ -17,17 +17,17 @@ export interface ModelProvider {
 }
 
 export function createModelRunner(providers: readonly ModelProvider[]) {
-  if (!providers.length) throw new Error('Model provider required');
+  if (!providers.length) throw new Error("Model provider required");
   const progressDefault = (_value: DetectionProgress) => {};
   async function inspect(text: string, progress = progressDefault, signal?: AbortSignal) {
     signal?.throwIfAborted();
     const plans = [];
     for (const provider of providers) {
       const chunks = [];
-      for (const chunk of modelChunkIterator(text, value => provider.tokenCount(value))) {
+      for (const chunk of modelChunkIterator(text, (value) => provider.tokenCount(value))) {
         signal?.throwIfAborted();
         chunks.push(chunk);
-        await new Promise<void>(resolve => setTimeout(resolve, 0));
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
       }
       plans.push({ provider, chunks });
     }
@@ -41,11 +41,16 @@ export function createModelRunner(providers: readonly ModelProvider[]) {
         signal?.throwIfAborted();
         const aligned = (provider.align ?? alignSourceTokens)(chunk.text, tokens);
         const spans = decodeBioTokenSpans(chunk.text, aligned, { threshold: 0 });
-        predictions.push(...modelDetections(chunk.text, spans).map(span => ({
-          ...span, start: span.start + chunk.start, end: span.end + chunk.start, source: provider.source,
-        })));
-        progress({ stage: 'processing', completed: ++completed, total });
-        await new Promise<void>(resolve => setTimeout(resolve, 0));
+        predictions.push(
+          ...modelDetections(chunk.text, spans).map((span) => ({
+            ...span,
+            start: span.start + chunk.start,
+            end: span.end + chunk.start,
+            source: provider.source,
+          })),
+        );
+        progress({ stage: "processing", completed: ++completed, total });
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
       }
     }
     signal?.throwIfAborted();
@@ -53,7 +58,9 @@ export function createModelRunner(providers: readonly ModelProvider[]) {
   }
   return {
     inspect,
-    async detect(text: string, progress = progressDefault) { return (await inspect(text, progress)).complete; },
-    dispose: () => Promise.all(providers.map(provider => provider.dispose())),
+    async detect(text: string, progress = progressDefault) {
+      return (await inspect(text, progress)).complete;
+    },
+    dispose: () => Promise.all(providers.map((provider) => provider.dispose())),
   };
 }

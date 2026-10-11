@@ -1,0 +1,164 @@
+[
+  {
+    "id": "uppercase-unknown-token",
+    "text": "YÊU CẦU TRA SOÁT GIAO DỊCH. CHƯA CÓ THÔNG TIN KHÁCH HÀNG.",
+    "sensitive": [],
+    "retain": [
+      "YÊU CẦU TRA SOÁT GIAO DỊCH. CHƯA CÓ THÔNG TIN KHÁCH HÀNG."
+    ],
+    "knownMiss": "The shipping pack labels two uppercase words as names (recorded in docs/evaluations/recognition-production-v1/README.md). Remove this entry when a pack passes it."
+  },
+  {
+    "id": "banking-letter",
+    "text": "Tôi là Nguyễn Minh Anh, chủ tài khoản 001234567890. Ngày 08/09/2026, tôi chuyển 2.500.000 đồng. Mã giao dịch GD202609080126. Liên hệ 0901234567 hoặc minh.anh@example.com.\nTrân trọng,\nNguyễn Minh Anh",
+    "sensitive": [
+      "Nguyễn Minh Anh",
+      "001234567890",
+      "GD202609080126",
+      "0901234567",
+      "minh.anh@example.com"
+    ],
+    "retain": [
+      "08/09/2026",
+      "2.500.000 đồng"
+    ]
+  },
+  {
+    "id": "unlabelled-people",
+    "text": "Nguyễn Minh Anh đã chuyển tiền cho Trần Thị Mai tại Hà Nội.",
+    "sensitive": [
+      "Nguyễn Minh Anh",
+      "Trần Thị Mai",
+      "Hà Nội"
+    ],
+    "retain": [
+      "đã chuyển tiền cho"
+    ]
+  },
+  {
+    "id": "street-address",
+    "text": "Khách hàng Trần Minh Bình sống tại 123 Lê Lợi, Quận 1, TP. Hồ Chí Minh.",
+    "sensitive": [
+      "Trần Minh Bình",
+      "123",
+      "Lê Lợi",
+      "Quận 1",
+      "Hồ Chí Minh"
+    ],
+    "retain": [
+      "sống tại"
+    ]
+  },
+  {
+    "id": "unicode-contacts",
+    "text": "😀 Lê Hoàng Nam gửi thư đến nam.test+demo@example.com.vn. Máy bàn (028) 3822 1234, số quốc tế +44 20 7946 0958.",
+    "sensitive": [
+      "Lê Hoàng Nam",
+      "nam.test+demo@example.com.vn",
+      "(028) 3822 1234",
+      "+44 20 7946 0958"
+    ],
+    "retain": [
+      "😀"
+    ]
+  },
+  {
+    "id": "ordinary-prose",
+    "text": "Báo cáo tổng hợp đã hoàn tất. Ngày 09/09/2026, tổng số tiền là 2.500.000 đồng.",
+    "sensitive": [],
+    "retain": [
+      "Báo cáo tổng hợp đã hoàn tất.",
+      "09/09/2026",
+      "2.500.000 đồng"
+    ]
+  },
+  {
+    "id": "mixed-contact-address",
+    "text": "Nguyễn Minh Anh sống tại 123 Lê Lợi, Quận 1, TP. Hồ Chí Minh. Email minh.anh@example.com, điện thoại 0901234567.",
+    "sensitive": [
+      "Nguyễn Minh Anh",
+      "123 Lê Lợi",
+      "Quận 1",
+      "Hồ Chí Minh",
+      "minh.anh@example.com",
+      "0901234567"
+    ],
+    "retain": [
+      "sống tại"
+    ]
+  },
+  {
+    "id": "different-family-name",
+    "text": "Tôi tên là Phạm Thị Hồng, địa chỉ 45 Nguyễn Huệ, Đà Nẵng.",
+    "sensitive": [
+      "Phạm Thị Hồng",
+      "45 Nguyễn Huệ",
+      "Đà Nẵng"
+    ],
+    "retain": []
+  },
+  {
+    "id": "lowercase-name",
+    "text": "Khách hàng nguyễn văn an cần hỗ trợ.",
+    "sensitive": [
+      "nguyễn văn an"
+    ],
+    "retain": [
+      "cần hỗ trợ"
+    ]
+  },
+  {
+    "id": "unaccented-names",
+    "text": "Nguyen Van An chuyen tien cho Tran Thi Mai.",
+    "sensitive": [
+      "Nguyen Van An",
+      "Tran Thi Mai"
+    ],
+    "retain": [
+      "chuyen tien cho"
+    ]
+  },
+  {
+    "id": "second-street",
+    "text": "Lê Tuấn Kiệt liên hệ từ 12 Trần Phú, Hải Phòng.",
+    "sensitive": [
+      "Lê Tuấn Kiệt",
+      "12 Trần Phú",
+      "Hải Phòng"
+    ],
+    "retain": [
+      "liên hệ từ"
+    ]
+  },
+  {
+    "id": "complete-apartment-address",
+    "text": "Khách hàng Hoàng Gia Bảo nhận thư tại căn 1208, tòa B, 36 Nguyễn Trãi, Thanh Xuân, Hà Nội.",
+    "sensitive": [
+      "Hoàng Gia Bảo",
+      "căn 1208, tòa B, 36 Nguyễn Trãi, Thanh Xuân, Hà Nội"
+    ],
+    "retain": [
+      "nhận thư tại"
+    ]
+  },
+  {
+    "id": "complete-rural-address",
+    "text": "Địa chỉ của Đinh Thị Thu: thôn Đông, xã Bình Minh, huyện Thanh Oai, Hà Nội.",
+    "sensitive": [
+      "Đinh Thị Thu",
+      "thôn Đông, xã Bình Minh, huyện Thanh Oai, Hà Nội"
+    ],
+    "retain": [
+      "Địa chỉ của"
+    ]
+  },
+  {
+    "id": "long-tail",
+    "text": "Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Nội dung tổng hợp. Khách hàng Trần Minh Bình. Email tail@example.org.",
+    "sensitive": [
+      "Trần Minh Bình",
+      "tail@example.org"
+    ],
+    "retain": []
+  }
+]

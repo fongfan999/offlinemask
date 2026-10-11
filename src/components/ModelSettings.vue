@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import AppIcon from "./AppIcon.vue";
 import { formatModelBytes as sizes, type ModelStatus } from "../adapters/models";
+import { recognitionPack } from "../core/detection/pack.ts";
 const props = defineProps<{
   status: ModelStatus;
   desktop: boolean;
@@ -49,7 +50,7 @@ const errorMessage = computed(() => {
 <template>
   <section class="model-settings glass glass-card" aria-labelledby="model-title">
     <div class="model-card-heading">
-      <h2 id="model-title">Gói nhận diện tiếng Việt</h2>
+      <h2 id="model-title">{{ recognitionPack.name }}</h2>
       <span
         v-if="status.stage !== 'missing'"
         class="model-badge"
@@ -134,7 +135,7 @@ const errorMessage = computed(() => {
     </div>
     <details class="model-details">
       <summary>Thông tin gói</summary>
-      <p>Underthesea + OpenMed · Nguồn: Hugging Face · Giấy phép Apache 2.0.</p>
+      <p>{{ recognitionPack.attribution }}</p>
     </details>
   </section>
 </template>

@@ -15,7 +15,13 @@ use std::{
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 #[derive(Deserialize)]
 struct Manifest {
+    models: Vec<Model>,
     assets: Vec<Asset>,
+}
+#[derive(Deserialize)]
+struct Model {
+    directory: String,
+    graph: String,
 }
 #[derive(Deserialize)]
 struct Asset {
@@ -97,17 +103,17 @@ fn run() -> Result<()> {
     });
     ort::init_from(runtime).with_telemetry(false).commit()?;
     let manifest: Manifest =
-        serde_json::from_str(include_str!("../../../scripts/release-pack-v1.json"))?;
-    let directories = ["underthesea", "vietnamese-pii-multilingual"];
+        serde_json::from_str(include_str!("../../../packs/vietnamese-pii-v1.json"))?;
     let mut sessions: Vec<Option<(Session, Config)>> =
-        (0..directories.len()).map(|_| None).collect();
+        (0..manifest.models.len()).map(|_| None).collect();
     let mut stdout = io::stdout().lock();
     for frame in requests {
         let request: Request = serde_json::from_slice(&frame)?;
         let result = (|| -> Result<serde_json::Value> {
-            let directory = directories.get(request.model).ok_or("Invalid model")?;
+            let model = manifest.models.get(request.model).ok_or("Invalid model")?;
+            let directory = &model.directory;
             if sessions[request.model].is_none() {
-                for asset in manifest.assets.iter().filter(|a| a.directory == *directory) {
+                for asset in manifest.assets.iter().filter(|a| &a.directory == directory) {
                     verify(&root.join(directory).join(&asset.name), &asset.sha256)?;
                 }
                 let config: Config =
@@ -115,7 +121,7 @@ fn run() -> Result<()> {
                 let session = Session::builder()?
                     .with_log_level(ort::logging::LogLevel::Fatal)?
                     .with_intra_threads(threads)?
-                    .commit_from_file(root.join(directory).join("model_int8.onnx"))?;
+                    .commit_from_file(root.join(directory).join(format!("{}.onnx", model.graph)))?;
                 sessions[request.model] = Some((session, config));
             }
             let (session, config) = sessions[request.model]

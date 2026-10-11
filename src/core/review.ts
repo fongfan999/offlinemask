@@ -22,8 +22,7 @@ export const findings: readonly Finding[] = [
     label: "Họ và tên",
     value: "Nguyễn Minh Anh",
     alias: "[TEN_DEMO_01]",
-    reason:
-      "Tên xuất hiện sau “Tôi là” và trong phần chữ ký. Hai vị trí dùng chung một bí danh.",
+    reason: "Tên xuất hiện sau “Tôi là” và trong phần chữ ký. Hai vị trí dùng chung một bí danh.",
     source: "Ngữ cảnh và chữ ký · mẫu minh họa",
   },
   {
@@ -31,8 +30,7 @@ export const findings: readonly Finding[] = [
     label: "Số tài khoản",
     value: "001234567890",
     alias: "[STK_DEMO_01]",
-    reason:
-      "Dãy số xuất hiện sau “chủ tài khoản”. Giữ nguyên các số 0 đầu khi đối chiếu bản gốc.",
+    reason: "Dãy số xuất hiện sau “chủ tài khoản”. Giữ nguyên các số 0 đầu khi đối chiếu bản gốc.",
     source: "Nhãn “chủ tài khoản” · mẫu minh họa",
   },
   {
@@ -58,8 +56,7 @@ export const findings: readonly Finding[] = [
     label: "Email",
     value: "minh.anh@example.com",
     alias: "[EMAIL_DEMO_01]",
-    reason:
-      "Địa chỉ email trong phần thông tin liên hệ. Bí danh thay thế toàn bộ địa chỉ.",
+    reason: "Địa chỉ email trong phần thông tin liên hệ. Bí danh thay thế toàn bộ địa chỉ.",
     source: "Địa chỉ email · mẫu minh họa",
   },
 ];
@@ -68,10 +65,7 @@ export function initialDecisions(): Decisions {
   return Object.fromEntries(findings.map(({ id }) => [id, "pending"]));
 }
 
-export function splitText(
-  text: string,
-  entries: readonly Finding[],
-): TextPart[] {
+export function splitText(text: string, entries: readonly Finding[]): TextPart[] {
   const parts: TextPart[] = [];
   let cursor = 0;
   while (cursor < text.length) {
@@ -79,15 +73,13 @@ export function splitText(
     for (const finding of entries) {
       if (!finding.value) continue;
       const index = text.indexOf(finding.value, cursor);
-      if (index >= 0 && (!next || index < next.index))
-        next = { index, finding };
+      if (index >= 0 && (!next || index < next.index)) next = { index, finding };
     }
     if (!next) {
       parts.push({ text: text.slice(cursor) });
       break;
     }
-    if (next.index > cursor)
-      parts.push({ text: text.slice(cursor, next.index) });
+    if (next.index > cursor) parts.push({ text: text.slice(cursor, next.index) });
     parts.push({ text: next.finding.value, findingId: next.finding.id });
     cursor = next.index + next.finding.value.length;
   }
@@ -95,25 +87,20 @@ export function splitText(
 }
 
 export function pendingCount(decisions: Decisions): number {
-  return findings.filter(
-    ({ id }) => !decisions[id] || decisions[id] === "pending",
-  ).length;
+  return findings.filter(({ id }) => !decisions[id] || decisions[id] === "pending").length;
 }
 
 export function previewText(decisions: Decisions): string {
   return splitText(sampleText, findings)
     .map((part) => {
       const finding = findings.find((item) => item.id === part.findingId);
-      return finding && decisions[finding.id] !== "keep"
-        ? finding.alias
-        : part.text;
+      return finding && decisions[finding.id] !== "keep" ? finding.alias : part.text;
     })
     .join("");
 }
 
 // Preparing a copy must never silently treat an unreviewed suggestion as accepted.
 export function prepareCopy(decisions: Decisions): string {
-  if (pendingCount(decisions))
-    throw new Error("Review every finding before preparing a copy.");
+  if (pendingCount(decisions)) throw new Error("Review every finding before preparing a copy.");
   return previewText(decisions);
 }

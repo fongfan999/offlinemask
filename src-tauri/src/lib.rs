@@ -4,7 +4,7 @@ pub fn run() {
         let root = app
             .path()
             .app_local_data_dir()?
-            .join("models/vietnamese-pii-v1");
+            .join(models::pack_directory());
         let handle = app.handle().clone();
         app.manage(models::Models::with_notifier(
             root,

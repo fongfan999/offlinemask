@@ -100,6 +100,8 @@ impl Drop for Process {
 struct Slot {
     closed: bool,
     epoch: u32,
+    /// Models the loaded child serves; requests outside this range never reach it.
+    models: usize,
     process: Option<Process>,
     active: Option<Control>,
 }
@@ -121,13 +123,29 @@ pub struct Supervisor {
     slot: Arc<Mutex<Slot>>,
 }
 impl Supervisor {
-    pub fn load(&self, executable: &Path, library: &Path, root: &Path) -> Reply<(u32, Vec<Value>)> {
+    /// Start the helper and prepare `models` sessions, one per pack model in order.
+    pub fn load(
+        &self,
+        executable: &Path,
+        library: &Path,
+        root: &Path,
+        models: usize,
+    ) -> Reply<(u32, Vec<Value>)> {
         self.load_command(
             Command::new(executable).arg(library).arg(root).arg("4"),
+            models,
             Duration::from_secs(120),
         )
     }
-    fn load_command(&self, command: &mut Command, timeout: Duration) -> Reply<(u32, Vec<Value>)> {
+    fn load_command(
+        &self,
+        command: &mut Command,
+        models: usize,
+        timeout: Duration,
+    ) -> Reply<(u32, Vec<Value>)> {
+        if models == 0 {
+            return Err("input");
+        }
         let epoch = {
             let mut slot = self.slot.lock().map_err(|_| "unavailable")?;
             if slot.closed {
@@ -135,14 +153,14 @@ impl Supervisor {
             }
             slot.clear();
             slot.epoch = slot.epoch.checked_add(1).ok_or("unavailable")?;
+            slot.models = models;
             slot.process = Some(Process::spawn(command)?);
             slot.epoch
         };
         let values = self.with_process(epoch, |process| {
-            Ok(vec![
-                process.request(0, None, timeout)?,
-                process.request(1, None, timeout)?,
-            ])
+            (0..models)
+                .map(|model| process.request(model, None, timeout))
+                .collect()
         })?;
         Ok((epoch, values))
     }
@@ -171,8 +189,14 @@ impl Supervisor {
         result
     }
     pub fn run(&self, epoch: u32, model: usize, ids: &[i64]) -> Reply<Value> {
-        if model > 1 || !(2..=384).contains(&ids.len()) || ids.iter().any(|id| *id < 0) {
+        if !(2..=384).contains(&ids.len()) || ids.iter().any(|id| *id < 0) {
             return Err("input");
+        }
+        {
+            let slot = self.slot.lock().map_err(|_| "unavailable")?;
+            if slot.epoch == epoch && model >= slot.models {
+                return Err("input");
+            }
         }
         self.with_process(epoch, |process| {
             process.request(model, Some(ids), Duration::from_secs(15))
@@ -221,12 +245,15 @@ for line in sys.stdin:
         let supervisor = Supervisor::default();
         for mode in ["exit", "hang", "bad", "stale"] {
             assert!(supervisor
-                .load_command(&mut fake(mode), Duration::from_millis(200))
+                .load_command(&mut fake(mode), 2, Duration::from_millis(200))
                 .is_err());
-            let (epoch, _) = supervisor
-                .load_command(&mut fake("ok"), Duration::from_secs(2))
+            let (epoch, values) = supervisor
+                .load_command(&mut fake("ok"), 2, Duration::from_secs(2))
                 .unwrap();
+            assert_eq!(values.len(), 2);
             assert!(supervisor.run(epoch, 0, &[1, 2]).is_ok());
+            assert!(supervisor.run(epoch, 1, &[1, 2]).is_ok());
+            assert_eq!(supervisor.run(epoch, 2, &[1, 2]), Err("input"));
             supervisor.release(epoch).unwrap();
         }
     }
@@ -234,10 +261,10 @@ for line in sys.stdin:
     fn old_release_and_requests_cannot_affect_replacement() {
         let supervisor = Supervisor::default();
         let (old, _) = supervisor
-            .load_command(&mut fake("ok"), Duration::from_secs(2))
+            .load_command(&mut fake("ok"), 1, Duration::from_secs(2))
             .unwrap();
         let (new, _) = supervisor
-            .load_command(&mut fake("ok"), Duration::from_secs(2))
+            .load_command(&mut fake("ok"), 1, Duration::from_secs(2))
             .unwrap();
         supervisor.release(old).unwrap();
         assert!(supervisor.run(old, 0, &[1, 2]).is_err());
@@ -250,7 +277,7 @@ for line in sys.stdin:
             let supervisor = Supervisor::default();
             let background = supervisor.clone();
             let thread = std::thread::spawn(move || {
-                background.load_command(&mut fake("hang"), Duration::from_secs(120))
+                background.load_command(&mut fake("hang"), 1, Duration::from_secs(120))
             });
             let deadline = std::time::Instant::now() + Duration::from_secs(2);
             let (epoch, child) = loop {
@@ -265,7 +292,7 @@ for line in sys.stdin:
             if shutdown {
                 supervisor.shutdown();
                 assert!(supervisor
-                    .load_command(&mut fake("ok"), Duration::from_secs(2))
+                    .load_command(&mut fake("ok"), 1, Duration::from_secs(2))
                     .is_err());
             }
             supervisor.release(epoch).unwrap();

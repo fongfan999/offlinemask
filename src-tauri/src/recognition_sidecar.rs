@@ -59,7 +59,8 @@ pub async fn recognition_native_load(
         } else {
             "recognition-sidecar"
         });
-        let (epoch, values) = supervisor.load(&executable, &library, &root)?;
+        let count = crate::models::pack().models.len();
+        let (epoch, values) = supervisor.load(&executable, &library, &root, count)?;
         let result = (|| {
             let mut labels = Vec::new();
             for value in values {
@@ -117,7 +118,7 @@ pub async fn recognition_native_run(
     model: usize,
     ids: Vec<i64>,
 ) -> Reply<Value> {
-    if model > 1 || !(2..=384).contains(&ids.len()) {
+    if !(2..=384).contains(&ids.len()) {
         return Err("input");
     }
     let supervisor = state.supervisor.clone();

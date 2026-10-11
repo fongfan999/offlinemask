@@ -3,6 +3,7 @@ use crate::recognition_tokenizer::{Encoded, RecognitionTokenizer};
 use reqwest::{blocking::Client, header::RANGE, StatusCode};
 use serde::Serialize;
 use sha2::{Digest, Sha256};
+use std::collections::BTreeMap;
 use std::{
     fs::{self, File, OpenOptions},
     io::{Read, Write},
@@ -27,11 +28,16 @@ const REQUEST_TIMEOUT: Duration = Duration::from_secs(120);
 
 pub type Notifier = Box<dyn Fn(&ModelStatus) + Send + Sync>;
 
-fn pack() -> Pack {
-    let pack: Pack = serde_json::from_str(include_str!("../../scripts/release-pack-v1.json"))
+/// The one pack this build offers. Replace the file under `packs/` to ship another.
+pub(crate) fn pack() -> Pack {
+    let pack: Pack = serde_json::from_str(include_str!("../../packs/vietnamese-pii-v1.json"))
         .expect("pinned recognition pack");
     pack.validate().expect("valid recognition pack");
     pack
+}
+/// App-local directory, relative to the app data directory, holding this pack's versions.
+pub(crate) fn pack_directory() -> PathBuf {
+    PathBuf::from("models").join(pack().id)
 }
 #[derive(Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -49,7 +55,7 @@ struct Inner {
     pack: Pack,
     status: Mutex<ModelStatus>,
     cancel: AtomicBool,
-    tokenizer: Mutex<Option<RecognitionTokenizer>>,
+    tokenizers: Mutex<BTreeMap<String, RecognitionTokenizer>>,
     notify: Notifier,
     published: Mutex<Option<Instant>>,
 }
@@ -111,7 +117,7 @@ impl Models {
                 root: None,
             }),
             cancel: AtomicBool::new(false),
-            tokenizer: Mutex::new(None),
+            tokenizers: Mutex::new(BTreeMap::new()),
             notify,
             published: Mutex::new(None),
         }));
@@ -300,10 +306,12 @@ pub(crate) fn fetch_asset(
     Ok(())
 }
 
+/// Exact offsets from the pinned tokenizer of one pack model that declares native offsets.
 #[tauri::command]
 pub async fn recognition_encode(
     models: tauri::State<'_, Models>,
     text: String,
+    model: String,
 ) -> Result<Encoded, String> {
     if text.len() > 200_000 {
         return Err("length".into());
@@ -317,17 +325,27 @@ pub async fn recognition_encode(
             }
             PathBuf::from(status.root.as_ref().ok_or("unavailable")?)
         };
-        // A poisoned slot only ever holds a complete tokenizer or nothing.
-        let mut tokenizer = manager
+        // Only directories the pack names; the request never carries a path.
+        let pack = &manager.0.pack;
+        let directory = &pack.native_model(&model).ok_or("model")?.directory;
+        let asset = pack.asset(directory, "tokenizer.json").ok_or("asset")?;
+        // A poisoned map only ever holds complete tokenizers.
+        let mut tokenizers = manager
             .0
-            .tokenizer
+            .tokenizers
             .lock()
             .unwrap_or_else(PoisonError::into_inner);
-        if tokenizer.is_none() {
-            *tokenizer = Some(RecognitionTokenizer::load(&root).map_err(str::to_owned)?);
+        if !tokenizers.contains_key(directory) {
+            let tokenizer = RecognitionTokenizer::load(
+                &root.join(directory).join("tokenizer.json"),
+                asset.bytes,
+                &asset.sha256,
+            )
+            .map_err(str::to_owned)?;
+            tokenizers.insert(directory.clone(), tokenizer);
         }
-        tokenizer
-            .as_ref()
+        tokenizers
+            .get(directory)
             .ok_or("unavailable")?
             .encode(&text)
             .map_err(str::to_owned)
@@ -578,16 +596,20 @@ mod tests {
                 seen.fetch_add(1, Ordering::Relaxed);
             }),
         );
+        // Wait for the startup check's own push, not merely its status change.
         let deadline = std::time::Instant::now() + Duration::from_secs(3);
-        while manager.status().stage == "checking" {
+        while count.load(Ordering::Relaxed) == 0 {
             assert!(std::time::Instant::now() < deadline);
             std::thread::yield_now();
         }
-        let after_check = count.load(Ordering::Relaxed);
-        manager.publish(false);
-        manager.publish(false);
-        assert_eq!(count.load(Ordering::Relaxed), after_check);
+        assert_ne!(manager.status().stage, "checking");
+        // Start the interval here so the check below does not depend on thread timing.
         manager.publish(true);
-        assert_eq!(count.load(Ordering::Relaxed), after_check + 1);
+        let forced = count.load(Ordering::Relaxed);
+        manager.publish(false);
+        manager.publish(false);
+        assert_eq!(count.load(Ordering::Relaxed), forced);
+        manager.publish(true);
+        assert_eq!(count.load(Ordering::Relaxed), forced + 1);
     }
 }

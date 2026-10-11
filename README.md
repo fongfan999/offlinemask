@@ -2,33 +2,21 @@
 
 Mask and restore sensitive data, entirely on your device.
 
-OfflineMask is a planned cross-platform desktop tool for preparing sensitive information before using external AI. The initial focus is Vietnamese banking workflows, with an extensible design for other industries, languages, and file formats.
+OfflineMask is a desktop app for preparing sensitive text before pasting it into an external AI tool. You paste text, the app replaces names, account numbers, phone numbers and other private values with consistent aliases on your machine, you review the result, copy it to the AI of your choice, and paste the reply back to restore the original values. Nothing leaves the device: there is no server, no telemetry and no automatic update check. The first language focus is Vietnamese banking workflows; the detection pipeline is designed so that other languages and models can be added as packs.
 
-The MVP covers pasted text, CSV, supported Excel workbooks, user review, consistent aliases, encrypted local restoration mappings, and reusable rule packs and profiles. Required resources can be supplied locally, and the application operates without external network requests.
+**Status: working prototype, not a finished product.** Text masking, review and in-session restoration work. Spreadsheet, PDF, Word and image input, encrypted history and signed releases are not implemented. Detection is rule-based plus an optional model pack and has documented misses; always review the result before sharing it. See the [product requirements](PRD.md) for the intended scope and [product direction](docs/product-direction.md) for the decisions behind the current experience.
 
-## Project status
+## How it works
 
-The owner accepted the current UI as **good enough for the boilerplate**, with page-by-page feedback to follow. See [product direction and acceptance notes](docs/product-direction.md) before changing the experience. This is not final design or MVP acceptance.
+- **Built-in rules** recognise emails, phone numbers and labelled banking identifiers (accounts, national IDs, passports, tax codes, transaction and customer codes) without any model files. The app works offline from the first launch.
+- **An optional recognition pack** adds contextual categories: names, addresses, organizations, birth dates, card and login details. The pack is downloaded on demand from Settings (712 MB transferred, 1.14 GB installed), verified by size and SHA-256, and runs locally through ONNX Runtime inside a web worker. Startup and processing never touch the network.
+- **Review and aliases.** Every finding can be kept or hidden; a manual selection can be hidden too. Aliases are consistent within a session, so the AI's reply can be restored exactly. Private sessions live only in memory and disappear when the app closes.
 
-The desktop boilerplate uses **Tauri 2 + Vue 3 + TypeScript + Vite**, with pnpm for frontend dependencies and a focused Rust layer for native integration. Node, pnpm, and Rust versions are pinned in `mise.toml`.
+Detection quality is evidence-based and recorded, not promised: the shipping pack reproduces all 398 recorded synthetic outcomes of its evaluation, which still include known misses and over-masking. Read [the integration evidence](docs/evaluations/recognition-production-v1/README.md) before relying on it.
 
-The home page offers **real text processing and an Excel sample workspace**, with other formats marked coming soon. Type or paste text, process it locally, review the original and masked preview, adjust mask/keep choices, copy the result, and restore the AI's reply inside the same session. Each conversion creates a separate sidebar session. Private text stays in memory and clears on close/reload; only synthetic sample sessions persist. Excel provides a sample table with tab-separated clipboard output, not XLSX import/export. See [text detection and model setup](docs/decisions/0005-library-text-detection.md) and [session storage boundaries](docs/decisions/0004-text-processing.md).
+## Getting started
 
-The interface follows the owner's personal brand theme (warm paper, ink, cobalt accent, light and dark) with shared CSS tokens; no UI library or remote assets are required. Text detection uses contact-parsing libraries and optional Vietnamese models downloaded through Settings, with documented gaps; it is not comprehensive detection. Within an open text session, pasted AI replies can be restored by replacing that session's exact aliases on the device. File adapters and encrypted storage remain unimplemented.
-
-OfflineMask is source available under the [**O’Saasy License Agreement**](LICENSE.md). Copyright © 2026, Phong Phan. Third-party code and recognition resources retain their own licenses. See the [license decision](docs/decisions/0050-osaasy-license.md) and [contribution guidance](CONTRIBUTING.md).
-
-See the [review design notes](docs/review-design.md) for interaction choices and verification.
-
-See the [accepted stack decision](docs/decisions/0001-desktop-stack.md) and [setup notes and documentation reviewed](docs/development.md).
-
-See [the product requirements document](PRD.md) for scope, user journeys, acceptance criteria, and open decisions.
-
-See [Tauri 2 versus Electrobun 2](docs/desktop-framework-comparison.md) for the supporting comparison and unmeasured performance questions.
-
-## Development with mise
-
-Install [mise](https://mise.jdx.dev/getting-started.html) and the [Tauri system prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS. On macOS, the Xcode Command Line Tools are sufficient for desktop development.
+There are no published binaries yet; build from source. Install [mise](https://mise.jdx.dev/getting-started.html) and the [Tauri 2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS (on macOS the Xcode Command Line Tools suffice), then:
 
 ```sh
 mise trust
@@ -37,27 +25,51 @@ mise exec -- pnpm install --frozen-lockfile
 mise exec -- pnpm desktop:dev
 ```
 
-With mise activated in your shell, you can use `pnpm desktop:dev` directly. `mise exec` also works from terminals where mise is not activated. No global Node or pnpm version changes are needed. mise manages Rust through rustup.
+`mise.toml` pins Node, pnpm and Rust; `mise exec --` applies them even when mise is not activated in your shell. Downloading build dependencies needs a network connection; the application itself does not.
 
 | Command | Purpose |
 | --- | --- |
-| `mise exec -- pnpm dev` | Browser preview at localhost:1420; no native APIs. |
-| `mise exec -- pnpm typecheck` | Check Vue, TypeScript, and Vite configuration. |
-| `mise exec -- pnpm lint` | ESLint and Prettier checks for the frontend, tests, and build scripts; `pnpm format` rewrites. |
-| `mise exec -- pnpm test` | Check text detection, transformations, session isolation, storage boundaries, and sample review. |
-| `mise exec -- pnpm models:download` | Optional developer download of pinned model assets for model evaluations. |
-| `mise exec -- pnpm models:check` | Verify local model hashes; no downloads. |
-| `mise exec -- pnpm test:models` | Run synthetic regressions against real local model weights. |
-| `mise exec -- pnpm compare:models` | Compare each pinned model and the pair on 66 synthetic cases; write coverage, failure, CPU timing and peak-memory reports locally. |
-| `mise exec -- pnpm build` | Prepare local WASM, type check, and build frontend assets without model weights. |
-| `mise exec -- pnpm check:native` | Rust formatting and Clippy checks. |
-| `mise exec -- pnpm desktop:build` | Build desktop release and platform bundles. |
-| `mise exec -- pnpm tauri build --bundles app -- --locked` | Build a macOS app using the Cargo lockfile. |
+| `mise exec -- pnpm dev` | Browser preview at localhost:1420 without native APIs (no pack download, built-in rules only). |
+| `mise exec -- pnpm desktop:dev` | The desktop app with hot reload. |
+| `mise exec -- pnpm lint` | ESLint and Prettier; `pnpm format` rewrites. |
+| `mise exec -- pnpm typecheck` | Vue, TypeScript and Vite configuration. |
+| `mise exec -- pnpm test` | Fast tests: detection rules, transformations, sessions, storage boundaries, the pack contract. No model files needed. |
+| `mise exec -- pnpm build` | Production frontend without model weights. |
+| `mise exec -- pnpm check:native` | rustfmt and Clippy for the Rust layer; `cargo test --manifest-path src-tauri/Cargo.toml --locked` runs its tests. |
+| `mise exec -- pnpm test:models <pack root>` | Run the real recognition pack against the committed synthetic fixtures (see [packs/README.md](packs/README.md)). |
+| `mise exec -- pnpm desktop:build` | Desktop bundle for the current platform. macOS arm64 uses the verified native-inference path. |
 
-The default app includes **no model weights**. Email, phone, and labelled banking identifiers work immediately. Settings explicitly downloads one optional **Vietnamese recognition pack: 712 MB transferred, 1.14 GB installed**. It contains Underthesea INT8 + OpenMed mSuperClinical INT8. Downloads support pause/resume; transport and restored files are verified before the complete pack becomes ready. Startup and text processing do not access the Internet. See [pack delivery](docs/decisions/0041-compressed-pack-installer-and-r2.md) and [production integration](docs/decisions/0042-production-recognition-pair.md).
+Only macOS on Apple Silicon has been built and tested so far. The CI workflow compiles the native layer on Linux and Windows as an advisory check; those platforms are not yet qualified.
 
-The production adapter matches the selected pair’s **398 recorded synthetic outcomes** on CPU, including category-specific masking; 386 independent records cover 500 annotated values, of which 495 are fully covered under their correct category. Known misses and unwanted masking remain. This is integration parity, not 100% detection, real banking accuracy, or completion of the previous quality gates. Review results before sharing. See [evidence and platform limitations](docs/evaluations/recognition-production-v1/README.md).
+## Replacing the models
 
-Developers can run `mise exec -- pnpm models:download` for the historical OpenMed evaluation baseline. The shipping pack is pinned separately in `scripts/release-pack-v1.json`. These assets stay in ignored `public/models/` and are excluded from both frontend and desktop production builds. They are not required to build or test the lightweight flow.
+Everything the app knows about its models is one file under [`packs/`](packs/). The TypeScript loaders, the Rust installer and the evaluation helpers all read it, so a different model, or a pack for another language, is a change to that file plus the files it pins. [packs/README.md](packs/README.md) walks through the contract (inputs, outputs, labels, offsets) and the checks a replacement has to pass: `pnpm test` for the code around the models and `pnpm test:models` for the models themselves.
 
-Keep `pnpm-lock.yaml` and `src-tauri/Cargo.lock` in version control. Tool installation and initial dependency downloads require a network connection; this is separate from the application's offline runtime requirement.
+## Repository layout
+
+| Path | Contents |
+| --- | --- |
+| `src/core/` | Portable logic: detection rules, model policy, pack loading, aliases, sessions, restoration. No Vue or Tauri imports. |
+| `src/core/detection/` | The detection pipeline. `pack.ts` reads the pack, `recognition.ts` loads it, `policy.ts` merges model and rule evidence. |
+| `src/adapters/` | The only modules that talk to Tauri: the detection worker bridge, pack status and downloads, the website link. |
+| `src/workers/` | The detection web worker. |
+| `src/composables/`, `src/pages/`, `src/components/` | Vue state and screens. |
+| `src-tauri/` | Rust: pack download and verification, exact tokenizer offsets, opt-in native inference. |
+| `packs/` | Recognition pack definitions. |
+| `tests/` | Node test runner suites and synthetic fixtures. |
+| `scripts/` | Build tooling at the top level; frozen evaluation experiments in subdirectories ([index](scripts/README.md)). |
+| `docs/decisions/` | Architecture decision records, numbered. |
+| `docs/evaluations/` | Evaluation protocols and results; large raw outputs are kept out of git. |
+| `brand/` | The `[—]` mark and icon sources. |
+
+[docs/development.md](docs/development.md) has the detailed setup notes, module boundaries and the history of evaluation tooling.
+
+## Privacy principles
+
+Only synthetic data belongs in this repository, in issues and in screenshots. The app stores no private text, collects no corrections and sends nothing anywhere; the sample history on disk holds references to public fixtures and mask/keep choices only. Changes that would relax any of this need a recorded decision. Vulnerabilities are reported privately as described in [SECURITY.md](SECURITY.md).
+
+## Contributing and license
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions and the checks to run, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for expectations. Agents working in this repository follow [AGENTS.md](AGENTS.md).
+
+OfflineMask is source available under the [O’Saasy License Agreement](LICENSE.md). Copyright © 2026, Phong Phan. Third-party code and the recognition models keep their own licenses, recorded under [`docs/licenses/`](docs/licenses/) and in the pack attribution. See the [license decision](docs/decisions/0050-osaasy-license.md).

@@ -5,7 +5,7 @@ use reqwest::blocking::Client;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
-    collections::BTreeSet,
+    collections::{BTreeMap, BTreeSet},
     fs::{self, File},
     io::{Read, Write},
     path::{Path, PathBuf},
@@ -15,7 +15,39 @@ use std::{
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
 pub(crate) struct Pack {
+    /// Stable identifier; the app-local `models/<id>` directory holds installed versions.
+    pub id: String,
+    /// User-facing name; the frontend owns this copy.
+    pub name: String,
+    pub attribution: String,
+    pub models: Vec<Model>,
     pub assets: Vec<Asset>,
+}
+/// One token-classification model of the pack. The frontend decides how it is loaded.
+#[derive(Clone, Debug, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase", deny_unknown_fields)]
+pub(crate) struct Model {
+    pub directory: String,
+    pub source: String,
+    /// ONNX graph file name without the `.onnx` extension.
+    pub graph: String,
+    pub offsets: Offsets,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub labels: BTreeMap<String, String>,
+}
+#[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
+#[serde(rename_all = "lowercase")]
+pub(crate) enum Offsets {
+    /// Exact offsets come from the native `tokenizers` crate (`recognition_encode`).
+    Native,
+    /// The frontend aligns tokenizer pieces sequentially.
+    Sequential,
+}
+/// The installed-file catalog alone identifies a pack version on disk, so adding
+/// model metadata or renaming a pack never orphans an existing installation.
+#[derive(Serialize)]
+struct Catalog<'a> {
+    assets: &'a [Asset],
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -77,13 +109,31 @@ fn hash_string(s: &str) -> bool {
 impl Pack {
     pub fn validate(&self) -> Result<(), String> {
         // Bound counts as well as per-file sizes, so aggregate byte arithmetic is safe.
-        if self.assets.is_empty() || self.assets.len() > 256 {
+        if !component(&self.id)
+            || self.name.trim().is_empty()
+            || self.attribution.trim().is_empty()
+            || self.models.is_empty()
+            || self.models.len() > 64
+            || self.assets.is_empty()
+            || self.assets.len() > 256
+        {
             return Err("manifest".into());
+        }
+        let mut directories = BTreeSet::new();
+        for m in &self.models {
+            if !component(&m.directory)
+                || !component(&m.graph)
+                || m.source.trim().is_empty()
+                || !directories.insert(&m.directory)
+            {
+                return Err("manifest".into());
+            }
         }
         let mut paths = BTreeSet::new();
         for a in &self.assets {
             if !component(&a.directory)
                 || !component(&a.name)
+                || !directories.contains(&a.directory)
                 || !paths.insert((&a.directory, &a.name))
                 || a.name == "LICENSE"
                 || !hash_string(&a.sha256)
@@ -130,16 +180,36 @@ impl Pack {
                 return Err("manifest".into());
             }
         }
+        for m in &self.models {
+            if !paths.contains(&(&m.directory, &format!("{}.onnx", m.graph))) {
+                return Err("manifest".into());
+            }
+        }
         self.installed_bytes()
             .checked_add(self.download_bytes())
             .ok_or("manifest")?;
         Ok(())
     }
-    pub fn id(&self) -> String {
+    /// Content fingerprint of the installed files; names the on-disk version directory.
+    pub fn fingerprint(&self) -> String {
+        let catalog = Catalog {
+            assets: &self.assets,
+        };
         format!(
             "{:x}",
-            Sha256::digest(serde_json::to_vec(self).expect("serializable pack"))
+            Sha256::digest(serde_json::to_vec(&catalog).expect("serializable pack"))
         )
+    }
+    /// The model whose exact offsets the native tokenizer must supply, by directory.
+    pub fn native_model(&self, directory: &str) -> Option<&Model> {
+        self.models
+            .iter()
+            .find(|m| m.directory == directory && m.offsets == Offsets::Native)
+    }
+    pub fn asset(&self, directory: &str, name: &str) -> Option<&Asset> {
+        self.assets
+            .iter()
+            .find(|a| a.directory == directory && a.name == name)
     }
     pub fn installed_bytes(&self) -> u64 {
         self.assets.iter().map(|a| a.bytes).sum()
@@ -148,10 +218,10 @@ impl Pack {
         self.assets.iter().map(|a| a.transport.bytes).sum()
     }
     pub fn release_root(&self, base: &Path) -> PathBuf {
-        base.join("packs").join(self.id())
+        base.join("packs").join(self.fingerprint())
     }
     fn cache_root(&self, base: &Path) -> PathBuf {
-        base.join("downloads").join(self.id())
+        base.join("downloads").join(self.fingerprint())
     }
     pub fn installed(&self, root: &Path, cancel: &AtomicBool) -> bool {
         self.assets.iter().all(|a| {
@@ -273,7 +343,7 @@ impl Pack {
             progress(Progress::Download(downloaded));
         }
         progress(Progress::Install(0));
-        let staging = base.join("staging").join(self.id());
+        let staging = base.join("staging").join(self.fingerprint());
         let mut installed = 0;
         for a in &self.assets {
             cancelled(cancel)?;
@@ -476,6 +546,25 @@ mod tests {
     fn hash(data: &[u8]) -> String {
         format!("{:x}", Sha256::digest(data))
     }
+    /// A one-model developer pack whose graph is `test-model/model.onnx`.
+    fn pack(assets: Vec<Asset>) -> Pack {
+        Pack {
+            id: "test-pack".into(),
+            name: "Test pack".into(),
+            attribution: "Synthetic".into(),
+            models: vec![Model {
+                directory: "test-model".into(),
+                source: "Test model".into(),
+                graph: "model".into(),
+                offsets: Offsets::Sequential,
+                labels: BTreeMap::new(),
+            }],
+            assets,
+        }
+    }
+    fn shipping_pack() -> Pack {
+        serde_json::from_str(include_str!("../../packs/vietnamese-pii-v1.json")).unwrap()
+    }
     fn asset(data: &[u8], name: &str) -> (Asset, Vec<u8>) {
         let compressed = zstd::stream::encode_all(data, 3).unwrap();
         (
@@ -504,9 +593,7 @@ mod tests {
         let f = Fixture::new();
         let (a, a_bytes) = asset(b"model bytes", "model.onnx");
         let (b, b_bytes) = asset(b"tokenizer bytes", "tokenizer.json");
-        let pack = Pack {
-            assets: vec![a.clone(), b.clone()],
-        };
+        let pack = pack(vec![a.clone(), b.clone()]);
         fs::create_dir_all(f.0.join("packs/previous")).unwrap();
         fs::write(f.0.join("packs/previous/keep"), b"previous").unwrap();
         cached(&pack, &f.0, &a, &a_bytes);
@@ -530,9 +617,7 @@ mod tests {
     fn interrupted_extraction_resumes_from_verified_cache() {
         let f = Fixture::new();
         let (a, bytes) = asset(&vec![42; 200_000], "model.onnx");
-        let pack = Pack {
-            assets: vec![a.clone()],
-        };
+        let pack = pack(vec![a.clone()]);
         cached(&pack, &f.0, &a, &bytes);
         let cancel = AtomicBool::new(false);
         assert_eq!(
@@ -580,9 +665,7 @@ mod tests {
         let (a, aa) = asset(b"model", "model.onnx");
         let (mut b, bb) = asset(b"tokenizer", "tokenizer.json");
         b.sha256 = hash(b"wrong output");
-        let pack = Pack {
-            assets: vec![a.clone(), b.clone()],
-        };
+        let pack = pack(vec![a.clone(), b.clone()]);
         cached(&pack, &f.0, &a, &aa);
         cached(&pack, &f.0, &b, &bb);
         assert_eq!(
@@ -593,7 +676,7 @@ mod tests {
         assert!(f
             .0
             .join("staging")
-            .join(pack.id())
+            .join(pack.fingerprint())
             .join("test-model/model.onnx")
             .exists());
         assert!(pack.cache_root(&f.0).join(&b.transport.sha256).exists());
@@ -636,24 +719,47 @@ mod tests {
                 4 => invalid.transport.encoding = Encoding::Identity,
                 _ => invalid.bytes = u64::MAX,
             }
-            assert!(Pack {
-                assets: vec![invalid]
-            }
-            .validate()
-            .is_err());
+            assert!(pack(vec![invalid]).validate().is_err());
         }
-        assert!(Pack {
-            assets: vec![a.clone(), a.clone()]
-        }
-        .validate()
-        .is_err());
-        assert!(Pack {
-            assets: vec![a; 257]
-        }
-        .validate()
-        .is_err());
+        assert!(pack(vec![a.clone(), a.clone()]).validate().is_err());
+        assert!(pack(vec![a.clone(); 257]).validate().is_err());
+        assert!(pack(vec![a.clone()]).validate().is_ok());
         assert_eq!(ensure_space(100, 99), Err("space".into()));
         assert!(ensure_space(100, 100).is_ok());
+    }
+    #[test]
+    fn validates_model_entries_against_the_catalog() {
+        let (a, _) = asset(b"model", "model.onnx");
+        let (other, _) = asset(b"other", "model.onnx");
+        let mut orphan = other.clone();
+        orphan.directory = "unlisted".into();
+        assert!(pack(vec![a.clone(), orphan]).validate().is_err());
+        let mut missing_graph = pack(vec![a.clone()]);
+        missing_graph.models[0].graph = "absent".into();
+        assert!(missing_graph.validate().is_err());
+        let mut duplicate = pack(vec![a.clone()]);
+        duplicate.models.push(duplicate.models[0].clone());
+        assert!(duplicate.validate().is_err());
+        let mut unsafe_id = pack(vec![a.clone()]);
+        unsafe_id.id = "../elsewhere".into();
+        assert!(unsafe_id.validate().is_err());
+        let mut no_models = pack(vec![a]);
+        no_models.models.clear();
+        assert!(no_models.validate().is_err());
+    }
+    #[test]
+    fn shipping_pack_is_valid_and_keeps_its_installed_fingerprint() {
+        let pack = shipping_pack();
+        pack.validate().unwrap();
+        assert_eq!(pack.id, "vietnamese-pii-v1");
+        // Installed before model metadata joined the manifest; must stay discoverable.
+        assert_eq!(
+            pack.fingerprint(),
+            "65245d3fd3cb14042784f0b6b1da08f4551a2aa32ccd972a3830103af457f390"
+        );
+        assert!(pack.native_model("underthesea").is_some());
+        assert!(pack.native_model("vietnamese-pii-multilingual").is_none());
+        assert!(pack.asset("underthesea", "tokenizer.json").is_some());
     }
     #[test]
     fn recognizes_verified_legacy_install_without_network() {
@@ -661,7 +767,7 @@ mod tests {
         let (a, _) = asset(b"model", "model.onnx");
         fs::create_dir(f.0.join("test-model")).unwrap();
         fs::write(f.0.join("test-model/model.onnx"), b"model").unwrap();
-        let pack = Pack { assets: vec![a] };
+        let pack = pack(vec![a]);
         assert_eq!(
             pack.discovered_root(&f.0, &AtomicBool::new(false)),
             Some(f.0.clone())
@@ -675,8 +781,7 @@ mod tests {
     #[ignore = "downloads 712 MB from the owner-authorized public R2 bucket; explicit developer check"]
     fn public_release_pack_installs_from_r2() {
         let f = Fixture::new();
-        let pack: Pack =
-            serde_json::from_str(include_str!("../../scripts/release-pack-v1.json")).unwrap();
+        let pack = shipping_pack();
         let client = Client::builder()
             .https_only(true)
             .connect_timeout(std::time::Duration::from_secs(15))
@@ -692,8 +797,7 @@ mod tests {
     #[ignore = "uses local prepared 712 MB release objects; explicit developer check"]
     fn actual_release_pack_round_trip() {
         let f = Fixture::new();
-        let pack: Pack =
-            serde_json::from_str(include_str!("../../scripts/release-pack-v1.json")).unwrap();
+        let pack = shipping_pack();
         pack.validate().unwrap();
         let source = Path::new(env!("CARGO_MANIFEST_DIR")).join("../artifacts/r2-v1-upload");
         fs::create_dir_all(pack.cache_root(&f.0)).unwrap();
