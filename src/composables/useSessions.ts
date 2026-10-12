@@ -18,8 +18,8 @@ function defaultStorage(): HistoryStorage | null {
 }
 
 /** Session list for the sidebar. Sample sessions persist here in plain storage;
- * private text sessions never do. They live in memory, and the shell mirrors
- * them into the passcode vault when one is unlocked (decision 0062).
+ * private text sessions never do. The shell loads them from, and mirrors every
+ * change into, the passcode vault (decisions 0062 and 0063).
  */
 export function useSessions(storage: HistoryStorage | null = defaultStorage()) {
   const sessions = ref<Session[]>([]);

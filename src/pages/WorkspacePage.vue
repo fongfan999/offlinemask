@@ -49,6 +49,12 @@ const {
 } = useProvided(runKey);
 const { save } = useProvided(sessionsKey);
 const vault = useProvided(vaultKey);
+/** Private sessions live on disk behind the app passcode; the browser preview has no disk. */
+const savedNote = computed(() =>
+  vault.state.value === "unlocked"
+    ? "Đã mã hóa và lưu trên máy này."
+    : "Bản xem trước: phiên chỉ nằm trong bộ nhớ.",
+);
 
 const view = ref<ReviewView>("masked");
 /** The text card shows one step at a time: 1 paste, 2 mask (while processing), 3 copy, 4 restore. */
@@ -362,9 +368,7 @@ defineExpose({
       >
         <RestorePanel ref="restorePanel" :session-id="session.id" :analysis="session.analysis" />
         <footer class="card-footer">
-          <span class="action-hint"
-            ><AppIcon name="lock" :size="13" />Phiên này sẽ bị xóa khi bạn đóng ứng dụng.</span
-          >
+          <span class="action-hint"><AppIcon name="lock" :size="13" />{{ savedNote }}</span>
           <button class="quiet-button" @click="openStep(2)">
             <AppIcon name="eye" :size="15" />Xem lại bản đã ẩn
           </button>
@@ -604,18 +608,8 @@ defineExpose({
         <footer class="card-footer">
           <span v-if="session" class="action-hint"
             ><AppIcon v-if="privateSession" name="lock" :size="13" />{{
-              !privateSession
-                ? "Phiên mẫu"
-                : vault.state.value === "unlocked"
-                  ? "Đã lưu trên máy này."
-                  : "Phiên này sẽ bị xóa khi bạn đóng ứng dụng."
-            }}<button
-              v-if="privateSession && vault.state.value === 'none'"
-              class="link-button"
-              @click="emit('navigate', 'settings')"
-            >
-              Đặt mật mã để giữ lại
-            </button></span
+              privateSession ? savedNote : "Phiên mẫu"
+            }}</span
           >
           <button v-if="textProcessing" class="quiet-button" @click="cancel(true)">
             Hủy xử lý

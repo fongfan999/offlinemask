@@ -43,7 +43,7 @@ const session = createTextSession(
   [{ start: 4, end: 14, type: "SDT", label: "Số điện thoại", priority: 1 }],
 );
 
-test("vault: no file means sessions stay in memory and saves are no-ops", async () => {
+test("vault: before the passcode exists, saves are no-ops", async () => {
   const { adapter, store } = fakeAdapter();
   const vault = useVault(adapter);
   await vault.start();

@@ -1807,6 +1807,3 @@ td.alias {
 .vault-settings .model-uninstall .lock-reset-actions {
   justify-content: flex-start;
 }
-.action-hint .link-button {
-  margin-left: 6px;
-}

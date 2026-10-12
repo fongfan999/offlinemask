@@ -12,7 +12,6 @@ defineProps<{
   page: Page;
   open: boolean;
   preparing: boolean;
-  saved: boolean;
   version: string;
 }>();
 const emit = defineEmits<{ navigate: [destination: Page, id?: string | null]; close: [] }>();
@@ -96,13 +95,7 @@ defineExpose({
           ><small
             >{{ session.fixture === "private-text-v1" ? `${sessionTitle(session)} · ` : ""
             }}{{ dateLabel(session.createdAt)
-            }}{{
-              session.fixture === "private-text-v1"
-                ? saved
-                  ? " · Đã lưu"
-                  : " · Tạm thời"
-                : " · Mẫu"
-            }}</small
+            }}{{ session.fixture === "private-text-v1" ? "" : " · Mẫu" }}</small
           ></span
         >
       </button>

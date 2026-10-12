@@ -43,7 +43,8 @@ provide(sessionsKey, store);
 provide(runKey, run);
 provide(vaultKey, vault);
 
-// Private sessions mirror into the vault whenever they change, once it is open.
+// The app passcode gates the shell: first launch creates it, later launches ask
+// for it. Private sessions only exist on disk behind it (decision 0063).
 let saveTimer: ReturnType<typeof setTimeout> | undefined;
 watch(
   sessions,
@@ -122,7 +123,11 @@ async function closeSidebar() {
 
 <template>
   <div class="ambient" aria-hidden="true"></div>
-  <LockPage v-if="vault.state.value === 'locked'" @unlocked="openVault" @reset="() => {}" />
+  <LockPage
+    v-if="vault.state.value === 'locked' || vault.state.value === 'none'"
+    :mode="vault.state.value === 'locked' ? 'unlock' : 'setup'"
+    @unlocked="openVault"
+  />
   <div v-else-if="vault.checked.value" class="app-shell">
     <button
       v-if="sidebarOpen"
@@ -137,7 +142,6 @@ async function closeSidebar() {
       :page="page"
       :open="sidebarOpen"
       :preparing="pack.preparing.value"
-      :saved="vault.state.value === 'unlocked'"
       :version="version"
       @navigate="navigate"
       @close="closeSidebar"
