@@ -5,6 +5,7 @@ pub fn run() {
             .path()
             .app_local_data_dir()?
             .join(models::pack_directory());
+        app.manage(vault::Vault::new(app.path().app_local_data_dir()?));
         let handle = app.handle().clone();
         app.manage(models::Models::with_notifier(
             root,
@@ -42,7 +43,13 @@ pub fn run() {
         models::model_status,
         models::download_models,
         models::cancel_model_download,
-        models::uninstall_models
+        models::uninstall_models,
+        vault::vault_status,
+        vault::vault_create,
+        vault::vault_unlock,
+        vault::vault_save,
+        vault::vault_change_passcode,
+        vault::vault_reset
     ]);
     #[cfg(all(
         feature = "minilm-desktop-prototype",
@@ -54,6 +61,12 @@ pub fn run() {
         models::download_models,
         models::cancel_model_download,
         models::uninstall_models,
+        vault::vault_status,
+        vault::vault_create,
+        vault::vault_unlock,
+        vault::vault_save,
+        vault::vault_change_passcode,
+        vault::vault_reset,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -68,6 +81,12 @@ pub fn run() {
         models::download_models,
         models::cancel_model_download,
         models::uninstall_models,
+        vault::vault_status,
+        vault::vault_create,
+        vault::vault_unlock,
+        vault::vault_save,
+        vault::vault_change_passcode,
+        vault::vault_reset,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -86,6 +105,12 @@ pub fn run() {
         models::download_models,
         models::cancel_model_download,
         models::uninstall_models,
+        vault::vault_status,
+        vault::vault_create,
+        vault::vault_unlock,
+        vault::vault_save,
+        vault::vault_change_passcode,
+        vault::vault_reset,
         recognition_native::recognition_native_load,
         recognition_native::recognition_native_run,
         recognition_native::recognition_native_release
@@ -117,6 +142,7 @@ mod minilm_prototype;
 mod model_pack;
 mod models;
 mod recognition_tokenizer;
+mod vault;
 use tauri::{Emitter, Manager};
 
 #[cfg(all(

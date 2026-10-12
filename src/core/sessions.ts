@@ -123,6 +123,115 @@ export function decodeSessions(raw: string | null): SampleSession[] {
     };
   });
 }
+/** Private sessions for the encrypted vault (decision 0062). Everything the
+ * review screen needs comes back; the in-progress undo buffer does not. */
+export const vaultVersion = 1;
+export function encodePrivateSessions(sessions: readonly Session[]): string {
+  return JSON.stringify({
+    version: vaultVersion,
+    sessions: sessions
+      .filter((s): s is TextSession => s.fixture === "private-text-v1")
+      .map((s) => ({
+        id: s.id,
+        number: s.number,
+        format: s.format,
+        fixture: s.fixture,
+        createdAt: s.createdAt,
+        original: s.original,
+        options: s.options,
+        analysis: s.analysis,
+        manualMaskCount: s.manualMaskCount ?? 0,
+        decisions: s.decisions,
+      })),
+  });
+}
+const aliasPattern = /^\[[A-Z][A-Z_]*_\d+_[a-f0-9]{4,8}\]$/;
+const optionIds = new Set<string>(detectionOptions.map((option) => option.id));
+function isString(value: unknown): value is string {
+  return typeof value === "string";
+}
+/** Reject anything that is not a complete, self-consistent private session; one
+ * bad record invalidates the whole vault rather than loading a partial list. */
+export function decodePrivateSessions(raw: string): TextSession[] {
+  const data = JSON.parse(raw);
+  if (data?.version !== vaultVersion || !Array.isArray(data.sessions))
+    throw new Error("Unsupported vault");
+  const ids = new Set<string>();
+  return data.sessions.map((s: TextSession): TextSession => {
+    const findings = s?.analysis?.findings;
+    const spans = s?.analysis?.spans;
+    if (
+      !s ||
+      !isString(s.id) ||
+      !/^[a-f0-9-]{36}$/i.test(s.id) ||
+      ids.has(s.id) ||
+      !Number.isSafeInteger(s.number) ||
+      s.number < 1 ||
+      s.format !== "text" ||
+      s.fixture !== "private-text-v1" ||
+      !isString(s.createdAt) ||
+      !Number.isFinite(Date.parse(s.createdAt)) ||
+      !isString(s.original) ||
+      !Array.isArray(s.options) ||
+      !s.options.every((option) => optionIds.has(option)) ||
+      !Array.isArray(findings) ||
+      !Array.isArray(spans) ||
+      !findings.every(
+        (f) =>
+          f &&
+          isString(f.id) &&
+          isString(f.label) &&
+          isString(f.value) &&
+          isString(f.alias) &&
+          aliasPattern.test(f.alias) &&
+          (f.reason === undefined || isString(f.reason)) &&
+          (f.source === undefined || isString(f.source)),
+      ) ||
+      !spans.every(
+        (span) =>
+          span &&
+          Number.isSafeInteger(span.start) &&
+          Number.isSafeInteger(span.end) &&
+          span.start >= 0 &&
+          span.end > span.start &&
+          span.end <= s.original.length &&
+          findings.some((f) => f.id === span.findingId),
+      ) ||
+      !s.decisions ||
+      typeof s.decisions !== "object" ||
+      findings.some((f) => !["mask", "keep"].includes(s.decisions[f.id] ?? "")) ||
+      (s.manualMaskCount !== undefined && !Number.isSafeInteger(s.manualMaskCount))
+    )
+      throw new Error("Invalid vault");
+    ids.add(s.id);
+    return {
+      id: s.id,
+      number: s.number,
+      format: "text",
+      fixture: "private-text-v1",
+      createdAt: s.createdAt,
+      original: s.original,
+      options: [...s.options],
+      analysis: {
+        findings: findings.map((f) => ({
+          id: f.id,
+          label: f.label,
+          value: f.value,
+          alias: f.alias,
+          reason: f.reason,
+          source: f.source,
+        })),
+        spans: spans.map((span) => ({
+          start: span.start,
+          end: span.end,
+          findingId: span.findingId,
+        })),
+      },
+      manualMaskCount: s.manualMaskCount ?? 0,
+      decisions: Object.fromEntries(findings.map((f) => [f.id, s.decisions[f.id]!])),
+    };
+  });
+}
 export const sheetHeaders = [
   "Họ và tên",
   "Số tài khoản",

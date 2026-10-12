@@ -1,5 +1,11 @@
 import { ref } from "vue";
-import { decodeSessions, encodeSessions, historyKey, type Session } from "../core/sessions.ts";
+import {
+  decodeSessions,
+  encodeSessions,
+  historyKey,
+  type Session,
+  type TextSession,
+} from "../core/sessions.ts";
 
 export const historyReadError =
   "Không thể đọc lịch sử đã lưu. Các phiên mới vẫn có thể dùng trong lần mở này.";
@@ -11,8 +17,9 @@ function defaultStorage(): HistoryStorage | null {
   return typeof localStorage === "undefined" ? null : localStorage;
 }
 
-/** Session list for the sidebar. Only sample sessions persist; private text
- * sessions live in this list for the app's lifetime and never reach storage.
+/** Session list for the sidebar. Sample sessions persist here in plain storage;
+ * private text sessions never do. They live in memory, and the shell mirrors
+ * them into the passcode vault when one is unlocked (decision 0062).
  */
 export function useSessions(storage: HistoryStorage | null = defaultStorage()) {
   const sessions = ref<Session[]>([]);
@@ -48,5 +55,15 @@ export function useSessions(storage: HistoryStorage | null = defaultStorage()) {
   function find(id: string | null) {
     return sessions.value.find((session) => session.id === id);
   }
-  return { sessions, storageError, save, add, remove, find };
+  /** Replace the private sessions with the vault's copy, newest first with samples. */
+  function load(privateSessions: readonly TextSession[]) {
+    sessions.value = [
+      ...sessions.value.filter((session) => session.fixture !== "private-text-v1"),
+      ...privateSessions,
+    ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  }
+  function removePrivate() {
+    sessions.value = sessions.value.filter((session) => session.fixture !== "private-text-v1");
+  }
+  return { sessions, storageError, save, add, remove, find, load, removePrivate };
 }

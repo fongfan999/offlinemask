@@ -1,14 +1,32 @@
 <script setup lang="ts">
-import { computed, nextTick, onBeforeUnmount, onMounted, provide, ref, useTemplateRef } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  provide,
+  ref,
+  useTemplateRef,
+  watch,
+} from "vue";
 import { version } from "../package.json";
 import { createTextDetector } from "./adapters/text-detection.ts";
 import AppIcon from "./components/AppIcon.vue";
 import AppSidebar from "./components/AppSidebar.vue";
-import { packKey, runKey, sessionsKey, type Page, type PageHandle } from "./composables/context.ts";
+import LockPage from "./components/LockPage.vue";
+import {
+  packKey,
+  runKey,
+  sessionsKey,
+  vaultKey,
+  type Page,
+  type PageHandle,
+} from "./composables/context.ts";
 import { useMaskingRun } from "./composables/useMaskingRun.ts";
 import { useRecognitionPack } from "./composables/useRecognitionPack.ts";
 import { useSessions } from "./composables/useSessions.ts";
-import type { Format, Session } from "./core/sessions.ts";
+import { useVault } from "./composables/useVault.ts";
+import type { Format, Session, TextSession } from "./core/sessions.ts";
 import HomePage from "./pages/HomePage.vue";
 import SettingsPage from "./pages/SettingsPage.vue";
 import WorkspacePage from "./pages/WorkspacePage.vue";
@@ -19,9 +37,26 @@ const store = useSessions();
 const { sessions, storageError } = store;
 const detector = createTextDetector();
 const run = useMaskingRun({ detector, pack, sessions, onSession: adoptSession });
+const vault = useVault();
 provide(packKey, pack);
 provide(sessionsKey, store);
 provide(runKey, run);
+provide(vaultKey, vault);
+
+// Private sessions mirror into the vault whenever they change, once it is open.
+let saveTimer: ReturnType<typeof setTimeout> | undefined;
+watch(
+  sessions,
+  () => {
+    if (vault.state.value !== "unlocked") return;
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(() => void vault.save(sessions.value), 300);
+  },
+  { deep: true },
+);
+function openVault(privateSessions: TextSession[]) {
+  store.load(privateSessions);
+}
 
 const page = ref<Page>("home");
 const activeId = ref<string | null>(null);
@@ -40,8 +75,10 @@ const sidebarToggle = useTemplateRef<HTMLButtonElement>("sidebarToggle");
 
 onMounted(() => {
   void pack.start();
+  void vault.start();
 });
 onBeforeUnmount(() => {
+  clearTimeout(saveTimer);
   pack.stop();
   run.destroy();
 });
@@ -85,7 +122,8 @@ async function closeSidebar() {
 
 <template>
   <div class="ambient" aria-hidden="true"></div>
-  <div class="app-shell">
+  <LockPage v-if="vault.state.value === 'locked'" @unlocked="openVault" @reset="() => {}" />
+  <div v-else-if="vault.checked.value" class="app-shell">
     <button
       v-if="sidebarOpen"
       class="sidebar-scrim"
@@ -99,6 +137,7 @@ async function closeSidebar() {
       :page="page"
       :open="sidebarOpen"
       :preparing="pack.preparing.value"
+      :saved="vault.state.value === 'unlocked'"
       :version="version"
       @navigate="navigate"
       @close="closeSidebar"

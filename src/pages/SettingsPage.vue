@@ -2,6 +2,7 @@
 import { useTemplateRef } from "vue";
 import ModelSettings from "../components/ModelSettings.vue";
 import SettingsTools from "../components/SettingsTools.vue";
+import VaultSettings from "../components/VaultSettings.vue";
 import { desktopModels } from "../adapters/models.ts";
 import { packKey, runKey, useProvided } from "../composables/context.ts";
 
@@ -27,5 +28,6 @@ defineExpose({
     @pause="run('pause')"
     @uninstall="run('uninstall')"
   />
+  <VaultSettings />
   <SettingsTools />
 </template>

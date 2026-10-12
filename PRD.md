@@ -6,7 +6,7 @@
 
 **Updated:** 9 September 2026
 
-**Status:** Product name, MVP scope, and application foundation selected: Tauri 2 + Vue 3 + TypeScript + Vite. Desktop foundation and an interactive sample review prototype are implemented; format home, sidebar navigation, and persistent sample-session history are implemented; library-backed offline text detection and in-memory private text previews are implemented; exact-alias restoration works within an open text session without persistence; comprehensive detection, file handling, and encrypted private-data persistence remain pending. See [text processing scope](docs/decisions/0004-text-processing.md). See [Decision 0001](docs/decisions/0001-desktop-stack.md).
+**Status:** Product name, MVP scope, and application foundation selected: Tauri 2 + Vue 3 + TypeScript + Vite. Desktop foundation and an interactive sample review prototype are implemented; format home, sidebar navigation, and persistent sample-session history are implemented; library-backed offline text detection and in-memory private text previews are implemented; exact-alias restoration works within an open text session; private sessions persist in a passcode-protected encrypted vault ([Decision 0062](docs/decisions/0062-passcode-vault.md)); comprehensive detection and file handling remain pending. See [text processing scope](docs/decisions/0004-text-processing.md). See [Decision 0001](docs/decisions/0001-desktop-stack.md).
 
 **Boilerplate acceptance:** On 9 September 2026, the owner accepted the current UI as a starting baseline and will provide page-by-page feedback later. Preserve the agreed simplicity, palette, navigation, and session model. See [product direction](docs/product-direction.md); production requirements below remain outstanding.
 

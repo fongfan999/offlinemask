@@ -3,7 +3,14 @@ import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
-import { packKey, runKey, sessionsKey, useProvided, type Page } from "../composables/context.ts";
+import {
+  packKey,
+  runKey,
+  sessionsKey,
+  useProvided,
+  vaultKey,
+  type Page,
+} from "../composables/context.ts";
 import { reviewHint, useTextReview, type ReviewView } from "../composables/useTextReview.ts";
 import { detectionOptions } from "../core/detection/options.ts";
 import { possibleNames } from "../core/name-hints.ts";
@@ -41,6 +48,7 @@ const {
   cancel,
 } = useProvided(runKey);
 const { save } = useProvided(sessionsKey);
+const vault = useProvided(vaultKey);
 
 const view = ref<ReviewView>("masked");
 /** The text card shows one step at a time: 1 paste, 2 mask (while processing), 3 copy, 4 restore. */
@@ -596,8 +604,18 @@ defineExpose({
         <footer class="card-footer">
           <span v-if="session" class="action-hint"
             ><AppIcon v-if="privateSession" name="lock" :size="13" />{{
-              privateSession ? "Phiên này sẽ bị xóa khi bạn đóng ứng dụng." : "Phiên mẫu"
-            }}</span
+              !privateSession
+                ? "Phiên mẫu"
+                : vault.state.value === "unlocked"
+                  ? "Đã lưu trên máy này."
+                  : "Phiên này sẽ bị xóa khi bạn đóng ứng dụng."
+            }}<button
+              v-if="privateSession && vault.state.value === 'none'"
+              class="link-button"
+              @click="emit('navigate', 'settings')"
+            >
+              Đặt mật mã để giữ lại
+            </button></span
           >
           <button v-if="textProcessing" class="quiet-button" @click="cancel(true)">
             Hủy xử lý

@@ -752,7 +752,8 @@ h1 {
   letter-spacing: 0.02em;
   text-align: right;
 }
-/* The sample is a one-time try, so it is a small link, not a button. */
+/* Small underlined text buttons: the one-time sample, "set a passcode", "forgot". */
+.link-button,
 .sample-link {
   padding: 0;
   border: 0;
@@ -763,6 +764,7 @@ h1 {
   text-decoration-color: var(--line-strong);
   text-underline-offset: 3px;
 }
+.link-button:hover,
 .sample-link:hover {
   color: var(--accent);
   text-decoration-color: currentColor;
@@ -1710,4 +1712,101 @@ td.alias {
   .manual-review {
     margin-inline: 17px;
   }
+}
+
+/* Passcode vault: lock screen at launch and the settings card. */
+.lock-page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.lock-card {
+  width: min(420px, 100%);
+  display: grid;
+  gap: 14px;
+  padding: 32px 28px;
+  border-radius: 14px;
+  text-align: center;
+}
+.lock-card h1 {
+  font-size: 24px;
+  margin: 0;
+}
+.lock-card > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.6;
+}
+.lock-card .primary-action {
+  justify-self: stretch;
+}
+.lock-card .link-button {
+  justify-self: center;
+}
+.lock-reset {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--error-soft);
+}
+.lock-reset p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.lock-reset-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.passcode-input {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font: 15px var(--sans);
+  letter-spacing: 0.12em;
+}
+.passcode-input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+.passcode-form {
+  display: grid;
+  gap: 8px;
+  max-width: 360px;
+  margin-top: 14px;
+}
+.passcode-form label {
+  margin-top: 6px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.passcode-form .primary-action,
+.passcode-form .quiet-button {
+  justify-self: start;
+  margin-top: 8px;
+}
+.vault-settings {
+  margin-top: 18px;
+  padding: 28px;
+}
+.vault-settings .model-uninstall {
+  margin-top: 16px;
+}
+.vault-settings .model-uninstall p {
+  margin: 0 0 10px;
+  font-size: 13px;
+}
+.vault-settings .model-uninstall .lock-reset-actions {
+  justify-content: flex-start;
+}
+.action-hint .link-button {
+  margin-left: 6px;
 }
