@@ -44,16 +44,16 @@ const { save } = useProvided(sessionsKey);
 
 const view = ref<ReviewView>("masked");
 /** The text card shows one step at a time: 1 paste, 2 mask (while processing), 3 copy, 4 restore. */
-const stepLabels = ["Dán văn bản", "Ẩn thông tin", "Sao chép sang AI", "Dán câu trả lời"];
+const stepLabels = ["Ẩn thông tin", "Sao chép sang AI", "Khôi phục"];
 const restoreStep = ref(false);
 /** Step panels cross-fade; focus that targets the incoming panel waits for it. */
-const pendingFocus = ref<"copy" | "restore" | "step3" | null>(null);
+const pendingFocus = ref<"copy" | "restore" | "step2" | null>(null);
 function afterStepEnter() {
   const target = pendingFocus.value;
   pendingFocus.value = null;
   if (target === "copy") copyButton.value?.focus();
   else if (target === "restore") restorePanel.value?.focusInput();
-  else if (target === "step3") stepButtons.value?.[2]?.focus();
+  else if (target === "step2") stepButtons.value?.[1]?.focus();
 }
 const changesOpen = ref(false);
 const copied = ref(false);
@@ -144,9 +144,9 @@ const subtitle = computed(() =>
   session.value
     ? privateSession.value
       ? `${sessionTitle(session.value)} · ${
-          step.value === 4
+          step.value === 3
             ? "Dán câu trả lời của AI; mã thay thế được đổi lại thành tên thật ngay trên máy bạn."
-            : "Đọc lại bản đã ẩn, rồi bấm Sao chép để gửi AI."
+            : "Đọc lại bản đã ẩn, rồi sao chép để gửi AI."
         }`
       : "Đọc lại kết quả, rồi sao chép khi bạn thấy phù hợp."
     : props.format === "text"
@@ -156,20 +156,20 @@ const subtitle = computed(() =>
 /** A text run keeps going in the background; the sample table never waits. */
 const textProcessing = computed(() => props.format === "text" && processing.value);
 const step = computed(() => {
-  if (!session.value) return textProcessing.value ? 2 : 1;
-  return restoreStep.value && privateSession.value ? 4 : 3;
+  if (!session.value) return 1;
+  return restoreStep.value && privateSession.value ? 3 : 2;
 });
 function canOpenStep(target: number) {
-  if (target <= 2) return !!session.value && props.format === "text";
+  if (target === 1) return !!session.value && props.format === "text";
   return (
-    (target === 3 && step.value === 4) || (target === 4 && step.value === 3 && privateSession.value)
+    (target === 2 && step.value === 3) || (target === 3 && step.value === 2 && privateSession.value)
   );
 }
-/** Steps 1 and 2 from a session reopen the draft with this text and choices; the
+/** Step 1 from a session reopens the draft with this text and choices; the
  * session stays in the sidebar and masking again creates a new one (no overwrite). */
 function openStep(target: number) {
   if (!canOpenStep(target)) return;
-  if (target <= 2) {
+  if (target === 1) {
     const current = session.value!;
     draft.value = current.fixture === "private-text-v1" ? current.original : sampleText;
     if (current.fixture === "private-text-v1") {
@@ -179,8 +179,8 @@ function openStep(target: number) {
     emit("navigate", "text");
     return;
   }
-  restoreStep.value = target === 4;
-  pendingFocus.value = target === 4 ? "restore" : "step3";
+  restoreStep.value = target === 3;
+  pendingFocus.value = target === 3 ? "restore" : "step2";
 }
 const characterLimit = maxTextLength.toLocaleString("vi-VN");
 
@@ -254,7 +254,8 @@ function primaryAction() {
 function submitShortcut() {
   if (!primaryDisabled.value) primaryAction();
 }
-async function copy() {
+/** Copy the masked text; `restore` also moves on to pasting the AI's reply. */
+async function copy(restore = false) {
   selectedText.value = null;
   const text = output.value;
   const sessionId = session.value?.id;
@@ -262,10 +263,11 @@ async function copy() {
     await navigator.clipboard.writeText(text);
     if (session.value?.id !== sessionId || output.value !== text) return;
     copied.value = true;
-    copyStatus.value = privateSession.value
-      ? "Đã sao chép. Dán vào ChatGPT, Gemini hoặc Claude; khi có câu trả lời, dán vào ô ở bước 4."
-      : "Đã sao chép. Bạn có thể dán vào nơi mình chọn.";
-    if (privateSession.value) openStep(4);
+    copyStatus.value =
+      restore && privateSession.value
+        ? "Đã sao chép. Dán vào ChatGPT, Gemini hoặc Claude; khi có câu trả lời, dán vào ô này."
+        : "Đã sao chép. Bạn có thể dán vào nơi mình chọn.";
+    if (restore && privateSession.value) openStep(3);
   } catch {
     if (session.value?.id !== sessionId || output.value !== text) return;
     view.value = "masked";
@@ -328,7 +330,7 @@ defineExpose({
           }"
           :aria-label="`Bước ${index + 1}: ${label}`"
           :title="
-            index < 2 && session ? 'Sửa văn bản rồi ẩn lại. Phiên này vẫn được giữ.' : undefined
+            index === 0 && session ? 'Sửa văn bản rồi ẩn lại. Phiên này vẫn được giữ.' : undefined
           "
           :aria-current="index + 1 === step ? 'step' : undefined"
           :disabled="!canOpenStep(index + 1)"
@@ -346,7 +348,7 @@ defineExpose({
     </nav>
     <Transition name="step" mode="out-in" @after-enter="afterStepEnter">
       <div
-        v-if="step === 4 && session?.fixture === 'private-text-v1'"
+        v-if="step === 3 && session?.fixture === 'private-text-v1'"
         key="restore"
         class="step-panel"
       >
@@ -355,7 +357,7 @@ defineExpose({
           <span class="action-hint"
             ><AppIcon name="lock" :size="13" />Phiên này sẽ bị xóa khi bạn đóng ứng dụng.</span
           >
-          <button class="quiet-button" @click="openStep(3)">
+          <button class="quiet-button" @click="openStep(2)">
             <AppIcon name="eye" :size="15" />Xem lại bản đã ẩn
           </button>
         </footer>
@@ -375,6 +377,16 @@ defineExpose({
           <span v-if="format === 'excel' || (session && !privateSession)" class="sample-tag"
             >Dữ liệu mẫu</span
           >
+          <button
+            v-else-if="privateSession"
+            class="icon-button"
+            :class="{ 'is-done': copied }"
+            :aria-label="copied ? 'Đã sao chép' : 'Chỉ sao chép'"
+            :title="copied ? 'Đã sao chép' : 'Chỉ sao chép'"
+            @click="copy(false)"
+          >
+            <AppIcon :name="copied ? 'check' : 'copy'" :size="17" />
+          </button>
         </header>
         <template v-if="format === 'text' && !session">
           <fieldset class="detection-options" :disabled="processing">
@@ -605,14 +617,16 @@ defineExpose({
                   ? "Tải thêm để tiếp tục"
                   : "Ẩn thông tin"
             }}<AppIcon name="arrow" :size="16" /></button
-          ><button v-else ref="copyButton" class="primary-action" @click="copy">
-            <AppIcon v-if="copied" name="check" :size="17" /><span
-              v-else-if="privateSession"
-              class="step-number"
-              aria-hidden="true"
-              >3</span
-            ><AppIcon v-else name="copy" :size="17" />{{
-              copied ? "Đã sao chép" : "Sao chép để gửi AI"
+          ><button
+            v-else-if="privateSession"
+            ref="copyButton"
+            class="primary-action"
+            @click="copy(true)"
+          >
+            <AppIcon name="copy" :size="17" />Sao chép<AppIcon name="arrow" :size="16" />Khôi phục</button
+          ><button v-else ref="copyButton" class="primary-action" @click="copy(false)">
+            <AppIcon :name="copied ? 'check' : 'copy'" :size="17" />{{
+              copied ? "Đã sao chép" : "Sao chép kết quả"
             }}
           </button>
         </footer>
@@ -620,7 +634,7 @@ defineExpose({
     </Transition>
   </section>
   <p v-if="processingError" class="storage-error" role="alert">{{ processingError }}</p>
-  <p v-if="(session && step !== 4) || copyStatus" class="feedback" role="status">
+  <p v-if="(session && step !== 3) || copyStatus" class="feedback" role="status">
     {{
       copyStatus ||
       (session

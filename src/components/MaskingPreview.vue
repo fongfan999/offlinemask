@@ -5,11 +5,11 @@ import AppIcon from "./AppIcon.vue";
 <template>
   <figure
     class="masking-preview"
-    aria-label="Bốn bước: dán văn bản, bấm Ẩn thông tin, sao chép sang AI, rồi dán câu trả lời để đọc lại tên thật"
+    aria-label="Ba bước: dán văn bản và bấm Ẩn thông tin, sao chép sang AI, rồi dán câu trả lời để đọc lại tên thật"
   >
     <div class="preview-flow">
       <div class="preview-document glass">
-        <div class="preview-step"><span class="step-number">1</span>Dán văn bản</div>
+        <div class="preview-step"><span class="step-number">1</span>Dán văn bản và bấm Ẩn</div>
         <div class="preview-label"><AppIcon name="file" :size="14" />Bản gốc</div>
         <div class="preview-value original-value">Phong Phan</div>
         <div class="preview-amount">2.500.000 ₫</div>
@@ -18,7 +18,9 @@ import AppIcon from "./AppIcon.vue";
         <AppIcon name="arrow" :size="22" />
       </div>
       <div class="preview-document preview-result glass">
-        <div class="preview-step"><span class="step-number">2</span>Bấm Ẩn thông tin</div>
+        <div class="preview-step">
+          <span class="step-number is-done"><AppIcon name="check" :size="12" /></span>Đã ẩn xong
+        </div>
         <div class="preview-label"><AppIcon name="check" :size="14" />Bản đã ẩn</div>
         <div class="preview-value alias-value">[TEN_DEMO_01]</div>
         <div class="preview-amount">2.500.000 ₫</div>
@@ -27,7 +29,7 @@ import AppIcon from "./AppIcon.vue";
         <AppIcon name="arrow" :size="22" />
       </div>
       <div class="preview-document preview-ai glass">
-        <div class="preview-step"><span class="step-number">3</span>Sao chép sang AI</div>
+        <div class="preview-step"><span class="step-number">2</span>Sao chép sang AI</div>
         <div class="preview-label"><AppIcon name="sparkle" :size="14" />AI của bạn</div>
         <strong>Hỏi AI như bình thường</strong>
         <small>ChatGPT, Gemini, Claude, Perplexity…</small>
@@ -35,7 +37,7 @@ import AppIcon from "./AppIcon.vue";
     </div>
     <figcaption class="preview-return">
       <span class="preview-step"
-        ><span class="step-number">4</span>Dán câu trả lời của AI vào lại</span
+        ><span class="step-number">3</span>Khôi phục: dán câu trả lời của AI vào lại</span
       >
       <span>Tên thật hiện ra như cũ, vẫn chỉ trên máy bạn.</span>
     </figcaption>
@@ -104,6 +106,10 @@ import AppIcon from "./AppIcon.vue";
 .preview-ai .step-number {
   background: var(--note-ink);
   color: var(--note);
+}
+.step-number.is-done {
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 .preview-label {
   display: flex;
