@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
+import PasscodeSetup from "../components/PasscodeSetup.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import {
@@ -49,12 +50,20 @@ const {
 } = useProvided(runKey);
 const { save } = useProvided(sessionsKey);
 const vault = useProvided(vaultKey);
-/** Private sessions live on disk behind the app passcode; the browser preview has no disk. */
+/** With a passcode, private sessions live encrypted on disk; without one they
+ * last until the app closes, and the review screen offers to keep them. */
 const savedNote = computed(() =>
   vault.state.value === "unlocked"
     ? "Đã mã hóa và lưu trên máy này."
-    : "Bản xem trước: phiên chỉ nằm trong bộ nhớ.",
+    : vault.state.value === "none"
+      ? "Chưa lưu trên máy."
+      : "Bản xem trước: phiên chỉ nằm trong bộ nhớ.",
 );
+const keepOffer = computed(
+  () => privateSession.value && vault.state.value === "none" && !vault.offerDismissed.value,
+);
+const settingPasscode = ref(false);
+const keptNotice = ref("");
 
 const view = ref<ReviewView>("masked");
 /** The text card shows one step at a time: 1 paste, 2 mask (while processing), 3 copy, 4 restore. */
@@ -548,6 +557,52 @@ defineExpose({
               @click="undoManualMask"
             >
               Hoàn tác
+            </button>
+          </div>
+        </div>
+        <div v-if="keepOffer || keptNotice" class="keep-offer" role="status">
+          <AppIcon name="lock" :size="18" />
+          <div class="keep-offer-body">
+            <template v-if="keptNotice">
+              <strong>{{ keptNotice }}</strong>
+            </template>
+            <template v-else-if="!settingPasscode">
+              <strong>Muốn giữ phiên này cho lần sau?</strong>
+              <span
+                >Đặt mật mã để mã hóa và lưu các phiên trên máy này. Không đặt thì phiên mất khi
+                đóng ứng dụng.</span
+              >
+            </template>
+            <template v-else>
+              <strong>Đặt mật mã cho OfflineMask</strong>
+              <span
+                >Ứng dụng sẽ hỏi mật mã khi khởi động. Quên mật mã thì phải xóa hết và bắt đầu
+                lại.</span
+              >
+              <PasscodeSetup
+                compact
+                @created="
+                  settingPasscode = false;
+                  keptNotice = 'Đã lưu. Các phiên của bạn sẽ có sẵn khi mở lại ứng dụng.';
+                "
+              />
+            </template>
+          </div>
+          <div v-if="!keptNotice" class="keep-offer-actions">
+            <button
+              class="quiet-button"
+              @click="
+                settingPasscode ? (settingPasscode = false) : (vault.offerDismissed.value = true)
+              "
+            >
+              {{ settingPasscode ? "Hủy" : "Để sau" }}
+            </button>
+            <button
+              v-if="!settingPasscode"
+              class="quiet-button accent"
+              @click="settingPasscode = true"
+            >
+              Đặt mật mã
             </button>
           </div>
         </div>

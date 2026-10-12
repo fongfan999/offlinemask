@@ -12,6 +12,8 @@ defineProps<{
   page: Page;
   open: boolean;
   preparing: boolean;
+  /** No passcode yet: private sessions are gone when the app closes. */
+  unsaved: boolean;
   version: string;
 }>();
 const emit = defineEmits<{ navigate: [destination: Page, id?: string | null]; close: [] }>();
@@ -95,7 +97,9 @@ defineExpose({
           ><small
             >{{ session.fixture === "private-text-v1" ? `${sessionTitle(session)} · ` : ""
             }}{{ dateLabel(session.createdAt)
-            }}{{ session.fixture === "private-text-v1" ? "" : " · Mẫu" }}</small
+            }}{{
+              session.fixture === "private-text-v1" ? (unsaved ? " · Chưa lưu" : "") : " · Mẫu"
+            }}</small
           ></span
         >
       </button>

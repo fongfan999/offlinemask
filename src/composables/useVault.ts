@@ -32,6 +32,8 @@ export function useVault(adapter: VaultAdapter = nativeVaultAdapter) {
   const checked = ref(false);
   const busy = ref(false);
   const error = ref("");
+  /** "Để sau" on the keep-sessions offer hides it for the rest of this launch. */
+  const offerDismissed = ref(false);
   let saving: Promise<void> = Promise.resolve();
   let pending: string | null = null;
 
@@ -127,5 +129,17 @@ export function useVault(adapter: VaultAdapter = nativeVaultAdapter) {
       busy.value = false;
     }
   }
-  return { state, checked, busy, error, start, unlock, create, save, changePasscode, reset };
+  return {
+    state,
+    checked,
+    busy,
+    error,
+    offerDismissed,
+    start,
+    unlock,
+    create,
+    save,
+    changePasscode,
+    reset,
+  };
 }

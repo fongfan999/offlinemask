@@ -1807,3 +1807,64 @@ td.alias {
 .vault-settings .model-uninstall .lock-reset-actions {
   justify-content: flex-start;
 }
+/* Offer on the review screen to keep sessions behind a passcode. */
+.keep-offer {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 14px 24px 0;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+.keep-offer > svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--accent);
+}
+.keep-offer-body {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.keep-offer-body strong {
+  display: block;
+  font-weight: 600;
+}
+.keep-offer-body > span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.keep-offer-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.keep-offer .quiet-button {
+  padding: 7px 10px;
+}
+.keep-offer .quiet-button.accent {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.passcode-form.compact {
+  margin-top: 10px;
+  max-width: 320px;
+}
+.passcode-form.compact .primary-action {
+  min-height: 38px;
+  padding: 8px 16px;
+  font-size: 13px;
+}
+@media (max-width: 600px) {
+  .keep-offer {
+    flex-wrap: wrap;
+  }
+  .keep-offer-actions {
+    margin-left: 30px;
+  }
+}

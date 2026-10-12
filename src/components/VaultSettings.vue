@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import PasscodeSetup from "./PasscodeSetup.vue";
 import { sessionsKey, useProvided, vaultKey } from "../composables/context.ts";
 
-/** App passcode: change it, or wipe everything and set a new one at the next screen. */
+/** App passcode: optional. Set it here or from the review screen; change or wipe it here. */
 const vault = useProvided(vaultKey);
 const store = useProvided(sessionsKey);
 
@@ -29,7 +30,11 @@ async function change() {
 }
 async function wipe() {
   confirmingWipe.value = false;
-  if (await vault.reset()) store.removePrivate();
+  notice.value = "";
+  if (await vault.reset()) {
+    store.removePrivate();
+    notice.value = "Đã xóa toàn bộ phiên đã lưu và bỏ mật mã.";
+  }
 }
 </script>
 
@@ -37,15 +42,35 @@ async function wipe() {
   <section class="vault-settings glass glass-card" aria-labelledby="vault-title">
     <div class="model-card-heading">
       <h2 id="vault-title">Mật mã ứng dụng</h2>
-      <span v-if="vault.state.value === 'unlocked'" class="model-badge installed">Đang bảo vệ</span>
+      <span
+        v-if="vault.state.value !== 'unavailable'"
+        class="model-badge"
+        :class="{ installed: vault.state.value === 'unlocked' }"
+        >{{ vault.state.value === "unlocked" ? "Đang bảo vệ" : "Chưa đặt" }}</span
+      >
     </div>
     <p v-if="vault.state.value === 'unavailable'" class="model-description">
       Mật mã và lưu phiên chỉ có trong ứng dụng máy tính. Bản xem trước giữ phiên trong bộ nhớ.
     </p>
+    <template v-else-if="vault.state.value === 'none'">
+      <p class="model-description">
+        Không bắt buộc. Có mật mã, các phiên của bạn được mã hóa và lưu trên máy này để mở lại lần
+        sau; ứng dụng sẽ hỏi mật mã khi khởi động. Không có mật mã, phiên mất khi đóng ứng dụng.
+        Quên mật mã thì chỉ có thể xóa hết và bắt đầu lại.
+      </p>
+      <PasscodeSetup
+        @created="
+          notice =
+            privateCount > 0
+              ? `Đã lưu ${privateCount} phiên hiện có. Các phiên mới cũng sẽ được lưu.`
+              : 'Đã đặt mật mã. Các phiên của bạn sẽ được lưu trên máy này.'
+        "
+      />
+    </template>
     <template v-else>
       <p class="model-description">
-        Mật mã mở ứng dụng mỗi lần khởi động. Các phiên của bạn được mã hóa bằng mật mã này và lưu
-        trên máy; không gì rời khỏi máy.
+        Ứng dụng hỏi mật mã khi khởi động. Các phiên được mã hóa bằng mật mã này và lưu trên máy;
+        không gì rời khỏi máy.
       </p>
       <details class="model-details">
         <summary>Đổi mật mã</summary>
@@ -86,28 +111,25 @@ async function wipe() {
           >
             Đổi mật mã
           </button>
-          <p v-if="notice" class="restore-status" role="status">{{ notice }}</p>
         </form>
       </details>
       <div class="model-uninstall">
         <template v-if="!confirmingWipe">
           <button class="quiet-button danger-button" @click="confirmingWipe = true">
-            Xóa dữ liệu và đặt lại mật mã
+            Xóa phiên đã lưu và bỏ mật mã
           </button>
         </template>
         <template v-else>
-          <p>
-            Xóa {{ privateCount }} phiên đã lưu và bỏ mật mã hiện tại? Không thể hoàn tác. Bạn sẽ
-            tạo mật mã mới ngay sau đó.
-          </p>
+          <p>Xóa {{ privateCount }} phiên đã lưu và bỏ mật mã? Không thể hoàn tác.</p>
           <div class="lock-reset-actions">
             <button class="quiet-button" @click="confirmingWipe = false">Hủy</button>
             <button class="quiet-button danger-button" :disabled="vault.busy.value" @click="wipe">
-              Xóa và đặt lại
+              Xóa và bỏ mật mã
             </button>
           </div>
         </template>
       </div>
     </template>
+    <p v-if="notice" class="restore-status" role="status">{{ notice }}</p>
   </section>
 </template>
