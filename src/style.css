@@ -39,8 +39,10 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
 }
+/* Dark tokens apply when the system is dark and the user has not chosen light
+   in Settings, or whenever the user has chosen dark (data-theme on <html>). */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     --paper: #151713;
     --paper-raised: #1b1e19;
     --paper-sunk: #1f221d;
@@ -61,6 +63,31 @@
     --backdrop: #000000b3;
     --dot: #4b5046;
   }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #151713;
+  --paper-raised: #1b1e19;
+  --paper-sunk: #1f221d;
+  --ink: #ebeae2;
+  --muted: #a8ab9f;
+  --line: #30342d;
+  --line-strong: #474d43;
+  --accent: #93a9ff;
+  --accent-strong: #b8c6ff;
+  --accent-soft: #1f2744;
+  --on-accent: #0f1530;
+  --note: #28335c;
+  --note-ink: #dfe6ff;
+  --warm: #e48d5d;
+  --error: #f2a17a;
+  --error-soft: #3a2218;
+  --shadow: #00000040;
+  --backdrop: #000000b3;
+  --dot: #4b5046;
+}
+:root[data-theme="light"] {
+  color-scheme: light;
 }
 * {
   box-sizing: border-box;
@@ -1614,6 +1641,43 @@ td.alias {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.7;
+}
+/* Appearance: a segmented radio group in the view-switch style. */
+.theme-switch {
+  display: flex;
+  flex-shrink: 0;
+  gap: 2px;
+  margin: 0;
+  padding: 3px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper-sunk);
+}
+.theme-switch label {
+  position: relative;
+  padding: 7px 14px;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--muted);
+  cursor: pointer;
+}
+.theme-switch input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+.theme-switch label:has(input:checked) {
+  background: var(--paper-raised);
+  border-color: var(--line);
+  color: var(--ink);
+  font-weight: 600;
+}
+.theme-switch label:has(input:focus-visible) {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
 }
 .settings-tools button:disabled {
   color: var(--muted);

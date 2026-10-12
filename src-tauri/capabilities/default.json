@@ -1,11 +1,12 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Receive recognition-pack status events and open the product homepage. Model downloads accept no URLs; the local tokenizer receives transient text and never persists or transmits it.",
+  "description": "Receive recognition-pack status events open the product homepage, and set the window theme chosen in Settings. Model downloads accept no URLs; the local tokenizer receives transient text and never persists or transmits it.",
   "windows": ["main"],
   "permissions": [
     "core:event:allow-listen",
     "core:event:allow-unlisten",
+    "core:window:allow-set-theme",
     {
       "identifier": "opener:allow-open-url",
       "allow": [
