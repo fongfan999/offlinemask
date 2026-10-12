@@ -5,11 +5,13 @@ import AppIcon from "./AppIcon.vue";
 <template>
   <figure
     class="masking-preview"
-    aria-label="Ba bước: dán văn bản và bấm Ẩn thông tin, sao chép sang AI, rồi dán câu trả lời để đọc lại tên thật"
+    aria-label="Ba bước: dán văn bản và bấm Ẩn thông tin, sao chép bản đã ẩn sang AI, rồi dán câu trả lời của AI vào OfflineMask để thấy lại tên thật"
   >
     <div class="preview-flow">
       <div class="preview-document glass">
-        <div class="preview-step"><span class="step-number">1</span>Dán văn bản và bấm Ẩn</div>
+        <div class="preview-step">
+          <span class="step-number">1</span><span>Dán, bấm <strong>Ẩn thông tin</strong></span>
+        </div>
         <div class="preview-label"><AppIcon name="file" :size="14" />Bản gốc</div>
         <div class="preview-value original-value">Phong Phan</div>
         <div class="preview-amount">2.500.000 ₫</div>
@@ -18,11 +20,9 @@ import AppIcon from "./AppIcon.vue";
         <AppIcon name="arrow" :size="22" />
       </div>
       <div class="preview-document preview-result glass">
-        <div class="preview-step">
-          <span class="step-number is-done"><AppIcon name="check" :size="12" /></span>Đã ẩn xong
-        </div>
+        <div class="preview-step preview-outcome">Kết quả</div>
         <div class="preview-label"><AppIcon name="check" :size="14" />Bản đã ẩn</div>
-        <div class="preview-value alias-value">[TEN_DEMO_01]</div>
+        <div class="preview-value alias-value">[TEN_1_3030]</div>
         <div class="preview-amount">2.500.000 ₫</div>
       </div>
       <div class="preview-connector ai-connector" aria-hidden="true">
@@ -37,9 +37,9 @@ import AppIcon from "./AppIcon.vue";
     </div>
     <figcaption class="preview-return">
       <span class="preview-step"
-        ><span class="step-number">3</span>Khôi phục: dán câu trả lời của AI vào lại</span
+        ><span class="step-number">3</span>Dán câu trả lời của AI vào OfflineMask</span
       >
-      <span>Tên thật hiện ra như cũ, vẫn chỉ trên máy bạn.</span>
+      <span>Tên thật hiện lại, vẫn chỉ trên máy bạn.</span>
     </figcaption>
   </figure>
 </template>
@@ -83,9 +83,8 @@ import AppIcon from "./AppIcon.vue";
 .preview-ai > small {
   display: block;
   margin-top: 8px;
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.6;
-  opacity: 0.8;
 }
 .preview-result {
   border-color: var(--line-strong);
@@ -99,6 +98,15 @@ import AppIcon from "./AppIcon.vue";
   font-weight: 500;
   line-height: 1.4;
   color: var(--ink);
+  min-height: 20px;
+}
+.preview-step strong {
+  font-weight: 650;
+}
+/* The middle panel is what step 1 produces, not a step of its own. */
+.preview-outcome {
+  color: var(--muted);
+  font-weight: 400;
 }
 .preview-ai .preview-step {
   color: inherit;
@@ -106,10 +114,6 @@ import AppIcon from "./AppIcon.vue";
 .preview-ai .step-number {
   background: var(--note-ink);
   color: var(--note);
-}
-.step-number.is-done {
-  background: var(--accent-soft);
-  color: var(--accent);
 }
 .preview-label {
   display: flex;
@@ -167,17 +171,19 @@ import AppIcon from "./AppIcon.vue";
     margin-top: 24px;
   }
 }
+/* Phones read the flow top to bottom. */
 @media (max-width: 600px) {
   .preview-flow {
-    grid-template-columns: minmax(0, 1fr) 36px minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 340px;
+    margin: 0 auto;
   }
-  .ai-connector {
-    grid-column: 3;
-    padding: 12px 0;
+  .preview-connector {
+    padding: 8px 0;
     transform: rotate(90deg);
   }
   .preview-ai {
-    grid-column: 3;
+    transform: rotate(1deg);
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -187,14 +193,7 @@ import AppIcon from "./AppIcon.vue";
 }
 @media (max-width: 440px) {
   .preview-document {
-    padding: 14px 10px;
-  }
-  .preview-step {
-    font-size: 12px;
-  }
-  .preview-value {
-    padding: 5px;
-    font-size: 11px;
+    padding: 14px 16px;
   }
 }
 </style>

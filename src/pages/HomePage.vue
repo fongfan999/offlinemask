@@ -16,13 +16,6 @@ defineExpose({
   },
 });
 
-// The hero promises offline use; until the pack is installed the one-time download is said up front.
-const offlineClaim = computed(() =>
-  pack.ready.value || pack.status.value.stage === "checking"
-    ? "Không cần Internet."
-    : "Tải một lần, sau đó không cần Internet.",
-);
-
 interface PackNotice {
   icon: "check" | "download";
   title: string;
@@ -42,7 +35,7 @@ const packNotice = computed<PackNotice | null>(() => {
     case "checking":
       return null;
     case "ready":
-      return { icon: "check", title: "Đã sẵn sàng. Dùng không cần Internet." };
+      return { icon: "check", title: "Gói nhận diện đã sẵn sàng." };
     case "downloading":
       return {
         icon: "download",
@@ -75,8 +68,8 @@ const packNotice = computed<PackNotice | null>(() => {
     default:
       return {
         icon: "download",
-        title: `Lần đầu cần tải thêm ${size}, chỉ một lần.`,
-        detail: pack.error.value || "Sau đó mọi thứ chạy trên máy bạn, không cần Internet.",
+        title: `Tải gói nhận diện (${size}) để tự ẩn họ tên, địa chỉ và thông tin riêng tư khác.`,
+        detail: pack.error.value || "Email, số điện thoại, số tài khoản đã dùng được ngay.",
         action: download("Tải về"),
       };
   }
@@ -90,8 +83,8 @@ const packNotice = computed<PackNotice | null>(() => {
     </span>
     <h1 ref="heading" tabindex="-1">Ẩn thông tin nhạy cảm<span>trước khi chia sẻ với AI.</span></h1>
     <p>
-      Tên, số tài khoản, số điện thoại… được thay bằng mã thay thế ngay trên máy bạn.
-      {{ offlineClaim }}
+      Số tài khoản, số điện thoại, họ tên… được đổi thành mã thay thế ngay trên máy bạn, không cần
+      Internet.
     </p>
     <MaskingPreview />
   </div>
