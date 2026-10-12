@@ -81,10 +81,10 @@ defineExpose({
       </button>
     </nav>
     <div class="history-heading">
-      CÁC PHIÊN CỦA BẠN <span>{{ sessions.length || "" }}</span>
+      LỊCH SỬ <span>{{ sessions.length || "" }}</span>
     </div>
     <div class="history-list">
-      <p v-if="!sessions.length" class="empty-history">Chưa có phiên nào.</p>
+      <p v-if="!sessions.length" class="empty-history">Chưa có mục nào.</p>
       <button
         v-for="session in sessions"
         :key="session.id"

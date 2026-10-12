@@ -15,11 +15,11 @@ import {
 export const vaultMessages = {
   "wrong-passcode": "Mật mã chưa đúng.",
   "passcode-invalid": "Mật mã gồm đúng 6 chữ số.",
-  corrupt: "Tệp phiên đã lưu bị hỏng, không mở được. Bạn có thể xóa và bắt đầu lại.",
+  corrupt: "Tệp lịch sử đã lưu bị hỏng, không mở được. Bạn có thể xóa và bắt đầu lại.",
   exists: "Mật mã đã được đặt trước đó.",
-  missing: "Không còn tệp phiên đã lưu.",
-  locked: "Chưa mở khóa phiên đã lưu.",
-  io: "Chưa đọc hoặc ghi được phiên đã lưu. Vui lòng thử lại.",
+  missing: "Không còn tệp lịch sử đã lưu.",
+  locked: "Chưa mở khóa lịch sử đã lưu.",
+  io: "Chưa đọc hoặc ghi được lịch sử đã lưu. Vui lòng thử lại.",
 } as const;
 
 /** Passcode-protected local store for private sessions (decision 0062).

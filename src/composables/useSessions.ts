@@ -8,9 +8,8 @@ import {
 } from "../core/sessions.ts";
 
 export const historyReadError =
-  "Không thể đọc lịch sử đã lưu. Các phiên mới vẫn có thể dùng trong lần mở này.";
-export const historyWriteError =
-  "Chưa lưu được lịch sử. Giữ ứng dụng mở để tiếp tục các phiên này.";
+  "Không thể đọc lịch sử đã lưu. Bạn vẫn có thể ẩn thông tin mới trong lần mở này.";
+export const historyWriteError = "Chưa lưu được lịch sử. Giữ ứng dụng mở để không mất các mục này.";
 
 type HistoryStorage = Pick<Storage, "getItem" | "setItem">;
 function defaultStorage(): HistoryStorage | null {

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
+import ComingSoonBadge from "./ComingSoonBadge.vue";
 import { formatModelBytes as sizes, type ModelStatus } from "../adapters/models";
 import { recognitionPack } from "../core/detection/pack.ts";
 const props = defineProps<{
@@ -119,7 +120,7 @@ const errorMessage = computed(() => {
           status.stage === "ready"
             ? "Đã cài trên máy"
             : status.installedBytes !== status.total
-              ? `Sau khi cài: ${sizes(status.installedBytes)}`
+              ? `Tải một lần · chiếm ${sizes(status.installedBytes)} trên máy`
               : "Chỉ cần tải một lần"
         }}</span>
       </div>
@@ -146,33 +147,54 @@ const errorMessage = computed(() => {
         }}
       </button>
     </div>
-    <details class="model-details">
-      <summary>Thông tin gói</summary>
-      <p>{{ recognitionPack.attribution }}</p>
-      <div v-if="status.stage === 'ready'" class="model-uninstall">
-        <template v-if="confirmingUninstall">
-          <p>
-            Gỡ gói sẽ xoá {{ sizes(status.installedBytes) }} khỏi máy. Để nhận diện họ tên và địa
-            chỉ lại, bạn cần tải lại {{ sizes(status.total) }}.
+    <div class="model-details">
+      <!-- The offline route to the same pack: a download page and file installer, both placeholders until available. -->
+      <details class="offline-install">
+        <summary>Cài từ tệp <ComingSoonBadge /></summary>
+        <div class="settings-tool-row">
+          <p id="offline-install-hint">
+            Tải gói trên
+            <span
+              class="placeholder-link"
+              role="link"
+              aria-disabled="true"
+              aria-label="offlinemask.com — trang tải gói sắp có"
+              >offlinemask.com</span
+            >, rồi chọn tệp để cài.
           </p>
-          <div class="model-uninstall-actions">
-            <button class="quiet-button danger-button" :disabled="busy" @click="uninstall">
-              Gỡ gói
-            </button>
-            <button class="quiet-button" @click="confirmingUninstall = false">Huỷ</button>
-          </div>
-        </template>
-        <template v-else>
-          <button
-            class="quiet-button"
-            :disabled="busy || processing"
-            @click="confirmingUninstall = true"
-          >
-            Gỡ gói nhận diện
+          <button class="quiet-button" disabled aria-describedby="offline-install-hint">
+            Chọn tệp
           </button>
-          <p v-if="processing">Chờ lượt xử lý hiện tại xong để gỡ gói.</p>
-        </template>
-      </div>
-    </details>
+        </div>
+      </details>
+      <details>
+        <summary>Chi tiết</summary>
+        <p>{{ recognitionPack.attribution }}</p>
+        <div v-if="status.stage === 'ready'" class="model-uninstall">
+          <template v-if="confirmingUninstall">
+            <p>
+              Gỡ gói sẽ xóa {{ sizes(status.installedBytes) }} khỏi máy. Muốn tự ẩn họ tên và địa
+              chỉ lại, bạn cần tải lại {{ sizes(status.total) }}.
+            </p>
+            <div class="model-uninstall-actions">
+              <button class="quiet-button danger-button" :disabled="busy" @click="uninstall">
+                Gỡ gói
+              </button>
+              <button class="quiet-button" @click="confirmingUninstall = false">Hủy</button>
+            </div>
+          </template>
+          <template v-else>
+            <button
+              class="quiet-button"
+              :disabled="busy || processing"
+              @click="confirmingUninstall = true"
+            >
+              Gỡ gói nhận diện
+            </button>
+            <p v-if="processing">Chờ lượt xử lý hiện tại xong để gỡ gói.</p>
+          </template>
+        </div>
+      </details>
+    </div>
   </section>
 </template>

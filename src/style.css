@@ -1619,9 +1619,23 @@ td.alias {
   }
 }
 
-.settings-tools {
-  margin-top: 24px;
-  padding: 0 8px;
+/* App-wide preferences: rows split by a rule inside one card. */
+.app-settings {
+  margin-top: 18px;
+  padding: 28px;
+}
+.app-settings-title {
+  margin: 0 0 6px;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.03em;
+}
+.app-settings .settings-tool-row {
+  padding-top: 18px;
+}
+.app-settings .settings-tool-row + .settings-tool-row {
+  margin-top: 18px;
+  border-top: 1px solid var(--line);
 }
 .settings-tool-row {
   display: flex;
@@ -1629,13 +1643,16 @@ td.alias {
   justify-content: space-between;
   gap: 20px;
 }
-.settings-tool-row h2 {
+.settings-tool-row h3 {
   display: flex;
   align-items: center;
   gap: 9px;
   margin: 0 0 8px;
   font-size: 14px;
   font-weight: 600;
+}
+.settings-tool-row > h3 {
+  margin: 0;
 }
 .settings-tool-row p {
   color: var(--muted);
@@ -1679,22 +1696,15 @@ td.alias {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
-.settings-tools button:disabled {
+.settings-tool-row button:disabled {
   color: var(--muted);
   background: transparent;
   border-color: var(--line);
   cursor: not-allowed;
 }
-.offline-install {
-  margin-top: 20px;
-  border-top: 1px solid var(--line);
-  padding-top: 18px;
-}
-.offline-install summary {
-  width: fit-content;
-  cursor: pointer;
-  font-size: 12px;
-  color: var(--muted);
+/* Disclosures at the foot of a card share one rule above them. */
+.model-details details + details {
+  margin-top: 12px;
 }
 .offline-install summary .coming-soon-badge {
   margin-left: 8px;
@@ -1836,6 +1846,46 @@ td.alias {
 .passcode-form .quiet-button {
   justify-self: start;
   margin-top: 8px;
+}
+/* Submit and an optional secondary action share one row. */
+.passcode-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+.passcode-form .passcode-actions > * {
+  margin-top: 0;
+  flex-shrink: 0;
+}
+.vault-settings .model-description {
+  margin-bottom: 0;
+}
+/* Confirmation after a passcode action, at the top of the card. */
+.settings-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 14px 0 0;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--note-ink);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.settings-notice:focus {
+  outline: none;
+}
+.settings-notice svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.vault-start {
+  margin-top: 18px;
+  color: var(--accent);
+  border-color: var(--accent);
 }
 .vault-settings {
   margin-top: 18px;

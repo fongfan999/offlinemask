@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { useTemplateRef } from "vue";
+import AppSettings from "../components/AppSettings.vue";
 import ModelSettings from "../components/ModelSettings.vue";
-import SettingsTools from "../components/SettingsTools.vue";
-import ThemeSettings from "../components/ThemeSettings.vue";
 import VaultSettings from "../components/VaultSettings.vue";
 import { desktopModels } from "../adapters/models.ts";
 import { packKey, runKey, useProvided } from "../composables/context.ts";
@@ -30,6 +29,5 @@ defineExpose({
     @uninstall="run('uninstall')"
   />
   <VaultSettings />
-  <ThemeSettings />
-  <SettingsTools />
+  <AppSettings />
 </template>

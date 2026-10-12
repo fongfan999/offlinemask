@@ -66,8 +66,13 @@ const active = computed(() => store.find(activeId.value));
 const format = computed<Format>(
   () => active.value?.format ?? (page.value === "excel" ? "excel" : "text"),
 );
+// Settings has no crumb: its heading already says "Cài đặt".
 const topbarLabel = computed(() =>
-  page.value === "settings" ? "Cài đặt" : format.value === "text" ? "Văn bản" : "Bảng tính",
+  page.value === "home" || page.value === "settings"
+    ? ""
+    : format.value === "text"
+      ? "Văn bản"
+      : "Bảng tính",
 );
 
 const pageRef = useTemplateRef<PageHandle>("pageRef");
@@ -155,7 +160,7 @@ async function closeSidebar() {
             @click="openSidebar"
           >
             <AppIcon name="list" /></button
-          ><span v-if="page !== 'home'">{{ topbarLabel }}</span>
+          ><span v-if="topbarLabel">{{ topbarLabel }}</span>
         </div>
       </header>
       <main :class="{ 'home-page': page === 'home' }">

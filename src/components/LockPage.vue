@@ -34,7 +34,7 @@ async function reset() {
         ><AppIcon name="mask" :size="26"
       /></span>
       <h1>Nhập mật mã để mở OfflineMask</h1>
-      <p>Các phiên của bạn được mã hóa trên máy này. Mật mã không được lưu ở đâu cả.</p>
+      <p>Lịch sử của bạn được mã hóa trên máy này. Mật mã không được lưu ở đâu cả.</p>
       <PasscodeField
         id="lock-passcode"
         ref="input"
@@ -64,7 +64,7 @@ async function reset() {
       </button>
       <div v-else class="lock-reset" role="group" aria-label="Quên mật mã">
         <p>
-          Không có cách lấy lại mật mã. Xóa toàn bộ phiên đã lưu và mở ứng dụng với danh sách trống?
+          Không có cách lấy lại mật mã. Xóa toàn bộ lịch sử đã lưu và mở ứng dụng với lịch sử trống?
         </p>
         <div class="lock-reset-actions">
           <button type="button" class="quiet-button" @click="confirmingReset = false">Hủy</button>

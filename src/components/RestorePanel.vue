@@ -39,7 +39,7 @@ const status = computed(() => {
   const current = result.value;
   if (!current) return "";
   if (!current.restored && !current.unknown.length)
-    return "Không tìm thấy mã thay thế của phiên này trong nội dung đã dán.";
+    return "Không tìm thấy mã thay thế của văn bản này trong nội dung đã dán.";
   return current.restored === 1
     ? "Đã khôi phục 1 mã thay thế."
     : `Đã khôi phục ${current.restored.toLocaleString("vi-VN")} mã thay thế.`;
@@ -47,7 +47,7 @@ const status = computed(() => {
 const unknownNote = computed(() => {
   const unknown = result.value?.unknown ?? [];
   if (!unknown.length) return "";
-  return `${unknown.length === 1 ? "1 mã thay thế" : `${unknown.length} mã thay thế`} không thuộc phiên này được giữ nguyên: ${unknown.join(", ")}.`;
+  return `${unknown.length === 1 ? "1 mã thay thế" : `${unknown.length} mã thay thế`} không thuộc văn bản này được giữ nguyên: ${unknown.join(", ")}.`;
 });
 
 function restore() {
@@ -74,7 +74,7 @@ async function copy() {
 <template>
   <div class="restore-body">
     <p class="restore-intro">
-      Dán câu trả lời của AI vào đây. Mã thay thế trong phiên này được đổi lại thành thông tin thật,
+      Dán câu trả lời của AI vào đây. Mã thay thế của văn bản này được đổi lại thành thông tin thật,
       ngay trên máy bạn.
     </p>
     <label class="sr-only" for="restore-input">Phản hồi của AI chứa mã thay thế</label>

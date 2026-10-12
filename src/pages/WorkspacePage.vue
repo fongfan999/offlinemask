@@ -57,7 +57,7 @@ const savedNote = computed(() =>
     ? "Đã mã hóa và lưu trên máy này."
     : vault.state.value === "none"
       ? "Chưa lưu trên máy."
-      : "Bản xem trước: phiên chỉ nằm trong bộ nhớ.",
+      : "Bản xem trước: lịch sử chỉ nằm trong bộ nhớ.",
 );
 const keepOffer = computed(
   () => privateSession.value && vault.state.value === "none" && !vault.offerDismissed.value,
@@ -321,10 +321,10 @@ defineExpose({
     </div>
     <div v-if="session" class="editor-actions">
       <button class="quiet-button" @click="emit('remove', session.id)">
-        <AppIcon name="close" :size="15" />Xóa phiên
+        <AppIcon name="close" :size="15" />Xóa khỏi lịch sử
       </button>
       <button class="quiet-button" @click="emit('navigate', format)">
-        <AppIcon name="plus" :size="15" />Phiên mới
+        <AppIcon name="plus" :size="15" />Tạo mới
       </button>
     </div>
   </div>
@@ -353,7 +353,9 @@ defineExpose({
           }"
           :aria-label="`Bước ${index + 1}: ${label}`"
           :title="
-            index === 0 && session ? 'Sửa văn bản rồi ẩn lại. Phiên này vẫn được giữ.' : undefined
+            index === 0 && session
+              ? 'Sửa văn bản rồi ẩn lại. Bản này vẫn được giữ trong lịch sử.'
+              : undefined
           "
           :aria-current="index + 1 === step ? 'step' : undefined"
           :disabled="!canOpenStep(index + 1)"
@@ -567,9 +569,9 @@ defineExpose({
               <strong>{{ keptNotice }}</strong>
             </template>
             <template v-else-if="!settingPasscode">
-              <strong>Muốn giữ phiên này cho lần sau?</strong>
+              <strong>Muốn giữ lại cho lần sau?</strong>
               <span
-                >Đặt mật mã để mã hóa và lưu các phiên trên máy này. Không đặt thì phiên mất khi
+                >Đặt mật mã để mã hóa và lưu lịch sử trên máy này. Không đặt thì lịch sử mất khi
                 đóng ứng dụng.</span
               >
             </template>
@@ -583,7 +585,7 @@ defineExpose({
                 compact
                 @created="
                   settingPasscode = false;
-                  keptNotice = 'Đã lưu. Các phiên của bạn sẽ có sẵn khi mở lại ứng dụng.';
+                  keptNotice = 'Đã lưu. Lịch sử của bạn sẽ có sẵn khi mở lại ứng dụng.';
                 "
               />
             </template>
@@ -663,7 +665,7 @@ defineExpose({
         <footer class="card-footer">
           <span v-if="session" class="action-hint"
             ><AppIcon v-if="privateSession" name="lock" :size="13" />{{
-              privateSession ? savedNote : "Phiên mẫu"
+              privateSession ? savedNote : "Bản mẫu"
             }}</span
           >
           <button v-if="textProcessing" class="quiet-button" @click="cancel(true)">
@@ -706,7 +708,7 @@ defineExpose({
       copyStatus ||
       (session
         ? "Kiểm tra nội dung còn lại trước khi chia sẻ."
-        : "Kết quả sẽ xuất hiện trong một phiên mới ở thanh bên.")
+        : "Kết quả sẽ được lưu vào lịch sử ở thanh bên.")
     }}
   </p>
   <p v-if="format === 'excel'" class="prototype-note">

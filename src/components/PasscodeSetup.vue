@@ -51,11 +51,15 @@ async function create() {
     />
     <p v-if="mismatch" class="input-error" role="alert">Hai lần nhập chưa giống nhau.</p>
     <p v-else-if="vault.error.value" class="input-error" role="alert">{{ vault.error.value }}</p>
-    <button class="primary-action" type="submit" :disabled="disabled">
-      <span v-if="vault.busy.value" class="spinner" aria-hidden="true"></span
-      ><AppIcon v-else name="lock" :size="17" />{{
-        vault.busy.value ? "Đang lưu…" : "Đặt mật mã và lưu"
-      }}
-    </button>
+    <div class="passcode-actions">
+      <button class="primary-action" type="submit" :disabled="disabled">
+        <span v-if="vault.busy.value" class="spinner" aria-hidden="true"></span
+        ><AppIcon v-else name="lock" :size="17" />{{
+          vault.busy.value ? "Đang lưu…" : "Đặt mật mã và lưu"
+        }}
+      </button>
+      <!-- Optional secondary action, such as cancelling, beside the submit button. -->
+      <slot />
+    </div>
   </form>
 </template>
