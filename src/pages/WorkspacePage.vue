@@ -43,6 +43,18 @@ const {
 const { save } = useProvided(sessionsKey);
 
 const view = ref<ReviewView>("masked");
+/** The text card shows one step at a time: 1 paste, 2 mask (while processing), 3 copy, 4 restore. */
+const stepLabels = ["Dán văn bản", "Ẩn thông tin", "Sao chép sang AI", "Dán câu trả lời"];
+const restoreStep = ref(false);
+/** Step panels cross-fade; focus that targets the incoming panel waits for it. */
+const pendingFocus = ref<"copy" | "restore" | "step3" | null>(null);
+function afterStepEnter() {
+  const target = pendingFocus.value;
+  pendingFocus.value = null;
+  if (target === "copy") copyButton.value?.focus();
+  else if (target === "restore") restorePanel.value?.focusInput();
+  else if (target === "step3") stepButtons.value?.[2]?.focus();
+}
 const changesOpen = ref(false);
 const copied = ref(false);
 const copyStatus = ref("");
@@ -50,6 +62,7 @@ const manualCopy = ref(false);
 const content = useTemplateRef<HTMLTextAreaElement>("content");
 const copyButton = useTemplateRef<HTMLButtonElement>("copyButton");
 const restorePanel = useTemplateRef<InstanceType<typeof RestorePanel>>("restorePanel");
+const stepButtons = useTemplateRef<HTMLButtonElement[]>("stepButtons");
 const heading = useTemplateRef<HTMLHeadingElement>("heading");
 
 const session = computed(() => props.session);
@@ -130,7 +143,11 @@ const title = computed(() =>
 const subtitle = computed(() =>
   session.value
     ? privateSession.value
-      ? `${sessionTitle(session.value)} · Đọc lại bản đã ẩn, bấm Sao chép để gửi AI, rồi dán câu trả lời ở bước 4.`
+      ? `${sessionTitle(session.value)} · ${
+          step.value === 4
+            ? "Dán câu trả lời của AI; mã thay thế được đổi lại thành tên thật ngay trên máy bạn."
+            : "Đọc lại bản đã ẩn, rồi bấm Sao chép để gửi AI."
+        }`
       : "Đọc lại kết quả, rồi sao chép khi bạn thấy phù hợp."
     : props.format === "text"
       ? "Nhập hoặc dán văn bản để ẩn thông tin bằng mã thay thế."
@@ -138,6 +155,33 @@ const subtitle = computed(() =>
 );
 /** A text run keeps going in the background; the sample table never waits. */
 const textProcessing = computed(() => props.format === "text" && processing.value);
+const step = computed(() => {
+  if (!session.value) return textProcessing.value ? 2 : 1;
+  return restoreStep.value && privateSession.value ? 4 : 3;
+});
+function canOpenStep(target: number) {
+  if (target <= 2) return !!session.value && props.format === "text";
+  return (
+    (target === 3 && step.value === 4) || (target === 4 && step.value === 3 && privateSession.value)
+  );
+}
+/** Steps 1 and 2 from a session reopen the draft with this text and choices; the
+ * session stays in the sidebar and masking again creates a new one (no overwrite). */
+function openStep(target: number) {
+  if (!canOpenStep(target)) return;
+  if (target <= 2) {
+    const current = session.value!;
+    draft.value = current.fixture === "private-text-v1" ? current.original : sampleText;
+    if (current.fixture === "private-text-v1") {
+      selectedOptions.value = [...current.options];
+      selectionEdited.value = true;
+    }
+    emit("navigate", "text");
+    return;
+  }
+  restoreStep.value = target === 4;
+  pendingFocus.value = target === 4 ? "restore" : "step3";
+}
 const characterLimit = maxTextLength.toLocaleString("vi-VN");
 
 const review = useTextReview({
@@ -164,6 +208,7 @@ watch(
   () => {
     view.value = "masked";
     changesOpen.value = false;
+    restoreStep.value = false;
     clearFeedback();
   },
 );
@@ -218,9 +263,9 @@ async function copy() {
     if (session.value?.id !== sessionId || output.value !== text) return;
     copied.value = true;
     copyStatus.value = privateSession.value
-      ? "Đã sao chép. Dán vào ChatGPT, Gemini hoặc Claude. Khi có câu trả lời, dán vào bước 4 bên dưới."
+      ? "Đã sao chép. Dán vào ChatGPT, Gemini hoặc Claude; khi có câu trả lời, dán vào ô ở bước 4."
       : "Đã sao chép. Bạn có thể dán vào nơi mình chọn.";
-    if (privateSession.value) void restorePanel.value?.reveal();
+    if (privateSession.value) openStep(4);
   } catch {
     if (session.value?.id !== sessionId || output.value !== text) return;
     view.value = "masked";
@@ -236,7 +281,8 @@ defineExpose({
     heading.value?.focus({ preventScroll: true });
   },
   focusResult() {
-    copyButton.value?.focus();
+    if (copyButton.value) copyButton.value.focus();
+    else pendingFocus.value = "copy";
   },
 });
 </script>
@@ -263,262 +309,318 @@ defineExpose({
       format === 'text' ? 'Ẩn thông tin trong văn bản' : 'Ẩn thông tin trong bảng tính mẫu'
     "
   >
-    <header class="card-header">
-      <div v-if="session" class="view-switch" aria-label="Chọn bản văn bản">
-        <button :aria-pressed="view === 'masked'" @click="selectView('masked')">Bản đã ẩn</button
-        ><button :aria-pressed="view === 'original'" @click="selectView('original')">
-          Bản gốc
+    <nav v-if="format === 'text'" class="stepper" aria-label="Các bước">
+      <template v-for="(label, index) in stepLabels" :key="label">
+        <span
+          v-if="index"
+          class="step-line"
+          :class="{ 'is-done': index < step }"
+          aria-hidden="true"
+        ></span>
+        <button
+          ref="stepButtons"
+          type="button"
+          class="step"
+          :class="{
+            'is-current': index + 1 === step,
+            'is-done': index + 1 < step,
+            'is-upcoming': index + 1 > step,
+          }"
+          :aria-label="`Bước ${index + 1}: ${label}`"
+          :title="
+            index < 2 && session ? 'Sửa văn bản rồi ẩn lại. Phiên này vẫn được giữ.' : undefined
+          "
+          :aria-current="index + 1 === step ? 'step' : undefined"
+          :disabled="!canOpenStep(index + 1)"
+          @click="openStep(index + 1)"
+        >
+          <span class="step-number" aria-hidden="true"
+            ><AppIcon v-if="index + 1 < step" name="check" :size="12" /><span
+              v-else-if="index + 1 === step && textProcessing"
+              class="spinner"
+            ></span
+            ><template v-else>{{ index + 1 }}</template></span
+          ><span class="step-label">{{ label }}</span>
         </button>
-      </div>
-      <span v-else class="document-label"
-        ><AppIcon :name="format === 'text' ? 'file' : 'table'" :size="17" />{{
-          format === "text" ? "Văn bản của bạn" : "Giao dịch mẫu · 2 dòng"
-        }}</span
+      </template>
+    </nav>
+    <Transition name="step" mode="out-in" @after-enter="afterStepEnter">
+      <div
+        v-if="step === 4 && session?.fixture === 'private-text-v1'"
+        key="restore"
+        class="step-panel"
       >
-      <button
-        v-if="format === 'text' && !session && !draft"
-        class="quiet-button"
-        @click="draft = sampleText"
-      >
-        Dùng văn bản mẫu
-      </button>
-      <span v-else-if="format === 'excel' || (session && !privateSession)" class="sample-tag"
-        >Dữ liệu mẫu</span
-      >
-    </header>
-    <template v-if="format === 'text' && !session">
-      <fieldset class="detection-options" :disabled="processing">
-        <legend>Bạn muốn ẩn thông tin nào?</legend>
-        <div class="option-grid">
-          <label
-            v-for="option in detectionOptions"
-            :key="option.id"
-            class="detection-option"
-            :class="{ selected: selectedOptions.includes(option.id) }"
-            :title="option.detail"
+        <RestorePanel ref="restorePanel" :session-id="session.id" :analysis="session.analysis" />
+        <footer class="card-footer">
+          <span class="action-hint"
+            ><AppIcon name="lock" :size="13" />Phiên này sẽ bị xóa khi bạn đóng ứng dụng.</span
           >
-            <input
-              v-model="selectedOptions"
-              type="checkbox"
-              :aria-label="
-                option.model && !modelsReady ? `${option.label} · Cần tải thêm` : option.label
-              "
-              :value="option.id"
-              @change="selectionEdited = true"
-            />
-            <span
-              >{{ option.label
-              }}<small v-if="option.model && !modelsReady">Cần tải thêm</small></span
+          <button class="quiet-button" @click="openStep(3)">
+            <AppIcon name="eye" :size="15" />Xem lại bản đã ẩn
+          </button>
+        </footer>
+      </div>
+      <div v-else :key="session ? 'review' : 'draft'" class="step-panel">
+        <header v-if="session || format === 'excel'" class="card-header">
+          <div v-if="session" class="view-switch" aria-label="Chọn bản văn bản">
+            <button :aria-pressed="view === 'masked'" @click="selectView('masked')">
+              Bản đã ẩn</button
+            ><button :aria-pressed="view === 'original'" @click="selectView('original')">
+              Bản gốc
+            </button>
+          </div>
+          <span v-else class="document-label"
+            ><AppIcon name="table" :size="17" />Giao dịch mẫu · 2 dòng</span
+          >
+          <span v-if="format === 'excel' || (session && !privateSession)" class="sample-tag"
+            >Dữ liệu mẫu</span
+          >
+        </header>
+        <template v-if="format === 'text' && !session">
+          <fieldset class="detection-options" :disabled="processing">
+            <legend>Bạn muốn ẩn thông tin nào?</legend>
+            <div class="option-grid">
+              <label
+                v-for="option in detectionOptions"
+                :key="option.id"
+                class="detection-option"
+                :class="{ selected: selectedOptions.includes(option.id) }"
+                :title="option.detail"
+              >
+                <input
+                  v-model="selectedOptions"
+                  type="checkbox"
+                  :aria-label="
+                    option.model && !modelsReady ? `${option.label} · Cần tải thêm` : option.label
+                  "
+                  :value="option.id"
+                  @change="selectionEdited = true"
+                />
+                <span
+                  >{{ option.label
+                  }}<small v-if="option.model && !modelsReady">Cần tải thêm</small></span
+                >
+              </label>
+            </div>
+            <div v-if="missingSelectedModels" class="model-requirement">
+              <AppIcon name="download" :size="16" />
+              <p>
+                Tải gói nhận diện để dùng các mục đã chọn.<span
+                  >{{ formatModelBytes(models.total) }} · Chỉ cần tải một lần</span
+                >
+              </p>
+              <button class="quiet-button" @click="emit('navigate', 'settings')">
+                {{ preparing ? "Xem tiến độ" : "Xem chi tiết"
+                }}<AppIcon name="chevron" :size="12" />
+              </button>
+            </div>
+            <p v-if="!selectedOptions.length" class="input-error" role="status">
+              Chọn ít nhất một loại thông tin để tiếp tục.
+            </p>
+          </fieldset>
+          <label class="sr-only" for="text-input">Văn bản cần ẩn thông tin</label>
+          <textarea
+            id="text-input"
+            v-model="draft"
+            :disabled="processing"
+            class="text-content"
+            placeholder="Nhập hoặc dán văn bản vào đây…"
+            spellcheck="false"
+            autocomplete="off"
+            autocorrect="off"
+            autocapitalize="off"
+            aria-describedby="text-input-hint"
+            :aria-invalid="draft.length > maxTextLength"
+            @input="processingError = ''"
+            @keydown.meta.enter.prevent="submitShortcut"
+            @keydown.ctrl.enter.prevent="submitShortcut"
+          ></textarea>
+          <div class="input-hint-row">
+            <button
+              v-if="!draft && !processing"
+              type="button"
+              class="sample-link"
+              @click="draft = sampleText"
             >
-          </label>
+              Thử với văn bản mẫu
+            </button>
+            <p
+              id="text-input-hint"
+              class="input-hint"
+              :class="{ 'input-error': draft.length > maxTextLength }"
+              aria-live="polite"
+            >
+              {{
+                draft.length > maxTextLength
+                  ? draftError
+                  : `${draft.length.toLocaleString("vi-VN")} / ${characterLimit} ký tự`
+              }}
+            </p>
+          </div>
+        </template>
+        <template v-else-if="format === 'text' || manualCopy"
+          ><label class="sr-only" for="document-content">{{
+            session && view === "masked" ? "Bản đã ẩn" : "Bản gốc"
+          }}</label
+          ><textarea
+            id="document-content"
+            ref="content"
+            class="text-content"
+            :value="manualCopy ? output : visibleText"
+            readonly
+            :aria-describedby="privateSession ? 'manual-review-hint' : undefined"
+            spellcheck="false"
+            @select="captureSelection"
+            @keyup="captureSelection"
+            @mouseup="captureSelection"
+          ></textarea>
+        </template>
+        <div
+          v-else
+          class="sheet-scroll"
+          tabindex="0"
+          aria-label="Bảng giao dịch mẫu, cuộn ngang để xem các cột"
+        >
+          <table>
+            <caption class="sr-only">
+              {{
+                session && view === "masked" ? "Bảng đã ẩn thông tin" : "Bảng gốc"
+              }}
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">#</th>
+                <th v-for="header in sheetHeaders" :key="header" scope="col">
+                  {{ header }}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, index) in rows" :key="index">
+                <th scope="row">{{ index + 1 }}</th>
+                <td v-for="(cell, col) in row" :key="col" :class="{ alias: cell.startsWith('[') }">
+                  {{ cell }}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div class="sheet-caption">
+            <AppIcon name="table" :size="14" />Giao dịch<span>2 dòng · 6 cột</span>
+          </div>
         </div>
-        <div v-if="missingSelectedModels" class="model-requirement">
-          <AppIcon name="download" :size="16" />
-          <p>
-            Tải gói nhận diện để dùng các mục đã chọn.<span
-              >{{ formatModelBytes(models.total) }} · Chỉ cần tải một lần</span
-            >
+        <div v-if="privateSession" class="manual-review">
+          <p id="manual-review-hint" role="status">
+            <AppIcon v-if="!reviewStatus" name="compose" :size="14" />{{
+              reviewStatus || reviewHint
+            }}
           </p>
-          <button class="quiet-button" @click="emit('navigate', 'settings')">
-            {{ preparing ? "Xem tiến độ" : "Xem chi tiết" }}<AppIcon name="chevron" :size="12" />
+          <div class="manual-review-actions">
+            <button v-if="selectedText" class="quiet-button" @click="hideSelection">
+              Ẩn phần đã chọn
+            </button>
+            <button
+              v-if="session?.fixture === 'private-text-v1' && session.reviewUndo"
+              class="quiet-button"
+              @click="undoManualMask"
+            >
+              Hoàn tác
+            </button>
+          </div>
+        </div>
+        <div v-if="warning" class="review-warning" role="status">
+          <AppIcon name="info" :size="18" />
+          <p>
+            <strong>{{ warning.title }}</strong
+            ><span>{{ warning.body }}</span>
+          </p>
+          <button
+            v-if="warning.action"
+            class="quiet-button"
+            :disabled="pack.busy.value || (warning.action === 'download' && !desktopModels)"
+            @click="warningAction"
+          >
+            {{ warning.action === "download" ? "Tải về" : "Xem tiến độ"
+            }}<AppIcon name="chevron" :size="12" />
           </button>
         </div>
-        <p v-if="!selectedOptions.length" class="input-error" role="status">
-          Chọn ít nhất một loại thông tin để tiếp tục.
+        <p v-if="session && !activeFindings.length" class="detection-note" role="status">
+          Chưa phát hiện thông tin cần ẩn. Bản xem trước giữ nguyên nội dung; hãy kiểm tra lại trước
+          khi chia sẻ.
         </p>
-      </fieldset>
-      <label class="sr-only" for="text-input">Văn bản cần ẩn thông tin</label>
-      <textarea
-        id="text-input"
-        v-model="draft"
-        :disabled="processing"
-        class="text-content"
-        placeholder="Nhập hoặc dán văn bản vào đây…"
-        spellcheck="false"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        aria-describedby="text-input-hint"
-        :aria-invalid="draft.length > maxTextLength"
-        @input="processingError = ''"
-        @keydown.meta.enter.prevent="submitShortcut"
-        @keydown.ctrl.enter.prevent="submitShortcut"
-      ></textarea>
-      <p
-        id="text-input-hint"
-        class="input-hint"
-        :class="{ 'input-error': draft.length > maxTextLength }"
-        aria-live="polite"
-      >
-        {{
-          draft.length > maxTextLength
-            ? draftError
-            : `${draft.length.toLocaleString("vi-VN")} / ${characterLimit} ký tự`
-        }}
-      </p>
-    </template>
-    <template v-else-if="format === 'text' || manualCopy"
-      ><label class="sr-only" for="document-content">{{
-        session && view === "masked" ? "Bản đã ẩn" : "Bản gốc"
-      }}</label
-      ><textarea
-        id="document-content"
-        ref="content"
-        class="text-content"
-        :value="manualCopy ? output : visibleText"
-        readonly
-        :aria-describedby="privateSession ? 'manual-review-hint' : undefined"
-        spellcheck="false"
-        @select="captureSelection"
-        @keyup="captureSelection"
-        @mouseup="captureSelection"
-      ></textarea>
-    </template>
-    <div
-      v-else
-      class="sheet-scroll"
-      tabindex="0"
-      aria-label="Bảng giao dịch mẫu, cuộn ngang để xem các cột"
-    >
-      <table>
-        <caption class="sr-only">
-          {{
-            session && view === "masked" ? "Bảng đã ẩn thông tin" : "Bảng gốc"
-          }}
-        </caption>
-        <thead>
-          <tr>
-            <th scope="col">#</th>
-            <th v-for="header in sheetHeaders" :key="header" scope="col">
-              {{ header }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(row, index) in rows" :key="index">
-            <th scope="row">{{ index + 1 }}</th>
-            <td v-for="(cell, col) in row" :key="col" :class="{ alias: cell.startsWith('[') }">
-              {{ cell }}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <div class="sheet-caption">
-        <AppIcon name="table" :size="14" />Giao dịch<span>2 dòng · 6 cột</span>
+        <div v-if="session && activeFindings.length" class="changes">
+          <button
+            class="changes-toggle"
+            :aria-expanded="changesOpen"
+            aria-controls="change-list"
+            @click="changesOpen = !changesOpen"
+          >
+            <span
+              ><AppIcon name="check" :size="15" />Đã ẩn {{ maskCount }} mục{{
+                unchecked ? ` · ${unchecked.count} loại chưa kiểm tra` : " thông tin"
+              }}</span
+            ><span
+              >{{ changesOpen ? "Thu gọn" : "Xem thay đổi" }}<AppIcon name="chevron" :size="12"
+            /></span>
+          </button>
+          <div v-show="changesOpen" id="change-list" class="change-list">
+            <p>Bỏ chọn những thông tin bạn muốn giữ nguyên.</p>
+            <label v-for="finding in activeFindings" :key="finding.id" class="change-row"
+              ><input
+                type="checkbox"
+                :checked="session.decisions[finding.id] === 'mask'"
+                @change="toggle(finding.id)"
+              /><span
+                ><strong>{{ finding.label }}</strong
+                ><small>{{ finding.value }}</small
+                ><small>{{ finding.reason }}</small
+                ><small>{{ finding.source }}</small></span
+              ><code>{{
+                session.decisions[finding.id] === "mask" ? finding.alias : "Giữ nguyên"
+              }}</code></label
+            >
+          </div>
+        </div>
+        <p v-if="textProcessing" class="detection-note" role="status">{{ processingStatus }}</p>
+        <footer class="card-footer">
+          <span v-if="session" class="action-hint"
+            ><AppIcon v-if="privateSession" name="lock" :size="13" />{{
+              privateSession ? "Phiên này sẽ bị xóa khi bạn đóng ứng dụng." : "Phiên mẫu"
+            }}</span
+          >
+          <button v-if="textProcessing" class="quiet-button" @click="cancel(true)">
+            Hủy xử lý
+          </button>
+          <button
+            v-if="!session"
+            class="primary-action"
+            :disabled="primaryDisabled"
+            :title="format === 'text' ? '⌘/Ctrl + Enter' : undefined"
+            @click="primaryAction"
+          >
+            <span v-if="textProcessing" class="spinner" aria-hidden="true"></span
+            ><AppIcon v-else name="sparkle" :size="17" />{{
+              textProcessing
+                ? "Đang xử lý…"
+                : format === "text" && missingSelectedModels
+                  ? "Tải thêm để tiếp tục"
+                  : "Ẩn thông tin"
+            }}<AppIcon name="arrow" :size="16" /></button
+          ><button v-else ref="copyButton" class="primary-action" @click="copy">
+            <AppIcon v-if="copied" name="check" :size="17" /><span
+              v-else-if="privateSession"
+              class="step-number"
+              aria-hidden="true"
+              >3</span
+            ><AppIcon v-else name="copy" :size="17" />{{
+              copied ? "Đã sao chép" : "Sao chép để gửi AI"
+            }}
+          </button>
+        </footer>
       </div>
-    </div>
-    <div v-if="privateSession" class="manual-review">
-      <p id="manual-review-hint" role="status">
-        <AppIcon v-if="!reviewStatus" name="compose" :size="14" />{{ reviewStatus || reviewHint }}
-      </p>
-      <div class="manual-review-actions">
-        <button v-if="selectedText" class="quiet-button" @click="hideSelection">
-          Ẩn phần đã chọn
-        </button>
-        <button
-          v-if="session?.fixture === 'private-text-v1' && session.reviewUndo"
-          class="quiet-button"
-          @click="undoManualMask"
-        >
-          Hoàn tác
-        </button>
-      </div>
-    </div>
-    <div v-if="warning" class="review-warning" role="status">
-      <AppIcon name="info" :size="18" />
-      <p>
-        <strong>{{ warning.title }}</strong
-        ><span>{{ warning.body }}</span>
-      </p>
-      <button
-        v-if="warning.action"
-        class="quiet-button"
-        :disabled="pack.busy.value || (warning.action === 'download' && !desktopModels)"
-        @click="warningAction"
-      >
-        {{ warning.action === "download" ? "Tải về" : "Xem tiến độ"
-        }}<AppIcon name="chevron" :size="12" />
-      </button>
-    </div>
-    <p v-if="session && !activeFindings.length" class="detection-note" role="status">
-      Chưa phát hiện thông tin cần ẩn. Bản xem trước giữ nguyên nội dung; hãy kiểm tra lại trước khi
-      chia sẻ.
-    </p>
-    <div v-if="session && activeFindings.length" class="changes">
-      <button
-        class="changes-toggle"
-        :aria-expanded="changesOpen"
-        aria-controls="change-list"
-        @click="changesOpen = !changesOpen"
-      >
-        <span
-          ><AppIcon name="check" :size="15" />Đã ẩn {{ maskCount }} mục{{
-            unchecked ? ` · ${unchecked.count} loại chưa kiểm tra` : " thông tin"
-          }}</span
-        ><span
-          >{{ changesOpen ? "Thu gọn" : "Xem thay đổi" }}<AppIcon name="chevron" :size="12"
-        /></span>
-      </button>
-      <div v-show="changesOpen" id="change-list" class="change-list">
-        <p>Bỏ chọn những thông tin bạn muốn giữ nguyên.</p>
-        <label v-for="finding in activeFindings" :key="finding.id" class="change-row"
-          ><input
-            type="checkbox"
-            :checked="session.decisions[finding.id] === 'mask'"
-            @change="toggle(finding.id)"
-          /><span
-            ><strong>{{ finding.label }}</strong
-            ><small>{{ finding.value }}</small
-            ><small>{{ finding.reason }}</small
-            ><small>{{ finding.source }}</small></span
-          ><code>{{
-            session.decisions[finding.id] === "mask" ? finding.alias : "Giữ nguyên"
-          }}</code></label
-        >
-      </div>
-    </div>
-    <p v-if="textProcessing" class="detection-note" role="status">{{ processingStatus }}</p>
-    <footer class="card-footer">
-      <span v-if="session" class="action-hint"
-        ><AppIcon v-if="privateSession" name="lock" :size="13" />{{
-          privateSession ? "Chỉ lưu trong lúc mở ứng dụng." : "Phiên mẫu"
-        }}</span
-      >
-      <button v-if="textProcessing" class="quiet-button" @click="cancel(true)">Hủy xử lý</button>
-      <button
-        v-if="!session"
-        class="primary-action"
-        :disabled="primaryDisabled"
-        :title="format === 'text' ? '⌘/Ctrl + Enter' : undefined"
-        @click="primaryAction"
-      >
-        <AppIcon name="sparkle" :size="17" />{{
-          textProcessing
-            ? "Đang xử lý…"
-            : format === "text" && missingSelectedModels
-              ? "Tải thêm để tiếp tục"
-              : "Ẩn thông tin"
-        }}<AppIcon name="arrow" :size="16" /></button
-      ><button v-else ref="copyButton" class="primary-action" @click="copy">
-        <AppIcon v-if="copied" name="check" :size="17" /><span
-          v-else-if="privateSession"
-          class="step-number"
-          aria-hidden="true"
-          >3</span
-        ><AppIcon v-else name="copy" :size="17" />{{
-          copied ? "Đã sao chép" : "Sao chép để gửi AI"
-        }}
-      </button>
-    </footer>
+    </Transition>
   </section>
-  <RestorePanel
-    v-if="session?.fixture === 'private-text-v1'"
-    ref="restorePanel"
-    :session-id="session.id"
-    :analysis="session.analysis"
-  />
   <p v-if="processingError" class="storage-error" role="alert">{{ processingError }}</p>
-  <p v-if="session || copyStatus" class="feedback" role="status">
+  <p v-if="(session && step !== 4) || copyStatus" class="feedback" role="status">
     {{
       copyStatus ||
       (session

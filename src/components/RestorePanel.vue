@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
+import { computed, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
 import { restoreAliases, type Restoration } from "../core/restore.ts";
 import type { TextAnalysis } from "../core/text.ts";
@@ -10,17 +10,12 @@ const reply = ref("");
 const result = ref<Restoration | null>(null);
 const copied = ref(false);
 const copyStatus = ref("");
-const open = ref(false);
 const output = useTemplateRef<HTMLTextAreaElement>("output");
-const panel = useTemplateRef<HTMLDetailsElement>("panel");
+const input = useTemplateRef<HTMLTextAreaElement>("input");
 
-/** After the masked copy is on the clipboard, the next step opens and comes into view. */
 defineExpose({
-  async reveal() {
-    open.value = true;
-    await nextTick();
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    panel.value?.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "nearest" });
+  focusInput() {
+    input.value?.focus({ preventScroll: true });
   },
 });
 
@@ -32,7 +27,6 @@ watch(
     result.value = null;
     copied.value = false;
     copyStatus.value = "";
-    open.value = false;
   },
 );
 watch(reply, () => {
@@ -78,60 +72,51 @@ async function copy() {
 </script>
 
 <template>
-  <details
-    ref="panel"
-    class="restore glass"
-    :open="open"
-    @toggle="open = ($event.target as HTMLDetailsElement).open"
-  >
-    <summary>
-      <span class="step-number" aria-hidden="true">4</span>Dán câu trả lời của AI để đọc lại tên
-      thật
-      <span class="restore-hint"
-        >Mã thay thế trong phiên này được đổi lại thành thông tin thật, ngay trên máy bạn.</span
-      >
-    </summary>
-    <div class="restore-body">
-      <label class="sr-only" for="restore-input">Phản hồi của AI chứa mã thay thế</label>
+  <div class="restore-body">
+    <p class="restore-intro">
+      Dán câu trả lời của AI vào đây. Mã thay thế trong phiên này được đổi lại thành thông tin thật,
+      ngay trên máy bạn.
+    </p>
+    <label class="sr-only" for="restore-input">Phản hồi của AI chứa mã thay thế</label>
+    <textarea
+      id="restore-input"
+      ref="input"
+      v-model="reply"
+      class="text-content restore-input"
+      placeholder="Dán phản hồi của AI vào đây…"
+      spellcheck="false"
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="off"
+      @keydown.meta.enter.prevent="restore"
+      @keydown.ctrl.enter.prevent="restore"
+    ></textarea>
+    <div class="restore-actions">
+      <p v-if="status" class="restore-status" role="status">
+        {{ status }}<span v-if="unknownNote" class="restore-unknown">{{ unknownNote }}</span>
+      </p>
+      <button class="primary-action" :disabled="!reply.trim()" @click="restore">
+        <AppIcon name="undo" :size="16" />Khôi phục
+      </button>
+    </div>
+    <template v-if="result && result.restored">
+      <label class="sr-only" for="restore-output">Bản đã khôi phục</label>
       <textarea
-        id="restore-input"
-        v-model="reply"
+        id="restore-output"
+        ref="output"
         class="text-content restore-input"
-        placeholder="Dán phản hồi của AI vào đây…"
+        :value="result.text"
+        readonly
         spellcheck="false"
-        autocomplete="off"
-        autocorrect="off"
-        autocapitalize="off"
-        @keydown.meta.enter.prevent="restore"
-        @keydown.ctrl.enter.prevent="restore"
       ></textarea>
       <div class="restore-actions">
-        <p v-if="status" class="restore-status" role="status">
-          {{ status }}<span v-if="unknownNote" class="restore-unknown">{{ unknownNote }}</span>
-        </p>
-        <button class="primary-action" :disabled="!reply.trim()" @click="restore">
-          <AppIcon name="undo" :size="16" />Khôi phục
+        <p v-if="copyStatus" class="restore-status" role="status">{{ copyStatus }}</p>
+        <button class="quiet-button" @click="copy">
+          <AppIcon :name="copied ? 'check' : 'copy'" :size="15" />{{
+            copied ? "Đã sao chép" : "Sao chép bản khôi phục"
+          }}
         </button>
       </div>
-      <template v-if="result && result.restored">
-        <label class="sr-only" for="restore-output">Bản đã khôi phục</label>
-        <textarea
-          id="restore-output"
-          ref="output"
-          class="text-content restore-input"
-          :value="result.text"
-          readonly
-          spellcheck="false"
-        ></textarea>
-        <div class="restore-actions">
-          <p v-if="copyStatus" class="restore-status" role="status">{{ copyStatus }}</p>
-          <button class="quiet-button" @click="copy">
-            <AppIcon :name="copied ? 'check' : 'copy'" :size="15" />{{
-              copied ? "Đã sao chép" : "Sao chép bản khôi phục"
-            }}
-          </button>
-        </div>
-      </template>
-    </div>
-  </details>
+    </template>
+  </div>
 </template>
