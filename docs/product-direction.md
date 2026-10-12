@@ -162,3 +162,4 @@ From here on every change has its own decision with rationale and verification, 
 | 12 Oct | Sessions should survive a restart. Private sessions are kept in a passcode-protected encrypted vault; a forgotten passcode has no recovery and starts the user with an empty list. Setting a passcode is opt-in from Settings or the review footer. | [0062](decisions/0062-passcode-vault.md) |
 | 12 Oct | The passcode is app-level and created on first launch; sessions are stored on disk behind it, never only in memory. Sessions are its first use. | [0063](decisions/0063-app-level-passcode.md) |
 | 12 Oct | The passcode is optional. Nobody is asked to create one at launch; after masking, the review screen offers to keep sessions behind a passcode, set in place. The lock screen appears only once a passcode exists. | [0064](decisions/0064-optional-passcode.md) |
+| 12 Oct | The passcode is six digits, entered like a phone passcode. | [0065](decisions/0065-six-digit-passcode.md) |

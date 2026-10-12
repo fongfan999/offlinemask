@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
+import PasscodeField from "./PasscodeField.vue";
 import { sessionsKey, useProvided, vaultKey } from "../composables/context.ts";
 import type { TextSession } from "../core/sessions.ts";
 
@@ -10,7 +11,7 @@ const vault = useProvided(vaultKey);
 const store = useProvided(sessionsKey);
 const passcode = ref("");
 const confirmingReset = ref(false);
-const input = useTemplateRef<HTMLInputElement>("input");
+const input = useTemplateRef<InstanceType<typeof PasscodeField>>("input");
 
 onMounted(() => input.value?.focus());
 
@@ -34,19 +35,22 @@ async function reset() {
       /></span>
       <h1>Nhập mật mã để mở OfflineMask</h1>
       <p>Các phiên của bạn được mã hóa trên máy này. Mật mã không được lưu ở đâu cả.</p>
-      <label class="sr-only" for="lock-passcode">Mật mã</label>
-      <input
+      <PasscodeField
         id="lock-passcode"
         ref="input"
         v-model="passcode"
-        class="passcode-input"
-        type="password"
+        label="Mật mã 6 số"
         autocomplete="current-password"
-        placeholder="Mật mã"
         :disabled="vault.busy.value"
+        autofocus
+        @complete="unlock"
       />
       <p v-if="vault.error.value" class="input-error" role="alert">{{ vault.error.value }}</p>
-      <button class="primary-action" type="submit" :disabled="!passcode || vault.busy.value">
+      <button
+        class="primary-action"
+        type="submit"
+        :disabled="passcode.length !== 6 || vault.busy.value"
+      >
         <span v-if="vault.busy.value" class="spinner" aria-hidden="true"></span
         ><AppIcon v-else name="lock" :size="17" />{{ vault.busy.value ? "Đang mở…" : "Mở khóa" }}
       </button>

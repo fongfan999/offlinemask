@@ -17,13 +17,13 @@ export const desktopVault = isTauri();
 
 /** Error codes from the native `vault` module. Anything else is an I/O message. */
 export type VaultErrorCode =
-  "wrong-passcode" | "passcode-too-short" | "exists" | "missing" | "locked" | "corrupt";
+  "wrong-passcode" | "passcode-invalid" | "exists" | "missing" | "locked" | "corrupt";
 
 export function vaultErrorCode(error: unknown): VaultErrorCode | "io" {
   const text = typeof error === "string" ? error : "";
   if (text.startsWith("io:")) return "io";
   return (
-    ["wrong-passcode", "passcode-too-short", "exists", "missing", "locked", "corrupt"] as const
+    ["wrong-passcode", "passcode-invalid", "exists", "missing", "locked", "corrupt"] as const
   ).includes(text as VaultErrorCode)
     ? (text as VaultErrorCode)
     : "io";

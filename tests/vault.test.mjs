@@ -10,7 +10,7 @@ function fakeAdapter(initial = null) {
     status: async () => (store.key ? "unlocked" : store.file ? "locked" : "none"),
     async create(passcode, data) {
       if (store.file) throw "exists";
-      if (passcode.length < 4) throw "passcode-too-short";
+      if (!/^\d{6}$/.test(passcode)) throw "passcode-invalid";
       store.file = { passcode, data };
       store.key = passcode;
     },
@@ -27,7 +27,7 @@ function fakeAdapter(initial = null) {
     },
     async changePasscode(current, next) {
       if (store.file.passcode !== current) throw "wrong-passcode";
-      if (next.length < 4) throw "passcode-too-short";
+      if (!/^\d{6}$/.test(next)) throw "passcode-invalid";
       store.file.passcode = next;
     },
     async reset() {
@@ -57,9 +57,9 @@ test("vault: create unlocks, saves coalesce, and the stored copy decodes", async
   const { adapter, store } = fakeAdapter();
   const vault = useVault(adapter);
   await vault.start();
-  assert.equal(await vault.create("123", [session]), false);
-  assert.equal(vault.error.value, vaultMessages["passcode-too-short"]);
-  assert.equal(await vault.create("1234", [session]), true);
+  assert.equal(await vault.create("12345", [session]), false);
+  assert.equal(vault.error.value, vaultMessages["passcode-invalid"]);
+  assert.equal(await vault.create("123456", [session]), true);
   assert.equal(vault.state.value, "unlocked");
   assert.equal(store.file.data, encodePrivateSessions([session]));
   void vault.save([session]);
@@ -71,32 +71,32 @@ test("vault: create unlocks, saves coalesce, and the stored copy decodes", async
 
 test("vault: wrong passcode is reported, the right one returns sessions, reset empties everything", async () => {
   const { adapter, store } = fakeAdapter({
-    passcode: "abcd",
+    passcode: "246810",
     data: encodePrivateSessions([session]),
   });
   const vault = useVault(adapter);
   await vault.start();
   assert.equal(vault.state.value, "locked");
-  assert.equal(await vault.unlock("zzzz"), null);
+  assert.equal(await vault.unlock("000000"), null);
   assert.equal(vault.error.value, vaultMessages["wrong-passcode"]);
   assert.equal(vault.state.value, "locked");
-  const sessions = await vault.unlock("abcd");
+  const sessions = await vault.unlock("246810");
   assert.equal(sessions.length, 1);
   assert.equal(sessions[0].id, session.id);
   assert.equal(vault.state.value, "unlocked");
-  assert.equal(await vault.changePasscode("nope", "efgh"), false);
-  assert.equal(await vault.changePasscode("abcd", "efgh"), true);
-  assert.equal(store.file.passcode, "efgh");
+  assert.equal(await vault.changePasscode("999999", "135790"), false);
+  assert.equal(await vault.changePasscode("246810", "135790"), true);
+  assert.equal(store.file.passcode, "135790");
   assert.equal(await vault.reset(), true);
   assert.equal(vault.state.value, "none");
   assert.equal(store.file, null);
 });
 
 test("vault: a file that decodes to garbage counts as corrupt and stays closed", async () => {
-  const { adapter } = fakeAdapter({ passcode: "abcd", data: '{"version":9}' });
+  const { adapter } = fakeAdapter({ passcode: "246810", data: '{"version":9}' });
   const vault = useVault(adapter);
   await vault.start();
-  assert.equal(await vault.unlock("abcd"), null);
+  assert.equal(await vault.unlock("246810"), null);
   assert.equal(vault.error.value, vaultMessages.corrupt);
   assert.equal(vault.state.value, "locked");
 });

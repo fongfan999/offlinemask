@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import PasscodeField from "./PasscodeField.vue";
 import PasscodeSetup from "./PasscodeSetup.vue";
 import { sessionsKey, useProvided, vaultKey } from "../composables/context.ts";
 
@@ -13,13 +14,22 @@ const nextConfirm = ref("");
 const notice = ref("");
 const confirmingWipe = ref(false);
 
-const nextMismatch = computed(() => !!nextConfirm.value && next.value !== nextConfirm.value);
+const nextMismatch = computed(
+  () => nextConfirm.value.length === 6 && next.value !== nextConfirm.value,
+);
+const changeReady = computed(
+  () =>
+    current.value.length === 6 &&
+    next.value.length === 6 &&
+    nextConfirm.value.length === 6 &&
+    !nextMismatch.value,
+);
 const privateCount = computed(
   () => store.sessions.value.filter((session) => session.fixture === "private-text-v1").length,
 );
 
 async function change() {
-  if (!current.value || !next.value || nextMismatch.value) return;
+  if (!changeReady.value) return;
   notice.value = "";
   if (await vault.changePasscode(current.value, next.value)) {
     current.value = "";
@@ -75,40 +85,32 @@ async function wipe() {
       <details class="model-details">
         <summary>Đổi mật mã</summary>
         <form class="passcode-form" @submit.prevent="change">
-          <label for="vault-current">Mật mã hiện tại</label>
-          <input
+          <span class="passcode-caption">Mật mã hiện tại</span>
+          <PasscodeField
             id="vault-current"
             v-model="current"
-            class="passcode-input"
-            type="password"
+            label="Mật mã hiện tại"
             autocomplete="current-password"
           />
-          <label for="vault-next">Mật mã mới (ít nhất 4 ký tự)</label>
-          <input
+          <span class="passcode-caption">Mật mã mới (6 số)</span>
+          <PasscodeField
             id="vault-next"
             v-model="next"
-            class="passcode-input"
-            type="password"
+            label="Mật mã mới, 6 số"
             autocomplete="new-password"
           />
-          <label for="vault-next-confirm">Nhập lại mật mã mới</label>
-          <input
+          <span class="passcode-caption">Nhập lại mật mã mới</span>
+          <PasscodeField
             id="vault-next-confirm"
             v-model="nextConfirm"
-            class="passcode-input"
-            type="password"
+            label="Nhập lại mật mã mới"
             autocomplete="new-password"
-            :aria-invalid="nextMismatch"
           />
           <p v-if="nextMismatch" class="input-error" role="alert">Hai lần nhập chưa giống nhau.</p>
           <p v-else-if="vault.error.value" class="input-error" role="alert">
             {{ vault.error.value }}
           </p>
-          <button
-            class="quiet-button"
-            type="submit"
-            :disabled="!current || !next || !nextConfirm || nextMismatch || vault.busy.value"
-          >
+          <button class="quiet-button" type="submit" :disabled="!changeReady || vault.busy.value">
             Đổi mật mã
           </button>
         </form>

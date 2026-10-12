@@ -27,7 +27,8 @@ const HEADER_LEN: usize = 4 + 4 + 4 + SALT_LEN + NONCE_LEN;
 /// on a 2020 laptop, which is fine for an unlock that happens once per launch.
 const M_COST_KIB: u32 = 64 * 1024;
 const T_COST: u32 = 3;
-const MIN_PASSCODE_CHARS: usize = 4;
+/// Like a phone passcode: exactly six digits.
+const PASSCODE_DIGITS: usize = 6;
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug, Serialize)]
 #[serde(rename_all = "lowercase")]
@@ -49,7 +50,7 @@ pub struct VaultStatus {
 #[derive(Debug, PartialEq, Eq)]
 pub enum VaultError {
     WrongPasscode,
-    PasscodeTooShort,
+    PasscodeInvalid,
     Exists,
     Missing,
     Locked,
@@ -61,7 +62,7 @@ impl VaultError {
     pub fn code(&self) -> String {
         match self {
             VaultError::WrongPasscode => "wrong-passcode".into(),
-            VaultError::PasscodeTooShort => "passcode-too-short".into(),
+            VaultError::PasscodeInvalid => "passcode-invalid".into(),
             VaultError::Exists => "exists".into(),
             VaultError::Missing => "missing".into(),
             VaultError::Locked => "locked".into(),
@@ -179,8 +180,8 @@ struct Header {
 }
 
 fn check_passcode(passcode: &str) -> Result<(), VaultError> {
-    if passcode.chars().count() < MIN_PASSCODE_CHARS {
-        return Err(VaultError::PasscodeTooShort);
+    if passcode.len() != PASSCODE_DIGITS || !passcode.bytes().all(|b| b.is_ascii_digit()) {
+        return Err(VaultError::PasscodeInvalid);
     }
     Ok(())
 }
@@ -380,7 +381,7 @@ mod tests {
         let vault = Vault::new(dir.0.clone());
         assert_eq!(vault.status().state, VaultState::None);
         vault
-            .create("1234", r#"{"version":1,"sessions":[]}"#)
+            .create("123456", r#"{"version":1,"sessions":[]}"#)
             .unwrap();
         assert_eq!(vault.status().state, VaultState::Unlocked);
         vault.save(r#"{"version":1,"sessions":["a"]}"#).unwrap();
@@ -388,20 +389,23 @@ mod tests {
         let reopened = Vault::new(dir.0.clone());
         assert_eq!(reopened.status().state, VaultState::Locked);
         assert_eq!(
-            reopened.unlock("0000").unwrap_err(),
+            reopened.unlock("000000").unwrap_err(),
             VaultError::WrongPasscode
         );
         assert_eq!(reopened.status().state, VaultState::Locked);
         assert_eq!(
-            reopened.unlock("1234").unwrap(),
+            reopened.unlock("123456").unwrap(),
             r#"{"version":1,"sessions":["a"]}"#
         );
-        reopened.change_passcode("1234", "mật mã mới").unwrap();
+        reopened.change_passcode("123456", "654321").unwrap();
 
         let again = Vault::new(dir.0.clone());
-        assert_eq!(again.unlock("1234").unwrap_err(), VaultError::WrongPasscode);
         assert_eq!(
-            again.unlock("mật mã mới").unwrap(),
+            again.unlock("123456").unwrap_err(),
+            VaultError::WrongPasscode
+        );
+        assert_eq!(
+            again.unlock("654321").unwrap(),
             r#"{"version":1,"sessions":["a"]}"#
         );
         assert!(!dir.0.join("sessions.vault.tmp").exists());
@@ -412,12 +416,19 @@ mod tests {
         let dir = TempDir::new();
         let vault = Vault::new(dir.0.clone());
         assert_eq!(
-            vault.create("123", "{}").unwrap_err(),
-            VaultError::PasscodeTooShort
+            vault.create("12345", "{}").unwrap_err(),
+            VaultError::PasscodeInvalid
+        );
+        assert_eq!(
+            vault.create("12345a", "{}").unwrap_err(),
+            VaultError::PasscodeInvalid
         );
         assert_eq!(vault.save("{}").unwrap_err(), VaultError::Locked);
-        vault.create("abcd", "{}").unwrap();
-        assert_eq!(vault.create("abcd", "{}").unwrap_err(), VaultError::Exists);
+        vault.create("246810", "{}").unwrap();
+        assert_eq!(
+            vault.create("246810", "{}").unwrap_err(),
+            VaultError::Exists
+        );
 
         // Flip a byte in the ciphertext: the authenticated header and tag reject it.
         let path = dir.0.join(FILE_NAME);
@@ -427,22 +438,22 @@ mod tests {
         fs::write(&path, &bytes).unwrap();
         let reopened = Vault::new(dir.0.clone());
         assert_eq!(
-            reopened.unlock("abcd").unwrap_err(),
+            reopened.unlock("246810").unwrap_err(),
             VaultError::WrongPasscode
         );
         fs::write(&path, b"nope").unwrap();
-        assert_eq!(reopened.unlock("abcd").unwrap_err(), VaultError::Corrupt);
+        assert_eq!(reopened.unlock("246810").unwrap_err(), VaultError::Corrupt);
     }
 
     #[test]
     fn reset_removes_the_file_and_the_key() {
         let dir = TempDir::new();
         let vault = Vault::new(dir.0.clone());
-        vault.create("passcode", "{}").unwrap();
+        vault.create("111111", "{}").unwrap();
         vault.reset().unwrap();
         assert_eq!(vault.status().state, VaultState::None);
         assert!(!dir.0.join(FILE_NAME).exists());
-        assert_eq!(vault.unlock("passcode").unwrap_err(), VaultError::Missing);
+        assert_eq!(vault.unlock("111111").unwrap_err(), VaultError::Missing);
         vault.reset().unwrap();
     }
 }

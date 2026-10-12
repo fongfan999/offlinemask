@@ -14,7 +14,7 @@ import {
 
 export const vaultMessages = {
   "wrong-passcode": "Mật mã chưa đúng.",
-  "passcode-too-short": "Mật mã cần ít nhất 4 ký tự.",
+  "passcode-invalid": "Mật mã gồm đúng 6 chữ số.",
   corrupt: "Tệp phiên đã lưu bị hỏng, không mở được. Bạn có thể xóa và bắt đầu lại.",
   exists: "Mật mã đã được đặt trước đó.",
   missing: "Không còn tệp phiên đã lưu.",
