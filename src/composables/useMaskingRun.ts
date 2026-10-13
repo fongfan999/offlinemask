@@ -7,7 +7,7 @@ import {
   type DetectionOption,
 } from "../core/detection/options.ts";
 import type { DetectionProgress } from "../core/detection/types.ts";
-import { createSession, createTextSession, type Format, type Session } from "../core/sessions.ts";
+import { createTextSession, type Format, type Session } from "../core/sessions.ts";
 import { validateText } from "../core/text.ts";
 
 export const loadingStatus = "Đang chuẩn bị… Lần đầu có thể mất một lúc.";
@@ -80,11 +80,8 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     detector.destroy();
   }
   async function mask(format: Format): Promise<Session | undefined> {
-    if (format === "excel") {
-      const session = createSession("excel", sessions.value);
-      onSession(session);
-      return session;
-    }
+    // Spreadsheets have their own flow (useSheetRun, decision 0076).
+    if (format !== "text") return;
     if (
       processing.value ||
       draftError.value ||

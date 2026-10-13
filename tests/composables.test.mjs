@@ -75,7 +75,7 @@ function fakeDetector() {
 test("sessions: only sample sessions reach storage; private sessions stay in memory", () => {
   const storage = memoryStorage();
   const store = useSessions(storage);
-  const sample = createSession("excel", []);
+  const sample = createSession("text", []);
   store.add(sample);
   assert.deepEqual(storage.writes, [historyKey]);
   const text = createTextSession(
@@ -246,7 +246,7 @@ test("run: a finished text run hands its session to the shell and clears the dra
   assert.equal(run.processingStatus.value, "");
 });
 
-test("run: cancellation discards the result, failures keep the draft, excel is immediate", async () => {
+test("run: cancellation discards the result, failures keep the draft, spreadsheets are not its job", async () => {
   const detector = fakeDetector();
   const sessions = ref([]);
   const received = [];
@@ -271,9 +271,9 @@ test("run: cancellation discards the result, failures keep the draft, excel is i
   assert.equal(run.processingError.value, processingFailure);
   assert.equal(run.draft.value, "Số 0901234567");
 
-  const excel = await run.mask("excel");
-  assert.equal(excel.format, "excel");
-  assert.deepEqual(received, [excel]);
+  // Spreadsheets have their own flow; the text run ignores them.
+  assert.equal(await run.mask("excel"), undefined);
+  assert.deepEqual(received, []);
   run.destroy();
   assert.deepEqual(detector.calls.at(-1), ["destroy"]);
 });

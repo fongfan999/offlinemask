@@ -9,7 +9,7 @@ import {
   decodePrivateSessions,
   encodePrivateSessions,
   type Session,
-  type TextSession,
+  type PrivateSession,
 } from "../core/sessions.ts";
 
 export const vaultMessages = {
@@ -51,7 +51,7 @@ export function useVault(adapter: VaultAdapter = nativeVaultAdapter) {
     }
   }
   /** Returns the stored sessions, or null with `error` set. */
-  async function unlock(passcode: string): Promise<TextSession[] | null> {
+  async function unlock(passcode: string): Promise<PrivateSession[] | null> {
     if (busy.value) return null;
     busy.value = true;
     error.value = "";

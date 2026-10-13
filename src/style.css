@@ -1124,6 +1124,221 @@ th {
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
+/* Spreadsheet screen (SheetPage.vue): drop zone, toolbar, sheet tabs, column choices. */
+.drop-zone {
+  display: grid;
+  justify-items: center;
+  gap: 8px;
+  width: calc(100% - 48px);
+  margin: 22px 24px 0;
+  padding: 44px 24px;
+  border: 1.5px dashed var(--line-strong);
+  border-radius: 12px;
+  background: var(--paper);
+  color: var(--ink);
+  text-align: center;
+  cursor: pointer;
+  transition:
+    border-color 0.16s,
+    background-color 0.16s;
+}
+.drop-zone:hover,
+.drop-zone.is-dragging {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.drop-zone.is-busy {
+  cursor: progress;
+}
+.drop-zone strong {
+  font-size: 16px;
+  font-weight: 600;
+}
+.drop-zone > span:last-child {
+  color: var(--muted);
+  font-size: 13px;
+}
+.drop-zone u {
+  text-underline-offset: 3px;
+}
+.drop-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  margin-bottom: 4px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.drop-error {
+  margin: 12px 24px 0;
+}
+/* Masking all rows: one panel in place of the preview, with a bar and an estimate. */
+.sheet-progress {
+  display: grid;
+  gap: 10px;
+  margin: 22px 24px 0;
+  padding: 28px 24px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper);
+}
+.sheet-progress-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+.sheet-progress .pack-progress {
+  height: 8px;
+  margin: 4px 0;
+}
+.sheet-progress-detail {
+  margin: 0;
+  color: var(--muted);
+  font: 12px var(--mono);
+}
+/* Lines above a sheet's header: a title, the account holder, balances. */
+.sheet-preamble {
+  margin: 0 24px 10px;
+  padding: 10px 14px;
+  border-left: 2px solid var(--line-strong);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.sheet-preamble p {
+  margin: 0;
+}
+.sheet-preamble mark {
+  padding: 0 3px;
+  border-radius: 3px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--mono);
+}
+/* A card that ends without a footer keeps its bottom padding. */
+.step-panel > :last-child:not(.card-footer) {
+  margin-bottom: 22px;
+}
+/* Data previews are dense: up to 20 rows should fit without much scrolling. */
+.sheet-scroll th,
+.sheet-scroll td {
+  padding: 9px 12px;
+}
+.sheet-toolbar {
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.sheet-toolbar .sheet-hint {
+  margin: 0;
+}
+/* Hủy sits beside the busy button at every width. */
+.card-footer.sheet-footer {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+}
+.card-footer.sheet-footer .primary-action {
+  align-self: auto;
+}
+.sheet-hint,
+.sheet-caption-line,
+.sheet-note,
+.sheet-summary {
+  margin: 0 24px 12px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.sheet-caption-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font: 11px var(--mono);
+}
+.sheet-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+}
+.sheet-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: var(--accent);
+}
+.sheet-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  color: var(--ink);
+  font-size: 13px;
+}
+.sheet-summary svg {
+  color: var(--accent);
+}
+.sheet-tabs {
+  display: flex;
+  gap: 4px;
+  margin: 0 24px 8px;
+  overflow-x: auto;
+}
+.sheet-tabs button {
+  padding: 6px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px 8px 0 0;
+  background: none;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.sheet-tabs button[aria-selected="true"] {
+  border-color: var(--line);
+  border-bottom-color: transparent;
+  background: var(--paper);
+  color: var(--ink);
+  font-weight: 600;
+}
+.plan-row th {
+  padding: 8px 10px;
+  background: var(--paper-raised);
+  text-transform: none;
+  letter-spacing: 0;
+}
+.plan-select {
+  max-width: 180px;
+  padding: 5px 8px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--paper);
+  color: var(--muted);
+  font: 12px var(--sans);
+}
+.plan-select.is-hide {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--note-ink);
+  font-weight: 600;
+}
+.plan-select.is-scan {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+th.alias,
+th.value,
+td.value {
+  color: var(--accent);
+}
+td.value {
+  background: var(--accent-soft);
+}
 td.alias {
   color: var(--accent);
   font-family: var(--mono);
@@ -1288,6 +1503,20 @@ td.alias {
   }
   .highlight-field {
     margin: 0 17px;
+  }
+  .drop-zone {
+    width: calc(100% - 34px);
+    margin-inline: 17px;
+  }
+  .sheet-hint,
+  .sheet-caption-line,
+  .sheet-note,
+  .sheet-summary,
+  .sheet-tabs,
+  .sheet-progress,
+  .sheet-preamble,
+  .drop-error {
+    margin-inline: 17px;
   }
   .changes,
   .sheet-scroll {

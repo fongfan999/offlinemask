@@ -3,11 +3,11 @@ import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from
 import AppIcon from "./AppIcon.vue";
 import PasscodeField from "./PasscodeField.vue";
 import { sessionsKey, useProvided, vaultKey } from "../composables/context.ts";
-import type { TextSession } from "../core/sessions.ts";
+import type { PrivateSession } from "../core/sessions.ts";
 
 /** Shown at launch when a passcode exists. It unlocks on the sixth digit, like a
  * phone; there is no button to press. Forgetting the passcode wipes the vault. */
-const emit = defineEmits<{ unlocked: [sessions: TextSession[]] }>();
+const emit = defineEmits<{ unlocked: [sessions: PrivateSession[]] }>();
 const vault = useProvided(vaultKey);
 const store = useProvided(sessionsKey);
 const passcode = ref("");

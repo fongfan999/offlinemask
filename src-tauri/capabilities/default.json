@@ -1,12 +1,14 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Receive recognition-pack status events open the product homepage, and set the window theme chosen in Settings. Model downloads accept no URLs; the local tokenizer receives transient text and never persists or transmits it.",
+  "description": "Receive recognition-pack status events, open the product homepage, set the window theme chosen in Settings, and save a masked spreadsheet copy to the one path picked in the save dialog (the dialog adds only that file to the fs scope). Model downloads accept no URLs; the local tokenizer receives transient text and never persists or transmits it.",
   "windows": ["main"],
   "permissions": [
     "core:event:allow-listen",
     "core:event:allow-unlisten",
     "core:window:allow-set-theme",
+    "dialog:allow-save",
+    "fs:allow-write-file",
     {
       "identifier": "opener:allow-open-url",
       "allow": [

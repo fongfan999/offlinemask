@@ -21,17 +21,15 @@ import { findings, sampleText } from "../core/review.ts";
 import { occurrenceMarks, reviewDisplay, type TextMark } from "../core/review-marks.ts";
 import { sessionPreview } from "../core/session-preview.ts";
 import {
-  maskedRows,
   sessionOutput,
   sessionTitle,
-  sheetHeaders,
-  sheetRows,
   type Format,
-  type Session,
+  type SampleSession,
+  type TextSession,
 } from "../core/sessions.ts";
 import { maxTextLength } from "../core/text.ts";
 
-const props = defineProps<{ format: Format; session?: Session }>();
+const props = defineProps<{ format: Format; session?: SampleSession | TextSession }>();
 const emit = defineEmits<{
   navigate: [destination: Page, id?: string | null];
   mask: [];
@@ -126,9 +124,6 @@ const display = computed<{ text: string; marks: TextMark[] }>(() => {
     ),
   };
 });
-const rows = computed(() =>
-  session.value && view.value === "masked" ? maskedRows(session.value.decisions) : sheetRows,
-);
 const maskCount = computed(() =>
   session.value
     ? activeFindings.value.filter((finding) => session.value?.decisions[finding.id] === "mask")
@@ -188,9 +183,7 @@ const title = computed(() =>
     ? privateSession.value
       ? sessionPreview(session.value)
       : sessionTitle(session.value)
-    : props.format === "text"
-      ? "Ẩn thông tin trong văn bản."
-      : "Ẩn thông tin trong bảng tính.",
+    : "Ẩn thông tin trong văn bản.",
 );
 const subtitle = computed(() =>
   session.value
@@ -199,11 +192,9 @@ const subtitle = computed(() =>
         ? sessionTitle(session.value)
         : `${sessionTitle(session.value)} · Đọc lại bản đã ẩn, rồi sao chép để gửi AI.`
       : "Đọc lại kết quả, rồi sao chép khi bạn thấy phù hợp."
-    : props.format === "text"
-      ? "Thông tin bạn chọn được thay bằng mã như [SDT_1_…], ngay trên máy bạn."
-      : "Một lần nhấn. Thông tin riêng tư được thay bằng mã thay thế.",
+    : "Thông tin bạn chọn được thay bằng mã như [SDT_1_…], ngay trên máy bạn.",
 );
-/** A text run keeps going in the background; the sample table never waits. */
+/** A text run keeps going in the background while the user navigates. */
 const textProcessing = computed(() => props.format === "text" && processing.value);
 const step = computed(() => {
   if (!session.value) return 1;
@@ -440,7 +431,6 @@ defineExpose({
 <template>
   <div class="editor-heading">
     <div>
-      <span v-if="format === 'excel' && !session" class="eyebrow">THỬ VỚI DỮ LIỆU MẪU</span>
       <h1 ref="heading" tabindex="-1">{{ title }}</h1>
       <p>{{ subtitle }}</p>
     </div>
@@ -453,12 +443,7 @@ defineExpose({
       </button>
     </div>
   </div>
-  <section
-    class="glass-card glass"
-    :aria-label="
-      format === 'text' ? 'Ẩn thông tin trong văn bản' : 'Ẩn thông tin trong bảng tính mẫu'
-    "
-  >
+  <section class="glass-card glass" aria-label="Ẩn thông tin trong văn bản">
     <nav v-if="format === 'text'" class="stepper" aria-label="Các bước">
       <template v-for="(label, index) in stepLabels" :key="label">
         <span
@@ -522,20 +507,15 @@ defineExpose({
         </footer>
       </div>
       <div v-else :key="session ? 'review' : 'draft'" class="step-panel">
-        <header v-if="session || format === 'excel'" class="card-header">
-          <div v-if="session" class="view-switch" aria-label="Chọn bản văn bản">
+        <header v-if="session" class="card-header">
+          <div class="view-switch" aria-label="Chọn bản văn bản">
             <button :aria-pressed="view === 'masked'" @click="selectView('masked')">
               Bản đã ẩn</button
             ><button :aria-pressed="view === 'original'" @click="selectView('original')">
               Bản gốc
             </button>
           </div>
-          <span v-else class="document-label"
-            ><AppIcon name="table" :size="17" />Giao dịch mẫu · 2 dòng</span
-          >
-          <span v-if="format === 'excel' || (session && !privateSession)" class="sample-tag"
-            >Dữ liệu mẫu</span
-          >
+          <span v-if="!privateSession" class="sample-tag">Dữ liệu mẫu</span>
           <button
             v-else-if="privateSession"
             class="quiet-button edit-text"
@@ -666,7 +646,7 @@ defineExpose({
             </p>
           </fieldset>
         </template>
-        <template v-else-if="format === 'text' || manualCopy"
+        <template v-else
           ><label class="sr-only" for="document-content">{{
             session && view === "masked" ? "Bản đã ẩn" : "Bản gốc"
           }}</label
@@ -681,39 +661,6 @@ defineExpose({
             @mouseup="captureSelection"
           />
         </template>
-        <div
-          v-else
-          class="sheet-scroll"
-          tabindex="0"
-          aria-label="Bảng giao dịch mẫu, cuộn ngang để xem các cột"
-        >
-          <table>
-            <caption class="sr-only">
-              {{
-                session && view === "masked" ? "Bảng đã ẩn thông tin" : "Bảng gốc"
-              }}
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col">#</th>
-                <th v-for="header in sheetHeaders" :key="header" scope="col">
-                  {{ header }}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(row, index) in rows" :key="index">
-                <th scope="row">{{ index + 1 }}</th>
-                <td v-for="(cell, col) in row" :key="col" :class="{ alias: cell.startsWith('[') }">
-                  {{ cell }}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-          <div class="sheet-caption">
-            <AppIcon name="table" :size="14" />Giao dịch<span>2 dòng · 6 cột</span>
-          </div>
-        </div>
         <!-- The warning already says how to fix misses; the hint only shows without it. -->
         <div
           v-if="
@@ -899,7 +846,4 @@ defineExpose({
   </section>
   <p v-if="processingError" class="storage-error" role="alert">{{ processingError }}</p>
   <p v-if="copyStatus" class="feedback" role="status">{{ copyStatus }}</p>
-  <p v-if="format === 'excel'" class="prototype-note">
-    Bảng mẫu tương tác. Chưa nhập hoặc xuất tệp Excel/CSV; sao chép ở dạng bảng phân cách bằng tab.
-  </p>
 </template>

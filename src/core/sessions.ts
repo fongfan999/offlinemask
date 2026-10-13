@@ -1,13 +1,16 @@
 import { detectionOptions, type DetectionOption } from "./detection/options.ts";
-import { findings, prepareCopy, type Decisions } from "./review.ts";
+import { findings, prepareCopy, type Decisions, type Finding } from "./review.ts";
 import { analyzeText, maskedText, type TextAnalysis } from "./text.ts";
 import type { Detection } from "./detection/types.ts";
+import type { ColumnPlan } from "./sheet/columns.ts";
 
 export type Format = "text" | "excel";
+/** A synthetic text sample (fixture references only). Spreadsheet samples were
+ * replaced by real files in decision 0076. */
 export interface SampleSession {
   id: string;
   number: number;
-  format: Format;
+  format: "text";
   fixture: "sample-v1";
   createdAt: string;
   decisions: Decisions;
@@ -25,9 +28,32 @@ export interface TextSession {
   reviewUndo?: { analysis: TextAnalysis; decisions: Decisions };
   decisions: Decisions;
 }
-export type Session = SampleSession | TextSession;
+/** A masked spreadsheet (decision 0076). The workbook itself is never stored: only
+ * what the screen shows (the masked first rows) and the alias table needed to
+ * restore the AI's returned file. */
+export interface SheetSession {
+  id: string;
+  number: number;
+  format: "excel";
+  fixture: "private-sheet-v1";
+  createdAt: string;
+  fileName: string;
+  /** Always "columns" now; "cells" came from the removed scan-every-cell option. */
+  mode: "columns" | "cells";
+  sheets: { name: string; rows: number; plans: ColumnPlan[] }[];
+  /** Masked lines above the header, header and first rows per sheet. */
+  preview: { preamble?: string[][]; header: string[]; rows: string[][] }[];
+  findings: Finding[];
+  masked: number;
+}
+export type PrivateSession = TextSession | SheetSession;
+export type Session = SampleSession | PrivateSession;
+export function isPrivate(session: Session): session is PrivateSession {
+  return session.fixture !== "sample-v1";
+}
+export const sheetPreviewRows = 20;
 export const historyKey = "offlinemask.sample-sessions.v1";
-export function createSession(format: Format, existing: readonly Session[]): SampleSession {
+export function createSession(format: "text", existing: readonly Session[]): SampleSession {
   return {
     id: crypto.randomUUID(),
     number: existing.reduce((max, s) => Math.max(max, s.number), 0) + 1,
@@ -70,9 +96,17 @@ export function createTextSession(
     decisions: Object.fromEntries(analysis.findings.map((finding) => [finding.id, "mask"])),
   };
 }
+/** A fresh session id whose alias scope no other session in this instance uses. */
+export function newSessionId(existing: readonly Session[]): string {
+  let id: string;
+  do id = crypto.randomUUID();
+  while (existing.some((session) => aliasScope(session.id) === aliasScope(id)));
+  return id;
+}
 export function sessionTitle(session: Session): string {
   if (session.fixture === "private-text-v1") return `Văn bản #${session.number}`;
-  return `${session.format === "text" ? "Yêu cầu hỗ trợ" : "Giao dịch mẫu"} #${session.number}`;
+  if (session.fixture === "private-sheet-v1") return `Bảng tính #${session.number}`;
+  return `Yêu cầu hỗ trợ #${session.number}`;
 }
 // Store only versioned fixture references and choices. Never extend this to private
 // input: persistent originals require the encrypted vault lifecycle in the PRD.
@@ -91,37 +125,41 @@ export function encodeSessions(sessions: readonly Session[]): string {
       })),
   });
 }
+/** The spreadsheet sample was replaced by real files (decision 0076); stored
+ * spreadsheet samples are dropped on load, text samples stay. */
 export function decodeSessions(raw: string | null): SampleSession[] {
   if (!raw) return [];
   const data = JSON.parse(raw);
   if (data.version !== 1 || !Array.isArray(data.sessions)) throw new Error("Unsupported history");
   const ids = new Set<string>();
-  return data.sessions.map((s: SampleSession) => {
-    if (
-      !s ||
-      typeof s.id !== "string" ||
-      !/^[a-f0-9-]{36}$/i.test(s.id) ||
-      ids.has(s.id) ||
-      !Number.isSafeInteger(s.number) ||
-      s.number < 1 ||
-      !["text", "excel"].includes(s.format) ||
-      s.fixture !== "sample-v1" ||
-      typeof s.createdAt !== "string" ||
-      !Number.isFinite(Date.parse(s.createdAt)) ||
-      !s.decisions ||
-      findings.some((f) => !["mask", "keep"].includes(s.decisions[f.id] ?? ""))
-    )
-      throw new Error("Invalid history");
-    ids.add(s.id);
-    return {
-      id: s.id,
-      number: s.number,
-      format: s.format,
-      fixture: s.fixture,
-      createdAt: s.createdAt,
-      decisions: Object.fromEntries(findings.map((f) => [f.id, s.decisions[f.id]!])),
-    };
-  });
+  return data.sessions
+    .filter((s: { format?: string }) => s?.format !== "excel")
+    .map((s: SampleSession) => {
+      if (
+        !s ||
+        typeof s.id !== "string" ||
+        !/^[a-f0-9-]{36}$/i.test(s.id) ||
+        ids.has(s.id) ||
+        !Number.isSafeInteger(s.number) ||
+        s.number < 1 ||
+        s.format !== "text" ||
+        s.fixture !== "sample-v1" ||
+        typeof s.createdAt !== "string" ||
+        !Number.isFinite(Date.parse(s.createdAt)) ||
+        !s.decisions ||
+        findings.some((f) => !["mask", "keep"].includes(s.decisions[f.id] ?? ""))
+      )
+        throw new Error("Invalid history");
+      ids.add(s.id);
+      return {
+        id: s.id,
+        number: s.number,
+        format: s.format,
+        fixture: s.fixture,
+        createdAt: s.createdAt,
+        decisions: Object.fromEntries(findings.map((f) => [f.id, s.decisions[f.id]!])),
+      };
+    });
 }
 /** Private sessions for the encrypted vault (decision 0062). Everything the
  * review screen needs comes back; the in-progress undo buffer does not. */
@@ -129,20 +167,23 @@ export const vaultVersion = 1;
 export function encodePrivateSessions(sessions: readonly Session[]): string {
   return JSON.stringify({
     version: vaultVersion,
-    sessions: sessions
-      .filter((s): s is TextSession => s.fixture === "private-text-v1")
-      .map((s) => ({
-        id: s.id,
-        number: s.number,
-        format: s.format,
-        fixture: s.fixture,
-        createdAt: s.createdAt,
-        original: s.original,
-        options: s.options,
-        analysis: s.analysis,
-        manualMaskCount: s.manualMaskCount ?? 0,
-        decisions: s.decisions,
-      })),
+    sessions: [
+      ...sessions.filter((s): s is SheetSession => s.fixture === "private-sheet-v1"),
+      ...sessions
+        .filter((s): s is TextSession => s.fixture === "private-text-v1")
+        .map((s) => ({
+          id: s.id,
+          number: s.number,
+          format: s.format,
+          fixture: s.fixture,
+          createdAt: s.createdAt,
+          original: s.original,
+          options: s.options,
+          analysis: s.analysis,
+          manualMaskCount: s.manualMaskCount ?? 0,
+          decisions: s.decisions,
+        })),
+    ],
   });
 }
 const aliasPattern = /^\[[A-Z][A-Z_]*_\d+_[a-f0-9]{4,8}\]$/;
@@ -152,12 +193,107 @@ function isString(value: unknown): value is string {
 }
 /** Reject anything that is not a complete, self-consistent private session; one
  * bad record invalidates the whole vault rather than loading a partial list. */
-export function decodePrivateSessions(raw: string): TextSession[] {
+function isFinding(f: Finding): boolean {
+  return (
+    !!f &&
+    isString(f.id) &&
+    isString(f.label) &&
+    isString(f.value) &&
+    isString(f.alias) &&
+    aliasPattern.test(f.alias) &&
+    (f.reason === undefined || isString(f.reason)) &&
+    (f.source === undefined || isString(f.source))
+  );
+}
+function isPlan(plan: ColumnPlan): boolean {
+  return (
+    !!plan &&
+    (plan.mode === "keep" ||
+      plan.mode === "scan" ||
+      (plan.mode === "hide" && /^[A-Z_]+$/.test(plan.type) && isString(plan.label)))
+  );
+}
+const isGrid = (rows: unknown) =>
+  Array.isArray(rows) && rows.every((row) => Array.isArray(row) && row.every(isString));
+function decodeSheetSession(s: SheetSession): SheetSession {
+  if (
+    !isString(s.fileName) ||
+    !["columns", "cells"].includes(s.mode) ||
+    !Array.isArray(s.sheets) ||
+    !s.sheets.every(
+      (sheet) =>
+        sheet &&
+        isString(sheet.name) &&
+        Number.isSafeInteger(sheet.rows) &&
+        sheet.rows >= 0 &&
+        Array.isArray(sheet.plans) &&
+        sheet.plans.every(isPlan),
+    ) ||
+    !Array.isArray(s.preview) ||
+    s.preview.length !== s.sheets.length ||
+    !s.preview.every(
+      (table) =>
+        table &&
+        Array.isArray(table.header) &&
+        table.header.every(isString) &&
+        isGrid(table.rows) &&
+        (table.preamble === undefined || isGrid(table.preamble)),
+    ) ||
+    !Array.isArray(s.findings) ||
+    !s.findings.every(isFinding) ||
+    !Number.isSafeInteger(s.masked)
+  )
+    throw new Error("Invalid vault");
+  return {
+    id: s.id,
+    number: s.number,
+    format: "excel",
+    fixture: "private-sheet-v1",
+    createdAt: s.createdAt,
+    fileName: s.fileName,
+    mode: s.mode,
+    sheets: s.sheets.map((sheet) => ({
+      name: sheet.name,
+      rows: sheet.rows,
+      plans: sheet.plans.map((plan) => ({ ...plan })),
+    })),
+    preview: s.preview.map((table) => ({
+      ...(table.preamble ? { preamble: table.preamble.map((row) => [...row]) } : {}),
+      header: [...table.header],
+      rows: table.rows.map((row) => [...row]),
+    })),
+    findings: s.findings.map((f) => ({
+      id: f.id,
+      label: f.label,
+      value: f.value,
+      alias: f.alias,
+      reason: f.reason,
+      source: f.source,
+    })),
+    masked: s.masked,
+  };
+}
+export function decodePrivateSessions(raw: string): PrivateSession[] {
   const data = JSON.parse(raw);
   if (data?.version !== vaultVersion || !Array.isArray(data.sessions))
     throw new Error("Unsupported vault");
   const ids = new Set<string>();
-  return data.sessions.map((s: TextSession): TextSession => {
+  return data.sessions.map((s: TextSession | SheetSession): PrivateSession => {
+    if (
+      s?.fixture === "private-sheet-v1" &&
+      isString(s.id) &&
+      /^[a-f0-9-]{36}$/i.test(s.id) &&
+      !ids.has(s.id) &&
+      Number.isSafeInteger(s.number) &&
+      s.number >= 1 &&
+      s.format === "excel" &&
+      isString(s.createdAt) &&
+      Number.isFinite(Date.parse(s.createdAt))
+    ) {
+      ids.add(s.id);
+      return decodeSheetSession(s);
+    }
+    if (s?.fixture !== "private-text-v1") throw new Error("Invalid vault");
     const findings = s?.analysis?.findings;
     const spans = s?.analysis?.spans;
     if (
@@ -232,45 +368,8 @@ export function decodePrivateSessions(raw: string): TextSession[] {
     };
   });
 }
-export const sheetHeaders = [
-  "Họ và tên",
-  "Số tài khoản",
-  "Mã giao dịch",
-  "Số điện thoại",
-  "Email",
-  "Số tiền (VND)",
-];
-export const sheetRows = [
-  [
-    "Nguyễn Minh Anh",
-    "001234567890",
-    "GD202609080126",
-    "0901234567",
-    "minh.anh@example.com",
-    "2500000",
-  ],
-  [
-    "Nguyễn Minh Anh",
-    "001234567890",
-    "GD202609080126",
-    "0901234567",
-    "minh.anh@example.com",
-    "1500000",
-  ],
-];
-export function maskedRows(decisions: Decisions): string[][] {
-  prepareCopy(decisions); // Shared explicit-choice gate.
-  return sheetRows.map((row) =>
-    row.map((value) => {
-      const finding = findings.find((f) => f.value === value);
-      return finding && decisions[finding.id] === "mask" ? finding.alias : value;
-    }),
-  );
-}
-export function sessionOutput(session: Session): string {
+export function sessionOutput(session: SampleSession | TextSession): string {
   if (session.fixture === "private-text-v1")
     return maskedText(session.original, session.analysis, session.decisions);
-  return session.format === "text"
-    ? prepareCopy(session.decisions)
-    : [sheetHeaders, ...maskedRows(session.decisions)].map((row) => row.join("\t")).join("\n");
+  return prepareCopy(session.decisions);
 }

@@ -191,3 +191,20 @@ export function createTextDetector(invokeLocal: typeof invoke = invoke) {
     },
   };
 }
+
+/** The detector runs one request at a time. The text page and spreadsheet masking
+ * share it, so requests wait their turn here instead of failing (decision 0076). */
+export function queueDetections(
+  detector: ReturnType<typeof createTextDetector>,
+): ReturnType<typeof createTextDetector> {
+  let tail: Promise<unknown> = Promise.resolve();
+  return {
+    ...detector,
+    detect(text, progress, modelRoot, options) {
+      const run = () => detector.detect(text, progress, modelRoot, options);
+      const next = tail.then(run, run);
+      tail = next.catch(() => undefined);
+      return next;
+    },
+  };
+}

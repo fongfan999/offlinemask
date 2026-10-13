@@ -10,7 +10,8 @@ import {
   watch,
 } from "vue";
 import { version } from "../package.json";
-import { createTextDetector } from "./adapters/text-detection.ts";
+import { createSheetFiles } from "./adapters/sheet-files.ts";
+import { createTextDetector, queueDetections } from "./adapters/text-detection.ts";
 import AppIcon from "./components/AppIcon.vue";
 import AppSidebar from "./components/AppSidebar.vue";
 import LockPage from "./components/LockPage.vue";
@@ -18,6 +19,7 @@ import {
   packKey,
   runKey,
   sessionsKey,
+  sheetKey,
   vaultKey,
   type Page,
   type PageHandle,
@@ -25,23 +27,29 @@ import {
 import { useMaskingRun } from "./composables/useMaskingRun.ts";
 import { useRecognitionPack } from "./composables/useRecognitionPack.ts";
 import { useSessions } from "./composables/useSessions.ts";
+import { useSheetRun } from "./composables/useSheetRun.ts";
 import { useVault } from "./composables/useVault.ts";
-import type { Format, Session, TextSession } from "./core/sessions.ts";
+import type { Format, PrivateSession, Session } from "./core/sessions.ts";
 import HomePage from "./pages/HomePage.vue";
 import SettingsPage from "./pages/SettingsPage.vue";
+import SheetPage from "./pages/SheetPage.vue";
 import WorkspacePage from "./pages/WorkspacePage.vue";
 
 // The shell owns navigation and wires the three shared stores for its pages.
 const pack = useRecognitionPack();
 const store = useSessions();
 const { sessions, storageError } = store;
-const detector = createTextDetector();
+// Text and spreadsheet masking share one detector; requests take turns.
+const detector = queueDetections(createTextDetector());
 const run = useMaskingRun({ detector, pack, sessions, onSession: adoptSession });
+const sheetFiles = createSheetFiles();
+const sheet = useSheetRun({ detector, files: sheetFiles, pack, sessions, onSession: adoptSession });
 const vault = useVault();
 provide(packKey, pack);
 provide(sessionsKey, store);
 provide(runKey, run);
 provide(vaultKey, vault);
+provide(sheetKey, sheet);
 
 // The app passcode is optional (decision 0064). When one exists the lock page
 // comes first; private sessions mirror into the vault while it is open.
@@ -55,7 +63,7 @@ watch(
   },
   { deep: true },
 );
-function openVault(privateSessions: TextSession[]) {
+function openVault(privateSessions: PrivateSession[]) {
   store.load(privateSessions);
 }
 
@@ -63,6 +71,12 @@ const page = ref<Page>("home");
 const activeId = ref<string | null>(null);
 const sidebarOpen = ref(false);
 const active = computed(() => store.find(activeId.value));
+const activeText = computed(() =>
+  active.value && active.value.fixture !== "private-sheet-v1" ? active.value : undefined,
+);
+const activeSheet = computed(() =>
+  active.value?.fixture === "private-sheet-v1" ? active.value : undefined,
+);
 const format = computed<Format>(
   () => active.value?.format ?? (page.value === "excel" ? "excel" : "text"),
 );
@@ -103,8 +117,8 @@ function adoptSession(session: Session) {
     if (activeId.value && !store.find(activeId.value)) activeId.value = session.id;
   }
   store.add(session);
-  // A finished text run only takes the screen while the user still waits on the text page.
-  const waiting = session.format === "excel" || (page.value === "text" && !activeId.value);
+  // A finished run only takes the screen while the user still waits on its page.
+  const waiting = page.value === session.format && !activeId.value;
   if (!waiting) return;
   activeId.value = session.id;
   void nextTick(() => pageRef.value?.focusResult?.());
@@ -128,7 +142,7 @@ function openFormat(destination: Page, id: string | null = null) {
   return navigate(destination, last && store.find(last) ? last : null);
 }
 async function startMasking() {
-  await run.mask(format.value);
+  await run.mask("text");
 }
 function removeSession(id: string) {
   const target = active.value?.id === id ? format.value : null;
@@ -187,15 +201,22 @@ async function closeSidebar() {
       <main :class="{ 'home-page': page === 'home' }">
         <!-- The text and spreadsheet pages stay alive across navigation, so the step,
              view and pasted reply are still there on return. All of it is RAM only. -->
-        <KeepAlive include="WorkspacePage">
+        <KeepAlive include="WorkspacePage,SheetPage">
           <HomePage v-if="page === 'home'" ref="pageRef" @navigate="openFormat" />
           <SettingsPage v-else-if="page === 'settings'" ref="pageRef" />
+          <SheetPage
+            v-else-if="page === 'excel'"
+            ref="pageRef"
+            :session="activeSheet"
+            @navigate="navigate"
+            @remove="removeSession"
+          />
           <WorkspacePage
             v-else
             ref="pageRef"
-            :key="page"
-            :format="format"
-            :session="active"
+            key="text"
+            format="text"
+            :session="activeText"
             @navigate="navigate"
             @mask="startMasking"
             @remove="removeSession"

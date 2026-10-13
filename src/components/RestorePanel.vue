@@ -5,7 +5,7 @@ import HighlightedText from "./HighlightedText.vue";
 import { restoreAliases, type Restoration } from "../core/restore.ts";
 import type { TextAnalysis } from "../core/text.ts";
 
-const props = defineProps<{ sessionId: string; analysis: TextAnalysis }>();
+const props = defineProps<{ sessionId: string; analysis: TextAnalysis; newLabel?: string }>();
 /** After copying, the next step is another reply or a new text; nothing needs "finishing". */
 const emit = defineEmits<{ newText: [] }>();
 
@@ -109,7 +109,7 @@ async function copy() {
         <template v-if="copied">
           <button class="quiet-button" @click="anotherReply">Dán câu trả lời khác</button>
           <button class="quiet-button" @click="emit('newText')">
-            <AppIcon name="plus" :size="15" />Ẩn văn bản mới
+            <AppIcon name="plus" :size="15" />{{ newLabel ?? "Ẩn văn bản mới" }}
           </button>
         </template>
         <button v-else class="primary-action" @click="copy">

@@ -4,7 +4,7 @@ import AppIcon from "./AppIcon.vue";
 import { openProductWebsite, productWebsite } from "../adapters/desktop.ts";
 import type { Page } from "../composables/context.ts";
 import { sessionPreview } from "../core/session-preview.ts";
-import { sessionTitle, type Session } from "../core/sessions.ts";
+import { isPrivate, sessionTitle, type Session } from "../core/sessions.ts";
 
 defineProps<{
   sessions: readonly Session[];
@@ -96,9 +96,8 @@ defineExpose({
           <AppIcon :name="session.format === 'text' ? 'file' : 'table'" :size="16" /><span
             ><strong>{{ sessionPreview(session) }}</strong
             ><small
-              >{{ session.fixture === "private-text-v1" ? `${sessionTitle(session)} · ` : ""
-              }}{{ dateLabel(session.createdAt)
-              }}{{ session.fixture === "private-text-v1" ? "" : " · Mẫu" }}</small
+              >{{ isPrivate(session) ? `${sessionTitle(session)} · ` : ""
+              }}{{ dateLabel(session.createdAt) }}{{ isPrivate(session) ? "" : " · Mẫu" }}</small
             ></span
           >
         </button>

@@ -4,7 +4,8 @@ import {
   encodeSessions,
   historyKey,
   type Session,
-  type TextSession,
+  isPrivate,
+  type PrivateSession,
 } from "../core/sessions.ts";
 
 export const historyReadError =
@@ -55,14 +56,14 @@ export function useSessions(storage: HistoryStorage | null = defaultStorage()) {
     return sessions.value.find((session) => session.id === id);
   }
   /** Replace the private sessions with the vault's copy, newest first with samples. */
-  function load(privateSessions: readonly TextSession[]) {
+  function load(privateSessions: readonly PrivateSession[]) {
     sessions.value = [
-      ...sessions.value.filter((session) => session.fixture !== "private-text-v1"),
+      ...sessions.value.filter((session) => !isPrivate(session)),
       ...privateSessions,
     ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
   }
   function removePrivate() {
-    sessions.value = sessions.value.filter((session) => session.fixture !== "private-text-v1");
+    sessions.value = sessions.value.filter((session) => !isPrivate(session));
   }
   return { sessions, storageError, save, add, remove, find, load, removePrivate };
 }

@@ -120,6 +120,11 @@ pub fn run() {
             .open_js_links_on_click(false)
             .build(),
     );
+    // Spreadsheet export: the save dialog grants write access to the one file the
+    // user picks; no other path is in the fs scope (decision 0076).
+    let builder = builder
+        .plugin(tauri_plugin_dialog::init())
+        .plugin(tauri_plugin_fs::init());
     #[cfg(not(feature = "recognition-native-sidecar"))]
     builder
         .run(tauri::generate_context!())

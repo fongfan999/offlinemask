@@ -107,7 +107,7 @@ test("aliases are session scoped and skip existing source tokens", () => {
 test("private sessions are excluded entirely from sample persistence", () => {
   const text = "synthetic@example.org";
   const privateSession = createTextSession(text, [], [finding(text, text, "EMAIL")]);
-  const sample = createSession("excel", [privateSession]);
+  const sample = createSession("text", [privateSession]);
   const encoded = encodeSessions([privateSession, sample]);
   for (const value of [
     privateSession.id,

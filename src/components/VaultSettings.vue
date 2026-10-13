@@ -4,6 +4,7 @@ import AppIcon from "./AppIcon.vue";
 import PasscodeField from "./PasscodeField.vue";
 import PasscodeSetup from "./PasscodeSetup.vue";
 import { sessionsKey, useProvided, vaultKey } from "../composables/context.ts";
+import { isPrivate } from "../core/sessions.ts";
 
 /** App passcode: optional. Set it here or from the review screen; change or wipe it here. */
 const vault = useProvided(vaultKey);
@@ -35,9 +36,7 @@ const changeReady = computed(
     nextConfirm.value.length === 6 &&
     !nextMismatch.value,
 );
-const privateCount = computed(
-  () => store.sessions.value.filter((session) => session.fixture === "private-text-v1").length,
-);
+const privateCount = computed(() => store.sessions.value.filter(isPrivate).length);
 
 async function change() {
   if (!changeReady.value) return;

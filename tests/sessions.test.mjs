@@ -5,13 +5,12 @@ import {
   decodeSessions,
   encodeSessions,
   sessionOutput,
-  maskedRows,
 } from "../src/core/sessions.ts";
 
 test("each conversion creates an independent session, round trips and preserves choices", () => {
   const first = createSession("text", []);
   first.decisions.account = "keep";
-  const second = createSession("excel", [first]);
+  const second = createSession("text", [first]);
   assert.notEqual(first.id, second.id);
   assert.equal(second.number, 2);
   const restored = decodeSessions(encodeSessions([second, first]));
@@ -36,15 +35,9 @@ test("corrupt, duplicate, unsupported and incomplete history is rejected", () =>
   session.decisions.account = "pending";
   assert.throws(() => decodeSessions(encodeSessions([session])));
 });
-test("table masking preserves shape, exact amounts and repeated aliases", () => {
-  const session = createSession("excel", []);
-  const rows = maskedRows(session.decisions);
-  assert.equal(rows.length, 2);
-  assert.ok(rows.every((row) => row.length === 6));
-  assert.equal(rows[0][0], rows[1][0]);
-  assert.equal(rows[0][5], "2500000");
-  assert.equal(rows[1][5], "1500000");
-  assert.equal(sessionOutput(session).split("\n").length, 3);
-  session.decisions.account = "keep";
-  assert.equal(maskedRows(session.decisions)[0][1], "001234567890");
+test("spreadsheet samples saved by earlier builds are dropped on load", () => {
+  const text = createSession("text", []);
+  const raw = JSON.parse(encodeSessions([text]));
+  raw.sessions.push({ ...raw.sessions[0], id: crypto.randomUUID(), format: "excel", number: 2 });
+  assert.deepEqual(decodeSessions(JSON.stringify(raw)), [text]);
 });
