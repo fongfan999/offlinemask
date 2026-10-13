@@ -1526,10 +1526,18 @@ td.alias {
   background: var(--accent-soft);
   color: var(--note-ink);
 }
-.model-requirement p {
+.model-requirement-body {
   flex: 1;
+  min-width: 0;
+}
+.model-requirement p {
   font-size: 12px;
   line-height: 1.5;
+}
+.model-requirement .pack-progress {
+  display: block;
+  height: 4px;
+  margin: 8px 0 2px;
 }
 .model-requirement p span {
   display: block;
@@ -1619,7 +1627,8 @@ td.alias {
   font: 12px var(--mono);
   font-variant-numeric: tabular-nums;
 }
-.download-progress progress {
+.download-progress progress,
+.pack-progress {
   width: 100%;
   height: 6px;
   border: 0;
@@ -1629,14 +1638,17 @@ td.alias {
   overflow: hidden;
   background: var(--paper-sunk);
 }
-.download-progress progress::-webkit-progress-bar {
+.download-progress progress::-webkit-progress-bar,
+.pack-progress::-webkit-progress-bar {
   background: var(--paper-sunk);
 }
-.download-progress progress::-webkit-progress-value {
+.download-progress progress::-webkit-progress-value,
+.pack-progress::-webkit-progress-value {
   background: var(--accent);
   border-radius: 999px;
 }
-.download-progress progress::-moz-progress-bar {
+.download-progress progress::-moz-progress-bar,
+.pack-progress::-moz-progress-bar {
   background: var(--accent);
 }
 .download-progress p,

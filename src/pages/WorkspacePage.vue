@@ -13,6 +13,7 @@ import {
   vaultKey,
   type Page,
 } from "../composables/context.ts";
+import { packProgress } from "../composables/useRecognitionPack.ts";
 import { reviewHint, useTextReview, type ReviewView } from "../composables/useTextReview.ts";
 import { detectionOptions } from "../core/detection/options.ts";
 import { possibleNames } from "../core/name-hints.ts";
@@ -301,11 +302,87 @@ function selectView(nextView: ReviewView) {
   view.value = nextView;
   manualCopy.value = false;
 }
+/** While a selected category waits for the pack, the notice and the primary button
+ * follow every stage: download, install, pause, error (decision 0074). */
+const packWait = computed(() => {
+  const status = models.value;
+  const percent = packProgress(status);
+  switch (status.stage) {
+    case "downloading":
+      return {
+        busy: true,
+        percent,
+        title: `Đang tải gói nhận diện… ${percent} %`,
+        detail: `${formatModelBytes(status.downloaded)} / ${formatModelBytes(status.total)} · Tải xong sẽ tự cài đặt, rồi nút Ẩn thông tin bật lại.`,
+        button: `Đang tải… ${percent} %`,
+        action: "pause" as const,
+      };
+    case "installing":
+      return {
+        busy: true,
+        percent,
+        title:
+          status.installed >= status.installedBytes
+            ? "Đang kiểm tra gói nhận diện lần cuối…"
+            : `Đang cài đặt gói nhận diện… ${percent} %`,
+        detail: "Bước này không cần Internet. Xong là nút Ẩn thông tin bật lại.",
+        button:
+          status.installed >= status.installedBytes
+            ? "Đang kiểm tra…"
+            : `Đang cài đặt… ${percent} %`,
+        action: "pause" as const,
+      };
+    case "cancelling":
+      return {
+        busy: true,
+        percent,
+        title: "Đang tạm dừng…",
+        detail: "Phần đã tải được giữ lại.",
+        button: "Đang tạm dừng…",
+        action: null,
+      };
+    case "paused":
+      return {
+        busy: false,
+        percent,
+        title: `Đã tạm dừng tải · ${percent} %`,
+        detail: "Phần đã tải được giữ lại.",
+        button: "Tiếp tục tải",
+        action: "resume" as const,
+      };
+    case "error":
+      return {
+        busy: false,
+        percent: null,
+        title: "Chưa tải xong gói nhận diện.",
+        detail: pack.error.value || "Kiểm tra kết nối rồi thử lại.",
+        button: "Thử lại",
+        action: "resume" as const,
+      };
+    default:
+      return {
+        busy: false,
+        percent: null,
+        title: "Tải gói nhận diện để dùng các mục đã chọn.",
+        detail: `${formatModelBytes(status.total)} · Chỉ cần tải một lần`,
+        button: "Tải thêm để tiếp tục",
+        action: "details" as const,
+      };
+  }
+});
+/** The notice already shows progress; its button acts on the download in place. */
+function packWaitAction() {
+  const action = packWait.value.action;
+  if (action === "resume") void pack.run("download");
+  else if (action === "pause") void pack.run("pause");
+  else emit("navigate", "settings");
+}
 const primaryDisabled = computed(
   () =>
     props.format === "text" &&
     (processing.value ||
       !selectedOptions.value.length ||
+      (missingSelectedModels.value && packWait.value.busy) ||
       (!missingSelectedModels.value && !!draftError.value)),
 );
 function primaryAction() {
@@ -539,27 +616,49 @@ defineExpose({
                   v-model="selectedOptions"
                   type="checkbox"
                   :aria-label="
-                    option.model && !modelsReady ? `${option.label} · Cần tải thêm` : option.label
+                    option.model && !modelsReady
+                      ? `${option.label} · ${packWait.busy ? 'Đang tải' : 'Cần tải thêm'}`
+                      : option.label
                   "
                   :value="option.id"
                   @change="selectionEdited = true"
                 />
                 <span
                   >{{ option.label
-                  }}<small v-if="option.model && !modelsReady">Cần tải thêm</small></span
+                  }}<small v-if="option.model && !modelsReady">{{
+                    packWait.busy ? "Đang tải…" : "Cần tải thêm"
+                  }}</small></span
                 >
               </label>
             </div>
-            <div v-if="missingSelectedModels" class="model-requirement">
-              <AppIcon name="download" :size="16" />
-              <p>
-                Tải gói nhận diện để dùng các mục đã chọn.<span
-                  >{{ formatModelBytes(models.total) }} · Chỉ cần tải một lần</span
-                >
-              </p>
-              <button class="quiet-button" @click="emit('navigate', 'settings')">
-                {{ preparing ? "Xem tiến độ" : "Xem chi tiết"
-                }}<AppIcon name="chevron" :size="12" />
+            <div v-if="missingSelectedModels" class="model-requirement" role="status">
+              <span v-if="packWait.busy" class="spinner" aria-hidden="true"></span
+              ><AppIcon v-else name="download" :size="16" />
+              <div class="model-requirement-body">
+                <p>
+                  {{ packWait.title }}<span>{{ packWait.detail }}</span>
+                </p>
+                <progress
+                  v-if="packWait.percent !== null"
+                  class="pack-progress"
+                  :value="packWait.percent"
+                  max="100"
+                  :aria-label="packWait.title"
+                ></progress>
+              </div>
+              <button
+                v-if="packWait.action"
+                class="quiet-button"
+                :disabled="packWait.action !== 'details' && (pack.busy.value || !desktopModels)"
+                @click="packWaitAction"
+              >
+                {{
+                  packWait.action === "resume"
+                    ? packWait.button
+                    : packWait.action === "pause"
+                      ? "Tạm dừng"
+                      : "Xem chi tiết"
+                }}<AppIcon v-if="packWait.action === 'details'" name="chevron" :size="12" />
               </button>
             </div>
             <p v-if="!selectedOptions.length" class="input-error" role="status">
@@ -769,12 +868,16 @@ defineExpose({
             :title="format === 'text' ? '⌘/Ctrl + Enter' : undefined"
             @click="primaryAction"
           >
-            <span v-if="textProcessing" class="spinner" aria-hidden="true"></span
+            <span
+              v-if="textProcessing || (format === 'text' && missingSelectedModels && packWait.busy)"
+              class="spinner"
+              aria-hidden="true"
+            ></span
             ><AppIcon v-else name="sparkle" :size="17" />{{
               textProcessing
                 ? "Đang xử lý…"
                 : format === "text" && missingSelectedModels
-                  ? "Tải thêm để tiếp tục"
+                  ? packWait.button
                   : "Ẩn thông tin"
             }}<AppIcon name="arrow" :size="16" /></button
           ><template v-else-if="privateSession"
