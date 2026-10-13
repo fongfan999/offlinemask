@@ -93,12 +93,17 @@ const packNotice = computed<PackNotice | null>(() => {
     <button class="format-card glass" @click="emit('navigate', 'text')">
       <span class="format-icon"><AppIcon name="text" :size="29" /></span
       ><span class="format-title">Văn bản<AppIcon name="arrow" :size="20" /></span
-      ><span class="format-description">Email, tin nhắn, hợp đồng, CV</span>
+      ><span class="format-description">Email, tin nhắn</span>
     </button>
     <button class="format-card glass" @click="emit('navigate', 'excel')">
       <span class="format-icon"><AppIcon name="table" :size="29" /></span
       ><span class="format-title">Bảng tính<AppIcon name="arrow" :size="20" /></span
       ><span class="format-description">Excel, CSV</span>
+    </button>
+    <button class="format-card glass" @click="emit('navigate', 'word')">
+      <span class="format-icon"><AppIcon name="file" :size="29" /></span
+      ><span class="format-title">Tài liệu<AppIcon name="arrow" :size="20" /></span
+      ><span class="format-description">Word</span>
     </button>
     <div
       v-if="packNotice"
@@ -124,7 +129,6 @@ const packNotice = computed<PackNotice | null>(() => {
     <span id="upcoming-formats" class="upcoming-formats-label">Định dạng <ComingSoonBadge /></span>
     <ul aria-labelledby="upcoming-formats">
       <li>PDF</li>
-      <li>Word</li>
       <li>Hình ảnh</li>
     </ul>
   </aside>

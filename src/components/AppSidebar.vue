@@ -79,6 +79,12 @@ defineExpose({
       >
         <AppIcon name="table" />Bảng tính
       </button>
+      <button
+        :aria-current="page === 'word' && (!activeId || !history) ? 'page' : undefined"
+        @click="emit('navigate', 'word')"
+      >
+        <AppIcon name="file" />Tài liệu
+      </button>
     </nav>
     <template v-if="history">
       <div class="history-heading">
@@ -93,7 +99,12 @@ defineExpose({
           :aria-current="activeId === session.id ? 'page' : undefined"
           @click="emit('navigate', session.format, session.id)"
         >
-          <AppIcon :name="session.format === 'text' ? 'file' : 'table'" :size="16" /><span
+          <AppIcon
+            :name="
+              session.format === 'text' ? 'text' : session.format === 'word' ? 'file' : 'table'
+            "
+            :size="16"
+          /><span
             ><strong>{{ sessionPreview(session) }}</strong
             ><small
               >{{ isPrivate(session) ? `${sessionTitle(session)} · ` : ""

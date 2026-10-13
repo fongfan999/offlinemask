@@ -7,7 +7,8 @@ const previewLength = 44;
  * Nothing here is persisted; sample sessions keep their numbered titles.
  */
 export function sessionPreview(session: Session): string {
-  if (session.fixture === "private-sheet-v1") return session.fileName;
+  if (session.fixture === "private-sheet-v1" || session.fixture === "private-doc-v1")
+    return session.fileName;
   if (session.fixture !== "private-text-v1") return sessionTitle(session);
   const line = sessionOutput(session)
     .split(/\r?\n/u)

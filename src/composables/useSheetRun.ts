@@ -13,9 +13,7 @@ import {
   applyEdits,
   maskTables,
   restoreTables,
-  scanBatches,
   scanCells,
-  splitDetections,
   type CellEdits,
   type SheetTable,
 } from "../core/sheet/mask.ts";
@@ -28,6 +26,7 @@ import {
   type SheetSession,
 } from "../core/sessions.ts";
 import type { TextDetector } from "./useMaskingRun.ts";
+import { scanTexts, type TextScanProgress } from "./scanTexts.ts";
 
 export interface SheetDraft {
   /** Chosen when the file opens, so the preview shows the aliases the file will get. */
@@ -113,72 +112,21 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     return previewTables.value.map((table, index) => applyEdits(table, result.edits[index]));
   });
 
-  /** Detect once per distinct text: statements repeat the same merchant or note
-   * hundreds of times. Texts without a letter cannot hold a name or an address, so
-   * they skip the model and only meet the fast email, phone and account rules. */
-  async function detectCells(
+  const detectCells = (
     cells: { key: string; text: string }[],
-    report?: (progress: { stage: "loading" | "reading"; done: number; total: number }) => void,
+    report?: (progress: TextScanProgress) => void,
     into = new Map<string, Detection[]>(),
     stopped: () => boolean = () => false,
-  ) {
-    const byText = new Map<string, string[]>();
-    for (const cell of cells) {
-      const keys = byText.get(cell.text);
-      if (keys) keys.push(cell.key);
-      else byText.set(cell.text, [cell.key]);
-    }
-    const unique = [...byText.keys()];
-    const hasLetter = (text: string) => /\p{L}/u.test(text);
-    const groups = [
-      {
-        texts: unique.filter(hasLetter),
-        options: options.value,
-        root: pack.readyRoot.value ?? undefined,
-      },
-      {
-        texts: unique.filter((text) => !hasLetter(text)),
-        options: [...localOptions],
-        root: undefined,
-      },
-    ];
-    const total = unique.length;
-    let done = 0;
-    for (const group of groups) {
-      // Small batches keep progress moving and make cancelling quick.
-      const batches = scanBatches(
-        group.texts.map((text, index) => ({ key: String(index), text })),
-        8_000,
-      );
-      for (const batch of batches) {
-        if (stopped()) throw new DOMException("Cancelled", "AbortError");
-        const found = await detector.detect(
-          batch.text,
-          (step) =>
-            report?.(
-              step.stage === "loading"
-                ? { stage: "loading", done, total }
-                : {
-                    stage: "reading",
-                    done:
-                      done +
-                      Math.floor((batch.parts.length * step.completed) / Math.max(1, step.total)),
-                    total,
-                  },
-            ),
-          group.root,
-          group.options,
-        );
-        const spans = splitDetections(batch, found);
-        for (const part of batch.parts)
-          for (const key of byText.get(group.texts[Number(part.key)]!)!)
-            into.set(key, spans.get(part.key) ?? []);
-        done += batch.parts.length;
-        report?.({ stage: "reading", done, total });
-      }
-    }
-    return into;
-  }
+  ) =>
+    scanTexts(
+      detector,
+      cells,
+      options.value,
+      pack.readyRoot.value ?? undefined,
+      report,
+      into,
+      stopped,
+    );
   // Scan the preview rows of scanned columns whenever the plan or pack changes.
   let previewRun = 0;
   watch(

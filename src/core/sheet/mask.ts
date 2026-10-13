@@ -65,7 +65,13 @@ export class AliasBook {
 }
 
 /** Replace detected spans in one cell, earliest and highest-priority first. */
-export function maskCell(text: string, detections: readonly Detection[], book: AliasBook): string {
+/** Detected spans to replace in one text, earliest and highest-priority first, as
+ * alias replacements. Shared by spreadsheet cells and Word paragraphs. */
+export function detectionReplacements(
+  text: string,
+  detections: readonly Detection[],
+  book: AliasBook,
+): { start: number; end: number; text: string }[] {
   const ordered = [...detections]
     .filter((d) => d.start >= 0 && d.end <= text.length && d.end > d.start)
     .filter((d) => !needsLetters.has(d.type) || /\p{L}/u.test(text.slice(d.start, d.end)))
@@ -76,18 +82,26 @@ export function maskCell(text: string, detections: readonly Detection[], book: A
   for (const detection of ordered)
     if (!taken.some((other) => other.start < detection.end && other.end > detection.start))
       taken.push(detection);
-  taken.sort((a, b) => a.start - b.start);
+  return taken
+    .sort((a, b) => a.start - b.start)
+    .map((detection) => ({
+      start: detection.start,
+      end: detection.end,
+      text: book.alias(
+        detection.type,
+        detection.label,
+        text.slice(detection.start, detection.end),
+        "Bạn đã quét",
+      ),
+    }));
+}
+/** Replace detected spans in one cell. */
+export function maskCell(text: string, detections: readonly Detection[], book: AliasBook): string {
   let output = "";
   let cursor = 0;
-  for (const detection of taken) {
-    output += text.slice(cursor, detection.start);
-    output += book.alias(
-      detection.type,
-      detection.label,
-      text.slice(detection.start, detection.end),
-      "Bạn đã quét",
-    );
-    cursor = detection.end;
+  for (const replacement of detectionReplacements(text, detections, book)) {
+    output += text.slice(cursor, replacement.start) + replacement.text;
+    cursor = replacement.end;
   }
   return output + text.slice(cursor);
 }

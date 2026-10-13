@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
+import FileDropZone from "../components/FileDropZone.vue";
+import MaskProgress from "../components/MaskProgress.vue";
 import PasscodeSetup from "../components/PasscodeSetup.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import SheetPreview from "../components/SheetPreview.vue";
@@ -21,8 +23,6 @@ const pack = useProvided(packKey);
 const vault = useProvided(vaultKey);
 const historyOn = computed(() => vault.state.value === "unlocked");
 const heading = useTemplateRef<HTMLHeadingElement>("heading");
-const picker = useTemplateRef<HTMLInputElement>("picker");
-const returnedPicker = useTemplateRef<HTMLInputElement>("returnedPicker");
 const primary = useTemplateRef<HTMLButtonElement>("primary");
 
 const stepLabels = ["Ẩn thông tin", "Tải về và gửi AI", "Khôi phục"];
@@ -30,7 +30,6 @@ const restoreStep = ref(false);
 const step = computed(() => (!props.session ? 1 : restoreStep.value ? 3 : 2));
 const sheetIndex = ref(0);
 const showOriginal = ref(false);
-const dragging = ref(false);
 const status = ref("");
 const restoreKind = ref<"file" | "text">("file");
 // Plain data (not deeply reactive): its edits are posted to the worker as they are.
@@ -101,40 +100,6 @@ const draftView = computed(() => {
     };
   return sheet.preview.value[sheetIndex.value] ?? null;
 });
-/** The masking panel: stage, share done, and an estimate once there is enough to go on. */
-function duration(seconds: number) {
-  if (seconds < 60) return `${Math.max(5, Math.round(seconds / 5) * 5)} giây`;
-  return `${Math.round(seconds / 60)} phút`;
-}
-/** One steady line while masking: the same words, a percentage that only goes up,
- * and a time estimate only once it is stable. Stages (loading the models, reading,
- * writing) are not named: with the native engine they change many times a second. */
-let shownPercent = 0;
-watch(
-  () => sheet.processing.value,
-  (running) => {
-    if (running) shownPercent = 0;
-  },
-);
-const progressView = computed(() => {
-  const progress = sheet.progress.value;
-  if (!progress) return null;
-  const reading = progress.total ? Math.floor((progress.done * 100) / progress.total) : 0;
-  const percent = (shownPercent = Math.max(
-    shownPercent,
-    progress.stage === "masking" ? 100 : Math.min(reading, 99),
-  ));
-  const elapsed = (Date.now() - progress.startedAt) / 1000;
-  // Once an estimate shows, it stays until the end ("Sắp xong…" for the last stretch).
-  const estimate =
-    elapsed <= 5 || percent < 5
-      ? ""
-      : percent >= 95 || progress.stage === "masking"
-        ? "Sắp xong…"
-        : `Còn khoảng ${duration((elapsed * (progress.total - progress.done)) / Math.max(1, progress.done))}`;
-  // Only a percentage and a time: counts of "distinct texts" mean nothing to people.
-  return { title: `Đang ẩn thông tin… ${percent} %`, percent, detail: estimate };
-});
 const scanning = computed(() =>
   sheet.plans.value.some((plans) => plans.some((plan) => plan.mode === "scan")),
 );
@@ -154,14 +119,6 @@ const restoreView = computed(() => {
   return applyEdits(table, current.edits[0], sheetPreviewRows);
 });
 
-function pick(files: FileList | null | undefined) {
-  const file = files?.[0];
-  if (file) void sheet.openFile(file);
-}
-function drop(event: DragEvent) {
-  dragging.value = false;
-  pick(event.dataTransfer?.files);
-}
 function trySample() {
   const file = new File([sampleSheetCsv()], sampleSheetName, { type: "text/csv" });
   void sheet.openFile(file);
@@ -182,9 +139,8 @@ async function download() {
     status.value = "Chưa lưu được tệp. Hãy thử lại.";
   }
 }
-async function openReturned(files: FileList | null | undefined) {
-  const file = files?.[0];
-  if (!file || !props.session) return;
+async function openReturned(file: File) {
+  if (!props.session) return;
   restoreBusy.value = true;
   restoreError.value = "";
   restoreSaved.value = false;
@@ -194,10 +150,6 @@ async function openReturned(files: FileList | null | undefined) {
   restoreBusy.value = false;
   if (typeof result === "string") restoreError.value = result;
   else restore.value = result;
-}
-function dropReturned(event: DragEvent) {
-  dragging.value = false;
-  void openReturned(event.dataTransfer?.files);
 }
 async function downloadRestored() {
   if (!restore.value) return;
@@ -311,33 +263,13 @@ defineExpose({
     <!-- Step 1: open a file, choose per column, preview, mask all. -->
     <div v-if="!session" class="step-panel">
       <template v-if="!draft">
-        <button
-          type="button"
-          class="drop-zone"
-          :class="{ 'is-dragging': dragging, 'is-busy': sheet.opening.value }"
-          :disabled="sheet.opening.value"
-          @click="picker?.click()"
-          @dragover.prevent="dragging = true"
-          @dragleave="dragging = false"
-          @drop.prevent="drop"
-        >
-          <span class="drop-icon"><AppIcon name="table" :size="26" /></span>
-          <strong>{{
-            sheet.opening.value ? "Đang mở tệp…" : "Kéo thả tệp Excel hoặc CSV vào đây"
-          }}</strong>
-          <span>hoặc <u>chọn tệp</u> · .xlsx, .csv · tối đa 20 MB</span>
-        </button>
-        <input
-          ref="picker"
-          class="sr-only"
-          type="file"
+        <FileDropZone
+          icon="table"
+          title="Kéo thả tệp Excel hoặc CSV vào đây"
+          hint=".xlsx, .csv · tối đa 20 MB"
           accept=".xlsx,.csv"
-          tabindex="-1"
-          aria-hidden="true"
-          @change="
-            pick(($event.target as HTMLInputElement).files);
-            ($event.target as HTMLInputElement).value = '';
-          "
+          :busy="sheet.opening.value"
+          @file="sheet.openFile"
         />
         <div class="input-hint-row">
           <button type="button" class="sample-link" @click="trySample">Thử với tệp mẫu</button>
@@ -348,7 +280,7 @@ defineExpose({
       </template>
       <template v-else>
         <!-- While masking runs, only the progress, Hủy and the busy button remain. -->
-        <template v-if="!progressView">
+        <template v-if="!sheet.progress.value">
           <header class="card-header sheet-toolbar">
             <p class="sheet-hint">Chọn cách xử lý từng cột. Gợi ý dựa trên tên cột và dữ liệu.</p>
             <div class="view-switch" aria-label="Chọn bản xem">
@@ -369,18 +301,7 @@ defineExpose({
             </button>
           </div>
         </template>
-        <div v-if="progressView" class="sheet-progress" role="status" aria-live="polite">
-          <p class="sheet-progress-title">
-            <span class="spinner" aria-hidden="true"></span>{{ progressView.title }}
-          </p>
-          <progress
-            class="pack-progress"
-            :value="progressView.percent"
-            max="100"
-            :aria-label="progressView.title"
-          ></progress>
-          <p v-if="progressView.detail" class="sheet-progress-detail">{{ progressView.detail }}</p>
-        </div>
+        <MaskProgress v-if="sheet.progress.value" :progress="sheet.progress.value" />
         <SheetPreview
           v-else-if="draftView"
           :preamble="draftView.preamble"
@@ -392,18 +313,18 @@ defineExpose({
           :label="`Trang ${sheetNames[sheetIndex]}`"
           @plan="(column, plan) => sheet.setPlan(sheetIndex, column, plan)"
         />
-        <p v-if="!progressView" class="sheet-caption-line">
+        <p v-if="!sheet.progress.value" class="sheet-caption-line">
           Xem trước {{ Math.min(sheetPreviewRows, draft.tables[sheetIndex]?.rows.length ?? 0) }} /
           {{ (draft.tables[sheetIndex]?.rows.length ?? 0).toLocaleString("vi-VN") }} dòng
           đầu<template v-if="sheet.previewScanning.value">
             · <span class="spinner" aria-hidden="true"></span> Đang đọc các ô được quét…</template
           >
         </p>
-        <p v-if="scanNeedsPack && !progressView" class="sheet-note">
+        <p v-if="scanNeedsPack && !sheet.progress.value" class="sheet-note">
           <AppIcon name="info" :size="14" />Các ô được quét đang tìm email, số điện thoại, số tài
           khoản. Tải gói nhận diện để tìm cả họ tên và địa chỉ.
         </p>
-        <p v-for="note in progressView ? [] : draft.notes" :key="note" class="sheet-note">
+        <p v-for="note in sheet.progress.value ? [] : draft.notes" :key="note" class="sheet-note">
           <AppIcon name="info" :size="14" />{{ note }}
         </p>
         <p v-if="sheet.processingError.value" class="input-error drop-error" role="alert">
@@ -524,33 +445,15 @@ defineExpose({
         </div>
       </header>
       <template v-if="restoreKind === 'file'">
-        <input
-          ref="returnedPicker"
-          class="sr-only"
-          type="file"
-          accept=".xlsx,.csv"
-          tabindex="-1"
-          aria-hidden="true"
-          @change="
-            openReturned(($event.target as HTMLInputElement).files);
-            ($event.target as HTMLInputElement).value = '';
-          "
-        />
-        <button
+        <FileDropZone
           v-if="!restore"
-          type="button"
-          class="drop-zone"
-          :class="{ 'is-dragging': dragging, 'is-busy': restoreBusy }"
-          :disabled="restoreBusy"
-          @click="returnedPicker?.click()"
-          @dragover.prevent="dragging = true"
-          @dragleave="dragging = false"
-          @drop.prevent="dropReturned"
-        >
-          <span class="drop-icon"><AppIcon name="undo" :size="24" /></span>
-          <strong>{{ restoreBusy ? "Đang mở tệp…" : "Kéo thả tệp AI trả về vào đây" }}</strong>
-          <span>hoặc <u>chọn tệp</u> · mã thay thế được đổi lại thành thông tin thật</span>
-        </button>
+          icon="undo"
+          title="Kéo thả tệp AI trả về vào đây"
+          hint="mã thay thế được đổi lại thành thông tin thật"
+          accept=".xlsx,.csv"
+          :busy="restoreBusy"
+          @file="openReturned"
+        />
         <template v-else>
           <p class="sheet-summary" role="status">
             <AppIcon :name="restore.restored ? 'check' : 'info'" :size="15" />{{ restoreStatus }}

@@ -4,7 +4,7 @@ import { analyzeText, maskedText, type TextAnalysis } from "./text.ts";
 import type { Detection } from "./detection/types.ts";
 import type { ColumnPlan } from "./sheet/columns.ts";
 
-export type Format = "text" | "excel";
+export type Format = "text" | "excel" | "word";
 /** A synthetic text sample (fixture references only). Spreadsheet samples were
  * replaced by real files in decision 0076. */
 export interface SampleSession {
@@ -46,7 +46,21 @@ export interface SheetSession {
   findings: Finding[];
   masked: number;
 }
-export type PrivateSession = TextSession | SheetSession;
+/** A masked Word document (decision 0078). Like spreadsheets, only the masked first
+ * paragraphs and the alias table are kept, never the document. */
+export interface DocSession {
+  id: string;
+  number: number;
+  format: "word";
+  fixture: "private-doc-v1";
+  createdAt: string;
+  fileName: string;
+  paragraphs: number;
+  preview: { text: string; marks: { start: number; end: number }[] }[];
+  findings: Finding[];
+  masked: number;
+}
+export type PrivateSession = TextSession | SheetSession | DocSession;
 export type Session = SampleSession | PrivateSession;
 export function isPrivate(session: Session): session is PrivateSession {
   return session.fixture !== "sample-v1";
@@ -106,6 +120,7 @@ export function newSessionId(existing: readonly Session[]): string {
 export function sessionTitle(session: Session): string {
   if (session.fixture === "private-text-v1") return `Văn bản #${session.number}`;
   if (session.fixture === "private-sheet-v1") return `Bảng tính #${session.number}`;
+  if (session.fixture === "private-doc-v1") return `Tài liệu #${session.number}`;
   return `Yêu cầu hỗ trợ #${session.number}`;
 }
 // Store only versioned fixture references and choices. Never extend this to private
@@ -169,6 +184,7 @@ export function encodePrivateSessions(sessions: readonly Session[]): string {
     version: vaultVersion,
     sessions: [
       ...sessions.filter((s): s is SheetSession => s.fixture === "private-sheet-v1"),
+      ...sessions.filter((s): s is DocSession => s.fixture === "private-doc-v1"),
       ...sessions
         .filter((s): s is TextSession => s.fixture === "private-text-v1")
         .map((s) => ({
@@ -215,6 +231,55 @@ function isPlan(plan: ColumnPlan): boolean {
 }
 const isGrid = (rows: unknown) =>
   Array.isArray(rows) && rows.every((row) => Array.isArray(row) && row.every(isString));
+function decodeDocSession(s: DocSession): DocSession {
+  if (
+    !isString(s.fileName) ||
+    !Number.isSafeInteger(s.paragraphs) ||
+    s.paragraphs < 0 ||
+    !Array.isArray(s.preview) ||
+    !s.preview.every(
+      (paragraph) =>
+        paragraph &&
+        isString(paragraph.text) &&
+        Array.isArray(paragraph.marks) &&
+        paragraph.marks.every(
+          (mark) =>
+            mark &&
+            Number.isSafeInteger(mark.start) &&
+            Number.isSafeInteger(mark.end) &&
+            mark.start >= 0 &&
+            mark.end >= mark.start &&
+            mark.end <= paragraph.text.length,
+        ),
+    ) ||
+    !Array.isArray(s.findings) ||
+    !s.findings.every(isFinding) ||
+    !Number.isSafeInteger(s.masked)
+  )
+    throw new Error("Invalid vault");
+  return {
+    id: s.id,
+    number: s.number,
+    format: "word",
+    fixture: "private-doc-v1",
+    createdAt: s.createdAt,
+    fileName: s.fileName,
+    paragraphs: s.paragraphs,
+    preview: s.preview.map((paragraph) => ({
+      text: paragraph.text,
+      marks: paragraph.marks.map((mark) => ({ start: mark.start, end: mark.end })),
+    })),
+    findings: s.findings.map((f) => ({
+      id: f.id,
+      label: f.label,
+      value: f.value,
+      alias: f.alias,
+      reason: f.reason,
+      source: f.source,
+    })),
+    masked: s.masked,
+  };
+}
 function decodeSheetSession(s: SheetSession): SheetSession {
   if (
     !isString(s.fileName) ||
@@ -278,7 +343,7 @@ export function decodePrivateSessions(raw: string): PrivateSession[] {
   if (data?.version !== vaultVersion || !Array.isArray(data.sessions))
     throw new Error("Unsupported vault");
   const ids = new Set<string>();
-  return data.sessions.map((s: TextSession | SheetSession): PrivateSession => {
+  return data.sessions.map((s: PrivateSession): PrivateSession => {
     if (
       s?.fixture === "private-sheet-v1" &&
       isString(s.id) &&
@@ -292,6 +357,20 @@ export function decodePrivateSessions(raw: string): PrivateSession[] {
     ) {
       ids.add(s.id);
       return decodeSheetSession(s);
+    }
+    if (
+      s?.fixture === "private-doc-v1" &&
+      isString(s.id) &&
+      /^[a-f0-9-]{36}$/i.test(s.id) &&
+      !ids.has(s.id) &&
+      Number.isSafeInteger(s.number) &&
+      s.number >= 1 &&
+      s.format === "word" &&
+      isString(s.createdAt) &&
+      Number.isFinite(Date.parse(s.createdAt))
+    ) {
+      ids.add(s.id);
+      return decodeDocSession(s);
     }
     if (s?.fixture !== "private-text-v1") throw new Error("Invalid vault");
     const findings = s?.analysis?.findings;

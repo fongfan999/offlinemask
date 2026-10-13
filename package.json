@@ -39,6 +39,7 @@
     "@tauri-apps/plugin-opener": "^2.5.5",
     "exceljs": "4.4.0",
     "ipaddr.js": "2.5.0",
+    "jszip": "3.10.2",
     "libphonenumber-js": "1.13.12",
     "linkify-it": "6.1.0",
     "openmed": "2.3.0",

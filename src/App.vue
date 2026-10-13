@@ -17,6 +17,7 @@ import AppSidebar from "./components/AppSidebar.vue";
 import LockPage from "./components/LockPage.vue";
 import {
   packKey,
+  docKey,
   runKey,
   sessionsKey,
   sheetKey,
@@ -27,10 +28,12 @@ import {
 import { useMaskingRun } from "./composables/useMaskingRun.ts";
 import { useRecognitionPack } from "./composables/useRecognitionPack.ts";
 import { useSessions } from "./composables/useSessions.ts";
+import { useDocRun } from "./composables/useDocRun.ts";
 import { useSheetRun } from "./composables/useSheetRun.ts";
 import { useVault } from "./composables/useVault.ts";
 import type { Format, PrivateSession, Session } from "./core/sessions.ts";
 import HomePage from "./pages/HomePage.vue";
+import DocPage from "./pages/DocPage.vue";
 import SettingsPage from "./pages/SettingsPage.vue";
 import SheetPage from "./pages/SheetPage.vue";
 import WorkspacePage from "./pages/WorkspacePage.vue";
@@ -44,12 +47,14 @@ const detector = queueDetections(createTextDetector());
 const run = useMaskingRun({ detector, pack, sessions, onSession: adoptSession });
 const sheetFiles = createSheetFiles();
 const sheet = useSheetRun({ detector, files: sheetFiles, pack, sessions, onSession: adoptSession });
+const doc = useDocRun({ detector, files: sheetFiles, pack, sessions, onSession: adoptSession });
 const vault = useVault();
 provide(packKey, pack);
 provide(sessionsKey, store);
 provide(runKey, run);
 provide(vaultKey, vault);
 provide(sheetKey, sheet);
+provide(docKey, doc);
 
 // The app passcode is optional (decision 0064). When one exists the lock page
 // comes first; private sessions mirror into the vault while it is open.
@@ -72,28 +77,32 @@ const activeId = ref<string | null>(null);
 const sidebarOpen = ref(false);
 const active = computed(() => store.find(activeId.value));
 const activeText = computed(() =>
-  active.value && active.value.fixture !== "private-sheet-v1" ? active.value : undefined,
+  active.value?.fixture === "private-text-v1" || active.value?.fixture === "sample-v1"
+    ? active.value
+    : undefined,
 );
 const activeSheet = computed(() =>
   active.value?.fixture === "private-sheet-v1" ? active.value : undefined,
 );
+const activeDoc = computed(() =>
+  active.value?.fixture === "private-doc-v1" ? active.value : undefined,
+);
 const format = computed<Format>(
-  () => active.value?.format ?? (page.value === "excel" ? "excel" : "text"),
+  () =>
+    active.value?.format ?? (page.value === "excel" || page.value === "word" ? page.value : "text"),
 );
 // Settings has no crumb: its heading already says "Cài đặt".
 const topbarLabel = computed(() =>
   page.value === "home" || page.value === "settings"
     ? ""
-    : format.value === "text"
-      ? "Văn bản"
-      : "Bảng tính",
+    : { text: "Văn bản", excel: "Bảng tính", word: "Tài liệu" }[format.value],
 );
 
 /** History is a passcode feature (decision 0071). Without it each format has one
  * screen: a new result replaces the previous one, and coming back to the format
  * shows whatever was last open there (decision 0072). */
 const historyOn = computed(() => vault.state.value === "unlocked");
-const lastOpened: Record<Format, string | null> = { text: null, excel: null };
+const lastOpened: Record<Format, string | null> = { text: null, excel: null, word: null };
 
 const pageRef = useTemplateRef<PageHandle>("pageRef");
 const sidebar = useTemplateRef<InstanceType<typeof AppSidebar>>("sidebar");
@@ -124,7 +133,8 @@ function adoptSession(session: Session) {
   void nextTick(() => pageRef.value?.focusResult?.());
 }
 async function navigate(destination: Page, id: string | null = null) {
-  if (destination === "text" || destination === "excel") lastOpened[destination] = id;
+  if (destination === "text" || destination === "excel" || destination === "word")
+    lastOpened[destination] = id;
   page.value = destination;
   activeId.value = id;
   sidebarOpen.value = false;
@@ -136,7 +146,7 @@ async function navigate(destination: Page, id: string | null = null) {
 /** The sidebar and home cards open a format; without history that means its last screen.
  * "Tạo mới" and "Sửa văn bản" inside the page go through `navigate` and start a draft. */
 function openFormat(destination: Page, id: string | null = null) {
-  if (id || historyOn.value || (destination !== "text" && destination !== "excel"))
+  if (id || historyOn.value || destination === "home" || destination === "settings")
     return navigate(destination, id);
   const last = lastOpened[destination];
   return navigate(destination, last && store.find(last) ? last : null);
@@ -201,13 +211,20 @@ async function closeSidebar() {
       <main :class="{ 'home-page': page === 'home' }">
         <!-- The text and spreadsheet pages stay alive across navigation, so the step,
              view and pasted reply are still there on return. All of it is RAM only. -->
-        <KeepAlive include="WorkspacePage,SheetPage">
+        <KeepAlive include="WorkspacePage,SheetPage,DocPage">
           <HomePage v-if="page === 'home'" ref="pageRef" @navigate="openFormat" />
           <SettingsPage v-else-if="page === 'settings'" ref="pageRef" />
           <SheetPage
             v-else-if="page === 'excel'"
             ref="pageRef"
             :session="activeSheet"
+            @navigate="navigate"
+            @remove="removeSession"
+          />
+          <DocPage
+            v-else-if="page === 'word'"
+            ref="pageRef"
+            :session="activeDoc"
             @navigate="navigate"
             @remove="removeSession"
           />
