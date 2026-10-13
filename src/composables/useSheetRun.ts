@@ -79,7 +79,17 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
   const previewDetections = shallowRef(new Map<string, Detection[]>());
   const previewScanning = ref(false);
   /** The original workbook and its edits per masked session, for downloading. RAM only. */
-  const originals = new Map<string, { handle: string; edits: CellEdits }>();
+  const originals = new Map<
+    string,
+    { handle: string; edits: CellEdits; tables: SheetTable[]; notes: string[] }
+  >();
+  /** A workbook handle stays open while a draft or any masked session still uses it. */
+  function release(handle: string) {
+    const used =
+      draft.value?.handle === handle ||
+      [...originals.values()].some((original) => original.handle === handle);
+    if (!used) files.close(handle);
+  }
 
   const options = computed<DetectionOption[]>(() =>
     pack.ready.value ? detectionOptions.map((option) => option.id) : [...localOptions],
@@ -231,8 +241,30 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     }
   }
   function discardDraft() {
-    if (draft.value) files.close(draft.value.handle);
+    const handle = draft.value?.handle;
     draft.value = null;
+    if (handle) release(handle);
+  }
+  /** Step 1 of a masked file: the same file and its column choices, ready to mask
+   * again. Masking again creates a new session; this one is not overwritten. */
+  function canReopen(session: SheetSession) {
+    return originals.has(session.id);
+  }
+  function reopen(session: SheetSession) {
+    const original = originals.get(session.id);
+    if (!original) return false;
+    const previous = draft.value?.handle;
+    previewDetections.value = new Map();
+    draft.value = {
+      sessionId: newSessionId(sessions.value),
+      fileName: session.fileName,
+      handle: original.handle,
+      tables: original.tables,
+      notes: original.notes,
+      plans: session.sheets.map((sheet) => sheet.plans.map((plan) => ({ ...plan }))),
+    };
+    if (previous && previous !== original.handle) release(previous);
+    return true;
   }
   function setPlan(sheet: number, column: number, plan: ColumnPlan) {
     if (draft.value) draft.value.plans[sheet]![column] = plan;
@@ -241,8 +273,8 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
   function prune() {
     for (const [id, original] of originals)
       if (!sessions.value.some((session) => session.id === id)) {
-        files.close(original.handle);
         originals.delete(id);
+        release(original.handle);
       }
   }
 
@@ -288,7 +320,12 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
         findings: result.findings,
         masked: result.masked,
       };
-      originals.set(id, { handle: current.handle, edits: result.edits });
+      originals.set(id, {
+        handle: current.handle,
+        edits: result.edits,
+        tables: current.tables,
+        notes: current.notes,
+      });
       draft.value = null;
       onSession(session);
       prune();
@@ -357,6 +394,8 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     setPlan,
     maskAll,
     cancelMask,
+    canReopen,
+    reopen,
     canDownload,
     download,
     openReturned,

@@ -188,17 +188,26 @@ export async function readXlsx(bytes: Uint8Array): Promise<OpenedFile> {
   };
 }
 
-/** Edited cells become plain text; every other cell keeps its value, formula and style. */
+/** Edited cells become plain text; every other cell keeps its value, formula and style.
+ * The in-memory workbook is put back afterwards: the same opened file can be masked
+ * again with other choices, and one copy's aliases must never leak into the next. */
 export async function writeXlsx(source: XlsxSource, edits: CellEdits): Promise<Uint8Array> {
+  const previous: [ExcelJS.Cell, ExcelJS.CellValue][] = [];
   source.sheets.forEach((sheet, index) => {
     edits[index]?.forEach((columns, row) =>
       columns.forEach((text, column) => {
-        sheet.getRow(row + 1).getCell(column + 1).value = text;
+        const cell = sheet.getRow(row + 1).getCell(column + 1);
+        previous.push([cell, cell.value]);
+        cell.value = text;
       }),
     );
   });
-  const buffer = await source.workbook.xlsx.writeBuffer();
-  return new Uint8Array(buffer as ArrayBuffer);
+  try {
+    const buffer = await source.workbook.xlsx.writeBuffer();
+    return new Uint8Array(buffer as ArrayBuffer);
+  } finally {
+    for (const [cell, value] of previous.reverse()) cell.value = value;
+  }
 }
 
 export async function openSheetFile(bytes: Uint8Array, name: string): Promise<OpenedFile> {

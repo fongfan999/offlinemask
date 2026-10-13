@@ -431,3 +431,20 @@ test("a statement's title and summary lines sit above the header and are scanned
   assert.equal(copy.getCell("B5").value, -1070761);
   assert.equal(copy.getCell("A4").value, "Ngày giao dịch");
 });
+
+test("writing one opened workbook twice never carries the first copy's aliases into the second", async () => {
+  const workbook = new ExcelJS.Workbook();
+  const sheet = workbook.addWorksheet("A");
+  sheet.addRow(["Tên", "SĐT"]);
+  sheet.addRow(["An", "0901234567"]);
+  const file = await openSheetFile(new Uint8Array(await workbook.xlsx.writeBuffer()), "a.xlsx");
+  const first = await writeSheetFile(file.source, editsOf([[1, 0, "[TEN_1_4aae]"]]));
+  const second = await writeSheetFile(file.source, editsOf([[1, 1, "[SDT_1_4aae]"]]));
+  const read = async (bytes) => {
+    const back = new ExcelJS.Workbook();
+    await back.xlsx.load(bytes);
+    return [back.getWorksheet("A").getCell("A2").value, back.getWorksheet("A").getCell("B2").value];
+  };
+  assert.deepEqual(await read(first), ["[TEN_1_4aae]", "0901234567"]);
+  assert.deepEqual(await read(second), ["An", "[SDT_1_4aae]"]);
+});

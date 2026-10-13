@@ -106,29 +106,34 @@ function duration(seconds: number) {
   if (seconds < 60) return `${Math.max(5, Math.round(seconds / 5) * 5)} giây`;
   return `${Math.round(seconds / 60)} phút`;
 }
+/** One steady line while masking: the same words, a percentage that only goes up,
+ * and a time estimate only once it is stable. Stages (loading the models, reading,
+ * writing) are not named: with the native engine they change many times a second. */
+let shownPercent = 0;
+watch(
+  () => sheet.processing.value,
+  (running) => {
+    if (running) shownPercent = 0;
+  },
+);
 const progressView = computed(() => {
   const progress = sheet.progress.value;
   if (!progress) return null;
-  if (progress.stage === "loading")
-    return {
-      title: "Đang chuẩn bị gói nhận diện…",
-      percent: null,
-      detail: "Lần đầu có thể mất một lúc. Tệp gốc không bị thay đổi.",
-    };
-  if (progress.stage === "masking")
-    return { title: "Đang tạo bản đã ẩn…", percent: 100, detail: "Tệp gốc không bị thay đổi." };
-  const percent = progress.total ? Math.floor((progress.done * 100) / progress.total) : 0;
+  const reading = progress.total ? Math.floor((progress.done * 100) / progress.total) : 0;
+  const percent = (shownPercent = Math.max(
+    shownPercent,
+    progress.stage === "masking" ? 100 : Math.min(reading, 99),
+  ));
   const elapsed = (Date.now() - progress.startedAt) / 1000;
+  // Once an estimate shows, it stays until the end ("Sắp xong…" for the last stretch).
   const estimate =
-    progress.done && elapsed > 3 && percent >= 3
-      ? `Còn khoảng ${duration((elapsed * (progress.total - progress.done)) / progress.done)}`
-      : "Đang ước tính thời gian…";
+    elapsed <= 5 || percent < 5
+      ? ""
+      : percent >= 95 || progress.stage === "masking"
+        ? "Sắp xong…"
+        : `Còn khoảng ${duration((elapsed * (progress.total - progress.done)) / Math.max(1, progress.done))}`;
   // Only a percentage and a time: counts of "distinct texts" mean nothing to people.
-  return {
-    title: `Đang ẩn thông tin… ${percent} %`,
-    percent,
-    detail: estimate,
-  };
+  return { title: `Đang ẩn thông tin… ${percent} %`, percent, detail: estimate };
 });
 const scanning = computed(() =>
   sheet.plans.value.some((plans) => plans.some((plan) => plan.mode === "scan")),
@@ -207,17 +212,27 @@ function anotherFile() {
   restore.value = null;
   restoreSaved.value = false;
 }
+/** "Tạo mới" and "Ẩn bảng tính mới" start from an empty drop zone. */
+function newSheet() {
+  sheet.discardDraft();
+  emit("navigate", "excel");
+}
 function openStep(target: number) {
   if (!props.session) return;
   if (target === 1) {
-    emit("navigate", "excel");
+    // The same file and choices, ready to mask again; this session is kept.
+    if (sheet.reopen(props.session)) emit("navigate", "excel");
     return;
   }
   restoreStep.value = target === 3;
 }
 function canOpenStep(target: number) {
   if (!props.session) return false;
-  return target === 1 || (target === 2 && step.value === 3) || (target === 3 && step.value === 2);
+  return (
+    (target === 1 && sheet.canReopen(props.session)) ||
+    (target === 2 && step.value === 3) ||
+    (target === 3 && step.value === 2)
+  );
 }
 const restoreStatus = computed(() => {
   const current = restore.value;
@@ -248,7 +263,7 @@ defineExpose({
       <button v-if="session && historyOn" class="quiet-button" @click="emit('remove', session.id)">
         <AppIcon name="close" :size="15" />Xóa khỏi lịch sử
       </button>
-      <button v-if="session" class="quiet-button" @click="emit('navigate', 'excel')">
+      <button v-if="session" class="quiet-button" @click="newSheet">
         <AppIcon name="plus" :size="15" />Tạo mới
       </button>
       <button
@@ -360,11 +375,11 @@ defineExpose({
           </p>
           <progress
             class="pack-progress"
-            :value="progressView.percent ?? undefined"
+            :value="progressView.percent"
             max="100"
             :aria-label="progressView.title"
           ></progress>
-          <p class="sheet-progress-detail">{{ progressView.detail }}</p>
+          <p v-if="progressView.detail" class="sheet-progress-detail">{{ progressView.detail }}</p>
         </div>
         <SheetPreview
           v-else-if="draftView"
@@ -560,7 +575,7 @@ defineExpose({
           </button>
           <template v-if="restore && restoreSaved">
             <button class="quiet-button" @click="anotherFile">Khôi phục tệp khác</button>
-            <button class="quiet-button" @click="emit('navigate', 'excel')">
+            <button class="quiet-button" @click="newSheet">
               <AppIcon name="plus" :size="15" />Ẩn bảng tính mới
             </button>
           </template>
@@ -581,7 +596,7 @@ defineExpose({
           :session-id="session.id"
           :analysis="{ findings: session.findings, spans: [] }"
           new-label="Ẩn bảng tính mới"
-          @new-text="emit('navigate', 'excel')"
+          @new-text="newSheet"
         />
         <footer class="card-footer">
           <button class="quiet-button" @click="openStep(2)">
