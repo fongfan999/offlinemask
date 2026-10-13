@@ -1,26 +1,46 @@
 <script setup lang="ts">
-import { onMounted, ref, useTemplateRef } from "vue";
+import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
 import PasscodeField from "./PasscodeField.vue";
 import { sessionsKey, useProvided, vaultKey } from "../composables/context.ts";
 import type { TextSession } from "../core/sessions.ts";
 
-/** Shown at launch when a passcode exists. Forgetting it wipes the vault. */
+/** Shown at launch when a passcode exists. It unlocks on the sixth digit, like a
+ * phone; there is no button to press. Forgetting the passcode wipes the vault. */
 const emit = defineEmits<{ unlocked: [sessions: TextSession[]] }>();
 const vault = useProvided(vaultKey);
 const store = useProvided(sessionsKey);
 const passcode = ref("");
 const confirmingReset = ref(false);
+const shake = ref(0);
+const digitsOnly = ref(false);
 const input = useTemplateRef<InstanceType<typeof PasscodeField>>("input");
 
 onMounted(() => input.value?.focus());
+// Typing again clears the last error.
+watch(passcode, (value) => {
+  if (value) vault.error.value = "";
+});
+// A letter or symbol is dropped; say why for a moment.
+let hintTimer: ReturnType<typeof setTimeout> | undefined;
+function rejected() {
+  digitsOnly.value = true;
+  clearTimeout(hintTimer);
+  hintTimer = setTimeout(() => (digitsOnly.value = false), 2500);
+}
+onBeforeUnmount(() => clearTimeout(hintTimer));
 
 async function unlock() {
-  if (!passcode.value || vault.busy.value) return;
+  if (passcode.value.length !== 6 || vault.busy.value) return;
   const sessions = await vault.unlock(passcode.value);
   passcode.value = "";
   if (sessions) emit("unlocked", sessions);
-  else input.value?.focus();
+  else {
+    shake.value++;
+    // The field is re-enabled on the next render; focus it after that.
+    await nextTick();
+    input.value?.focus();
+  }
 }
 async function reset() {
   if (await vault.reset()) store.removePrivate();
@@ -34,7 +54,7 @@ async function reset() {
         ><AppIcon name="mask" :size="26"
       /></span>
       <h1>Nhập mật mã để mở OfflineMask</h1>
-      <p>Lịch sử của bạn được mã hóa trên máy này. Mật mã không được lưu ở đâu cả.</p>
+      <p>Mở khóa để xem lịch sử của bạn.</p>
       <PasscodeField
         id="lock-passcode"
         ref="input"
@@ -42,18 +62,18 @@ async function reset() {
         label="Mật mã 6 số"
         autocomplete="current-password"
         :disabled="vault.busy.value"
+        :invalid="!!vault.error.value"
+        :shake="shake"
         autofocus
         @complete="unlock"
+        @rejected="rejected"
       />
-      <p v-if="vault.error.value" class="input-error" role="alert">{{ vault.error.value }}</p>
-      <button
-        class="primary-action"
-        type="submit"
-        :disabled="passcode.length !== 6 || vault.busy.value"
-      >
-        <span v-if="vault.busy.value" class="spinner" aria-hidden="true"></span
-        ><AppIcon v-else name="lock" :size="17" />{{ vault.busy.value ? "Đang mở…" : "Mở khóa" }}
-      </button>
+      <p class="lock-status" :class="{ 'is-error': vault.error.value }" aria-live="polite">
+        <template v-if="vault.busy.value"
+          ><span class="spinner" aria-hidden="true"></span>Đang mở…</template
+        ><template v-else-if="vault.error.value">{{ vault.error.value }}</template
+        ><template v-else-if="digitsOnly">Chỉ nhập số.</template>
+      </p>
       <button
         v-if="!confirmingReset"
         type="button"
@@ -63,9 +83,7 @@ async function reset() {
         Quên mật mã?
       </button>
       <div v-else class="lock-reset" role="group" aria-label="Quên mật mã">
-        <p>
-          Không có cách lấy lại mật mã. Xóa toàn bộ lịch sử đã lưu và mở ứng dụng với lịch sử trống?
-        </p>
+        <p>Không có cách lấy lại mật mã. Xóa lịch sử và bỏ mật mã? Không thể hoàn tác.</p>
         <div class="lock-reset-actions">
           <button type="button" class="quiet-button" @click="confirmingReset = false">Hủy</button>
           <button
@@ -74,7 +92,7 @@ async function reset() {
             :disabled="vault.busy.value"
             @click="reset"
           >
-            Xóa và bắt đầu lại
+            Xóa và bỏ mật mã
           </button>
         </div>
       </div>
