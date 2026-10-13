@@ -1,5 +1,12 @@
 import { nextTick, ref, type Ref } from "vue";
-import { addManualMask, previewSelection, type SourceSelection } from "../core/manual-mask.ts";
+import {
+  addManualMask,
+  addManualMasks,
+  previewSelection,
+  unmaskedOccurrences,
+  type SourceSelection,
+} from "../core/manual-mask.ts";
+import type { TextAnalysis } from "../core/text.ts";
 import { aliasScope, type Session, type TextSession } from "../core/sessions.ts";
 
 export const reviewHint = "Thấy tên hay số nào còn sót? Bôi đen là ẩn ngay.";
@@ -82,18 +89,50 @@ export function useTextReview(options: TextReviewOptions) {
       selection.range,
       session.manualMaskCount,
     );
-    session.reviewUndo = { analysis: session.analysis, decisions: { ...session.decisions } };
-    session.manualMaskCount = update.manualMaskCount;
-    session.analysis = update.analysis;
-    session.decisions = update.decisions;
-    options.view.value = "masked";
-    selectedText.value = null;
+    apply(session, update);
     reviewStatus.value = hiddenMessage;
     await nextTick();
     const element = options.element();
     element?.focus();
     element?.setSelectionRange(0, 0);
     return true;
+  }
+  /** One click on a likely name in the warning: every clear-text occurrence of it
+   * shares one new alias, undoable like any manual correction. */
+  async function hideOccurrences(value: string) {
+    const session = privateSession();
+    if (!session) return false;
+    const ranges = unmaskedOccurrences(session.original, session.analysis, value);
+    if (!ranges.length) return false;
+    apply(
+      session,
+      addManualMasks(
+        session.original,
+        session.analysis,
+        session.decisions,
+        aliasScope(session.id),
+        ranges,
+        session.manualMaskCount,
+      ),
+    );
+    reviewStatus.value =
+      ranges.length === 1 ? `Đã ẩn “${value}”.` : `Đã ẩn “${value}” ở ${ranges.length} chỗ.`;
+    return true;
+  }
+  function apply(
+    session: TextSession,
+    update: {
+      analysis: TextAnalysis;
+      decisions: TextSession["decisions"];
+      manualMaskCount: number;
+    },
+  ) {
+    session.reviewUndo = { analysis: session.analysis, decisions: { ...session.decisions } };
+    session.manualMaskCount = update.manualMaskCount;
+    session.analysis = update.analysis;
+    session.decisions = update.decisions;
+    options.view.value = "masked";
+    selectedText.value = null;
   }
   async function undoManualMask() {
     const session = privateSession();
@@ -108,5 +147,13 @@ export function useTextReview(options: TextReviewOptions) {
     options.element()?.focus();
     return true;
   }
-  return { selectedText, reviewStatus, captureSelection, hideSelection, undoManualMask, clear };
+  return {
+    selectedText,
+    reviewStatus,
+    captureSelection,
+    hideSelection,
+    hideOccurrences,
+    undoManualMask,
+    clear,
+  };
 }

@@ -55,7 +55,7 @@ async function wipe() {
   notice.value = "";
   if (await vault.reset()) {
     store.removePrivate();
-    await announce("Đã xóa toàn bộ lịch sử đã lưu và bỏ mật mã.");
+    await announce("Đã xóa lịch sử, bỏ mật mã và tắt lịch sử.");
   }
 }
 </script>
@@ -75,12 +75,12 @@ async function wipe() {
       <AppIcon name="check" :size="16" />{{ notice }}
     </p>
     <p v-if="vault.state.value === 'unavailable'" class="model-description">
-      Mật mã và lưu lịch sử chỉ có trong ứng dụng máy tính. Bản xem trước chỉ giữ lịch sử trong bộ
-      nhớ.
+      Mật mã và lịch sử chỉ có trong ứng dụng máy tính.
     </p>
     <template v-else-if="vault.state.value === 'none'">
       <p class="model-description">
-        Đặt mật mã 6 số để giữ lịch sử khi mở lại ứng dụng.<template v-if="settingUp">
+        Đặt mật mã 6 số để bật lịch sử: các văn bản bạn ẩn được lưu trên máy này để mở lại
+        sau.<template v-if="settingUp">
           Ứng dụng sẽ hỏi mật mã khi khởi động; quên mật mã thì phải xóa hết và bắt đầu
           lại.</template
         >
@@ -101,8 +101,8 @@ async function wipe() {
           settingUp = false;
           void announce(
             privateCount > 0
-              ? `Đã lưu ${privateCount} mục trong lịch sử. Các mục mới cũng sẽ được lưu.`
-              : 'Đã đặt mật mã. Lịch sử của bạn sẽ được lưu trên máy này.',
+              ? `Đã bật lịch sử với ${privateCount} mục hiện có.`
+              : 'Đã bật lịch sử. Các văn bản bạn ẩn sẽ được lưu trên máy này.',
           );
         "
       >
@@ -161,8 +161,8 @@ async function wipe() {
           <summary>Bỏ mật mã</summary>
           <div class="model-uninstall">
             <p>
-              Xóa {{ privateCount }} mục trong lịch sử và bỏ mật mã. Không thể hoàn tác; các mục mới
-              sẽ mất khi đóng ứng dụng.
+              Xóa {{ privateCount }} mục trong lịch sử, bỏ mật mã và tắt lịch sử. Không thể hoàn
+              tác.
             </p>
             <button class="quiet-button danger-button" :disabled="vault.busy.value" @click="wipe">
               Xóa và bỏ mật mã

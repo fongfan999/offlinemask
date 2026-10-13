@@ -12,8 +12,8 @@ defineProps<{
   page: Page;
   open: boolean;
   preparing: boolean;
-  /** No passcode yet: private sessions are gone when the app closes. */
-  unsaved: boolean;
+  /** History is a passcode feature: the list stays hidden until one is set. */
+  history: boolean;
   version: string;
 }>();
 const emit = defineEmits<{ navigate: [destination: Page, id?: string | null]; close: [] }>();
@@ -68,42 +68,43 @@ defineExpose({
         <AppIcon name="home" />Trang chủ
       </button>
       <button
-        :aria-current="page === 'text' && !activeId ? 'page' : undefined"
+        :aria-current="page === 'text' && (!activeId || !history) ? 'page' : undefined"
         @click="emit('navigate', 'text')"
       >
         <AppIcon name="text" />Văn bản
       </button>
       <button
-        :aria-current="page === 'excel' && !activeId ? 'page' : undefined"
+        :aria-current="page === 'excel' && (!activeId || !history) ? 'page' : undefined"
         @click="emit('navigate', 'excel')"
       >
         <AppIcon name="table" />Bảng tính
       </button>
     </nav>
-    <div class="history-heading">
-      LỊCH SỬ <span>{{ sessions.length || "" }}</span>
-    </div>
-    <div class="history-list">
-      <p v-if="!sessions.length" class="empty-history">Chưa có mục nào.</p>
-      <button
-        v-for="session in sessions"
-        :key="session.id"
-        class="history-item"
-        :aria-current="activeId === session.id ? 'page' : undefined"
-        @click="emit('navigate', session.format, session.id)"
-      >
-        <AppIcon :name="session.format === 'text' ? 'file' : 'table'" :size="16" /><span
-          ><strong>{{ sessionPreview(session) }}</strong
-          ><small
-            >{{ session.fixture === "private-text-v1" ? `${sessionTitle(session)} · ` : ""
-            }}{{ dateLabel(session.createdAt)
-            }}{{
-              session.fixture === "private-text-v1" ? (unsaved ? " · Chưa lưu" : "") : " · Mẫu"
-            }}</small
-          ></span
+    <template v-if="history">
+      <div class="history-heading">
+        LỊCH SỬ <span>{{ sessions.length || "" }}</span>
+      </div>
+      <div class="history-list">
+        <p v-if="!sessions.length" class="empty-history">Chưa có mục nào.</p>
+        <button
+          v-for="session in sessions"
+          :key="session.id"
+          class="history-item"
+          :aria-current="activeId === session.id ? 'page' : undefined"
+          @click="emit('navigate', session.format, session.id)"
         >
-      </button>
-    </div>
+          <AppIcon :name="session.format === 'text' ? 'file' : 'table'" :size="16" /><span
+            ><strong>{{ sessionPreview(session) }}</strong
+            ><small
+              >{{ session.fixture === "private-text-v1" ? `${sessionTitle(session)} · ` : ""
+              }}{{ dateLabel(session.createdAt)
+              }}{{ session.fixture === "private-text-v1" ? "" : " · Mẫu" }}</small
+            ></span
+          >
+        </button>
+      </div>
+    </template>
+    <div v-else class="sidebar-spacer"></div>
     <nav class="settings-nav" aria-label="Cài đặt ứng dụng">
       <button
         :aria-current="page === 'settings' ? 'page' : undefined"

@@ -1,3 +1,4 @@
+import type { TextMark } from "./review-marks.ts";
 import type { TextAnalysis } from "./text.ts";
 
 /** Anything shaped like one of this app's aliases: `[TYPE_n_scope]` or `[AN_THEM_n_scope]`.
@@ -10,6 +11,8 @@ export interface Restoration {
   restored: number;
   /** Distinct alias-shaped tokens that do not belong to this session, left untouched. */
   unknown: string[];
+  /** Where each restored value sits in `text`, for highlighting. */
+  marks: TextMark[];
 }
 
 function escapeRegExp(value: string) {
@@ -27,12 +30,18 @@ export function restoreAliases(text: string, analysis: TextAnalysis): Restoratio
   for (const match of text.matchAll(aliasShape)) {
     if (!values.has(match[0])) unknown.add(match[0]);
   }
-  if (!values.size) return { text, restored: 0, unknown: [...unknown] };
+  if (!values.size) return { text, restored: 0, unknown: [...unknown], marks: [] };
   const known = new RegExp([...values.keys()].map(escapeRegExp).join("|"), "g");
-  let restored = 0;
-  const result = text.replace(known, (alias) => {
-    restored++;
-    return values.get(alias)!;
-  });
-  return { text: result, restored, unknown: [...unknown] };
+  const marks: TextMark[] = [];
+  let result = "";
+  let cursor = 0;
+  for (const match of text.matchAll(known)) {
+    result += text.slice(cursor, match.index);
+    const value = values.get(match[0])!;
+    marks.push({ start: result.length, end: result.length + value.length, kind: "value" });
+    result += value;
+    cursor = match.index + match[0].length;
+  }
+  result += text.slice(cursor);
+  return { text: result, restored: marks.length, unknown: [...unknown], marks };
 }

@@ -83,28 +83,73 @@ export function addManualMask(
   selection: SourceSelection,
   after = 0,
 ): { analysis: TextAnalysis; decisions: Decisions; manualMaskCount: number } {
-  const { start, end } = selection;
+  return addManualMasks(text, analysis, decisions, scope, [selection], after);
+}
+
+/** Source ranges of `value` that a one-click correction may hide: whole words,
+ * on character boundaries, and clear of every existing finding. */
+export function unmaskedOccurrences(
+  text: string,
+  analysis: TextAnalysis,
+  value: string,
+): SourceSelection[] {
+  if (!value.trim()) return [];
+  const boundaries = new Set(graphemeBoundaries(text));
+  const word = (character: string | undefined) =>
+    !!character && /[\p{L}\p{M}\p{N}_]/u.test(character);
+  const ranges: SourceSelection[] = [];
+  for (let start = text.indexOf(value); start >= 0; start = text.indexOf(value, start + 1)) {
+    const end = start + value.length;
+    if (
+      boundaries.has(start) &&
+      boundaries.has(end) &&
+      !word(text[start - 1]) &&
+      !word(text[end]) &&
+      !analysis.spans.some((span) => span.start < end && span.end > start)
+    )
+      ranges.push({ start, end });
+  }
+  return ranges;
+}
+
+/** Hide one or more ranges under a single new alias, e.g. every occurrence of a name. */
+export function addManualMasks(
+  text: string,
+  analysis: TextAnalysis,
+  decisions: Decisions,
+  scope: string,
+  selections: readonly SourceSelection[],
+  after = 0,
+): { analysis: TextAnalysis; decisions: Decisions; manualMaskCount: number } {
   if (
+    !selections.length ||
     !Number.isSafeInteger(after) ||
     after < 0 ||
     after >= Number.MAX_SAFE_INTEGER ||
-    !/^[a-f0-9]{4,8}$/i.test(scope) ||
-    !Number.isInteger(start) ||
-    !Number.isInteger(end) ||
-    start < 0 ||
-    end > text.length ||
-    start >= end ||
-    !text.slice(start, end).trim()
+    !/^[a-f0-9]{4,8}$/i.test(scope)
   )
     throw new Error("Invalid manual selection");
   const boundaries = graphemeBoundaries(text);
-  if (!boundaries.includes(start) || !boundaries.includes(end))
-    throw new Error("Partial character selection");
-  // Callers must resolve display coordinates and expand partial spans first.
-  if (
-    analysis.spans.some((s) => s.start < end && s.end > start && (s.start < start || s.end > end))
-  )
-    throw new Error("Partial finding selection");
+  const sorted = [...selections].sort((a, b) => a.start - b.start);
+  sorted.forEach(({ start, end }, index) => {
+    if (
+      !Number.isInteger(start) ||
+      !Number.isInteger(end) ||
+      start < 0 ||
+      end > text.length ||
+      start >= end ||
+      !text.slice(start, end).trim() ||
+      (index > 0 && start < sorted[index - 1]!.end)
+    )
+      throw new Error("Invalid manual selection");
+    if (!boundaries.includes(start) || !boundaries.includes(end))
+      throw new Error("Partial character selection");
+    // Callers must resolve display coordinates and expand partial spans first.
+    if (
+      analysis.spans.some((s) => s.start < end && s.end > start && (s.start < start || s.end > end))
+    )
+      throw new Error("Partial finding selection");
+  });
   let count = after;
   let id: string;
   let alias: string;
@@ -112,15 +157,17 @@ export function addManualMask(
     id = `AN_THEM_${++count}`;
     alias = `[${id}_${scope}]`;
   } while (text.includes(alias) || analysis.findings.some((f) => f.id === id || f.alias === alias));
-  const spans = analysis.spans.filter((s) => s.end <= start || s.start >= end);
-  spans.push({ start, end, findingId: id });
+  const spans = analysis.spans.filter((s) =>
+    sorted.every(({ start, end }) => s.end <= start || s.start >= end),
+  );
+  for (const { start, end } of sorted) spans.push({ start, end, findingId: id });
   spans.sort((a, b) => a.start - b.start);
   const used = new Set(spans.map((s) => s.findingId));
   const findings = analysis.findings.filter((f) => used.has(f.id));
   findings.push({
     id,
     alias,
-    value: text.slice(start, end),
+    value: text.slice(sorted[0]!.start, sorted[0]!.end),
     label: "Ẩn thêm",
     reason: "Chỉ phần bạn đã chọn.",
     source: "Bạn đã chọn",

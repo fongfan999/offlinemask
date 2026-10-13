@@ -50,6 +50,7 @@ test("manual corrections restore too, and a session without findings leaves text
     text: "Không có gì [TEN_1_4aae]",
     restored: 0,
     unknown: ["[TEN_1_4aae]"],
+    marks: [],
   });
   const manual = addManualMask(text, empty, {}, scope, { start: 5, end: 17 });
   const result = restoreAliases(`Người: [AN_THEM_1_${scope}].`, manual.analysis);

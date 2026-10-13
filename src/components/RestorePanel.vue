@@ -1,16 +1,19 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
+import HighlightedText from "./HighlightedText.vue";
 import { restoreAliases, type Restoration } from "../core/restore.ts";
 import type { TextAnalysis } from "../core/text.ts";
 
 const props = defineProps<{ sessionId: string; analysis: TextAnalysis }>();
+/** After copying, the next step is another reply or a new text; nothing needs "finishing". */
+const emit = defineEmits<{ newText: [] }>();
 
 const reply = ref("");
 const result = ref<Restoration | null>(null);
 const copied = ref(false);
 const copyStatus = ref("");
-const output = useTemplateRef<HTMLTextAreaElement>("output");
+const output = useTemplateRef<InstanceType<typeof HighlightedText>>("output");
 const input = useTemplateRef<HTMLTextAreaElement>("input");
 
 defineExpose({
@@ -29,8 +32,9 @@ watch(
     copyStatus.value = "";
   },
 );
-watch(reply, () => {
-  result.value = null;
+// Restoring is instant and local, so it follows the pasted reply as it changes.
+watch(reply, (text) => {
+  result.value = text.trim() ? restoreAliases(text, props.analysis) : null;
   copied.value = false;
   copyStatus.value = "";
 });
@@ -50,11 +54,11 @@ const unknownNote = computed(() => {
   return `${unknown.length === 1 ? "1 mã thay thế" : `${unknown.length} mã thay thế`} không thuộc văn bản này được giữ nguyên: ${unknown.join(", ")}.`;
 });
 
-function restore() {
-  if (!reply.value.trim()) return;
-  result.value = restoreAliases(reply.value, props.analysis);
-  copied.value = false;
-  copyStatus.value = "";
+/** Clear the box for the AI's next reply in the same conversation. */
+function anotherReply() {
+  reply.value = "";
+  input.value?.focus({ preventScroll: true });
+  input.value?.scrollIntoView({ block: "nearest", behavior: "smooth" });
 }
 async function copy() {
   const current = result.value;
@@ -64,8 +68,8 @@ async function copy() {
     copied.value = true;
     copyStatus.value = "Đã sao chép bản khôi phục.";
   } catch {
-    output.value?.focus();
-    output.value?.select();
+    output.value?.field?.focus();
+    output.value?.field?.select();
     copyStatus.value = "Nhấn ⌘C hoặc Ctrl+C để sao chép phần đã chọn.";
   }
 }
@@ -88,33 +92,28 @@ async function copy() {
       autocomplete="off"
       autocorrect="off"
       autocapitalize="off"
-      @keydown.meta.enter.prevent="restore"
-      @keydown.ctrl.enter.prevent="restore"
     ></textarea>
-    <div class="restore-actions">
-      <p v-if="status" class="restore-status" role="status">
-        {{ status }}<span v-if="unknownNote" class="restore-unknown">{{ unknownNote }}</span>
-      </p>
-      <button class="primary-action" :disabled="!reply.trim()" @click="restore">
-        <AppIcon name="undo" :size="16" />Khôi phục
-      </button>
-    </div>
+    <p v-if="status" class="restore-status" role="status">
+      {{ status }}<span v-if="unknownNote" class="restore-unknown">{{ unknownNote }}</span>
+    </p>
     <template v-if="result && result.restored">
       <label class="sr-only" for="restore-output">Bản đã khôi phục</label>
-      <textarea
+      <HighlightedText
         id="restore-output"
         ref="output"
-        class="text-content restore-input"
         :value="result.text"
-        readonly
-        spellcheck="false"
-      ></textarea>
+        :marks="result.marks"
+      />
       <div class="restore-actions">
         <p v-if="copyStatus" class="restore-status" role="status">{{ copyStatus }}</p>
-        <button class="quiet-button" @click="copy">
-          <AppIcon :name="copied ? 'check' : 'copy'" :size="15" />{{
-            copied ? "Đã sao chép" : "Sao chép bản khôi phục"
-          }}
+        <template v-if="copied">
+          <button class="quiet-button" @click="anotherReply">Dán câu trả lời khác</button>
+          <button class="quiet-button" @click="emit('newText')">
+            <AppIcon name="plus" :size="15" />Ẩn văn bản mới
+          </button>
+        </template>
+        <button v-else class="primary-action" @click="copy">
+          <AppIcon name="copy" :size="17" />Sao chép bản khôi phục
         </button>
       </div>
     </template>

@@ -249,6 +249,10 @@ nav button:hover,
   flex: 1;
   scrollbar-width: thin;
 }
+/* Without history (no passcode) the settings link still sits at the bottom. */
+.sidebar-spacer {
+  flex: 1;
+}
 .empty-history {
   font-size: 12px;
   line-height: 1.8;
@@ -768,6 +772,50 @@ h1 {
   color: var(--muted);
   opacity: 1;
 }
+/* Highlights behind a read-only textarea (HighlightedText.vue): the mirror repeats
+   the text in transparent ink at the same metrics and paints only the marks. */
+.highlight-field {
+  position: relative;
+  margin: 0 24px;
+}
+.highlight-field .text-content {
+  margin: 0;
+  width: 100%;
+}
+.highlight-mirror {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-color: transparent;
+  color: transparent;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  resize: none;
+  pointer-events: none;
+}
+.highlight-input {
+  position: relative;
+  background: transparent;
+}
+.highlight-mirror mark {
+  color: transparent;
+  border-radius: 3px;
+}
+/* An alias in the masked copy, or a value that will be hidden in the original. */
+.highlight-mirror .mark-alias,
+.highlight-mirror .mark-value {
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 2px var(--accent-soft);
+}
+/* A likely name still in clear text. */
+.highlight-mirror .mark-hint {
+  background: var(--error-soft);
+  box-shadow:
+    0 -1px 0 0 var(--error-soft),
+    0 2px 0 0 var(--error);
+}
 .input-hint-row {
   display: flex;
   justify-content: space-between;
@@ -840,8 +888,10 @@ h1 {
   margin-top: 1px;
   color: var(--error);
 }
-.review-warning p {
+.review-warning-body {
   flex: 1;
+}
+.review-warning p {
   margin: 0;
   font-size: 13px;
   line-height: 1.55;
@@ -859,6 +909,24 @@ h1 {
 .review-warning .quiet-button {
   padding: 7px 10px;
   background: var(--paper-raised);
+}
+/* One click hides every occurrence of a likely name. */
+.warning-names {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.warning-names .quiet-button {
+  padding: 5px 10px;
+  font-size: 12px;
+}
+.edit-text {
+  padding: 6px 12px;
+  font-size: 12px;
+}
+.copy-only {
+  font-size: 13px;
 }
 .card-footer {
   display: flex;
@@ -1104,6 +1172,13 @@ td.alias {
   height: 160px;
   min-height: 120px;
 }
+.restore-body .highlight-field {
+  margin: 0;
+}
+.restore-body .highlight-input {
+  height: 160px;
+  min-height: 120px;
+}
 .restore-actions {
   display: flex;
   align-items: center;
@@ -1210,6 +1285,9 @@ td.alias {
   .restore-input {
     margin: 0;
     width: 100%;
+  }
+  .highlight-field {
+    margin: 0 17px;
   }
   .changes,
   .sheet-scroll {
@@ -1359,13 +1437,35 @@ td.alias {
 }
 .detection-options {
   min-width: 0;
-  margin: 0 24px 20px;
+  margin: 16px 24px 0;
   padding: 0;
   border: 0;
 }
-/* Without a card header, the first block of the draft keeps its distance from the stepper. */
-.step-panel > .detection-options:first-child {
+/* The draft opens with the text box; what to hide is one line under it. */
+.draft-input {
   margin-top: 22px;
+}
+.options-summary {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.options-summary p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+}
+.options-summary strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.options-summary .link-button {
+  flex-shrink: 0;
+  font-size: 13px;
+}
+.options-summary + .option-grid {
+  margin-top: 12px;
 }
 .detection-options legend {
   padding: 0;

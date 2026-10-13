@@ -75,6 +75,12 @@ const topbarLabel = computed(() =>
       : "Bảng tính",
 );
 
+/** History is a passcode feature (decision 0071). Without it each format has one
+ * screen: a new result replaces the previous one, and coming back to the format
+ * shows whatever was last open there (decision 0072). */
+const historyOn = computed(() => vault.state.value === "unlocked");
+const lastOpened: Record<Format, string | null> = { text: null, excel: null };
+
 const pageRef = useTemplateRef<PageHandle>("pageRef");
 const sidebar = useTemplateRef<InstanceType<typeof AppSidebar>>("sidebar");
 const sidebarToggle = useTemplateRef<HTMLButtonElement>("sidebarToggle");
@@ -90,6 +96,12 @@ onBeforeUnmount(() => {
 });
 
 function adoptSession(session: Session) {
+  if (!historyOn.value) {
+    for (const old of sessions.value.filter((item) => item.format === session.format))
+      store.remove(old.id);
+    lastOpened[session.format] = session.id;
+    if (activeId.value && !store.find(activeId.value)) activeId.value = session.id;
+  }
   store.add(session);
   // A finished text run only takes the screen while the user still waits on the text page.
   const waiting = session.format === "excel" || (page.value === "text" && !activeId.value);
@@ -98,6 +110,7 @@ function adoptSession(session: Session) {
   void nextTick(() => pageRef.value?.focusResult?.());
 }
 async function navigate(destination: Page, id: string | null = null) {
+  if (destination === "text" || destination === "excel") lastOpened[destination] = id;
   page.value = destination;
   activeId.value = id;
   sidebarOpen.value = false;
@@ -105,6 +118,14 @@ async function navigate(destination: Page, id: string | null = null) {
   await nextTick();
   window.scrollTo({ top: 0, left: 0 });
   pageRef.value?.focusHeading();
+}
+/** The sidebar and home cards open a format; without history that means its last screen.
+ * "Tạo mới" and "Sửa văn bản" inside the page go through `navigate` and start a draft. */
+function openFormat(destination: Page, id: string | null = null) {
+  if (id || historyOn.value || (destination !== "text" && destination !== "excel"))
+    return navigate(destination, id);
+  const last = lastOpened[destination];
+  return navigate(destination, last && store.find(last) ? last : null);
 }
 async function startMasking() {
   await run.mask(format.value);
@@ -143,9 +164,9 @@ async function closeSidebar() {
       :page="page"
       :open="sidebarOpen"
       :preparing="pack.preparing.value"
-      :unsaved="vault.state.value === 'none'"
+      :history="historyOn"
       :version="version"
-      @navigate="navigate"
+      @navigate="openFormat"
       @close="closeSidebar"
     />
     <div class="workspace" :inert="sidebarOpen">
@@ -164,18 +185,22 @@ async function closeSidebar() {
         </div>
       </header>
       <main :class="{ 'home-page': page === 'home' }">
-        <HomePage v-if="page === 'home'" ref="pageRef" @navigate="navigate" />
-        <SettingsPage v-else-if="page === 'settings'" ref="pageRef" />
-        <WorkspacePage
-          v-else
-          ref="pageRef"
-          :key="page"
-          :format="format"
-          :session="active"
-          @navigate="navigate"
-          @mask="startMasking"
-          @remove="removeSession"
-        />
+        <!-- The text and spreadsheet pages stay alive across navigation, so the step,
+             view and pasted reply are still there on return. All of it is RAM only. -->
+        <KeepAlive include="WorkspacePage">
+          <HomePage v-if="page === 'home'" ref="pageRef" @navigate="openFormat" />
+          <SettingsPage v-else-if="page === 'settings'" ref="pageRef" />
+          <WorkspacePage
+            v-else
+            ref="pageRef"
+            :key="page"
+            :format="format"
+            :session="active"
+            @navigate="navigate"
+            @mask="startMasking"
+            @remove="removeSession"
+          />
+        </KeepAlive>
         <p v-if="storageError" class="storage-error" role="alert">
           {{ storageError }}
         </p>
