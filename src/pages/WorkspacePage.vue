@@ -309,7 +309,10 @@ const primaryDisabled = computed(
       (!missingSelectedModels.value && !!draftError.value)),
 );
 function primaryAction() {
+  // "Tải thêm để tiếp tục" is an explicit request: start the download, then show its progress.
   if (props.format === "text" && missingSelectedModels.value) {
+    if (desktopModels && ["missing", "paused", "error"].includes(models.value.stage))
+      void pack.run("download");
     emit("navigate", "settings");
     return;
   }
