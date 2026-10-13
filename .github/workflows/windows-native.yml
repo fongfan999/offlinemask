@@ -1,0 +1,46 @@
+# Windows x64 native recognition build (decision 0077).
+#
+# Builds the release package with the native ONNX Runtime helper on a real Windows
+# runner, verifies the bundled files and their imports, and starts the helper so it
+# loads onnxruntime.dll and the app-local Visual C++ runtime. The installers are
+# uploaded for a manual check on a Windows PC with the recognition pack installed;
+# that check, not this job, is what qualifies Windows for the default build.
+name: Windows native build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "src-tauri/**"
+      - "scripts/*native*"
+      - "scripts/build-desktop.mjs"
+      - ".cargo/**"
+      - ".github/workflows/windows-native.yml"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and smoke-test (windows-latest)
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: mise exec -- pnpm install --frozen-lockfile
+      - run: mise exec -- cargo test --manifest-path src-tauri/Cargo.toml --locked --features recognition-native-sidecar
+      # Prepares resources, builds with the release feature, verifies the output and
+      # starts the packaged helper (scripts/build-native-desktop.mjs).
+      - run: mise exec -- pnpm desktop:build:native
+      - uses: actions/upload-artifact@v4
+        with:
+          name: offlinemask-windows-x64-native
+          path: |
+            src-tauri/target/release/bundle/nsis/*.exe
+            src-tauri/target/release/bundle/msi/*.msi
+            artifacts/native-desktop/provenance.json
+            artifacts/native-desktop/native-sha256.txt
+          if-no-files-found: error

@@ -30,7 +30,8 @@ mise exec -- pnpm desktop:dev
 | Command | Purpose |
 | --- | --- |
 | `mise exec -- pnpm dev` | Browser preview at localhost:1420 without native APIs (no pack download, built-in rules only). |
-| `mise exec -- pnpm desktop:dev` | The desktop app with hot reload. |
+| `mise exec -- pnpm desktop:dev` | The desktop app with hot reload. Recognition runs in WASM (slow on long input). |
+| `mise exec -- pnpm desktop:dev:native` | The same with the native recognition helper (macOS arm64, Windows x64): release-speed masking while developing. |
 | `mise exec -- pnpm lint` | ESLint and Prettier; `pnpm format` rewrites. |
 | `mise exec -- pnpm typecheck` | Vue, TypeScript and Vite configuration. |
 | `mise exec -- pnpm test` | Fast tests: detection rules, transformations, sessions, storage boundaries, the pack contract. No model files needed. |
@@ -38,8 +39,9 @@ mise exec -- pnpm desktop:dev
 | `mise exec -- pnpm check:native` | rustfmt and Clippy for the Rust layer; `cargo test --manifest-path src-tauri/Cargo.toml --locked` runs its tests. |
 | `mise exec -- pnpm test:models <pack root>` | Run the real recognition pack against the committed synthetic fixtures (see [packs/README.md](packs/README.md)). |
 | `mise exec -- pnpm desktop:build` | Desktop bundle for the current platform. macOS arm64 uses the verified native-inference path. |
+| `mise exec -- pnpm desktop:build:native` | Native-inference bundle on macOS arm64 or Windows x64 (Windows awaits qualification, [Decision 0077](docs/decisions/0077-native-recognition-windows.md)). |
 
-Only macOS on Apple Silicon has been built and tested so far. The CI workflow compiles the native layer on Linux and Windows as an advisory check; those platforms are not yet qualified.
+Only macOS on Apple Silicon has been built and tested so far. The CI workflow compiles the native layer on Linux and Windows as an advisory check, and a separate workflow builds and smoke-tests the Windows native package; Windows becomes qualified after the manual checklist in Decision 0077.
 
 ## Replacing the models
 

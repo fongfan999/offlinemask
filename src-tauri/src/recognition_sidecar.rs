@@ -44,12 +44,12 @@ pub async fn recognition_native_load(
     let supervisor = state.supervisor.clone();
     tauri::async_runtime::spawn_blocking(move || {
         #[cfg(feature = "recognition-native-release")]
-        verify_bundle()?;
+        verify_bundle(&library)?;
         #[cfg(not(feature = "recognition-native-release"))]
         if !crate::models::valid(
             &library,
-            35937208,
-            "76831409ce6eded92b4cb343cf422c458a60c1ea1d5f3cfa69692ab7fcc67f0f",
+            crate::native_runtime::BYTES,
+            crate::native_runtime::SHA256,
             &AtomicBool::new(false),
         ) {
             return Err("runtime");
@@ -85,7 +85,7 @@ pub async fn recognition_native_load(
 // upstream hash before staging, then seal the complete bundle. Check that seal
 // locally before loading executable resources; do not contact a trust service.
 #[cfg(all(feature = "recognition-native-release", target_os = "macos"))]
-fn verify_bundle() -> Reply<()> {
+fn verify_bundle(_library: &std::path::Path) -> Reply<()> {
     use std::process::{Command, Stdio};
     let executable = std::env::current_exe().map_err(|_| "runtime")?;
     let bundle = executable
@@ -109,8 +109,41 @@ fn verify_bundle() -> Reply<()> {
     }
 }
 
-#[cfg(all(feature = "recognition-native-release", not(target_os = "macos")))]
-compile_error!("The native release package is currently qualified only on macOS arm64");
+// Windows has no bundle seal to check offline, and release resources are not re-signed,
+// so the release build compiles in the SHA-256 of every native resource it ships
+// (runtime, Visual C++ runtime, helper) and refuses to start the helper on a mismatch.
+#[cfg(all(feature = "recognition-native-release", target_os = "windows"))]
+fn verify_bundle(library: &std::path::Path) -> Reply<()> {
+    use std::sync::atomic::AtomicBool;
+    const EXPECTED: &str = env!(
+        "OFFLINEMASK_NATIVE_SHA256",
+        "Release builds take native resource hashes from scripts/build-native-desktop.mjs"
+    );
+    let directory = library.parent().ok_or("runtime")?;
+    let mut checked = 0;
+    for entry in EXPECTED.split(',').filter(|entry| !entry.is_empty()) {
+        let (name, hash) = entry.split_once('=').ok_or("runtime")?;
+        if name.contains(['/', '\\']) || name.contains("..") {
+            return Err("runtime");
+        }
+        let actual = crate::models::digest(&directory.join(name), &AtomicBool::new(false))
+            .map_err(|_| "runtime")?;
+        if actual != hash {
+            return Err("runtime");
+        }
+        checked += 1;
+    }
+    if checked == 0 {
+        return Err("runtime");
+    }
+    Ok(())
+}
+
+#[cfg(all(
+    feature = "recognition-native-release",
+    not(any(target_os = "macos", target_os = "windows"))
+))]
+compile_error!("The native release package is qualified only on macOS arm64 and Windows x64");
 #[tauri::command]
 pub async fn recognition_native_run(
     state: State<'_, NativeRecognition>,

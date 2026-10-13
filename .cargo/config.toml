@@ -1,0 +1,6 @@
+# Windows builds link the C runtime statically, as Tauri's distribution guide
+# suggests, so the app and the recognition helper start on PCs without the
+# Visual C++ Redistributable. ONNX Runtime's own C++ runtime DLLs are bundled
+# next to it by scripts/prepare-native-desktop.mjs (decision 0077).
+[target.'cfg(all(windows, target_env = "msvc"))']
+rustflags = ["-C", "target-feature=+crt-static"]

@@ -1,0 +1,21 @@
+{
+  "version": "1.24.3",
+  "sourcePackage": "onnxruntime-node",
+  "license": "MIT",
+  "targets": {
+    "darwin-arm64": {
+      "packagePath": "darwin/arm64",
+      "file": "libonnxruntime.1.24.3.dylib",
+      "sha256": "76831409ce6eded92b4cb343cf422c458a60c1ea1d5f3cfa69692ab7fcc67f0f",
+      "bytes": 35937208
+    },
+    "win32-x64": {
+      "packagePath": "win32/x64",
+      "file": "onnxruntime.dll",
+      "sha256": "4bc168111012971ae1ffef36c1f29c06b026d17e9063bd17f6390359fbe32a84",
+      "bytes": 23850016,
+      "note": "Microsoft-signed; DirectML, d3d12 and dxgi are delay-loaded and unused by the CPU provider. Needs the Visual C++ 2015-2022 C++ runtime, bundled app-local.",
+      "cppRuntime": ["msvcp140.dll", "msvcp140_1.dll", "vcruntime140.dll", "vcruntime140_1.dll"]
+    }
+  }
+}

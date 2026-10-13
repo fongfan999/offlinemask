@@ -26,6 +26,13 @@ struct Process {
 }
 impl Process {
     fn spawn(command: &mut Command) -> Reply<Self> {
+        // A console helper would otherwise open a terminal window on Windows.
+        #[cfg(windows)]
+        {
+            use std::os::windows::process::CommandExt;
+            const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+            command.creation_flags(CREATE_NO_WINDOW);
+        }
         let mut child = command
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())

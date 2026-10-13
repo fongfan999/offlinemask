@@ -30,7 +30,8 @@ pub fn run() {
         app.manage(recognition_native::NativeRecognition::new(
             app.path()
                 .resource_dir()?
-                .join("native/libonnxruntime.1.24.3.dylib"),
+                .join("native")
+                .join(native_runtime::LIBRARY),
         ));
         Ok(())
     });
@@ -150,6 +151,8 @@ mod recognition_tokenizer;
 mod vault;
 use tauri::{Emitter, Manager};
 
+#[cfg(feature = "recognition-native-desktop")]
+mod native_runtime;
 #[cfg(all(
     feature = "recognition-native-desktop",
     not(feature = "recognition-native-sidecar")
