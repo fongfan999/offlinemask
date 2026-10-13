@@ -55,7 +55,10 @@ export function useRecognitionPack(
   let timer: ReturnType<typeof setTimeout> | undefined;
   let state: "idle" | "started" | "stopped" = "idle";
 
+  /** A status read can resolve after a newer pushed status (for example the
+   * "paused" push overtaking the read made right after pausing); never go back. */
   function apply(next: ModelStatus) {
+    if ((next.revision ?? 0) < (status.value.revision ?? 0)) return;
     status.value = next;
     error.value = "";
   }

@@ -49,6 +49,10 @@ pub struct ModelStatus {
     installed: u64,
     error: Option<String>,
     root: Option<String>,
+    /// Grows on every access to the status. A command reply and a pushed event can
+    /// reach the webview in either order; the UI keeps the higher revision, so a
+    /// stale "cancelling" read can no longer overwrite the "paused" push.
+    revision: u64,
 }
 struct Inner {
     root: PathBuf,
@@ -115,6 +119,7 @@ impl Models {
                 installed: 0,
                 error: None,
                 root: None,
+                revision: 0,
             }),
             cancel: AtomicBool::new(false),
             tokenizers: Mutex::new(BTreeMap::new()),
@@ -171,8 +176,12 @@ impl Models {
         removed.map_err(str::to_owned)
     }
     /// The status is plain data, so a panic elsewhere never makes it unreadable.
+    /// Every access bumps the revision, so any snapshot taken after a change is newer
+    /// than every snapshot taken before it.
     fn status(&self) -> MutexGuard<'_, ModelStatus> {
-        self.0.status.lock().unwrap_or_else(PoisonError::into_inner)
+        let mut status = self.0.status.lock().unwrap_or_else(PoisonError::into_inner);
+        status.revision += 1;
+        status
     }
     /// Push the current status. Progress is coalesced; `force` bypasses the interval.
     fn publish(&self, force: bool) {

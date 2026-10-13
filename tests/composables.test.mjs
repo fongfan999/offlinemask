@@ -184,6 +184,30 @@ test("pack: failures surface messages and a missing event channel falls back to 
   broken.stop();
 });
 
+test("pack: a stale status read cannot overwrite a newer push after pausing", async () => {
+  const at = (stage, revision) => ({ ...status(stage), revision });
+  let adapter;
+  adapter = fakeAdapter({
+    status: async () => at("downloading", 1),
+    // The read made right after pausing was taken before the worker stopped,
+    // but its reply lands after the "paused" push.
+    cancel: async () => {
+      adapter.push(at("paused", 4));
+    },
+  });
+  const original = adapter.status;
+  const pack = useRecognitionPack(adapter);
+  await pack.start();
+  assert.equal(pack.status.value.stage, "downloading");
+  adapter.status = async () => at("cancelling", 3);
+  await pack.run("pause");
+  assert.equal(pack.status.value.stage, "paused");
+  adapter.status = original;
+  adapter.push(at("downloading", 5));
+  assert.equal(pack.status.value.stage, "downloading");
+  pack.stop();
+});
+
 test("run: a finished text run hands its session to the shell and clears the draft", async () => {
   const detector = fakeDetector();
   const ready = ref(false);

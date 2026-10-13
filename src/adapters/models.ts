@@ -18,6 +18,8 @@ export interface ModelStatus {
   installed: number;
   error: string | null;
   root: string | null;
+  /** Native snapshot order; replies and pushes may arrive out of order. */
+  revision?: number;
 }
 
 export const installedModelBytes = packInstalledBytes();
