@@ -7,10 +7,23 @@ import MaskProgress from "../components/MaskProgress.vue";
 import PasscodeSetup from "../components/PasscodeSetup.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import ReviewList from "../components/ReviewList.vue";
-import { docKey, packKey, useProvided, vaultKey, type Page } from "../composables/context.ts";
-import { docPreviewParagraphs, type DocRestore } from "../composables/useDocRun.ts";
+import {
+  docKey,
+  packKey,
+  runKey,
+  useProvided,
+  vaultKey,
+  type Page,
+} from "../composables/context.ts";
+import {
+  docErrorMessages,
+  docPreviewParagraphs,
+  type DocRestore,
+} from "../composables/useDocRun.ts";
 import { applyReplacements } from "../core/doc/docx.ts";
 import { sampleDocName, sampleDocx } from "../core/doc/sample.ts";
+import { decodeText } from "../core/sheet/files.ts";
+import { maxTextLength } from "../core/text.ts";
 import type { DocSession } from "../core/sessions.ts";
 
 /** Word documents (decision 0078), in the same three steps as the other pages. */
@@ -23,6 +36,7 @@ const emit = defineEmits<{
 const doc = useProvided(docKey);
 const pack = useProvided(packKey);
 const vault = useProvided(vaultKey);
+const run = useProvided(runKey);
 const historyOn = computed(() => vault.state.value === "unlocked");
 const heading = useTemplateRef<HTMLHeadingElement>("heading");
 const primary = useTemplateRef<HTMLButtonElement>("primary");
@@ -101,6 +115,30 @@ const restoreStatus = computed(() => {
   return `Đã khôi phục ${current.restored.toLocaleString("vi-VN")} mã thay thế.`;
 });
 
+/** Plain text has a page of its own: a dropped .txt or .md opens there, pasted and
+ * ready to mask (decision 0083). Four bytes per character is the most UTF-8 needs. */
+const plainText = /\.(txt|md)$/i;
+async function openFile(file: File) {
+  if (!plainText.test(file.name)) return doc.openFile(file);
+  doc.fileError.value = "";
+  if (run.processing.value) {
+    doc.fileError.value = "Trang Văn bản đang ẩn một văn bản khác. Hãy thử lại khi xong.";
+    return;
+  }
+  const text =
+    file.size > maxTextLength * 4 ? null : decodeText(new Uint8Array(await file.arrayBuffer()));
+  if (text === null || text.length > maxTextLength) {
+    doc.fileError.value = `Tệp văn bản dài hơn ${maxTextLength.toLocaleString("vi-VN")} ký tự. Hãy chia nhỏ rồi dán từng phần vào trang Văn bản.`;
+    return;
+  }
+  if (!text.trim()) {
+    doc.fileError.value = docErrorMessages.empty;
+    return;
+  }
+  run.draft.value = text;
+  run.processingError.value = "";
+  emit("navigate", "text");
+}
 async function trySample() {
   const bytes = await sampleDocx();
   await doc.openFile(new File([new Uint8Array(bytes)], sampleDocName));
@@ -233,9 +271,9 @@ defineExpose({
           icon="file"
           title="Kéo thả tệp Word vào đây"
           hint=".docx · tối đa 20 MB"
-          accept=".docx"
+          accept=".docx,.txt,.md"
           :busy="doc.opening.value"
-          @file="doc.openFile"
+          @file="openFile"
         />
         <div class="input-hint-row">
           <button type="button" class="sample-link" @click="trySample">Thử với tệp mẫu</button>

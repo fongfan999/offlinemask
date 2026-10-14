@@ -465,3 +465,17 @@ test("in files, a model name without a capital letter is skipped; capitalized na
   );
   assert.equal(out, `[DIA_CHI_1_${scope}] tử ngộ đạo, gặp [TEN_1_${scope}] và trần bình`);
 });
+
+test("plain text decodes UTF-16 with a BOM and UTF-8 with or without one", () => {
+  const text = "Nguyễn Minh Anh";
+  const le = new Uint8Array(2 + text.length * 2);
+  le.set([0xff, 0xfe]);
+  for (let i = 0; i < text.length; i++)
+    le.set([text.charCodeAt(i) & 0xff, text.charCodeAt(i) >> 8], 2 + i * 2);
+  assert.equal(decodeText(le), text);
+  assert.equal(decodeText(new TextEncoder().encode(text)), text);
+  assert.equal(
+    decodeText(new Uint8Array([0xef, 0xbb, 0xbf, ...new TextEncoder().encode(text)])),
+    text,
+  );
+});

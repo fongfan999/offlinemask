@@ -1174,6 +1174,8 @@ th {
 }
 .drop-error {
   margin: 12px 24px 0;
+  font-size: 13px;
+  line-height: 1.6;
 }
 /* Masking all rows: one panel in place of the preview, with a bar and an estimate. */
 .sheet-progress {

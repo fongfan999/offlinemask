@@ -13,7 +13,7 @@ import type { SheetProgress } from "./useSheetRun.ts";
 
 export const processingFailure =
   "Chưa xử lý được văn bản trên thiết bị. Nội dung vẫn được giữ nguyên. Hãy thử lại hoặc kiểm tra gói nhận diện trong Cài đặt.";
-/** Detector progress in the shape the shared progress panel shows (decision 0080).
+/** Detector progress in the shape the shared progress panel shows (decision 0082).
  * `completed` is fractional across the pack's models, so it is scaled to whole steps. */
 export function textProgress(progress: DetectionProgress, startedAt: number): SheetProgress {
   return progress.stage === "loading"

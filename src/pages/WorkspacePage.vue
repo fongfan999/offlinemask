@@ -198,7 +198,7 @@ const subtitle = computed(() =>
 /** A text run keeps going in the background while the user navigates. */
 const textProcessing = computed(() => props.format === "text" && processing.value);
 /** Short texts finish in a moment; the progress panel appears only for a longer run,
- * so it never flashes (decision 0080). */
+ * so it never flashes (decision 0082). */
 const progressShown = ref(false);
 let progressTimer: ReturnType<typeof setTimeout> | undefined;
 watch(textProcessing, (busy) => {

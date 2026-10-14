@@ -1,4 +1,4 @@
-# 0080 — The text page shows the same progress panel as files
+# 0082 — The text page shows the same progress panel as files
 
 Date: 14 October 2026. Status: requested by the owner ("for the excel and word, I see an animation, for the text, do we have it. What if the text is long?").
 

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, watch } from "vue";
 
-/** One steady line while a file or a long text is masked (decisions 0076, 0078, 0080):
+/** One steady line while a file or a long text is masked (decisions 0076, 0078, 0082):
  * the same words, a percentage that only goes up, and a time estimate only once it is
  * stable. Stages are not named: with the native engine they change many times a second.
  * Counts of distinct texts are not shown either; they mean nothing to people. */
