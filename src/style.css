@@ -122,12 +122,12 @@ button:focus-visible,
 textarea:focus-visible,
 input:focus-visible,
 summary:focus-visible,
-[tabindex]:focus-visible {
+[tabindex]:not([tabindex="-1"]):focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
   border-radius: 3px;
 }
-h1:focus {
+[tabindex="-1"]:focus {
   outline: none;
 }
 button:disabled {
