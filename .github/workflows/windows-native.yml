@@ -17,6 +17,8 @@ on:
       - "scripts/build-desktop.mjs"
       - ".cargo/**"
       - ".github/workflows/windows-native.yml"
+      - ".gitattributes"
+      - "docs/licenses/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

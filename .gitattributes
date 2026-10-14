@@ -1,0 +1,4 @@
+# Check out text files with LF on every platform. Release scripts pin the SHA-256 of
+# licence notices (docs/licenses/), and Rust embeds pack files with include_str!, so a
+# Windows checkout must not turn them into CRLF (decision 0077).
+* text=auto eol=lf
