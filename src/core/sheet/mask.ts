@@ -1,4 +1,5 @@
 import type { Detection } from "../detection/types.ts";
+import { keepAliases } from "../file-review.ts";
 import type { Finding } from "../review.ts";
 import { restoreAliases } from "../restore.ts";
 import type { ColumnPlan } from "./columns.ts";
@@ -64,9 +65,11 @@ export class AliasBook {
   }
 }
 
-/** Replace detected spans in one cell, earliest and highest-priority first. */
 /** Detected spans to replace in one text, earliest and highest-priority first, as
- * alias replacements. Shared by spreadsheet cells and Word paragraphs. */
+ * alias replacements. Shared by spreadsheet cells and Word paragraphs, which are
+ * formal written text: there a person's name is capitalized, so a name span without
+ * a capital letter ("tử", "ngàn", "sân hận") is a misreading and is skipped
+ * (decision 0079). The text page keeps every span: chat often has lowercase names. */
 export function detectionReplacements(
   text: string,
   detections: readonly Detection[],
@@ -75,6 +78,7 @@ export function detectionReplacements(
   const ordered = [...detections]
     .filter((d) => d.start >= 0 && d.end <= text.length && d.end > d.start)
     .filter((d) => !needsLetters.has(d.type) || /\p{L}/u.test(text.slice(d.start, d.end)))
+    .filter((d) => d.type !== "TEN" || /\p{Lu}/u.test(text.slice(d.start, d.end)))
     .sort(
       (a, b) => b.priority - a.priority || b.end - b.start - (a.end - a.start) || a.start - b.start,
     );
@@ -276,3 +280,31 @@ export function splitDetections(
   }
   return into;
 }
+
+/** The file's edits without the values the user chose to keep (decision 0079): those
+ * go back to their original text, and a cell with nothing left hidden is not edited. */
+export function keepCells(
+  edits: CellEdits,
+  findings: readonly Finding[],
+  kept: ReadonlySet<string>,
+): CellEdits {
+  if (!kept.size) return edits;
+  const values = new Map(findings.map((finding) => [finding.alias, finding.value]));
+  return edits.map((sheet) => {
+    const changes = new Map<number, Map<number, string>>();
+    for (const [row, cells] of sheet)
+      for (const [column, text] of cells) {
+        const next = keepAliases(text, values, kept);
+        if (next === null) continue;
+        if (!changes.has(row)) changes.set(row, new Map());
+        changes.get(row)!.set(column, next);
+      }
+    return changes;
+  });
+}
+/** Every masked cell's text, for counting aliases. */
+export function* editedTexts(edits: CellEdits): Generator<string> {
+  for (const sheet of edits) for (const cells of sheet.values()) yield* cells.values();
+}
+export const editedCells = (edits: CellEdits) =>
+  edits.reduce((sum, sheet) => sum + [...sheet.values()].reduce((n, c) => n + c.size, 0), 0);

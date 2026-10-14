@@ -6,6 +6,7 @@ import FileDropZone from "../components/FileDropZone.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import PasscodeSetup from "../components/PasscodeSetup.vue";
 import RestorePanel from "../components/RestorePanel.vue";
+import ReviewList from "../components/ReviewList.vue";
 import { docKey, packKey, useProvided, vaultKey, type Page } from "../composables/context.ts";
 import { docPreviewParagraphs, type DocRestore } from "../composables/useDocRun.ts";
 import { applyReplacements } from "../core/doc/docx.ts";
@@ -41,6 +42,7 @@ const settingPasscode = ref(false);
 const keptNotice = ref("");
 
 const draft = doc.draft;
+const review = computed(() => (props.session ? doc.review(props.session) : null));
 watch(
   () => props.session?.id,
   () => {
@@ -303,6 +305,11 @@ defineExpose({
         {{ Math.min(docPreviewParagraphs, session.paragraphs) }} /
         {{ session.paragraphs.toLocaleString("vi-VN") }} đoạn đầu của bản đã ẩn
       </p>
+      <ReviewList
+        v-if="review?.length"
+        :groups="review"
+        @change="(aliases, keep) => doc.setKept(session!, aliases, keep)"
+      />
       <div
         v-if="!historyOn && (vault.state.value === 'none' || keptNotice)"
         class="keep-offer"

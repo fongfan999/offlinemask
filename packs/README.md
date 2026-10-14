@@ -23,10 +23,11 @@ The shipping pack is [`vietnamese-pii-v1.json`](vietnamese-pii-v1.json). The bui
       "source": "Underthesea · INT8",    // internal provenance before the pack name replaces it
       "graph": "model_int8",             // <graph>.onnx is loaded
       "offsets": "native",               // see “Choosing offsets” below
-      "labels": { "PER": "PERSON", "LOC": "LOCATION", "ORG": "ORGANIZATION" }
+      "labels": { "PER": "PERSON", "LOC": "LOCATION", "ORG": "ORGANIZATION" },
+      "minScore": 0.3                    // optional; spans whose mean token probability is lower are dropped
     },
     { "directory": "vietnamese-pii-multilingual", "source": "OpenMed · mSuperClinical · INT8",
-      "graph": "model_int8", "offsets": "sequential" }
+      "graph": "model_int8", "offsets": "sequential", "minScore": 0.3 }
   ],
   "assets": [                            // every file of every model, pinned by size and SHA-256
     {
@@ -69,6 +70,10 @@ Detections must point at exact positions in the user's original text.
 
 - `"sequential"`: the JavaScript aligner in `src/core/detection/source-offsets.ts` walks the tokenizer pieces in order against the NFC-normalized text. It works for Metaspace/SentencePiece-style tokenizers whose pieces reproduce the source characters (the OpenMed models).
 - `"native"`: the Rust `tokenizers` crate reports byte offsets for the same `tokenizer.json`, converted to UTF-16 units. The JavaScript token IDs must match the native IDs exactly, or the request fails closed. Use this when pieces do not reproduce the source (the Underthesea model). The optional `labels` map translates the model's label set; with a map present, unmapped labels become `O`.
+
+### Choosing `minScore`
+
+Optional, per model. A decoded span whose mean token probability is below `minScore` is dropped; absent means every span counts. Raise it only from a measured sweep that regresses no gate: `scripts/score-threshold/evaluate.mjs` runs the pack fixtures and the annotated corpora at several values. The shipped pack uses 0.3: at 0.4 an organization in the corpora was only partly covered ([decision 0079](../docs/decisions/0079-file-review-and-capital-names.md)).
 
 ## Replacing the models, step by step
 

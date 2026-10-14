@@ -448,3 +448,20 @@ test("writing one opened workbook twice never carries the first copy's aliases i
   assert.deepEqual(await read(first), ["[TEN_1_4aae]", "0901234567"]);
   assert.deepEqual(await read(second), ["An", "[SDT_1_4aae]"]);
 });
+
+test("in files, a model name without a capital letter is skipped; capitalized names stay", () => {
+  const book = new AliasBook(scope);
+  const text = "Thái tử ngộ đạo, gặp Nguyễn Minh Anh và trần bình";
+  const out = maskCell(
+    text,
+    [
+      detection(5, 7, "TEN"),
+      detection(8, 11, "TEN"),
+      detection(21, 36, "TEN"),
+      detection(40, 49, "TEN"),
+      detection(0, 4, "DIA_CHI"),
+    ],
+    book,
+  );
+  assert.equal(out, `[DIA_CHI_1_${scope}] tử ngộ đạo, gặp [TEN_1_${scope}] và trần bình`);
+});

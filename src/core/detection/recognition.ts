@@ -101,7 +101,11 @@ export async function loadPackRecognition(
   try {
     for (const model of pack.models) {
       const session = await backend(model, root);
-      runners.push(createModelRunner([createPackProvider(model, session, encode)]));
+      runners.push(
+        createModelRunner([createPackProvider(model, session, encode)], {
+          threshold: model.minScore ?? 0,
+        }),
+      );
     }
   } catch (error) {
     await Promise.all(runners.map((runner) => runner.dispose()));

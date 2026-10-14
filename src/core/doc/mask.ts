@@ -75,3 +75,25 @@ export function previewParagraphs(
     .slice(0, limit)
     .map((paragraph) => applyReplacements(paragraph.text, edits?.get(paragraph.id) ?? []));
 }
+
+/** The document's edits without the values the user chose to keep (decision 0079). */
+export function keepReplacements(edits: DocEdits, kept: ReadonlySet<string>): DocEdits {
+  if (!kept.size) return edits;
+  const paragraphs = new Map<number, Replacement[]>();
+  for (const [id, replacements] of edits.paragraphs) {
+    const left = replacements.filter((replacement) => !kept.has(replacement.text));
+    if (left.length) paragraphs.set(id, left);
+  }
+  return {
+    paragraphs,
+    links: new Map([...edits.links].filter(([, alias]) => !kept.has(alias))),
+  };
+}
+/** Every alias the document's edits write, for counting. */
+export function* editedAliases(edits: DocEdits): Generator<string> {
+  for (const replacements of edits.paragraphs.values())
+    for (const replacement of replacements) yield replacement.text;
+  yield* edits.links.values();
+}
+export const editedPlaces = (edits: DocEdits) =>
+  [...edits.paragraphs.values()].reduce((sum, list) => sum + list.length, 0);

@@ -2342,6 +2342,124 @@ td.alias {
 .vault-settings .model-uninstall .lock-reset-actions {
   justify-content: flex-start;
 }
+/* Values a masked file hides, to keep some before saving (decision 0079). */
+.review-list {
+  margin: 18px 24px 0;
+  padding: 14px 16px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper-raised);
+}
+.review-head {
+  font-size: 13px;
+  line-height: 1.55;
+}
+.review-head strong {
+  display: block;
+  font-weight: 600;
+}
+.review-head span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.review-types {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 12px;
+}
+.review-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px 5px 8px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.review-type span {
+  color: var(--muted);
+  font: 11px var(--mono);
+}
+.review-type.is-off {
+  color: var(--muted);
+  border-style: dashed;
+}
+.review-list input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+.review-search {
+  width: 100%;
+  margin-top: 10px;
+  padding: 7px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper);
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+}
+.review-search:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.review-values {
+  max-height: 280px;
+  margin: 10px 0 0;
+  padding: 0;
+  overflow-y: auto;
+  list-style: none;
+  scrollbar-width: thin;
+}
+/* A searchable list keeps its height while filtering, so the page does not jump. */
+.review-values.is-steady {
+  height: 280px;
+}
+.review-value {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 2px;
+  border-top: 1px solid var(--line);
+  cursor: pointer;
+  font-size: 13px;
+}
+.review-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.review-meta {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.review-value.is-kept .review-text {
+  color: var(--muted);
+  text-decoration: line-through;
+}
+.review-empty,
+.review-more {
+  margin: 0;
+  padding: 8px 2px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+@media (max-width: 600px) {
+  .review-value {
+    flex-wrap: wrap;
+  }
+  .review-meta {
+    width: 100%;
+    padding-left: 25px;
+  }
+}
 /* Offer on the review screen to keep sessions behind a passcode. */
 .keep-offer {
   display: flex;

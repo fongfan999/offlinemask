@@ -8,9 +8,14 @@ import {
 } from "../adapters/sheet-files.ts";
 import { detectionOptions, localOptions, type DetectionOption } from "../core/detection/options.ts";
 import type { Detection } from "../core/detection/types.ts";
+import { countAliases, reviewGroups } from "../core/file-review.ts";
+import type { Finding } from "../core/review.ts";
 import { suggestColumn, type ColumnPlan } from "../core/sheet/columns.ts";
 import {
   applyEdits,
+  editedCells,
+  editedTexts,
+  keepCells,
   maskTables,
   restoreTables,
   scanCells,
@@ -27,6 +32,7 @@ import {
 } from "../core/sessions.ts";
 import type { TextDetector } from "./useMaskingRun.ts";
 import { scanTexts, type TextScanProgress } from "./scanTexts.ts";
+import { useKeptValues } from "./useKeptValues.ts";
 
 export interface SheetDraft {
   /** Chosen when the file opens, so the preview shows the aliases the file will get. */
@@ -80,8 +86,17 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
   /** The original workbook and its edits per masked session, for downloading. RAM only. */
   const originals = new Map<
     string,
-    { handle: string; edits: CellEdits; tables: SheetTable[]; notes: string[] }
+    {
+      handle: string;
+      edits: CellEdits;
+      tables: SheetTable[];
+      notes: string[];
+      /** Every value the file hid, before any is kept, and how often. */
+      findings: Finding[];
+      counts: Map<string, number>;
+    }
   >();
+  const kept = useKeptValues();
   /** A workbook handle stays open while a draft or any masked session still uses it. */
   function release(handle: string) {
     const used =
@@ -222,6 +237,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     for (const [id, original] of originals)
       if (!sessions.value.some((session) => session.id === id)) {
         originals.delete(id);
+        kept.forget(id);
         release(original.handle);
       }
   }
@@ -273,6 +289,8 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
         edits: result.edits,
         tables: current.tables,
         notes: current.notes,
+        findings: result.findings,
+        counts: countAliases(editedTexts(result.edits), result.findings),
       });
       draft.value = null;
       onSession(session);
@@ -296,10 +314,31 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
   function canDownload(session: SheetSession) {
     return originals.has(session.id);
   }
+  /** Hidden values of a masked file, while its workbook is open, for the review list. */
+  function review(session: SheetSession) {
+    const original = originals.get(session.id);
+    return original ? reviewGroups(original.findings, original.counts, kept.of(session.id)) : null;
+  }
+  /** Keep (or hide again) values everywhere in the file; the session's preview, count
+   * and alias table follow, so restoring knows only what the file hides. */
+  function setKept(session: SheetSession, aliases: readonly string[], keep: boolean) {
+    const original = originals.get(session.id);
+    const stored = sessions.value.find((item) => item.id === session.id);
+    if (!original || stored?.format !== "excel") return;
+    const now = kept.set(session.id, aliases, keep);
+    const edits = keepCells(original.edits, original.findings, now);
+    stored.preview = original.tables.map((table, index) => {
+      const view = applyEdits(table, edits[index], sheetPreviewRows);
+      return { preamble: view.preamble, header: view.header, rows: view.rows };
+    });
+    stored.findings = original.findings.filter((finding) => !now.has(finding.alias));
+    stored.masked = editedCells(edits);
+  }
   async function download(session: SheetSession): Promise<boolean> {
     const original = originals.get(session.id);
     if (!original) return false;
-    const bytes = await files.write(original.handle, original.edits);
+    const edits = keepCells(original.edits, original.findings, kept.of(session.id));
+    const bytes = await files.write(original.handle, edits);
     return saveFile(bytes, exportName(session.fileName, "đã ẩn"));
   }
 
@@ -345,6 +384,8 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     canReopen,
     reopen,
     canDownload,
+    review,
+    setKept,
     download,
     openReturned,
     downloadRestored,

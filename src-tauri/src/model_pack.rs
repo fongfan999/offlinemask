@@ -40,6 +40,9 @@ pub(crate) struct Model {
     pub offsets: Offsets,
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub labels: BTreeMap<String, String>,
+    /// Lowest mean token probability a span may have; the frontend drops weaker spans.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub min_score: Option<f64>,
 }
 #[derive(Clone, Copy, Debug, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
@@ -595,6 +598,7 @@ mod tests {
                 graph: "model".into(),
                 offsets: Offsets::Sequential,
                 labels: BTreeMap::new(),
+                min_score: None,
             }],
             assets,
         }

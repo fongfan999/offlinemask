@@ -64,6 +64,8 @@ test("pack validation rejects what a contributor is most likely to get wrong", (
     ["identity mismatch", (p) => (p.assets[0].transport.bytes = 11)],
     ["installer-owned LICENSE", (p) => p.assets.push(asset("one", "LICENSE"))],
     ["label map values", (p) => (p.models[0].labels = { PER: 3 })],
+    ["score above one", (p) => (p.models[0].minScore = 1.2)],
+    ["score as text", (p) => (p.models[0].minScore = "0.3")],
     [
       "parts do not add up",
       (p) =>

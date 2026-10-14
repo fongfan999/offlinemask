@@ -19,6 +19,12 @@ export interface PackModel {
    * When present, labels missing from the map are treated as `O`.
    */
   labels?: Record<string, string>;
+  /**
+   * Optional lowest mean token probability (0 ≤ minScore < 1) a decoded span must reach;
+   * weaker spans are dropped. Absent means 0, every span. Set only from a measured
+   * evaluation that regresses no gate (decision 0079).
+   */
+  minScore?: number;
 }
 
 export interface PackTransportPart {
@@ -103,6 +109,12 @@ function validateModel(value: unknown, index: number): PackModel {
   const offsets = model.offsets;
   if (offsets !== "native" && offsets !== "sequential")
     fail(`${field}.offsets must be "native" or "sequential"`);
+  const minScore = model.minScore;
+  if (
+    minScore !== undefined &&
+    (typeof minScore !== "number" || !Number.isFinite(minScore) || minScore < 0 || minScore >= 1)
+  )
+    fail(`${field}.minScore must be a number from 0 up to 1`);
   let labels: Record<string, string> | undefined;
   if (model.labels !== undefined) {
     labels = {};
@@ -115,6 +127,7 @@ function validateModel(value: unknown, index: number): PackModel {
     graph: pathComponent(model.graph, `${field}.graph`),
     offsets,
     ...(labels ? { labels } : {}),
+    ...(minScore !== undefined ? { minScore } : {}),
   };
 }
 

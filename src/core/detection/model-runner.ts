@@ -16,7 +16,12 @@ export interface ModelProvider {
   dispose(): Promise<unknown>;
 }
 
-export function createModelRunner(providers: readonly ModelProvider[]) {
+/** `threshold` drops a decoded span whose mean token probability is below it; 0 keeps
+ * every span, as shipped. Evaluations may raise it (decision 0079). */
+export function createModelRunner(
+  providers: readonly ModelProvider[],
+  { threshold = 0 }: { threshold?: number } = {},
+) {
   if (!providers.length) throw new Error("Model provider required");
   const progressDefault = (_value: DetectionProgress) => {};
   async function inspect(text: string, progress = progressDefault, signal?: AbortSignal) {
@@ -40,7 +45,7 @@ export function createModelRunner(providers: readonly ModelProvider[]) {
         const tokens = await provider.predict(chunk.text);
         signal?.throwIfAborted();
         const aligned = (provider.align ?? alignSourceTokens)(chunk.text, tokens);
-        const spans = decodeBioTokenSpans(chunk.text, aligned, { threshold: 0 });
+        const spans = decodeBioTokenSpans(chunk.text, aligned, { threshold });
         predictions.push(
           ...modelDetections(chunk.text, spans).map((span) => ({
             ...span,

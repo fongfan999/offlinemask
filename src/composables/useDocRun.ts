@@ -6,12 +6,22 @@ import {
   type SheetFiles,
 } from "../adapters/sheet-files.ts";
 import { maxDocBytes, type DocEdits, type DocParagraph, type DocError } from "../core/doc/docx.ts";
-import { maskParagraphs, previewParagraphs, restoreParagraphs } from "../core/doc/mask.ts";
+import {
+  editedAliases,
+  editedPlaces,
+  keepReplacements,
+  maskParagraphs,
+  previewParagraphs,
+  restoreParagraphs,
+} from "../core/doc/mask.ts";
 import { detectionOptions, localOptions, type DetectionOption } from "../core/detection/options.ts";
 import type { Detection } from "../core/detection/types.ts";
+import { countAliases, reviewGroups } from "../core/file-review.ts";
+import type { Finding } from "../core/review.ts";
 import { aliasScope, newSessionId, type DocSession, type Session } from "../core/sessions.ts";
 import type { TextDetector } from "./useMaskingRun.ts";
 import { scanTexts } from "./scanTexts.ts";
+import { useKeptValues } from "./useKeptValues.ts";
 import type { SheetProgress } from "./useSheetRun.ts";
 
 export const docPreviewParagraphs = 20;
@@ -47,6 +57,9 @@ interface Original {
   paragraphs: DocParagraph[];
   notes: string[];
   mailto: string[];
+  /** Every value the document hid, before any is kept, and how often. */
+  findings: Finding[];
+  counts: Map<string, number>;
 }
 export interface DocRunDependencies {
   detector: TextDetector;
@@ -75,6 +88,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
   const previewDetections = shallowRef(new Map<number, Detection[]>());
   const previewScanning = ref(false);
   const originals = new Map<string, Original>();
+  const kept = useKeptValues();
   let cancelled = false;
 
   const options = computed<DetectionOption[]>(() =>
@@ -166,6 +180,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
     for (const [id, original] of originals)
       if (!sessions.value.some((session) => session.id === id)) {
         originals.delete(id);
+        kept.forget(id);
         release(original.handle);
       }
   }
@@ -212,6 +227,8 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
         paragraphs: current.paragraphs,
         notes: current.notes,
         mailto: current.mailto,
+        findings: result.findings,
+        counts: countAliases(editedAliases(result.edits), result.findings),
       });
       draft.value = null;
       onSession(session);
@@ -250,10 +267,28 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
     if (previous && previous !== original.handle) release(previous);
     return true;
   }
+  /** Hidden values of a masked document, while its file is open, for the review list. */
+  function review(session: DocSession) {
+    const original = originals.get(session.id);
+    return original ? reviewGroups(original.findings, original.counts, kept.of(session.id)) : null;
+  }
+  /** Keep (or hide again) values everywhere in the document; the session's preview,
+   * count and alias table follow, so restoring knows only what the file hides. */
+  function setKept(session: DocSession, aliases: readonly string[], keep: boolean) {
+    const original = originals.get(session.id);
+    const stored = sessions.value.find((item) => item.id === session.id);
+    if (!original || stored?.format !== "word") return;
+    const now = kept.set(session.id, aliases, keep);
+    const edits = keepReplacements(original.edits, now);
+    stored.preview = previewParagraphs(original.paragraphs, edits.paragraphs, docPreviewParagraphs);
+    stored.findings = original.findings.filter((finding) => !now.has(finding.alias));
+    stored.masked = editedPlaces(edits);
+  }
   async function download(session: DocSession): Promise<boolean> {
     const original = originals.get(session.id);
     if (!original) return false;
-    const bytes = await files.writeDoc(original.handle, original.edits);
+    const edits = keepReplacements(original.edits, kept.of(session.id));
+    const bytes = await files.writeDoc(original.handle, edits);
     return saveFile(bytes, exportName(session.fileName, "đã ẩn"));
   }
   async function openReturned(session: DocSession, file: File): Promise<DocRestore | string> {
@@ -298,6 +333,8 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
     cancelMask,
     canReopen,
     reopen,
+    review,
+    setKept,
     download,
     openReturned,
     downloadRestored,

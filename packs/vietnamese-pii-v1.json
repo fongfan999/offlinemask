@@ -8,6 +8,7 @@
       "source": "Underthesea · INT8",
       "graph": "model_int8",
       "offsets": "native",
+      "minScore": 0.3,
       "labels": {
         "PER": "PERSON",
         "LOC": "LOCATION",
@@ -18,7 +19,8 @@
       "directory": "vietnamese-pii-multilingual",
       "source": "OpenMed · mSuperClinical · INT8",
       "graph": "model_int8",
-      "offsets": "sequential"
+      "offsets": "sequential",
+      "minScore": 0.3
     }
   ],
   "assets": [
