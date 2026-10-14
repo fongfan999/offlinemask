@@ -212,7 +212,7 @@ async function closeSidebar() {
         <!-- The text and spreadsheet pages stay alive across navigation, so the step,
              view and pasted reply are still there on return. All of it is RAM only. -->
         <KeepAlive include="WorkspacePage,SheetPage,DocPage">
-          <HomePage v-if="page === 'home'" ref="pageRef" @navigate="openFormat" />
+          <HomePage v-if="page === 'home'" ref="pageRef" @navigate="openFormat" @start="navigate" />
           <SettingsPage v-else-if="page === 'settings'" ref="pageRef" />
           <SheetPage
             v-else-if="page === 'excel'"

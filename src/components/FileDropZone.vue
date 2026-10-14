@@ -6,11 +6,13 @@ import AppIcon from "./AppIcon.vue";
  * button; the real file input stays hidden. Window drops reach the page because
  * Tauri's own drag-and-drop is off (decision 0076). */
 defineProps<{
-  icon: "table" | "file" | "undo";
+  icon: "table" | "file" | "undo" | "upload";
   title: string;
   hint: string;
   accept: string;
   busy?: boolean;
+  /** One row (icon beside the words), for the home page's start box. */
+  compact?: boolean;
 }>();
 const emit = defineEmits<{ file: [file: File] }>();
 const picker = useTemplateRef<HTMLInputElement>("picker");
@@ -26,7 +28,7 @@ function take(files: FileList | null | undefined) {
   <button
     type="button"
     class="drop-zone"
-    :class="{ 'is-dragging': dragging, 'is-busy': busy }"
+    :class="{ 'is-dragging': dragging, 'is-busy': busy, 'is-compact': compact }"
     :disabled="busy"
     @click="picker?.click()"
     @dragover.prevent="dragging = true"
@@ -37,8 +39,10 @@ function take(files: FileList | null | undefined) {
     "
   >
     <span class="drop-icon"><AppIcon :name="icon" :size="26" /></span>
-    <strong>{{ busy ? "Đang mở tệp…" : title }}</strong>
-    <span>hoặc <u>chọn tệp</u> · {{ hint }}</span>
+    <span class="drop-words"
+      ><strong>{{ busy ? "Đang mở tệp…" : title }}</strong>
+      <span>hoặc <u>chọn tệp</u> · {{ hint }}</span></span
+    >
   </button>
   <input
     ref="picker"

@@ -1,13 +1,76 @@
 <script setup lang="ts">
-import { computed, useTemplateRef } from "vue";
+import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from "vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import AppIcon from "../components/AppIcon.vue";
+import FileDropZone from "../components/FileDropZone.vue";
 import MaskingPreview from "../components/MaskingPreview.vue";
-import { packKey, useProvided, type Page } from "../composables/context.ts";
+import {
+  docKey,
+  packKey,
+  runKey,
+  sheetKey,
+  useProvided,
+  type Page,
+} from "../composables/context.ts";
+import { sampleText } from "../core/review.ts";
 import { packProgress } from "../composables/useRecognitionPack.ts";
 
-const emit = defineEmits<{ navigate: [destination: Page] }>();
+const emit = defineEmits<{
+  /** A card or link: the format's page as the user last left it. */
+  navigate: [destination: Page];
+  /** The start box: the format's first step, where the file or text just went. */
+  start: [destination: Page];
+}>();
 const pack = useProvided(packKey);
+const run = useProvided(runKey);
+const sheet = useProvided(sheetKey);
+const doc = useProvided(docKey);
+
+/** One place to start (decision 0089): drop or choose any supported file, or paste
+ * text anywhere on the page; the app opens the right page with it. */
+const accept = ".xlsx,.xls,.ods,.csv,.docx,.odt,.txt,.md";
+const pasteKey = /Mac|iPhone|iPad/.test(navigator.userAgent) ? "⌘V" : "Ctrl+V";
+const startError = ref("");
+async function startWith(file: File) {
+  startError.value = "";
+  const name = file.name.toLowerCase();
+  if (/\.(txt|md)$/.test(name)) {
+    startError.value = await run.openTextFile(file);
+    if (!startError.value) emit("start", "text");
+  } else if (/\.(xlsx|xls|ods|csv)$/.test(name)) {
+    emit("start", "excel");
+    void sheet.openFile(file);
+  } else if (/\.(docx|odt)$/.test(name)) {
+    emit("start", "word");
+    void doc.openFile(file);
+  } else if (/\.doc$/.test(name))
+    startError.value = "Tệp .doc cũ hãy mở bằng Word và lưu lại thành .docx trước.";
+  else if (/\.(pdf|jpe?g|png|heic|webp)$/.test(name))
+    startError.value =
+      "PDF và hình ảnh sắp được hỗ trợ. Hiện mở được Excel, CSV, Word và tệp văn bản.";
+  else
+    startError.value =
+      "Chưa mở được loại tệp này. Hãy dùng Excel (.xlsx, .xls), .ods, .csv, Word (.docx), .odt hoặc .txt.";
+}
+function startWithText(text: string) {
+  if (run.processing.value) {
+    startError.value = "Trang Văn bản đang ẩn một văn bản khác. Hãy thử lại khi xong.";
+    return;
+  }
+  run.draft.value = text;
+  run.processingError.value = "";
+  emit("start", "text");
+}
+function paste(event: ClipboardEvent) {
+  const file = event.clipboardData?.files[0];
+  const text = event.clipboardData?.getData("text/plain") ?? "";
+  if (!file && !text.trim()) return;
+  event.preventDefault();
+  if (file) void startWith(file);
+  else startWithText(text);
+}
+onMounted(() => window.addEventListener("paste", paste));
+onBeforeUnmount(() => window.removeEventListener("paste", paste));
 const heading = useTemplateRef<HTMLHeadingElement>("heading");
 defineExpose({
   focusHeading() {
@@ -68,8 +131,9 @@ const packNotice = computed<PackNotice | null>(() => {
     default:
       return {
         icon: "download",
-        title: `Tải gói nhận diện (${size}) để tự ẩn họ tên, địa chỉ và thông tin riêng tư khác.`,
-        detail: pack.error.value || "Email, số điện thoại, số tài khoản đã dùng được ngay.",
+        title: `Muốn tự ẩn cả họ tên và địa chỉ? Tải thêm gói nhận diện (${size}, chỉ một lần).`,
+        detail:
+          pack.error.value || "Không bắt buộc: email, số điện thoại, số tài khoản đã được ẩn ngay.",
         action: download("Tải về"),
       };
   }
@@ -88,8 +152,25 @@ const packNotice = computed<PackNotice | null>(() => {
     </p>
     <MaskingPreview />
   </div>
+  <section class="start-box" aria-label="Bắt đầu">
+    <FileDropZone
+      icon="upload"
+      title="Kéo thả tệp hoặc dán văn bản"
+      :hint="`Excel, CSV, Word, TXT · dán bằng ${pasteKey}`"
+      :accept="accept"
+      compact
+      @file="startWith"
+    />
+    <p v-if="startError" class="input-error start-error" role="alert">{{ startError }}</p>
+    <div class="start-notes">
+      <span><AppIcon name="lock" :size="13" />Tệp và văn bản không rời khỏi máy bạn.</span>
+      <button type="button" class="sample-link" @click="startWithText(sampleText)">
+        Xem thử với ví dụ
+      </button>
+    </div>
+  </section>
   <section class="format-grid" aria-labelledby="format-heading">
-    <h2 id="format-heading">Chọn nội dung để bắt đầu</h2>
+    <h2 id="format-heading">Hoặc chọn loại nội dung</h2>
     <button class="format-card glass" @click="emit('navigate', 'text')">
       <span class="format-icon"><AppIcon name="text" :size="29" /></span
       ><span class="format-title">Văn bản<AppIcon name="arrow" :size="20" /></span

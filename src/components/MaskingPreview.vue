@@ -5,12 +5,12 @@ import AppIcon from "./AppIcon.vue";
 <template>
   <figure
     class="masking-preview"
-    aria-label="Ba bước: dán văn bản và bấm Ẩn thông tin, sao chép bản đã ẩn sang AI, rồi dán câu trả lời của AI vào OfflineMask để thấy lại tên thật"
+    aria-label="Ba bước: bấm Ẩn thông tin, gửi bản đã ẩn cho AI, rồi đưa câu trả lời của AI vào OfflineMask để thấy lại tên thật"
   >
     <div class="preview-flow">
       <div class="preview-document glass">
         <div class="preview-step">
-          <span class="step-number">1</span><span>Dán, bấm <strong>Ẩn thông tin</strong></span>
+          <span class="step-number">1</span><span>Bấm <strong>Ẩn thông tin</strong></span>
         </div>
         <div class="preview-label"><AppIcon name="file" :size="14" />Bản gốc</div>
         <div class="preview-value original-value">Phong Phan</div>
@@ -29,7 +29,7 @@ import AppIcon from "./AppIcon.vue";
         <AppIcon name="arrow" :size="22" />
       </div>
       <div class="preview-document preview-ai glass">
-        <div class="preview-step"><span class="step-number">2</span>Sao chép sang AI</div>
+        <div class="preview-step"><span class="step-number">2</span>Gửi bản đã ẩn cho AI</div>
         <div class="preview-label"><AppIcon name="sparkle" :size="14" />AI của bạn</div>
         <strong>Hỏi AI như bình thường</strong>
         <small>ChatGPT, Gemini, Claude, Perplexity…</small>
@@ -37,7 +37,7 @@ import AppIcon from "./AppIcon.vue";
     </div>
     <figcaption class="preview-return">
       <span class="preview-step"
-        ><span class="step-number">3</span>Dán câu trả lời của AI vào OfflineMask</span
+        ><span class="step-number">3</span>Đưa câu trả lời của AI vào OfflineMask</span
       >
       <span>Tên thật hiện lại, vẫn chỉ trên máy bạn.</span>
     </figcaption>
