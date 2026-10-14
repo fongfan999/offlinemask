@@ -1,5 +1,5 @@
 import type { Detection } from "./types.ts";
-import { mergeModelDetections } from "./model-policy.ts";
+import { mergeModelDetections, plausibleModelDetections } from "./model-policy.ts";
 import { completeAddressBoundaries } from "./address-boundaries.ts";
 import { detectBankingIdentifiers } from "./banking.ts";
 import { detectContactDetails } from "./contact.ts";
@@ -20,7 +20,7 @@ export function localDetections(text: string): Detection[] {
  * contact, identifier or address-completion rules. Neither array is persisted.
  */
 export function applyDetectionPolicy(text: string, predictions: readonly Detection[]) {
-  const modelOnly = mergeModelDetections([...predictions]);
+  const modelOnly = plausibleModelDetections(text, mergeModelDetections([...predictions]));
   const fields = detectLabelledFields(text);
   const completed = completeAddressBoundaries(text, [...modelOnly, ...fields.detections]);
   const complete = reconcileStructuredValues(

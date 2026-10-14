@@ -160,5 +160,67 @@
       "tail@example.org"
     ],
     "retain": []
+  },
+  {
+    "id": "contract-parties",
+    "text": "HỢP ĐỒNG CỘNG TÁC VIÊN\nHôm nay, ngày … tháng … năm 2025, Chúng tôi gồm có:\n\tBÊN A\t: CÔNG TY CỔ PHẦN HOA MAI\n\tMã số thuế\t: 0101234567\n\tĐịa chỉ trụ sở\t: 12 Lê Lợi, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh\n\t\t\tĐại diện bởi\t: Ông TRẦN VĂN HÙNG\n\tChức vụ\t: Giám Đốc\n\tBÊN B\t: LÊ THỊ THU HÀ\n\tNgày sinh\t: 05/03/1996\n\tCCCD số\t: 079196001234\n\tĐịa chỉ thường trú\t: 45 Nguyễn Huệ, phường 2, Quận 5, TP.HCM\n\tSố tài khoản\t: 100200300400\n(Sau đây gọi là “Bên B”)",
+    "sensitive": [
+      "CÔNG TY CỔ PHẦN HOA MAI",
+      "0101234567",
+      "12 Lê Lợi, Phường Bến Nghé, Quận 1, Thành phố Hồ Chí Minh",
+      "TRẦN VĂN HÙNG",
+      "LÊ THỊ THU HÀ",
+      "05/03/1996",
+      "079196001234",
+      "45 Nguyễn Huệ, phường 2, Quận 5, TP.HCM",
+      "100200300400"
+    ],
+    "retain": [
+      "BÊN A\t:",
+      "BÊN B\t:",
+      "(Sau đây gọi là “Bên B”)",
+      "Đại diện bởi\t: Ông",
+      "Chúng tôi gồm có:"
+    ]
+  },
+  {
+    "id": "contract-clauses",
+    "text": "1.1.\tTheo các điều khoản của Hợp đồng này, Bên A yêu cầu và Bên B đồng ý cung cấp dịch vụ thiết kế. Các Bên thống nhất rằng Bên A thanh toán cho Bên B trong vòng 05 ngày; bên B gửi đề nghị thanh toán cho bên A. Trường hợp một Bên vi phạm, Bên bị vi phạm có quyền chấm dứt Hợp đồng. Bên thứ ba không được sử dụng Sản phẩm.",
+    "sensitive": [],
+    "retain": [
+      "Bên A yêu cầu và Bên B đồng ý",
+      "Các Bên thống nhất rằng Bên A thanh toán cho Bên B",
+      "bên B gửi đề nghị thanh toán cho bên A",
+      "một Bên vi phạm, Bên bị vi phạm",
+      "Bên thứ ba"
+    ]
+  },
+  {
+    "id": "contract-headings",
+    "text": "Điều 3.\tPhí Dịch Vụ - Thanh Toán\nThù lao: 8.800.000 VND (Bằng chữ: Tám triệu tám trăm nghìn đồng) – Đã bao gồm thuế TNCN\nĐiều 5.\tPhạt vi phạm Hợp đồng – Bồi thường thiệt hại\nSự Kiện Bất Khả Kháng là sự kiện không lường trước được và nằm ngoài sự kiểm soát hợp lý của các Bên.\nMọi Thông Tin Mật sẽ được coi là tài sản của Bên A.",
+    "sensitive": [],
+    "retain": [
+      "Phí Dịch Vụ - Thanh Toán",
+      "Bằng chữ: Tám triệu tám trăm nghìn đồng",
+      "Phạt vi phạm Hợp đồng",
+      "Sự Kiện Bất Khả Kháng là sự kiện",
+      "các Bên",
+      "Mọi Thông Tin Mật sẽ"
+    ]
+  },
+  {
+    "id": "contract-signatures",
+    "text": "Hợp đồng này được lập thành bốn (04) bản. Bên A giữ ba (03) bản, Bên B giữ một (01) bản.\nĐại diện Bên A\nBên B\nGiám Đốc\nTRẦN VĂN HÙNG\n\nLÊ THỊ THU HÀ\nHotline: 0974000111. Email: phap.che@example.com",
+    "sensitive": [
+      "TRẦN VĂN HÙNG",
+      "LÊ THỊ THU HÀ",
+      "0974000111",
+      "phap.che@example.com"
+    ],
+    "retain": [
+      "Bên A giữ ba (03) bản, Bên B giữ một (01) bản.",
+      "Đại diện Bên A",
+      "Giám Đốc"
+    ]
   }
 ]

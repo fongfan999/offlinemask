@@ -153,12 +153,14 @@ export function detectContextFields(
     if (end === prefixEnd || (capitals < 2 && !acronym)) continue;
     // Reject an overlong name rather than quietly complete just its first tokens.
     if (tokens === 12 && /^[^\S\r\n]+[\p{Lu}\p{N}]/u.test(text.slice(cursor))) continue;
+    // A contract names its parties with the same legal prefix ("BÊN A: CÔNG TY …").
     const labelled =
-      /(?:don vi|ten (?:cong ty|doanh nghiep)|to chuc)[^\S\r\n]*[:：][^\S\r\n]*$/u.test(
+      /(?:don vi|ten (?:cong ty|doanh nghiep)|to chuc|(?:cac )?ben(?: [a-z]| \d{1,2}| [a-z]+(?: [a-z]+)?)?|dai dien|khach hang|doi tac|nha thau|chu dau tu)[^\S\r\n]*[:：][^\S\r\n]*$/u.test(
         fold(text.slice(Math.max(0, start - 70), start)),
       );
+    // Model evidence anywhere on the name, the prefix included, seeds the completion.
     const seeded = seeds.some(
-      (d) => ["TO_CHUC", "TEN"].includes(d.type) && d.start < end && d.end > prefixEnd,
+      (d) => ["TO_CHUC", "TEN"].includes(d.type) && d.start < end && d.end > start,
     );
     if (!labelled && !seeded) continue;
     fields.detections.push(finding(start, end, "TO_CHUC", "Tổ chức"));

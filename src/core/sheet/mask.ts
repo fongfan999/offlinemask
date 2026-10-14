@@ -266,18 +266,17 @@ export function splitDetections(
   detections: readonly Detection[],
   into: Map<string, Detection[]> = new Map(),
 ): Map<string, Detection[]> {
-  for (const detection of detections) {
-    const part = batch.parts.find((p) => detection.start >= p.start && detection.start < p.end);
-    if (!part) continue;
-    const list = into.get(part.key) ?? [];
-    list.push({
-      ...detection,
-      start: detection.start - part.start,
-      // A span never runs past its own cell.
-      end: Math.min(detection.end, part.end) - part.start,
-    });
-    into.set(part.key, list);
-  }
+  for (const detection of detections)
+    // A span over the separator belongs to every cell it touches, clipped to each.
+    for (const part of batch.parts) {
+      if (detection.start >= part.end || detection.end <= part.start) continue;
+      const start = Math.max(detection.start, part.start) - part.start;
+      const end = Math.min(detection.end, part.end) - part.start;
+      if (end <= start) continue;
+      const list = into.get(part.key) ?? [];
+      list.push({ ...detection, start, end });
+      into.set(part.key, list);
+    }
   return into;
 }
 

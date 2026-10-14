@@ -103,4 +103,4 @@ Optional, per model. A decoded span whose mean token probability is below `minSc
 
 ## What a pack cannot change
 
-The six user-facing categories, the structured-value rules, the alias format and the review flow are shared code with their own tests. A pack changes which contextual evidence feeds that policy, nothing else. The historical OpenMed development models under `scripts/model-manifest.json` are kept for reproducing earlier evaluations and are not a pack.
+The six user-facing categories, the structured-value rules, the plausibility rules for model spans (field separators, contract parties, boilerplate phrases; decision 0080), the alias format and the review flow are shared code with their own tests. A pack changes which contextual evidence feeds that policy, nothing else. The historical OpenMed development models under `scripts/model-manifest.json` are kept for reproducing earlier evaluations and are not a pack.

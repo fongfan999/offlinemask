@@ -33,18 +33,154 @@ export const combinedModelSource = "Kết hợp nhiều mô hình";
 /** Placeholder provenance; the model runner replaces it with the provider's source. */
 export const defaultModelSource = "Mô hình nhận diện";
 
+const contextual = new Set(["TEN", "DIA_CHI", "TO_CHUC"]);
+const word = /[\p{L}\p{M}\p{N}_]/u;
+/** A field separator or a line break never sits inside one name, place or organization;
+ * a sentence end never sits inside a name or an organization (addresses keep "TP. HCM"). */
+const addressSeparators = /[:：\t\r\n]/gu;
+const nameSeparators = /[:：\t\r\n]|\.(?=\s|$)/gu;
+/** The parties of a Vietnamese contract ("Bên A", "BÊN B", "Bên thuê", "Các Bên"): a role
+ * in the text, never a person, place or organization. A closed list, so "bên chị Lan"
+ * still keeps the name. */
+const partyRoles = [
+  "\\p{L}",
+  "\\d{1,2}",
+  "(?:thứ\\s+)?(?:nhất|hai|ba|bốn|năm)",
+  "kia",
+  "còn\\s+lại",
+  "(?:bị\\s+)?vi\\s+phạm",
+  "bị\\s+ảnh\\s+hưởng",
+  "(?:cho\\s+)?(?:mua|bán|thuê|vay|mượn|tặng)(?:\\s+lại)?",
+  "(?:được|nhận)\\s+(?:tặng\\s+cho|bảo\\s+lãnh|ủy\\s+quyền|chuyển\\s+nhượng|thế\\s+chấp|đặt\\s+cọc|nhượng\\s+quyền|bảo\\s+hiểm)",
+  "(?:bảo\\s+lãnh|ủy\\s+quyền|chuyển\\s+nhượng|thế\\s+chấp|đặt\\s+cọc|nhượng\\s+quyền|bảo\\s+hiểm|góp\\s+vốn|gia\\s+công)",
+  "(?:nhận|giao|cung\\s+cấp|sử\\s+dụng|đặt|thi\\s+công|phân\\s+phối|đại\\s+lý)(?:\\s+(?:hàng|dịch\\s+vụ))?",
+];
+const party = new RegExp(
+  `^(?:(?:các|hai|ba|mỗi|một|từng)\\s+)?bên(?:\\s+(?:${partyRoles.join("|")}))?$`,
+  "iu",
+);
+
+/** Contract boilerplate that Title Case makes look like names ("Sự Kiện Bất Khả Kháng",
+ * "Phí Dịch Vụ - Thanh Toán", "Bằng chữ: Tám triệu đồng"): a span inside one of these
+ * phrases, or inside an amount written in words, is a misreading. Whole phrases only, so
+ * "Nguyễn Thanh Toán" or "Công ty Dịch vụ Bình An", which reach past them, are kept. */
+const numberWords =
+  "một|hai|ba|bốn|năm|sáu|bảy|tám|chín|mười|mươi|lăm|linh|lẻ|trăm|nghìn|ngàn|triệu|tỷ|tỉ";
+const boilerplatePhrases = [
+  "hợp đồng cộng tác viên",
+  "sự kiện bất khả kháng",
+  "bất khả kháng",
+  "hợp đồng",
+  "phụ lục",
+  "điều khoản",
+  "điều \\d+",
+  "khoản \\d+",
+  "mục \\d+",
+  "cộng tác viên",
+  "phí dịch vụ",
+  "dịch vụ",
+  "thanh toán",
+  "thù lao",
+  "bằng chữ",
+  "bằng văn bản",
+  "mọi thông tin mật",
+  "thông tin mật",
+  "mọi thông tin",
+  "bảo mật",
+  "án phí",
+  "phạt vi phạm",
+  "phạt",
+  "vi phạm",
+  "bồi thường",
+  "thiệt hại",
+  "các bên",
+  "hai bên",
+  "mỗi bên",
+  "bên kia",
+  "bên thứ ba",
+  "giấy ủy quyền",
+  "giấy phép",
+  "giấy tờ",
+  "giấy chứng nhận",
+  "sản phẩm",
+  "bao bì",
+  "chức vụ",
+  "(?:tổng |phó )?giám đốc(?: (?:tài chính|điều hành|kinh doanh|nhân sự|kỹ thuật|dự án|sản xuất|chi nhánh))?",
+  "kế toán trưởng",
+  "trưởng phòng",
+  "chủ tịch(?: hội đồng (?:quản trị|thành viên))?",
+  `(?:(?:${numberWords}) )+(?:trăm|nghìn|ngàn|triệu|tỷ|tỉ|đồng|vnd|usd)`,
+];
+// Longest phrase first, and consecutive phrases form one run ("HỢP ĐỒNG DỊCH VỤ").
+const phrase = `(?:${[...boilerplatePhrases]
+  .sort((a, b) => b.length - a.length)
+  .join("|")
+  .replace(/ /g, "[^\\S\\r\\n]+")})`;
+const boilerplate = new RegExp(
+  `(?<![\\p{L}\\p{M}\\p{N}])${phrase}(?:[^\\S\\r\\n]+${phrase})*(?![\\p{L}\\p{M}\\p{N}])`,
+  "giu",
+);
+/** Ranges of the boilerplate phrases in one text, for spans to be checked against. */
+export function boilerplateRanges(text: string): [number, number][] {
+  return [...text.normalize("NFC").matchAll(boilerplate)].map((match) => [
+    match.index,
+    match.index + match[0].length,
+  ]);
+}
+
+/** Whether a predicted name, place or organization can be one at all: it needs a letter
+ * and two symbols (a place may count digits: "Quận 5"), and it is not a contract party. */
+export function plausibleContextualSpan(type: string, value: string): boolean {
+  if (!contextual.has(type)) return true;
+  const content = value.normalize("NFC");
+  const symbols = content.match(type === "DIA_CHI" ? /[\p{L}\p{N}]/gu : /\p{L}/gu) ?? [];
+  if (symbols.length < 2 || !/\p{L}/u.test(content)) return false;
+  const words = content
+    .replace(/[^\p{L}\p{M}\p{N}\s]/gu, " ")
+    .replace(/\s+/gu, " ")
+    .trim();
+  return !party.test(words);
+}
+
+/** A predicted span cut at the separators its type never contains, trimmed. */
+function pieces(text: string, start: number, end: number, type: string) {
+  const result: [number, number][] = [];
+  const pattern = type === "DIA_CHI" ? addressSeparators : nameSeparators;
+  let cursor = start;
+  const push = (from: number, to: number) => {
+    while (from < to && /\s/u.test(text[from]!)) from++;
+    while (to > from && /\s/u.test(text[to - 1]!)) to--;
+    if (to > from) result.push([from, to]);
+  };
+  for (const match of text.slice(start, end).matchAll(pattern)) {
+    push(cursor, start + match.index);
+    cursor = start + match.index + match[0].length;
+  }
+  push(cursor, end);
+  return result;
+}
+
 /** Dates/amounts/currencies stay readable; model scores are review cues, not guarantees. */
 export function modelDetections(text: string, spans: readonly DecodedEntitySpan[]): Detection[] {
   const detections: Detection[] = [];
-  for (const span of [...spans].sort((a, b) => a.start - b.start)) {
-    const label = labels[span.canonical_label];
-    if (!label) continue;
-    const [type, name] = label;
-    let { start, end } = span;
+  const typed = [...spans]
+    .sort((a, b) => a.start - b.start)
+    .flatMap((span) => {
+      const label = labels[span.canonical_label];
+      if (!label) return [];
+      const [type, name] = label;
+      // A span never crosses a field separator or a line; each side stands on its own.
+      const parts = contextual.has(type)
+        ? pieces(text, span.start, span.end, type)
+        : [[span.start, span.end] as [number, number]];
+      return parts.map(([start, end]) => ({ start, end, type, name }));
+    });
+  for (const piece of typed) {
+    const { type, name } = piece;
+    let { start, end } = piece;
     // A subword prediction must never leave the rest of the same word exposed.
     // This repairs boundaries only; it does not guess adjacent unlabelled names.
-    if (["TEN", "DIA_CHI", "TO_CHUC"].includes(type)) {
-      const word = /[\p{L}\p{M}\p{N}_]/u;
+    if (contextual.has(type)) {
       while (start > 0 && word.test(text[start] ?? "") && word.test(text[start - 1] ?? "")) start--;
       while (end < text.length && word.test(text[end - 1] ?? "") && word.test(text[end] ?? ""))
         end++;
@@ -52,7 +188,7 @@ export function modelDetections(text: string, spans: readonly DecodedEntitySpan[
     const previous = detections[detections.length - 1];
     // The model labels Vietnamese name/address components separately.
     // A hyphen/apostrophe joins two predicted name pieces, never arbitrary prose.
-    const joiner = type === "TEN" ? /^(?:[^\S\r\n]*|[-'’])$/u : /^[\s,]*$/u;
+    const joiner = type === "TEN" ? /^(?:[^\S\r\n]*|[-'’])$/u : /^(?:[^\S\r\n]|,)*$/u;
     if (
       previous &&
       (type === "TEN" || type === "DIA_CHI") &&
@@ -74,7 +210,20 @@ export function modelDetections(text: string, spans: readonly DecodedEntitySpan[
       reason: "Mô hình nhận diện theo ngữ cảnh. Hãy kiểm tra lại phạm vi thông tin được ẩn.",
     });
   }
-  return detections;
+  return plausibleModelDetections(text, detections);
+}
+
+/** Drop the spans no name, place or organization can be. Applied per model window and
+ * again on the whole text, where a phrase cut by a window edge is whole. Decomposed
+ * text skips the phrase check: ranges are NFC positions, and the window text is NFC. */
+export function plausibleModelDetections(text: string, detections: readonly Detection[]) {
+  const phrases = text === text.normalize("NFC") ? boilerplateRanges(text) : [];
+  return detections.filter(
+    (d) =>
+      plausibleContextualSpan(d.type, text.slice(d.start, d.end)) &&
+      (!contextual.has(d.type) ||
+        !phrases.some(([start, end]) => start <= d.start && d.end <= end)),
+  );
 }
 
 /** Combine overlapping evidence across models/windows without dropping exposed tails. */
