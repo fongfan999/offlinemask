@@ -49,6 +49,7 @@ const {
   draftError,
   missingSelectedModels,
   cancel,
+  openTextFile,
 } = useProvided(runKey);
 const { save } = useProvided(sessionsKey);
 const vault = useProvided(vaultKey);
@@ -196,6 +197,19 @@ const subtitle = computed(() =>
     : "Thông tin bạn chọn được thay bằng mã như [SDT_1_…], ngay trên máy bạn.",
 );
 /** A text run keeps going in the background while the user navigates. */
+/** A .txt or .md file dropped on the text box becomes the draft (decision 0088); other
+ * files are pointed to their page. Dropped text (not a file) is left to the browser. */
+function dragOver(event: DragEvent) {
+  if (event.dataTransfer?.types.includes("Files")) event.preventDefault();
+}
+async function dropFile(event: DragEvent) {
+  const file = event.dataTransfer?.files[0];
+  if (!file) return;
+  event.preventDefault();
+  processingError.value = /\.(txt|md)$/i.test(file.name)
+    ? await openTextFile(file)
+    : "Ô này nhận tệp .txt hoặc .md. Mở tệp Excel ở Bảng tính, tệp Word ở Tài liệu.";
+}
 const textProcessing = computed(() => props.format === "text" && processing.value);
 /** Short texts finish in a moment; the progress panel appears only for a longer run,
  * so it never flashes (decision 0082). */
@@ -542,7 +556,7 @@ defineExpose({
             v-model="draft"
             :disabled="processing"
             class="text-content draft-input"
-            placeholder="Nhập hoặc dán văn bản vào đây…"
+            placeholder="Nhập, dán văn bản hoặc kéo thả tệp .txt vào đây…"
             spellcheck="false"
             autocomplete="off"
             autocorrect="off"
@@ -550,6 +564,8 @@ defineExpose({
             aria-describedby="text-input-hint"
             :aria-invalid="draft.length > maxTextLength"
             @input="processingError = ''"
+            @dragover="dragOver"
+            @drop="dropFile"
             @keydown.meta.enter.prevent="submitShortcut"
             @keydown.ctrl.enter.prevent="submitShortcut"
           ></textarea>

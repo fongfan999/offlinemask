@@ -15,15 +15,9 @@ import {
   vaultKey,
   type Page,
 } from "../composables/context.ts";
-import {
-  docErrorMessages,
-  docPreviewParagraphs,
-  type DocRestore,
-} from "../composables/useDocRun.ts";
+import { docPreviewParagraphs, type DocRestore } from "../composables/useDocRun.ts";
 import { applyReplacements } from "../core/doc/docx.ts";
 import { sampleDocName, sampleDocx } from "../core/doc/sample.ts";
-import { decodeText } from "../core/sheet/files.ts";
-import { maxTextLength } from "../core/text.ts";
 import type { DocSession } from "../core/sessions.ts";
 
 /** Word and OpenDocument documents (decisions 0078, 0084), in the same three steps as the other pages. */
@@ -116,28 +110,12 @@ const restoreStatus = computed(() => {
 });
 
 /** Plain text has a page of its own: a dropped .txt or .md opens there, pasted and
- * ready to mask (decision 0083). Four bytes per character is the most UTF-8 needs. */
+ * ready to mask (decision 0083). */
 const plainText = /\.(txt|md)$/i;
 async function openFile(file: File) {
   if (!plainText.test(file.name)) return doc.openFile(file);
-  doc.fileError.value = "";
-  if (run.processing.value) {
-    doc.fileError.value = "Trang Văn bản đang ẩn một văn bản khác. Hãy thử lại khi xong.";
-    return;
-  }
-  const text =
-    file.size > maxTextLength * 4 ? null : decodeText(new Uint8Array(await file.arrayBuffer()));
-  if (text === null || text.length > maxTextLength) {
-    doc.fileError.value = `Tệp văn bản dài hơn ${maxTextLength.toLocaleString("vi-VN")} ký tự. Hãy chia nhỏ rồi dán từng phần vào trang Văn bản.`;
-    return;
-  }
-  if (!text.trim()) {
-    doc.fileError.value = docErrorMessages.empty;
-    return;
-  }
-  run.draft.value = text;
-  run.processingError.value = "";
-  emit("navigate", "text");
+  doc.fileError.value = await run.openTextFile(file);
+  if (!doc.fileError.value) emit("navigate", "text");
 }
 async function trySample() {
   const bytes = await sampleDocx();

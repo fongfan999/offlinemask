@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
+import ComingSoonBadge from "./ComingSoonBadge.vue";
 import { openProductWebsite, productWebsite } from "../adapters/desktop.ts";
 import type { Page } from "../composables/context.ts";
 import { sessionPreview } from "../core/session-preview.ts";
@@ -18,6 +19,16 @@ defineProps<{
 }>();
 const emit = defineEmits<{ navigate: [destination: Page, id?: string | null]; close: [] }>();
 
+/** Each content type with the files it opens (decision 0088). */
+const formats = [
+  { page: "text", icon: "text", label: "Văn bản", types: "TXT, MD" },
+  { page: "excel", icon: "table", label: "Bảng tính", types: "XLSX, XLS, ODS, CSV" },
+  { page: "word", icon: "file", label: "Tài liệu", types: "DOCX, ODT" },
+] as const;
+const upcomingFormats = [
+  { label: "PDF", icon: "pdf", types: "" },
+  { label: "Hình ảnh", icon: "image", types: "JPG, PNG" },
+];
 const start = useTemplateRef<HTMLButtonElement>("start");
 const websiteError = ref("");
 async function visitWebsite(event: MouseEvent) {
@@ -68,22 +79,26 @@ defineExpose({
         <AppIcon name="home" />Trang chủ
       </button>
       <button
-        :aria-current="page === 'text' && (!activeId || !history) ? 'page' : undefined"
-        @click="emit('navigate', 'text')"
+        v-for="format in formats"
+        :key="format.page"
+        :aria-current="page === format.page && (!activeId || !history) ? 'page' : undefined"
+        @click="emit('navigate', format.page)"
       >
-        <AppIcon name="text" />Văn bản
+        <AppIcon :name="format.icon" /><span class="nav-text"
+          >{{ format.label }}<small>{{ format.types }}</small></span
+        >
       </button>
+      <!-- Formats that are planned but not built: visible, not clickable. -->
       <button
-        :aria-current="page === 'excel' && (!activeId || !history) ? 'page' : undefined"
-        @click="emit('navigate', 'excel')"
+        v-for="upcoming in upcomingFormats"
+        :key="upcoming.label"
+        class="nav-upcoming"
+        :aria-label="`${upcoming.label}, sắp có`"
+        disabled
       >
-        <AppIcon name="table" />Bảng tính
-      </button>
-      <button
-        :aria-current="page === 'word' && (!activeId || !history) ? 'page' : undefined"
-        @click="emit('navigate', 'word')"
-      >
-        <AppIcon name="file" />Tài liệu
+        <AppIcon :name="upcoming.icon" /><span class="nav-text nav-label"
+          >{{ upcoming.label }}<small v-if="upcoming.types">{{ upcoming.types }}</small></span
+        ><ComingSoonBadge />
       </button>
     </nav>
     <template v-if="history">

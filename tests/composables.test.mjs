@@ -399,3 +399,20 @@ test("review: sample sessions and stale selections never change", async () => {
   assert.equal(await review.hideSelection(), false);
   assert.equal(await review.undoManualMask(), false);
 });
+
+test("run: a .txt file becomes the draft; long, empty or busy cases explain why", async () => {
+  const detector = fakeDetector();
+  const run = useMaskingRun({
+    detector,
+    pack: { ready: ref(false), readyRoot: ref(null) },
+    sessions: ref([]),
+    onSession: () => {},
+  });
+  assert.equal(await run.openTextFile(new File(["Gọi 0901234567"], "a.txt")), "");
+  assert.equal(run.draft.value, "Gọi 0901234567");
+  assert.match(await run.openTextFile(new File(["a".repeat(50_001)], "b.md")), /dài hơn 50\.000/);
+  assert.match(await run.openTextFile(new File(["  \n"], "c.txt")), /không có chữ/);
+  assert.equal(run.draft.value, "Gọi 0901234567", "a refused file leaves the draft");
+  void run.mask("text");
+  assert.match(await run.openTextFile(new File(["x"], "d.txt")), /đang ẩn/);
+});

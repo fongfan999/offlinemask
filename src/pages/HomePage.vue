@@ -2,7 +2,6 @@
 import { computed, useTemplateRef } from "vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import AppIcon from "../components/AppIcon.vue";
-import ComingSoonBadge from "../components/ComingSoonBadge.vue";
 import MaskingPreview from "../components/MaskingPreview.vue";
 import { packKey, useProvided, type Page } from "../composables/context.ts";
 import { packProgress } from "../composables/useRecognitionPack.ts";
@@ -17,7 +16,7 @@ defineExpose({
 });
 
 interface PackNotice {
-  icon: "check" | "download";
+  icon: "download";
   title: string;
   detail?: string;
   action?: { label: string; run: () => void; needsDesktop?: boolean };
@@ -34,8 +33,9 @@ const packNotice = computed<PackNotice | null>(() => {
   switch (status.stage) {
     case "checking":
       return null;
+    // Once installed there is nothing to do here; Cài đặt shows the pack (decision 0088).
     case "ready":
-      return { icon: "check", title: "Gói nhận diện đã sẵn sàng." };
+      return null;
     case "downloading":
       return {
         icon: "download",
@@ -93,24 +93,22 @@ const packNotice = computed<PackNotice | null>(() => {
     <button class="format-card glass" @click="emit('navigate', 'text')">
       <span class="format-icon"><AppIcon name="text" :size="29" /></span
       ><span class="format-title">Văn bản<AppIcon name="arrow" :size="20" /></span
-      ><span class="format-description">Email, tin nhắn</span>
+      ><span class="format-description">Dán email, tin nhắn</span
+      ><span class="format-types">TXT, MD</span>
     </button>
     <button class="format-card glass" @click="emit('navigate', 'excel')">
       <span class="format-icon"><AppIcon name="table" :size="29" /></span
       ><span class="format-title">Bảng tính<AppIcon name="arrow" :size="20" /></span
-      ><span class="format-description">Excel, ODS, CSV</span>
+      ><span class="format-description">Sao kê, danh sách</span
+      ><span class="format-types">XLSX, XLS, ODS, CSV</span>
     </button>
     <button class="format-card glass" @click="emit('navigate', 'word')">
       <span class="format-icon"><AppIcon name="file" :size="29" /></span
       ><span class="format-title">Tài liệu<AppIcon name="arrow" :size="20" /></span
-      ><span class="format-description">Word, ODT</span>
+      ><span class="format-description">Hợp đồng, báo cáo</span
+      ><span class="format-types">DOCX, ODT</span>
     </button>
-    <div
-      v-if="packNotice"
-      class="pack-notice"
-      :class="{ 'pack-ready': pack.ready.value }"
-      role="status"
-    >
+    <div v-if="packNotice" class="pack-notice" role="status">
       <AppIcon :name="packNotice.icon" :size="16" />
       <p>
         {{ packNotice.title }}<span v-if="packNotice.detail">{{ packNotice.detail }}</span>
@@ -125,11 +123,4 @@ const packNotice = computed<PackNotice | null>(() => {
       </button>
     </div>
   </section>
-  <aside class="coming-soon" aria-labelledby="upcoming-formats">
-    <span id="upcoming-formats" class="upcoming-formats-label">Định dạng <ComingSoonBadge /></span>
-    <ul aria-labelledby="upcoming-formats">
-      <li>PDF</li>
-      <li>Hình ảnh</li>
-    </ul>
-  </aside>
 </template>
