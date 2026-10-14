@@ -5,10 +5,11 @@ import type { DocEdits, DocParagraph } from "../core/doc/docx.ts";
 import type { FilesRequest, FilesResponse } from "../workers/files.worker.ts";
 
 export const fileErrorMessages: Record<FileError, string> = {
-  unsupported: "Chỉ hỗ trợ tệp .xlsx và .csv. Tệp .xls cũ hãy lưu lại thành .xlsx trước.",
+  unsupported: "Chỉ hỗ trợ tệp .xlsx, .ods và .csv. Tệp .xls cũ hãy lưu lại thành .xlsx trước.",
   "too-large": "Tệp lớn hơn 20 MB. Hãy chia nhỏ tệp rồi thử lại.",
   "too-many-rows": "Tệp có hơn 100.000 dòng. Hãy chia nhỏ tệp rồi thử lại.",
-  unreadable: "Chưa đọc được tệp này. Hãy kiểm tra tệp có mở được trong Excel không.",
+  unreadable:
+    "Chưa đọc được tệp này. Hãy kiểm tra tệp mở được trong Excel hoặc LibreOffice và không có mật khẩu.",
   empty: "Tệp không có dữ liệu.",
 };
 export class SheetAdapterError extends Error {
@@ -83,8 +84,15 @@ const mimeTypes = {
   csv: "text/csv",
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   odt: "application/vnd.oasis.opendocument.text",
+  ods: "application/vnd.oasis.opendocument.spreadsheet",
 };
-const fileKinds = { xlsx: "Excel", csv: "CSV", docx: "Word", odt: "OpenDocument" } as const;
+const fileKinds = {
+  xlsx: "Excel",
+  csv: "CSV",
+  docx: "Word",
+  odt: "OpenDocument",
+  ods: "OpenDocument",
+} as const;
 /** "Sổ khách.xlsx" + "da-an" → "Sổ khách (đã ẩn).xlsx". */
 export function exportName(original: string, suffix: string): string {
   const dot = original.lastIndexOf(".");
@@ -99,7 +107,9 @@ export function exportName(original: string, suffix: string): string {
 export async function saveFile(bytes: Uint8Array, name: string): Promise<boolean> {
   const extension = name.toLowerCase().split(".").pop();
   const format =
-    extension === "csv" || extension === "docx" || extension === "odt" ? extension : "xlsx";
+    extension === "csv" || extension === "docx" || extension === "odt" || extension === "ods"
+      ? extension
+      : "xlsx";
   if (isTauri()) {
     const [{ save }, { writeFile }] = await Promise.all([
       import("@tauri-apps/plugin-dialog"),

@@ -79,7 +79,7 @@ const subtitle = computed(() => {
   }
   return draft.value
     ? `${totalRows.value.toLocaleString("vi-VN")} dòng${draft.value.tables.length > 1 ? ` · ${draft.value.tables.length} trang tính` : ""} · Chọn cách xử lý từng cột, rồi ẩn toàn bộ.`
-    : "Mở tệp Excel hoặc CSV. Thông tin bạn chọn được thay bằng mã như [SDT_1_…], ngay trên máy bạn.";
+    : "Mở tệp Excel, LibreOffice hoặc CSV. Thông tin bạn chọn được thay bằng mã như [SDT_1_…], ngay trên máy bạn.";
 });
 const totalRows = computed(
   () => draft.value?.tables.reduce((sum, table) => sum + table.rows.length, 0) ?? 0,
@@ -267,9 +267,9 @@ defineExpose({
       <template v-if="!draft">
         <FileDropZone
           icon="table"
-          title="Kéo thả tệp Excel hoặc CSV vào đây"
-          hint=".xlsx, .csv · tối đa 20 MB"
-          accept=".xlsx,.csv"
+          title="Kéo thả bảng tính vào đây"
+          hint=".xlsx, .ods, .csv · tối đa 20 MB"
+          accept=".xlsx,.ods,.csv"
           :busy="sheet.opening.value"
           @file="sheet.openFile"
         />
@@ -457,7 +457,7 @@ defineExpose({
           icon="undo"
           title="Kéo thả tệp AI trả về vào đây"
           hint="mã thay thế được đổi lại thành thông tin thật"
-          accept=".xlsx,.csv"
+          accept=".xlsx,.ods,.csv"
           :busy="restoreBusy"
           @file="openReturned"
         />

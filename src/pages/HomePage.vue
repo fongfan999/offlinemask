@@ -98,7 +98,7 @@ const packNotice = computed<PackNotice | null>(() => {
     <button class="format-card glass" @click="emit('navigate', 'excel')">
       <span class="format-icon"><AppIcon name="table" :size="29" /></span
       ><span class="format-title">Bảng tính<AppIcon name="arrow" :size="20" /></span
-      ><span class="format-description">Excel, CSV</span>
+      ><span class="format-description">Excel, ODS, CSV</span>
     </button>
     <button class="format-card glass" @click="emit('navigate', 'word')">
       <span class="format-icon"><AppIcon name="file" :size="29" /></span

@@ -1,17 +1,18 @@
 import ExcelJS from "exceljs";
 import Papa from "papaparse";
 import type { CellEdits, SheetTable } from "./mask.ts";
+import { odsGrid, parseOds, readOdsPackage, writeOds, type OdsSource } from "./ods.ts";
 
-/** Supported input (decision 0076): ordinary .xlsx workbooks and .csv files, up to
+/** Supported input (decisions 0076, 0085): .xlsx and .ods workbooks and .csv files, up to
  * these limits. Everything stays in memory on this machine. */
 export const maxFileBytes = 20 * 1024 * 1024;
 export const maxDataRows = 100_000;
-export type SheetFormat = "xlsx" | "csv";
+export type SheetFormat = "xlsx" | "ods" | "csv";
 export type FileError = "unsupported" | "too-large" | "too-many-rows" | "unreadable" | "empty";
 
 export function sheetFormat(fileName: string): SheetFormat | null {
   const extension = fileName.toLowerCase().split(".").pop();
-  return extension === "xlsx" ? "xlsx" : extension === "csv" ? "csv" : null;
+  return extension === "xlsx" || extension === "ods" || extension === "csv" ? extension : null;
 }
 
 export interface CsvSource {
@@ -25,7 +26,7 @@ export interface XlsxSource {
   workbook: ExcelJS.Workbook;
   sheets: ExcelJS.Worksheet[];
 }
-export type SheetSource = CsvSource | XlsxSource;
+export type SheetSource = CsvSource | XlsxSource | OdsSource;
 export interface OpenedFile {
   source: SheetSource;
   tables: SheetTable[];
@@ -215,6 +216,20 @@ export async function writeXlsx(source: XlsxSource, edits: CellEdits): Promise<U
   }
 }
 
+export async function readOds(bytes: Uint8Array): Promise<OpenedFile> {
+  const zip = await readOdsPackage(bytes);
+  if (!zip) throw new SheetFileError("unreadable");
+  const xml = await zip.file("content.xml")!.async("string");
+  const sheets = parseOds(xml);
+  const tables = sheets.map((sheet) => tableFrom(sheet.name, odsGrid(sheet.rows, maxDataRows)));
+  checkRows(tables);
+  return {
+    source: { format: "ods", zip, xml, sheets },
+    tables,
+    notes: ["Ghi chú trong ô, biểu đồ và hình ảnh không được kiểm tra."],
+  };
+}
+
 export async function openSheetFile(bytes: Uint8Array, name: string): Promise<OpenedFile> {
   const format = sheetFormat(name);
   if (!format) throw new SheetFileError("unsupported");
@@ -226,11 +241,10 @@ export async function openSheetFile(bytes: Uint8Array, name: string): Promise<Op
       throw error instanceof SheetFileError ? error : new SheetFileError("unreadable");
     }
   }
-  return readXlsx(bytes);
+  return format === "ods" ? readOds(bytes) : readXlsx(bytes);
 }
 
 export function writeSheetFile(source: SheetSource, edits: CellEdits): Promise<Uint8Array> {
-  return source.format === "csv"
-    ? Promise.resolve(writeCsv(source, edits))
-    : writeXlsx(source, edits);
+  if (source.format === "csv") return Promise.resolve(writeCsv(source, edits));
+  return source.format === "ods" ? writeOds(source, edits) : writeXlsx(source, edits);
 }

@@ -144,7 +144,31 @@ export function odtMailtoTargets(source: DocSource): string[] {
   return [...found];
 }
 
-const authors = /<(dc:creator|meta:initial-creator)>[^<]*<\/\1>/g;
+/** Author names in ODF XML: document properties, comments and tracked changes. */
+export const odfAuthors = /<(dc:creator|meta:initial-creator)>[^<]*<\/\1>/g;
+
+/** What every masked ODF copy needs besides its edited text: author names cleared in
+ * `meta.xml`, the first-page thumbnail (a picture of the original) removed with its
+ * manifest entry, and `mimetype` kept the first, uncompressed entry. */
+export async function cleanOdfPackage(zip: JSZip, mimeType: string): Promise<Uint8Array> {
+  const meta = zip.file("meta.xml");
+  if (meta) zip.file("meta.xml", (await meta.async("string")).replace(odfAuthors, "<$1></$1>"));
+  const thumbnails = Object.keys(zip.files).filter((name) => name.startsWith("Thumbnails/"));
+  if (thumbnails.length) {
+    thumbnails.forEach((name) => zip.remove(name));
+    const manifest = zip.file("META-INF/manifest.xml");
+    if (manifest)
+      zip.file(
+        "META-INF/manifest.xml",
+        (await manifest.async("string")).replace(
+          /<manifest:file-entry\b[^>]*manifest:full-path="Thumbnails\/[^"]*"[^>]*\/>/g,
+          "",
+        ),
+      );
+  }
+  zip.file("mimetype", mimeType, { compression: "STORE" });
+  return zip.generateAsync({ type: "uint8array", compression: "DEFLATE" });
+}
 
 /** Write a copy with the edits applied; the opened source is not changed. Author names
  * (document properties, comments, tracked changes) are cleared, and the first-page
@@ -159,24 +183,8 @@ export async function writeOdt(source: DocSource, edits: DocEdits): Promise<Uint
         const alias = edits.links.get(unescapeXml(address));
         return alias ? `xlink:href="mailto:${escapeXml(alias)}` : whole;
       })
-      .replace(authors, "<$1></$1>");
+      .replace(odfAuthors, "<$1></$1>");
     if (xml !== part.xml) zip.file(part.name, xml);
   });
-  const meta = zip.file("meta.xml");
-  if (meta) zip.file("meta.xml", (await meta.async("string")).replace(authors, "<$1></$1>"));
-  const thumbnails = Object.keys(zip.files).filter((name) => name.startsWith("Thumbnails/"));
-  if (thumbnails.length) {
-    thumbnails.forEach((name) => zip.remove(name));
-    const manifest = zip.file("META-INF/manifest.xml");
-    if (manifest)
-      zip.file(
-        "META-INF/manifest.xml",
-        (await manifest.async("string")).replace(
-          /<manifest:file-entry\b[^>]*manifest:full-path="Thumbnails\/[^"]*"[^>]*\/>/g,
-          "",
-        ),
-      );
-  }
-  zip.file("mimetype", odtMimeType, { compression: "STORE" });
-  return zip.generateAsync({ type: "uint8array", compression: "DEFLATE" });
+  return cleanOdfPackage(zip, odtMimeType);
 }
