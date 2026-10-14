@@ -2,6 +2,7 @@
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import HighlightedText from "../components/HighlightedText.vue";
+import MaskProgress from "../components/MaskProgress.vue";
 import PasscodeSetup from "../components/PasscodeSetup.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
@@ -43,7 +44,7 @@ const {
   selectedOptions,
   selectionEdited,
   processing,
-  processingStatus,
+  progress,
   processingError,
   draftError,
   missingSelectedModels,
@@ -196,6 +197,15 @@ const subtitle = computed(() =>
 );
 /** A text run keeps going in the background while the user navigates. */
 const textProcessing = computed(() => props.format === "text" && processing.value);
+/** Short texts finish in a moment; the progress panel appears only for a longer run,
+ * so it never flashes (decision 0080). */
+const progressShown = ref(false);
+let progressTimer: ReturnType<typeof setTimeout> | undefined;
+watch(textProcessing, (busy) => {
+  clearTimeout(progressTimer);
+  progressShown.value = false;
+  if (busy) progressTimer = setTimeout(() => (progressShown.value = true), 700);
+});
 const step = computed(() => {
   if (!session.value) return 1;
   return restoreStep.value && privateSession.value ? 3 : 2;
@@ -798,7 +808,7 @@ defineExpose({
             >
           </div>
         </div>
-        <p v-if="textProcessing" class="detection-note" role="status">{{ processingStatus }}</p>
+        <MaskProgress v-if="textProcessing && progressShown && progress" :progress="progress" />
         <footer class="card-footer">
           <span v-if="session" class="action-hint"
             ><AppIcon v-if="privateSession && savedNote" name="lock" :size="13" />{{

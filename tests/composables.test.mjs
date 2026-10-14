@@ -225,7 +225,8 @@ test("run: a finished text run hands its session to the shell and clears the dra
   const masking = run.mask("text");
   assert.equal(run.processing.value, true);
   await nextTick();
-  assert.equal(run.processingStatus.value, "Đang phân tích 25%…");
+  assert.equal(run.progress.value.stage, "reading");
+  assert.equal(run.progress.value.done / run.progress.value.total, 0.25);
   detector.settle([
     {
       start: 4,
@@ -243,7 +244,7 @@ test("run: a finished text run hands its session to the shell and clears the dra
   assert.deepEqual(received, [session]);
   assert.equal(run.draft.value, "");
   assert.equal(run.processing.value, false);
-  assert.equal(run.processingStatus.value, "");
+  assert.equal(run.progress.value, null);
 });
 
 test("run: cancellation discards the result, failures keep the draft, spreadsheets are not its job", async () => {

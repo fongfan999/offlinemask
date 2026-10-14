@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, watch } from "vue";
 
-/** One steady line while a file is masked (decisions 0076, 0078): the same words, a
- * percentage that only goes up, and a time estimate only once it is stable. Stages
- * are not named: with the native engine they change many times a second. Counts of
- * distinct texts are not shown either; they mean nothing to people. */
+/** One steady line while a file or a long text is masked (decisions 0076, 0078, 0080):
+ * the same words, a percentage that only goes up, and a time estimate only once it is
+ * stable. Stages are not named: with the native engine they change many times a second.
+ * Counts of distinct texts are not shown either; they mean nothing to people. */
 const props = defineProps<{
   progress: {
     stage: "loading" | "reading" | "masking";

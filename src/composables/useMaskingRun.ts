@@ -9,14 +9,21 @@ import {
 import type { DetectionProgress } from "../core/detection/types.ts";
 import { createTextSession, type Format, type Session } from "../core/sessions.ts";
 import { validateText } from "../core/text.ts";
+import type { SheetProgress } from "./useSheetRun.ts";
 
-export const loadingStatus = "Đang chuẩn bị… Lần đầu có thể mất một lúc.";
 export const processingFailure =
   "Chưa xử lý được văn bản trên thiết bị. Nội dung vẫn được giữ nguyên. Hãy thử lại hoặc kiểm tra gói nhận diện trong Cài đặt.";
-export function processingStatusFor(progress: DetectionProgress): string {
+/** Detector progress in the shape the shared progress panel shows (decision 0080).
+ * `completed` is fractional across the pack's models, so it is scaled to whole steps. */
+export function textProgress(progress: DetectionProgress, startedAt: number): SheetProgress {
   return progress.stage === "loading"
-    ? loadingStatus
-    : `Đang phân tích ${Math.round((progress.completed / progress.total) * 100)}%…`;
+    ? { stage: "loading", done: 0, total: 0, startedAt }
+    : {
+        stage: "reading",
+        done: Math.round((progress.completed / Math.max(1, progress.total)) * 1000),
+        total: 1000,
+        startedAt,
+      };
 }
 
 export type TextDetector = Pick<
@@ -39,7 +46,7 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
   const selectedOptions = ref<DetectionOption[]>([...localOptions]);
   const selectionEdited = ref(false);
   const processing = ref(false);
-  const processingStatus = ref("");
+  const progress = ref<SheetProgress | null>(null);
   const processingError = ref("");
   const draftError = computed(() => validateText(draft.value));
   const missingSelectedModels = computed(
@@ -73,7 +80,7 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     currentRun++;
     detector.cancel(preserveModels);
     processing.value = false;
-    processingStatus.value = "";
+    progress.value = null;
   }
   function destroy() {
     currentRun++;
@@ -94,12 +101,14 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     const run = ++currentRun;
     const original = draft.value;
     const options = [...selectedOptions.value];
+    const startedAt = Date.now();
+    progress.value = { stage: "loading", done: 0, total: 0, startedAt };
     try {
       const modelRoot = pack.readyRoot.value ?? undefined;
       const detections = await detector.detect(
         original,
-        (progress) => {
-          if (run === currentRun) processingStatus.value = processingStatusFor(progress);
+        (step) => {
+          if (run === currentRun) progress.value = textProgress(step, startedAt);
         },
         modelRoot,
         options,
@@ -114,7 +123,7 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     } finally {
       if (run === currentRun) {
         processing.value = false;
-        processingStatus.value = "";
+        progress.value = null;
       }
     }
   }
@@ -123,7 +132,7 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     selectedOptions,
     selectionEdited,
     processing,
-    processingStatus,
+    progress,
     processingError,
     draftError,
     missingSelectedModels,
