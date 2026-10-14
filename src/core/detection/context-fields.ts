@@ -158,9 +158,10 @@ export function detectContextFields(
       /(?:don vi|ten (?:cong ty|doanh nghiep)|to chuc|(?:cac )?ben(?: [a-z]| \d{1,2}| [a-z]+(?: [a-z]+)?)?|dai dien|khach hang|doi tac|nha thau|chu dau tu)[^\S\r\n]*[:：][^\S\r\n]*$/u.test(
         fold(text.slice(Math.max(0, start - 70), start)),
       );
-    // Model evidence anywhere on the name, the prefix included, seeds the completion.
+    // Model evidence anywhere on the name, the prefix included, seeds the completion;
+    // a model may read "Nông sản Suối Mơ" as a place, which is still a name after the prefix.
     const seeded = seeds.some(
-      (d) => ["TO_CHUC", "TEN"].includes(d.type) && d.start < end && d.end > start,
+      (d) => ["TO_CHUC", "TEN", "DIA_CHI"].includes(d.type) && d.start < end && d.end > start,
     );
     if (!labelled && !seeded) continue;
     fields.detections.push(finding(start, end, "TO_CHUC", "Tổ chức"));

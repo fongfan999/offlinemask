@@ -27,6 +27,7 @@ interface Segment {
   textStart: number;
   textEnd: number;
   text: string;
+  field?: boolean;
 }
 /** A paragraph is runs of text (segment indices) and literal tabs or line breaks. */
 type Piece = { segment: number } | { literal: string };
@@ -40,6 +41,9 @@ export interface DocParagraph {
   id: number;
   part: string;
   text: string;
+  /** A field instruction (`w:instrText`, e.g. "PAGE \\* MERGEFORMAT" or a mailto link):
+   * Word syntax, not prose, so only its contact values are ever replaced. */
+  field?: boolean;
 }
 /** A replacement in paragraph-text offsets. */
 export interface Replacement {
@@ -112,6 +116,7 @@ export function parsePart(name: string, xml: string): PartModel {
         textStart,
         textEnd,
         text: unescapeXml(xml.slice(textStart, textEnd)),
+        ...(element === "w:instrText" ? { field: true } : {}),
       });
       const piece = { segment: segments.length - 1 };
       if (element === "w:instrText" || !open.length) paragraphs.push([piece]);
@@ -216,7 +221,10 @@ export async function openDocx(
       const text = paragraphText(part, pieces);
       if (!text.trim()) return;
       index.push([partIndex, paragraphIndex]);
-      paragraphs.push({ id: index.length - 1, part: part.name, text });
+      const field = pieces.some(
+        (piece) => "segment" in piece && part.segments[piece.segment]!.field,
+      );
+      paragraphs.push({ id: index.length - 1, part: part.name, text, ...(field ? { field } : {}) });
     }),
   );
   if (!paragraphs.length) throw new DocFileError("empty");

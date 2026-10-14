@@ -7,6 +7,8 @@ export interface Detection {
   source: string;
   reason: string;
   priority: number;
+  /** Mean token probability of a model span, when a model produced it. */
+  score?: number;
 }
 
 export type DetectionProgress = {

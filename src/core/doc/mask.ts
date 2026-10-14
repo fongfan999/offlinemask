@@ -10,6 +10,8 @@ import {
 } from "./docx.ts";
 
 const emailShape = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+/** Field instructions carry Word syntax ("PAGE", "MERGEFORMAT", "HYPERLINK"), never prose. */
+const prose = new Set(["TEN", "DIA_CHI", "TO_CHUC"]);
 
 /** Mask every paragraph with its detections; one alias per type and value across the
  * document, and `mailto:` link targets get the same email alias as the text. */
@@ -26,9 +28,10 @@ export function maskParagraphs(
   const edits: DocEdits = { paragraphs: new Map(), links: new Map() };
   let masked = 0;
   for (const paragraph of paragraphs) {
+    const found = detections.get(paragraph.id) ?? [];
     const replacements = detectionReplacements(
       paragraph.text,
-      detections.get(paragraph.id) ?? [],
+      paragraph.field ? found.filter((d) => !prose.has(d.type)) : found,
       book,
     );
     if (!replacements.length) continue;

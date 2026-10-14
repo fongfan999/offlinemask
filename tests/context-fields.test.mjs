@@ -113,6 +113,12 @@ test("organization completion requires a bounded name and context and never cons
   assert.deepEqual(entries(text, [seed(text, "Mây Hồng")]), [
     ["TO_CHUC", "Hợp tác xã Nông sản Mây Hồng"],
   ]);
+  // A model that reads the name as a place still seeds the completion (decision 0081).
+  assert.deepEqual(entries(text, [seed(text, "Nông sản Mây Hồng", "DIA_CHI")]), [
+    ["TO_CHUC", "Hợp tác xã Nông sản Mây Hồng"],
+  ]);
+  const elsewhere = "Công ty TNHH Mây Hồng tại Hà Nội đã nộp hồ sơ.";
+  assert.deepEqual(entries(elsewhere, [seed(elsewhere, "Hà Nội", "DIA_CHI")]), []);
   const long = "Đơn vị: Công ty " + Array.from({ length: 15 }, (_, i) => `Tên${i}`).join(" ");
   assert.deepEqual(entries(long), []);
 });

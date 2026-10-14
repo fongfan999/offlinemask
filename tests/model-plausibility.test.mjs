@@ -228,3 +228,36 @@ test("boilerplate runs, titles and job titles are checked on the whole text as w
     [["DIA_CHI", "12 Lê Duẩn, Đà Nẵng"]],
   );
 });
+
+test("a one-word name, place or organization needs a confident score unless it is the whole text", () => {
+  const text = "Chị Lan gửi bản Đại Tạng Kinh về Huế.";
+  const found = modelDetections(text, [
+    { ...span(text, "Lan", "PERSON"), score: 0.98 },
+    { ...span(text, "Đại", "PERSON"), score: 0.35 },
+    { ...span(text, "Kinh", "LOCATION"), score: 0.58 },
+    { ...span(text, "Huế", "LOCATION"), score: 1 },
+  ]);
+  assert.deepEqual(values(text, found), [
+    ["TEN", "Lan"],
+    ["DIA_CHI", "Huế"],
+  ]);
+  assert.equal(found[0].score, 0.98);
+  // Adjacent pieces form one multi-word name, which the rule does not touch.
+  const low = "nguyễn văn an cần hỗ trợ";
+  const joined = modelDetections(low, [
+    { ...span(low, "nguyễn", "LAST_NAME"), score: 0.31 },
+    { ...span(low, "văn", "MIDDLE_NAME"), score: 0.3 },
+    { ...span(low, "an", "FIRST_NAME"), score: 0.33 },
+  ]);
+  assert.deepEqual(values(low, joined), [["TEN", "nguyễn văn an"]]);
+  // A single word on its own, such as a spreadsheet cell, is all the evidence there is.
+  assert.deepEqual(
+    values(
+      "Trâm",
+      modelDetections("Trâm", [{ start: 0, end: 4, canonical_label: "FIRST_NAME", score: 0.4 }]),
+    ),
+    [["TEN", "Trâm"]],
+  );
+  // A span without a score (older callers) is kept.
+  assert.equal(modelDetections(text, [span(text, "Đại", "PERSON")]).length, 1);
+});

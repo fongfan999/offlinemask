@@ -34,6 +34,10 @@ export const combinedModelSource = "Kết hợp nhiều mô hình";
 export const defaultModelSource = "Mô hình nhận diện";
 
 const contextual = new Set(["TEN", "DIA_CHI", "TO_CHUC"]);
+/** A single word is weak evidence of a name, place or organization: a real one scores
+ * close to 1 ("Lan", "Hùng", "Huế"), while a model's one-word misreadings of prose sit
+ * below this ("Đại", "Hán", "Kinh"). Measured on the pack models (decision 0081). */
+export const singleWordMinScore = 0.6;
 const word = /[\p{L}\p{M}\p{N}_]/u;
 /** A field separator or a line break never sits inside one name, place or organization;
  * a sentence end never sits inside a name or an organization (addresses keep "TP. HCM"). */
@@ -173,10 +177,16 @@ export function modelDetections(text: string, spans: readonly DecodedEntitySpan[
       const parts = contextual.has(type)
         ? pieces(text, span.start, span.end, type)
         : [[span.start, span.end] as [number, number]];
-      return parts.map(([start, end]) => ({ start, end, type, name }));
+      return parts.map(([start, end]) => ({
+        start,
+        end,
+        type,
+        name,
+        score: span.score ?? undefined,
+      }));
     });
   for (const piece of typed) {
-    const { type, name } = piece;
+    const { type, name, score } = piece;
     let { start, end } = piece;
     // A subword prediction must never leave the rest of the same word exposed.
     // This repairs boundaries only; it does not guess adjacent unlabelled names.
@@ -198,6 +208,7 @@ export function modelDetections(text: string, spans: readonly DecodedEntitySpan[
     ) {
       previous.start = Math.min(previous.start, start);
       previous.end = Math.max(previous.end, end);
+      if (score !== undefined) previous.score = Math.max(previous.score ?? 0, score);
       continue;
     }
     detections.push({
@@ -208,6 +219,7 @@ export function modelDetections(text: string, spans: readonly DecodedEntitySpan[
       priority: 50,
       source: defaultModelSource,
       reason: "Mô hình nhận diện theo ngữ cảnh. Hãy kiểm tra lại phạm vi thông tin được ẩn.",
+      ...(score !== undefined ? { score } : {}),
     });
   }
   return plausibleModelDetections(text, detections);
@@ -218,12 +230,15 @@ export function modelDetections(text: string, spans: readonly DecodedEntitySpan[
  * text skips the phrase check: ranges are NFC positions, and the window text is NFC. */
 export function plausibleModelDetections(text: string, detections: readonly Detection[]) {
   const phrases = text === text.normalize("NFC") ? boilerplateRanges(text) : [];
-  return detections.filter(
-    (d) =>
-      plausibleContextualSpan(d.type, text.slice(d.start, d.end)) &&
-      (!contextual.has(d.type) ||
-        !phrases.some(([start, end]) => start <= d.start && d.end <= end)),
-  );
+  return detections.filter((d) => {
+    const value = text.slice(d.start, d.end);
+    if (!plausibleContextualSpan(d.type, value)) return false;
+    if (!contextual.has(d.type)) return true;
+    if (phrases.some(([start, end]) => start <= d.start && d.end <= end)) return false;
+    // One word on its own (a cell, a short message) is the whole evidence there is.
+    const alone = value.trim() === text.trim();
+    return alone || /\s/u.test(value.trim()) || (d.score ?? 1) >= singleWordMinScore;
+  });
 }
 
 /** Combine overlapping evidence across models/windows without dropping exposed tails. */

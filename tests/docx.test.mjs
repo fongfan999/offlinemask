@@ -194,3 +194,28 @@ test("Word sessions round-trip through the vault, never reach sample storage, an
     assert.throws(() => decodePrivateSessions(encodePrivateSessions([damaged])));
   }
 });
+
+test("field instructions keep their Word syntax: only contact values are replaced in them", async () => {
+  const bytes = await docx({
+    body:
+      "<w:p><w:r><w:t>Trang</w:t></w:r></w:p>" +
+      '<w:p><w:r><w:fldChar w:fldCharType="begin"/></w:r><w:r><w:instrText xml:space="preserve"> PAGE \\* MERGEFORMAT </w:instrText></w:r><w:r><w:fldChar w:fldCharType="end"/></w:r></w:p>' +
+      '<w:p><w:r><w:instrText xml:space="preserve"> HYPERLINK "mailto:an@example.com" </w:instrText></w:r></w:p>',
+  });
+  const file = await openDocx(bytes);
+  const [prose, page, link] = file.paragraphs;
+  assert.equal(prose.field, undefined);
+  assert.equal(page.field, true);
+  assert.equal(link.field, true);
+  const detections = new Map([
+    [prose.id, [detection(0, 5, "TEN")]],
+    [page.id, [detection(1, 5, "TEN"), detection(9, 20, "TO_CHUC")]],
+    [link.id, [detection(link.text.indexOf("an@"), link.text.indexOf("an@") + 14, "EMAIL")]],
+  ]);
+  const result = maskParagraphs(file.paragraphs, detections, scope);
+  assert.equal(result.masked, 2);
+  assert.deepEqual(
+    previewParagraphs(file.paragraphs, result.edits.paragraphs, 3).map((p) => p.text),
+    [`[TEN_1_${scope}]`, " PAGE \\* MERGEFORMAT ", ` HYPERLINK "mailto:[EMAIL_1_${scope}]" `],
+  );
+});
