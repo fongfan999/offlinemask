@@ -20,7 +20,7 @@ export class DocFileError extends Error {
  * footers, footnotes, endnotes and comments. */
 const textPart = /^word\/(document|header\d*|footer\d*|footnotes|endnotes|comments)\.xml$/;
 
-interface Segment {
+export interface Segment {
   /** Offsets of the opening tag and of the text inside it in the part's XML. */
   openStart: number;
   openEnd: number;
@@ -30,8 +30,8 @@ interface Segment {
   field?: boolean;
 }
 /** A paragraph is runs of text (segment indices) and literal tabs or line breaks. */
-type Piece = { segment: number } | { literal: string };
-interface PartModel {
+export type Piece = { segment: number } | { literal: string };
+export interface PartModel {
   name: string;
   xml: string;
   segments: Segment[];
@@ -57,6 +57,8 @@ export interface DocEdits {
   links: Map<string, string>;
 }
 export interface DocSource {
+  /** Word (.docx) or OpenDocument text (.odt, decision 0084). */
+  format: "docx" | "odt";
   zip: JSZip;
   parts: PartModel[];
   /** Paragraph id → part index and paragraph index within it. */
@@ -127,7 +129,7 @@ export function parsePart(name: string, xml: string): PartModel {
   return { name, xml, segments, paragraphs };
 }
 
-function paragraphText(part: PartModel, pieces: readonly Piece[]): string {
+export function paragraphText(part: PartModel, pieces: readonly Piece[]): string {
   return pieces
     .map((piece) => ("segment" in piece ? part.segments[piece.segment]!.text : piece.literal))
     .join("");
@@ -235,7 +237,7 @@ export async function openDocx(
   if (Object.keys(zip.files).some((name) => /^word\/(embeddings|media)\//.test(name)))
     notes[0] =
       "Tài liệu có hình ảnh hoặc đối tượng nhúng; chúng không được kiểm tra và vẫn nằm trong tệp.";
-  return { source: { zip, parts, index, links }, paragraphs, notes };
+  return { source: { format: "docx", zip, parts, index, links }, paragraphs, notes };
 }
 
 /** `mailto:` targets of hyperlinks, which hold email addresses outside the text. */
@@ -246,10 +248,9 @@ export function mailtoTargets(source: DocSource): string[] {
   return [...found];
 }
 
-/** Write a copy with the edits applied. The opened source is not changed, so the
- * same file can be masked again. Author names in the file's properties are cleared. */
-export async function writeDocx(source: DocSource, edits: DocEdits): Promise<Uint8Array> {
-  const zip = await JSZip.loadAsync(await source.zip.generateAsync({ type: "uint8array" }));
+/** New XML for every text part the edits change, by part index. Each changed segment's
+ * text is rewritten in place; tags and every other byte of the part stay as they were. */
+export function rewriteParts(source: DocSource, edits: DocEdits): Map<number, string> {
   const perPart = new Map<number, Map<number, string>>();
   for (const [id, replacements] of edits.paragraphs) {
     const [partIndex, paragraphIndex] = source.index[id] ?? [];
@@ -264,6 +265,7 @@ export async function writeDocx(source: DocSource, edits: DocEdits): Promise<Uin
       if (text !== part.segments[segment]!.text) changes.set(segment, text);
     perPart.set(partIndex, changes);
   }
+  const rewritten = new Map<number, string>();
   for (const [partIndex, changes] of perPart) {
     const part = source.parts[partIndex]!;
     let xml = "";
@@ -278,8 +280,35 @@ export async function writeDocx(source: DocSource, edits: DocEdits): Promise<Uin
       xml += part.xml.slice(cursor, segment.openStart) + openTag + escapeXml(text);
       cursor = segment.textEnd;
     }
-    zip.file(part.name, xml + part.xml.slice(cursor));
+    rewritten.set(partIndex, xml + part.xml.slice(cursor));
   }
+  return rewritten;
+}
+
+/** Word's document thumbnail (`docProps/thumbnail.*`) is a picture of the first page:
+ * it would show the original text, so the masked copy drops it and its relationship. */
+async function dropDocxThumbnail(zip: JSZip) {
+  const thumbnails = Object.keys(zip.files).filter((name) => /^docProps\/thumbnail\./i.test(name));
+  if (!thumbnails.length) return;
+  thumbnails.forEach((name) => zip.remove(name));
+  const rels = zip.file("_rels/.rels");
+  if (rels)
+    zip.file(
+      "_rels/.rels",
+      (await rels.async("string")).replace(
+        /<Relationship\b[^>]*Target="\/?docProps\/thumbnail\.[^"]*"[^>]*\/>/gi,
+        "",
+      ),
+    );
+}
+
+/** Write a copy with the edits applied. The opened source is not changed, so the
+ * same file can be masked again. Author names in the file's properties are cleared. */
+export async function writeDocx(source: DocSource, edits: DocEdits): Promise<Uint8Array> {
+  const zip = await JSZip.loadAsync(await source.zip.generateAsync({ type: "uint8array" }));
+  for (const [partIndex, xml] of rewriteParts(source, edits))
+    zip.file(source.parts[partIndex]!.name, xml);
+  await dropDocxThumbnail(zip);
   for (const { part, xml } of source.links) {
     const next = xml.replace(/Target="mailto:([^"?]+)/g, (whole, address: string) => {
       const alias = edits.links.get(unescapeXml(address));

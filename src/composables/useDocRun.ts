@@ -26,14 +26,16 @@ import type { SheetProgress } from "./useSheetRun.ts";
 
 export const docPreviewParagraphs = 20;
 export const docErrorMessages: Record<DocError, string> = {
-  unsupported: "Chỉ hỗ trợ tệp .docx. Tệp .doc cũ hãy mở bằng Word và lưu lại thành .docx trước.",
+  unsupported:
+    "Chỉ hỗ trợ tệp .docx và .odt. Tệp .doc cũ hãy mở bằng Word và lưu lại thành .docx trước.",
   "too-large": "Tệp lớn hơn 20 MB. Hãy chia nhỏ tài liệu rồi thử lại.",
-  unreadable: "Chưa đọc được tệp này. Hãy kiểm tra tệp có mở được trong Word không.",
+  unreadable:
+    "Chưa đọc được tệp này. Hãy kiểm tra tệp mở được trong Word hoặc LibreOffice và không có mật khẩu.",
   empty: "Tài liệu không có chữ để ẩn.",
 };
 export const docFailure =
   "Chưa xử lý được tài liệu trên thiết bị. Tệp gốc không bị thay đổi. Hãy thử lại.";
-const docxName = /\.docx$/i;
+const documentName = /\.(docx|odt)$/i;
 
 export interface DocDraft {
   sessionId: string;
@@ -75,7 +77,7 @@ function errorMessage(error: unknown) {
     : docErrorMessages.unreadable;
 }
 
-/** The Word flow (decision 0078): open a .docx, preview the first paragraphs with the
+/** The document flow (decisions 0078, 0084): open a .docx or .odt, preview the first paragraphs with the
  * aliases they will get, mask every paragraph in the background, save a masked copy,
  * and later restore the AI's returned document. Documents stay in the worker, in RAM. */
 export function useDocRun({ detector, files, pack, sessions, onSession }: DocRunDependencies) {
@@ -144,7 +146,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
   }
   async function openFile(file: File) {
     fileError.value = "";
-    if (!docxName.test(file.name)) {
+    if (!documentName.test(file.name)) {
       fileError.value = docErrorMessages.unsupported;
       return;
     }
@@ -292,7 +294,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
     return saveFile(bytes, exportName(session.fileName, "đã ẩn"));
   }
   async function openReturned(session: DocSession, file: File): Promise<DocRestore | string> {
-    if (!docxName.test(file.name)) return docErrorMessages.unsupported;
+    if (!documentName.test(file.name)) return docErrorMessages.unsupported;
     if (file.size > maxDocBytes) return docErrorMessages["too-large"];
     try {
       const opened = await files.openDoc(file);

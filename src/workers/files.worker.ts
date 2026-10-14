@@ -1,9 +1,7 @@
 /// <reference lib="webworker" />
+import { openDocument, writeDocument } from "../core/doc/document.ts";
 import {
-  mailtoTargets,
-  openDocx,
   DocFileError,
-  writeDocx,
   type DocEdits,
   type DocParagraph,
   type DocSource,
@@ -67,19 +65,19 @@ self.onmessage = async (event: MessageEvent<FilesRequest>) => {
       if (!source) throw new SheetFileError("unreadable");
       written(request.id, await writeSheetFile(source, request.edits));
     } else if (request.type === "open-doc") {
-      const file = await openDocx(new Uint8Array(request.bytes));
+      const file = await openDocument(new Uint8Array(request.bytes));
       docs.set(request.handle, file.source);
       send({
         type: "opened-doc",
         id: request.id,
         paragraphs: file.paragraphs,
         notes: file.notes,
-        mailto: mailtoTargets(file.source),
+        mailto: file.mailto,
       });
     } else {
       const source = docs.get(request.handle);
       if (!source) throw new DocFileError("unreadable");
-      written(request.id, await writeDocx(source, request.edits));
+      written(request.id, await writeDocument(source, request.edits));
     }
   } catch (error) {
     send({

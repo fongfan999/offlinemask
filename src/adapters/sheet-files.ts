@@ -82,8 +82,9 @@ const mimeTypes = {
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   csv: "text/csv",
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  odt: "application/vnd.oasis.opendocument.text",
 };
-const fileKinds = { xlsx: "Excel", csv: "CSV", docx: "Word" } as const;
+const fileKinds = { xlsx: "Excel", csv: "CSV", docx: "Word", odt: "OpenDocument" } as const;
 /** "Sổ khách.xlsx" + "da-an" → "Sổ khách (đã ẩn).xlsx". */
 export function exportName(original: string, suffix: string): string {
   const dot = original.lastIndexOf(".");
@@ -97,7 +98,8 @@ export function exportName(original: string, suffix: string): string {
  * downloads it. Returns false when the user cancels. */
 export async function saveFile(bytes: Uint8Array, name: string): Promise<boolean> {
   const extension = name.toLowerCase().split(".").pop();
-  const format = extension === "csv" || extension === "docx" ? extension : "xlsx";
+  const format =
+    extension === "csv" || extension === "docx" || extension === "odt" ? extension : "xlsx";
   if (isTauri()) {
     const [{ save }, { writeFile }] = await Promise.all([
       import("@tauri-apps/plugin-dialog"),

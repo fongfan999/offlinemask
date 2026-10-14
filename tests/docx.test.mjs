@@ -219,3 +219,22 @@ test("field instructions keep their Word syntax: only contact values are replace
     [`[TEN_1_${scope}]`, " PAGE \\* MERGEFORMAT ", ` HYPERLINK "mailto:[EMAIL_1_${scope}]" `],
   );
 });
+
+test("the masked copy drops Word's first-page thumbnail and its relationship", async () => {
+  const zip = await JSZip.loadAsync(
+    await docx({ body: "<w:p><w:r><w:t>Nguyễn Minh Anh</w:t></w:r></w:p>" }),
+  );
+  zip.file("docProps/thumbnail.jpeg", new Uint8Array([255, 216]));
+  zip.file(
+    "_rels/.rels",
+    '<Relationships><Relationship Id="rId1" Type="officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/thumbnail" Target="docProps/thumbnail.jpeg"/></Relationships>',
+  );
+  const file = await openDocx(await zip.generateAsync({ type: "uint8array" }));
+  const written = await JSZip.loadAsync(
+    await writeDocx(file.source, { paragraphs: new Map(), links: new Map() }),
+  );
+  assert.equal(written.file("docProps/thumbnail.jpeg"), null);
+  const rels = await written.file("_rels/.rels").async("string");
+  assert.doesNotMatch(rels, /thumbnail/);
+  assert.match(rels, /word\/document\.xml/);
+});

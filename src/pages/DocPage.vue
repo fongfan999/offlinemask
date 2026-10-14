@@ -26,7 +26,7 @@ import { decodeText } from "../core/sheet/files.ts";
 import { maxTextLength } from "../core/text.ts";
 import type { DocSession } from "../core/sessions.ts";
 
-/** Word documents (decision 0078), in the same three steps as the other pages. */
+/** Word and OpenDocument documents (decisions 0078, 0084), in the same three steps as the other pages. */
 const props = defineProps<{ session?: DocSession }>();
 const emit = defineEmits<{
   navigate: [destination: Page, id?: string | null];
@@ -87,7 +87,7 @@ const subtitle = computed(() => {
       : `Tài liệu #${props.session.number} · ${props.session.paragraphs.toLocaleString("vi-VN")} đoạn · Đọc lại rồi tải tệp đã ẩn về để gửi AI.`;
   return draft.value
     ? `${draft.value.paragraphs.length.toLocaleString("vi-VN")} đoạn · Xem trước rồi ẩn toàn bộ.`
-    : "Mở tệp Word (.docx). Thông tin riêng tư được thay bằng mã như [TEN_1_…], ngay trên máy bạn; định dạng được giữ nguyên.";
+    : "Mở tệp Word hoặc LibreOffice (.docx, .odt). Thông tin riêng tư được thay bằng mã như [TEN_1_…], ngay trên máy bạn; định dạng được giữ nguyên.";
 });
 const draftView = computed(() => {
   const current = draft.value;
@@ -269,9 +269,9 @@ defineExpose({
       <template v-if="!draft">
         <FileDropZone
           icon="file"
-          title="Kéo thả tệp Word vào đây"
-          hint=".docx · tối đa 20 MB"
-          accept=".docx,.txt,.md"
+          title="Kéo thả tài liệu vào đây"
+          hint=".docx, .odt · tối đa 20 MB"
+          accept=".docx,.odt,.txt,.md"
           :busy="doc.opening.value"
           @file="openFile"
         />
@@ -415,9 +415,9 @@ defineExpose({
         <FileDropZone
           v-if="!restore"
           icon="undo"
-          title="Kéo thả tệp Word AI trả về vào đây"
+          title="Kéo thả tệp AI trả về vào đây"
           hint="mã thay thế được đổi lại thành thông tin thật"
-          accept=".docx"
+          accept=".docx,.odt"
           :busy="restoreBusy"
           @file="openReturned"
         />

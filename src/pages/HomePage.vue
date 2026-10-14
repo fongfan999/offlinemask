@@ -103,7 +103,7 @@ const packNotice = computed<PackNotice | null>(() => {
     <button class="format-card glass" @click="emit('navigate', 'word')">
       <span class="format-icon"><AppIcon name="file" :size="29" /></span
       ><span class="format-title">Tài liệu<AppIcon name="arrow" :size="20" /></span
-      ><span class="format-description">Word</span>
+      ><span class="format-description">Word, ODT</span>
     </button>
     <div
       v-if="packNotice"
