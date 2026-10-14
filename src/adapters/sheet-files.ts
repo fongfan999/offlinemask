@@ -5,7 +5,7 @@ import type { DocEdits, DocParagraph } from "../core/doc/docx.ts";
 import type { FilesRequest, FilesResponse } from "../workers/files.worker.ts";
 
 export const fileErrorMessages: Record<FileError, string> = {
-  unsupported: "Chỉ hỗ trợ tệp .xlsx, .ods và .csv. Tệp .xls cũ hãy lưu lại thành .xlsx trước.",
+  unsupported: "Chỉ hỗ trợ tệp Excel (.xlsx, .xls), .ods và .csv.",
   "too-large": "Tệp lớn hơn 20 MB. Hãy chia nhỏ tệp rồi thử lại.",
   "too-many-rows": "Tệp có hơn 100.000 dòng. Hãy chia nhỏ tệp rồi thử lại.",
   unreadable:

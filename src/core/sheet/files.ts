@@ -3,16 +3,18 @@ import Papa from "papaparse";
 import type { CellEdits, SheetTable } from "./mask.ts";
 import { odsGrid, parseOds, readOdsPackage, writeOds, type OdsSource } from "./ods.ts";
 
-/** Supported input (decisions 0076, 0085): .xlsx and .ods workbooks and .csv files, up to
- * these limits. Everything stays in memory on this machine. */
+/** Supported input (decisions 0076, 0085, 0086): .xlsx, .xls and .ods workbooks and .csv
+ * files, up to these limits. Everything stays in memory on this machine. */
 export const maxFileBytes = 20 * 1024 * 1024;
 export const maxDataRows = 100_000;
-export type SheetFormat = "xlsx" | "ods" | "csv";
+export type SheetFormat = "xlsx" | "xls" | "ods" | "csv";
 export type FileError = "unsupported" | "too-large" | "too-many-rows" | "unreadable" | "empty";
 
 export function sheetFormat(fileName: string): SheetFormat | null {
   const extension = fileName.toLowerCase().split(".").pop();
-  return extension === "xlsx" || extension === "ods" || extension === "csv" ? extension : null;
+  return extension === "xlsx" || extension === "xls" || extension === "ods" || extension === "csv"
+    ? extension
+    : null;
 }
 
 export interface CsvSource {
@@ -175,6 +177,13 @@ export async function readXlsx(bytes: Uint8Array): Promise<OpenedFile> {
   } catch {
     throw new SheetFileError("unreadable");
   }
+  return workbookFile(workbook, [
+    "Biểu đồ, bảng tổng hợp (pivot) và macro không được giữ lại trong tệp tải về.",
+  ]);
+}
+
+/** Tables of an in-memory ExcelJS workbook: an opened .xlsx, or an .xls converted. */
+export function workbookFile(workbook: ExcelJS.Workbook, notes: string[]): OpenedFile {
   const sheets = workbook.worksheets.filter((sheet) => sheet.state !== "veryHidden");
   const tables = sheets.map((sheet) => {
     const grid: string[][] = [];
@@ -187,11 +196,7 @@ export async function readXlsx(bytes: Uint8Array): Promise<OpenedFile> {
     return tableFrom(sheet.name, grid);
   });
   checkRows(tables);
-  return {
-    source: { format: "xlsx", workbook, sheets },
-    tables,
-    notes: ["Biểu đồ, bảng tổng hợp (pivot) và macro không được giữ lại trong tệp tải về."],
-  };
+  return { source: { format: "xlsx", workbook, sheets }, tables, notes };
 }
 
 /** Edited cells become plain text; every other cell keeps its value, formula and style.
@@ -241,6 +246,7 @@ export async function openSheetFile(bytes: Uint8Array, name: string): Promise<Op
       throw error instanceof SheetFileError ? error : new SheetFileError("unreadable");
     }
   }
+  if (format === "xls") return (await import("./xls.ts")).readXls(bytes);
   return format === "ods" ? readOds(bytes) : readXlsx(bytes);
 }
 

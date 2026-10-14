@@ -44,7 +44,8 @@
     "linkify-it": "6.1.0",
     "openmed": "2.3.0",
     "papaparse": "5.7.0",
-    "vue": "^3.5.13"
+    "vue": "^3.5.13",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

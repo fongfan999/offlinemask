@@ -211,7 +211,8 @@ const editsOf = (entries) => [
 
 test("CSV keeps its delimiter and line breaks, reads Windows-1258, and writes UTF-8 with a BOM", async () => {
   assert.equal(sheetFormat("A.CSV"), "csv");
-  assert.equal(sheetFormat("a.xls"), null);
+  assert.equal(sheetFormat("a.xls"), "xls");
+  assert.equal(sheetFormat("a.xlsb"), null);
   const text = 'Họ tên;Số tiền\r\nNguyễn Minh Anh;"2.500,5"\r\nTrần Bình;100\r\n';
   const file = await openSheetFile(new TextEncoder().encode(text), "giao-dich.csv");
   assert.equal(file.source.delimiter, ";");
@@ -270,7 +271,7 @@ test("XLSX keeps every sheet, styles, numbers and formulas outside the edited ce
 });
 
 test("files outside the supported scope are refused with a reason", async () => {
-  await assert.rejects(openSheetFile(new Uint8Array(1), "a.xls"), { code: "unsupported" });
+  await assert.rejects(openSheetFile(new Uint8Array(1), "a.numbers"), { code: "unsupported" });
   await assert.rejects(openSheetFile(new Uint8Array(21 * 1024 * 1024), "a.csv"), {
     code: "too-large",
   });

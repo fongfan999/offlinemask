@@ -17,6 +17,6 @@ Verified: `pnpm lint`, `pnpm typecheck` and `pnpm test` (253) pass. The new test
 
 In the browser preview, a synthetic `.ods` opened with the expected column suggestions and masked six cells. Not verified: files written by LibreOffice itself (it is not installed here), and opening the masked copy in LibreOffice.
 
-## .xls (pending)
+## .xls (pending, then done in [0086](0086-old-excel-files.md))
 
 Old Excel files are binary (BIFF inside an OLE container), and many Vietnamese bank "xls" exports are really HTML or XML spreadsheets. Reading them safely needs a maintained reader. The usual one, SheetJS Community Edition (Apache-2.0), publishes current versions only on its own CDN (`cdn.sheetjs.com`). The npm registry copy (0.18.5) lacks fixes for a prototype-pollution issue (CVE-2023-30533) and a ReDoS (CVE-2024-22363), and untrusted files are exactly what this app opens. Installing 0.20.3 from the CDN was blocked by this session's permission policy, because it fetches code from outside the npm registry. The owner decides whether to allow it. If allowed, the plan is: read `.xls` with SheetJS in the file worker only (loaded on demand), convert it to the in-memory ExcelJS workbook the `.xlsx` path uses, and save the masked copy as `.xlsx`, with values, merged cells and column widths. Until then the message stays "Tệp .xls cũ hãy lưu lại thành .xlsx trước".

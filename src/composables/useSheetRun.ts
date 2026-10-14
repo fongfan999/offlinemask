@@ -65,6 +65,8 @@ export interface SheetProgress {
   total: number;
   startedAt: number;
 }
+/** An .xls is read into the .xlsx workbook model, so its copies are .xlsx (decision 0086). */
+const savedName = (name: string) => name.replace(/\.xls$/i, ".xlsx");
 export const sheetFailure =
   "Chưa xử lý được bảng tính trên thiết bị. Tệp gốc không bị thay đổi. Hãy thử lại.";
 
@@ -339,7 +341,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     if (!original) return false;
     const edits = keepCells(original.edits, original.findings, kept.of(session.id));
     const bytes = await files.write(original.handle, edits);
-    return saveFile(bytes, exportName(session.fileName, "đã ẩn"));
+    return saveFile(bytes, exportName(savedName(session.fileName), "đã ẩn"));
   }
 
   /** Open the file that came back from the AI and swap this session's aliases back. */
@@ -358,7 +360,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     const bytes = await files.write(restore.handle, restore.edits);
     return saveFile(
       bytes,
-      exportName(restore.fileName.replace(/ \(đã ẩn\)(?=\.[^.]+$)/, ""), "đã khôi phục"),
+      exportName(savedName(restore.fileName).replace(/ \(đã ẩn\)(?=\.[^.]+$)/, ""), "đã khôi phục"),
     );
   }
   function closeReturned(restore: SheetRestore | null) {

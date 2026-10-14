@@ -268,8 +268,8 @@ defineExpose({
         <FileDropZone
           icon="table"
           title="Kéo thả bảng tính vào đây"
-          hint=".xlsx, .ods, .csv · tối đa 20 MB"
-          accept=".xlsx,.ods,.csv"
+          hint=".xlsx, .xls, .ods, .csv · tối đa 20 MB"
+          accept=".xlsx,.xls,.ods,.csv"
           :busy="sheet.opening.value"
           @file="sheet.openFile"
         />
@@ -457,7 +457,7 @@ defineExpose({
           icon="undo"
           title="Kéo thả tệp AI trả về vào đây"
           hint="mã thay thế được đổi lại thành thông tin thật"
-          accept=".xlsx,.ods,.csv"
+          accept=".xlsx,.xls,.ods,.csv"
           :busy="restoreBusy"
           @file="openReturned"
         />
