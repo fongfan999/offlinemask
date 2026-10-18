@@ -13,12 +13,12 @@ import {
   backgroundMessage,
   launchError,
   lockedMessage,
-  panelKey,
   shortcutError,
   shortcutKey,
   useQuickActions,
   workingMessage,
 } from "../src/composables/useQuickActions.ts";
+import { panelKey } from "../src/adapters/quick-actions.ts";
 
 const detection = (start, end, type) => ({
   start,
@@ -132,6 +132,7 @@ function fakeAdapter(clipboard = "") {
       calls.push(["autostart", on]);
       adapter.autostart = on;
     },
+    quit: async () => calls.push(["quit"]),
   };
   return adapter;
 }
@@ -305,6 +306,11 @@ test("with permission, the shortcut takes the selection and pastes the result ov
     adapter.calls.filter((call) => call[0] === "paste"),
     [["paste", `Gọi ${alias} giúp tôi.`]],
   );
+  // A marker went on the clipboard before the copy chord, so a selection equal to
+  // the old clipboard would still have counted.
+  const writes = adapter.calls.filter((call) => call[0] === "write").map((call) => call[1]);
+  assert.match(writes[0], /OfflineMask/);
+  assert.equal(writes.at(-1), `Gọi ${alias} giúp tôi.`);
   // The panel's own buttons never touch the selection.
   adapter.clipboard = phoneText;
   await quick.act("mask");
@@ -328,6 +334,10 @@ test("nothing selected, or no permission, falls back to the clipboard; the hint 
     adapter.calls.filter((call) => call[0] === "paste"),
     [],
   );
+  // No selection: the marker was replaced by the user's clipboard before masking it.
+  const writes = adapter.calls.filter((call) => call[0] === "write").map((call) => call[1]);
+  assert.match(writes[0], /OfflineMask/);
+  assert.equal(writes[1], phoneText);
 
   const denied = fakeAdapter(phoneText);
   denied.permission = "denied";
@@ -383,4 +393,57 @@ test("closing the window hides it and tells the panel; the login item mirrors th
   assert.equal(quick.launchAtLogin.value, false);
   quick.stop();
   assert.ok(adapter.calls.some((call) => call[0] === "unclose"));
+});
+
+test("a selection with nothing to hide, or a failure, hands the clipboard back", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("bản cũ");
+  adapter.permission = "granted";
+  adapter.selection = "Không có gì để ẩn ở đây.";
+  const run = fakeRun(sessions);
+  run.outcome = { session: createTextSession(adapter.selection, [], []) };
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  const status = await quick.act("auto");
+  assert.equal(status.message, quickMessages.nothing);
+  assert.equal(adapter.clipboard, "bản cũ");
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "paste"),
+    [],
+  );
+  // An unexpected throw after the busy flash still ends in a status, never a stuck panel.
+  run.maskText = async () => {
+    throw new Error("synthetic");
+  };
+  const failed = await quick.act("auto");
+  assert.equal(failed.message, quickMessages.failed);
+  assert.equal(failed.tone, "error");
+  assert.equal(adapter.clipboard, "bản cũ");
+  assert.equal(quick.busy.value, false);
+});
+
+test("the tray's quit flushes pending work before the native exit", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  const order = [];
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    flush: async () => {
+      order.push("flush");
+    },
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  adapter.command("quit");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(order, ["flush"]);
+  assert.deepEqual(adapter.calls.at(-1), ["quit"]);
 });

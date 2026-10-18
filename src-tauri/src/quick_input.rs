@@ -59,14 +59,24 @@ fn wait_for_modifiers() {
     // No cheap modifier query here; the explicit releases below cover the usual case.
     sleep(Duration::from_millis(120));
 }
+/// The letter of the chord as a key the front application reads as an accelerator.
+/// Windows: the virtual-key code (`VK_C` = 0x43), because a Unicode text event with
+/// Control held is typing, not Ctrl+C. macOS and X11 map the character through the
+/// current layout to a key code.
+#[cfg(windows)]
+fn letter_key(letter: char) -> Key {
+    Key::Other(letter.to_ascii_uppercase() as u32)
+}
+#[cfg(not(windows))]
+fn letter_key(letter: char) -> Key {
+    Key::Unicode(letter)
+}
 fn chord(enigo: &mut Enigo, letter: char) -> Result<(), String> {
     wait_for_modifiers();
     enigo.key(Key::Shift, Direction::Release).map_err(io)?;
     enigo.key(MODIFIER, Direction::Release).map_err(io)?;
     enigo.key(MODIFIER, Direction::Press).map_err(io)?;
-    let typed = enigo
-        .key(Key::Unicode(letter), Direction::Click)
-        .map_err(io);
+    let typed = enigo.key(letter_key(letter), Direction::Click).map_err(io);
     enigo.key(MODIFIER, Direction::Release).map_err(io)?;
     typed
 }

@@ -61,7 +61,7 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
             "restore" => {
                 let _ = app.emit_to(MAIN_WINDOW, COMMAND_EVENT, Command { command: "restore" });
             }
-            "quit" => app.exit(0),
+            "quit" => request_quit(app),
             _ => {}
         });
     if let Some(icon) = app.default_window_icon() {
@@ -86,6 +86,23 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     }
     tray.build(app)?;
     Ok(())
+}
+
+/// Quitting goes through the frontend first, so a pending vault save (debounced
+/// 300 ms in the shell) is written before the process ends. The frontend answers
+/// with `quick_quit`; if it never does, the app exits anyway after a grace period.
+const QUIT_GRACE: std::time::Duration = std::time::Duration::from_secs(2);
+pub fn request_quit<R: Runtime>(app: &AppHandle<R>) {
+    let _ = app.emit_to(MAIN_WINDOW, COMMAND_EVENT, Command { command: "quit" });
+    let handle = app.clone();
+    std::thread::spawn(move || {
+        std::thread::sleep(QUIT_GRACE);
+        handle.exit(0);
+    });
+}
+#[tauri::command]
+pub fn quick_quit(app: AppHandle) {
+    app.exit(0);
 }
 
 /// The login item starts the app with this flag, so it begins hidden in the tray.

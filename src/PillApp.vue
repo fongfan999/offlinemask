@@ -1,32 +1,23 @@
 <script setup lang="ts">
 import { onBeforeUnmount, onMounted, ref } from "vue";
-import { isTauri } from "@tauri-apps/api/core";
-import { listen, emitTo, type UnlistenFn } from "@tauri-apps/api/event";
-import { getCurrentWindow, primaryMonitor, PhysicalPosition } from "@tauri-apps/api/window";
 import AppIcon from "./components/AppIcon.vue";
 import {
-  events,
-  mainWindow,
+  panelKey,
   quickShortcutLabel,
   type PanelStatus,
   type QuickCommand,
 } from "./adapters/quick-actions.ts";
-import { panelKey } from "./composables/useQuickActions.ts";
+import { nativeQuickPanel as panel } from "./adapters/quick-panel.ts";
 
 /** The floating quick-action panel (decision 0090). It owns only its own window:
  * where it sits, whether it is shown, and the last outcome the shell sent. The
  * shell does the masking and restoring; the panel never touches the clipboard. */
-const positionKey = "offlinemask.quick-panel-position.v1";
 const flashMs = 3600;
-const margin = 24;
 
 const status = ref<PanelStatus | null>(null);
 const pinned = ref(false);
-// In the browser preview the page only shows its layout; there is no window to move.
-const desktop = isTauri();
-const panel = desktop ? getCurrentWindow() : null;
 let flashTimer: ReturnType<typeof setTimeout> | undefined;
-const stops: UnlistenFn[] = [];
+const stops: (() => void)[] = [];
 
 function readPinned() {
   try {
@@ -35,86 +26,47 @@ function readPinned() {
     return false;
   }
 }
-/** Last dragged-to position, or the bottom-right corner of the primary screen. */
-async function place() {
-  if (!panel) return;
-  try {
-    const raw = localStorage.getItem(positionKey);
-    const monitor = await primaryMonitor();
-    const size = await panel.outerSize();
-    if (raw) {
-      const { x, y } = JSON.parse(raw) as { x: number; y: number };
-      const inside =
-        !monitor ||
-        (x >= monitor.position.x &&
-          y >= monitor.position.y &&
-          x + size.width <= monitor.position.x + monitor.size.width &&
-          y + size.height <= monitor.position.y + monitor.size.height);
-      if (Number.isFinite(x) && Number.isFinite(y) && inside)
-        return panel.setPosition(new PhysicalPosition(x, y));
-    }
-    if (!monitor) return;
-    const area = monitor.workArea ?? monitor;
-    const gap = Math.round(margin * monitor.scaleFactor);
-    await panel.setPosition(
-      new PhysicalPosition(
-        area.position.x + area.size.width - size.width - gap,
-        area.position.y + area.size.height - size.height - gap,
-      ),
-    );
-  } catch {
-    // Without monitor information the window keeps whatever position it has.
-  }
-}
-async function rememberPosition() {
-  if (!panel) return;
-  try {
-    const { x, y } = await panel.outerPosition();
-    localStorage.setItem(positionKey, JSON.stringify({ x, y }));
-  } catch {
-    // Unwritable storage: the next launch uses the default corner.
-  }
-}
 async function show() {
-  await place();
-  await panel?.show();
+  // Without monitor information the window keeps whatever position it has.
+  await panel.place().catch(() => {});
+  await panel.show();
 }
 function hideLater() {
   clearTimeout(flashTimer);
-  flashTimer = setTimeout(() => void panel?.hide(), flashMs);
+  flashTimer = setTimeout(() => void panel.hide(), flashMs);
 }
 async function send(command: QuickCommand) {
-  await emitTo(mainWindow, events.command, { command }).catch(() => {});
+  await panel.send(command).catch(() => {});
 }
 async function close() {
   clearTimeout(flashTimer);
   pinned.value = false;
-  await panel?.hide();
+  await panel.hide();
   await send("unpin");
 }
 
 onMounted(async () => {
   pinned.value = readPinned();
-  if (!panel) return;
+  if (!panel.desktop) return;
   // Take the corner (or the remembered spot) while still hidden, so the first
   // flash does not jump.
-  await place();
+  await panel.place().catch(() => {});
   stops.push(
-    await listen<PanelStatus>(events.status, async (event) => {
-      status.value = event.payload;
-      pinned.value = event.payload.pinned;
+    await panel.onStatus(async (next) => {
+      status.value = next;
+      pinned.value = next.pinned;
       clearTimeout(flashTimer);
       await show();
       // A result flashes by; the panel stays only while the user keeps it.
-      if (!pinned.value && event.payload.tone !== "busy") hideLater();
+      if (!pinned.value && next.tone !== "busy") hideLater();
     }),
-    await listen<{ pinned: boolean }>(events.pin, async (event) => {
-      pinned.value = event.payload.pinned;
+    await panel.onPin(async (next) => {
+      pinned.value = next;
       clearTimeout(flashTimer);
-      if (pinned.value) await show();
-      else await panel?.hide();
+      if (next) await show();
+      else await panel.hide();
     }),
-    await panel.onMoved(() => void rememberPosition()),
+    await panel.onMoved(() => void panel.rememberPosition().catch(() => {})),
   );
   if (pinned.value) await show();
 });

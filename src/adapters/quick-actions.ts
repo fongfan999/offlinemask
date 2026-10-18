@@ -13,13 +13,16 @@ export const quickShortcutLabel = /Mac|iPhone|iPad/.test(navigator.userAgent)
 /** Label of the floating panel window in `tauri.conf.json`. */
 export const panelWindow = "pill";
 export const mainWindow = "main";
+/** Preferences shared by the shell and the panel window: both read plain storage. */
+export const panelKey = "offlinemask.quick-panel.v1";
+export const panelPositionKey = "offlinemask.quick-panel-position.v1";
 /** Where the app keeps living once its window is closed (decision 0092). */
 export const trayLabel = /Mac|iPhone|iPad/.test(navigator.userAgent)
   ? "thanh menu"
   : "khay hệ thống";
 
-/** Panel → shell: a button in the panel, or its close control. */
-export type QuickCommand = "mask" | "restore" | "unpin";
+/** Panel or tray → shell: a button in the panel, its close control, or the tray's quit. */
+export type QuickCommand = "mask" | "restore" | "unpin" | "quit";
 export interface QuickStatus {
   message: string;
   tone: "ok" | "error" | "busy";
@@ -61,6 +64,8 @@ export interface QuickActionsAdapter {
   hideMainWindow(): Promise<void>;
   launchAtLogin(): Promise<boolean>;
   setLaunchAtLogin(on: boolean): Promise<void>;
+  /** End the process; the shell flushes pending saves first (decision 0092). */
+  quit(): Promise<void>;
 }
 
 export const nativeQuickActions: QuickActionsAdapter = {
@@ -103,4 +108,5 @@ export const nativeQuickActions: QuickActionsAdapter = {
   hideMainWindow: () => getCurrentWindow().hide(),
   launchAtLogin: () => isEnabled(),
   setLaunchAtLogin: (on) => (on ? enable() : disable()),
+  quit: () => invoke("quick_quit"),
 };

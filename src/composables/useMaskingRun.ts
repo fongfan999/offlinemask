@@ -7,7 +7,12 @@ import {
   type DetectionOption,
 } from "../core/detection/options.ts";
 import type { DetectionProgress } from "../core/detection/types.ts";
-import { createTextSession, type Format, type Session } from "../core/sessions.ts";
+import {
+  createTextSession,
+  type Format,
+  type Session,
+  type TextSession,
+} from "../core/sessions.ts";
 import { decodeText } from "../core/decode-text.ts";
 import { maxTextLength, validateText } from "../core/text.ts";
 import type { SheetProgress } from "./useSheetRun.ts";
@@ -87,12 +92,14 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     currentRun++;
     detector.destroy();
   }
-  /** One detection run over `original`, ending in a session handed to `onSession`.
-   * Returns undefined when a newer run superseded it; throws when detection failed. */
+  /** One detection run over `original`, ending in a session handed to `onSession`
+   * when `adopt` agrees. Returns undefined when a newer run superseded it; throws
+   * when detection failed. */
   async function detectSession(
     original: string,
     options: readonly DetectionOption[],
-  ): Promise<Session | undefined> {
+    adopt: (session: TextSession) => boolean = () => true,
+  ): Promise<TextSession | undefined> {
     processing.value = true;
     processingError.value = "";
     const run = ++currentRun;
@@ -110,7 +117,7 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
       );
       if (run !== currentRun) return;
       const session = createTextSession(original, sessions.value, detections, options);
-      onSession(session);
+      if (adopt(session)) onSession(session);
       return session;
     } catch (error) {
       // A cancelled or superseded run fails quietly; only the current one reports.
@@ -143,17 +150,23 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     }
   }
   /** Mask text that did not come through the draft (the clipboard quick action,
-   * decision 0090). The draft stays untouched; a run already in flight wins. */
+   * decision 0090). The draft stays untouched; a run already in flight wins. A
+   * result with nothing to hide is returned but not adopted, so it neither replaces
+   * the text on screen (decision 0072) nor lands in history. */
   async function maskText(
     text: string,
-  ): Promise<{ session: Session } | { error: "busy" | "invalid" | "failed"; message: string }> {
+  ): Promise<{ session: TextSession } | { error: "busy" | "invalid" | "failed"; message: string }> {
     const invalid = validateText(text);
     if (invalid) return { error: "invalid", message: invalid };
     if (processing.value) return { error: "busy", message: "" };
     // Categories that need the pack fall back to the built-in ones while it is missing.
     const options = missingSelectedModels.value ? [...localOptions] : selectedOptions.value;
     try {
-      const session = await detectSession(text, options);
+      const session = await detectSession(
+        text,
+        options,
+        (candidate) => candidate.analysis.findings.length > 0,
+      );
       if (!session) return { error: "busy", message: "" };
       return { session };
     } catch {

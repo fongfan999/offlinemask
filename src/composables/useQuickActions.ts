@@ -1,5 +1,6 @@
 import { computed, ref, watch, type Ref } from "vue";
 import {
+  panelKey,
   trayLabel,
   type InputPermission,
   type QuickActionsAdapter,
@@ -13,10 +14,9 @@ import {
   sessionFindings,
 } from "../core/quick-actions.ts";
 import type { Finding } from "../core/review.ts";
-import { isPrivate, sessionOutput, type Session } from "../core/sessions.ts";
+import { isPrivate, sessionOutput, type Session, type TextSession } from "../core/sessions.ts";
 
 export const shortcutKey = "offlinemask.quick-shortcut.v1";
-export const panelKey = "offlinemask.quick-panel.v1";
 export const shortcutError =
   "Chưa đăng ký được phím tắt. Có thể một ứng dụng khác đang dùng tổ hợp này.";
 export const lockedMessage = "Mở khóa OfflineMask trước khi dùng thao tác nhanh.";
@@ -35,11 +35,15 @@ export interface QuickActionsDependencies {
   run: {
     maskText(
       text: string,
-    ): Promise<{ session: Session } | { error: "busy" | "invalid" | "failed"; message: string }>;
+    ): Promise<
+      { session: TextSession } | { error: "busy" | "invalid" | "failed"; message: string }
+    >;
   };
   sessions: Ref<readonly Session[]>;
   /** While the lock screen is up, nothing may be masked or restored. */
   locked: () => boolean;
+  /** Pending work to finish before the process ends (the shell's debounced vault save). */
+  flush?: () => Promise<void>;
   storage?: PreferenceStorage | null;
 }
 
@@ -52,6 +56,7 @@ export function useQuickActions({
   run,
   sessions,
   locked,
+  flush,
   storage = defaultStorage(),
 }: QuickActionsDependencies) {
   // Two preferences, no content: on/off for the shortcut and the panel.
@@ -137,25 +142,32 @@ export function useQuickActions({
     if (adapter.desktop)
       await adapter.sendStatus({ ...status, pinned: pinned.value }).catch(() => {});
   }
-  /** The shortcut first tries to take the front application's selection; a changed
-   * clipboard means there was one, and the result then goes back over it. Without
-   * permission, or with nothing selected, the clipboard's own text is used as before. */
+  /** The shortcut first tries to take the front application's selection. A marker
+   * goes on the clipboard before the copy chord, so a selection that equals the old
+   * clipboard still counts and no answer to the chord is told apart from one; with
+   * nothing selected the user's clipboard is put back. Without permission the
+   * clipboard's own text is used as before. */
   async function takeSelection(before: string): Promise<{ text: string; replaced: boolean }> {
     if (inputPermission.value === "unknown") await checkInputPermission();
     if (inputPermission.value !== "granted") return { text: before, replaced: false };
+    // An empty clipboard (or an image) needs no marker: any text after the chord is new.
+    const marker = before ? `\u2063OfflineMask ${Date.now().toString(36)}\u2063` : "";
     try {
+      if (marker) await adapter.writeClipboard(marker);
       await adapter.copySelection();
       const text = await adapter.readClipboard();
-      if (text.trim() && text !== before) return { text, replaced: true };
+      if (text !== marker && text.trim()) return { text, replaced: true };
     } catch {
       // Keys could not be sent this time: the clipboard flow still works.
     }
+    if (marker) await adapter.writeClipboard(before).catch(() => {});
     return { text: before, replaced: false };
   }
   /** Run one action. `auto` (the shortcut) decides from the text: known aliases
    * restore, anything else is masked; the panel's buttons act on the clipboard only. */
   async function act(command: "auto" | "mask" | "restore"): Promise<QuickStatus> {
     let replaced = false;
+    let before = "";
     const done = async (message: string, tone: QuickStatus["tone"] = "ok") => {
       // Only the first clipboard-only result after a refusal carries the hint.
       if (command === "auto" && !replaced && inputPermission.value === "denied" && !hinted) {
@@ -166,24 +178,28 @@ export function useQuickActions({
       await show(status);
       return status;
     };
+    /** Nothing changed: a taken selection hands the user their clipboard back. */
+    const undone = async (message: string) => {
+      if (replaced) await adapter.writeClipboard(before).catch(() => {});
+      return done(message, "error");
+    };
     if (locked()) return done(lockedMessage, "error");
     if (busy.value) return done(quickMessages.busy, "error");
     busy.value = true;
     try {
-      let text: string;
       try {
-        text = await adapter.readClipboard();
+        before = await adapter.readClipboard();
       } catch {
         return await done(quickMessages.clipboard, "error");
       }
-      if (command === "auto") ({ text, replaced } = await takeSelection(text));
+      let text = before;
+      if (command === "auto") ({ text, replaced } = await takeSelection(before));
       const direction = quickDirection(text, knownTables());
-      if (direction === "empty") return await done(quickMessages.empty, "error");
+      if (direction === "empty") return await undone(quickMessages.empty);
       if (command === "restore" || (command === "auto" && direction !== "mask")) {
         if (direction !== "restore")
-          return await done(
+          return await undone(
             direction === "unknown" ? quickMessages.unknown : quickMessages.noAliases,
-            "error",
           );
         const result = restoreFromTables(text, knownTables());
         try {
@@ -197,10 +213,9 @@ export function useQuickActions({
       await show({ message: workingMessage, tone: "busy" });
       const outcome = await run.maskText(text);
       if ("error" in outcome)
-        return await done(outcome.error === "busy" ? quickMessages.busy : outcome.message, "error");
+        return await undone(outcome.error === "busy" ? quickMessages.busy : outcome.message);
       const session = outcome.session;
-      if (session.fixture !== "private-text-v1" || !session.analysis.findings.length)
-        return await done(quickMessages.nothing, "error");
+      if (!session.analysis.findings.length) return await undone(quickMessages.nothing);
       try {
         await adapter.writeClipboard(sessionOutput(session));
       } catch {
@@ -209,6 +224,9 @@ export function useQuickActions({
       // The result is pasted before the panel flashes, so the paste cannot land there.
       if (replaced) await adapter.pasteResult().catch(() => {});
       return await done(quickMessages.masked(session.analysis.findings.length, replaced));
+    } catch {
+      // Whatever broke, the panel must not stay on "Đang ẩn thông tin…".
+      return await undone(quickMessages.failed);
     } finally {
       busy.value = false;
     }
@@ -237,8 +255,17 @@ export function useQuickActions({
     write(panelKey, on);
     if (adapter.desktop) await adapter.setPinned(on).catch(() => {});
   }
+  /** The tray's quit: finish pending saves, then let the native side exit. */
+  async function quit() {
+    try {
+      await flush?.();
+    } finally {
+      await adapter.quit().catch(() => {});
+    }
+  }
   function onCommand(command: QuickCommand) {
     if (command === "unpin") void setPinned(false);
+    else if (command === "quit") void quit();
     else void act(command);
   }
 

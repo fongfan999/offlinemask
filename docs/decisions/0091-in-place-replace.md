@@ -32,3 +32,13 @@ Only two chords are ever sent, only inside the handling of the user's own shortc
 ## Verified
 
 `pnpm lint`, `pnpm typecheck`, `pnpm test` (268 tests, 2 new), `cargo check`, `cargo clippy -D warnings` and `cargo fmt --check` pass. In the running macOS dev build without the Accessibility permission: ⌘⇧M still masked the clipboard text, and the front application stayed frontmost through the flash. The in-place path itself (copy chord, paste chord) needs the permission granted to the dev binary and was not exercised in this session; see the note in the commit message.
+
+## Review follow-up (same day)
+
+A code review of the three quick-action commits (8 findings, all applied at the owner's request) changed this flow in three ways:
+
+- **Marker instead of a diff.** The selection check used to compare the clipboard before and after the copy chord, which missed a selection equal to the old clipboard and left the user's clipboard overwritten when there was nothing to do. Now, when the clipboard holds text, an invisible marker (`\u2063OfflineMask …\u2063`) is written first; anything else after the chord is the selection, and the marker still being there means none, in which case the previous text is put back. An empty or non-text clipboard gets no marker, so an image on the clipboard survives a press with nothing selected.
+- **Nothing to do gives the clipboard back.** When a taken selection has nothing to hide, holds aliases from no known session, or the run fails, the previous clipboard text is restored before the message, so "giữ nguyên" is true.
+- **Windows chord.** The letter is sent as the virtual-key code (`VK_C`, `VK_V`) on Windows; a Unicode text event with Control held is typing, not Ctrl+C. macOS and X11 keep the layout mapping. Still not run on Windows.
+
+Also from the review: a quick mask that finds nothing no longer creates or adopts a session (`maskText` adopts only sessions with findings), so it cannot replace the text on screen without a passcode; an unexpected failure after the "Đang ẩn thông tin…" flash ends in "Chưa thực hiện được thao tác…" instead of a stuck panel; and the panel's Tauri calls moved from `PillApp.vue` into `src/adapters/quick-panel.ts`, which also keeps the panel bundle free of the composable and core modules.

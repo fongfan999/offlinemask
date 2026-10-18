@@ -58,6 +58,11 @@ const quick = useQuickActions({
   run,
   sessions,
   locked: () => vault.state.value === "locked",
+  // Quitting from the tray waits for the debounced vault save below.
+  flush: async () => {
+    clearTimeout(saveTimer);
+    if (vault.state.value === "unlocked") await vault.save(sessions.value);
+  },
 });
 provide(packKey, pack);
 provide(quickKey, quick);

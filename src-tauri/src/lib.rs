@@ -73,7 +73,8 @@ pub fn run() {
         vault::vault_reset,
         quick_input::quick_input_permission,
         quick_input::quick_copy_selection,
-        quick_input::quick_paste_result
+        quick_input::quick_paste_result,
+        background::quick_quit
     ]);
     #[cfg(all(
         feature = "minilm-desktop-prototype",
@@ -94,6 +95,7 @@ pub fn run() {
         quick_input::quick_input_permission,
         quick_input::quick_copy_selection,
         quick_input::quick_paste_result,
+        background::quick_quit,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -117,6 +119,7 @@ pub fn run() {
         quick_input::quick_input_permission,
         quick_input::quick_copy_selection,
         quick_input::quick_paste_result,
+        background::quick_quit,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -144,6 +147,7 @@ pub fn run() {
         quick_input::quick_input_permission,
         quick_input::quick_copy_selection,
         quick_input::quick_paste_result,
+        background::quick_quit,
         recognition_native::recognition_native_load,
         recognition_native::recognition_native_run,
         recognition_native::recognition_native_release

@@ -48,6 +48,7 @@ export const quickMessages = {
   noAliases: "Không thấy mã thay thế nào trong clipboard để khôi phục.",
   busy: "Đang ẩn một văn bản khác. Thử lại sau giây lát.",
   clipboard: "Chưa đọc hoặc ghi được clipboard. Thử sao chép lại.",
+  failed: "Chưa thực hiện được thao tác. Nội dung được giữ nguyên, hãy thử lại.",
   masked: (n: number, replaced = false) =>
     replaced
       ? `Đã ẩn ${count(n)} thông tin ngay tại chỗ bạn chọn. Bản đã ẩn cũng nằm trong clipboard.`

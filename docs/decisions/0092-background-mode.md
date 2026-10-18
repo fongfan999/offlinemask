@@ -27,3 +27,7 @@ Consulted: the Tauri 2 system-tray guide (`TrayIconBuilder`, `MenuItem::with_id`
 ## Verified
 
 `pnpm lint`, `pnpm typecheck`, `pnpm test` (269 tests, 1 new), `cargo clippy -D warnings` and `cargo fmt --check` pass. On the macOS dev build, checked through the Core Graphics window list and System Events confined to the OfflineMask process: the menu bar shows a status item; clicking the window's close button hid the window, the process stayed alive, and the panel flashed the notice and hid again; clicking the app's Dock tile brought the window back and frontmost. The tray menu's own items could not be driven through System Events (the menu exposes no accessible items), so "Ẩn thông tin trong clipboard", "Khôi phục trong clipboard" and "Thoát OfflineMask" were not exercised live; they send the same event the panel's buttons do. "Khởi động cùng máy" was not toggled on the development binary, since the login item would point at `target/debug/offlinemask`. Windows and Linux were not run.
+
+## Review follow-up (same day)
+
+"Thoát OfflineMask" no longer exits on the spot. The tray sends the `quit` command to the main window, which clears the shell's 300 ms vault-save debounce, awaits the save and then calls `quick_quit`; if the frontend never answers (window not loaded, script error) the native side exits anyway after two seconds. The unused `core:window:allow-show` grant on the main window was removed; reopening is done from Rust. ⌘Q on macOS still exits without this flush, as before this work.

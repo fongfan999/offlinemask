@@ -416,3 +416,33 @@ test("run: a .txt file becomes the draft; long, empty or busy cases explain why"
   void run.mask("text");
   assert.match(await run.openTextFile(new File(["x"], "d.txt")), /đang ẩn/);
 });
+
+test("run: maskText leaves the draft alone and adopts only sessions with findings", async () => {
+  const detector = fakeDetector();
+  const received = [];
+  const sessions = ref([]);
+  const run = useMaskingRun({
+    detector,
+    pack: { ready: ref(false), readyRoot: ref(null) },
+    sessions,
+    onSession: (session) => received.push(session),
+  });
+  run.draft.value = "bản nháp đang gõ";
+  const empty = run.maskText("Không có gì để ẩn.");
+  detector.settle([]);
+  const nothing = await empty;
+  assert.equal(nothing.session.analysis.findings.length, 0);
+  assert.deepEqual(received, []);
+  const masked = run.maskText("Gọi 0901234567 nhé");
+  detector.settle([
+    { start: 4, end: 14, type: "SDT", label: "SĐT", source: "t", reason: "t", priority: 1 },
+  ]);
+  const found = await masked;
+  assert.equal(found.session.analysis.findings.length, 1);
+  assert.equal(received.length, 1);
+  assert.equal(run.draft.value, "bản nháp đang gõ");
+  assert.deepEqual(await run.maskText("   "), {
+    error: "invalid",
+    message: "Nhập hoặc dán văn bản để bắt đầu.",
+  });
+});
