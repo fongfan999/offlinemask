@@ -64,6 +64,7 @@ ort = { version = "=2.0.0-rc.10", optional = true, default-features = false, fea
 minilm-tokenizer = { package = "offlinemask-minilm-tokenizer-prototype", path = "../scripts/minilm-native/native", optional = true }
 tauri-plugin-dialog = "=2.7.3"
 tauri-plugin-fs = "=2.5.2"
+tauri-plugin-clipboard-manager = "=2.5.0"
 
 
 # A freshly installed pack is verified by hashing 1.1 GB once. Unoptimized
@@ -83,3 +84,6 @@ lto = true
 opt-level = 3
 panic = "abort"
 strip = true
+
+[target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
+tauri-plugin-global-shortcut = "=2.4.1"

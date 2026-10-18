@@ -19,11 +19,28 @@
         "minWidth": 640,
         "minHeight": 560,
         "dragDropEnabled": false
+      },
+      {
+        "label": "pill",
+        "title": "OfflineMask",
+        "url": "pill.html",
+        "width": 336,
+        "height": 124,
+        "resizable": false,
+        "decorations": false,
+        "alwaysOnTop": true,
+        "visibleOnAllWorkspaces": true,
+        "skipTaskbar": true,
+        "visible": false,
+        "focus": false,
+        "acceptFirstMouse": true,
+        "dragDropEnabled": false
       }
     ],
     "security": {
       "capabilities": [
-        "default"
+        "default",
+        "pill"
       ],
       "csp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self' asset: http://asset.localhost https://asset.localhost ipc: http://ipc.localhost; img-src 'self' data:; style-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'",
       "devCsp": "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; worker-src 'self'; connect-src 'self' asset: http://asset.localhost https://asset.localhost ipc: http://ipc.localhost http://localhost:1420 ws://localhost:1420; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; object-src 'none'; base-uri 'self'; form-action 'none'",

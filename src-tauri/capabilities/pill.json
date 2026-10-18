@@ -1,0 +1,22 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "pill",
+  "description": "The floating quick-action panel (decision 0090). It shows and positions itself, can be dragged, follows the theme, receives outcomes from the main window and sends back which button was pressed. It touches no clipboard, file or network.",
+  "windows": [
+    "pill"
+  ],
+  "permissions": [
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+    "core:event:allow-emit-to",
+    "core:window:allow-show",
+    "core:window:allow-hide",
+    "core:window:allow-set-position",
+    "core:window:allow-outer-position",
+    "core:window:allow-outer-size",
+    "core:window:allow-primary-monitor",
+    "core:window:allow-current-monitor",
+    "core:window:allow-start-dragging",
+    "core:window:allow-set-theme"
+  ]
+}

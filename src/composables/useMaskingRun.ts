@@ -87,21 +87,15 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     currentRun++;
     detector.destroy();
   }
-  async function mask(format: Format): Promise<Session | undefined> {
-    // Spreadsheets have their own flow (useSheetRun, decision 0076).
-    if (format !== "text") return;
-    if (
-      processing.value ||
-      draftError.value ||
-      !selectedOptions.value.length ||
-      missingSelectedModels.value
-    )
-      return;
+  /** One detection run over `original`, ending in a session handed to `onSession`.
+   * Returns undefined when a newer run superseded it; throws when detection failed. */
+  async function detectSession(
+    original: string,
+    options: readonly DetectionOption[],
+  ): Promise<Session | undefined> {
     processing.value = true;
     processingError.value = "";
     const run = ++currentRun;
-    const original = draft.value;
-    const options = [...selectedOptions.value];
     const startedAt = Date.now();
     progress.value = { stage: "loading", done: 0, total: 0, startedAt };
     try {
@@ -112,20 +106,58 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
           if (run === currentRun) progress.value = textProgress(step, startedAt);
         },
         modelRoot,
-        options,
+        [...options],
       );
       if (run !== currentRun) return;
       const session = createTextSession(original, sessions.value, detections, options);
-      draft.value = "";
       onSession(session);
       return session;
-    } catch {
-      if (run === currentRun) processingError.value = processingFailure;
+    } catch (error) {
+      // A cancelled or superseded run fails quietly; only the current one reports.
+      if (run !== currentRun) return;
+      throw error;
     } finally {
       if (run === currentRun) {
         processing.value = false;
         progress.value = null;
       }
+    }
+  }
+  async function mask(format: Format): Promise<Session | undefined> {
+    // Spreadsheets have their own flow (useSheetRun, decision 0076).
+    if (format !== "text") return;
+    if (
+      processing.value ||
+      draftError.value ||
+      !selectedOptions.value.length ||
+      missingSelectedModels.value
+    )
+      return;
+    const original = draft.value;
+    try {
+      const session = await detectSession(original, selectedOptions.value);
+      if (session) draft.value = "";
+      return session;
+    } catch {
+      processingError.value = processingFailure;
+    }
+  }
+  /** Mask text that did not come through the draft (the clipboard quick action,
+   * decision 0090). The draft stays untouched; a run already in flight wins. */
+  async function maskText(
+    text: string,
+  ): Promise<{ session: Session } | { error: "busy" | "invalid" | "failed"; message: string }> {
+    const invalid = validateText(text);
+    if (invalid) return { error: "invalid", message: invalid };
+    if (processing.value) return { error: "busy", message: "" };
+    // Categories that need the pack fall back to the built-in ones while it is missing.
+    const options = missingSelectedModels.value ? [...localOptions] : selectedOptions.value;
+    try {
+      const session = await detectSession(text, options);
+      if (!session) return { error: "busy", message: "" };
+      return { session };
+    } catch {
+      return { error: "failed", message: processingFailure };
     }
   }
   /** A .txt or .md file becomes the draft (decision 0083); an error message otherwise.
@@ -152,6 +184,7 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     draftError,
     missingSelectedModels,
     mask,
+    maskText,
     cancel,
     destroy,
   };

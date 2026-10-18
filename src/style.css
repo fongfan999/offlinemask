@@ -2557,3 +2557,132 @@ td.alias {
     margin-left: 30px;
   }
 }
+
+/* Quick actions in Settings (decision 0090). */
+.quick-intro,
+.quick-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.quick-note {
+  margin-top: 6px;
+  color: var(--warm);
+}
+.quick-key {
+  padding: 2px 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: 6px;
+  background: var(--paper-sunk);
+  font: 11px var(--mono);
+  letter-spacing: 0.04em;
+}
+.quick-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.quick-toggle input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+.quick-error {
+  color: var(--error);
+}
+.quick-last {
+  margin: 18px 0 0;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+/* The floating quick-action panel: its own small window, same tokens. */
+.pill-body {
+  min-width: 0;
+  overflow: hidden;
+  background: var(--paper-raised);
+}
+.pill {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  height: 100vh;
+  padding: 8px 12px 10px;
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+  user-select: none;
+  -webkit-user-select: none;
+}
+.pill-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  cursor: grab;
+}
+.pill-head .brand-mark {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+}
+.pill-head .brand-name {
+  font-size: 13px;
+}
+.pill-hint {
+  margin-left: 2px;
+  color: var(--muted);
+  font: 10px var(--mono);
+  letter-spacing: 0.08em;
+}
+.pill-close {
+  display: flex;
+  margin-left: auto;
+  padding: 4px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+}
+.pill-close:hover {
+  background: var(--paper-sunk);
+  color: var(--ink);
+}
+.pill-actions {
+  display: flex;
+  gap: 8px;
+}
+.pill-actions .primary-action,
+.pill-actions .quiet-button {
+  flex: 1;
+  justify-content: center;
+  gap: 6px;
+  min-height: 0;
+  height: 32px;
+  padding: 0 10px;
+  font-size: 12px;
+}
+.pill-status {
+  margin: 0;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+.pill-status.is-ok {
+  color: var(--ink);
+}
+.pill-status.is-error {
+  color: var(--error);
+}
+.pill-status.is-busy {
+  color: var(--note-ink);
+}

@@ -2,6 +2,7 @@
 import { useTemplateRef } from "vue";
 import AppSettings from "../components/AppSettings.vue";
 import ModelSettings from "../components/ModelSettings.vue";
+import QuickActionSettings from "../components/QuickActionSettings.vue";
 import VaultSettings from "../components/VaultSettings.vue";
 import { desktopModels } from "../adapters/models.ts";
 import { packKey, runKey, useProvided } from "../composables/context.ts";
@@ -29,5 +30,6 @@ defineExpose({
     @uninstall="run('uninstall')"
   />
   <VaultSettings />
+  <QuickActionSettings />
   <AppSettings />
 </template>

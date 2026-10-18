@@ -5,6 +5,11 @@ import type { TextAnalysis } from "./text.ts";
  * Scopes are four hex characters since decision 0059; eight-character ones from earlier builds still match. */
 const aliasShape = /\[[A-Z][A-Z_]*_\d+_[a-f0-9]{4,8}\]/g;
 
+/** Every alias-shaped token in `text`, in order, duplicates included. */
+export function aliasTokens(text: string): string[] {
+  return [...text.matchAll(aliasShape)].map((match) => match[0]);
+}
+
 export interface Restoration {
   text: string;
   /** Number of alias occurrences replaced with their original value. */

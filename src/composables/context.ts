@@ -1,6 +1,7 @@
 import { inject, type InjectionKey } from "vue";
 import type { Format } from "../core/sessions.ts";
 import type { useMaskingRun } from "./useMaskingRun.ts";
+import type { useQuickActions } from "./useQuickActions.ts";
 import type { useRecognitionPack } from "./useRecognitionPack.ts";
 import type { DocRun } from "./useDocRun.ts";
 import type { SheetRun } from "./useSheetRun.ts";
@@ -20,6 +21,7 @@ export type RecognitionPack = ReturnType<typeof useRecognitionPack>;
 export type SessionStore = ReturnType<typeof useSessions>;
 export type MaskingRun = ReturnType<typeof useMaskingRun>;
 export type SessionVault = ReturnType<typeof useVault>;
+export type QuickActions = ReturnType<typeof useQuickActions>;
 
 export const packKey: InjectionKey<RecognitionPack> = Symbol("recognition-pack");
 export const sessionsKey: InjectionKey<SessionStore> = Symbol("sessions");
@@ -27,6 +29,7 @@ export const runKey: InjectionKey<MaskingRun> = Symbol("masking-run");
 export const vaultKey: InjectionKey<SessionVault> = Symbol("session-vault");
 export const sheetKey: InjectionKey<SheetRun> = Symbol("sheet-run");
 export const docKey: InjectionKey<DocRun> = Symbol("doc-run");
+export const quickKey: InjectionKey<QuickActions> = Symbol("quick-actions");
 
 /** Pages are only rendered by the shell, which provides every key. */
 export function useProvided<T>(key: InjectionKey<T>): T {

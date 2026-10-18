@@ -1,6 +1,11 @@
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     let builder = tauri::Builder::default().setup(|app| {
+        // Quick actions (decision 0090): one global shortcut; the clipboard is read
+        // only when the user presses it or a panel button. Nothing watches it.
+        #[cfg(desktop)]
+        app.handle()
+            .plugin(tauri_plugin_global_shortcut::Builder::new().build())?;
         let root = app
             .path()
             .app_local_data_dir()?
@@ -125,7 +130,8 @@ pub fn run() {
     // user picks; no other path is in the fs scope (decision 0076).
     let builder = builder
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_fs::init());
+        .plugin(tauri_plugin_fs::init())
+        .plugin(tauri_plugin_clipboard_manager::init());
     #[cfg(not(feature = "recognition-native-sidecar"))]
     builder
         .run(tauri::generate_context!())

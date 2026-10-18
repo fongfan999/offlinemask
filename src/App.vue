@@ -10,6 +10,7 @@ import {
   watch,
 } from "vue";
 import { version } from "../package.json";
+import { nativeQuickActions } from "./adapters/quick-actions.ts";
 import { createSheetFiles } from "./adapters/sheet-files.ts";
 import { createTextDetector, queueDetections } from "./adapters/text-detection.ts";
 import AppIcon from "./components/AppIcon.vue";
@@ -18,6 +19,7 @@ import LockPage from "./components/LockPage.vue";
 import {
   packKey,
   docKey,
+  quickKey,
   runKey,
   sessionsKey,
   sheetKey,
@@ -26,6 +28,7 @@ import {
   type PageHandle,
 } from "./composables/context.ts";
 import { useMaskingRun } from "./composables/useMaskingRun.ts";
+import { useQuickActions } from "./composables/useQuickActions.ts";
 import { useRecognitionPack } from "./composables/useRecognitionPack.ts";
 import { useSessions } from "./composables/useSessions.ts";
 import { useDocRun } from "./composables/useDocRun.ts";
@@ -49,7 +52,15 @@ const sheetFiles = createSheetFiles();
 const sheet = useSheetRun({ detector, files: sheetFiles, pack, sessions, onSession: adoptSession });
 const doc = useDocRun({ detector, files: sheetFiles, pack, sessions, onSession: adoptSession });
 const vault = useVault();
+// Clipboard quick actions (decision 0090) reuse the text run and every alias table.
+const quick = useQuickActions({
+  adapter: nativeQuickActions,
+  run,
+  sessions,
+  locked: () => vault.state.value === "locked",
+});
 provide(packKey, pack);
+provide(quickKey, quick);
 provide(sessionsKey, store);
 provide(runKey, run);
 provide(vaultKey, vault);
@@ -111,10 +122,12 @@ const sidebarToggle = useTemplateRef<HTMLButtonElement>("sidebarToggle");
 onMounted(() => {
   void pack.start();
   void vault.start();
+  void quick.start();
 });
 onBeforeUnmount(() => {
   clearTimeout(saveTimer);
   pack.stop();
+  quick.stop();
   run.destroy();
 });
 
@@ -157,6 +170,7 @@ async function startMasking() {
 function removeSession(id: string) {
   const target = active.value?.id === id ? format.value : null;
   store.remove(id);
+  quick.forget(id);
   if (target) void navigate(target);
 }
 async function openSidebar() {

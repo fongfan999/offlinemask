@@ -83,7 +83,7 @@ These are documentation findings, not results from independent product tests. Pr
 ### Deferred
 
 - PDF, Word, scanned documents, images, audio, OCR, and legacy or macro-enabled Excel formats.
-- Browser extensions, clipboard interception, AI-provider integrations, and automatic submission to external AI.
+- Browser extensions, background clipboard interception (watching or polling the clipboard), AI-provider integrations, and automatic submission to external AI. Reading the clipboard only when the user presses the quick-action shortcut or a panel button is in scope ([Decision 0090](docs/decisions/0090-clipboard-quick-actions.md)).
 - Central administration, shared team vaults, cloud accounts, cloud synchronisation, and enterprise deployment consoles.
 - Public marketplace, automatic pack updates, and arbitrary executable third-party plugins.
 - Training a custom detection model and adding further language packs.

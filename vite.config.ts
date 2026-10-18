@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import process from "node:process";
+import { fileURLToPath } from "node:url";
 const host = process.env.TAURI_DEV_HOST;
 
 // https://vite.dev/config/
@@ -16,7 +17,14 @@ export default defineConfig(() => ({
   plugins: [vue()],
   build: {
     copyPublicDir: false,
-    rollupOptions: { output: { assetFileNames } },
+    rollupOptions: {
+      // The floating quick-action panel is its own small page (decision 0090).
+      input: {
+        main: fileURLToPath(new URL("index.html", import.meta.url)),
+        pill: fileURLToPath(new URL("pill.html", import.meta.url)),
+      },
+      output: { assetFileNames },
+    },
   },
   worker: {
     rollupOptions: { output: { assetFileNames } },
