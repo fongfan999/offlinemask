@@ -19,7 +19,7 @@ use objc2_app_kit::{NSEvent, NSEventMask, NSEventType, NSScreen, NSWorkspace};
 use tauri::{AppHandle, Manager, Runtime};
 
 use crate::selection::{
-    emit_cleared, emit_made, usable, Gesture, Point, Rect, Selection, SETTLE_MS,
+    emit_cleared, emit_made, usable, Gesture, Point, Probe, Rect, Selection, SETTLE_MS,
 };
 
 #[repr(C)]
@@ -253,4 +253,38 @@ pub fn start<R: Runtime>(app: AppHandle<R>, enabled: Arc<AtomicBool>) {
         std::mem::forget(block);
     });
     let _ = app.app_handle();
+}
+
+/// One look for the keyboard poller: the frontmost application, the pointer and the
+/// mouse buttons are read on the main thread; the selection itself off it.
+pub fn probe<R: Runtime>(app: &AppHandle<R>) -> Probe {
+    let (sender, receiver) = std::sync::mpsc::channel();
+    let posted = app.run_on_main_thread(move || {
+        let Some(mtm) = MainThreadMarker::new() else {
+            return;
+        };
+        let down = NSEvent::pressedMouseButtons() & 1 != 0;
+        let pid = NSWorkspace::sharedWorkspace()
+            .frontmostApplication()
+            .map(|front| front.processIdentifier());
+        let _ = sender.send((down, pid, pointer_top_left(mtm)));
+    });
+    if posted.is_err() {
+        return Probe::Nothing;
+    }
+    let Ok((down, pid, pointer)) = receiver.recv_timeout(Duration::from_secs(1)) else {
+        return Probe::Nothing;
+    };
+    if down {
+        return Probe::MouseDown;
+    }
+    match pid.and_then(read_selection) {
+        Some((text, bounds, editable)) => Probe::Found(Selection {
+            text,
+            bounds,
+            pointer,
+            editable,
+        }),
+        None => Probe::Nothing,
+    }
 }

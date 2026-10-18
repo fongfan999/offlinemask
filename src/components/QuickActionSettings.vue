@@ -70,9 +70,9 @@ const quick = useProvided(quickKey);
       <div>
         <h3>Nút nổi khi bôi đen</h3>
         <p id="quick-popover-help">
-          Tắt mặc định. Khi bật, vừa bôi đen văn bản trong ứng dụng khác là bảng nổi hiện ngay phía
-          trên với hai nút; bấm là thay ngay tại chỗ. OfflineMask chỉ theo dõi nút chuột và đọc phần
-          bạn đã chọn, không đọc phím.
+          Tắt mặc định. Khi bật, vừa chọn văn bản trong ứng dụng khác (kéo chuột hoặc ⌘A) là một nút
+          tròn nhỏ hiện ngay phía trên; bấm một lần là xong. OfflineMask chỉ đọc phần đang được chọn
+          ở ứng dụng phía trước, không đọc phím bạn gõ.
         </p>
         <p v-if="quick.desktop && !quick.popoverSupported.value" class="quick-note">
           Hệ này chưa hỗ trợ (Linux sẽ có sau trên X11).

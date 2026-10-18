@@ -25,15 +25,17 @@ use windows::Win32::UI::Accessibility::{
     UIA_TextPatternId, UIA_ValuePatternId,
 };
 use windows::Win32::UI::HiDpi::{GetDpiForMonitor, MDT_EFFECTIVE_DPI};
-use windows::Win32::UI::Input::KeyboardAndMouse::GetDoubleClickTime;
+use windows::Win32::UI::Input::KeyboardAndMouse::{
+    GetAsyncKeyState, GetDoubleClickTime, VK_LBUTTON,
+};
 use windows::Win32::UI::WindowsAndMessaging::{
-    CallNextHookEx, DispatchMessageW, GetMessageW, GetWindowThreadProcessId, SetWindowsHookExW,
-    TranslateMessage, WindowFromPoint, HHOOK, MSG, MSLLHOOKSTRUCT, WH_MOUSE_LL, WM_LBUTTONDOWN,
-    WM_LBUTTONUP,
+    CallNextHookEx, DispatchMessageW, GetCursorPos, GetMessageW, GetWindowThreadProcessId,
+    SetWindowsHookExW, TranslateMessage, WindowFromPoint, HHOOK, MSG, MSLLHOOKSTRUCT, WH_MOUSE_LL,
+    WM_LBUTTONDOWN, WM_LBUTTONUP,
 };
 
 use crate::selection::{
-    emit_cleared, emit_made, usable, Gesture, Point, Rect, Selection, SETTLE_MS,
+    emit_cleared, emit_made, usable, Gesture, Point, Probe, Rect, Selection, SETTLE_MS,
 };
 
 /// What the hook procedure needs: it is a plain function with no context argument.
@@ -256,4 +258,32 @@ pub fn start<R: Runtime>(app: AppHandle<R>, enabled: Arc<AtomicBool>) {
             }
         }
     });
+}
+
+/// One look for the keyboard poller (no permission involved on Windows).
+pub fn probe<R: Runtime>(_app: &AppHandle<R>) -> Probe {
+    // SAFETY: plain queries of the mouse button and the cursor.
+    unsafe {
+        if GetAsyncKeyState(i32::from(VK_LBUTTON.0)) as u16 & 0x8000 != 0 {
+            return Probe::MouseDown;
+        }
+        let mut physical = POINT::default();
+        if GetCursorPos(&mut physical).is_err() {
+            return Probe::Nothing;
+        }
+        let scale = scale_at(physical);
+        let pointer = Point {
+            x: physical.x as f64 / scale,
+            y: physical.y as f64 / scale,
+        };
+        match read_selection(physical) {
+            Some((text, bounds, editable)) => Probe::Found(Selection {
+                text,
+                bounds,
+                pointer,
+                editable,
+            }),
+            None => Probe::Nothing,
+        }
+    }
 }

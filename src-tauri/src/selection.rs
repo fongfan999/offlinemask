@@ -73,11 +73,92 @@ pub struct SelectionWatch {
     started: Mutex<bool>,
 }
 
+/// The text of the selection last announced, so the mouse path and the keyboard
+/// poller never announce the same selection twice.
+static LAST_SHOWN: Mutex<String> = Mutex::new(String::new());
+
 pub fn emit_made<R: Runtime>(app: &AppHandle<R>, selection: Selection) {
+    if let Ok(mut last) = LAST_SHOWN.lock() {
+        last.clone_from(&selection.text);
+    }
     let _ = app.emit_to(MAIN_WINDOW, MADE_EVENT, selection);
 }
 pub fn emit_cleared<R: Runtime>(app: &AppHandle<R>) {
+    if let Ok(mut last) = LAST_SHOWN.lock() {
+        last.clear();
+    }
     let _ = app.emit_to(MAIN_WINDOW, CLEARED_EVENT, ());
+}
+
+/// What one look at the front application found.
+pub enum Probe {
+    /// The left button is down: a mouse selection is in progress; its own path handles it.
+    MouseDown,
+    /// No usable selection (none, too short, this app, a password field, no permission).
+    Nothing,
+    Found(Selection),
+}
+/// Keyboard selections (⌘A, ⇧ with arrows) produce no mouse event. While the popover is
+/// on, the front application's selection is read every `POLL`; a selection that holds
+/// still for one look is announced, and one that disappears is cleared. No key is read.
+pub const POLL: std::time::Duration = std::time::Duration::from_millis(450);
+/// Decide what to announce after a look: `candidate` is the text seen on the previous
+/// look. Returns the new candidate and whether to announce or clear.
+pub fn after_look(
+    candidate: Option<&str>,
+    last_shown: &str,
+    probe: &Probe,
+) -> (Option<String>, Step) {
+    match probe {
+        Probe::MouseDown => (None, Step::Wait),
+        Probe::Nothing => (
+            None,
+            if last_shown.is_empty() {
+                Step::Wait
+            } else {
+                Step::Clear
+            },
+        ),
+        Probe::Found(selection) => {
+            let steady = candidate == Some(selection.text.as_str());
+            let step = if steady && selection.text != last_shown {
+                Step::Announce
+            } else {
+                Step::Wait
+            };
+            (Some(selection.text.clone()), step)
+        }
+    }
+}
+#[derive(Debug, PartialEq)]
+pub enum Step {
+    Wait,
+    Announce,
+    Clear,
+}
+fn start_poller<R: Runtime>(app: AppHandle<R>, enabled: Arc<AtomicBool>) {
+    std::thread::spawn(move || {
+        let mut candidate: Option<String> = None;
+        loop {
+            std::thread::sleep(POLL);
+            if !enabled.load(Ordering::Relaxed) {
+                candidate = None;
+                continue;
+            }
+            let probe = backend::probe(&app);
+            let last = LAST_SHOWN
+                .lock()
+                .map(|text| text.clone())
+                .unwrap_or_default();
+            let (next, step) = after_look(candidate.as_deref(), &last, &probe);
+            candidate = next;
+            match (step, probe) {
+                (Step::Announce, Probe::Found(selection)) => emit_made(&app, selection),
+                (Step::Clear, _) => emit_cleared(&app),
+                _ => {}
+            }
+        }
+    });
 }
 
 #[cfg(target_os = "macos")]
@@ -91,6 +172,9 @@ mod backend {
         false
     }
     pub fn start(_app: AppHandle, _enabled: Arc<AtomicBool>) {}
+    pub fn probe<R: Runtime>(_app: &AppHandle<R>) -> Probe {
+        Probe::Nothing
+    }
 }
 
 #[tauri::command]
@@ -115,7 +199,8 @@ pub fn quick_selection_watch(
         .map_err(|_| "io: poisoned".to_string())?;
     if enabled && !*started {
         *started = true;
-        backend::start(app, watch.enabled.clone());
+        backend::start(app.clone(), watch.enabled.clone());
+        start_poller(app, watch.enabled.clone());
     }
     Ok(())
 }
@@ -136,6 +221,36 @@ mod tests {
         // A release with no recorded press (the press happened before the watch started).
         assert!(!gesture.released(Point { x: 0.0, y: 0.0 }, 1));
         assert!(gesture.released(Point { x: 0.0, y: 0.0 }, 3));
+    }
+
+    fn found(text: &str) -> Probe {
+        Probe::Found(Selection {
+            text: text.to_string(),
+            bounds: None,
+            pointer: Point { x: 0.0, y: 0.0 },
+            editable: true,
+        })
+    }
+
+    #[test]
+    fn a_keyboard_selection_is_announced_once_it_holds_still_and_cleared_when_gone() {
+        // First look: seen, not yet steady.
+        let (candidate, step) = after_look(None, "", &found("Nguyễn Văn A"));
+        assert_eq!(step, Step::Wait);
+        // Same text on the next look: announce.
+        let (candidate, step) = after_look(candidate.as_deref(), "", &found("Nguyễn Văn A"));
+        assert_eq!(step, Step::Announce);
+        // Already shown (by this path or by the mouse path): never again.
+        let (candidate, step) =
+            after_look(candidate.as_deref(), "Nguyễn Văn A", &found("Nguyễn Văn A"));
+        assert_eq!(step, Step::Wait);
+        // A drag in progress waits; a vanished selection clears what was shown.
+        let (_, step) = after_look(candidate.as_deref(), "Nguyễn Văn A", &Probe::MouseDown);
+        assert_eq!(step, Step::Wait);
+        let (_, step) = after_look(candidate.as_deref(), "Nguyễn Văn A", &Probe::Nothing);
+        assert_eq!(step, Step::Clear);
+        let (_, step) = after_look(None, "", &Probe::Nothing);
+        assert_eq!(step, Step::Wait);
     }
 
     #[test]
