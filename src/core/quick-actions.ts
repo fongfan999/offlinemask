@@ -48,9 +48,15 @@ export const quickMessages = {
   noAliases: "Không thấy mã thay thế nào trong clipboard để khôi phục.",
   busy: "Đang ẩn một văn bản khác. Thử lại sau giây lát.",
   clipboard: "Chưa đọc hoặc ghi được clipboard. Thử sao chép lại.",
-  masked: (n: number) =>
-    `Đã ẩn ${count(n)} thông tin. Bản đã ẩn đang trong clipboard, dán vào AI được rồi.`,
-  restored: (n: number, unknown: number) =>
-    `Đã khôi phục ${count(n)} mã thay thế. Bản khôi phục đang trong clipboard.` +
+  masked: (n: number, replaced = false) =>
+    replaced
+      ? `Đã ẩn ${count(n)} thông tin ngay tại chỗ bạn chọn. Bản đã ẩn cũng nằm trong clipboard.`
+      : `Đã ẩn ${count(n)} thông tin. Bản đã ẩn đang trong clipboard, dán vào AI được rồi.`,
+  restored: (n: number, unknown: number, replaced = false) =>
+    (replaced
+      ? `Đã khôi phục ${count(n)} mã thay thế ngay tại chỗ bạn chọn.`
+      : `Đã khôi phục ${count(n)} mã thay thế. Bản khôi phục đang trong clipboard.`) +
     (unknown ? ` ${count(unknown)} mã khác không thuộc văn bản nào đang mở, giữ nguyên.` : ""),
+  /** Shown once per launch when the selection could not be taken for lack of permission. */
+  permissionHint: "Muốn thay ngay tại chỗ? Cấp quyền Trợ năng trong Cài đặt › Thao tác nhanh.",
 } as const;

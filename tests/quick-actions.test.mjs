@@ -107,6 +107,17 @@ function fakeAdapter(clipboard = "") {
     sendStatus: async (status) =>
       calls.push(["status", status.message, status.tone, status.pinned]),
     setPinned: async (pinned) => calls.push(["pin", pinned]),
+    permission: "unsupported",
+    selection: null,
+    inputPermission: async (prompt) => {
+      calls.push(["permission", prompt]);
+      return adapter.permission;
+    },
+    copySelection: async () => {
+      calls.push(["copy"]);
+      if (adapter.selection !== null) adapter.clipboard = adapter.selection;
+    },
+    pasteResult: async () => calls.push(["paste", adapter.clipboard]),
   };
   return adapter;
 }
@@ -137,7 +148,8 @@ test("the shortcut masks ordinary text and leaves the masked copy on the clipboa
     storage: memoryStorage(),
   });
   await quick.start();
-  assert.deepEqual(adapter.calls, [["register"]]);
+  // Start registers the shortcut and reads the keystroke permission once.
+  assert.deepEqual(adapter.calls, [["register"], ["permission", false]]);
   const status = await quick.act("auto");
   assert.equal(status.tone, "ok");
   assert.equal(status.message, quickMessages.masked(1));
@@ -256,4 +268,73 @@ test("in the browser preview nothing registers and the preferences stay off", as
   assert.equal(quick.shortcutOn.value, false);
   await quick.start();
   assert.deepEqual(adapter.calls, []);
+});
+
+test("with permission, the shortcut takes the selection and pastes the result over it", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("bản cũ trong clipboard");
+  adapter.permission = "granted";
+  adapter.selection = phoneText;
+  const run = fakeRun(sessions);
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  const status = await quick.act("auto");
+  assert.equal(status.message, quickMessages.masked(1, true));
+  assert.deepEqual(run.texts, [phoneText]);
+  const alias = sessions.value[0].analysis.findings[0].alias;
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "paste"),
+    [["paste", `Gọi ${alias} giúp tôi.`]],
+  );
+  // The panel's own buttons never touch the selection.
+  adapter.clipboard = phoneText;
+  await quick.act("mask");
+  assert.equal(adapter.calls.filter((call) => call[0] === "copy").length, 1);
+});
+
+test("nothing selected, or no permission, falls back to the clipboard; the hint shows once", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter(phoneText);
+  adapter.permission = "granted";
+  adapter.selection = null; // the copy chord changes nothing
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  assert.equal((await quick.act("auto")).message, quickMessages.masked(1));
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "paste"),
+    [],
+  );
+
+  const denied = fakeAdapter(phoneText);
+  denied.permission = "denied";
+  const quick2 = useQuickActions({
+    adapter: denied,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  const first = await quick2.act("auto");
+  assert.equal(first.message, `${quickMessages.masked(1)} ${quickMessages.permissionHint}`);
+  assert.equal(quick2.inputPermission.value, "denied");
+  denied.clipboard = phoneText;
+  const second = await quick2.act("auto");
+  assert.equal(second.message, quickMessages.masked(1));
+  assert.deepEqual(
+    denied.calls.filter((call) => call[0] === "copy"),
+    [],
+  );
+  // The Settings button asks with the system prompt.
+  await quick2.checkInputPermission(true);
+  assert.deepEqual(denied.calls.at(-1), ["permission", true]);
 });

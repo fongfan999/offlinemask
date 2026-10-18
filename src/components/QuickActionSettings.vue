@@ -20,8 +20,9 @@ const quick = useProvided(quickKey);
           Phím tắt <kbd class="quick-key">{{ quickShortcutLabel }}</kbd>
         </h3>
         <p id="quick-shortcut-help">
-          Văn bản thường được ẩn; câu trả lời của AI có mã thay thế được khôi phục. Kết quả nằm
-          trong clipboard, dán là xong.
+          Chọn văn bản trong ứng dụng khác rồi nhấn: văn bản thường được ẩn, câu trả lời của AI có
+          mã thay thế được khôi phục, và kết quả thay ngay vào chỗ đã chọn. Không chọn gì thì phím
+          tắt làm việc với clipboard.
         </p>
         <p v-if="quick.shortcutFailure.value" class="quick-error" role="alert">
           {{ quick.shortcutFailure.value }}
@@ -36,6 +37,29 @@ const quick = useProvided(quickKey);
           @change="quick.setShortcut(($event.target as HTMLInputElement).checked)"
         />Bật
       </label>
+    </div>
+    <div
+      v-if="quick.desktop && quick.inputPermission.value !== 'granted'"
+      class="settings-tool-row"
+    >
+      <div>
+        <h3>Thay ngay tại chỗ</h3>
+        <p id="quick-permission-help">
+          {{
+            quick.inputPermission.value === "unsupported"
+              ? "Hệ điều hành này không cho OfflineMask gửi phím ⌘C và ⌘V thay bạn, nên kết quả nằm trong clipboard."
+              : "macOS cần bạn cho phép OfflineMask gửi phím ⌘C và ⌘V thay bạn (quyền Trợ năng). Chỉ hai phím đó, chỉ khi bạn nhấn phím tắt."
+          }}
+        </p>
+      </div>
+      <button
+        v-if="quick.inputPermission.value !== 'unsupported'"
+        class="quiet-button"
+        aria-describedby="quick-permission-help"
+        @click="quick.checkInputPermission(true)"
+      >
+        Cấp quyền
+      </button>
     </div>
     <div class="settings-tool-row">
       <div>

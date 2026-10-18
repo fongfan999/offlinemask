@@ -34,7 +34,8 @@
         "visible": false,
         "focus": false,
         "acceptFirstMouse": true,
-        "dragDropEnabled": false
+        "dragDropEnabled": false,
+        "focusable": false
       }
     ],
     "security": {

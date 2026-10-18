@@ -1,5 +1,10 @@
 import { computed, ref, watch, type Ref } from "vue";
-import type { QuickActionsAdapter, QuickCommand, QuickStatus } from "../adapters/quick-actions.ts";
+import type {
+  InputPermission,
+  QuickActionsAdapter,
+  QuickCommand,
+  QuickStatus,
+} from "../adapters/quick-actions.ts";
 import {
   quickDirection,
   quickMessages,
@@ -66,6 +71,17 @@ export function useQuickActions({
   const shortcutFailure = ref("");
   const lastStatus = ref<QuickStatus | null>(null);
   const busy = ref(false);
+  /** Whether ⌘⇧M may replace the selection in place (decision 0091); "unknown" until checked. */
+  const inputPermission = ref<InputPermission | "unknown">("unknown");
+  let hinted = false;
+  async function checkInputPermission(prompt = false) {
+    if (!adapter.desktop) return;
+    try {
+      inputPermission.value = await adapter.inputPermission(prompt);
+    } catch {
+      inputPermission.value = "unsupported";
+    }
+  }
 
   // Alias tables of every private session seen in this launch, RAM only. A session
   // replaced on the one-screen flow without a passcode (decision 0072) stays
@@ -89,10 +105,31 @@ export function useQuickActions({
     if (adapter.desktop)
       await adapter.sendStatus({ ...status, pinned: pinned.value }).catch(() => {});
   }
-  /** Run one action on the clipboard. `auto` (the shortcut) decides from the text:
-   * known aliases restore, anything else is masked. */
+  /** The shortcut first tries to take the front application's selection; a changed
+   * clipboard means there was one, and the result then goes back over it. Without
+   * permission, or with nothing selected, the clipboard's own text is used as before. */
+  async function takeSelection(before: string): Promise<{ text: string; replaced: boolean }> {
+    if (inputPermission.value === "unknown") await checkInputPermission();
+    if (inputPermission.value !== "granted") return { text: before, replaced: false };
+    try {
+      await adapter.copySelection();
+      const text = await adapter.readClipboard();
+      if (text.trim() && text !== before) return { text, replaced: true };
+    } catch {
+      // Keys could not be sent this time: the clipboard flow still works.
+    }
+    return { text: before, replaced: false };
+  }
+  /** Run one action. `auto` (the shortcut) decides from the text: known aliases
+   * restore, anything else is masked; the panel's buttons act on the clipboard only. */
   async function act(command: "auto" | "mask" | "restore"): Promise<QuickStatus> {
+    let replaced = false;
     const done = async (message: string, tone: QuickStatus["tone"] = "ok") => {
+      // Only the first clipboard-only result after a refusal carries the hint.
+      if (command === "auto" && !replaced && inputPermission.value === "denied" && !hinted) {
+        hinted = true;
+        message += ` ${quickMessages.permissionHint}`;
+      }
       const status = { message, tone };
       await show(status);
       return status;
@@ -107,6 +144,7 @@ export function useQuickActions({
       } catch {
         return await done(quickMessages.clipboard, "error");
       }
+      if (command === "auto") ({ text, replaced } = await takeSelection(text));
       const direction = quickDirection(text, knownTables());
       if (direction === "empty") return await done(quickMessages.empty, "error");
       if (command === "restore" || (command === "auto" && direction !== "mask")) {
@@ -121,7 +159,8 @@ export function useQuickActions({
         } catch {
           return await done(quickMessages.clipboard, "error");
         }
-        return await done(quickMessages.restored(result.restored, result.unknown.length));
+        if (replaced) await adapter.pasteResult().catch(() => {});
+        return await done(quickMessages.restored(result.restored, result.unknown.length, replaced));
       }
       await show({ message: workingMessage, tone: "busy" });
       const outcome = await run.maskText(text);
@@ -135,7 +174,9 @@ export function useQuickActions({
       } catch {
         return await done(quickMessages.clipboard, "error");
       }
-      return await done(quickMessages.masked(session.analysis.findings.length));
+      // The result is pasted before the panel flashes, so the paste cannot land there.
+      if (replaced) await adapter.pasteResult().catch(() => {});
+      return await done(quickMessages.masked(session.analysis.findings.length, replaced));
     } finally {
       busy.value = false;
     }
@@ -170,14 +211,20 @@ export function useQuickActions({
   }
 
   let stopCommands: (() => void) | undefined;
+  // Permission is granted in the OS settings while this window is in the background,
+  // so it is re-read whenever the window comes back.
+  const recheck = () => void checkInputPermission();
   async function start() {
     if (!adapter.desktop) return;
     stopCommands = await adapter.onCommand(onCommand).catch(() => undefined);
     if (shortcutOn.value) await applyShortcut(true);
+    if (typeof window !== "undefined") window.addEventListener("focus", recheck);
+    await checkInputPermission();
   }
   function stop() {
     stopCommands?.();
     stopCommands = undefined;
+    if (typeof window !== "undefined") window.removeEventListener("focus", recheck);
     if (shortcutOn.value) void applyShortcut(false);
   }
 
@@ -188,6 +235,8 @@ export function useQuickActions({
     shortcutFailure,
     lastStatus,
     busy,
+    inputPermission: computed(() => inputPermission.value),
+    checkInputPermission,
     act,
     setShortcut,
     setPinned,

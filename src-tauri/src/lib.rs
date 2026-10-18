@@ -55,7 +55,10 @@ pub fn run() {
         vault::vault_unlock,
         vault::vault_save,
         vault::vault_change_passcode,
-        vault::vault_reset
+        vault::vault_reset,
+        quick_input::quick_input_permission,
+        quick_input::quick_copy_selection,
+        quick_input::quick_paste_result
     ]);
     #[cfg(all(
         feature = "minilm-desktop-prototype",
@@ -73,6 +76,9 @@ pub fn run() {
         vault::vault_save,
         vault::vault_change_passcode,
         vault::vault_reset,
+        quick_input::quick_input_permission,
+        quick_input::quick_copy_selection,
+        quick_input::quick_paste_result,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -93,6 +99,9 @@ pub fn run() {
         vault::vault_save,
         vault::vault_change_passcode,
         vault::vault_reset,
+        quick_input::quick_input_permission,
+        quick_input::quick_copy_selection,
+        quick_input::quick_paste_result,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -117,6 +126,9 @@ pub fn run() {
         vault::vault_save,
         vault::vault_change_passcode,
         vault::vault_reset,
+        quick_input::quick_input_permission,
+        quick_input::quick_copy_selection,
+        quick_input::quick_paste_result,
         recognition_native::recognition_native_load,
         recognition_native::recognition_native_run,
         recognition_native::recognition_native_release
@@ -153,6 +165,7 @@ mod minilm_native_graph;
 mod minilm_prototype;
 mod model_pack;
 mod models;
+mod quick_input;
 mod recognition_tokenizer;
 mod vault;
 use tauri::{Emitter, Manager};
