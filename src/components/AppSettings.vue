@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { version } from "../../package.json";
+import BrandMark from "./BrandMark.vue";
 import ComingSoonBadge from "./ComingSoonBadge.vue";
 import { themeChoices, useTheme } from "../composables/useTheme.ts";
 
@@ -27,7 +28,11 @@ const { theme, setTheme } = useTheme();
     <div class="settings-tool-row">
       <div>
         <h3>Cập nhật <ComingSoonBadge /></h3>
-        <p>Phiên bản {{ version }}</p>
+        <p class="about-lockup">
+          <span class="brand-mark"><BrandMark :size="20" /></span
+          ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
+          <span class="about-version">Phiên bản {{ version }}</span>
+        </p>
         <p id="updates-policy">
           OfflineMask không tự kết nối Internet; bạn chủ động kiểm tra bản mới cho ứng dụng và gói
           nhận diện.

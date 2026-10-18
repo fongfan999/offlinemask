@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AppIcon from "./AppIcon.vue";
+import BrandMark from "./BrandMark.vue";
 </script>
 
 <template>
@@ -10,7 +11,10 @@ import AppIcon from "./AppIcon.vue";
     <div class="preview-flow">
       <div class="preview-document glass">
         <div class="preview-step">
-          <span class="step-number">1</span><span>Bấm <strong>Ẩn thông tin</strong></span>
+          <span class="step-number">1</span
+          ><span
+            >Bấm <strong><BrandMark :size="15" class="inline-mark" />Ẩn thông tin</strong></span
+          >
         </div>
         <div class="preview-label"><AppIcon name="file" :size="14" />Bản gốc</div>
         <div class="preview-value original-value">Phong Phan</div>
@@ -37,7 +41,9 @@ import AppIcon from "./AppIcon.vue";
     </div>
     <figcaption class="preview-return">
       <span class="preview-step"
-        ><span class="step-number">3</span>Đưa câu trả lời của AI vào OfflineMask</span
+        ><span class="step-number">3</span
+        ><BrandMark variant="restore" :size="15" class="inline-mark" />Đưa câu trả lời của AI vào
+        OfflineMask</span
       >
       <span>Tên thật hiện lại, vẫn chỉ trên máy bạn.</span>
     </figcaption>

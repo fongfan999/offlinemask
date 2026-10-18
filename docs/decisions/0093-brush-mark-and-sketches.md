@@ -47,11 +47,26 @@ One thing to watch: the pages' "Xem lại bản đã ẩn" button uses the thin-
 - `src/components/BrandMark.vue` renders the generated path in `currentColor` and replaces the stroke-based `mask` glyph in the sidebar tile, the lock page and the floating panel's head. The `mask` glyph in `AppIcon.vue` remains the small UI icon on the panel's "Ẩn thông tin" button; it is an icon, not the logo.
 - Python needs nothing beyond the standard library. The sheets set the wordmark in the system sans as live SVG text; the shipped mark files contain no text and embed no fonts.
 
+### Where the mark appears
+
+The owner asked for the mark everywhere, so people get used to it. It now stands in every place the product names itself or asks for the action:
+
+- Sidebar tile, home hero, lock page and the floating panel's head: the mask on a cobalt tile.
+- The primary "Ẩn thông tin" buttons on the text, document and spreadsheet pages: the mask replaces the AI sparkle, which stays on the AI panel only.
+- The home illustration: the mask before "Ẩn thông tin" in step 1, the restore mark before step 3.
+- The restore panel's intro and the panel's restore controls: the restore mark.
+- Settings: the quick-action help shows the pair beside the words, and the version line is a small lockup (tile, wordmark, version).
+- The macOS menu bar: a template icon (`src-tauri/icons/tray-template.png`, the mark in black with the eye holes transparent), which the system recolours for light and dark bars; this closes the follow-up in [0092](0092-background-mode.md). Windows and Linux trays keep the coloured app icon. The `image-png` Tauri feature is enabled to load it.
+- The README on GitHub: the mark above the title, paper variant in dark mode.
+
+Not given the mark: the stepper (numbers stay), the tray menu items (a non-template image would vanish on dark menus), and alias tokens.
+
 ## Verification
 
 - Both sketch sheets, the mark at 256 and 512 px, the generated 128 px icon and the favicon at 16/20/32/48/128 px (4× nearest-neighbour strip) were inspected after each brush change.
 - `pnpm lint`, `pnpm test`, `pnpm build` pass; the sidebar tile, lock page and pill were checked in the browser preview.
-- Not verified: the packaged `.app`/`.ico` on a real dock or taskbar, and the menu bar tray icon, which uses the same generated icon.
+- The in-app placements were checked with `pnpm lint`, `pnpm test` and `pnpm build`; the Rust side with `cargo check`.
+- Not verified: the packaged `.app`/`.ico` on a real dock or taskbar, and the template icon in a real menu bar.
 
 ## Consequences
 

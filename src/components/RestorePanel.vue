@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
+import BrandMark from "./BrandMark.vue";
 import HighlightedText from "./HighlightedText.vue";
 import { restoreAliases, type Restoration } from "../core/restore.ts";
 import type { TextAnalysis } from "../core/text.ts";
@@ -78,8 +79,8 @@ async function copy() {
 <template>
   <div class="restore-body">
     <p class="restore-intro">
-      Dán câu trả lời của AI vào đây. Mã thay thế của văn bản này được đổi lại thành thông tin thật,
-      ngay trên máy bạn.
+      <BrandMark variant="restore" :size="16" class="inline-mark" />Dán câu trả lời của AI vào đây.
+      Mã thay thế của văn bản này được đổi lại thành thông tin thật, ngay trên máy bạn.
     </p>
     <label class="sr-only" for="restore-input">Phản hồi của AI chứa mã thay thế</label>
     <textarea

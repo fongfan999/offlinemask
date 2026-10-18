@@ -1,3 +1,8 @@
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="brand/mark-paper.svg">
+  <img src="brand/mark-ink.svg" width="72" height="72" alt="OfflineMask mark: a brush swipe with two eye holes">
+</picture>
+
 # OfflineMask
 
 Mask and restore sensitive data, entirely on your device.

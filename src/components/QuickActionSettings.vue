@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { quickShortcutLabel, trayLabel } from "../adapters/quick-actions.ts";
+import BrandMark from "./BrandMark.vue";
 import { quickKey, useProvided } from "../composables/context.ts";
 
 /** Clipboard quick actions (decision 0090): the shortcut and the floating panel. */
@@ -95,8 +96,10 @@ const quick = useProvided(quickKey);
       <div>
         <h3 id="quick-panel-title">Bảng nổi</h3>
         <p id="quick-panel-help">
-          Một ô nhỏ luôn nổi trên các cửa sổ khác với hai nút Ẩn thông tin và Khôi phục. Kéo để đặt
-          ở chỗ bạn muốn.
+          Một ô nhỏ luôn nổi trên các cửa sổ khác với hai nút
+          <BrandMark :size="15" class="inline-mark" />Ẩn thông tin và
+          <BrandMark variant="restore" :size="15" class="inline-mark" />Khôi phục. Kéo để đặt ở chỗ
+          bạn muốn.
         </p>
       </div>
       <label class="quick-toggle">

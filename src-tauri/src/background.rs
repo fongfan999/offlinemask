@@ -107,6 +107,15 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
             "quit" => request_quit(app),
             _ => {}
         });
+    // The macOS menu bar takes a template: the mark in black with the eye holes
+    // transparent, which the system recolours for light and dark bars. Windows
+    // and Linux trays show the coloured app icon.
+    #[cfg(target_os = "macos")]
+    {
+        let icon = tauri::image::Image::from_bytes(include_bytes!("../icons/tray-template.png"))?;
+        tray = tray.icon(icon).icon_as_template(true);
+    }
+    #[cfg(not(target_os = "macos"))]
     if let Some(icon) = app.default_window_icon() {
         tray = tray.icon(icon.clone());
     }

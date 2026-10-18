@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
+import BrandMark from "../components/BrandMark.vue";
 import HighlightedText from "../components/HighlightedText.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import PasscodeSetup from "../components/PasscodeSetup.vue";
@@ -846,7 +847,7 @@ defineExpose({
               class="spinner"
               aria-hidden="true"
             ></span
-            ><AppIcon v-else name="sparkle" :size="17" />{{
+            ><BrandMark v-else :size="17" />{{
               textProcessing
                 ? "Đang xử lý…"
                 : format === "text" && missingSelectedModels

@@ -203,6 +203,29 @@ p {
 .brand-accent {
   color: var(--accent);
 }
+/* The mark inside running text: cobalt, on the x-height, a hair of air after it. */
+.inline-mark {
+  display: inline-block;
+  vertical-align: -0.2em;
+  margin-right: 0.3em;
+  color: var(--accent);
+}
+.about-lockup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 650;
+  letter-spacing: -0.2px;
+}
+.about-lockup .brand-mark {
+  width: 28px;
+  height: 28px;
+}
+.about-version {
+  margin-left: 4px;
+  font: 500 12px var(--mono);
+  color: var(--muted);
+}
 nav {
   display: grid;
   gap: 4px;

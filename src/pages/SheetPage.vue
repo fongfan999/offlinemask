@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
+import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import PasscodeSetup from "../components/PasscodeSetup.vue";
@@ -344,7 +345,7 @@ defineExpose({
             @click="maskAll"
           >
             <span v-if="sheet.processing.value" class="spinner" aria-hidden="true"></span
-            ><AppIcon v-else name="sparkle" :size="17" />{{
+            ><BrandMark v-else :size="17" />{{
               sheet.processing.value
                 ? "Đang ẩn…"
                 : `Ẩn toàn bộ ${totalRows.toLocaleString("vi-VN")} dòng`
