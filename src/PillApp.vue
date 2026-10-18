@@ -118,5 +118,9 @@ onBeforeUnmount(() => {
     <p class="pill-status" :class="`is-${status?.tone ?? 'idle'}`" role="status">
       {{ status?.message ?? "Sao chép văn bản, rồi bấm một nút." }}
     </p>
+    <!-- While a text is masked the panel waits in its corner with a moving bar. -->
+    <div v-if="status?.tone === 'busy'" class="pill-progress" aria-hidden="true">
+      <span></span>
+    </div>
   </div>
 </template>

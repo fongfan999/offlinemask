@@ -20,6 +20,12 @@ pub fn run() {
             app.manage(selection::SelectionWatch::default());
             #[cfg(target_os = "macos")]
             services::install(app.handle());
+            // The floating panel must take clicks without activating the app, or the
+            // paste after a popover button lands in OfflineMask (decision 0096).
+            #[cfg(target_os = "macos")]
+            if let Some(panel) = app.get_webview_window("pill") {
+                panel_macos::make_non_activating(&panel);
+            }
             if background::started_in_background() {
                 if let Some(window) = app.get_webview_window(background::MAIN_WINDOW) {
                     let _ = window.hide();
@@ -214,6 +220,8 @@ mod minilm_native_graph;
 mod minilm_prototype;
 mod model_pack;
 mod models;
+#[cfg(target_os = "macos")]
+mod panel_macos;
 mod quick_input;
 mod recognition_tokenizer;
 mod selection;
