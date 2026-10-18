@@ -2,7 +2,9 @@ import { isTauri } from "@tauri-apps/api/core";
 import { emitTo, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import {
   availableMonitors,
+  cursorPosition,
   getCurrentWindow,
+  LogicalSize,
   PhysicalPosition,
   primaryMonitor,
   type Monitor,
@@ -16,8 +18,24 @@ import {
   type QuickCommand,
 } from "./quick-actions.ts";
 
+/** A logical rectangle on the desktop (points, top-left origin). */
+export interface Area {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+/** Where an anchored panel sits, with the screen it is on, so a later resize (the
+ * hover menu growing out of the circle) can stay on that screen. */
+export interface Spot {
+  x: number;
+  y: number;
+  area: Area;
+  scale: number;
+}
+
 /** Everything the floating panel window (decision 0090) asks of Tauri: its own
- * window, the two events with the shell, and the screen it sits on. */
+ * window, the two events with the shell, the screen it sits on and the pointer. */
 export interface QuickPanelAdapter {
   /** False in the browser preview, where the page only shows its layout. */
   desktop: boolean;
@@ -28,16 +46,24 @@ export interface QuickPanelAdapter {
   send(command: QuickCommand): Promise<void>;
   show(): Promise<void>;
   hide(): Promise<void>;
+  /** Resize to fit the content (logical points). */
+  fit(width: number, height: number): Promise<void>;
   /** Move to the remembered spot, or the bottom-right corner of the primary screen. */
   place(): Promise<void>;
-  /** Move just above a selection (or the pointer), kept on that screen (decision 0096). */
-  placeNear(anchor: PanelAnchor): Promise<void>;
+  /** The top-right corner of the primary screen, for the restore preview. */
+  placeTopRight(): Promise<void>;
+  /** The small circle just above the end of a selection (decision 0096). */
+  placeDot(anchor: PanelAnchor, size: { width: number; height: number }): Promise<Spot | null>;
+  /** The hover menu, growing out of the circle at `from`, kept on its screen. */
+  placeFrom(from: Spot, size: { width: number; height: number }): Promise<void>;
+  /** Whether the pointer is over the window; works while the app is in the background. */
+  pointerInside(): Promise<boolean>;
   rememberPosition(): Promise<void>;
 }
 
 const margin = 24;
-/** Space between the selection and the panel. */
-const gapAboveSelection = 8;
+/** Space between the selection and the circle. */
+const gapToSelection = 4;
 const none: UnlistenFn = () => {};
 
 /** The monitor holding a logical point, else the primary one. */
@@ -56,19 +82,39 @@ async function monitorAt(point: { x: number; y: number }): Promise<Monitor | nul
   });
   return hit ?? (await primaryMonitor());
 }
-/** Panel position (logical) above the anchor, clamped inside the monitor's work area. */
-export function positionAbove(
+function clamp(
+  spot: { x: number; y: number },
+  size: { width: number; height: number },
+  area: Area,
+) {
+  return {
+    x: Math.round(Math.min(Math.max(spot.x, area.x), area.x + area.width - size.width)),
+    y: Math.round(Math.min(Math.max(spot.y, area.y), area.y + area.height - size.height)),
+  };
+}
+/** The circle's window, centred over the end of the selection just above its first
+ * line (below it at the top edge of the screen), or beside the pointer. */
+export function dotSpot(
   anchor: PanelAnchor,
-  panel: { width: number; height: number },
-  area: { x: number; y: number; width: number; height: number },
+  size: { width: number; height: number },
+  area: Area,
 ): { x: number; y: number } {
-  const target = anchor.bounds ?? { ...anchor.pointer, width: 0, height: 0 };
-  let x = target.x + target.width / 2 - panel.width / 2;
-  let y = target.y - gapAboveSelection - panel.height;
-  if (y < area.y) y = target.y + target.height + gapAboveSelection;
-  x = Math.min(Math.max(x, area.x), area.x + area.width - panel.width);
-  y = Math.min(Math.max(y, area.y), area.y + area.height - panel.height);
-  return { x: Math.round(x), y: Math.round(y) };
+  const bounds = anchor.bounds;
+  if (!bounds)
+    return clamp({ x: anchor.pointer.x + 8, y: anchor.pointer.y - size.height - 8 }, size, area);
+  const x = bounds.x + bounds.width - size.width / 2;
+  let y = bounds.y - gapToSelection - size.height;
+  if (y < area.y) y = bounds.y + bounds.height + gapToSelection;
+  return clamp({ x, y }, size, area);
+}
+/** A larger window growing out of a smaller one at `from`: same top-left corner,
+ * shifted left only as far as the screen's right edge requires. */
+export function growFrom(
+  from: { x: number; y: number },
+  size: { width: number; height: number },
+  area: Area,
+): { x: number; y: number } {
+  return clamp(from, size, area);
 }
 
 export const nativeQuickPanel: QuickPanelAdapter = {
@@ -89,6 +135,10 @@ export const nativeQuickPanel: QuickPanelAdapter = {
     isTauri() ? emitTo(mainWindow, events.command, { command }) : Promise.resolve(),
   show: () => (isTauri() ? getCurrentWindow().show() : Promise.resolve()),
   hide: () => (isTauri() ? getCurrentWindow().hide() : Promise.resolve()),
+  fit: (width, height) =>
+    isTauri()
+      ? getCurrentWindow().setSize(new LogicalSize(Math.ceil(width), Math.ceil(height)))
+      : Promise.resolve(),
   async place() {
     if (!isTauri()) return;
     const panel = getCurrentWindow();
@@ -123,27 +173,59 @@ export const nativeQuickPanel: QuickPanelAdapter = {
       ),
     );
   },
-  async placeNear(anchor) {
+  async placeTopRight() {
     if (!isTauri()) return;
     const panel = getCurrentWindow();
-    const monitor = await monitorAt(anchor.bounds ?? anchor.pointer);
+    const monitor = await primaryMonitor();
     if (!monitor) return;
-    const scale = monitor.scaleFactor;
-    const physicalArea = monitor.workArea ?? monitor;
-    const area = {
-      x: physicalArea.position.x / scale,
-      y: physicalArea.position.y / scale,
-      width: physicalArea.size.width / scale,
-      height: physicalArea.size.height / scale,
-    };
     const size = await panel.outerSize();
-    const spot = positionAbove(
-      anchor,
-      { width: size.width / scale, height: size.height / scale },
-      area,
-    );
+    const area = monitor.workArea ?? monitor;
+    const gap = Math.round(margin * monitor.scaleFactor);
     await panel.setPosition(
+      new PhysicalPosition(
+        area.position.x + area.size.width - size.width - gap,
+        area.position.y + gap,
+      ),
+    );
+  },
+  async placeDot(anchor, size) {
+    if (!isTauri()) return null;
+    const monitor = await monitorAt(anchor.bounds ?? anchor.pointer);
+    if (!monitor) return null;
+    const scale = monitor.scaleFactor;
+    const physical = monitor.workArea ?? monitor;
+    const area = {
+      x: physical.position.x / scale,
+      y: physical.position.y / scale,
+      width: physical.size.width / scale,
+      height: physical.size.height / scale,
+    };
+    const spot = dotSpot(anchor, size, area);
+    await getCurrentWindow().setPosition(
       new PhysicalPosition(Math.round(spot.x * scale), Math.round(spot.y * scale)),
+    );
+    return { ...spot, area, scale };
+  },
+  async placeFrom(from, size) {
+    if (!isTauri()) return;
+    const spot = growFrom(from, size, from.area);
+    await getCurrentWindow().setPosition(
+      new PhysicalPosition(Math.round(spot.x * from.scale), Math.round(spot.y * from.scale)),
+    );
+  },
+  async pointerInside() {
+    if (!isTauri()) return false;
+    const panel = getCurrentWindow();
+    const [pointer, position, size] = await Promise.all([
+      cursorPosition(),
+      panel.outerPosition(),
+      panel.outerSize(),
+    ]);
+    return (
+      pointer.x >= position.x &&
+      pointer.y >= position.y &&
+      pointer.x < position.x + size.width &&
+      pointer.y < position.y + size.height
     );
   },
   async rememberPosition() {

@@ -55,6 +55,11 @@ extern "C" {
         value: *mut CFTypeRef,
     ) -> AXError;
     fn AXUIElementGetPid(element: AXUIElementRef, pid: *mut i32) -> AXError;
+    fn AXUIElementIsAttributeSettable(
+        element: AXUIElementRef,
+        attribute: CFStringRef,
+        settable: *mut u8,
+    ) -> AXError;
     fn AXValueGetValue(value: CFTypeRef, value_type: u32, out: *mut c_void) -> bool;
     fn AXIsProcessTrusted() -> bool;
 }
@@ -102,7 +107,18 @@ fn string(value: &CFType) -> Option<String> {
 /// is nothing usable. The application is addressed by process id: asking the
 /// system-wide element for the focused element answers "cannot complete" from a
 /// process like this one, while the per-application element answers.
-fn read_selection(frontmost_pid: i32) -> Option<(String, Option<Rect>)> {
+/// Whether an attribute of the element can be written, which is how Accessibility tells
+/// an editable field from read-only text.
+fn settable(element: AXUIElementRef, name: &str) -> bool {
+    let key = CFString::new(name);
+    let mut value: u8 = 0;
+    // SAFETY: valid element and key; the flag is written on success.
+    let status =
+        unsafe { AXUIElementIsAttributeSettable(element, key.as_concrete_TypeRef(), &mut value) };
+    status == AX_SUCCESS && value != 0
+}
+
+fn read_selection(frontmost_pid: i32) -> Option<(String, Option<Rect>, bool)> {
     // SAFETY: plain query.
     if !unsafe { AXIsProcessTrusted() } || frontmost_pid as u32 == std::process::id() {
         return None;
@@ -156,7 +172,8 @@ fn read_selection(frontmost_pid: i32) -> Option<(String, Option<Rect>)> {
                 height: rect.height,
             })
         });
-    Some((text, bounds))
+    let editable = settable(element, "AXValue") || settable(element, "AXSelectedText");
+    Some((text, bounds, editable))
 }
 
 /// Cocoa mouse locations have a bottom-left origin; the rest of the app uses top-left.
@@ -212,13 +229,14 @@ pub fn start<R: Runtime>(app: AppHandle<R>, enabled: Arc<AtomicBool>) {
                             if !enabled.load(Ordering::Relaxed) {
                                 return;
                             }
-                            if let Some((text, bounds)) = read_selection(pid) {
+                            if let Some((text, bounds, editable)) = read_selection(pid) {
                                 emit_made(
                                     &handle,
                                     Selection {
                                         text,
                                         bounds,
                                         pointer: at,
+                                        editable,
                                     },
                                 );
                             }

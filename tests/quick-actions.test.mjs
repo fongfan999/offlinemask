@@ -23,7 +23,7 @@ import {
   workingMessage,
 } from "../src/composables/useQuickActions.ts";
 import { panelKey } from "../src/adapters/quick-actions.ts";
-import { positionAbove } from "../src/adapters/quick-panel.ts";
+import { dotSpot, growFrom } from "../src/adapters/quick-panel.ts";
 
 const detection = (start, end, type) => ({
   start,
@@ -138,6 +138,7 @@ function fakeAdapter(clipboard = "") {
       adapter.autostart = on;
     },
     quit: async () => calls.push(["quit"]),
+    showMainWindow: async () => calls.push(["show-main"]),
     serviceHandler: null,
     changedHandler: null,
     files: {},
@@ -187,9 +188,10 @@ function fakeRun(sessions) {
     texts: [],
     probed: [],
     found: 0,
+    kinds: [],
     async probe(text) {
       run.probed.push(text);
-      return run.found;
+      return { count: run.found, kinds: run.kinds };
     },
     async maskText(text) {
       run.texts.push(text);
@@ -603,7 +605,12 @@ test("the popover asks above a fresh selection and its button replaces that sele
   await quick.start();
   assert.equal(quick.popoverOn.value, false);
   // Off: a selection shows nothing.
-  adapter.selectionHandler({ text: phoneText, bounds: null, pointer: { x: 10, y: 10 } });
+  adapter.selectionHandler({
+    text: phoneText,
+    bounds: null,
+    pointer: { x: 10, y: 10 },
+    editable: true,
+  });
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(quick.lastStatus.value, null);
 
@@ -611,14 +618,24 @@ test("the popover asks above a fresh selection and its button replaces that sele
   assert.equal(storage.data.get(popoverKey), "on");
   assert.deepEqual(adapter.calls.at(-1), ["popover", true]);
   const bounds = { x: 100, y: 200, width: 80, height: 18 };
-  adapter.selectionHandler({ text: phoneText, bounds, pointer: { x: 150, y: 210 } });
+  adapter.selectionHandler({
+    text: phoneText,
+    bounds,
+    pointer: { x: 150, y: 210 },
+    editable: true,
+  });
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(quick.lastStatus.value.tone, "select");
   assert.equal(quick.lastStatus.value.message, quickMessages.selectMask);
+  assert.equal(quick.lastStatus.value.action, "mask");
+  assert.equal(quick.lastStatus.value.hint, "Ẩn thông tin");
   assert.deepEqual(quick.lastStatus.value.anchor, { bounds, pointer: { x: 150, y: 210 } });
 
-  // The panel's button acts on the selection, not the clipboard, and pastes over it.
+  // The panel's button reads the exact selection with one copy chord, masks it, puts the
+  // user's clipboard back and pastes the result over the selection.
+  adapter.selection = phoneText;
   adapter.command("mask");
+  await new Promise((resolve) => setTimeout(resolve, 0));
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.deepEqual(run.texts, [phoneText]);
   const alias = sessions.value[0].analysis.findings[0].alias;
@@ -627,15 +644,20 @@ test("the popover asks above a fresh selection and its button replaces that sele
     [["paste", `Gọi ${alias} giúp tôi.`]],
   );
   assert.equal(quick.lastStatus.value.message, quickMessages.masked(1, true));
-  assert.deepEqual(
-    adapter.calls.filter((call) => call[0] === "copy"),
-    [],
-  );
+  assert.equal(adapter.calls.filter((call) => call[0] === "copy").length, 1);
+  adapter.selection = null;
 
   // A reply with that alias asks to restore; a press elsewhere dismisses the question.
-  adapter.selectionHandler({ text: `Trả lời ${alias}`, bounds: null, pointer: { x: 1, y: 1 } });
+  adapter.selectionHandler({
+    text: `Trả lời ${alias}`,
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: true,
+  });
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(quick.lastStatus.value.message, quickMessages.selectRestore);
+  assert.equal(quick.lastStatus.value.action, "restore");
+  assert.equal(quick.lastStatus.value.hint, "Khôi phục thông tin");
   adapter.clearedHandler();
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.deepEqual(adapter.calls.at(-1), ["dismiss"]);
@@ -646,8 +668,13 @@ test("the popover asks above a fresh selection and its button replaces that sele
   assert.equal(adapter.calls.filter((call) => call[0] === "paste").length, 1);
 
   // Foreign alias text and empty selections show nothing.
-  adapter.selectionHandler({ text: "[SDT_1_dead]", bounds: null, pointer: { x: 1, y: 1 } });
-  adapter.selectionHandler({ text: "  ", bounds: null, pointer: { x: 1, y: 1 } });
+  adapter.selectionHandler({
+    text: "[SDT_1_dead]",
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: true,
+  });
+  adapter.selectionHandler({ text: "  ", bounds: null, pointer: { x: 1, y: 1 }, editable: true });
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.notEqual(quick.lastStatus.value.tone, "select");
 
@@ -670,29 +697,306 @@ test("the popover asks above a fresh selection and its button replaces that sele
   assert.equal(quick2.popoverOn.value, false);
 });
 
-test("the panel sits above the selection, flips below at the top edge and stays on screen", () => {
-  const panel = { width: 336, height: 124 };
+test("the circle sits over the end of the selection, flips below at the top edge, stays on screen", () => {
+  const dot = { width: 48, height: 48 };
   const area = { x: 0, y: 25, width: 1440, height: 875 };
+  // Centred over the selection's right end, just above its first line.
   assert.deepEqual(
-    positionAbove(
+    dotSpot(
       { bounds: { x: 500, y: 400, width: 100, height: 20 }, pointer: { x: 0, y: 0 } },
-      panel,
+      dot,
       area,
     ),
-    { x: 382, y: 268 },
+    { x: 576, y: 348 },
   );
-  // Too close to the top: below the selection instead.
+  // Too close to the top: just below the selection instead.
   assert.deepEqual(
-    positionAbove(
+    dotSpot(
       { bounds: { x: 500, y: 40, width: 100, height: 20 }, pointer: { x: 0, y: 0 } },
-      panel,
+      dot,
       area,
     ),
-    { x: 382, y: 68 },
+    { x: 576, y: 64 },
   );
-  // No rectangle: around the pointer, clamped to the right and bottom edges.
-  assert.deepEqual(positionAbove({ pointer: { x: 1430, y: 890 } }, panel, area), {
-    x: 1104,
-    y: 758,
+  // No rectangle: beside the pointer, clamped to the right edge.
+  assert.deepEqual(dotSpot({ pointer: { x: 1430, y: 500 } }, dot, area), { x: 1392, y: 444 });
+  // The hover menu grows from the circle's corner and only moves left at the edge.
+  assert.deepEqual(growFrom({ x: 576, y: 348 }, { width: 240, height: 48 }, area), {
+    x: 576,
+    y: 348,
   });
+  assert.deepEqual(growFrom({ x: 1392, y: 444 }, { width: 240, height: 48 }, area), {
+    x: 1200,
+    y: 444,
+  });
+});
+
+test("read-only text: no circle for plain text, a restore preview with copy and open for AI replies", async () => {
+  const sessions = ref([phoneSession()]);
+  await nextTick();
+  const alias = sessions.value[0].analysis.findings[0].alias;
+  const adapter = fakeAdapter("clipboard cũ");
+  adapter.permission = "granted";
+  const opened = [];
+  const run = fakeRun(sessions);
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    openSession: (id) => opened.push(id),
+    storage: memoryStorage(),
+  });
+  adapter.showMainWindow = async () => adapter.calls.push(["show-main"]);
+  await quick.start();
+  await quick.setPopover(true);
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+
+  // Plain read-only text, or a selection holding aliases of no known session: nothing.
+  adapter.selectionHandler({
+    text: "Một đoạn văn bản bình thường.",
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: false,
+  });
+  adapter.selectionHandler({
+    text: "Mã [SDT_1_dead]",
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: false,
+  });
+  await tick();
+  assert.equal(quick.lastStatus.value, null);
+
+  // An AI reply with a known alias: the restore circle; its click opens the preview.
+  const reply = `Khách gọi từ ${alias}, gọi lại giúp.`;
+  adapter.selectionHandler({ text: reply, bounds: null, pointer: { x: 1, y: 1 }, editable: false });
+  await tick();
+  assert.equal(quick.lastStatus.value.tone, "select");
+  assert.equal(quick.lastStatus.value.action, "restore");
+  assert.equal(quick.lastStatus.value.hint, "Khôi phục thông tin");
+  adapter.command("restore");
+  await tick();
+  const preview = quick.lastStatus.value;
+  assert.equal(preview.tone, "preview");
+  assert.equal(preview.message, quickMessages.previewTitle(1));
+  assert.equal(preview.preview.text, "Khách gọi từ 0901234567, gọi lại giúp.");
+  assert.deepEqual(preview.preview.marks, [{ start: 13, end: 23, kind: "value" }]);
+  assert.equal(preview.preview.canOpen, true);
+  // Nothing was pasted, and the user's clipboard is back after the exact read.
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "paste"),
+    [],
+  );
+  assert.equal(adapter.clipboard, "clipboard cũ");
+
+  // "Sao chép" puts the restored text on the clipboard and confirms.
+  adapter.command("copy");
+  await tick();
+  assert.equal(adapter.clipboard, "Khách gọi từ 0901234567, gọi lại giúp.");
+  assert.equal(quick.lastStatus.value.message, quickMessages.previewCopied);
+
+  // "Mở trong OfflineMask" opens that session and brings the window back.
+  adapter.selectionHandler({ text: reply, bounds: null, pointer: { x: 1, y: 1 }, editable: false });
+  await tick();
+  adapter.command("restore");
+  await tick();
+  adapter.command("open");
+  await tick();
+  assert.deepEqual(opened, [sessions.value[0].id]);
+  assert.ok(adapter.calls.some((call) => call[0] === "show-main"));
+  assert.deepEqual(adapter.calls.at(-1), ["dismiss"]);
+});
+
+test("editable text: the circle masks, or restores in place when it holds known aliases", async () => {
+  const sessions = ref([phoneSession()]);
+  await nextTick();
+  const alias = sessions.value[0].analysis.findings[0].alias;
+  const adapter = fakeAdapter("");
+  adapter.permission = "granted";
+  const run = fakeRun(sessions);
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  await quick.setPopover(true);
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+  adapter.selectionHandler({
+    text: `Đã gọi ${alias}`,
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: true,
+  });
+  await tick();
+  assert.equal(quick.lastStatus.value.action, "restore");
+  adapter.selection = `Đã gọi ${alias}`;
+  adapter.command("restore");
+  await tick();
+  await tick();
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "paste"),
+    [["paste", "Đã gọi 0901234567"]],
+  );
+  assert.equal(quick.lastStatus.value.message, quickMessages.restored(1, 0, true));
+});
+
+test("quick masking hides every category the machine can run", async () => {
+  const detector = {
+    calls: [],
+    prepare() {},
+    cancel() {},
+    destroy() {},
+    async detect(text, _progress, _root, options) {
+      detector.calls.push(options);
+      return [];
+    },
+  };
+  const { useMaskingRun } = await import("../src/composables/useMaskingRun.ts");
+  const { detectionOptions, localOptions } = await import("../src/core/detection/options.ts");
+  const ready = ref(false);
+  const run = useMaskingRun({
+    detector,
+    pack: { ready, readyRoot: ref(null) },
+    sessions: ref([]),
+    onSession: () => {},
+  });
+  run.selectedOptions.value = ["email"];
+  await run.maskText("Gọi 0901234567");
+  assert.deepEqual(detector.calls.at(-1), [...localOptions]);
+  ready.value = true;
+  await run.maskText("Gọi 0901234567");
+  assert.deepEqual(
+    detector.calls.at(-1),
+    detectionOptions.map((option) => option.id),
+  );
+});
+
+test("read-only plain text: a circle only when the rules find something; its click shows the masked copy", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("clipboard cũ");
+  adapter.permission = "granted";
+  const opened = [];
+  const run = fakeRun(sessions);
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    openSession: (id) => opened.push(id),
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  await quick.setPopover(true);
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+  const select = () =>
+    adapter.selectionHandler({
+      text: phoneText,
+      bounds: null,
+      pointer: { x: 1, y: 1 },
+      editable: false,
+    });
+
+  // The rules find nothing: no circle on a web page or a document.
+  run.found = 0;
+  select();
+  await tick();
+  assert.equal(quick.lastStatus.value, null);
+
+  // They find a phone number: the masking circle.
+  run.found = 1;
+  select();
+  await tick();
+  assert.equal(quick.lastStatus.value.tone, "select");
+  assert.equal(quick.lastStatus.value.action, "mask");
+  assert.equal(quick.lastStatus.value.hint, "Ẩn thông tin");
+
+  // Its click masks into a new session and previews the masked copy; nothing is pasted.
+  adapter.command("mask");
+  await tick();
+  await tick();
+  const status = quick.lastStatus.value;
+  const alias = sessions.value[0].analysis.findings[0].alias;
+  assert.equal(status.tone, "preview");
+  assert.equal(status.message, quickMessages.maskedTitle(1));
+  assert.equal(status.preview.text, `Gọi ${alias} giúp tôi.`);
+  assert.deepEqual(status.preview.marks, [{ start: 4, end: 4 + alias.length }]);
+  assert.equal(status.preview.canOpen, true);
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "paste"),
+    [],
+  );
+  assert.equal(adapter.clipboard, "clipboard cũ");
+
+  // Copy puts the masked copy on the clipboard; open goes to the new session.
+  adapter.command("copy");
+  await tick();
+  assert.equal(adapter.clipboard, `Gọi ${alias} giúp tôi.`);
+  assert.equal(quick.lastStatus.value.message, quickMessages.previewCopied);
+  select();
+  await tick();
+  adapter.command("mask");
+  await tick();
+  await tick();
+  adapter.command("open");
+  await tick();
+  assert.deepEqual(opened, [sessions.value[0].id]);
+});
+
+test("the circle replaces with the exact selection, never with repeated Accessibility text", async () => {
+  // Chromium editors can report the selected text of a rich input several times over.
+  const sessions = ref([]);
+  const adapter = fakeAdapter("clipboard cũ");
+  adapter.permission = "granted";
+  const run = fakeRun(sessions);
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  await quick.setPopover(true);
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+  adapter.selectionHandler({
+    text: phoneText + phoneText + phoneText,
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: true,
+  });
+  await tick();
+  adapter.selection = phoneText;
+  adapter.command("mask");
+  await tick();
+  await tick();
+  const alias = sessions.value[0].analysis.findings[0].alias;
+  assert.deepEqual(run.texts, [phoneText]);
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "paste"),
+    [["paste", `Gọi ${alias} giúp tôi.`]],
+  );
+
+  // No exact read (the app ignores the copy chord): the result goes to the clipboard
+  // only, and nothing is pasted over the selection.
+  adapter.selection = null;
+  adapter.clipboard = "clipboard cũ";
+  adapter.selectionHandler({
+    text: "Số 0912345678",
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: true,
+  });
+  await tick();
+  adapter.command("mask");
+  await tick();
+  await tick();
+  assert.equal(adapter.calls.filter((call) => call[0] === "paste").length, 1);
+  assert.equal(run.texts.at(-1), "Số 0912345678");
+  // (The fake run masks its own sample text; what matters is that the result went to
+  // the clipboard instead of over the selection.)
+  assert.match(adapter.clipboard, /\[SDT_1_[a-f0-9]{4}\]/);
 });

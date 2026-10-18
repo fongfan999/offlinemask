@@ -40,6 +40,9 @@ pub struct Selection {
     pub bounds: Option<Rect>,
     /// Where the mouse came up.
     pub pointer: Point,
+    /// The selection sits in a field the user can type in (an input, a text area, an
+    /// editor). Read-only text, such as an AI's answer, is false; so is any doubt.
+    pub editable: bool,
 }
 
 /// Shared gesture logic: a press records where it began; a release after a drag of

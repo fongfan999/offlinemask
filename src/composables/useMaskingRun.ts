@@ -159,8 +159,11 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     const invalid = validateText(text);
     if (invalid) return { error: "invalid", message: invalid };
     if (processing.value) return { error: "busy", message: "" };
-    // Categories that need the pack fall back to the built-in ones while it is missing.
-    const options = missingSelectedModels.value ? [...localOptions] : selectedOptions.value;
+    // Quick actions hide as much as possible (decision 0096): every category the machine
+    // can run, whatever is ticked on the text page; the built-in ones without the pack.
+    const options = pack.ready.value
+      ? detectionOptions.map((option) => option.id)
+      : [...localOptions];
     try {
       const session = await detectSession(
         text,
@@ -175,12 +178,16 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
   }
   /** How many values the built-in rules find, for the clipboard watch (decision
    * 0094): no session, no progress, no draft, and a failure counts as nothing. */
-  async function probe(text: string): Promise<number> {
-    if (validateText(text)) return 0;
+  async function probe(text: string): Promise<{ count: number; kinds: string[] }> {
+    const nothing = { count: 0, kinds: [] };
+    if (validateText(text)) return nothing;
     try {
-      return (await detector.detect(text, () => {}, undefined, [...localOptions])).length;
+      const detections = await detector.detect(text, () => {}, undefined, [...localOptions]);
+      // Distinct values, like the "Đã ẩn n thông tin" count after masking.
+      const values = new Set(detections.map((d) => d.type + ":" + text.slice(d.start, d.end)));
+      return { count: values.size, kinds: [...new Set(detections.map((d) => d.label))] };
     } catch {
-      return 0;
+      return nothing;
     }
   }
   /** A .txt or .md file becomes the draft (decision 0083); an error message otherwise.

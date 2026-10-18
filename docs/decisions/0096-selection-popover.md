@@ -34,3 +34,36 @@ The owner's first live run showed the popover in the right place, above a select
 - **Progress while masking.** After a button press the panel moves to its corner with "Đang ẩn thông tin…" and a thin indeterminate bar along its bottom edge (a gentle pulse with reduced motion), then shows the result and hides.
 
 Verified: lint, typecheck, 276 tests, clippy and rustfmt. In the owner's running dev app, a click inside the visible panel left the frontmost application (a browser) frontmost. The full click-to-replace path is the owner's to confirm: select text in a chat box, click "Ẩn thông tin", and the selection should change in place while the bar runs in the corner.
+
+## Follow-up: a circle that grows on hover (same day)
+
+The owner asked for the popover to be "as small as possible, maybe just a circle, auto change icon depending on the text, hovering for full options, but the full options should be small as well, and follow the app design, like the borders should be radius", and noticed the mask button still used the old logo.
+
+- **One transparent window, four shapes.** The panel window is now transparent with no native shadow and is resized to whatever it shows, plus an 8 px margin for a CSS shadow in the brand's flat style:
+  - **circle**: 32 px, cobalt, just above the end of the selection (below it at the top edge of the screen, beside the pointer without a rectangle). It shows the new brush mark when a click will mask and a return arrow when the selection holds known aliases and a click will restore;
+  - **one click**: a click on the circle runs its action at once ("the idea is users should 1 click, but have a choice to open the full options version");
+  - **hover hint**: hovering the circle shows a short, non-clickable label beside it, "Ẩn thông tin" or "Khôi phục thông tin". A menu with both actions came first, then counted hints ("Ẩn 2 thông tin · Số điện thoại, Email"); the owner dropped both for these two general words;
+  - **restore preview**: for read-only text (below), a card in the top-right corner of the screen with the AI's text and the real values back, highlighted, plus "Sao chép" (the common case) and "Mở trong OfflineMask", which opens the session that owns the first alias when it is still known. It stays until one of its buttons or its × is used; the page and the clipboard are untouched until "Sao chép";
+  - **toast**: a card with 12 px corners in the corner of the screen for progress (with the moving bar), results and the clipboard watch's nudge (with a small "Ẩn" chip);
+  - **full panel**: the kept-on-screen panel, now with 14 px corners and the new mark on its button.
+- **Hover without focus.** The window polls the pointer position every 80 ms while it is a circle (to show and fold the hint), because the app is in the background and the webview may not report hover there; `mouseenter` is only a faster path.
+- **The new mark everywhere in the panel** (`BrandMark`), including the primary button that still drew the old glyph.
+- `pill.html?state=dot|hover|restore|preview|toast|busy|offer|panel` renders one shape with sample text in the browser preview, for design checks without the desktop app. Checked there in light and dark.
+
+Code: `src/PillApp.vue`, placement helpers `dotSpot` and `growFrom` in `src/adapters/quick-panel.ts` (unit-tested), the `action` field on `QuickStatus`, panel styles in `src/style.css`; window `transparent: true`, `shadow: false`; the panel capability gains `set-size`, `cursor-position` and `scale-factor`.
+
+## Follow-up: when the circle appears, and what it does (same day)
+
+The owner: "Dont just show the popover randomly. Writable text (like an input field): Mask -> Replace the text. Readonly text (like answer from AI): Restore -> Show a quick preview at top right corner, with some actions like copy, open the app to view the session", and "mask as much as possible".
+
+- **Editable or not.** The selection event now says whether the text sits in a field the user can type in. macOS asks Accessibility whether the element's `AXValue` or `AXSelectedText` can be written; Windows asks UI Automation for a value pattern that is not read-only. Any doubt counts as read-only, the harmless side.
+- **When the circle shows.** In an editable field: for ordinary text (mask, replaced in place) and for text holding known aliases (restore, replaced in place). In read-only text: for known aliases (restore preview), and for plain text only when the built-in rules find something to hide within 400 ms (masked preview); the owner chose this over always showing it, so selecting a sentence on a web page or in a PDF shows nothing. Names or addresses alone in read-only text need the pack and get no circle there; ⌘⇧M still covers them. Aliases of no known session show nothing.
+- **Masked preview.** The same top-right card for read-only text being masked: "Đã ẩn n thông tin", the masked copy with each alias highlighted, "Sao chép" and "Mở trong OfflineMask" (the new session). The page and the clipboard stay untouched until "Sao chép".
+- **Mask as much as possible.** Quick masking (shortcut, circle, panel, Services) now uses every category the machine can run, the pack's ones included when it is installed, whatever is ticked on the text page; the built-in ones without the pack.
+- **Open the session.** A new `quick_show_main` command brings the main window back, and the shell navigates to the session's page.
+
+Verified: lint, typecheck, 280 tests (the show rules, both previews, copy, open, in-place restore and the all-category masking are covered), clippy, the Windows backend type-checked for its target. The preview card and the hints were checked in the browser preview in light and dark. Not yet checked live: the editable/read-only signal in real applications (ChatGPT's input versus its answers, Lark, Notes), which is the owner's first test.
+
+## Follow-up: the circle replaced the text three times (same day)
+
+In ChatGPT's input in Dia the owner got the masked sentence three times in a row, every copy with the same alias. One masking run on text that already held the sentence three times: Chromium's Accessibility API reported the input's selected text repeated. The circle now reads the exact selection at click time with the copy chord (an invisible marker on the clipboard first, the user's clipboard put back after), the same round trip ⌘⇧M uses. The Accessibility text only decides whether the circle shows and in which direction. If the copy chord yields nothing, the result goes to the clipboard instead of over the selection. Regression test: repeated Accessibility text with a single copied selection pastes the single masked sentence.

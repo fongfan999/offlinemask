@@ -147,6 +147,11 @@ pub fn request_quit<R: Runtime>(app: &AppHandle<R>) {
 pub fn quick_quit(app: AppHandle) {
     app.exit(0);
 }
+/// "Mở trong OfflineMask" from the restore preview: bring the main window back.
+#[tauri::command]
+pub fn quick_show_main(app: AppHandle) {
+    show_main(&app);
+}
 
 /// The login item starts the app with this flag, so it begins hidden in the tray.
 pub const BACKGROUND_FLAG: &str = "--background";

@@ -21,8 +21,9 @@ export const trayLabel = /Mac|iPhone|iPad/.test(navigator.userAgent)
   ? "thanh menu"
   : "khay hệ thống";
 
-/** Panel or tray → shell: a button in the panel, its close control, or the tray's quit. */
-export type QuickCommand = "mask" | "restore" | "unpin" | "quit";
+/** Panel or tray → shell: a button in the panel, its close control, the tray's quit, or
+ * the restore preview's two actions (decision 0096). */
+export type QuickCommand = "mask" | "restore" | "unpin" | "quit" | "copy" | "open" | "close";
 /** Logical screen points, top-left origin (decision 0096). */
 export interface ScreenPoint {
   x: number;
@@ -41,14 +42,23 @@ export interface QuickStatus {
   message: string;
   /** `offer` is the clipboard watch's nudge and `select` the popover's question: both
    * stay longer than a result and wait for a button. */
-  tone: "ok" | "error" | "busy" | "offer" | "select";
+  tone: "ok" | "error" | "busy" | "offer" | "select" | "preview";
   anchor?: PanelAnchor;
+  /** For a selection: what the circle's click does, and so which icon it shows. */
+  action?: "mask" | "restore";
+  /** For a selection: what that click will do, in a few words, shown on hover. */
+  hint?: string;
+  /** The restore preview of read-only text: the restored text, where each restored
+   * value sits in it, and whether its session can be opened in the app. */
+  preview?: { text: string; marks: { start: number; end: number }[]; canOpen: boolean };
 }
 /** Text the user just selected in another application (decision 0096). */
 export interface SelectionMade {
   text: string;
   bounds?: ScreenRect | null;
   pointer: ScreenPoint;
+  /** Typed into: masking replaces it. Read-only text only ever gets a restore preview. */
+  editable: boolean;
 }
 /** What a macOS Service handed over (decision 0094). */
 export type ServiceRequest = { kind: "text"; text: string } | { kind: "files"; paths: string[] };
@@ -96,6 +106,8 @@ export interface QuickActionsAdapter {
   setLaunchAtLogin(on: boolean): Promise<void>;
   /** End the process; the shell flushes pending saves first (decision 0092). */
   quit(): Promise<void>;
+  /** Bring the main window back, from wherever it is (decision 0096). */
+  showMainWindow(): Promise<void>;
   /** Text or files from a macOS Service (decision 0094). */
   onService(handler: (request: ServiceRequest) => void): Promise<() => void>;
   /** Bytes of a file a Service handed over; any other path is refused natively. */
@@ -154,6 +166,7 @@ export const nativeQuickActions: QuickActionsAdapter = {
   launchAtLogin: () => isEnabled(),
   setLaunchAtLogin: (on) => (on ? enable() : disable()),
   quit: () => invoke("quick_quit"),
+  showMainWindow: () => invoke("quick_show_main"),
   onService: (handler) => listen<ServiceRequest>(events.service, (event) => handler(event.payload)),
   async readServiceFile(path) {
     const bytes = await invoke<ArrayBuffer | number[]>("quick_read_service_file", { path });

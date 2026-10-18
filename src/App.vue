@@ -64,7 +64,12 @@ const quick = useQuickActions({
     clearTimeout(saveTimer);
     if (vault.state.value === "unlocked") await vault.save(sessions.value);
   },
-  // A file from the Finder service (decision 0093) opens like one dropped on the home page.
+  // "Mở trong OfflineMask" in the restore preview (decision 0096).
+  openSession: (id) => {
+    const session = store.find(id);
+    if (session) void navigate(session.format, id);
+  },
+  // A file from the Finder service (decision 0094) opens like one dropped on the home page.
   openFile: async (file) => {
     const kind = fileKind(file.name);
     if (kind === "text") {

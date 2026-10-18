@@ -2603,22 +2603,214 @@ td.alias {
   line-height: 1.6;
 }
 
-/* The floating quick-action panel: its own small window, same tokens. */
+/* The floating quick-action window: its own small transparent window, same tokens.
+   The window is sized to the shape plus an 8 px margin that holds the shadow. */
+.pill-root,
 .pill-body {
   min-width: 0;
   overflow: hidden;
-  background: var(--paper-raised);
+  background: transparent;
 }
+.quick-window {
+  display: inline-flex;
+  padding: 8px;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.quick-dot,
+.quick-toast,
 .pill {
+  border: 1px solid var(--line-strong);
+  background: var(--paper-raised);
+  box-shadow:
+    0 2px 0 var(--shadow),
+    0 6px 14px -8px var(--shadow);
+}
+/* The circle over a selection. */
+.quick-dot {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border-color: transparent;
+  border-radius: 50%;
+  color: var(--on-accent);
+  background: var(--accent);
+  transition:
+    scale 0.14s,
+    background-color 0.14s;
+}
+.quick-dot:hover {
+  scale: 1.06;
+  background: var(--accent-strong);
+}
+.quick-dot-wrap {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+/* Beside the hovered circle: what a click will do, one line, not clickable. */
+.quick-hint {
+  display: flex;
+  align-items: center;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--paper-raised);
+  box-shadow:
+    0 2px 0 var(--shadow),
+    0 6px 14px -8px var(--shadow);
+  font-size: 12.5px;
+  white-space: nowrap;
+}
+/* The restore preview, top right: the AI's text with the real values back. */
+.quick-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 340px;
+  padding: 10px 12px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--paper-raised);
+  box-shadow:
+    0 2px 0 var(--shadow),
+    0 6px 14px -8px var(--shadow);
+}
+.quick-preview-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.quick-preview-title {
+  flex: 1;
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+.quick-preview-text {
+  max-height: 180px;
+  margin: 0;
+  padding: 8px 10px;
+  overflow: auto;
+  border-radius: 8px;
+  color: var(--ink);
+  background: var(--paper-sunk);
+  font-size: 12.5px;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  user-select: text;
+  -webkit-user-select: text;
+}
+.quick-preview-text mark {
+  padding: 0 2px;
+  border-radius: 3px;
+  color: var(--note-ink);
+  background: var(--note);
+}
+.quick-preview-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+}
+/* A flat text button, like a selection toolbar's items. */
+.quick-flat {
+  height: 30px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 12.5px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.quick-flat:hover {
+  color: var(--ink);
+  background: var(--paper-sunk);
+}
+.quick-preview-copy {
+  gap: 6px;
+  min-height: 0;
+  height: 30px;
+  padding: 0 14px;
+  font-size: 12.5px;
+}
+/* Small round button, still used by the clipboard nudge. */
+.quick-chip {
+  height: 24px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.quick-chip:hover {
+  border-color: var(--line-strong);
+  background: var(--paper-sunk);
+}
+.quick-chip.is-primary {
+  border-color: transparent;
+  color: var(--on-accent);
+  background: var(--accent);
+  font-weight: 600;
+}
+.quick-chip.is-primary:hover {
+  background: var(--accent-strong);
+}
+/* Progress and results in the corner. */
+.quick-toast {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 300px;
+  padding: 9px 12px 10px 9px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+.quick-toast-mark {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  color: var(--on-accent);
+  background: var(--accent);
+}
+.quick-toast.is-error .quick-toast-mark {
+  color: var(--paper-raised);
+  background: var(--error);
+}
+.quick-toast-text {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.45;
+}
+.quick-toast.is-error .quick-toast-text {
+  color: var(--error);
+}
+.quick-toast .quick-chip {
+  flex: none;
+}
+/* Kept on screen: the full panel. */
+.pill {
+  position: relative;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  height: 100vh;
+  width: 320px;
   padding: 8px 12px 10px;
-  border: 1px solid var(--line-strong);
-  background: var(--paper-raised);
-  user-select: none;
-  -webkit-user-select: none;
+  overflow: hidden;
+  border-radius: 14px;
 }
 .pill-head {
   display: flex;
@@ -2690,10 +2882,7 @@ td.alias {
 .pill-status.is-select {
   color: var(--warm);
 }
-.pill {
-  position: relative;
-}
-/* Indeterminate bar along the panel's bottom edge while masking runs. */
+/* Indeterminate bar along the bottom edge while masking runs. */
 .pill-progress {
   position: absolute;
   right: 0;

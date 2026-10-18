@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "pill",
-  "description": "The floating quick-action panel (decision 0090). It shows and positions itself, can be dragged, follows the theme, moves above a selection on whichever screen holds it (decision 0096), receives outcomes from the main window and sends back which button was pressed. It touches no clipboard, file or network.",
+  "description": "The floating quick-action panel (decision 0090). It shows, sizes and positions itself, follows the pointer for hover while it is a small circle, can be dragged, follows the theme, moves above a selection on whichever screen holds it (decision 0096), receives outcomes from the main window and sends back which button was pressed. It touches no clipboard, file or network.",
   "windows": [
     "pill"
   ],
@@ -12,6 +12,9 @@
     "core:window:allow-show",
     "core:window:allow-hide",
     "core:window:allow-set-position",
+    "core:window:allow-scale-factor",
+    "core:window:allow-cursor-position",
+    "core:window:allow-set-size",
     "core:window:allow-outer-position",
     "core:window:allow-outer-size",
     "core:window:allow-available-monitors",

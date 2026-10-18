@@ -10,6 +10,7 @@ import {
   type ServiceRequest,
 } from "../adapters/quick-actions.ts";
 import {
+  aliasMarks,
   quickDirection,
   quickMessages,
   restoreFromTables,
@@ -22,6 +23,9 @@ import { isPrivate, sessionOutput, type Session, type TextSession } from "../cor
 export const shortcutKey = "offlinemask.quick-shortcut.v1";
 export const watchKey = "offlinemask.quick-watch.v1";
 export const popoverKey = "offlinemask.quick-popover.v1";
+/** Read-only text gets a masking circle only if the built-in rules find something to
+ * hide within this time; otherwise selecting a sentence on a web page shows nothing. */
+const readOnlyProbeMs = 400;
 export const popoverError = "Chưa bật được nút nổi khi bôi đen trên hệ này.";
 export const popoverPermission =
   "Nút nổi khi bôi đen cần quyền Trợ năng (nút Cấp quyền ở trên) để đọc phần bạn chọn.";
@@ -49,10 +53,12 @@ export interface QuickActionsDependencies {
       { session: TextSession } | { error: "busy" | "invalid" | "failed"; message: string }
     >;
     /** Built-in rules only; how many values they find (the clipboard watch). */
-    probe(text: string): Promise<number>;
+    probe(text: string): Promise<{ count: number; kinds: string[] }>;
   };
   /** Opens a file a Service handed over on its page; returns an error message or "". */
   openFile?: (file: File) => Promise<string>;
+  /** Opens a session on its page in the main window (the restore preview's second action). */
+  openSession?: (id: string) => void;
   sessions: Ref<readonly Session[]>;
   /** While the lock screen is up, nothing may be masked or restored. */
   locked: () => boolean;
@@ -72,6 +78,7 @@ export function useQuickActions({
   locked,
   flush,
   openFile,
+  openSession,
   storage = defaultStorage(),
 }: QuickActionsDependencies) {
   // Two preferences, no content: on/off for the shortcut and the panel.
@@ -100,7 +107,9 @@ export function useQuickActions({
   const popoverOn = ref(adapter.desktop && read(popoverKey, false));
   const popoverSupported = ref(false);
   const popoverFailure = ref("");
-  let pendingSelection: string | null = null;
+  let pendingSelection: { text: string; editable: boolean } | null = null;
+  /** The restore preview on screen: its text for "Sao chép", its session for "Mở". */
+  let preview: { text: string; sessionId: string | null } | null = null;
   /** The last text this app put on the clipboard: its own output is never offered back. */
   let lastWritten = "";
   async function writeClipboard(text: string) {
@@ -179,6 +188,7 @@ export function useQuickActions({
     { deep: true, immediate: true },
   );
   const knownTables = () => [...tables.values()];
+  const tables_entries = () => tables.entries();
   function forget(id: string) {
     tables.delete(id);
   }
@@ -312,16 +322,114 @@ export function useQuickActions({
   }
   /** The popover: a fresh selection in another application. Its direction decides the
    * question; alias text from no known session and locked or busy states show nothing. */
+  /** The popover never shows at random. In a field the user types in, the circle masks
+   * (or restores, when the text holds known aliases) and replaces the text. In read-only
+   * text it only shows for known aliases, and its click opens a restore preview. Anything
+   * else (plain read-only text, aliases of no known session) shows nothing. */
   async function selectionMade(selection: SelectionMade) {
     if (!popoverOn.value || busy.value || locked()) return;
     const direction = quickDirection(selection.text, knownTables());
     if (direction !== "mask" && direction !== "restore") return;
-    pendingSelection = selection.text;
+    if (!selection.editable && direction === "mask") {
+      // Plain read-only text: only worth a circle when the rules find something.
+      let wait: ReturnType<typeof setTimeout> | undefined;
+      const probed = await Promise.race([
+        run.probe(selection.text),
+        new Promise<null>((resolve) => (wait = setTimeout(() => resolve(null), readOnlyProbeMs))),
+      ]);
+      clearTimeout(wait);
+      if (!probed?.count) return;
+    }
+    const action = direction as "mask" | "restore";
+    pendingSelection = { text: selection.text, editable: selection.editable };
     await show({
-      message: direction === "mask" ? quickMessages.selectMask : quickMessages.selectRestore,
+      message: action === "mask" ? quickMessages.selectMask : quickMessages.selectRestore,
       tone: "select",
+      action,
+      hint: action === "mask" ? quickMessages.hintMask : quickMessages.hintRestore,
       anchor: { bounds: selection.bounds ?? undefined, pointer: selection.pointer },
     });
+  }
+  /** Read-only AI text: show what it says with the real values, without touching the
+   * page or the clipboard; the preview's buttons copy it or open its session. */
+  async function showPreview(text: string) {
+    const tables = [...tables_entries()];
+    const result = restoreFromTables(
+      text,
+      tables.map(([, findings]) => findings),
+    );
+    const firstAlias = aliasTokens(text).find((token) =>
+      tables.some(([, findings]) => findings.some((finding) => finding.alias === token)),
+    );
+    const sessionId =
+      tables.find(([, findings]) =>
+        findings.some((finding) => finding.alias === firstAlias),
+      )?.[0] ?? null;
+    preview = { text: result.text, sessionId };
+    const canOpen = !!sessionId && !!openSession && sessions.value.some((s) => s.id === sessionId);
+    await show({
+      message: quickMessages.previewTitle(result.restored),
+      tone: "preview",
+      preview: { text: result.text, marks: result.marks, canOpen },
+    });
+  }
+  /** Read-only text with something to hide: mask it into a new session and show the
+   * masked copy in the preview, ready to copy into the AI tool. */
+  async function showMaskedPreview(text: string) {
+    if (busy.value) return show({ message: quickMessages.busy, tone: "error" });
+    busy.value = true;
+    try {
+      await show({ message: workingMessage, tone: "busy" });
+      const outcome = await run.maskText(text);
+      if ("error" in outcome)
+        return await show({
+          message: outcome.error === "busy" ? quickMessages.busy : outcome.message,
+          tone: "error",
+        });
+      const session = outcome.session;
+      if (!session.analysis.findings.length)
+        return await show({ message: quickMessages.nothing, tone: "error" });
+      const masked = sessionOutput(session);
+      preview = { text: masked, sessionId: session.id };
+      await show({
+        message: quickMessages.maskedTitle(session.analysis.findings.length),
+        tone: "preview",
+        preview: {
+          text: masked,
+          marks: aliasMarks(masked, session.analysis.findings),
+          canOpen: !!openSession,
+        },
+      });
+    } catch {
+      await show({ message: quickMessages.failed, tone: "error" });
+    } finally {
+      busy.value = false;
+    }
+  }
+  async function previewAction(command: "copy" | "open" | "close") {
+    const current = preview;
+    if (command === "close" || !current) {
+      preview = null;
+      if (adapter.desktop) await adapter.dismissPanel().catch(() => {});
+      return;
+    }
+    if (command === "copy") {
+      try {
+        await writeClipboard(current.text);
+      } catch {
+        await show({ message: quickMessages.clipboard, tone: "error" });
+        return;
+      }
+      preview = null;
+      await show({ message: quickMessages.previewCopied, tone: "ok" });
+      return;
+    }
+    if (current.sessionId && openSession) {
+      openSession(current.sessionId);
+      await adapter.showMainWindow().catch(() => {});
+    }
+    preview = null;
+    if (adapter.desktop) await adapter.dismissPanel().catch(() => {});
   }
   async function selectionCleared() {
     if (pendingSelection === null) return;
@@ -353,7 +461,7 @@ export function useQuickActions({
       return;
     }
     if (!text.trim() || text === lastWritten || aliasTokens(text).length) return;
-    const found = await run.probe(text);
+    const { count: found } = await run.probe(text);
     if (found > 0 && watchOn.value)
       await show({ message: quickMessages.offer(found), tone: "offer" });
   }
@@ -396,13 +504,56 @@ export function useQuickActions({
       await adapter.quit().catch(() => {});
     }
   }
+  /** The exact selection of the front application, read with the copy chord at the
+   * moment the circle is clicked; the user's clipboard is put back afterwards. The
+   * Accessibility text only decides whether the circle shows: some applications
+   * (Chromium editors) report it repeated or partial, and pasting a result built from
+   * it over the selection duplicated the user's text. */
+  async function exactSelection(): Promise<string | null> {
+    if (inputPermission.value !== "granted") return null;
+    let before = "";
+    try {
+      before = await adapter.readClipboard();
+    } catch {
+      // An unreadable clipboard is restored as empty.
+    }
+    const marker = `\u2063OfflineMask ${Date.now().toString(36)}\u2063`;
+    try {
+      await writeClipboard(marker);
+      await adapter.copySelection();
+      const text = await adapter.readClipboard();
+      return text !== marker && text.trim() ? text : null;
+    } catch {
+      return null;
+    } finally {
+      await writeClipboard(before).catch(() => {});
+    }
+  }
+  async function actOnSelection(
+    command: "mask" | "restore",
+    selection: { text: string; editable: boolean },
+  ) {
+    const exact = await exactSelection();
+    if (!selection.editable) {
+      const text = exact ?? selection.text;
+      if (command === "restore") await showPreview(text);
+      else await showMaskedPreview(text);
+      return;
+    }
+    // Replace in place only with the exact selection; without it the result goes to
+    // the clipboard and the user pastes it.
+    if (exact) await act(command, exact, { replace: true });
+    else await act(command, selection.text);
+  }
   function onCommand(command: QuickCommand) {
     if (command === "unpin") void setPinned(false);
     else if (command === "quit") void quit();
+    else if (command === "copy" || command === "open" || command === "close")
+      void previewAction(command);
     else if (pendingSelection !== null) {
-      const text = pendingSelection;
+      const selection = pendingSelection;
       pendingSelection = null;
-      void act(command, text, { replace: true });
+      void actOnSelection(command, selection);
     } else void act(command);
   }
 

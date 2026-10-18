@@ -61,6 +61,15 @@ export const quickMessages = {
   /** The opt-in clipboard watch noticed something (decision 0095). */
   offer: (n: number) =>
     `Văn bản vừa sao chép có ${count(n)} thông tin nhạy cảm. Bấm Ẩn thông tin để ẩn trước khi dán.`,
+  /** What a click on the circle will do, shown while it is hovered (decision 0096). */
+  hintMask: "Ẩn thông tin",
+  hintRestore: "Khôi phục thông tin",
+  /** The restore preview's heading, the confirmation after its copy button, and the
+   * case where the AI reply holds no alias of a session still known (decision 0096). */
+  previewTitle: (n: number) =>
+    n === 1 ? "Đã khôi phục 1 thông tin" : `Đã khôi phục ${count(n)} thông tin`,
+  maskedTitle: (n: number) => `Đã ẩn ${count(n)} thông tin`,
+  previewCopied: "Đã sao chép. Dán vào nơi bạn cần.",
   /** The popover's question over a fresh selection (decision 0096). */
   selectMask: "Ẩn thông tin trong phần vừa chọn? Kết quả thay ngay tại chỗ.",
   selectRestore: "Khôi phục mã thay thế trong phần vừa chọn? Kết quả thay ngay tại chỗ.",
@@ -69,3 +78,17 @@ export const quickMessages = {
   /** Shown once per launch when the selection could not be taken for lack of permission. */
   permissionHint: "Muốn thay ngay tại chỗ? Cấp quyền Trợ năng trong Cài đặt › Thao tác nhanh.",
 } as const;
+
+/** Where each alias sits in masked text, for highlighting in the preview. */
+export function aliasMarks(
+  text: string,
+  findings: readonly Finding[],
+): { start: number; end: number }[] {
+  const aliases = new Set(findings.map((finding) => finding.alias));
+  const marks: { start: number; end: number }[] = [];
+  for (const token of text.matchAll(/\[[A-Z][A-Z_]*_\d+_[a-f0-9]{4,8}\]/g)) {
+    if (aliases.has(token[0]))
+      marks.push({ start: token.index, end: token.index + token[0].length });
+  }
+  return marks;
+}

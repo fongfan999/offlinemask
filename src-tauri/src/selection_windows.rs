@@ -21,7 +21,8 @@ use windows::Win32::System::Ole::{
 };
 use windows::Win32::System::Threading::GetCurrentProcessId;
 use windows::Win32::UI::Accessibility::{
-    CUIAutomation, IUIAutomation, IUIAutomationTextPattern, UIA_TextPatternId,
+    CUIAutomation, IUIAutomation, IUIAutomationTextPattern, IUIAutomationValuePattern,
+    UIA_TextPatternId, UIA_ValuePatternId,
 };
 use windows::Win32::UI::HiDpi::{GetDpiForMonitor, MDT_EFFECTIVE_DPI};
 use windows::Win32::UI::Input::KeyboardAndMouse::GetDoubleClickTime;
@@ -106,7 +107,7 @@ unsafe fn first_rect(array: *mut SAFEARRAY) -> Option<Rect> {
     rect
 }
 
-fn read_selection(at: POINT) -> Option<(String, Option<Rect>)> {
+fn read_selection(at: POINT) -> Option<(String, Option<Rect>, bool)> {
     // SAFETY: COM calls on a thread we initialise and uninitialise ourselves.
     unsafe {
         let init = CoInitializeEx(None, COINIT_APARTMENTTHREADED);
@@ -142,7 +143,14 @@ fn read_selection(at: POINT) -> Option<(String, Option<Rect>)> {
                     width: rect.width / scale,
                     height: rect.height / scale,
                 });
-            Some((text, bounds))
+            // An editable field exposes a value pattern that is not read-only; anything
+            // else (documents, web pages, an AI's answer) counts as read-only.
+            let editable = element
+                .GetCurrentPatternAs::<IUIAutomationValuePattern>(UIA_ValuePatternId)
+                .ok()
+                .and_then(|value| value.CurrentIsReadOnly().ok())
+                .is_some_and(|read_only| !read_only.as_bool());
+            Some((text, bounds, editable))
         })();
         if init.is_ok() {
             CoUninitialize();
@@ -200,13 +208,14 @@ unsafe extern "system" fn hook(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRE
                             if !enabled.load(Ordering::Relaxed) {
                                 return;
                             }
-                            if let (Some(shared), Some((text, bounds))) =
+                            if let (Some(shared), Some((text, bounds, editable))) =
                                 (SHARED.get(), read_selection(physical))
                             {
                                 (shared.made)(Selection {
                                     text,
                                     bounds,
                                     pointer: at,
+                                    editable,
                                 });
                             }
                         });
