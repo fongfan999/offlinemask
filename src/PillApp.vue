@@ -71,15 +71,30 @@ function hideLater(delay: number) {
   clearTimeout(hideTimer);
   hideTimer = setTimeout(() => void hide(), delay);
 }
+/** The shape fades out before the window goes; a new status during the fade wins. */
+const fadeMs = 260;
+const leaving = ref(false);
+let fadeToken = 0;
 async function hide() {
   clearTimeout(hideTimer);
   clearTimeout(leaveTimer);
   stopHover();
   dot = null;
   if (pinned.value && mode.value !== "panel") return showCorner();
+  const token = ++fadeToken;
+  leaving.value = true;
+  await new Promise((resolve) => setTimeout(resolve, fadeMs));
+  if (token !== fadeToken) return;
   await panel.hide();
+  leaving.value = false;
+}
+/** Anything shown again cancels a fade in progress. */
+function stayVisible() {
+  fadeToken++;
+  leaving.value = false;
 }
 async function showCorner() {
+  stayVisible();
   stopHover();
   mode.value = pinned.value ? "panel" : "toast";
   await fit();
@@ -87,6 +102,7 @@ async function showCorner() {
   await panel.show();
 }
 async function showDot(anchor: NonNullable<PanelStatus["anchor"]>) {
+  stayVisible();
   mode.value = "dot";
   hovered.value = false;
   circle.value = "idle";
@@ -153,6 +169,7 @@ const previewParts = computed(() => {
   return parts;
 });
 async function showPreview() {
+  stayVisible();
   stopHover();
   dot = null;
   mode.value = "preview";
@@ -162,6 +179,7 @@ async function showPreview() {
 }
 
 async function present(next: PanelStatus) {
+  stayVisible();
   status.value = next;
   pinned.value = next.pinned;
   clearTimeout(hideTimer);
@@ -171,7 +189,7 @@ async function present(next: PanelStatus) {
     hovered.value = false;
     circle.value = next.tone === "busy" ? "busy" : next.tone === "error" ? "error" : "done";
     await reshape();
-    if (next.tone !== "busy") hideLater(next.tone === "error" ? 4500 : 2500);
+    if (next.tone !== "busy") hideLater(next.tone === "error" ? 4500 : 1500);
     return;
   }
   if (next.tone === "select" && next.anchor) {
@@ -299,7 +317,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="quick-window" :class="`is-${mode}`">
+  <div class="quick-window" :class="[`is-${mode}`, { 'is-leaving': leaving }]">
     <!-- The circle over a selection: one click does what its icon says. Hovering it
          shows a one-line hint beside it saying what that click will do. -->
     <div

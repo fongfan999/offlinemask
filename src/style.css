@@ -2612,6 +2612,9 @@ td.alias {
   background: transparent;
 }
 .quick-window {
+  transition:
+    opacity 0.26s ease,
+    scale 0.26s ease;
   display: inline-flex;
   /* Laid out at its natural size whatever the window's current size, so a toast shown
      right after the 48 px circle is measured at its full width, not squeezed. */
@@ -2655,6 +2658,16 @@ td.alias {
 .quick-dot.is-done svg,
 .quick-dot.is-error svg {
   stroke-width: 2.6;
+}
+/* Going away: a short fade and shrink before the window is hidden. */
+.quick-window.is-leaving {
+  opacity: 0;
+  scale: 0.92;
+}
+@media (prefers-reduced-motion: reduce) {
+  .quick-window.is-leaving {
+    scale: 1;
+  }
 }
 /* Processing in place: a ring turning inside the circle. */
 .quick-spinner {
