@@ -83,7 +83,7 @@ These are documentation findings, not results from independent product tests. Pr
 ### Deferred
 
 - PDF, Word, scanned documents, images, audio, OCR, and legacy or macro-enabled Excel formats.
-- Browser extensions, background interception of clipboard content, AI-provider integrations, and automatic submission to external AI. In scope: reading the clipboard when the user presses the quick-action shortcut, a panel button or a macOS Service ([Decision 0090](docs/decisions/0090-clipboard-quick-actions.md), [0094](docs/decisions/0094-macos-services.md)), and the opt-in, off-by-default clipboard watch that checks copied text with the built-in rules on the machine and only offers to mask ([Decision 0095](docs/decisions/0095-clipboard-watch.md)).
+- Browser extensions, background interception of clipboard content, AI-provider integrations, and automatic submission to external AI. In scope: reading the clipboard when the user presses the quick-action shortcut, a panel button or a macOS Service ([Decision 0090](docs/decisions/0090-clipboard-quick-actions.md), [0094](docs/decisions/0094-macos-services.md)), the opt-in selection popover that reads the text the user just selected ([Decision 0096](docs/decisions/0096-selection-popover.md)), and the opt-in, off-by-default clipboard watch that checks copied text with the built-in rules on the machine and only offers to mask ([Decision 0095](docs/decisions/0095-clipboard-watch.md)).
 - Central administration, shared team vaults, cloud accounts, cloud synchronisation, and enterprise deployment consoles.
 - Public marketplace, automatic pack updates, and arbitrary executable third-party plugins.
 - Training a custom detection model and adding further language packs.

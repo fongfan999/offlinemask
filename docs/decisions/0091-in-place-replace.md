@@ -42,3 +42,7 @@ A code review of the three quick-action commits (8 findings, all applied at the 
 - **Windows chord.** The letter is sent as the virtual-key code (`VK_C`, `VK_V`) on Windows; a Unicode text event with Control held is typing, not Ctrl+C. macOS and X11 keep the layout mapping. Still not run on Windows.
 
 Also from the review: a quick mask that finds nothing no longer creates or adopts a session (`maskText` adopts only sessions with findings), so it cannot replace the text on screen without a passcode; an unexpected failure after the "Đang ẩn thông tin…" flash ends in "Chưa thực hiện được thao tác…" instead of a stuck panel; and the panel's Tauri calls moved from `PillApp.vue` into `src/adapters/quick-panel.ts`, which also keeps the panel bundle free of the composable and core modules.
+
+## Follow-up: keystrokes on the main thread (same day)
+
+The first live run of the in-place path, once the development binary had the Accessibility permission, crashed the app: enigo resolves `Key::Unicode` through Text Input Services (`TSMGetInputSourceProperty`), which asserts it is on the main queue, and the chord ran on a tokio worker. The key presses now run on the main thread via `run_on_main_thread`, bounded by a three-second wait; the modifier wait and the settle delay stay off it. Verified afterwards in a TextEdit document with synthetic text: ⌘⇧M replaced the selection with the masked text in place, and a second ⌘⇧M on the masked text restored it in place, TextEdit keeping focus both times.

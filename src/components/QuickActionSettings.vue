@@ -63,6 +63,31 @@ const quick = useProvided(quickKey);
     </div>
     <div class="settings-tool-row">
       <div>
+        <h3>Nút nổi khi bôi đen</h3>
+        <p id="quick-popover-help">
+          Tắt mặc định. Khi bật, vừa bôi đen văn bản trong ứng dụng khác là bảng nổi hiện ngay phía
+          trên với hai nút; bấm là thay ngay tại chỗ. OfflineMask chỉ theo dõi nút chuột và đọc phần
+          bạn đã chọn, không đọc phím.
+        </p>
+        <p v-if="quick.desktop && !quick.popoverSupported.value" class="quick-note">
+          Hệ này chưa hỗ trợ (Linux sẽ có sau trên X11).
+        </p>
+        <p v-if="quick.popoverFailure.value" class="quick-error" role="alert">
+          {{ quick.popoverFailure.value }}
+        </p>
+      </div>
+      <label class="quick-toggle">
+        <input
+          type="checkbox"
+          :checked="quick.popoverOn.value"
+          :disabled="!quick.desktop || !quick.popoverSupported.value"
+          aria-describedby="quick-popover-help"
+          @change="quick.setPopover(($event.target as HTMLInputElement).checked)"
+        />Bật
+      </label>
+    </div>
+    <div class="settings-tool-row">
+      <div>
         <h3 id="quick-panel-title">Bảng nổi</h3>
         <p id="quick-panel-help">
           Một ô nhỏ luôn nổi trên các cửa sổ khác với hai nút Ẩn thông tin và Khôi phục. Kéo để đặt

@@ -3,8 +3,10 @@
 //! result back. Both are sent only while handling the user's own shortcut
 //! press; nothing is ever read from the keyboard and no event tap is installed.
 use enigo::{Direction, Enigo, InputError, Key, Keyboard, NewConError, Settings};
+use std::sync::mpsc;
 use std::thread::sleep;
 use std::time::Duration;
+use tauri::{AppHandle, Runtime};
 
 #[cfg(target_os = "macos")]
 const MODIFIER: Key = Key::Meta;
@@ -71,14 +73,41 @@ fn letter_key(letter: char) -> Key {
 fn letter_key(letter: char) -> Key {
     Key::Unicode(letter)
 }
-fn chord(enigo: &mut Enigo, letter: char) -> Result<(), String> {
-    wait_for_modifiers();
+/// The key presses themselves. On macOS enigo resolves the letter through Text Input
+/// Services, which asserts the main thread (a worker thread traps), so this runs via
+/// `on_main_thread`; the waits around it stay off the main thread.
+fn press(enigo: &mut Enigo, letter: char) -> Result<(), String> {
     enigo.key(Key::Shift, Direction::Release).map_err(io)?;
     enigo.key(MODIFIER, Direction::Release).map_err(io)?;
     enigo.key(MODIFIER, Direction::Press).map_err(io)?;
     let typed = enigo.key(letter_key(letter), Direction::Click).map_err(io);
     enigo.key(MODIFIER, Direction::Release).map_err(io)?;
     typed
+}
+/// Run `work` on the main thread and wait for its result (bounded, so a stuck main
+/// thread cannot hang the command forever).
+fn on_main_thread<R: Runtime>(
+    app: &AppHandle<R>,
+    work: impl FnOnce() -> Result<(), String> + Send + 'static,
+) -> Result<(), String> {
+    let (sender, receiver) = mpsc::channel();
+    app.run_on_main_thread(move || {
+        let _ = sender.send(work());
+    })
+    .map_err(|error| format!("io: {error}"))?;
+    receiver
+        .recv_timeout(Duration::from_secs(3))
+        .map_err(|_| "io: main thread did not answer".to_string())?
+}
+/// Wait for the user's modifiers, then send the chord on the main thread.
+fn chord<R: Runtime>(app: &AppHandle<R>, letter: char) -> Result<(), String> {
+    // Fail early, off the main thread, when keys cannot be sent at all.
+    drop(connect(false)?);
+    wait_for_modifiers();
+    on_main_thread(app, move || {
+        let mut enigo = connect(false)?;
+        press(&mut enigo, letter)
+    })
 }
 
 /// "granted", "denied" (macOS Accessibility not given) or "unsupported" (no way to
@@ -93,10 +122,9 @@ pub fn quick_input_permission(prompt: bool) -> String {
 }
 /// Copy the front application's selection to the clipboard, then wait for it to land.
 #[tauri::command]
-pub async fn quick_copy_selection() -> Result<(), String> {
-    tauri::async_runtime::spawn_blocking(|| {
-        let mut enigo = connect(false)?;
-        chord(&mut enigo, 'c')?;
+pub async fn quick_copy_selection(app: AppHandle) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        chord(&app, 'c')?;
         sleep(SETTLE);
         Ok(())
     })
@@ -105,11 +133,8 @@ pub async fn quick_copy_selection() -> Result<(), String> {
 }
 /// Paste the clipboard over the front application's selection.
 #[tauri::command]
-pub async fn quick_paste_result() -> Result<(), String> {
-    tauri::async_runtime::spawn_blocking(|| {
-        let mut enigo = connect(false)?;
-        chord(&mut enigo, 'v')
-    })
-    .await
-    .map_err(|error| format!("io: {error}"))?
+pub async fn quick_paste_result(app: AppHandle) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || chord(&app, 'v'))
+        .await
+        .map_err(|error| format!("io: {error}"))?
 }

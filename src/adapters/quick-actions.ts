@@ -23,10 +23,32 @@ export const trayLabel = /Mac|iPhone|iPad/.test(navigator.userAgent)
 
 /** Panel or tray → shell: a button in the panel, its close control, or the tray's quit. */
 export type QuickCommand = "mask" | "restore" | "unpin" | "quit";
+/** Logical screen points, top-left origin (decision 0096). */
+export interface ScreenPoint {
+  x: number;
+  y: number;
+}
+export interface ScreenRect extends ScreenPoint {
+  width: number;
+  height: number;
+}
+/** Where the panel should sit for a selection: above its rectangle, else at the pointer. */
+export interface PanelAnchor {
+  bounds?: ScreenRect;
+  pointer: ScreenPoint;
+}
 export interface QuickStatus {
   message: string;
-  /** `offer` is the clipboard watch's nudge: it stays a little longer than a result. */
-  tone: "ok" | "error" | "busy" | "offer";
+  /** `offer` is the clipboard watch's nudge and `select` the popover's question: both
+   * stay longer than a result and wait for a button. */
+  tone: "ok" | "error" | "busy" | "offer" | "select";
+  anchor?: PanelAnchor;
+}
+/** Text the user just selected in another application (decision 0096). */
+export interface SelectionMade {
+  text: string;
+  bounds?: ScreenRect | null;
+  pointer: ScreenPoint;
 }
 /** What a macOS Service handed over (decision 0094). */
 export type ServiceRequest = { kind: "text"; text: string } | { kind: "files"; paths: string[] };
@@ -40,6 +62,9 @@ export const events = {
   pin: "quick-pin",
   service: "quick-service",
   clipboardChanged: "clipboard-changed",
+  dismiss: "quick-dismiss",
+  selectionMade: "selection-made",
+  selectionCleared: "selection-cleared",
 } as const;
 
 /** Whether the app may send the copy and paste keystrokes that replace a selection
@@ -79,6 +104,13 @@ export interface QuickActionsAdapter {
   watchSupported(): Promise<boolean>;
   setClipboardWatch(on: boolean): Promise<void>;
   onClipboardChanged(handler: () => void): Promise<() => void>;
+  /** The selection popover (decision 0096): mouse-button gestures in other apps. */
+  selectionSupported(): Promise<boolean>;
+  setSelectionWatch(on: boolean): Promise<void>;
+  onSelection(handler: (selection: SelectionMade) => void): Promise<() => void>;
+  onSelectionCleared(handler: () => void): Promise<() => void>;
+  /** Hide the panel unless the user keeps it. */
+  dismissPanel(): Promise<void>;
 }
 
 export const nativeQuickActions: QuickActionsAdapter = {
@@ -131,4 +163,11 @@ export const nativeQuickActions: QuickActionsAdapter = {
     isTauri() ? invoke<boolean>("quick_watch_supported") : Promise.resolve(false),
   setClipboardWatch: (on) => invoke("quick_watch_clipboard", { enabled: on }),
   onClipboardChanged: (handler) => listen(events.clipboardChanged, () => handler()),
+  selectionSupported: () =>
+    isTauri() ? invoke<boolean>("quick_selection_supported") : Promise.resolve(false),
+  setSelectionWatch: (on) => invoke("quick_selection_watch", { enabled: on }),
+  onSelection: (handler) =>
+    listen<SelectionMade>(events.selectionMade, (event) => handler(event.payload)),
+  onSelectionCleared: (handler) => listen(events.selectionCleared, () => handler()),
+  dismissPanel: () => emitTo(panelWindow, events.dismiss, {}),
 };

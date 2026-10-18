@@ -17,6 +17,7 @@ pub fn run() {
             background::setup_tray(app.handle())?;
             app.manage(background::ServiceFiles::default());
             app.manage(clipboard_watch::ClipboardWatch::default());
+            app.manage(selection::SelectionWatch::default());
             #[cfg(target_os = "macos")]
             services::install(app.handle());
             if background::started_in_background() {
@@ -81,7 +82,9 @@ pub fn run() {
         background::quick_quit,
         background::quick_read_service_file,
         clipboard_watch::quick_watch_supported,
-        clipboard_watch::quick_watch_clipboard
+        clipboard_watch::quick_watch_clipboard,
+        selection::quick_selection_supported,
+        selection::quick_selection_watch
     ]);
     #[cfg(all(
         feature = "minilm-desktop-prototype",
@@ -106,6 +109,8 @@ pub fn run() {
         background::quick_read_service_file,
         clipboard_watch::quick_watch_supported,
         clipboard_watch::quick_watch_clipboard,
+        selection::quick_selection_supported,
+        selection::quick_selection_watch,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -133,6 +138,8 @@ pub fn run() {
         background::quick_read_service_file,
         clipboard_watch::quick_watch_supported,
         clipboard_watch::quick_watch_clipboard,
+        selection::quick_selection_supported,
+        selection::quick_selection_watch,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -164,6 +171,8 @@ pub fn run() {
         background::quick_read_service_file,
         clipboard_watch::quick_watch_supported,
         clipboard_watch::quick_watch_clipboard,
+        selection::quick_selection_supported,
+        selection::quick_selection_watch,
         recognition_native::recognition_native_load,
         recognition_native::recognition_native_run,
         recognition_native::recognition_native_release
@@ -207,6 +216,11 @@ mod model_pack;
 mod models;
 mod quick_input;
 mod recognition_tokenizer;
+mod selection;
+#[cfg(target_os = "macos")]
+mod selection_macos;
+#[cfg(windows)]
+mod selection_windows;
 #[cfg(target_os = "macos")]
 mod services;
 mod vault;

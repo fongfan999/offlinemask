@@ -18,6 +18,8 @@ const offerMs = 9000;
 
 const status = ref<PanelStatus | null>(null);
 const pinned = ref(false);
+/** While anchored to a selection, a programmatic move must not become the remembered spot. */
+let anchored = false;
 let flashTimer: ReturnType<typeof setTimeout> | undefined;
 const stops: (() => void)[] = [];
 
@@ -28,14 +30,20 @@ function readPinned() {
     return false;
   }
 }
-async function show() {
+async function show(anchor?: PanelStatus["anchor"]) {
   // Without monitor information the window keeps whatever position it has.
-  await panel.place().catch(() => {});
+  anchored = !!anchor;
+  if (anchor) await panel.placeNear(anchor).catch(() => {});
+  else await panel.place().catch(() => {});
   await panel.show();
+}
+async function hide() {
+  anchored = false;
+  await panel.hide();
 }
 function hideLater(delay = flashMs) {
   clearTimeout(flashTimer);
-  flashTimer = setTimeout(() => void panel.hide(), delay);
+  flashTimer = setTimeout(() => void hide(), delay);
 }
 async function send(command: QuickCommand) {
   await panel.send(command).catch(() => {});
@@ -43,7 +51,7 @@ async function send(command: QuickCommand) {
 async function close() {
   clearTimeout(flashTimer);
   pinned.value = false;
-  await panel.hide();
+  await hide();
   await send("unpin");
 }
 
@@ -58,18 +66,26 @@ onMounted(async () => {
       status.value = next;
       pinned.value = next.pinned;
       clearTimeout(flashTimer);
-      await show();
-      // A result flashes by; the panel stays only while the user keeps it.
+      await show(next.anchor);
+      // A result flashes by; the panel stays only while the user keeps it. A question
+      // (offer, select) waits longer for its answer.
       if (!pinned.value && next.tone !== "busy")
-        hideLater(next.tone === "offer" ? offerMs : flashMs);
+        hideLater(next.tone === "offer" || next.tone === "select" ? offerMs : flashMs);
     }),
     await panel.onPin(async (next) => {
       pinned.value = next;
       clearTimeout(flashTimer);
       if (next) await show();
-      else await panel.hide();
+      else await hide();
     }),
-    await panel.onMoved(() => void panel.rememberPosition().catch(() => {})),
+    await panel.onDismiss(async () => {
+      clearTimeout(flashTimer);
+      if (pinned.value) await show();
+      else await hide();
+    }),
+    await panel.onMoved(() => {
+      if (!anchored) void panel.rememberPosition().catch(() => {});
+    }),
   );
   if (pinned.value) await show();
 });

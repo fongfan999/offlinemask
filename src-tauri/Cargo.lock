@@ -3106,7 +3106,9 @@ name = "offlinemask"
 version = "1.0.0"
 dependencies = [
  "argon2",
+ "block2",
  "chacha20poly1305",
+ "core-foundation",
  "core-graphics",
  "enigo",
  "fs2",
@@ -3129,6 +3131,7 @@ dependencies = [
  "tauri-plugin-global-shortcut",
  "tauri-plugin-opener",
  "tokenizers",
+ "windows 0.62.2",
  "windows-sys 0.60.2",
  "zeroize",
  "zstd",

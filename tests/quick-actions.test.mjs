@@ -13,6 +13,8 @@ import {
   backgroundMessage,
   launchError,
   lockedMessage,
+  popoverKey,
+  popoverPermission,
   serviceFileError,
   shortcutError,
   shortcutKey,
@@ -21,6 +23,7 @@ import {
   workingMessage,
 } from "../src/composables/useQuickActions.ts";
 import { panelKey } from "../src/adapters/quick-actions.ts";
+import { positionAbove } from "../src/adapters/quick-panel.ts";
 
 const detection = (start, end, type) => ({
   start,
@@ -158,6 +161,23 @@ function fakeAdapter(clipboard = "") {
       adapter.changedHandler = handler;
       return () => {};
     },
+    popover: true,
+    selectionHandler: null,
+    clearedHandler: null,
+    selectionSupported: async () => adapter.popover,
+    setSelectionWatch: async (on) => {
+      if (!adapter.popover) throw new Error("unsupported");
+      calls.push(["popover", on]);
+    },
+    onSelection: async (handler) => {
+      adapter.selectionHandler = handler;
+      return () => {};
+    },
+    onSelectionCleared: async (handler) => {
+      adapter.clearedHandler = handler;
+      return () => {};
+    },
+    dismissPanel: async () => calls.push(["dismiss"]),
   };
   return adapter;
 }
@@ -571,4 +591,108 @@ test("the clipboard watch is off by default, nudges only on real finds, never on
   await quick2.start();
   assert.equal(quick2.watchSupported.value, false);
   assert.equal(quick2.watchOn.value, false);
+});
+
+test("the popover asks above a fresh selection and its button replaces that selection in place", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("clipboard cũ");
+  adapter.permission = "granted";
+  const run = fakeRun(sessions);
+  const storage = memoryStorage();
+  const quick = useQuickActions({ adapter, run, sessions, locked: () => false, storage });
+  await quick.start();
+  assert.equal(quick.popoverOn.value, false);
+  // Off: a selection shows nothing.
+  adapter.selectionHandler({ text: phoneText, bounds: null, pointer: { x: 10, y: 10 } });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(quick.lastStatus.value, null);
+
+  await quick.setPopover(true);
+  assert.equal(storage.data.get(popoverKey), "on");
+  assert.deepEqual(adapter.calls.at(-1), ["popover", true]);
+  const bounds = { x: 100, y: 200, width: 80, height: 18 };
+  adapter.selectionHandler({ text: phoneText, bounds, pointer: { x: 150, y: 210 } });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(quick.lastStatus.value.tone, "select");
+  assert.equal(quick.lastStatus.value.message, quickMessages.selectMask);
+  assert.deepEqual(quick.lastStatus.value.anchor, { bounds, pointer: { x: 150, y: 210 } });
+
+  // The panel's button acts on the selection, not the clipboard, and pastes over it.
+  adapter.command("mask");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(run.texts, [phoneText]);
+  const alias = sessions.value[0].analysis.findings[0].alias;
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "paste"),
+    [["paste", `Gọi ${alias} giúp tôi.`]],
+  );
+  assert.equal(quick.lastStatus.value.message, quickMessages.masked(1, true));
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "copy"),
+    [],
+  );
+
+  // A reply with that alias asks to restore; a press elsewhere dismisses the question.
+  adapter.selectionHandler({ text: `Trả lời ${alias}`, bounds: null, pointer: { x: 1, y: 1 } });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(quick.lastStatus.value.message, quickMessages.selectRestore);
+  adapter.clearedHandler();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(adapter.calls.at(-1), ["dismiss"]);
+  // After the dismissal the button is back to the clipboard flow.
+  adapter.clipboard = phoneText;
+  adapter.command("mask");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(adapter.calls.filter((call) => call[0] === "paste").length, 1);
+
+  // Foreign alias text and empty selections show nothing.
+  adapter.selectionHandler({ text: "[SDT_1_dead]", bounds: null, pointer: { x: 1, y: 1 } });
+  adapter.selectionHandler({ text: "  ", bounds: null, pointer: { x: 1, y: 1 } });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.notEqual(quick.lastStatus.value.tone, "select");
+
+  // Without the macOS permission the switch stays on but says what is missing.
+  adapter.permission = "denied";
+  await quick.checkInputPermission();
+  await quick.setPopover(true);
+  assert.equal(quick.popoverFailure.value, popoverPermission);
+  // Unsupported systems keep it off.
+  const bare = fakeAdapter("");
+  bare.popover = false;
+  const quick2 = useQuickActions({
+    adapter: bare,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage({ [popoverKey]: "on" }),
+  });
+  await quick2.start();
+  assert.equal(quick2.popoverOn.value, false);
+});
+
+test("the panel sits above the selection, flips below at the top edge and stays on screen", () => {
+  const panel = { width: 336, height: 124 };
+  const area = { x: 0, y: 25, width: 1440, height: 875 };
+  assert.deepEqual(
+    positionAbove(
+      { bounds: { x: 500, y: 400, width: 100, height: 20 }, pointer: { x: 0, y: 0 } },
+      panel,
+      area,
+    ),
+    { x: 382, y: 268 },
+  );
+  // Too close to the top: below the selection instead.
+  assert.deepEqual(
+    positionAbove(
+      { bounds: { x: 500, y: 40, width: 100, height: 20 }, pointer: { x: 0, y: 0 } },
+      panel,
+      area,
+    ),
+    { x: 382, y: 68 },
+  );
+  // No rectangle: around the pointer, clamped to the right and bottom edges.
+  assert.deepEqual(positionAbove({ pointer: { x: 1430, y: 890 } }, panel, area), {
+    x: 1104,
+    y: 758,
+  });
 });

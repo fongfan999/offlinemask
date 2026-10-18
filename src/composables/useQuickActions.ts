@@ -6,6 +6,7 @@ import {
   type QuickActionsAdapter,
   type QuickCommand,
   type QuickStatus,
+  type SelectionMade,
   type ServiceRequest,
 } from "../adapters/quick-actions.ts";
 import {
@@ -20,6 +21,10 @@ import { isPrivate, sessionOutput, type Session, type TextSession } from "../cor
 
 export const shortcutKey = "offlinemask.quick-shortcut.v1";
 export const watchKey = "offlinemask.quick-watch.v1";
+export const popoverKey = "offlinemask.quick-popover.v1";
+export const popoverError = "Chưa bật được nút nổi khi bôi đen trên hệ này.";
+export const popoverPermission =
+  "Nút nổi khi bôi đen cần quyền Trợ năng (nút Cấp quyền ở trên) để đọc phần bạn chọn.";
 export const watchError = "Chưa bật được theo dõi clipboard trên hệ này.";
 export const serviceFileError = "Chưa đọc được tệp từ Finder. Hãy kéo tệp vào OfflineMask.";
 export const shortcutError =
@@ -91,6 +96,11 @@ export function useQuickActions({
   const watchOn = ref(adapter.desktop && read(watchKey, false));
   const watchSupported = ref(false);
   const watchFailure = ref("");
+  // The selection popover (decision 0096): opt-in; the last selection waits for a button.
+  const popoverOn = ref(adapter.desktop && read(popoverKey, false));
+  const popoverSupported = ref(false);
+  const popoverFailure = ref("");
+  let pendingSelection: string | null = null;
   /** The last text this app put on the clipboard: its own output is never offered back. */
   let lastWritten = "";
   async function writeClipboard(text: string) {
@@ -187,8 +197,14 @@ export function useQuickActions({
    * restore, anything else is masked; the panel's buttons act on the clipboard only.
    * `given` is text handed over by a Service: it is used as is and the result goes
    * to the clipboard. */
-  async function act(command: "auto" | "mask" | "restore", given?: string): Promise<QuickStatus> {
-    let replaced = false;
+  async function act(
+    command: "auto" | "mask" | "restore",
+    given?: string,
+    options: { replace?: boolean } = {},
+  ): Promise<QuickStatus> {
+    // A popover action works on text still selected in the front application: the
+    // result is pasted over it, like the shortcut's in-place path.
+    let replaced = options.replace === true;
     let before = "";
     const done = async (message: string, tone: QuickStatus["tone"] = "ok") => {
       // Only the first clipboard-only result after a refusal carries the hint.
@@ -278,6 +294,38 @@ export function useQuickActions({
     write(panelKey, on);
     if (adapter.desktop) await adapter.setPinned(on).catch(() => {});
   }
+  /** The popover: a fresh selection in another application. Its direction decides the
+   * question; alias text from no known session and locked or busy states show nothing. */
+  async function selectionMade(selection: SelectionMade) {
+    if (!popoverOn.value || busy.value || locked()) return;
+    const direction = quickDirection(selection.text, knownTables());
+    if (direction !== "mask" && direction !== "restore") return;
+    pendingSelection = selection.text;
+    await show({
+      message: direction === "mask" ? quickMessages.selectMask : quickMessages.selectRestore,
+      tone: "select",
+      anchor: { bounds: selection.bounds ?? undefined, pointer: selection.pointer },
+    });
+  }
+  async function selectionCleared() {
+    if (pendingSelection === null) return;
+    pendingSelection = null;
+    if (adapter.desktop) await adapter.dismissPanel().catch(() => {});
+  }
+  async function setPopover(on: boolean) {
+    popoverFailure.value = "";
+    try {
+      await adapter.setSelectionWatch(on);
+      popoverOn.value = on;
+      write(popoverKey, on);
+      if (on && inputPermission.value === "denied") popoverFailure.value = popoverPermission;
+    } catch {
+      popoverOn.value = false;
+      write(popoverKey, false);
+      if (on) popoverFailure.value = popoverError;
+    }
+    if (!on) pendingSelection = null;
+  }
   /** The clipboard watch noticed a change: read once, check with the built-in rules,
    * and nudge. Our own output, alias text, empty and locked cases are left alone. */
   async function clipboardChanged() {
@@ -335,13 +383,19 @@ export function useQuickActions({
   function onCommand(command: QuickCommand) {
     if (command === "unpin") void setPinned(false);
     else if (command === "quit") void quit();
-    else void act(command);
+    else if (pendingSelection !== null) {
+      const text = pendingSelection;
+      pendingSelection = null;
+      void act(command, text, { replace: true });
+    } else void act(command);
   }
 
   let stopCommands: (() => void) | undefined;
   let stopClose: (() => void) | undefined;
   let stopService: (() => void) | undefined;
   let stopWatch: (() => void) | undefined;
+  let stopSelection: (() => void) | undefined;
+  let stopCleared: (() => void) | undefined;
   // Permission is granted in the OS settings while this window is in the background,
   // so it is re-read whenever the window comes back.
   const recheck = () => void checkInputPermission();
@@ -357,11 +411,19 @@ export function useQuickActions({
     stopWatch = await adapter
       .onClipboardChanged(() => void clipboardChanged())
       .catch(() => undefined);
+    stopSelection = await adapter
+      .onSelection((selection) => void selectionMade(selection))
+      .catch(() => undefined);
+    stopCleared = await adapter
+      .onSelectionCleared(() => void selectionCleared())
+      .catch(() => undefined);
     if (shortcutOn.value) await applyShortcut(true);
     if (typeof window !== "undefined") window.addEventListener("focus", recheck);
     await Promise.all([checkInputPermission(), readLaunchAtLogin()]);
     watchSupported.value = await adapter.watchSupported().catch(() => false);
     if (watchOn.value) await setClipboardWatch(watchSupported.value);
+    popoverSupported.value = await adapter.selectionSupported().catch(() => false);
+    if (popoverOn.value) await setPopover(popoverSupported.value);
   }
   function stop() {
     stopCommands?.();
@@ -372,6 +434,10 @@ export function useQuickActions({
     stopService = undefined;
     stopWatch?.();
     stopWatch = undefined;
+    stopSelection?.();
+    stopSelection = undefined;
+    stopCleared?.();
+    stopCleared = undefined;
     if (typeof window !== "undefined") window.removeEventListener("focus", recheck);
     if (shortcutOn.value) void applyShortcut(false);
   }
@@ -392,6 +458,10 @@ export function useQuickActions({
     watchSupported: computed(() => watchSupported.value),
     watchFailure,
     setClipboardWatch,
+    popoverOn: computed(() => popoverOn.value),
+    popoverSupported: computed(() => popoverSupported.value),
+    popoverFailure,
+    setPopover,
     act,
     setShortcut,
     setPinned,
