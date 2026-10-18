@@ -113,12 +113,25 @@ fn chord<R: Runtime>(app: &AppHandle<R>, letter: char) -> Result<(), String> {
 /// "granted", "denied" (macOS Accessibility not given) or "unsupported" (no way to
 /// send keys here, e.g. Wayland). With `prompt`, macOS shows its permission dialog.
 #[tauri::command]
-pub fn quick_input_permission(prompt: bool) -> String {
-    match connect(prompt) {
+pub fn quick_input_permission(app: AppHandle, prompt: bool) -> String {
+    let state = match connect(prompt) {
         Ok(_) => "granted".to_string(),
         Err(error) if error == "denied" => error,
         Err(_) => "unsupported".to_string(),
+    };
+    // macOS shows its own dialog at most once per app identity; after a dismissed or
+    // removed grant it stays silent, so an explicit request also opens the pane itself.
+    #[cfg(target_os = "macos")]
+    if prompt && state == "denied" {
+        use tauri_plugin_opener::OpenerExt;
+        let _ = app.opener().open_url(
+            "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility",
+            None::<&str>,
+        );
     }
+    #[cfg(not(target_os = "macos"))]
+    let _ = (app, prompt);
+    state
 }
 /// Copy the front application's selection to the clipboard, then wait for it to land.
 #[tauri::command]
