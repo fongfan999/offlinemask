@@ -30,6 +30,8 @@ type AXUIElementRef = *const OpaqueAXUIElement;
 type AXError = i32;
 const AX_SUCCESS: AXError = 0;
 /// `kAXValueTypeCGRect`.
+const AX_VALUE_CGPOINT: u32 = 1;
+const AX_VALUE_CGSIZE: u32 = 2;
 const AX_VALUE_CGRECT: u32 = 3;
 #[repr(C)]
 #[derive(Clone, Copy, Default)]
@@ -147,33 +149,77 @@ fn read_selection(frontmost_pid: i32) -> Option<(String, Option<Rect>, bool)> {
     {
         return None;
     }
+    // Native text views answer AXSelectedText; web content (WebKit and Chromium web
+    // areas: pages, an AI's answer) only answers through the text marker range.
     let text = attribute(element, "AXSelectedText")
         .as_ref()
-        .and_then(string)?;
+        .and_then(string)
+        .filter(|text| !text.is_empty())
+        .or_else(|| {
+            let range = attribute(element, "AXSelectedTextMarkerRange")?;
+            string(&parameterized(
+                element,
+                "AXStringForTextMarkerRange",
+                &range,
+            )?)
+        })?;
     if !usable(&text) {
         return None;
     }
-    let bounds = attribute(element, "AXSelectedTextRange")
-        .and_then(|range| parameterized(element, "AXBoundsForRange", &range))
-        .and_then(|value| {
-            let mut rect = CGRectRaw::default();
-            // SAFETY: an AXValue of CGRect type writes 4 f64 into `rect`.
-            let ok = unsafe {
-                AXValueGetValue(
-                    value.as_CFTypeRef(),
-                    AX_VALUE_CGRECT,
-                    &mut rect as *mut _ as *mut c_void,
-                )
-            };
-            (ok && rect.width > 0.0 && rect.height > 0.0).then_some(Rect {
-                x: rect.x,
-                y: rect.y,
-                width: rect.width,
-                height: rect.height,
-            })
-        });
+    let bounds = selection_bounds(element);
     let editable = settable(element, "AXValue") || settable(element, "AXSelectedText");
     Some((text, bounds, editable))
+}
+
+/// An AXValue of one of the geometry types, read into `out`.
+fn ax_value<T: Default>(value: &CFType, kind: u32) -> Option<T> {
+    let mut out = T::default();
+    // SAFETY: `kind` names the type `T` mirrors (CGPoint, CGSize or CGRect, all f64s).
+    let ok = unsafe {
+        AXValueGetValue(
+            value.as_CFTypeRef(),
+            kind,
+            &mut out as *mut T as *mut c_void,
+        )
+    };
+    ok.then_some(out)
+}
+fn usable_rect(rect: CGRectRaw) -> Option<Rect> {
+    // A real rectangle on screen: some apps answer with an empty or origin rectangle.
+    let real = rect.width > 0.0 && rect.height > 0.0 && (rect.x != 0.0 || rect.y != 0.0);
+    real.then_some(Rect {
+        x: rect.x,
+        y: rect.y,
+        width: rect.width,
+        height: rect.height,
+    })
+}
+/// Where the selection is on screen, so the circle sits by the text rather than by the
+/// pointer (decision 0096). Tried in order: the text range (native text views), the text
+/// marker range (WebKit and Chromium: web pages and rich editors), and the frame of the
+/// field or text area holding the selection. None leaves the pointer as the anchor.
+fn selection_bounds(element: AXUIElementRef) -> Option<Rect> {
+    let by_range = || {
+        let range = attribute(element, "AXSelectedTextRange")?;
+        let value = parameterized(element, "AXBoundsForRange", &range)?;
+        usable_rect(ax_value::<CGRectRaw>(&value, AX_VALUE_CGRECT)?)
+    };
+    let by_marker = || {
+        let range = attribute(element, "AXSelectedTextMarkerRange")?;
+        let value = parameterized(element, "AXBoundsForTextMarkerRange", &range)?;
+        usable_rect(ax_value::<CGRectRaw>(&value, AX_VALUE_CGRECT)?)
+    };
+    let by_frame = || {
+        let position = ax_value::<[f64; 2]>(&attribute(element, "AXPosition")?, AX_VALUE_CGPOINT)?;
+        let size = ax_value::<[f64; 2]>(&attribute(element, "AXSize")?, AX_VALUE_CGSIZE)?;
+        usable_rect(CGRectRaw {
+            x: position[0],
+            y: position[1],
+            width: size[0],
+            height: size[1],
+        })
+    };
+    by_range().or_else(by_marker).or_else(by_frame)
 }
 
 /// Cocoa mouse locations have a bottom-left origin; the rest of the app uses top-left.

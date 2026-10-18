@@ -87,3 +87,13 @@ Checked in the browser preview (`pill.html?state=circle-busy|circle-done|circle-
 After the check-mark timing change the owner saw no check mark at all. Reproduced in TextEdit with a native log around the copy chord: the panel window kept its `OfflineMaskQuickPanel` class and the non-activating style bit, yet from some clicks on OfflineMask was the frontmost application when ⌘C was sent, so nothing was copied, the selection was not replaced and the result fell back to the corner card. AppKit only records "this panel prevents activation" with the window server when the non-activating style is set at creation; set afterwards, as on Tauri's window, it holds only sometimes. The panel now also gets the private `_setPreventsActivation:` (sent only when the window answers it), the same remedy Tauri panel plugins use. Verified: five clicks in a row, hovered and not, each replaced the text in place with TextEdit frontmost; before, three of three and five of five failed.
 
 Two development-only hardenings came with it: the panel page and the quick-action composable ignore and drop listeners that finish registering after a hot reload has replaced them, so a leftover instance cannot resize the window or act twice.
+
+## Follow-up: the circle sits by the text (same day)
+
+The owner asked for the circle "around the text, rather around the cursor". It already aimed at the selection when the application reported where it was; it fell back to the pointer when it did not (Chromium editors, web pages) and after keyboard selections, where the pointer can be anywhere.
+
+- **macOS position chain:** the text range's bounds (native text views), then the text marker range's bounds (`AXSelectedTextMarkerRange` with `AXBoundsForTextMarkerRange`, what WebKit and Chromium answer for web pages and rich editors), then the frame of the field or text area holding the selection (`AXPosition` and `AXSize`), and only then the pointer. Empty or origin rectangles are skipped.
+- **Read-only web text is now read at all.** A Safari web area does not answer `AXSelectedText` (-25212), so selections on web pages, an AI's answer in a browser included, were never seen. The text now falls back to `AXStringForTextMarkerRange` on the selected marker range.
+- **Windows:** the selection's rectangles, then the focused element's `CurrentBoundingRectangle`. Type-checked only.
+
+Verified on macOS with the pointer parked far away: in TextEdit after ⌘A the circle's centre sat on the selection's right edge (791 vs 790.5) 4 px above the line; in a Safari text area likewise; on a read-only Safari page with synthetic text the circle now appears after ⌘A, where before no selection was read. Chromium (Dia, Chrome, Lark) was not driven here.

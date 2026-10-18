@@ -135,10 +135,22 @@ fn read_selection(at: POINT) -> Option<(String, Option<Rect>, bool)> {
                 return None;
             }
             let scale = scale_at(at);
+            // The selection's own rectangles, else the frame of the element holding it,
+            // so the circle sits by the text rather than by the pointer (decision 0096).
             let bounds = range
                 .GetBoundingRectangles()
                 .ok()
                 .and_then(|array| first_rect(array))
+                .or_else(|| {
+                    let frame = element.CurrentBoundingRectangle().ok()?;
+                    let rect = Rect {
+                        x: frame.left as f64,
+                        y: frame.top as f64,
+                        width: (frame.right - frame.left) as f64,
+                        height: (frame.bottom - frame.top) as f64,
+                    };
+                    (rect.width > 0.0 && rect.height > 0.0).then_some(rect)
+                })
                 .map(|rect| Rect {
                     x: rect.x / scale,
                     y: rect.y / scale,
