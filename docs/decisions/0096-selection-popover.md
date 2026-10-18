@@ -97,3 +97,5 @@ The owner asked for the circle "around the text, rather around the cursor". It a
 - **Windows:** the selection's rectangles, then the focused element's `CurrentBoundingRectangle`. Type-checked only.
 
 Verified on macOS with the pointer parked far away: in TextEdit after ⌘A the circle's centre sat on the selection's right edge (791 vs 790.5) 4 px above the line; in a Safari text area likewise; on a read-only Safari page with synthetic text the circle now appears after ⌘A, where before no selection was read. Chromium (Dia, Chrome, Lark) was not driven here.
+
+Refined the same evening: for read-only text the circle is anchored to the cursor again. In ChatGPT's conversation the reported rectangle of a selected message was the whole bubble or page, which put the circle in the far top-right corner (the owner: "for readonly text, I guess we should rely on the cursor"). Editable fields keep the text position, where it is precise.

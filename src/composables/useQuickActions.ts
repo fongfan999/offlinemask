@@ -348,7 +348,12 @@ export function useQuickActions({
       tone: "select",
       action,
       hint: action === "mask" ? quickMessages.hintMask : quickMessages.hintRestore,
-      anchor: { bounds: selection.bounds ?? undefined, pointer: selection.pointer },
+      // Editable fields report the selection's own rectangle; read-only text (a chat
+      // bubble, a page) often reports the whole block, so the cursor is the better spot.
+      anchor: {
+        bounds: selection.editable ? (selection.bounds ?? undefined) : undefined,
+        pointer: selection.pointer,
+      },
     });
   }
   /** Read-only AI text: show what it says with the real values, without touching the

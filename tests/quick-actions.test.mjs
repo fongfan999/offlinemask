@@ -1070,3 +1070,28 @@ test("stopping while start is still registering listeners leaves none behind", a
   assert.ok(removed.includes("command"));
   assert.ok(removed.includes("selection"));
 });
+
+test("read-only selections anchor the circle to the cursor, editable ones to the text", async () => {
+  const sessions = ref([phoneSession()]);
+  await nextTick();
+  const alias = sessions.value[0].analysis.findings[0].alias;
+  const adapter = fakeAdapter("");
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  await quick.setPopover(true);
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+  const bounds = { x: 1000, y: 200, width: 700, height: 460 };
+  const pointer = { x: 1210, y: 660 };
+  adapter.selectionHandler({ text: `Gọi ${alias}`, bounds, pointer, editable: false });
+  await tick();
+  assert.deepEqual(quick.lastStatus.value.anchor, { bounds: undefined, pointer });
+  adapter.selectionHandler({ text: phoneText, bounds, pointer, editable: true });
+  await tick();
+  assert.deepEqual(quick.lastStatus.value.anchor, { bounds, pointer });
+});
