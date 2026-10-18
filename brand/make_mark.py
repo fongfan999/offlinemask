@@ -360,24 +360,27 @@ def build_mark(weight=1.0):
     return {"band": swipe(weight=weight), "holes": [dot(x, y, r * weight) for x, y, r in EYES], "eyes": []}
 
 
-# The restore mark: the mask coming off. It pivots up from the left, one eye
-# still looking through its hole, the other already out in the open below the
-# lifted end. It shows the action, not a second state: the opposite of the
-# mask is the mask being taken off. "holes" are cut in single colour, "eyes"
-# are filled; on paper both are ink.
-RESTORE_HOLE = (33.0, 48.5, 6.4)
-RESTORE_EYE = (66.0, 62.0, 6.2)
-RGX0, RGX1, RGY0, RGY1 = 5.0, 95.0, 10.0, 69.0
+# The restore mark: an open eye. Masking hides the eyes behind the swipe;
+# restoring shows the hidden values again, and the open eye is what every
+# password field uses for "show". Two cobalt lids (the upper one heavier,
+# where the brush lands) around an ink pupil. Nothing is a hole; in single
+# colour the lids and the pupil are one fill.
+RESTORE_PUPIL = (50.0, 50.0, 10.0)
+RGX0, RGX1, RGY0, RGY1 = 8.0, 92.0, 24.0, 76.0
+
+
+def lid(pts, wmax, wmin=2.4, p=0.8, weight=1.0):
+    return to_path(brush(pts, lambda t: (wmin + (wmax - wmin) * math.sin(math.pi * t) ** p + wobble(t, 0.05)) * weight,
+                         start="taper", end="taper"))
 
 
 def build_restore(weight=1.0):
-    """Return {"band", "holes", "eyes"} for the mask coming off."""
-    pts = line((12, 52), (88, 24), n=80, bow=0.4)
-    half = 14.5
-    w = lambda t: (half - 0.08 * half * t ** 1.4 + wobble(t, 0.06)) * weight
-    return {"band": to_path(brush(pts, w, start="round", end="round")),
-            "holes": [dot(*RESTORE_HOLE[:2], RESTORE_HOLE[2] * weight)],
-            "eyes": [dot(*RESTORE_EYE[:2], RESTORE_EYE[2] * weight)]}
+    """Return {"band", "holes", "eyes"} for the open eye: both lids in "band"."""
+    top = arc(50, 66, 42, 150, 30, n=70, egg=0)
+    bottom = arc(50, 34, 42, 210, 330, n=70, egg=0)
+    return {"band": lid(top, 9.5, weight=weight) + " " + lid(bottom, 5.5, weight=weight),
+            "holes": [],
+            "eyes": [dot(RESTORE_PUPIL[0], RESTORE_PUPIL[1], RESTORE_PUPIL[2] * weight)]}
 
 
 def sketch_mask(weight=1.0):
