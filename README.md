@@ -62,7 +62,7 @@ Everything the app knows about its models is one file under [`packs/`](packs/). 
 | `scripts/` | Build tooling at the top level; frozen evaluation experiments in subdirectories ([index](scripts/README.md)). |
 | `docs/decisions/` | Architecture decision records, numbered. |
 | `docs/evaluations/` | Evaluation protocols and results; large raw outputs are kept out of git. |
-| `brand/` | The `[—]` mark and icon sources. |
+| `brand/` | The mark (a brush swipe with two eye holes), its generator, sketches and icon sources. |
 
 [docs/development.md](docs/development.md) has the detailed setup notes, module boundaries and the history of evaluation tooling.
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from "vue";
-import AppIcon from "./AppIcon.vue";
+import BrandMark from "./BrandMark.vue";
 import PasscodeField from "./PasscodeField.vue";
 import { sessionsKey, useProvided, vaultKey } from "../composables/context.ts";
 import type { PrivateSession } from "../core/sessions.ts";
@@ -50,9 +50,7 @@ async function reset() {
 <template>
   <main class="lock-page">
     <form class="lock-card glass" @submit.prevent="unlock">
-      <span class="hero-logo brand-mark" aria-hidden="true"
-        ><AppIcon name="mask" :size="26"
-      /></span>
+      <span class="hero-logo brand-mark" aria-hidden="true"><BrandMark :size="38" /></span>
       <h1>Nhập mật mã để mở OfflineMask</h1>
       <p>Mở khóa để xem lịch sử của bạn.</p>
       <PasscodeField

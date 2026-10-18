@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
+import BrandMark from "./BrandMark.vue";
 import ComingSoonBadge from "./ComingSoonBadge.vue";
 import { openProductWebsite, productWebsite } from "../adapters/desktop.ts";
 import type { Page } from "../composables/context.ts";
@@ -68,7 +69,7 @@ defineExpose({
       aria-label="OfflineMask — Trang chủ"
       @click="emit('navigate', 'home')"
     >
-      <span class="brand-mark"><AppIcon name="mask" :size="20" /></span
+      <span class="brand-mark"><BrandMark :size="28" /></span
       ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
     </button>
     <nav aria-label="Định dạng">

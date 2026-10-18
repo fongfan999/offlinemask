@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from "vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import AppIcon from "../components/AppIcon.vue";
+import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
 import MaskingPreview from "../components/MaskingPreview.vue";
 import {
@@ -143,7 +144,7 @@ const packNotice = computed<PackNotice | null>(() => {
 <template>
   <div class="introduction">
     <span class="hero-logo brand-mark" aria-hidden="true">
-      <AppIcon name="mask" :size="26" />
+      <BrandMark :size="38" />
     </span>
     <h1 ref="heading" tabindex="-1">Ẩn thông tin nhạy cảm<span>trước khi chia sẻ với AI.</span></h1>
     <p>
