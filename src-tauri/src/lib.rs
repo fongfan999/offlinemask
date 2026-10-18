@@ -6,6 +6,21 @@ pub fn run() {
         #[cfg(desktop)]
         app.handle()
             .plugin(tauri_plugin_global_shortcut::Builder::new().build())?;
+        // Background mode (decision 0092): tray icon, optional login item that
+        // starts hidden. The window hides on close from the frontend.
+        #[cfg(desktop)]
+        {
+            app.handle().plugin(tauri_plugin_autostart::init(
+                tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+                Some(vec![background::BACKGROUND_FLAG]),
+            ))?;
+            background::setup_tray(app.handle())?;
+            if background::started_in_background() {
+                if let Some(window) = app.get_webview_window(background::MAIN_WINDOW) {
+                    let _ = window.hide();
+                }
+            }
+        }
         let root = app
             .path()
             .app_local_data_dir()?
@@ -144,21 +159,25 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_clipboard_manager::init());
-    #[cfg(not(feature = "recognition-native-sidecar"))]
-    builder
-        .run(tauri::generate_context!())
-        .expect("error while running OfflineMask");
-    #[cfg(feature = "recognition-native-sidecar")]
     builder
         .build(tauri::generate_context!())
         .expect("error while building OfflineMask")
         .run(|app, event| {
+            // macOS: a click on the dock icon brings the hidden window back.
+            #[cfg(target_os = "macos")]
+            if matches!(event, tauri::RunEvent::Reopen { .. }) {
+                background::show_main(app);
+            }
+            #[cfg(feature = "recognition-native-sidecar")]
             if matches!(event, tauri::RunEvent::Exit) {
                 app.state::<recognition_native::NativeRecognition>()
                     .shutdown();
             }
+            #[cfg(not(any(target_os = "macos", feature = "recognition-native-sidecar")))]
+            let _ = (app, event);
         });
 }
+mod background;
 #[cfg(feature = "minilm-native-desktop-prototype")]
 mod minilm_native_graph;
 #[cfg(feature = "minilm-desktop-prototype")]

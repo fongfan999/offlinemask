@@ -1,9 +1,10 @@
 import { computed, ref, watch, type Ref } from "vue";
-import type {
-  InputPermission,
-  QuickActionsAdapter,
-  QuickCommand,
-  QuickStatus,
+import {
+  trayLabel,
+  type InputPermission,
+  type QuickActionsAdapter,
+  type QuickCommand,
+  type QuickStatus,
 } from "../adapters/quick-actions.ts";
 import {
   quickDirection,
@@ -20,6 +21,9 @@ export const shortcutError =
   "Chưa đăng ký được phím tắt. Có thể một ứng dụng khác đang dùng tổ hợp này.";
 export const lockedMessage = "Mở khóa OfflineMask trước khi dùng thao tác nhanh.";
 export const workingMessage = "Đang ẩn thông tin…";
+/** Flashed in the panel when the main window is closed (decision 0092). */
+export const backgroundMessage = `OfflineMask vẫn chạy nền: phím tắt và bảng nổi vẫn dùng được. Mở lại hoặc thoát hẳn từ biểu tượng OfflineMask ở ${trayLabel}.`;
+export const launchError = "Chưa đổi được cài đặt khởi động cùng máy. Vui lòng thử lại.";
 
 type PreferenceStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 function defaultStorage(): PreferenceStorage | null {
@@ -71,6 +75,34 @@ export function useQuickActions({
   const shortcutFailure = ref("");
   const lastStatus = ref<QuickStatus | null>(null);
   const busy = ref(false);
+  /** The login item (decision 0092); read from the OS, never assumed. */
+  const launchAtLogin = ref(false);
+  const launchFailure = ref("");
+  async function readLaunchAtLogin() {
+    if (!adapter.desktop) return;
+    try {
+      launchAtLogin.value = await adapter.launchAtLogin();
+    } catch {
+      launchAtLogin.value = false;
+    }
+  }
+  async function setLaunchAtLogin(on: boolean) {
+    launchFailure.value = "";
+    try {
+      await adapter.setLaunchAtLogin(on);
+      launchAtLogin.value = on;
+    } catch {
+      launchFailure.value = launchError;
+      await readLaunchAtLogin();
+    }
+  }
+  /** Closing the window keeps the shortcut and panel alive; the panel says so. */
+  async function closeToBackground() {
+    await adapter
+      .sendStatus({ message: backgroundMessage, tone: "ok", pinned: pinned.value })
+      .catch(() => {});
+    await adapter.hideMainWindow().catch(() => {});
+  }
   /** Whether ⌘⇧M may replace the selection in place (decision 0091); "unknown" until checked. */
   const inputPermission = ref<InputPermission | "unknown">("unknown");
   let hinted = false;
@@ -211,19 +243,25 @@ export function useQuickActions({
   }
 
   let stopCommands: (() => void) | undefined;
+  let stopClose: (() => void) | undefined;
   // Permission is granted in the OS settings while this window is in the background,
   // so it is re-read whenever the window comes back.
   const recheck = () => void checkInputPermission();
   async function start() {
     if (!adapter.desktop) return;
     stopCommands = await adapter.onCommand(onCommand).catch(() => undefined);
+    stopClose = await adapter
+      .onCloseRequested(() => void closeToBackground())
+      .catch(() => undefined);
     if (shortcutOn.value) await applyShortcut(true);
     if (typeof window !== "undefined") window.addEventListener("focus", recheck);
-    await checkInputPermission();
+    await Promise.all([checkInputPermission(), readLaunchAtLogin()]);
   }
   function stop() {
     stopCommands?.();
     stopCommands = undefined;
+    stopClose?.();
+    stopClose = undefined;
     if (typeof window !== "undefined") window.removeEventListener("focus", recheck);
     if (shortcutOn.value) void applyShortcut(false);
   }
@@ -237,6 +275,9 @@ export function useQuickActions({
     busy,
     inputPermission: computed(() => inputPermission.value),
     checkInputPermission,
+    launchAtLogin: computed(() => launchAtLogin.value),
+    launchFailure,
+    setLaunchAtLogin,
     act,
     setShortcut,
     setPinned,

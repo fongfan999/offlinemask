@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { quickShortcutLabel } from "../adapters/quick-actions.ts";
+import { quickShortcutLabel, trayLabel } from "../adapters/quick-actions.ts";
 import { quickKey, useProvided } from "../composables/context.ts";
 
 /** Clipboard quick actions (decision 0090): the shortcut and the floating panel. */
@@ -77,6 +77,28 @@ const quick = useProvided(quickKey);
           aria-describedby="quick-panel-help"
           @change="quick.setPinned(($event.target as HTMLInputElement).checked)"
         />Hiện
+      </label>
+    </div>
+    <div class="settings-tool-row">
+      <div>
+        <h3>Chạy nền</h3>
+        <p id="quick-launch-help">
+          Đóng cửa sổ thì OfflineMask vẫn chạy để phím tắt và bảng nổi dùng được; mở lại hoặc thoát
+          hẳn từ biểu tượng OfflineMask ở {{ trayLabel }}. Khởi động cùng máy mở ứng dụng ở chế độ
+          nền, không hiện cửa sổ.
+        </p>
+        <p v-if="quick.launchFailure.value" class="quick-error" role="alert">
+          {{ quick.launchFailure.value }}
+        </p>
+      </div>
+      <label class="quick-toggle">
+        <input
+          type="checkbox"
+          :checked="quick.launchAtLogin.value"
+          :disabled="!quick.desktop"
+          aria-describedby="quick-launch-help"
+          @change="quick.setLaunchAtLogin(($event.target as HTMLInputElement).checked)"
+        />Khởi động cùng máy
       </label>
     </div>
     <p v-if="quick.lastStatus.value" class="quick-last" role="status">

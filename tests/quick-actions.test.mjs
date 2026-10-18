@@ -10,6 +10,8 @@ import {
   sessionFindings,
 } from "../src/core/quick-actions.ts";
 import {
+  backgroundMessage,
+  launchError,
   lockedMessage,
   panelKey,
   shortcutError,
@@ -118,6 +120,18 @@ function fakeAdapter(clipboard = "") {
       if (adapter.selection !== null) adapter.clipboard = adapter.selection;
     },
     pasteResult: async () => calls.push(["paste", adapter.clipboard]),
+    closeHandler: null,
+    autostart: false,
+    onCloseRequested: async (handler) => {
+      adapter.closeHandler = handler;
+      return () => calls.push(["unclose"]);
+    },
+    hideMainWindow: async () => calls.push(["hide-main"]),
+    launchAtLogin: async () => adapter.autostart,
+    setLaunchAtLogin: async (on) => {
+      calls.push(["autostart", on]);
+      adapter.autostart = on;
+    },
   };
   return adapter;
 }
@@ -337,4 +351,36 @@ test("nothing selected, or no permission, falls back to the clipboard; the hint 
   // The Settings button asks with the system prompt.
   await quick2.checkInputPermission(true);
   assert.deepEqual(denied.calls.at(-1), ["permission", true]);
+});
+
+test("closing the window hides it and tells the panel; the login item mirrors the OS", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  adapter.autostart = true;
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  assert.equal(quick.launchAtLogin.value, true);
+  adapter.closeHandler();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "status" || call[0] === "hide-main"),
+    [["status", backgroundMessage, "ok", false], ["hide-main"]],
+  );
+  await quick.setLaunchAtLogin(false);
+  assert.equal(quick.launchAtLogin.value, false);
+  assert.deepEqual(adapter.calls.at(-1), ["autostart", false]);
+  adapter.setLaunchAtLogin = async () => {
+    throw new Error("no launch agent");
+  };
+  await quick.setLaunchAtLogin(true);
+  assert.equal(quick.launchFailure.value, launchError);
+  assert.equal(quick.launchAtLogin.value, false);
+  quick.stop();
+  assert.ok(adapter.calls.some((call) => call[0] === "unclose"));
 });

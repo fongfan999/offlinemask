@@ -1,5 +1,7 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { emitTo, listen } from "@tauri-apps/api/event";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { disable, enable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { readText, writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { isRegistered, register, unregister } from "@tauri-apps/plugin-global-shortcut";
 
@@ -11,6 +13,10 @@ export const quickShortcutLabel = /Mac|iPhone|iPad/.test(navigator.userAgent)
 /** Label of the floating panel window in `tauri.conf.json`. */
 export const panelWindow = "pill";
 export const mainWindow = "main";
+/** Where the app keeps living once its window is closed (decision 0092). */
+export const trayLabel = /Mac|iPhone|iPad/.test(navigator.userAgent)
+  ? "thanh menu"
+  : "khay hệ thống";
 
 /** Panel → shell: a button in the panel, or its close control. */
 export type QuickCommand = "mask" | "restore" | "unpin";
@@ -50,6 +56,11 @@ export interface QuickActionsAdapter {
   onCommand(handler: (command: QuickCommand) => void): Promise<() => void>;
   sendStatus(status: PanelStatus): Promise<void>;
   setPinned(pinned: boolean): Promise<void>;
+  /** Called instead of closing the main window; the handler decides what to do. */
+  onCloseRequested(handler: () => void): Promise<() => void>;
+  hideMainWindow(): Promise<void>;
+  launchAtLogin(): Promise<boolean>;
+  setLaunchAtLogin(on: boolean): Promise<void>;
 }
 
 export const nativeQuickActions: QuickActionsAdapter = {
@@ -84,4 +95,12 @@ export const nativeQuickActions: QuickActionsAdapter = {
     listen<{ command: QuickCommand }>(events.command, (event) => handler(event.payload.command)),
   sendStatus: (status) => emitTo(panelWindow, events.status, status),
   setPinned: (pinned) => emitTo(panelWindow, events.pin, { pinned }),
+  onCloseRequested: (handler) =>
+    getCurrentWindow().onCloseRequested((event) => {
+      event.preventDefault();
+      handler();
+    }),
+  hideMainWindow: () => getCurrentWindow().hide(),
+  launchAtLogin: () => isEnabled(),
+  setLaunchAtLogin: (on) => (on ? enable() : disable()),
 };
