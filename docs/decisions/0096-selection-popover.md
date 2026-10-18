@@ -71,3 +71,19 @@ In ChatGPT's input in Dia the owner got the masked sentence three times in a row
 ## Follow-up: keyboard selections (same day)
 
 The owner: the circle showed for a mouse selection but not after ⌘A. Only mouse-button events were observed, so keyboard selections (⌘A, ⇧ with arrows, double-tap word selections from the keyboard) never triggered it. Keys are still not observed. Instead, while the popover is on, a background look reads the front application's current selection every 450 ms through the same Accessibility (macOS) or UI Automation (Windows) call the mouse path uses. A selection that holds still for one look is announced; one that disappears is cleared, which also folds away a circle left over a selection the user has since abandoned. A drag in progress is skipped (the mouse path answers it at once), and the text last announced is shared by both paths, so a selection never shows twice. The decision logic (`after_look`) is unit-tested. The Settings text now says the app reads "phần đang được chọn ở ứng dụng phía trước, không đọc phím bạn gõ". Verified live in TextEdit on macOS: ⌘A brought the circle up on the second look, and → (deselect) folded it away on the next. Windows: type-checked only.
+
+## Follow-up: the circle shows its own progress (same day)
+
+The owner, after masking in ChatGPT's input showed a long result card squeezed into a narrow column in the corner: "when processing, I think the circle becomes something loading animation and done with a check mark will be better, dont use too much text".
+
+- **In place, on the circle.** A click on the circle that replaces the selection now plays out on the circle itself: a turning ring while the text is processed, a check mark that pops in when the text is replaced (gone after 2.5 s; 1.1 s was "too fast" for the owner), or an exclamation mark in the error colour with one short line beside it ("Không thấy thông tin cần ẩn") for 4.5 seconds. No card in the corner. Results carry an `inPlace` flag only for this path; the shortcut and the panel buttons still use the corner card, and the read-only previews are unchanged.
+- **Less text.** Results read "Đã ẩn 2 thông tin" / "Đã khôi phục 2 thông tin", with "· dán để dùng" only when the result is on the clipboard rather than in place.
+- **Squeezed card fixed.** The panel page laid the corner card out inside the window's current width, which was still the 48 px circle, so the text wrapped one word per line. The shape is now laid out at its natural size (`width: max-content`) before the window is fitted to it.
+
+Checked in the browser preview (`pill.html?state=circle-busy|circle-done|circle-error`) in light and dark; the corner card measures 286 px wide inside a 48 px viewport. 282 tests.
+
+## Follow-up: the click must never activate the app (same day)
+
+After the check-mark timing change the owner saw no check mark at all. Reproduced in TextEdit with a native log around the copy chord: the panel window kept its `OfflineMaskQuickPanel` class and the non-activating style bit, yet from some clicks on OfflineMask was the frontmost application when ⌘C was sent, so nothing was copied, the selection was not replaced and the result fell back to the corner card. AppKit only records "this panel prevents activation" with the window server when the non-activating style is set at creation; set afterwards, as on Tauri's window, it holds only sometimes. The panel now also gets the private `_setPreventsActivation:` (sent only when the window answers it), the same remedy Tauri panel plugins use. Verified: five clicks in a row, hovered and not, each replaced the text in place with TextEdit frontmost; before, three of three and five of five failed.
+
+Two development-only hardenings came with it: the panel page and the quick-action composable ignore and drop listeners that finish registering after a hot reload has replaced them, so a leftover instance cannot resize the window or act twice.

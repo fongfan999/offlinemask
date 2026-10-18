@@ -34,14 +34,22 @@ const pinned = ref(false);
 const mode = ref<Mode>("panel");
 /** The circle is hovered: the hint shows beside it. */
 const hovered = ref(false);
+/** A click on the circle that works in place plays out on the circle itself: it spins
+ * while the text is processed, shows a check mark when the text is replaced, or an
+ * exclamation mark with one short line when it could not be. */
+type Circle = "idle" | "busy" | "done" | "error";
+const circle = ref<Circle>("idle");
+const circleAction = ref<"mask" | "restore">("mask");
+/** The first sentence of a message is enough beside the circle. */
+const shortMessage = computed(() => (status.value?.message ?? "").split(/\.\s/)[0]);
 const shape = useTemplateRef<HTMLElement>("shape");
-const action = computed(() => status.value?.action ?? "mask");
 const busy = computed(() => status.value?.tone === "busy");
 let dot: Spot | null = null;
 let hideTimer: ReturnType<typeof setTimeout> | undefined;
 let leaveTimer: ReturnType<typeof setTimeout> | undefined;
 let hoverPoll: ReturnType<typeof setInterval> | undefined;
 const stops: (() => void)[] = [];
+let alive = true;
 
 function readPinned() {
   try {
@@ -81,6 +89,8 @@ async function showCorner() {
 async function showDot(anchor: NonNullable<PanelStatus["anchor"]>) {
   mode.value = "dot";
   hovered.value = false;
+  circle.value = "idle";
+  circleAction.value = status.value?.action ?? "mask";
   const size = await fit();
   dot = await panel.placeDot(anchor, size).catch(() => null);
   await panel.show();
@@ -156,6 +166,14 @@ async function present(next: PanelStatus) {
   pinned.value = next.pinned;
   clearTimeout(hideTimer);
   if (next.tone === "preview") return showPreview();
+  if (next.inPlace && mode.value === "dot") {
+    stopHover();
+    hovered.value = false;
+    circle.value = next.tone === "busy" ? "busy" : next.tone === "error" ? "error" : "done";
+    await reshape();
+    if (next.tone !== "busy") hideLater(next.tone === "error" ? 4500 : 2500);
+    return;
+  }
   if (next.tone === "select" && next.anchor) {
     await showDot(next.anchor);
     hideLater(askMs);
@@ -173,13 +191,21 @@ async function close() {
   await send("unpin");
 }
 
-/** Browser preview only: `pill.html?state=dot|hover|restore|preview|toast|busy|offer|panel` shows
+/** Browser preview only: `pill.html?state=dot|hover|restore|circle-busy|circle-done|circle-error|preview|toast|busy|offer|panel` shows
  * one shape with sample text, so the design can be checked without the desktop app. */
 function preview() {
   const state = new URLSearchParams(location.search).get("state");
   if (!state) return;
   const samples: Record<string, PanelStatus> = {
     dot: { message: "", tone: "select", action: "mask", pinned: false },
+    "circle-busy": { message: "Đang ẩn thông tin…", tone: "busy", inPlace: true, pinned: false },
+    "circle-done": { message: "Đã ẩn 2 thông tin", tone: "ok", inPlace: true, pinned: false },
+    "circle-error": {
+      message: "Không thấy thông tin cần ẩn. Clipboard được giữ nguyên.",
+      tone: "error",
+      inPlace: true,
+      pinned: false,
+    },
     hover: {
       message: "",
       tone: "select",
@@ -219,8 +245,10 @@ function preview() {
   status.value = samples[state] ?? null;
   pinned.value = state === "panel";
   hovered.value = state === "hover" || state === "restore";
+  circleAction.value = state === "restore" ? "restore" : "mask";
+  circle.value = state.startsWith("circle-") ? (state.slice(7) as Circle) : "idle";
   mode.value =
-    state === "dot" || state === "restore" || state === "hover"
+    state === "dot" || state === "restore" || state === "hover" || state.startsWith("circle-")
       ? "dot"
       : state === "panel"
         ? "panel"
@@ -237,22 +265,32 @@ onMounted(async () => {
   // flash does not jump.
   await fit();
   await panel.place().catch(() => {});
+  // Handlers run only while this page instance is mounted: a hot reload in development
+  // replaces the instance, and a leftover one must not keep resizing the window.
   stops.push(
-    await panel.onStatus((next) => void present(next)),
+    await panel.onStatus((next) => {
+      if (alive) void present(next);
+    }),
     await panel.onPin(async (next) => {
+      if (!alive) return;
       pinned.value = next;
       if (next) await showCorner();
       else await hide();
     }),
-    await panel.onDismiss(() => void hide()),
+    await panel.onDismiss(() => {
+      if (alive) void hide();
+    }),
     // Only the full panel can be dragged; its resting place is remembered.
     await panel.onMoved(() => {
-      if (mode.value === "panel") void panel.rememberPosition().catch(() => {});
+      if (alive && mode.value === "panel") void panel.rememberPosition().catch(() => {});
     }),
   );
-  if (pinned.value) await showCorner();
+  // Unmounted while the listeners were still being registered: drop them now.
+  if (!alive) for (const stop of stops) stop();
+  else if (pinned.value) await showCorner();
 });
 onBeforeUnmount(() => {
+  alive = false;
   clearTimeout(hideTimer);
   clearTimeout(leaveTimer);
   stopHover();
@@ -273,15 +311,28 @@ onBeforeUnmount(() => {
     >
       <button
         class="quick-dot"
-        :aria-label="status?.hint ?? (action === 'mask' ? 'Ẩn thông tin' : 'Khôi phục')"
-        @click="send(action)"
+        :class="`is-${circle}`"
+        :disabled="circle !== 'idle'"
+        :aria-label="circleAction === 'mask' ? 'Ẩn thông tin' : 'Khôi phục thông tin'"
+        @click="send(circleAction)"
       >
-        <BrandMark v-if="action === 'mask'" :size="20" />
-        <AppIcon v-else name="undo" :size="16" />
+        <span v-if="circle === 'busy'" class="quick-spinner" aria-hidden="true"></span>
+        <AppIcon v-else-if="circle === 'done'" name="check" :size="18" />
+        <AppIcon v-else-if="circle === 'error'" name="info" :size="18" />
+        <BrandMark v-else-if="circleAction === 'mask'" :size="20" />
+        <BrandMark v-else variant="restore" :size="20" />
       </button>
-      <span v-if="hovered && status?.hint" class="quick-hint" aria-hidden="true">
+      <span
+        v-if="circle === 'idle' && hovered && status?.hint"
+        class="quick-hint"
+        aria-hidden="true"
+      >
         {{ status.hint }}
       </span>
+      <span v-else-if="circle === 'error'" class="quick-hint is-error" role="status">
+        {{ shortMessage }}
+      </span>
+      <span v-else-if="circle !== 'idle'" class="sr-only" role="status">{{ status?.message }}</span>
     </div>
 
     <!-- Read-only AI text with the real values back: copy it, or open its session. -->

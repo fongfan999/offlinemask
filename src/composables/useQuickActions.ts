@@ -226,8 +226,9 @@ export function useQuickActions({
   async function act(
     command: "auto" | "mask" | "restore",
     given?: string,
-    options: { replace?: boolean } = {},
+    options: { replace?: boolean; inPlace?: boolean } = {},
   ): Promise<QuickStatus> {
+    const tag = options.inPlace ? { inPlace: true } : {};
     // A popover action works on text still selected in the front application: the
     // result is pasted over it, like the shortcut's in-place path.
     let replaced = options.replace === true;
@@ -238,7 +239,7 @@ export function useQuickActions({
         hinted = true;
         message += ` ${quickMessages.permissionHint}`;
       }
-      const status = { message, tone };
+      const status = { message, tone, ...tag };
       await show(status);
       return status;
     };
@@ -275,7 +276,7 @@ export function useQuickActions({
         if (replaced) await adapter.pasteResult().catch(() => {});
         return await done(quickMessages.restored(result.restored, result.unknown.length, replaced));
       }
-      await show({ message: workingMessage, tone: "busy" });
+      await show({ message: workingMessage, tone: "busy", ...tag });
       const outcome = await run.maskText(text);
       if ("error" in outcome)
         return await undone(outcome.error === "busy" ? quickMessages.busy : outcome.message);
@@ -542,7 +543,7 @@ export function useQuickActions({
     }
     // Replace in place only with the exact selection; without it the result goes to
     // the clipboard and the user pastes it.
-    if (exact) await act(command, exact, { replace: true });
+    if (exact) await act(command, exact, { replace: true, inPlace: true });
     else await act(command, selection.text);
   }
   function onCommand(command: QuickCommand) {
@@ -584,6 +585,12 @@ export function useQuickActions({
     stopCleared = await adapter
       .onSelectionCleared(() => void selectionCleared())
       .catch(() => undefined);
+    // stop() ran while the listeners were still being registered (a hot reload in
+    // development): drop them instead of leaving a second, invisible instance acting.
+    if (stopped) {
+      stopAll();
+      return;
+    }
     if (shortcutOn.value) await applyShortcut(true);
     if (typeof window !== "undefined") window.addEventListener("focus", recheck);
     await Promise.all([checkInputPermission(), readLaunchAtLogin()]);
@@ -592,7 +599,23 @@ export function useQuickActions({
     popoverSupported.value = await adapter.selectionSupported().catch(() => false);
     if (popoverOn.value) await setPopover(popoverSupported.value);
   }
+  let stopped = false;
+  function stopAll() {
+    stopCommands?.();
+    stopCommands = undefined;
+    stopClose?.();
+    stopClose = undefined;
+    stopService?.();
+    stopService = undefined;
+    stopWatch?.();
+    stopWatch = undefined;
+    stopSelection?.();
+    stopSelection = undefined;
+    stopCleared?.();
+    stopCleared = undefined;
+  }
   function stop() {
+    stopped = true;
     stopCommands?.();
     stopCommands = undefined;
     stopClose?.();

@@ -48,6 +48,9 @@ export interface QuickStatus {
   action?: "mask" | "restore";
   /** For a selection: what that click will do, in a few words, shown on hover. */
   hint?: string;
+  /** Progress and result of a click on the circle that works in place: the circle itself
+   * spins, then shows a check mark, instead of a card in the corner. */
+  inPlace?: boolean;
   /** The restore preview of read-only text: the restored text, where each restored
    * value sits in it, and whether its session can be opened in the app. */
   preview?: { text: string; marks: { start: number; end: number }[]; canOpen: boolean };

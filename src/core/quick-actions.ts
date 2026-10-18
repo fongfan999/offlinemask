@@ -49,15 +49,14 @@ export const quickMessages = {
   busy: "Đang ẩn một văn bản khác. Thử lại sau giây lát.",
   clipboard: "Chưa đọc hoặc ghi được clipboard. Thử sao chép lại.",
   failed: "Chưa thực hiện được thao tác. Nội dung được giữ nguyên, hãy thử lại.",
+  // Short on purpose: in place the change is visible, otherwise one line says where it is.
   masked: (n: number, replaced = false) =>
-    replaced
-      ? `Đã ẩn ${count(n)} thông tin ngay tại chỗ bạn chọn. Bản đã ẩn cũng nằm trong clipboard.`
-      : `Đã ẩn ${count(n)} thông tin. Bản đã ẩn đang trong clipboard, dán vào AI được rồi.`,
+    replaced ? `Đã ẩn ${count(n)} thông tin` : `Đã ẩn ${count(n)} thông tin · dán để dùng`,
   restored: (n: number, unknown: number, replaced = false) =>
     (replaced
-      ? `Đã khôi phục ${count(n)} mã thay thế ngay tại chỗ bạn chọn.`
-      : `Đã khôi phục ${count(n)} mã thay thế. Bản khôi phục đang trong clipboard.`) +
-    (unknown ? ` ${count(unknown)} mã khác không thuộc văn bản nào đang mở, giữ nguyên.` : ""),
+      ? `Đã khôi phục ${count(n)} thông tin`
+      : `Đã khôi phục ${count(n)} thông tin · dán để dùng`) +
+    (unknown ? ` · ${count(unknown)} mã lạ giữ nguyên` : ""),
   /** The opt-in clipboard watch noticed something (decision 0095). */
   offer: (n: number) =>
     `Văn bản vừa sao chép có ${count(n)} thông tin nhạy cảm. Bấm Ẩn thông tin để ẩn trước khi dán.`,

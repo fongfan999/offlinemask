@@ -1000,3 +1000,73 @@ test("the circle replaces with the exact selection, never with repeated Accessib
   // the clipboard instead of over the selection.)
   assert.match(adapter.clipboard, /\[SDT_1_[a-f0-9]{4}\]/);
 });
+
+test("a click on the circle reports its progress in place; the shortcut's results go to the corner", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("clipboard cũ");
+  adapter.permission = "granted";
+  const run = fakeRun(sessions);
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  await quick.setPopover(true);
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+  const sent = [];
+  adapter.sendStatus = async (status) => sent.push(status);
+  adapter.selectionHandler({
+    text: phoneText,
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: true,
+  });
+  await tick();
+  adapter.selection = phoneText;
+  adapter.command("mask");
+  await tick();
+  await tick();
+  const after = sent.slice(1).map((status) => [status.tone, status.inPlace ?? false]);
+  assert.deepEqual(after, [
+    ["busy", true],
+    ["ok", true],
+  ]);
+  assert.equal(sent.at(-1).message, quickMessages.masked(1, true));
+  assert.equal(quickMessages.masked(1, true), "Đã ẩn 1 thông tin");
+
+  // The shortcut keeps the corner toast.
+  sent.length = 0;
+  adapter.selection = null;
+  adapter.clipboard = phoneText;
+  await quick.act("auto");
+  assert.ok(sent.every((status) => !status.inPlace));
+});
+
+test("stopping while start is still registering listeners leaves none behind", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter(phoneText);
+  const removed = [];
+  const slow = (name, assign) => async (handler) => {
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    assign(handler);
+    return () => removed.push(name);
+  };
+  adapter.onCommand = slow("command", (handler) => (adapter.commandHandler = handler));
+  adapter.onSelection = slow("selection", (handler) => (adapter.selectionHandler = handler));
+  const run = fakeRun(sessions);
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  const starting = quick.start();
+  quick.stop();
+  await starting;
+  assert.ok(removed.includes("command"));
+  assert.ok(removed.includes("selection"));
+});

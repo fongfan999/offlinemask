@@ -59,6 +59,7 @@ pub fn make_non_activating<R: Runtime>(window: &WebviewWindow<R>) -> bool {
     let panel: Retained<NSPanel> =
         unsafe { Retained::retain(pointer as *mut NSPanel) }.expect("panel pointer");
     panel.setStyleMask(panel.styleMask() | NSWindowStyleMask::NonactivatingPanel);
+    prevent_activation(&panel);
     panel.setFloatingPanel(true);
     panel.setBecomesKeyOnlyIfNeeded(true);
     panel.setWorksWhenModal(true);
@@ -71,4 +72,19 @@ pub fn make_non_activating<R: Runtime>(window: &WebviewWindow<R>) -> bool {
     );
     let _ = window.app_handle();
     true
+}
+
+/// AppKit only tells the window server that a panel must not activate its app when the
+/// non-activating style is set at creation; set afterwards (as here, on Tauri's window)
+/// the click still activated OfflineMask from the second use on, so ⌘C and ⌘V went to
+/// OfflineMask instead of the user's application. The private `_setPreventsActivation:`
+/// sets that window-server flag directly. It is only sent when the window answers it.
+pub fn prevent_activation(panel: &NSPanel) {
+    let selector = objc2::sel!(_setPreventsActivation:);
+    // SAFETY: a plain query of the receiver's methods.
+    let answers: bool = unsafe { objc2::msg_send![panel, respondsToSelector: selector] };
+    if answers {
+        // SAFETY: the selector exists on this window (checked above) and takes a BOOL.
+        let _: () = unsafe { objc2::msg_send![panel, _setPreventsActivation: true] };
+    }
 }
