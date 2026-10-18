@@ -12,7 +12,8 @@ stack); the shipped mark files contain no text and embed no fonts.
 
 import os
 
-from make_mark import COBALT, INK, PAPER, GX0, GX1, GY0, GY1, build_mark, sketches, sketches2
+from make_mark import (COBALT, INK, PAPER, GX0, GX1, GY0, GY1, RGX0, RGX1, RGY0, RGY1,
+                       build_mark, build_restore, sketches, sketches2)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -22,14 +23,15 @@ SANS = "'Inter Display', Inter, -apple-system, 'SF Pro Display', 'Helvetica Neue
 MONO = "'JetBrains Mono', 'SF Mono', Menlo, monospace"
 
 M = build_mark(1.0)
-MB = build_mark(1.25)  # heavier brush beside semibold type
+R = build_restore(1.0)
+EXT = {id(M): (GX0, GX1, GY0, GY1), id(R): (RGX0, RGX1, RGY0, RGY1)}
 
 
 def mark(x, y, s, ink, accent, m=M, rotate=0.0):
     """Two colours: cobalt band, ink eyes. One colour: the band with the eyes
     cut out, so the background shows through."""
     rot = f" rotate({rotate} 50 50)" if rotate else ""
-    if ink == accent:
+    if ink == accent and m is M:
         body = f'<path d="{m["band"]} {" ".join(m["eyes"])}" fill-rule="evenodd" fill="{ink}"/>'
     else:
         body = f'<path d="{m["band"]}" fill="{accent}"/>' + "".join(f'<path d="{d}" fill="{ink}"/>' for d in m["eyes"])
@@ -62,8 +64,9 @@ def wordmark_text(x, y, size, ink, accent):
 
 # ---------------------------------------------------------------------------
 # 1. Mark files: a 100-box with the glyph centred by its extents.
-def mark_file(ink, accent, title):
-    body = f'<g transform="translate({-GX0 + (100 - (GX1 - GX0)) / 2:.2f} {-GY0 + (100 - (GY1 - GY0)) / 2:.2f})">' + mark(0, 0, 100, ink, accent) + "</g>"
+def mark_file(ink, accent, title, m=M):
+    x0, x1, y0, y1 = EXT[id(m)]
+    body = f'<g transform="translate({-x0 + (100 - (x1 - x0)) / 2:.2f} {-y0 + (100 - (y1 - y0)) / 2:.2f})">' + mark(0, 0, 100, ink, accent, m=m) + "</g>"
     return svg(100, 100, body, title=title)
 
 
@@ -71,15 +74,20 @@ write("brand/mark-ink.svg", mark_file(INK, COBALT, "OfflineMask mark — a brush
 write("brand/mark-paper.svg", mark_file(INK_DARK, COBALT_DARK, "OfflineMask mark on dark"))
 write("brand/mark-mono-black.svg", mark_file("#000", "#000", "OfflineMask mark, single colour"))
 write("brand/mark-mono-white.svg", mark_file("#fff", "#fff", "OfflineMask mark, single colour"))
+write("brand/mark-restore-ink.svg", mark_file(INK, COBALT, "OfflineMask restore mark — the mask lifted, eyes in the open", R))
+write("brand/mark-restore-paper.svg", mark_file(INK_DARK, COBALT_DARK, "OfflineMask restore mark on dark", R))
+write("brand/mark-restore-mono-black.svg", mark_file("#000", "#000", "OfflineMask restore mark, single colour", R))
+write("brand/mark-restore-mono-white.svg", mark_file("#fff", "#fff", "OfflineMask restore mark, single colour", R))
 
 
 # 2. Tiles. The glyph is centred by its extents, not its box.
-def tile_body(size, radius_ratio, bg, ink, accent, glyph, x=0, y=0):
+def tile_body(size, radius_ratio, bg, ink, accent, glyph, x=0, y=0, m=M):
     r = size * radius_ratio
     g = size * glyph
-    gx = x + (size - g * (GX0 + GX1) / 100) / 2
-    gy = y + (size - g * (GY0 + GY1) / 100) / 2
-    return f'<rect x="{x}" y="{y}" width="{size}" height="{size}" rx="{r:.1f}" fill="{bg}"/>' + mark(gx, gy, g, ink, accent)
+    x0, x1, y0, y1 = EXT[id(m)]
+    gx = x + (size - g * (x0 + x1) / 100) / 2
+    gy = y + (size - g * (y0 + y1) / 100) / 2
+    return f'<rect x="{x}" y="{y}" width="{size}" height="{size}" rx="{r:.1f}" fill="{bg}"/>' + mark(gx, gy, g, ink, accent, m=m)
 
 
 def app_icon():
@@ -101,6 +109,9 @@ module = (
     "export const markViewBox = \"0 0 100 100\";\n"
     f"export const markBand =\n  \"{M['band']}\";\n"
     f"export const markEyes = [\n  \"{M['eyes'][0]}\",\n  \"{M['eyes'][1]}\",\n];\n"
+    "// The restore mark: the mask lifted onto the forehead, eyes in the open (no holes).\n"
+    f"export const restoreBand =\n  \"{R['band']}\";\n"
+    f"export const restoreEyes = [\n  \"{R['eyes'][0]}\",\n  \"{R['eyes'][1]}\",\n];\n"
 )
 write("src/components/brand-paths.ts", module)
 
@@ -194,6 +205,11 @@ def preview_sheet():
         fav += text(x + s / 2, 190, str(s), 10, MUTED, 500, MONO, anchor="middle")
         x += s + 26
     row(220, PAPER, "FAVICON SIZES", fav, MUTED)
+    pair = (mark(240, 36, 100, INK, COBALT) + mark(372, 36, 100, INK, COBALT, m=R)
+            + tile_body(72, 0.22, COBALT, PAPER, PAPER, 0.84, 540, 50) + tile_body(72, 0.22, COBALT, PAPER, PAPER, 0.84, 628, 50, m=R)
+            + f'<g transform="translate(760 70)">{mark(0, 0, 32, INK, INK)}{mark(44, 0, 32, INK, INK, m=R)}</g>'
+            + text(240, 166, "MASK · RESTORE", 10, MUTED, 500, MONO, spacing=1.2))
+    row(180, PAPER, "ACTIONS", pair, MUTED)
     row(150, COBALT, "ON COBALT", wordmark_text(240, 96, 76, PAPER, PAPER) + mark(700, 20, 110, PAPER, PAPER), "#c9d3f7")
     return svg(W, y, "\n".join(rows), label="OfflineMask brand preview")
 

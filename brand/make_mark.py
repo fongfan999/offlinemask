@@ -360,6 +360,19 @@ def build_mark(weight=1.0):
     return {"band": swipe(weight=weight), "eyes": [dot(x, y, r * weight) for x, y, r in EYES]}
 
 
+# The restore mark: the same mask pushed up onto the forehead, a little askew
+# because it was just lifted, with the eyes out in the open below it. The eyes
+# are never holes here; in single colour everything is one fill.
+RESTORE_EYES = ((34.0, 65.5, 6.4), (66.0, 64.0, 6.2))
+RGX0, RGX1, RGY0, RGY1 = 7.0, 93.0, 13.0, 72.0
+
+
+def build_restore(weight=1.0):
+    """Return {"band": path, "eyes": [paths]} for the lifted mask."""
+    return {"band": swipe(11, 89, 30, 14.0, 8.0, 0.4, weight),
+            "eyes": [dot(x, y, r * weight) for x, y, r in RESTORE_EYES]}
+
+
 def sketch_mask(weight=1.0):
     m = build_mark(weight)
     return {"ink": m["eyes"], "accent": [m["band"]], "mono": m["band"] + " " + " ".join(m["eyes"])}

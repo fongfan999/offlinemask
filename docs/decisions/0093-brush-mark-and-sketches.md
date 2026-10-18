@@ -33,9 +33,15 @@ The mark is the thing the product does: a brush swipe that hides a value. Two ey
 - On a cobalt tile and in single colour: one path with the even-odd rule, so the eyes are holes that show the background. At 16 px it reads as a ninja; at 1024 px as a brush stroke.
 - The wordmark, lockup, minimum sizes and clear space in `brand/README.md` are updated for a wide mark (the clear space is the height of one eye hole).
 
+### The restore mark
+
+Masking has an opposite, restoring, and the quick actions put the two side by side (⌘⇧M on a selection, the floating panel's two buttons). The restore mark is the same mask pushed up onto the forehead, a little askew because it was just lifted, with the eyes out in the open below it. The two parts are unchanged, only their relation flips: eyes inside the swipe means hidden, eyes under the lifted swipe means revealed. It never has holes; in single colour the swipe and the eyes are one fill. It is an action icon, not a second logo: tiles, favicon and app icon stay the mask. `BrandMark.vue` takes `variant="restore"`; the panel's restore button and the one-button dot use it instead of the generic undo arrow.
+
+Alternatives tried on a strip: the mask pulled down under the chin (reads as a mouth), the lifted mask keeping empty eye holes (busy at 16 px), and a level lift (reads as a hat; the askew one reads as a movement).
+
 ### Generated, not drawn
 
-- `brand/make_mark.py` is the source. `brand/build.py` writes `brand/mark-*.svg`, `brand/tile-cobalt.svg` (1024 px, 824 px squircle, 22% radius, glyph at 84%), `public/favicon.svg`, the sketch sheets, `brand/preview-sheet.png` and `src/components/brand-paths.ts`. `brand/png.sh` rasterises the sheets with librsvg. `pnpm tauri icon brand/tile-cobalt.svg` regenerates `src-tauri/icons/` (the Android and iOS sets it also emits are deleted).
+- `brand/make_mark.py` is the source. `brand/build.py` writes `brand/mark-*.svg` and `brand/mark-restore-*.svg`, `brand/tile-cobalt.svg` (1024 px, 824 px squircle, 22% radius, glyph at 84%), `public/favicon.svg`, the sketch sheets, `brand/preview-sheet.png` and `src/components/brand-paths.ts`. `brand/png.sh` rasterises the sheets with librsvg. `pnpm tauri icon brand/tile-cobalt.svg` regenerates `src-tauri/icons/` (the Android and iOS sets it also emits are deleted).
 - `src/components/BrandMark.vue` renders the generated path in `currentColor` and replaces the stroke-based `mask` glyph in the sidebar tile, the lock page and the floating panel's head. The `mask` glyph in `AppIcon.vue` remains the small UI icon on the panel's "Ẩn thông tin" button; it is an icon, not the logo.
 - Python needs nothing beyond the standard library. The sheets set the wordmark in the system sans as live SVG text; the shipped mark files contain no text and embed no fonts.
 

@@ -1,10 +1,18 @@
 <script setup lang="ts">
-// The product mark, drawn from the generated brush paths (brand/make_mark.py):
-// a swipe with two eye holes. Everything is currentColor and the holes are cut
-// with the even-odd rule, so on a cobalt tile the eyes show the tile through.
-import { markBand, markEyes } from "./brand-paths.ts";
+// The product mark, drawn from the generated brush paths (brand/make_mark.py).
+// "mask": a swipe with two eye holes, cut with the even-odd rule so on a cobalt
+// tile the eyes show the tile through. "restore": the same mask lifted onto the
+// forehead with the eyes in the open; nothing overlaps, so the rule is harmless.
+// Everything is currentColor.
+import { computed } from "vue";
+import { markBand, markEyes, restoreBand, restoreEyes } from "./brand-paths.ts";
 
-defineProps<{ size?: number }>();
+const props = defineProps<{ size?: number; variant?: "mask" | "restore" }>();
+const d = computed(() =>
+  props.variant === "restore"
+    ? `${restoreBand} ${restoreEyes.join(" ")}`
+    : `${markBand} ${markEyes.join(" ")}`,
+);
 </script>
 <template>
   <svg
@@ -15,6 +23,6 @@ defineProps<{ size?: number }>();
     fill-rule="evenodd"
     aria-hidden="true"
   >
-    <path :d="`${markBand} ${markEyes.join(' ')}`" />
+    <path :d="d" />
   </svg>
 </template>
