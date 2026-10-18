@@ -74,7 +74,7 @@ write("brand/mark-ink.svg", mark_file(INK, COBALT, "OfflineMask mark — a brush
 write("brand/mark-paper.svg", mark_file(INK_DARK, COBALT_DARK, "OfflineMask mark on dark"))
 write("brand/mark-mono-black.svg", mark_file("#000", "#000", "OfflineMask mark, single colour"))
 write("brand/mark-mono-white.svg", mark_file("#fff", "#fff", "OfflineMask mark, single colour"))
-write("brand/mark-restore-ink.svg", mark_file(INK, COBALT, "OfflineMask restore mark — the mask coming off", R))
+write("brand/mark-restore-ink.svg", mark_file(INK, COBALT, "OfflineMask restore mark — the mask lifted, eyes in the open", R))
 write("brand/mark-restore-paper.svg", mark_file(INK_DARK, COBALT_DARK, "OfflineMask restore mark on dark", R))
 write("brand/mark-restore-mono-black.svg", mark_file("#000", "#000", "OfflineMask restore mark, single colour", R))
 write("brand/mark-restore-mono-white.svg", mark_file("#fff", "#fff", "OfflineMask restore mark, single colour", R))
@@ -109,10 +109,9 @@ module = (
     "export const markViewBox = \"0 0 100 100\";\n"
     f"export const markBand =\n  \"{M['band']}\";\n"
     f"export const markEyes = [\n  \"{M['holes'][0]}\",\n  \"{M['holes'][1]}\",\n];\n"
-    "// The restore mark: the mask coming off. One eye is still a hole in the band,\n"
-    "// the other is a filled dot below it; one even-odd path draws both.\n"
+    "// The restore mark: the mask lifted onto the forehead, eyes in the open (no holes).\n"
     f"export const restoreBand =\n  \"{R['band']}\";\n"
-    f"export const restoreEyes = [\n  \"{R['holes'][0]}\",\n  \"{R['eyes'][0]}\",\n];\n"
+    f"export const restoreEyes = [\n  \"{R['eyes'][0]}\",\n  \"{R['eyes'][1]}\",\n];\n"
 )
 write("src/components/brand-paths.ts", module)
 
