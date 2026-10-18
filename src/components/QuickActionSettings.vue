@@ -51,6 +51,11 @@ const quick = useProvided(quickKey);
               : "macOS cần bạn cho phép OfflineMask gửi phím ⌘C và ⌘V thay bạn (quyền Trợ năng). Chỉ hai phím đó, chỉ khi bạn nhấn phím tắt."
           }}
         </p>
+        <p v-if="quick.inputPermission.value === 'denied'" class="quick-note">
+          Đã bật trong Cài đặt hệ thống mà dòng này vẫn còn? macOS đang giữ một bản cũ của ứng dụng:
+          trong danh sách Trợ năng, chọn OfflineMask, bấm − để xóa, rồi bấm Cấp quyền ở đây một lần
+          nữa. Dòng này tự biến mất khi quyền có hiệu lực.
+        </p>
       </div>
       <button
         v-if="quick.inputPermission.value !== 'unsupported'"

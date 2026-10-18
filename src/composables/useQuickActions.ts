@@ -141,12 +141,28 @@ export function useQuickActions({
   /** Whether ⌘⇧M may replace the selection in place (decision 0091); "unknown" until checked. */
   const inputPermission = ref<InputPermission | "unknown">("unknown");
   let hinted = false;
+  // The grant is given in System Settings while this window sits behind it, and a
+  // window-focus event is not guaranteed on the way back, so while it is missing the
+  // state is re-read every two seconds; the poll stops as soon as it is granted.
+  let permissionPoll: ReturnType<typeof setInterval> | undefined;
   async function checkInputPermission(prompt = false) {
     if (!adapter.desktop) return;
     try {
       inputPermission.value = await adapter.inputPermission(prompt);
     } catch {
       inputPermission.value = "unsupported";
+    }
+    if (inputPermission.value === "denied") {
+      if (!permissionPoll) {
+        permissionPoll = setInterval(() => void checkInputPermission(), 2000);
+        // Under Node (the tests) a live interval would keep the process alive.
+        const timer: unknown = permissionPoll;
+        if (typeof timer === "object" && timer && "unref" in timer)
+          (timer as { unref(): void }).unref();
+      }
+    } else if (permissionPoll) {
+      clearInterval(permissionPoll);
+      permissionPoll = undefined;
     }
   }
 
@@ -439,6 +455,8 @@ export function useQuickActions({
     stopCleared?.();
     stopCleared = undefined;
     if (typeof window !== "undefined") window.removeEventListener("focus", recheck);
+    if (permissionPoll) clearInterval(permissionPoll);
+    permissionPoll = undefined;
     if (shortcutOn.value) void applyShortcut(false);
   }
 
