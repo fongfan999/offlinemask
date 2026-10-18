@@ -298,12 +298,22 @@ export function useQuickActions({
     }
   }
 
+  /** One shortcut per window, whichever instance registered it last. A hot reload in
+   * development creates a new instance before the old one stops; the old one must not
+   * then unregister the shortcut the new one just took. */
+  const owner = Symbol("quick-actions");
+  const registry = globalThis as { __offlinemaskShortcutOwner?: symbol };
   async function applyShortcut(on: boolean) {
     shortcutFailure.value = "";
     if (!adapter.desktop) return;
     try {
-      if (on) await adapter.registerShortcut(() => void act("auto"));
-      else await adapter.unregisterShortcut();
+      if (on) {
+        registry.__offlinemaskShortcutOwner = owner;
+        await adapter.registerShortcut(() => void act("auto"));
+      } else if (registry.__offlinemaskShortcutOwner === owner) {
+        registry.__offlinemaskShortcutOwner = undefined;
+        await adapter.unregisterShortcut();
+      }
     } catch {
       if (on) {
         shortcutOn.value = false;

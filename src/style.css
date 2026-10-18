@@ -2798,6 +2798,14 @@ td.alias {
   color: var(--note-ink);
   background: var(--note);
 }
+/* Expanded: wider, and most of a long answer visible without scrolling. */
+.quick-preview.is-expanded {
+  width: 560px;
+}
+.quick-preview.is-expanded .quick-preview-text {
+  max-height: 440px;
+  font-size: 13.5px;
+}
 .quick-preview-actions {
   display: flex;
   justify-content: flex-end;

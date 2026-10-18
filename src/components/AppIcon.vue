@@ -27,6 +27,8 @@ const paths: Record<string, string> = {
   info: "M12 8h.01 M12 11v6 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
   help: "M9.5 8a2.5 2.5 0 1 1 4 2c-1 .5-1.5 1-1.5 2 M12 16h.01 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
   close: "m6 6 12 12 M6 18 18 6",
+  expand: "M14 4h6v6 M10 20H4v-6 M20 4l-6 6 M4 20l6-6",
+  shrink: "M4 14h6v6 M20 10h-6V4 M14 10l6-6 M10 14l-6 6",
   copy: "M9 9h12v12H9Z M5 15H3V3h12v2",
   eye: "M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z",
   list: "M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01",

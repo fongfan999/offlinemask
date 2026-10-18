@@ -1095,3 +1095,29 @@ test("read-only selections anchor the circle to the cursor, editable ones to the
   await tick();
   assert.deepEqual(quick.lastStatus.value.anchor, { bounds, pointer });
 });
+
+test("a replaced instance stopping late does not unregister the live shortcut", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  const make = () =>
+    useQuickActions({
+      adapter,
+      run: fakeRun(sessions),
+      sessions,
+      locked: () => false,
+      storage: memoryStorage(),
+    });
+  const old = make();
+  await old.start();
+  const fresh = make();
+  await fresh.start();
+  old.stop();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "unregister"),
+    [],
+  );
+  fresh.stop();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(adapter.calls.at(-1), ["unregister"]);
+});

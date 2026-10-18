@@ -168,8 +168,16 @@ const previewParts = computed(() => {
     parts.push({ text: preview.text.slice(cursor), restored: false });
   return parts;
 });
+/** The preview can grow for a long answer, keeping its top-right corner. */
+const expanded = ref(false);
+async function toggleExpanded() {
+  expanded.value = !expanded.value;
+  await fit();
+  await panel.placeTopRight().catch(() => {});
+}
 async function showPreview() {
   stayVisible();
+  expanded.value = false;
   stopHover();
   dot = null;
   mode.value = "preview";
@@ -354,10 +362,25 @@ onBeforeUnmount(() => {
     </div>
 
     <!-- Read-only AI text with the real values back: copy it, or open its session. -->
-    <section v-else-if="mode === 'preview'" ref="shape" class="quick-preview" aria-live="polite">
+    <section
+      v-else-if="mode === 'preview'"
+      ref="shape"
+      class="quick-preview"
+      :class="{ 'is-expanded': expanded }"
+      aria-live="polite"
+    >
       <header class="quick-preview-head">
         <span class="quick-toast-mark" aria-hidden="true"><BrandMark :size="16" /></span>
         <h1 class="quick-preview-title">{{ status?.message }}</h1>
+        <button
+          class="pill-close"
+          :aria-label="expanded ? 'Thu gọn' : 'Xem rộng hơn'"
+          :title="expanded ? 'Thu gọn' : 'Xem rộng hơn'"
+          :aria-pressed="expanded"
+          @click="toggleExpanded"
+        >
+          <AppIcon :name="expanded ? 'shrink' : 'expand'" :size="14" />
+        </button>
         <button class="pill-close" aria-label="Đóng" @click="send('close')">
           <AppIcon name="close" :size="14" />
         </button>
