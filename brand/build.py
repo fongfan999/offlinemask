@@ -74,7 +74,7 @@ write("brand/mark-ink.svg", mark_file(INK, COBALT, "OfflineMask mark — a brush
 write("brand/mark-paper.svg", mark_file(INK_DARK, COBALT_DARK, "OfflineMask mark on dark"))
 write("brand/mark-mono-black.svg", mark_file("#000", "#000", "OfflineMask mark, single colour"))
 write("brand/mark-mono-white.svg", mark_file("#fff", "#fff", "OfflineMask mark, single colour"))
-write("brand/mark-restore-ink.svg", mark_file(INK, COBALT, "OfflineMask restore mark — an open eye", R))
+write("brand/mark-restore-ink.svg", mark_file(INK, COBALT, "OfflineMask restore mark — the mask's eyes, open", R))
 write("brand/mark-restore-paper.svg", mark_file(INK_DARK, COBALT_DARK, "OfflineMask restore mark on dark", R))
 write("brand/mark-restore-mono-black.svg", mark_file("#000", "#000", "OfflineMask restore mark, single colour", R))
 write("brand/mark-restore-mono-white.svg", mark_file("#fff", "#fff", "OfflineMask restore mark, single colour", R))
@@ -109,10 +109,10 @@ module = (
     "export const markViewBox = \"0 0 100 100\";\n"
     f"export const markBand =\n  \"{M['band']}\";\n"
     f"export const markEyes = [\n  \"{M['holes'][0]}\",\n  \"{M['holes'][1]}\",\n];\n"
-    "// The restore mark: an open eye. Two lids in one path and the pupil; nothing\n"
-    "// overlaps, so the same even-odd path fills all three.\n"
+    "// The restore mark: the mask's two eyes, open and calm. Two lids in one path\n"
+    "// and two eyes; nothing overlaps, so the same even-odd path fills them all.\n"
     f"export const restoreBand =\n  \"{R['band']}\";\n"
-    f"export const restoreEyes = [\"{R['eyes'][0]}\"];\n"
+    f"export const restoreEyes = [\n  \"{R['eyes'][0]}\",\n  \"{R['eyes'][1]}\",\n];\n"
 )
 write("src/components/brand-paths.ts", module)
 

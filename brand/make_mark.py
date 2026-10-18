@@ -360,27 +360,24 @@ def build_mark(weight=1.0):
     return {"band": swipe(weight=weight), "holes": [dot(x, y, r * weight) for x, y, r in EYES], "eyes": []}
 
 
-# The restore mark: an open eye. Masking hides the eyes behind the swipe;
-# restoring shows the hidden values again, and the open eye is what every
-# password field uses for "show". Two cobalt lids (the upper one heavier,
-# where the brush lands) around an ink pupil. Nothing is a hole; in single
-# colour the lids and the pupil are one fill.
-RESTORE_PUPIL = (50.0, 50.0, 10.0)
-RGX0, RGX1, RGY0, RGY1 = 8.0, 92.0, 24.0, 76.0
+# The restore mark: the mask's two eyes, open and calm. The swipe is gone;
+# what is left of it are two cobalt upper lids over the ink eyes, so the pair
+# reads masked / unmasked and the eyes look up at you rather than stare. No
+# holes; in single colour lids and eyes are one fill.
+RESTORE_EYES = ((33.0, 52.0, 6.8), (67.0, 50.0, 6.6))
+RGX0, RGX1, RGY0, RGY1 = 14.0, 86.0, 30.0, 59.0
 
 
-def lid(pts, wmax, wmin=2.4, p=0.8, weight=1.0):
+def lid(pts, wmax, wmin=2.2, p=0.8, weight=1.0):
     return to_path(brush(pts, lambda t: (wmin + (wmax - wmin) * math.sin(math.pi * t) ** p + wobble(t, 0.05)) * weight,
                          start="taper", end="taper"))
 
 
 def build_restore(weight=1.0):
-    """Return {"band", "holes", "eyes"} for the open eye: both lids in "band"."""
-    top = arc(50, 66, 42, 150, 30, n=70, egg=0)
-    bottom = arc(50, 34, 42, 210, 330, n=70, egg=0)
-    return {"band": lid(top, 9.5, weight=weight) + " " + lid(bottom, 5.5, weight=weight),
-            "holes": [],
-            "eyes": [dot(RESTORE_PUPIL[0], RESTORE_PUPIL[1], RESTORE_PUPIL[2] * weight)]}
+    """Return {"band", "holes", "eyes"} for the open eyes: both lids in "band"."""
+    lids = [lid(arc(x, y + 1, 16, 160, 20, n=50, egg=0), 6.5, weight=weight) for x, y, _ in RESTORE_EYES]
+    return {"band": " ".join(lids), "holes": [],
+            "eyes": [dot(x, y, r * weight) for x, y, r in RESTORE_EYES]}
 
 
 def sketch_mask(weight=1.0):
