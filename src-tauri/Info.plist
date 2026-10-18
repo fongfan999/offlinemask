@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- macOS Services (decision 0094). Both only hand content to the running app. -->
+	<key>NSServices</key>
+	<array>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Ẩn thông tin bằng OfflineMask</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>maskText</string>
+			<key>NSPortName</key>
+			<string>OfflineMask</string>
+			<key>NSSendTypes</key>
+			<array>
+				<string>public.utf8-plain-text</string>
+			</array>
+		</dict>
+		<dict>
+			<key>NSMenuItem</key>
+			<dict>
+				<key>default</key>
+				<string>Ẩn thông tin tệp bằng OfflineMask</string>
+			</dict>
+			<key>NSMessage</key>
+			<string>maskFiles</string>
+			<key>NSPortName</key>
+			<string>OfflineMask</string>
+			<key>NSSendFileTypes</key>
+			<array>
+				<string>org.openxmlformats.spreadsheetml.sheet</string>
+				<string>com.microsoft.excel.xls</string>
+				<string>org.oasis-open.opendocument.spreadsheet</string>
+				<string>public.comma-separated-values-text</string>
+				<string>org.openxmlformats.wordprocessingml.document</string>
+				<string>org.oasis-open.opendocument.text</string>
+				<string>public.plain-text</string>
+			</array>
+		</dict>
+	</array>
+</dict>
+</plist>

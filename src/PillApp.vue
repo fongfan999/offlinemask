@@ -13,6 +13,8 @@ import { nativeQuickPanel as panel } from "./adapters/quick-panel.ts";
  * where it sits, whether it is shown, and the last outcome the shell sent. The
  * shell does the masking and restoring; the panel never touches the clipboard. */
 const flashMs = 3600;
+/** A nudge from the clipboard watch waits for a decision a little longer. */
+const offerMs = 9000;
 
 const status = ref<PanelStatus | null>(null);
 const pinned = ref(false);
@@ -31,9 +33,9 @@ async function show() {
   await panel.place().catch(() => {});
   await panel.show();
 }
-function hideLater() {
+function hideLater(delay = flashMs) {
   clearTimeout(flashTimer);
-  flashTimer = setTimeout(() => void panel.hide(), flashMs);
+  flashTimer = setTimeout(() => void panel.hide(), delay);
 }
 async function send(command: QuickCommand) {
   await panel.send(command).catch(() => {});
@@ -58,7 +60,8 @@ onMounted(async () => {
       clearTimeout(flashTimer);
       await show();
       // A result flashes by; the panel stays only while the user keeps it.
-      if (!pinned.value && next.tone !== "busy") hideLater();
+      if (!pinned.value && next.tone !== "busy")
+        hideLater(next.tone === "offer" ? offerMs : flashMs);
     }),
     await panel.onPin(async (next) => {
       pinned.value = next;

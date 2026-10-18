@@ -173,6 +173,16 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
       return { error: "failed", message: processingFailure };
     }
   }
+  /** How many values the built-in rules find, for the clipboard watch (decision
+   * 0094): no session, no progress, no draft, and a failure counts as nothing. */
+  async function probe(text: string): Promise<number> {
+    if (validateText(text)) return 0;
+    try {
+      return (await detector.detect(text, () => {}, undefined, [...localOptions])).length;
+    } catch {
+      return 0;
+    }
+  }
   /** A .txt or .md file becomes the draft (decision 0083); an error message otherwise.
    * Four bytes per character is the most UTF-8 needs, so larger files are refused unread. */
   async function openTextFile(file: File): Promise<string> {
@@ -198,6 +208,7 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     missingSelectedModels,
     mask,
     maskText,
+    probe,
     cancel,
     destroy,
   };

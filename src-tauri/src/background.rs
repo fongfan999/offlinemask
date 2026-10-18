@@ -9,6 +9,49 @@ use tauri::{AppHandle, Emitter, Manager, Runtime};
 pub const MAIN_WINDOW: &str = "main";
 /// Same event and payload as the floating panel's buttons; the frontend handles both.
 const COMMAND_EVENT: &str = "quick-command";
+/// Text or files handed over by a macOS Service (decision 0094).
+pub const SERVICE_EVENT: &str = "quick-service";
+#[derive(Serialize, Clone)]
+#[serde(tag = "kind", rename_all = "lowercase")]
+pub enum ServiceRequest {
+    Text { text: String },
+    Files { paths: Vec<String> },
+}
+/// Paths a Service handed over, each readable once by `quick_read_service_file`. The
+/// webview cannot read any other path through this command.
+#[derive(Default)]
+pub struct ServiceFiles(std::sync::Mutex<Vec<String>>);
+impl ServiceFiles {
+    pub fn offer(&self, paths: &[String]) {
+        if let Ok(mut list) = self.0.lock() {
+            list.extend(paths.iter().cloned());
+        }
+    }
+    fn take(&self, path: &str) -> bool {
+        let Ok(mut list) = self.0.lock() else {
+            return false;
+        };
+        match list.iter().position(|item| item == path) {
+            Some(index) => {
+                list.remove(index);
+                true
+            }
+            None => false,
+        }
+    }
+}
+#[tauri::command]
+pub fn quick_read_service_file(
+    files: tauri::State<'_, ServiceFiles>,
+    path: String,
+) -> Result<tauri::ipc::Response, String> {
+    if !files.take(&path) {
+        return Err("denied".to_string());
+    }
+    std::fs::read(&path)
+        .map(tauri::ipc::Response::new)
+        .map_err(|error| format!("io: {error}"))
+}
 #[derive(Serialize, Clone)]
 struct Command {
     command: &'static str,

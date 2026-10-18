@@ -2686,3 +2686,6 @@ td.alias {
 .pill-status.is-busy {
   color: var(--note-ink);
 }
+.pill-status.is-offer {
+  color: var(--warm);
+}

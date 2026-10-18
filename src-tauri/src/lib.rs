@@ -15,6 +15,10 @@ pub fn run() {
                 Some(vec![background::BACKGROUND_FLAG]),
             ))?;
             background::setup_tray(app.handle())?;
+            app.manage(background::ServiceFiles::default());
+            app.manage(clipboard_watch::ClipboardWatch::default());
+            #[cfg(target_os = "macos")]
+            services::install(app.handle());
             if background::started_in_background() {
                 if let Some(window) = app.get_webview_window(background::MAIN_WINDOW) {
                     let _ = window.hide();
@@ -74,7 +78,10 @@ pub fn run() {
         quick_input::quick_input_permission,
         quick_input::quick_copy_selection,
         quick_input::quick_paste_result,
-        background::quick_quit
+        background::quick_quit,
+        background::quick_read_service_file,
+        clipboard_watch::quick_watch_supported,
+        clipboard_watch::quick_watch_clipboard
     ]);
     #[cfg(all(
         feature = "minilm-desktop-prototype",
@@ -96,6 +103,9 @@ pub fn run() {
         quick_input::quick_copy_selection,
         quick_input::quick_paste_result,
         background::quick_quit,
+        background::quick_read_service_file,
+        clipboard_watch::quick_watch_supported,
+        clipboard_watch::quick_watch_clipboard,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -120,6 +130,9 @@ pub fn run() {
         quick_input::quick_copy_selection,
         quick_input::quick_paste_result,
         background::quick_quit,
+        background::quick_read_service_file,
+        clipboard_watch::quick_watch_supported,
+        clipboard_watch::quick_watch_clipboard,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -148,6 +161,9 @@ pub fn run() {
         quick_input::quick_copy_selection,
         quick_input::quick_paste_result,
         background::quick_quit,
+        background::quick_read_service_file,
+        clipboard_watch::quick_watch_supported,
+        clipboard_watch::quick_watch_clipboard,
         recognition_native::recognition_native_load,
         recognition_native::recognition_native_run,
         recognition_native::recognition_native_release
@@ -182,6 +198,7 @@ pub fn run() {
         });
 }
 mod background;
+mod clipboard_watch;
 #[cfg(feature = "minilm-native-desktop-prototype")]
 mod minilm_native_graph;
 #[cfg(feature = "minilm-desktop-prototype")]
@@ -190,6 +207,8 @@ mod model_pack;
 mod models;
 mod quick_input;
 mod recognition_tokenizer;
+#[cfg(target_os = "macos")]
+mod services;
 mod vault;
 use tauri::{Emitter, Manager};
 

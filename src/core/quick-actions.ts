@@ -58,6 +58,11 @@ export const quickMessages = {
       ? `Đã khôi phục ${count(n)} mã thay thế ngay tại chỗ bạn chọn.`
       : `Đã khôi phục ${count(n)} mã thay thế. Bản khôi phục đang trong clipboard.`) +
     (unknown ? ` ${count(unknown)} mã khác không thuộc văn bản nào đang mở, giữ nguyên.` : ""),
+  /** The opt-in clipboard watch noticed something (decision 0095). */
+  offer: (n: number) =>
+    `Văn bản vừa sao chép có ${count(n)} thông tin nhạy cảm. Bấm Ẩn thông tin để ẩn trước khi dán.`,
+  /** A Finder service handed over more than one file (decision 0094). */
+  oneFile: (name: string) => `Mỗi lần một tệp: đã mở “${name}”.`,
   /** Shown once per launch when the selection could not be taken for lack of permission. */
   permissionHint: "Muốn thay ngay tại chỗ? Cấp quyền Trợ năng trong Cài đặt › Thao tác nhanh.",
 } as const;

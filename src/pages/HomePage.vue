@@ -13,6 +13,7 @@ import {
   useProvided,
   type Page,
 } from "../composables/context.ts";
+import { fileKind, fileKindErrors } from "../core/file-kind.ts";
 import { sampleText } from "../core/review.ts";
 import { packProgress } from "../composables/useRecognitionPack.ts";
 
@@ -34,24 +35,17 @@ const pasteKey = /Mac|iPhone|iPad/.test(navigator.userAgent) ? "⌘V" : "Ctrl+V"
 const startError = ref("");
 async function startWith(file: File) {
   startError.value = "";
-  const name = file.name.toLowerCase();
-  if (/\.(txt|md)$/.test(name)) {
+  const kind = fileKind(file.name);
+  if (kind === "text") {
     startError.value = await run.openTextFile(file);
     if (!startError.value) emit("start", "text");
-  } else if (/\.(xlsx|xls|ods|csv)$/.test(name)) {
+  } else if (kind === "excel") {
     emit("start", "excel");
     void sheet.openFile(file);
-  } else if (/\.(docx|odt)$/.test(name)) {
+  } else if (kind === "word") {
     emit("start", "word");
     void doc.openFile(file);
-  } else if (/\.doc$/.test(name))
-    startError.value = "Tệp .doc cũ hãy mở bằng Word và lưu lại thành .docx trước.";
-  else if (/\.(pdf|jpe?g|png|heic|webp)$/.test(name))
-    startError.value =
-      "PDF và hình ảnh sắp được hỗ trợ. Hiện mở được Excel, CSV, Word và tệp văn bản.";
-  else
-    startError.value =
-      "Chưa mở được loại tệp này. Hãy dùng Excel (.xlsx, .xls), .ods, .csv, Word (.docx), .odt hoặc .txt.";
+  } else startError.value = fileKindErrors[kind];
 }
 function startWithText(text: string) {
   if (run.processing.value) {

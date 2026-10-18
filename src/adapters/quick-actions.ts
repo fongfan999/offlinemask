@@ -25,8 +25,11 @@ export const trayLabel = /Mac|iPhone|iPad/.test(navigator.userAgent)
 export type QuickCommand = "mask" | "restore" | "unpin" | "quit";
 export interface QuickStatus {
   message: string;
-  tone: "ok" | "error" | "busy";
+  /** `offer` is the clipboard watch's nudge: it stays a little longer than a result. */
+  tone: "ok" | "error" | "busy" | "offer";
 }
+/** What a macOS Service handed over (decision 0094). */
+export type ServiceRequest = { kind: "text"; text: string } | { kind: "files"; paths: string[] };
 /** Shell → panel: a result to show, and whether the panel stays after showing it. */
 export interface PanelStatus extends QuickStatus {
   pinned: boolean;
@@ -35,6 +38,8 @@ export const events = {
   command: "quick-command",
   status: "quick-status",
   pin: "quick-pin",
+  service: "quick-service",
+  clipboardChanged: "clipboard-changed",
 } as const;
 
 /** Whether the app may send the copy and paste keystrokes that replace a selection
@@ -66,6 +71,14 @@ export interface QuickActionsAdapter {
   setLaunchAtLogin(on: boolean): Promise<void>;
   /** End the process; the shell flushes pending saves first (decision 0092). */
   quit(): Promise<void>;
+  /** Text or files from a macOS Service (decision 0094). */
+  onService(handler: (request: ServiceRequest) => void): Promise<() => void>;
+  /** Bytes of a file a Service handed over; any other path is refused natively. */
+  readServiceFile(path: string): Promise<Uint8Array<ArrayBuffer>>;
+  /** The opt-in clipboard watch (decision 0095): change notices only, no content. */
+  watchSupported(): Promise<boolean>;
+  setClipboardWatch(on: boolean): Promise<void>;
+  onClipboardChanged(handler: () => void): Promise<() => void>;
 }
 
 export const nativeQuickActions: QuickActionsAdapter = {
@@ -109,4 +122,13 @@ export const nativeQuickActions: QuickActionsAdapter = {
   launchAtLogin: () => isEnabled(),
   setLaunchAtLogin: (on) => (on ? enable() : disable()),
   quit: () => invoke("quick_quit"),
+  onService: (handler) => listen<ServiceRequest>(events.service, (event) => handler(event.payload)),
+  async readServiceFile(path) {
+    const bytes = await invoke<ArrayBuffer | number[]>("quick_read_service_file", { path });
+    return bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : Uint8Array.from(bytes);
+  },
+  watchSupported: () =>
+    isTauri() ? invoke<boolean>("quick_watch_supported") : Promise.resolve(false),
+  setClipboardWatch: (on) => invoke("quick_watch_clipboard", { enabled: on }),
+  onClipboardChanged: (handler) => listen(events.clipboardChanged, () => handler()),
 };

@@ -6,6 +6,7 @@ import {
   type QuickActionsAdapter,
   type QuickCommand,
   type QuickStatus,
+  type ServiceRequest,
 } from "../adapters/quick-actions.ts";
 import {
   quickDirection,
@@ -13,10 +14,14 @@ import {
   restoreFromTables,
   sessionFindings,
 } from "../core/quick-actions.ts";
+import { aliasTokens } from "../core/restore.ts";
 import type { Finding } from "../core/review.ts";
 import { isPrivate, sessionOutput, type Session, type TextSession } from "../core/sessions.ts";
 
 export const shortcutKey = "offlinemask.quick-shortcut.v1";
+export const watchKey = "offlinemask.quick-watch.v1";
+export const watchError = "Chưa bật được theo dõi clipboard trên hệ này.";
+export const serviceFileError = "Chưa đọc được tệp từ Finder. Hãy kéo tệp vào OfflineMask.";
 export const shortcutError =
   "Chưa đăng ký được phím tắt. Có thể một ứng dụng khác đang dùng tổ hợp này.";
 export const lockedMessage = "Mở khóa OfflineMask trước khi dùng thao tác nhanh.";
@@ -38,7 +43,11 @@ export interface QuickActionsDependencies {
     ): Promise<
       { session: TextSession } | { error: "busy" | "invalid" | "failed"; message: string }
     >;
+    /** Built-in rules only; how many values they find (the clipboard watch). */
+    probe(text: string): Promise<number>;
   };
+  /** Opens a file a Service handed over on its page; returns an error message or "". */
+  openFile?: (file: File) => Promise<string>;
   sessions: Ref<readonly Session[]>;
   /** While the lock screen is up, nothing may be masked or restored. */
   locked: () => boolean;
@@ -57,6 +66,7 @@ export function useQuickActions({
   sessions,
   locked,
   flush,
+  openFile,
   storage = defaultStorage(),
 }: QuickActionsDependencies) {
   // Two preferences, no content: on/off for the shortcut and the panel.
@@ -77,6 +87,16 @@ export function useQuickActions({
   };
   const shortcutOn = ref(adapter.desktop && read(shortcutKey, true));
   const pinned = ref(adapter.desktop && read(panelKey, false));
+  // The clipboard watch is opt-in (decision 0095): off until the user turns it on.
+  const watchOn = ref(adapter.desktop && read(watchKey, false));
+  const watchSupported = ref(false);
+  const watchFailure = ref("");
+  /** The last text this app put on the clipboard: its own output is never offered back. */
+  let lastWritten = "";
+  async function writeClipboard(text: string) {
+    lastWritten = text;
+    await adapter.writeClipboard(text);
+  }
   const shortcutFailure = ref("");
   const lastStatus = ref<QuickStatus | null>(null);
   const busy = ref(false);
@@ -153,19 +173,21 @@ export function useQuickActions({
     // An empty clipboard (or an image) needs no marker: any text after the chord is new.
     const marker = before ? `\u2063OfflineMask ${Date.now().toString(36)}\u2063` : "";
     try {
-      if (marker) await adapter.writeClipboard(marker);
+      if (marker) await writeClipboard(marker);
       await adapter.copySelection();
       const text = await adapter.readClipboard();
       if (text !== marker && text.trim()) return { text, replaced: true };
     } catch {
       // Keys could not be sent this time: the clipboard flow still works.
     }
-    if (marker) await adapter.writeClipboard(before).catch(() => {});
+    if (marker) await writeClipboard(before).catch(() => {});
     return { text: before, replaced: false };
   }
   /** Run one action. `auto` (the shortcut) decides from the text: known aliases
-   * restore, anything else is masked; the panel's buttons act on the clipboard only. */
-  async function act(command: "auto" | "mask" | "restore"): Promise<QuickStatus> {
+   * restore, anything else is masked; the panel's buttons act on the clipboard only.
+   * `given` is text handed over by a Service: it is used as is and the result goes
+   * to the clipboard. */
+  async function act(command: "auto" | "mask" | "restore", given?: string): Promise<QuickStatus> {
     let replaced = false;
     let before = "";
     const done = async (message: string, tone: QuickStatus["tone"] = "ok") => {
@@ -180,7 +202,7 @@ export function useQuickActions({
     };
     /** Nothing changed: a taken selection hands the user their clipboard back. */
     const undone = async (message: string) => {
-      if (replaced) await adapter.writeClipboard(before).catch(() => {});
+      if (replaced) await writeClipboard(before).catch(() => {});
       return done(message, "error");
     };
     if (locked()) return done(lockedMessage, "error");
@@ -192,8 +214,9 @@ export function useQuickActions({
       } catch {
         return await done(quickMessages.clipboard, "error");
       }
-      let text = before;
-      if (command === "auto") ({ text, replaced } = await takeSelection(before));
+      let text = given ?? before;
+      if (command === "auto" && given === undefined)
+        ({ text, replaced } = await takeSelection(before));
       const direction = quickDirection(text, knownTables());
       if (direction === "empty") return await undone(quickMessages.empty);
       if (command === "restore" || (command === "auto" && direction !== "mask")) {
@@ -203,7 +226,7 @@ export function useQuickActions({
           );
         const result = restoreFromTables(text, knownTables());
         try {
-          await adapter.writeClipboard(result.text);
+          await writeClipboard(result.text);
         } catch {
           return await done(quickMessages.clipboard, "error");
         }
@@ -217,7 +240,7 @@ export function useQuickActions({
       const session = outcome.session;
       if (!session.analysis.findings.length) return await undone(quickMessages.nothing);
       try {
-        await adapter.writeClipboard(sessionOutput(session));
+        await writeClipboard(sessionOutput(session));
       } catch {
         return await done(quickMessages.clipboard, "error");
       }
@@ -255,6 +278,52 @@ export function useQuickActions({
     write(panelKey, on);
     if (adapter.desktop) await adapter.setPinned(on).catch(() => {});
   }
+  /** The clipboard watch noticed a change: read once, check with the built-in rules,
+   * and nudge. Our own output, alias text, empty and locked cases are left alone. */
+  async function clipboardChanged() {
+    if (!watchOn.value || busy.value || locked()) return;
+    let text: string;
+    try {
+      text = await adapter.readClipboard();
+    } catch {
+      return;
+    }
+    if (!text.trim() || text === lastWritten || aliasTokens(text).length) return;
+    const found = await run.probe(text);
+    if (found > 0 && watchOn.value)
+      await show({ message: quickMessages.offer(found), tone: "offer" });
+  }
+  async function setClipboardWatch(on: boolean) {
+    watchFailure.value = "";
+    try {
+      await adapter.setClipboardWatch(on);
+      watchOn.value = on;
+      write(watchKey, on);
+    } catch {
+      watchOn.value = false;
+      write(watchKey, false);
+      if (on) watchFailure.value = watchError;
+    }
+  }
+  /** A macOS Service: text is masked or restored to the clipboard; the first file
+   * opens on its page in the main window. */
+  async function service(request: ServiceRequest) {
+    if (request.kind === "text") {
+      await act("auto", request.text);
+      return;
+    }
+    const [path, ...rest] = request.paths;
+    if (!path || !openFile) return;
+    const name = path.split(/[\\/]/).pop() || path;
+    try {
+      const bytes = await adapter.readServiceFile(path);
+      const error = await openFile(new File([bytes], name));
+      if (error) await show({ message: error, tone: "error" });
+      else if (rest.length) await show({ message: quickMessages.oneFile(name), tone: "ok" });
+    } catch {
+      await show({ message: serviceFileError, tone: "error" });
+    }
+  }
   /** The tray's quit: finish pending saves, then let the native side exit. */
   async function quit() {
     try {
@@ -271,6 +340,8 @@ export function useQuickActions({
 
   let stopCommands: (() => void) | undefined;
   let stopClose: (() => void) | undefined;
+  let stopService: (() => void) | undefined;
+  let stopWatch: (() => void) | undefined;
   // Permission is granted in the OS settings while this window is in the background,
   // so it is re-read whenever the window comes back.
   const recheck = () => void checkInputPermission();
@@ -280,15 +351,27 @@ export function useQuickActions({
     stopClose = await adapter
       .onCloseRequested(() => void closeToBackground())
       .catch(() => undefined);
+    stopService = await adapter
+      .onService((request) => void service(request))
+      .catch(() => undefined);
+    stopWatch = await adapter
+      .onClipboardChanged(() => void clipboardChanged())
+      .catch(() => undefined);
     if (shortcutOn.value) await applyShortcut(true);
     if (typeof window !== "undefined") window.addEventListener("focus", recheck);
     await Promise.all([checkInputPermission(), readLaunchAtLogin()]);
+    watchSupported.value = await adapter.watchSupported().catch(() => false);
+    if (watchOn.value) await setClipboardWatch(watchSupported.value);
   }
   function stop() {
     stopCommands?.();
     stopCommands = undefined;
     stopClose?.();
     stopClose = undefined;
+    stopService?.();
+    stopService = undefined;
+    stopWatch?.();
+    stopWatch = undefined;
     if (typeof window !== "undefined") window.removeEventListener("focus", recheck);
     if (shortcutOn.value) void applyShortcut(false);
   }
@@ -305,6 +388,10 @@ export function useQuickActions({
     launchAtLogin: computed(() => launchAtLogin.value),
     launchFailure,
     setLaunchAtLogin,
+    watchOn: computed(() => watchOn.value),
+    watchSupported: computed(() => watchSupported.value),
+    watchFailure,
+    setClipboardWatch,
     act,
     setShortcut,
     setPinned,

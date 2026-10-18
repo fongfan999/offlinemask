@@ -101,6 +101,31 @@ const quick = useProvided(quickKey);
         />Khởi động cùng máy
       </label>
     </div>
+    <div class="settings-tool-row">
+      <div>
+        <h3>Theo dõi clipboard</h3>
+        <p id="quick-watch-help">
+          Tắt mặc định. Khi bật, mỗi lần bạn sao chép văn bản, OfflineMask kiểm tra ngay trên máy
+          bằng quy tắc có sẵn (email, số điện thoại, số tài khoản) và chỉ nhắc ở bảng nổi nếu thấy.
+          Không lưu, không ghi lại, không gửi đi đâu.
+        </p>
+        <p v-if="quick.desktop && !quick.watchSupported.value" class="quick-note">
+          Hệ này không báo khi clipboard đổi, nên chưa theo dõi được.
+        </p>
+        <p v-if="quick.watchFailure.value" class="quick-error" role="alert">
+          {{ quick.watchFailure.value }}
+        </p>
+      </div>
+      <label class="quick-toggle">
+        <input
+          type="checkbox"
+          :checked="quick.watchOn.value"
+          :disabled="!quick.desktop || !quick.watchSupported.value"
+          aria-describedby="quick-watch-help"
+          @change="quick.setClipboardWatch(($event.target as HTMLInputElement).checked)"
+        />Bật
+      </label>
+    </div>
     <p v-if="quick.lastStatus.value" class="quick-last" role="status">
       Lần gần nhất: {{ quick.lastStatus.value.message }}
     </p>

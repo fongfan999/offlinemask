@@ -13,9 +13,11 @@ import {
   backgroundMessage,
   launchError,
   lockedMessage,
+  serviceFileError,
   shortcutError,
   shortcutKey,
   useQuickActions,
+  watchKey,
   workingMessage,
 } from "../src/composables/useQuickActions.ts";
 import { panelKey } from "../src/adapters/quick-actions.ts";
@@ -133,6 +135,29 @@ function fakeAdapter(clipboard = "") {
       adapter.autostart = on;
     },
     quit: async () => calls.push(["quit"]),
+    serviceHandler: null,
+    changedHandler: null,
+    files: {},
+    watch: true,
+    onService: async (handler) => {
+      adapter.serviceHandler = handler;
+      return () => {};
+    },
+    readServiceFile: async (path) => {
+      calls.push(["read", path]);
+      const bytes = adapter.files[path];
+      if (!bytes) throw new Error("denied");
+      return bytes;
+    },
+    watchSupported: async () => adapter.watch,
+    setClipboardWatch: async (on) => {
+      if (!adapter.watch) throw new Error("unsupported");
+      calls.push(["watch", on]);
+    },
+    onClipboardChanged: async (handler) => {
+      adapter.changedHandler = handler;
+      return () => {};
+    },
   };
   return adapter;
 }
@@ -140,6 +165,12 @@ function fakeRun(sessions) {
   const run = {
     outcome: null,
     texts: [],
+    probed: [],
+    found: 0,
+    async probe(text) {
+      run.probed.push(text);
+      return run.found;
+    },
     async maskText(text) {
       run.texts.push(text);
       if (run.outcome) return run.outcome;
@@ -446,4 +477,98 @@ test("the tray's quit flushes pending work before the native exit", async () => 
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.deepEqual(order, ["flush"]);
   assert.deepEqual(adapter.calls.at(-1), ["quit"]);
+});
+
+test("a Service hands text straight to the action and the first file to its page", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("clipboard cũ");
+  adapter.permission = "granted"; // a Service never takes the selection
+  const run = fakeRun(sessions);
+  const opened = [];
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    openFile: async (file) => {
+      opened.push([file.name, file.size]);
+      return file.name.endsWith(".pdf") ? "PDF sắp được hỗ trợ." : "";
+    },
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  adapter.serviceHandler({ kind: "text", text: phoneText });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(run.texts, [phoneText]);
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "copy" || call[0] === "paste"),
+    [],
+  );
+  assert.equal(quick.lastStatus.value.message, quickMessages.masked(1));
+
+  adapter.files["/tmp/a.xlsx"] = new Uint8Array([1, 2, 3]);
+  adapter.serviceHandler({ kind: "files", paths: ["/tmp/a.xlsx", "/tmp/b.xlsx"] });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(opened, [["a.xlsx", 3]]);
+  assert.equal(quick.lastStatus.value.message, quickMessages.oneFile("a.xlsx"));
+  adapter.files["/tmp/c.pdf"] = new Uint8Array([1]);
+  adapter.serviceHandler({ kind: "files", paths: ["/tmp/c.pdf"] });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(quick.lastStatus.value.message, "PDF sắp được hỗ trợ.");
+  adapter.serviceHandler({ kind: "files", paths: ["/tmp/never-offered.csv"] });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(quick.lastStatus.value.message, serviceFileError);
+});
+
+test("the clipboard watch is off by default, nudges only on real finds, never on our own output", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter(phoneText);
+  const run = fakeRun(sessions);
+  const storage = memoryStorage();
+  const quick = useQuickActions({ adapter, run, sessions, locked: () => false, storage });
+  await quick.start();
+  assert.equal(quick.watchOn.value, false);
+  assert.equal(quick.watchSupported.value, true);
+  adapter.changedHandler();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(run.probed, []);
+
+  await quick.setClipboardWatch(true);
+  assert.equal(storage.data.get(watchKey), "on");
+  assert.deepEqual(adapter.calls.at(-1), ["watch", true]);
+  run.found = 2;
+  adapter.changedHandler();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(run.probed, [phoneText]);
+  assert.equal(quick.lastStatus.value.message, quickMessages.offer(2));
+  assert.equal(quick.lastStatus.value.tone, "offer");
+
+  // Masking from the nudge writes our output; that change is not offered back.
+  await quick.act("mask");
+  const written = adapter.clipboard;
+  adapter.changedHandler();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(run.probed, [phoneText]);
+  assert.equal(adapter.clipboard, written);
+  // Alias text (an AI reply) and empty text are left alone too.
+  adapter.clipboard = `Reply ${sessions.value[0].analysis.findings[0].alias}`;
+  adapter.changedHandler();
+  adapter.clipboard = "   ";
+  adapter.changedHandler();
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.deepEqual(run.probed, [phoneText]);
+
+  // Unsupported systems keep it off and say why.
+  const bare = fakeAdapter("");
+  bare.watch = false;
+  const quick2 = useQuickActions({
+    adapter: bare,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage({ [watchKey]: "on" }),
+  });
+  await quick2.start();
+  assert.equal(quick2.watchSupported.value, false);
+  assert.equal(quick2.watchOn.value, false);
 });

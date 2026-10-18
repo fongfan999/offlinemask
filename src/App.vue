@@ -34,6 +34,7 @@ import { useSessions } from "./composables/useSessions.ts";
 import { useDocRun } from "./composables/useDocRun.ts";
 import { useSheetRun } from "./composables/useSheetRun.ts";
 import { useVault } from "./composables/useVault.ts";
+import { fileKind, fileKindErrors } from "./core/file-kind.ts";
 import type { Format, PrivateSession, Session } from "./core/sessions.ts";
 import HomePage from "./pages/HomePage.vue";
 import DocPage from "./pages/DocPage.vue";
@@ -62,6 +63,26 @@ const quick = useQuickActions({
   flush: async () => {
     clearTimeout(saveTimer);
     if (vault.state.value === "unlocked") await vault.save(sessions.value);
+  },
+  // A file from the Finder service (decision 0093) opens like one dropped on the home page.
+  openFile: async (file) => {
+    const kind = fileKind(file.name);
+    if (kind === "text") {
+      const error = await run.openTextFile(file);
+      if (!error) void navigate("text");
+      return error;
+    }
+    if (kind === "excel") {
+      void navigate("excel");
+      void sheet.openFile(file);
+      return "";
+    }
+    if (kind === "word") {
+      void navigate("word");
+      void doc.openFile(file);
+      return "";
+    }
+    return fileKindErrors[kind];
   },
 });
 provide(packKey, pack);
