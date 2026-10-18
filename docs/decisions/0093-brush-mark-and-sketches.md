@@ -35,9 +35,9 @@ The mark is the thing the product does: a brush swipe that hides a value. Two ey
 
 ### The restore mark
 
-Masking has an opposite, restoring, and the quick actions put the two side by side (⌘⇧M on a selection, the floating panel's two buttons). The restore mark is the same mask pushed up onto the forehead, a little askew because it was just lifted, with the eyes out in the open below it. The two parts are unchanged, only their relation flips: eyes inside the swipe means hidden, eyes under the lifted swipe means revealed. It never has holes; in single colour the swipe and the eyes are one fill. It is an action icon, not a second logo: tiles, favicon and app icon stay the mask. `BrandMark.vue` takes `variant="restore"`; the panel's restore button and the one-button dot use it instead of the generic undo arrow.
+Masking has an opposite, restoring, and the quick actions put the two side by side (⌘⇧M on a selection, the floating panel's buttons). The restore mark is the mask coming off: the swipe pivots up from the left, one eye still looking through its hole, the other already out in the open below the lifted end. It shows the action rather than a second state, which is what makes it read as the opposite of the mask even on its own. In single colour the covered eye is a hole and the free eye a filled dot, one even-odd path. It is an action icon, not a second logo: tiles, favicon and app icon stay the mask. `BrandMark.vue` takes `variant="restore"`; the panel's restore controls use it instead of the generic undo arrow.
 
-Alternatives tried on a strip: the mask pulled down under the chin (reads as a mouth), the lifted mask keeping empty eye holes (busy at 16 px), and a level lift (reads as a hat; the askew one reads as a movement).
+The first version was the mask pushed up level onto the forehead with both eyes below. Beside the mask and a label it read, but alone it read as a face with a hat, and the owner asked whether people would see the two as opposites. A strip of alternatives with a built-in backwards cue was drawn: the lifted mask with a small undo arrow (busy, the arrow fights the eyes), the mask as an outline only (a capsule), the swipe with its brush weight reversed (too subtle), the swipe curling back on itself (a question mark), and the peel. The peel is the only one that contains the motion.
 
 ### Generated, not drawn
 

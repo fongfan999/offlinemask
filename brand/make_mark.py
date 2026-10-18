@@ -356,26 +356,33 @@ GX0, GX1, GY0, GY1 = 6.0, 94.0, 30.0, 70.0
 
 
 def build_mark(weight=1.0):
-    """Return {"band": path, "eyes": [paths]} for the chosen mark."""
-    return {"band": swipe(weight=weight), "eyes": [dot(x, y, r * weight) for x, y, r in EYES]}
+    """Return {"band", "holes", "eyes"} for the chosen mark: both eyes are holes."""
+    return {"band": swipe(weight=weight), "holes": [dot(x, y, r * weight) for x, y, r in EYES], "eyes": []}
 
 
-# The restore mark: the same mask pushed up onto the forehead, a little askew
-# because it was just lifted, with the eyes out in the open below it. The eyes
-# are never holes here; in single colour everything is one fill.
-RESTORE_EYES = ((34.0, 65.5, 6.4), (66.0, 64.0, 6.2))
-RGX0, RGX1, RGY0, RGY1 = 7.0, 93.0, 13.0, 72.0
+# The restore mark: the mask coming off. It pivots up from the left, one eye
+# still looking through its hole, the other already out in the open below the
+# lifted end. It shows the action, not a second state: the opposite of the
+# mask is the mask being taken off. "holes" are cut in single colour, "eyes"
+# are filled; on paper both are ink.
+RESTORE_HOLE = (33.0, 48.5, 6.4)
+RESTORE_EYE = (66.0, 62.0, 6.2)
+RGX0, RGX1, RGY0, RGY1 = 5.0, 95.0, 10.0, 69.0
 
 
 def build_restore(weight=1.0):
-    """Return {"band": path, "eyes": [paths]} for the lifted mask."""
-    return {"band": swipe(11, 89, 30, 14.0, 8.0, 0.4, weight),
-            "eyes": [dot(x, y, r * weight) for x, y, r in RESTORE_EYES]}
+    """Return {"band", "holes", "eyes"} for the mask coming off."""
+    pts = line((12, 52), (88, 24), n=80, bow=0.4)
+    half = 14.5
+    w = lambda t: (half - 0.08 * half * t ** 1.4 + wobble(t, 0.06)) * weight
+    return {"band": to_path(brush(pts, w, start="round", end="round")),
+            "holes": [dot(*RESTORE_HOLE[:2], RESTORE_HOLE[2] * weight)],
+            "eyes": [dot(*RESTORE_EYE[:2], RESTORE_EYE[2] * weight)]}
 
 
 def sketch_mask(weight=1.0):
     m = build_mark(weight)
-    return {"ink": m["eyes"], "accent": [m["band"]], "mono": m["band"] + " " + " ".join(m["eyes"])}
+    return {"ink": m["holes"], "accent": [m["band"]], "mono": m["band"] + " " + " ".join(m["holes"])}
 
 
 SKETCHES2.insert(0, ("07", "MASK", "the swipe that hides, with two eye holes: what matters stays readable", sketch_mask))
