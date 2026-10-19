@@ -13,9 +13,6 @@ export const quickShortcutLabel = /Mac|iPhone|iPad/.test(navigator.userAgent)
 /** Label of the floating panel window in `tauri.conf.json`. */
 export const panelWindow = "pill";
 export const mainWindow = "main";
-/** Preferences shared by the shell and the panel window: both read plain storage. */
-export const panelKey = "offlinemask.quick-panel.v1";
-export const panelPositionKey = "offlinemask.quick-panel-position.v1";
 /** Where the app keeps living once its window is closed (decision 0092). */
 export const trayLabel = /Mac|iPhone|iPad/.test(navigator.userAgent)
   ? "thanh menu"
@@ -24,7 +21,7 @@ export const trayLabel = /Mac|iPhone|iPad/.test(navigator.userAgent)
 /** Panel or tray → shell: a button in the panel, its close control, the tray's quit, or
  * the restore preview's two actions (decision 0096). */
 export type QuickCommand =
-  "mask" | "restore" | "unknown" | "unpin" | "quit" | "copy" | "open" | "close" | "settings";
+  "mask" | "restore" | "unknown" | "quit" | "copy" | "open" | "close" | "settings";
 /** Logical screen points, top-left origin (decision 0096). */
 export interface ScreenPoint {
   x: number;
@@ -71,14 +68,11 @@ export interface SelectionMade {
 }
 /** What a macOS Service handed over (decision 0094). */
 export type ServiceRequest = { kind: "text"; text: string } | { kind: "files"; paths: string[] };
-/** Shell → panel: a result to show, and whether the panel stays after showing it. */
-export interface PanelStatus extends QuickStatus {
-  pinned: boolean;
-}
+/** Shell → panel: a result or a shape to show. */
+export type PanelStatus = QuickStatus;
 export const events = {
   command: "quick-command",
   status: "quick-status",
-  pin: "quick-pin",
   service: "quick-service",
   clipboardChanged: "clipboard-changed",
   dismiss: "quick-dismiss",
@@ -107,7 +101,6 @@ export interface QuickActionsAdapter {
   unregisterShortcut(): Promise<void>;
   onCommand(handler: (command: QuickCommand) => void): Promise<() => void>;
   sendStatus(status: PanelStatus): Promise<void>;
-  setPinned(pinned: boolean): Promise<void>;
   /** Called instead of closing the main window; the handler decides what to do. */
   onCloseRequested(handler: () => void): Promise<() => void>;
   hideMainWindow(): Promise<void>;
@@ -167,7 +160,6 @@ export const nativeQuickActions: QuickActionsAdapter = {
   onCommand: (handler) =>
     listen<{ command: QuickCommand }>(events.command, (event) => handler(event.payload.command)),
   sendStatus: (status) => emitTo(panelWindow, events.status, status),
-  setPinned: (pinned) => emitTo(panelWindow, events.pin, { pinned }),
   onCloseRequested: (handler) =>
     getCurrentWindow().onCloseRequested((event) => {
       event.preventDefault();

@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { quickShortcutLabel, trayLabel } from "../adapters/quick-actions.ts";
-import BrandMark from "./BrandMark.vue";
 import { quickKey, useProvided } from "../composables/context.ts";
 
-/** Clipboard quick actions (decision 0090): the shortcut and the floating panel. */
+/** Quick actions (decisions 0090 to 0096): the shortcut, the circle and the clipboard watch. */
 const quick = useProvided(quickKey);
 </script>
 
@@ -96,29 +95,9 @@ const quick = useProvided(quickKey);
     </div>
     <div class="settings-tool-row">
       <div>
-        <h3 id="quick-panel-title">Bảng nổi</h3>
-        <p id="quick-panel-help">
-          Một ô nhỏ luôn nổi trên các cửa sổ khác với hai nút
-          <BrandMark :size="15" class="inline-mark" />Ẩn thông tin và
-          <BrandMark variant="restore" :size="15" class="inline-mark" />Khôi phục. Kéo để đặt ở chỗ
-          bạn muốn.
-        </p>
-      </div>
-      <label class="quick-toggle">
-        <input
-          type="checkbox"
-          :checked="quick.pinned.value"
-          :disabled="!quick.desktop"
-          aria-describedby="quick-panel-help"
-          @change="quick.setPinned(($event.target as HTMLInputElement).checked)"
-        />Hiện
-      </label>
-    </div>
-    <div class="settings-tool-row">
-      <div>
         <h3>Chạy nền</h3>
         <p id="quick-launch-help">
-          Đóng cửa sổ thì OfflineMask vẫn chạy để phím tắt và bảng nổi dùng được; mở lại hoặc thoát
+          Đóng cửa sổ thì OfflineMask vẫn chạy để phím tắt và nút tròn dùng được; mở lại hoặc thoát
           hẳn từ biểu tượng OfflineMask ở {{ trayLabel }}. Khởi động cùng máy mở ứng dụng ở chế độ
           nền, không hiện cửa sổ.
         </p>
@@ -141,8 +120,8 @@ const quick = useProvided(quickKey);
         <h3>Theo dõi clipboard</h3>
         <p id="quick-watch-help">
           Tắt mặc định. Khi bật, mỗi lần bạn sao chép văn bản, OfflineMask kiểm tra ngay trên máy
-          bằng quy tắc có sẵn (email, số điện thoại, số tài khoản) và chỉ nhắc ở bảng nổi nếu thấy.
-          Không lưu, không ghi lại, không gửi đi đâu.
+          bằng quy tắc có sẵn (email, số điện thoại, số tài khoản) và chỉ nhắc ở góc màn hình nếu
+          thấy. Không lưu, không ghi lại, không gửi đi đâu.
         </p>
         <p v-if="quick.desktop && !quick.watchSupported.value" class="quick-note">
           Hệ này không báo khi clipboard đổi, nên chưa theo dõi được.

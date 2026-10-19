@@ -2647,8 +2647,7 @@ td.alias {
   -webkit-user-select: none;
 }
 .quick-dot,
-.quick-toast,
-.pill {
+.quick-toast {
   border: 1px solid var(--line-strong);
   background: var(--paper-raised);
   box-shadow:
@@ -2987,37 +2986,6 @@ td.alias {
 .quick-toast .quick-chip {
   flex: none;
 }
-/* Kept on screen: the full panel. */
-.pill {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  width: 320px;
-  padding: 8px 12px 10px;
-  overflow: hidden;
-  border-radius: 14px;
-}
-.pill-head {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  cursor: grab;
-}
-.pill-head .brand-mark {
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
-}
-.pill-head .brand-name {
-  font-size: 13px;
-}
-.pill-hint {
-  margin-left: 2px;
-  color: var(--muted);
-  font: 10px var(--mono);
-  letter-spacing: 0.08em;
-}
 .pill-close {
   display: flex;
   margin-left: auto;
@@ -3030,43 +2998,6 @@ td.alias {
 .pill-close:hover {
   background: var(--paper-sunk);
   color: var(--ink);
-}
-.pill-actions {
-  display: flex;
-  gap: 8px;
-}
-.pill-actions .primary-action,
-.pill-actions .quiet-button {
-  flex: 1;
-  justify-content: center;
-  gap: 6px;
-  min-height: 0;
-  height: 32px;
-  padding: 0 10px;
-  font-size: 12px;
-}
-.pill-status {
-  margin: 0;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  color: var(--muted);
-  font-size: 11px;
-  line-height: 1.5;
-}
-.pill-status.is-ok {
-  color: var(--ink);
-}
-.pill-status.is-error {
-  color: var(--error);
-}
-.pill-status.is-busy {
-  color: var(--note-ink);
-}
-.pill-status.is-offer,
-.pill-status.is-select {
-  color: var(--warm);
 }
 /* Indeterminate bar along the bottom edge while masking runs. */
 .pill-progress {

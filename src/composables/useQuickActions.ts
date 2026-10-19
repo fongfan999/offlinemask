@@ -1,6 +1,5 @@
 import { computed, ref, watch, type Ref } from "vue";
 import {
-  panelKey,
   trayLabel,
   type InputPermission,
   type QuickActionsAdapter,
@@ -36,7 +35,7 @@ export const shortcutError =
 export const lockedMessage = "Mở khóa OfflineMask trước khi dùng thao tác nhanh.";
 export const workingMessage = "Đang ẩn thông tin…";
 /** Flashed in the panel when the main window is closed (decision 0092). */
-export const backgroundMessage = `OfflineMask vẫn chạy nền: phím tắt và bảng nổi vẫn dùng được. Mở lại hoặc thoát hẳn từ biểu tượng OfflineMask ở ${trayLabel}.`;
+export const backgroundMessage = `OfflineMask vẫn chạy nền: phím tắt và nút tròn vẫn dùng được. Mở lại hoặc thoát hẳn từ biểu tượng OfflineMask ở ${trayLabel}.`;
 export const launchError = "Chưa đổi được cài đặt khởi động cùng máy. Vui lòng thử lại.";
 
 type PreferenceStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -87,7 +86,7 @@ export function useQuickActions({
   historyKept,
   storage = defaultStorage(),
 }: QuickActionsDependencies) {
-  // Two preferences, no content: on/off for the shortcut and the panel.
+  // Preferences only, no content: on/off switches.
   const read = (key: string, fallback: boolean) => {
     try {
       const value = storage?.getItem(key);
@@ -104,7 +103,6 @@ export function useQuickActions({
     }
   };
   const shortcutOn = ref(adapter.desktop && read(shortcutKey, true));
-  const pinned = ref(adapter.desktop && read(panelKey, false));
   // The clipboard watch is opt-in (decision 0095): off until the user turns it on.
   const watchOn = ref(adapter.desktop && read(watchKey, false));
   const watchSupported = ref(false);
@@ -154,9 +152,7 @@ export function useQuickActions({
   }
   /** Closing the window keeps the shortcut and panel alive; the panel says so. */
   async function closeToBackground() {
-    await adapter
-      .sendStatus({ message: backgroundMessage, tone: "ok", pinned: pinned.value })
-      .catch(() => {});
+    await adapter.sendStatus({ message: backgroundMessage, tone: "ok" }).catch(() => {});
     await adapter.hideMainWindow().catch(() => {});
   }
   /** Whether ⌘⇧M may replace the selection in place (decision 0091); "unknown" until checked. */
@@ -207,8 +203,7 @@ export function useQuickActions({
 
   async function show(status: QuickStatus) {
     lastStatus.value = status;
-    if (adapter.desktop)
-      await adapter.sendStatus({ ...status, pinned: pinned.value }).catch(() => {});
+    if (adapter.desktop) await adapter.sendStatus(status).catch(() => {});
   }
   /** The shortcut first tries to take the front application's selection. A marker
    * goes on the clipboard before the copy chord, so a selection that equals the old
@@ -337,11 +332,6 @@ export function useQuickActions({
     shortcutOn.value = on;
     write(shortcutKey, on);
     await applyShortcut(on);
-  }
-  async function setPinned(on: boolean) {
-    pinned.value = on;
-    write(panelKey, on);
-    if (adapter.desktop) await adapter.setPinned(on).catch(() => {});
   }
   /** The popover: a fresh selection in another application. Its direction decides the
    * question; alias text from no known session and locked or busy states show nothing. */
@@ -634,8 +624,7 @@ export function useQuickActions({
     if (adapter.desktop) await adapter.dismissPanel().catch(() => {});
   }
   function onCommand(command: QuickCommand) {
-    if (command === "unpin") void setPinned(false);
-    else if (command === "quit") void quit();
+    if (command === "quit") void quit();
     else if (command === "settings") void goToSettings();
     else if (command === "copy" || command === "open" || command === "close")
       void previewAction(command);
@@ -726,7 +715,6 @@ export function useQuickActions({
   return {
     desktop: adapter.desktop,
     shortcutOn: computed(() => shortcutOn.value),
-    pinned: computed(() => pinned.value),
     shortcutFailure,
     lastStatus,
     busy,
@@ -747,7 +735,6 @@ export function useQuickActions({
     act,
     shortcut,
     setShortcut,
-    setPinned,
     forget,
     start,
     stop,

@@ -2,24 +2,20 @@
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from "vue";
 import AppIcon from "./components/AppIcon.vue";
 import BrandMark from "./components/BrandMark.vue";
-import {
-  panelKey,
-  quickShortcutLabel,
-  type PanelStatus,
-  type QuickCommand,
-} from "./adapters/quick-actions.ts";
+import { type PanelStatus, type QuickCommand } from "./adapters/quick-actions.ts";
 import { nativeQuickPanel as panel, type Spot } from "./adapters/quick-panel.ts";
 
 /** The floating quick-action window (decisions 0090 and 0096). It owns only its own
  * window: its shape, where it sits, whether it is shown. The shell does the masking
- * and restoring; this page never touches the clipboard. Four shapes:
+ * and restoring; this page never touches the clipboard. Its shapes:
  * - `dot`: a 32 px circle just above a fresh selection; one click runs its action.
  *   Hovering it shows a one-line hint beside it saying what that click will do;
  * - `preview`: read-only AI text with the real values back, top right, with copy and
  *   open-in-app buttons; it stays until one is used or it is closed;
- * - `toast`: a small rounded card in the corner for progress and results;
- * - `panel`: the full panel with both buttons, when the user keeps it on screen. */
-type Mode = "dot" | "preview" | "notice" | "toast" | "panel";
+ * - `notice`: why codes of an earlier launch cannot be restored;
+ * - `toast`: a small rounded card in the corner for clipboard results (tray, Services).
+ * The always-visible panel was removed: the circle and ⌘⇧M cover it (decision 0096). */
+type Mode = "dot" | "preview" | "notice" | "toast";
 
 const flashMs = 3600;
 /** A question (a selection, the clipboard watch's nudge) waits longer for an answer. */
@@ -30,8 +26,7 @@ const leaveMs = 350;
 const inset = 8;
 
 const status = ref<PanelStatus | null>(null);
-const pinned = ref(false);
-const mode = ref<Mode>("panel");
+const mode = ref<Mode>("toast");
 /** The circle is hovered: the hint shows beside it. */
 const hovered = ref(false);
 /** A click on the circle that works in place plays out on the circle itself: it spins
@@ -53,13 +48,6 @@ let hoverPoll: ReturnType<typeof setInterval> | undefined;
 const stops: (() => void)[] = [];
 let alive = true;
 
-function readPinned() {
-  try {
-    return localStorage.getItem(panelKey) === "on";
-  } catch {
-    return false;
-  }
-}
 /** Size the window to the shape now on screen. */
 async function fit() {
   await nextTick();
@@ -83,7 +71,6 @@ async function hide() {
   clearTimeout(leaveTimer);
   stopHover();
   dot = null;
-  if (pinned.value && mode.value !== "panel") return showCorner();
   const token = ++fadeToken;
   leaving.value = true;
   await new Promise((resolve) => setTimeout(resolve, fadeMs));
@@ -100,7 +87,7 @@ async function showCorner() {
   stayVisible();
   stopTips();
   stopHover();
-  mode.value = pinned.value ? "panel" : "toast";
+  mode.value = "toast";
   await fit();
   await panel.place().catch(() => {});
   await panel.show();
@@ -289,7 +276,6 @@ async function present(next: PanelStatus) {
     return;
   }
   status.value = next;
-  pinned.value = next.pinned;
   clearTimeout(hideTimer);
   if (next.tone === "preview") return showPreview();
   if (next.tone === "notice") return showNotice();
@@ -307,67 +293,56 @@ async function present(next: PanelStatus) {
     return;
   }
   await showCorner();
-  if (!pinned.value && next.tone !== "busy") hideLater(next.tone === "offer" ? askMs : flashMs);
+  if (next.tone !== "busy") hideLater(next.tone === "offer" ? askMs : flashMs);
 }
 async function send(command: QuickCommand) {
   await panel.send(command).catch(() => {});
 }
-async function close() {
-  pinned.value = false;
-  await panel.hide();
-  await send("unpin");
-}
 
-/** Browser preview only: `pill.html?state=dot|hover|restore|unknown|circle-busy|circle-done|circle-error|preview|copied|notice|toast|busy|offer|panel` shows
+/** Browser preview only: `pill.html?state=dot|hover|restore|unknown|circle-busy|circle-done|circle-error|preview|copied|notice|toast|busy|offer` shows
  * one shape with sample text, so the design can be checked without the desktop app. */
 function preview() {
   const state = new URLSearchParams(location.search).get("state");
   if (!state) return;
   const samples: Record<string, PanelStatus> = {
-    dot: { message: "", tone: "select", action: "mask", pinned: false },
+    dot: { message: "", tone: "select", action: "mask" },
     unknown: {
       message: "",
       tone: "select",
       action: "unknown",
       hint: "Không tìm thấy bản gốc",
-      pinned: false,
     },
     notice: {
       message: "Không tìm thấy bản gốc",
       tone: "notice",
-      pinned: false,
       notice: {
         body: "Các mã thay thế này được tạo trong một lần mở trước và chưa được lưu lại, nên không khôi phục được. Đặt mật mã để giữ lịch sử giữa các lần mở OfflineMask.",
         settings: true,
       },
     },
-    "circle-busy": { message: "Đang ẩn thông tin…", tone: "busy", inPlace: true, pinned: false },
-    "circle-done": { message: "Đã ẩn 2 thông tin", tone: "ok", inPlace: true, pinned: false },
+    "circle-busy": { message: "Đang ẩn thông tin…", tone: "busy", inPlace: true },
+    "circle-done": { message: "Đã ẩn 2 thông tin", tone: "ok", inPlace: true },
     "circle-error": {
       message: "Không thấy thông tin cần ẩn. Clipboard được giữ nguyên.",
       tone: "error",
       inPlace: true,
-      pinned: false,
     },
     hover: {
       message: "",
       tone: "select",
       action: "mask",
       hint: "Ẩn thông tin",
-      pinned: false,
     },
     restore: {
       message: "",
       tone: "select",
       action: "restore",
       hint: "Khôi phục thông tin",
-      pinned: false,
     },
-    toast: { message: "Đã ẩn 2 thông tin ngay tại chỗ bạn chọn.", tone: "ok", pinned: false },
+    toast: { message: "Đã ẩn 2 thông tin ngay tại chỗ bạn chọn.", tone: "ok" },
     preview: {
       message: "Đã khôi phục",
       tone: "preview",
-      pinned: false,
       preview: {
         text: "Tóm tắt: khách Nguyễn Văn A gọi từ 0901234567 và cần hỗ trợ gấp. Đã gửi email xác nhận tới a@example.com.",
         marks: [
@@ -377,17 +352,14 @@ function preview() {
         canOpen: true,
       },
     },
-    busy: { message: "Đang ẩn thông tin…", tone: "busy", pinned: false },
+    busy: { message: "Đang ẩn thông tin…", tone: "busy" },
     offer: {
       message: "Văn bản vừa sao chép có 2 thông tin nhạy cảm.",
       tone: "offer",
-      pinned: false,
     },
-    panel: { message: "Sao chép văn bản, rồi bấm một nút.", tone: "ok", pinned: true },
   };
   status.value = samples[state === "copied" ? "preview" : state] ?? null;
   copied.value = state === "copied";
-  pinned.value = state === "panel";
   hovered.value = state === "hover" || state === "restore" || state === "unknown";
   circleAction.value = state === "restore" || state === "unknown" ? state : "mask";
   circle.value = state.startsWith("circle-") ? (state.slice(7) as Circle) : "idle";
@@ -395,7 +367,7 @@ function preview() {
   mode.value =
     dotStates.includes(state) || state.startsWith("circle-")
       ? "dot"
-      : state === "panel" || state === "preview" || state === "notice"
+      : state === "preview" || state === "notice"
         ? state
         : state === "copied"
           ? "preview"
@@ -403,11 +375,8 @@ function preview() {
 }
 
 onMounted(async () => {
-  pinned.value = readPinned();
   if (!panel.desktop) return preview();
-  mode.value = pinned.value ? "panel" : "toast";
-  // Take the corner (or the remembered spot) while still hidden, so the first
-  // flash does not jump.
+  // Take the corner while still hidden, so the first flash does not jump.
   await fit();
   await panel.place().catch(() => {});
   // Handlers run only while this page instance is mounted: a hot reload in development
@@ -416,23 +385,12 @@ onMounted(async () => {
     await panel.onStatus((next) => {
       if (alive) void present(next);
     }),
-    await panel.onPin(async (next) => {
-      if (!alive) return;
-      pinned.value = next;
-      if (next) await showCorner();
-      else await hide();
-    }),
     await panel.onDismiss(() => {
       if (alive) void hide();
-    }),
-    // Only the full panel can be dragged; its resting place is remembered.
-    await panel.onMoved(() => {
-      if (alive && mode.value === "panel") void panel.rememberPosition().catch(() => {});
     }),
   );
   // Unmounted while the listeners were still being registered: drop them now.
   if (!alive) for (const stop of stops) stop();
-  else if (pinned.value) await showCorner();
 });
 onBeforeUnmount(() => {
   alive = false;
@@ -587,32 +545,6 @@ onBeforeUnmount(() => {
       <button v-if="status?.tone === 'offer'" class="quick-chip is-primary" @click="send('mask')">
         Ẩn
       </button>
-      <div v-if="busy" class="pill-progress" aria-hidden="true"><span></span></div>
-    </div>
-
-    <!-- Kept on screen: the full panel, draggable by its header. -->
-    <div v-else ref="shape" class="pill">
-      <div class="pill-head" data-tauri-drag-region>
-        <span class="brand-mark" data-tauri-drag-region><BrandMark :size="18" /></span>
-        <span class="brand-name" data-tauri-drag-region
-          >Offline<span class="brand-accent">Mask</span></span
-        >
-        <span class="pill-hint" data-tauri-drag-region>{{ quickShortcutLabel }}</span>
-        <button class="pill-close" aria-label="Ẩn bảng nổi" @click="close">
-          <AppIcon name="close" :size="14" />
-        </button>
-      </div>
-      <div class="pill-actions">
-        <button class="primary-action" :disabled="busy" @click="send('mask')">
-          <BrandMark :size="16" />Ẩn thông tin
-        </button>
-        <button class="quiet-button" :disabled="busy" @click="send('restore')">
-          <BrandMark variant="restore" :size="16" />Khôi phục
-        </button>
-      </div>
-      <p class="pill-status" :class="`is-${status?.tone ?? 'idle'}`" role="status">
-        {{ status?.message ?? "Sao chép văn bản, rồi bấm một nút." }}
-      </p>
       <div v-if="busy" class="pill-progress" aria-hidden="true"><span></span></div>
     </div>
   </div>

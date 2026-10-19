@@ -22,7 +22,6 @@ import {
   watchKey,
   workingMessage,
 } from "../src/composables/useQuickActions.ts";
-import { panelKey } from "../src/adapters/quick-actions.ts";
 import { dotSpot, growFrom } from "../src/adapters/quick-panel.ts";
 
 const detection = (start, end, type) => ({
@@ -111,9 +110,7 @@ function fakeAdapter(clipboard = "") {
       commandHandler = handler;
       return () => calls.push(["unlisten"]);
     },
-    sendStatus: async (status) =>
-      calls.push(["status", status.message, status.tone, status.pinned]),
-    setPinned: async (pinned) => calls.push(["pin", pinned]),
+    sendStatus: async (status) => calls.push(["status", status.message, status.tone]),
     permission: "unsupported",
     selection: null,
     inputPermission: async (prompt) => {
@@ -226,12 +223,12 @@ test("the shortcut masks ordinary text and leaves the masked copy on the clipboa
   assert.deepEqual(run.texts, [phoneText]);
   const alias = sessions.value[0].analysis.findings[0].alias;
   assert.equal(adapter.clipboard, `Gọi ${alias} giúp tôi.`);
-  // The panel saw the work in progress, then the result; the panel is not pinned.
+  // The panel saw the work in progress, then the result.
   assert.deepEqual(
-    adapter.calls.filter((call) => call[0] === "status").map((call) => [call[1], call[2], call[3]]),
+    adapter.calls.filter((call) => call[0] === "status").map((call) => [call[1], call[2]]),
     [
-      [workingMessage, "busy", false],
-      [quickMessages.masked(1), "ok", false],
+      [workingMessage, "busy"],
+      [quickMessages.masked(1), "ok"],
     ],
   );
 });
@@ -291,7 +288,7 @@ test("empty, foreign-alias, locked and busy cases change nothing on the clipboar
 });
 
 test("preferences persist as on/off flags; a failed registration turns the shortcut off", async () => {
-  const storage = memoryStorage({ [panelKey]: "on" });
+  const storage = memoryStorage();
   const sessions = ref([]);
   const adapter = fakeAdapter("");
   adapter.registerShortcut = async () => {
@@ -304,22 +301,14 @@ test("preferences persist as on/off flags; a failed registration turns the short
     locked: () => false,
     storage,
   });
-  assert.equal(quick.pinned.value, true);
   assert.equal(quick.shortcutOn.value, true);
   await quick.start();
   assert.equal(quick.shortcutOn.value, false);
   assert.equal(quick.shortcutFailure.value, shortcutError);
-  await quick.setPinned(false);
-  assert.equal(storage.data.get(panelKey), "off");
-  assert.deepEqual(adapter.calls.at(-1), ["pin", false]);
   adapter.registerShortcut = async () => adapter.calls.push(["register"]);
   await quick.setShortcut(true);
   assert.equal(storage.data.get(shortcutKey), "on");
   assert.equal(quick.shortcutFailure.value, "");
-  // The panel's close control unpins through the command channel.
-  adapter.command("unpin");
-  await nextTick();
-  assert.equal(quick.pinned.value, false);
   quick.stop();
   assert.deepEqual(adapter.calls.at(-1), ["unregister"]);
 });
@@ -435,7 +424,7 @@ test("closing the window hides it and tells the panel; the login item mirrors th
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.deepEqual(
     adapter.calls.filter((call) => call[0] === "status" || call[0] === "hide-main"),
-    [["status", backgroundMessage, "ok", false], ["hide-main"]],
+    [["status", backgroundMessage, "ok"], ["hide-main"]],
   );
   await quick.setLaunchAtLogin(false);
   assert.equal(quick.launchAtLogin.value, false);

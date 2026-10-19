@@ -13,7 +13,6 @@ import {
 import {
   events,
   mainWindow,
-  panelPositionKey,
   type PanelAnchor,
   type PanelStatus,
   type QuickCommand,
@@ -41,15 +40,13 @@ export interface QuickPanelAdapter {
   /** False in the browser preview, where the page only shows its layout. */
   desktop: boolean;
   onStatus(handler: (status: PanelStatus) => void): Promise<UnlistenFn>;
-  onPin(handler: (pinned: boolean) => void): Promise<UnlistenFn>;
   onDismiss(handler: () => void): Promise<UnlistenFn>;
-  onMoved(handler: () => void): Promise<UnlistenFn>;
   send(command: QuickCommand): Promise<void>;
   show(): Promise<void>;
   hide(): Promise<void>;
   /** Resize to fit the content (logical points). */
   fit(width: number, height: number): Promise<void>;
-  /** Move to the remembered spot, or the bottom-right corner of the primary screen. */
+  /** The bottom-right corner of the primary screen. */
   place(): Promise<void>;
   /** The top-right corner of the primary screen, for the restore preview. */
   placeTopRight(): Promise<void>;
@@ -68,7 +65,6 @@ export interface QuickPanelAdapter {
   pointerInside(): Promise<boolean>;
   /** The pointer in the page's CSS pixels, or null when it is outside the window. */
   pointerInPage(): Promise<{ x: number; y: number } | null>;
-  rememberPosition(): Promise<void>;
 }
 
 const margin = 24;
@@ -144,14 +140,8 @@ export const nativeQuickPanel: QuickPanelAdapter = {
     isTauri()
       ? listen<PanelStatus>(events.status, (event) => handler(event.payload))
       : Promise.resolve(none),
-  onPin: (handler) =>
-    isTauri()
-      ? listen<{ pinned: boolean }>(events.pin, (event) => handler(event.payload.pinned))
-      : Promise.resolve(none),
   onDismiss: (handler) =>
     isTauri() ? listen(events.dismiss, () => handler()) : Promise.resolve(none),
-  onMoved: (handler) =>
-    isTauri() ? getCurrentWindow().onMoved(() => handler()) : Promise.resolve(none),
   send: (command) =>
     isTauri() ? emitTo(mainWindow, events.command, { command }) : Promise.resolve(),
   show: () => (isTauri() ? getCurrentWindow().show() : Promise.resolve()),
@@ -164,27 +154,8 @@ export const nativeQuickPanel: QuickPanelAdapter = {
     if (!isTauri()) return;
     const panel = getCurrentWindow();
     const monitor = await primaryMonitor();
-    const size = await panel.outerSize();
-    let raw: string | null = null;
-    try {
-      raw = localStorage.getItem(panelPositionKey);
-    } catch {
-      // Unreadable storage: the default corner below.
-    }
-    if (raw) {
-      const { x, y } = JSON.parse(raw) as { x: number; y: number };
-      const inside =
-        !monitor ||
-        (x >= monitor.position.x &&
-          y >= monitor.position.y &&
-          x + size.width <= monitor.position.x + monitor.size.width &&
-          y + size.height <= monitor.position.y + monitor.size.height);
-      if (Number.isFinite(x) && Number.isFinite(y) && inside) {
-        await panel.setPosition(new PhysicalPosition(x, y));
-        return;
-      }
-    }
     if (!monitor) return;
+    const size = await panel.outerSize();
     const area = monitor.workArea ?? monitor;
     const gap = Math.round(margin * monitor.scaleFactor);
     await panel.setPosition(
@@ -286,14 +257,5 @@ export const nativeQuickPanel: QuickPanelAdapter = {
       pointer.x < position.x + size.width &&
       pointer.y < position.y + size.height
     );
-  },
-  async rememberPosition() {
-    if (!isTauri()) return;
-    const { x, y } = await getCurrentWindow().outerPosition();
-    try {
-      localStorage.setItem(panelPositionKey, JSON.stringify({ x, y }));
-    } catch {
-      // Unwritable storage: the next launch uses the default corner.
-    }
   },
 };
