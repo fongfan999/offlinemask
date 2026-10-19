@@ -1,5 +1,6 @@
 import { computed, ref, watch, type Ref } from "vue";
 import {
+  selectionAnchor,
   type InputPermission,
   type QuickActionsAdapter,
   type QuickCommand,
@@ -435,12 +436,7 @@ export function useQuickActions({
           : action === "restore"
             ? quickMessages.hintRestore
             : quickMessages.hintUnknown,
-      // Editable fields report the selection's own rectangle; read-only text (a chat
-      // bubble, a page) often reports the whole block, so the cursor is the better spot.
-      anchor: {
-        bounds: selection.editable ? (selection.bounds ?? undefined) : undefined,
-        pointer: selection.pointer,
-      },
+      anchor: selectionAnchor(selection),
     });
   }
   /** Read-only AI text: show what it says with the real values, without touching the
@@ -637,10 +633,7 @@ export function useQuickActions({
       message: action === "mask" ? quickMessages.selectMask : quickMessages.selectRestore,
       tone: "select",
       action,
-      anchor: {
-        bounds: selection.editable ? (selection.bounds ?? undefined) : undefined,
-        pointer: selection.pointer,
-      },
+      anchor: selectionAnchor(selection),
     });
     if (action === "unknown") await explainUnknown();
     else await actOnSelection(action, { text: selection.text, editable: selection.editable });

@@ -65,6 +65,38 @@ export interface SelectionMade {
   pointer: ScreenPoint;
   /** Typed into: masking replaces it. Read-only text only ever gets a restore preview. */
   editable: boolean;
+  /** `bounds` is only the frame of the field holding the text (Chromium and Electron
+   * fields give no geometry for a range). */
+  field?: boolean;
+  /** Made with the mouse, so `pointer` is where the drag or clicks ended. */
+  mouse?: boolean;
+}
+/** Where the circle goes for a selection (decision 0101): by the text whenever its
+ * place is known. Read-only text (a chat bubble, a page) often reports a whole block,
+ * so the cursor is the better spot. When an editable field only reports its frame, the
+ * end of a mouse selection is where the pointer came up; after the keyboard (⌘A, ⌘⇧M)
+ * the text begins at the field's top-left. */
+export function selectionAnchor(selection: SelectionMade): PanelAnchor {
+  const { bounds, pointer } = selection;
+  if (!selection.editable || !bounds) return { pointer };
+  if (!selection.field) return { bounds, pointer };
+  const inside =
+    pointer.x >= bounds.x &&
+    pointer.x <= bounds.x + bounds.width &&
+    pointer.y >= bounds.y &&
+    pointer.y <= bounds.y + bounds.height;
+  if (selection.mouse && inside) return { pointer };
+  // The first line's start: a small box just inside the field's padding.
+  const line = Math.min(bounds.height, 24);
+  return {
+    bounds: {
+      x: bounds.x + 8,
+      y: bounds.y + Math.min(6, (bounds.height - line) / 2),
+      width: 16,
+      height: line,
+    },
+    pointer,
+  };
 }
 /** What a macOS Service handed over (decision 0094). */
 export type ServiceRequest = { kind: "text"; text: string } | { kind: "files"; paths: string[] };

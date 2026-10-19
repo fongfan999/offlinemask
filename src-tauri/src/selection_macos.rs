@@ -19,7 +19,7 @@ use objc2_app_kit::{NSEvent, NSEventMask, NSEventType, NSScreen, NSWorkspace};
 use tauri::{AppHandle, Manager, Runtime};
 
 use crate::selection::{
-    emit_cleared, emit_made, usable, Gesture, Point, Probe, Rect, Selection, SETTLE_MS,
+    emit_cleared, emit_made, usable, Gesture, Point, Probe, Read, Rect, Selection, SETTLE_MS,
 };
 
 #[repr(C)]
@@ -120,7 +120,7 @@ fn settable(element: AXUIElementRef, name: &str) -> bool {
     status == AX_SUCCESS && value != 0
 }
 
-fn read_selection(frontmost_pid: i32) -> Option<(String, Option<Rect>, bool)> {
+fn read_selection(frontmost_pid: i32) -> Option<Read> {
     // SAFETY: plain query.
     if !unsafe { AXIsProcessTrusted() } || frontmost_pid as u32 == std::process::id() {
         return None;
@@ -197,8 +197,9 @@ fn usable_rect(rect: CGRectRaw) -> Option<Rect> {
 /// Where the selection is on screen, so the circle sits by the text rather than by the
 /// pointer (decision 0096). Tried in order: the text range (native text views), the text
 /// marker range (WebKit and Chromium: web pages and rich editors), and the frame of the
-/// field or text area holding the selection. None leaves the pointer as the anchor.
-fn selection_bounds(element: AXUIElementRef) -> Option<Rect> {
+/// field or text area holding the selection, flagged as such. None leaves the pointer
+/// as the anchor.
+fn selection_bounds(element: AXUIElementRef) -> Option<(Rect, bool)> {
     let by_range = || {
         let range = attribute(element, "AXSelectedTextRange")?;
         let value = parameterized(element, "AXBoundsForRange", &range)?;
@@ -219,7 +220,10 @@ fn selection_bounds(element: AXUIElementRef) -> Option<Rect> {
             height: size[1],
         })
     };
-    by_range().or_else(by_marker).or_else(by_frame)
+    by_range()
+        .or_else(by_marker)
+        .map(|rect| (rect, false))
+        .or_else(|| by_frame().map(|rect| (rect, true)))
 }
 
 /// Cocoa mouse locations have a bottom-left origin; the rest of the app uses top-left.
@@ -280,7 +284,9 @@ pub fn start<R: Runtime>(app: AppHandle<R>, enabled: Arc<AtomicBool>) {
                                     &handle,
                                     Selection {
                                         text,
-                                        bounds,
+                                        field: bounds.as_ref().is_some_and(|(_, field)| *field),
+                                        bounds: bounds.map(|(rect, _)| rect),
+                                        mouse: true,
                                         pointer: at,
                                         editable,
                                     },
@@ -327,7 +333,9 @@ pub fn probe<R: Runtime>(app: &AppHandle<R>) -> Probe {
     match pid.and_then(read_selection) {
         Some((text, bounds, editable)) => Probe::Found(Selection {
             text,
-            bounds,
+            field: bounds.as_ref().is_some_and(|(_, field)| *field),
+            bounds: bounds.map(|(rect, _)| rect),
+            mouse: false,
             pointer,
             editable,
         }),

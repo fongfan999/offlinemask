@@ -1015,7 +1015,7 @@ test("read-only selections anchor the circle to the cursor, editable ones to the
   const pointer = { x: 1210, y: 660 };
   adapter.selectionHandler({ text: `Gọi ${alias}`, bounds, pointer, editable: false });
   await tick();
-  assert.deepEqual(quick.lastStatus.value.anchor, { bounds: undefined, pointer });
+  assert.deepEqual(quick.lastStatus.value.anchor, { pointer });
   adapter.selectionHandler({ text: phoneText, bounds, pointer, editable: true });
   await tick();
   assert.deepEqual(quick.lastStatus.value.anchor, { bounds, pointer });
@@ -1303,7 +1303,7 @@ test("⌘⇧M does exactly what a click on the circle does, and nothing without 
   await tick();
   await tick();
   assert.equal(sent[0].action, "restore");
-  assert.deepEqual(sent[0].anchor, { bounds: undefined, pointer: { x: 7, y: 9 } });
+  assert.deepEqual(sent[0].anchor, { pointer: { x: 7, y: 9 } });
   assert.equal(sent.at(-1).tone, "preview");
   assert.equal(sent.at(-1).preview.text, "Gọi lại 0901234567");
   assert.equal(adapter.calls.filter((call) => call[0] === "paste").length, 1);
@@ -1535,4 +1535,49 @@ test("the card goes with the result it sat under; an unanswered offer can come b
   quick.offerIntro();
   assert.equal(quick.introStage.value, null);
   quick.stop();
+});
+
+test("the circle goes by the text, even when a field only reports its frame", async () => {
+  const { selectionAnchor } = await import("../src/adapters/quick-actions.ts");
+  const pointer = { x: 900, y: 920 };
+  const text = { x: 600, y: 910, width: 300, height: 20 };
+  const field = { x: 594, y: 908, width: 529, height: 36 };
+  // A native field reports the selection itself.
+  assert.deepEqual(selectionAnchor({ text: "x", bounds: text, pointer, editable: true }), {
+    bounds: text,
+    pointer,
+  });
+  // Read-only text: the cursor.
+  assert.deepEqual(selectionAnchor({ text: "x", bounds: text, pointer, editable: false }), {
+    pointer,
+  });
+  // Only the field's frame (Chromium, Electron): a mouse selection ends at the pointer…
+  assert.deepEqual(
+    selectionAnchor({
+      text: "x",
+      bounds: field,
+      pointer,
+      editable: true,
+      field: true,
+      mouse: true,
+    }),
+    { pointer },
+  );
+  // …a keyboard one (⌘A, ⌘⇧M) starts at the field's first line, never its far end.
+  const keys = selectionAnchor({ text: "x", bounds: field, pointer, editable: true, field: true });
+  assert.equal(keys.bounds.x, field.x + 8);
+  assert.ok(keys.bounds.x + keys.bounds.width < field.x + 40);
+  assert.ok(
+    keys.bounds.y >= field.y && keys.bounds.y + keys.bounds.height <= field.y + field.height,
+  );
+  // A drag that ended outside the field also falls back to its start.
+  const outside = selectionAnchor({
+    text: "x",
+    bounds: field,
+    pointer: { x: 10, y: 10 },
+    editable: true,
+    field: true,
+    mouse: true,
+  });
+  assert.equal(outside.bounds.x, field.x + 8);
 });

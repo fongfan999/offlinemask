@@ -33,11 +33,20 @@ pub struct Rect {
     pub width: f64,
     pub height: f64,
 }
+/// What a backend reads: the text, where it is (with whether that is only the frame of
+/// the field holding it), and whether it can be typed over.
+pub type Read = (String, Option<(Rect, bool)>, bool);
 #[derive(Serialize, Clone, Debug, PartialEq)]
 pub struct Selection {
     pub text: String,
     /// None when the application reports the text but no rectangle.
     pub bounds: Option<Rect>,
+    /// `bounds` is the frame of the field holding the text, not the text itself: some
+    /// applications (Chromium and Electron text fields) give no geometry for a range.
+    pub field: bool,
+    /// Made by a mouse gesture, so `pointer` is where the drag or clicks ended; false
+    /// for the keyboard poller and ⌘⇧M, where the pointer says nothing about the text.
+    pub mouse: bool,
     /// Where the mouse came up.
     pub pointer: Point,
     /// The selection sits in a field the user can type in (an input, a text area, an
@@ -240,6 +249,8 @@ mod tests {
         Probe::Found(Selection {
             text: text.to_string(),
             bounds: None,
+            field: false,
+            mouse: false,
             pointer: Point { x: 0.0, y: 0.0 },
             editable: true,
         })

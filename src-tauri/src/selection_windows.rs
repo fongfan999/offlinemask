@@ -35,7 +35,7 @@ use windows::Win32::UI::WindowsAndMessaging::{
 };
 
 use crate::selection::{
-    emit_cleared, emit_made, usable, Gesture, Point, Probe, Rect, Selection, SETTLE_MS,
+    emit_cleared, emit_made, usable, Gesture, Point, Probe, Read, Rect, Selection, SETTLE_MS,
 };
 
 /// What the hook procedure needs: it is a plain function with no context argument.
@@ -109,7 +109,7 @@ unsafe fn first_rect(array: *mut SAFEARRAY) -> Option<Rect> {
     rect
 }
 
-fn read_selection(at: POINT) -> Option<(String, Option<Rect>, bool)> {
+fn read_selection(at: POINT) -> Option<Read> {
     // SAFETY: COM calls on a thread we initialise and uninitialise ourselves.
     unsafe {
         let init = CoInitializeEx(None, COINIT_APARTMENTTHREADED);
@@ -141,6 +141,7 @@ fn read_selection(at: POINT) -> Option<(String, Option<Rect>, bool)> {
                 .GetBoundingRectangles()
                 .ok()
                 .and_then(|array| first_rect(array))
+                .map(|rect| (rect, false))
                 .or_else(|| {
                     let frame = element.CurrentBoundingRectangle().ok()?;
                     let rect = Rect {
@@ -149,13 +150,16 @@ fn read_selection(at: POINT) -> Option<(String, Option<Rect>, bool)> {
                         width: (frame.right - frame.left) as f64,
                         height: (frame.bottom - frame.top) as f64,
                     };
-                    (rect.width > 0.0 && rect.height > 0.0).then_some(rect)
+                    (rect.width > 0.0 && rect.height > 0.0).then_some((rect, true))
                 })
-                .map(|rect| Rect {
-                    x: rect.x / scale,
-                    y: rect.y / scale,
-                    width: rect.width / scale,
-                    height: rect.height / scale,
+                .map(|(rect, field)| {
+                    let rect = Rect {
+                        x: rect.x / scale,
+                        y: rect.y / scale,
+                        width: rect.width / scale,
+                        height: rect.height / scale,
+                    };
+                    (rect, field)
                 });
             // An editable field exposes a value pattern that is not read-only; anything
             // else (documents, web pages, an AI's answer) counts as read-only.
@@ -227,7 +231,9 @@ unsafe extern "system" fn hook(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRE
                             {
                                 (shared.made)(Selection {
                                     text,
-                                    bounds,
+                                    field: bounds.as_ref().is_some_and(|(_, field)| *field),
+                                    bounds: bounds.map(|(rect, _)| rect),
+                                    mouse: true,
                                     pointer: at,
                                     editable,
                                 });
@@ -291,7 +297,9 @@ pub fn probe<R: Runtime>(_app: &AppHandle<R>) -> Probe {
         match read_selection(physical) {
             Some((text, bounds, editable)) => Probe::Found(Selection {
                 text,
-                bounds,
+                field: bounds.as_ref().is_some_and(|(_, field)| *field),
+                bounds: bounds.map(|(rect, _)| rect),
+                mouse: false,
                 pointer,
                 editable,
             }),
