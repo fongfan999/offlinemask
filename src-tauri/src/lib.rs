@@ -16,7 +16,6 @@ pub fn run() {
             ))?;
             background::setup_tray(app.handle())?;
             app.manage(background::ServiceFiles::default());
-            app.manage(clipboard_watch::ClipboardWatch::default());
             app.manage(selection::SelectionWatch::default());
             #[cfg(target_os = "macos")]
             services::install(app.handle());
@@ -88,8 +87,6 @@ pub fn run() {
         background::quick_quit,
         background::quick_show_main,
         background::quick_read_service_file,
-        clipboard_watch::quick_watch_supported,
-        clipboard_watch::quick_watch_clipboard,
         selection::quick_selection_supported,
         selection::quick_selection_watch,
         selection::quick_read_selection
@@ -116,8 +113,6 @@ pub fn run() {
         background::quick_quit,
         background::quick_show_main,
         background::quick_read_service_file,
-        clipboard_watch::quick_watch_supported,
-        clipboard_watch::quick_watch_clipboard,
         selection::quick_selection_supported,
         selection::quick_selection_watch,
         selection::quick_read_selection,
@@ -147,8 +142,6 @@ pub fn run() {
         background::quick_quit,
         background::quick_show_main,
         background::quick_read_service_file,
-        clipboard_watch::quick_watch_supported,
-        clipboard_watch::quick_watch_clipboard,
         selection::quick_selection_supported,
         selection::quick_selection_watch,
         selection::quick_read_selection,
@@ -182,8 +175,6 @@ pub fn run() {
         background::quick_quit,
         background::quick_show_main,
         background::quick_read_service_file,
-        clipboard_watch::quick_watch_supported,
-        clipboard_watch::quick_watch_clipboard,
         selection::quick_selection_supported,
         selection::quick_selection_watch,
         selection::quick_read_selection,
@@ -221,7 +212,6 @@ pub fn run() {
         });
 }
 mod background;
-mod clipboard_watch;
 #[cfg(feature = "minilm-native-desktop-prototype")]
 mod minilm_native_graph;
 #[cfg(feature = "minilm-desktop-prototype")]

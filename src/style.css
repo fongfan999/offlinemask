@@ -2993,29 +2993,6 @@ td.alias {
   padding: 0 14px;
   font-size: 12.5px;
 }
-/* Small round button, still used by the clipboard nudge. */
-.quick-chip {
-  height: 24px;
-  padding: 0 10px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--paper-raised);
-  font-size: 12px;
-  white-space: nowrap;
-}
-.quick-chip:hover {
-  border-color: var(--line-strong);
-  background: var(--paper-sunk);
-}
-.quick-chip.is-primary {
-  border-color: transparent;
-  color: var(--on-accent);
-  background: var(--accent);
-  font-weight: 600;
-}
-.quick-chip.is-primary:hover {
-  background: var(--accent-strong);
-}
 /* Progress and results in the corner. */
 .quick-toast {
   position: relative;
@@ -3049,9 +3026,6 @@ td.alias {
 }
 .quick-toast.is-error .quick-toast-text {
   color: var(--error);
-}
-.quick-toast .quick-chip {
-  flex: none;
 }
 .pill-close {
   display: flex;

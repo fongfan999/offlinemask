@@ -3132,7 +3132,6 @@ dependencies = [
  "tauri-plugin-opener",
  "tokenizers",
  "windows 0.62.2",
- "windows-sys 0.60.2",
  "zeroize",
  "zstd",
 ]

@@ -293,13 +293,13 @@ async function present(next: PanelStatus) {
     return;
   }
   await showCorner();
-  if (next.tone !== "busy") hideLater(next.tone === "offer" ? askMs : flashMs);
+  if (next.tone !== "busy") hideLater(flashMs);
 }
 async function send(command: QuickCommand) {
   await panel.send(command).catch(() => {});
 }
 
-/** Browser preview only: `pill.html?state=dot|hover|restore|unknown|circle-busy|circle-done|circle-error|preview|copied|notice|toast|busy|offer` shows
+/** Browser preview only: `pill.html?state=dot|hover|restore|unknown|circle-busy|circle-done|circle-error|preview|copied|notice|toast|busy` shows
  * one shape with sample text, so the design can be checked without the desktop app. */
 function preview() {
   const state = new URLSearchParams(location.search).get("state");
@@ -353,10 +353,6 @@ function preview() {
       },
     },
     busy: { message: "Đang ẩn thông tin…", tone: "busy" },
-    offer: {
-      message: "Văn bản vừa sao chép có 2 thông tin nhạy cảm.",
-      tone: "offer",
-    },
   };
   status.value = samples[state === "copied" ? "preview" : state] ?? null;
   copied.value = state === "copied";
@@ -542,9 +538,6 @@ onBeforeUnmount(() => {
         <BrandMark v-else :size="16" />
       </span>
       <p class="quick-toast-text" role="status">{{ status?.message }}</p>
-      <button v-if="status?.tone === 'offer'" class="quick-chip is-primary" @click="send('mask')">
-        Ẩn
-      </button>
       <div v-if="busy" class="pill-progress" aria-hidden="true"><span></span></div>
     </div>
   </div>

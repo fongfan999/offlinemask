@@ -20,7 +20,6 @@ import type { Finding } from "../core/review.ts";
 import { isPrivate, sessionOutput, type Session, type TextSession } from "../core/sessions.ts";
 
 export const shortcutKey = "offlinemask.quick-shortcut.v1";
-export const watchKey = "offlinemask.quick-watch.v1";
 export const popoverKey = "offlinemask.quick-popover.v1";
 /** Read-only text gets a masking circle only if the built-in rules find something to
  * hide within this time; otherwise selecting a sentence on a web page shows nothing. */
@@ -28,7 +27,6 @@ const readOnlyProbeMs = 1500;
 export const popoverError = "Chưa bật được nút nổi khi bôi đen trên hệ này.";
 export const popoverPermission =
   "Nút nổi khi bôi đen cần quyền Trợ năng (nút Cấp quyền ở trên) để đọc phần bạn chọn.";
-export const watchError = "Chưa bật được theo dõi clipboard trên hệ này.";
 export const serviceFileError = "Chưa đọc được tệp từ Finder. Hãy kéo tệp vào OfflineMask.";
 export const shortcutError =
   "Chưa đăng ký được phím tắt. Có thể một ứng dụng khác đang dùng tổ hợp này.";
@@ -103,10 +101,6 @@ export function useQuickActions({
     }
   };
   const shortcutOn = ref(adapter.desktop && read(shortcutKey, true));
-  // The clipboard watch is opt-in (decision 0095): off until the user turns it on.
-  const watchOn = ref(adapter.desktop && read(watchKey, false));
-  const watchSupported = ref(false);
-  const watchFailure = ref("");
   // The selection popover (decision 0096): opt-in; the last selection waits for a button.
   const popoverOn = ref(adapter.desktop && read(popoverKey, false));
   const popoverSupported = ref(false);
@@ -120,10 +114,7 @@ export function useQuickActions({
   const lastSkip = ref("");
   /** The restore preview on screen: its text for "Sao chép", its session for "Mở". */
   let preview: { text: string; sessionId: string | null } | null = null;
-  /** The last text this app put on the clipboard: its own output is never offered back. */
-  let lastWritten = "";
   async function writeClipboard(text: string) {
-    lastWritten = text;
     await adapter.writeClipboard(text);
   }
   const shortcutFailure = ref("");
@@ -501,33 +492,6 @@ export function useQuickActions({
     if (!on) pendingSelection = null;
     if (started) await syncShortcut();
   }
-  /** The clipboard watch noticed a change: read once, check with the built-in rules,
-   * and nudge. Our own output, alias text, empty and locked cases are left alone. */
-  async function clipboardChanged() {
-    if (!watchOn.value || busy.value || locked()) return;
-    let text: string;
-    try {
-      text = await adapter.readClipboard();
-    } catch {
-      return;
-    }
-    if (!text.trim() || text === lastWritten || aliasTokens(text).length) return;
-    const { count: found } = await run.probe(text);
-    if (found > 0 && watchOn.value)
-      await show({ message: quickMessages.offer(found), tone: "offer" });
-  }
-  async function setClipboardWatch(on: boolean) {
-    watchFailure.value = "";
-    try {
-      await adapter.setClipboardWatch(on);
-      watchOn.value = on;
-      write(watchKey, on);
-    } catch {
-      watchOn.value = false;
-      write(watchKey, false);
-      if (on) watchFailure.value = watchError;
-    }
-  }
   /** A macOS Service: text is masked or restored to the clipboard; the first file
    * opens on its page in the main window. */
   async function service(request: ServiceRequest) {
@@ -653,7 +617,6 @@ export function useQuickActions({
   let stopCommands: (() => void) | undefined;
   let stopClose: (() => void) | undefined;
   let stopService: (() => void) | undefined;
-  let stopWatch: (() => void) | undefined;
   let stopSelection: (() => void) | undefined;
   let stopCleared: (() => void) | undefined;
   // Permission is granted in the OS settings while this window is in the background,
@@ -667,9 +630,6 @@ export function useQuickActions({
       .catch(() => undefined);
     stopService = await adapter
       .onService((request) => void service(request))
-      .catch(() => undefined);
-    stopWatch = await adapter
-      .onClipboardChanged(() => void clipboardChanged())
       .catch(() => undefined);
     stopSelection = await adapter
       .onSelection((selection) => void selectionMade(selection))
@@ -686,8 +646,6 @@ export function useQuickActions({
     started = true;
     if (typeof window !== "undefined") window.addEventListener("focus", recheck);
     await Promise.all([checkInputPermission(), readLaunchAtLogin()]);
-    watchSupported.value = await adapter.watchSupported().catch(() => false);
-    if (watchOn.value) await setClipboardWatch(watchSupported.value);
     popoverSupported.value = await adapter.selectionSupported().catch(() => false);
     if (popoverOn.value) await setPopover(popoverSupported.value);
   }
@@ -699,8 +657,6 @@ export function useQuickActions({
     stopClose = undefined;
     stopService?.();
     stopService = undefined;
-    stopWatch?.();
-    stopWatch = undefined;
     stopSelection?.();
     stopSelection = undefined;
     stopCleared?.();
@@ -714,8 +670,6 @@ export function useQuickActions({
     stopClose = undefined;
     stopService?.();
     stopService = undefined;
-    stopWatch?.();
-    stopWatch = undefined;
     stopSelection?.();
     stopSelection = undefined;
     stopCleared?.();
@@ -741,10 +695,6 @@ export function useQuickActions({
     launchAtLogin: computed(() => launchAtLogin.value),
     launchFailure,
     setLaunchAtLogin,
-    watchOn: computed(() => watchOn.value),
-    watchSupported: computed(() => watchSupported.value),
-    watchFailure,
-    setClipboardWatch,
     popoverOn: computed(() => popoverOn.value),
     lastSkip,
     popoverSupported: computed(() => popoverSupported.value),

@@ -57,9 +57,6 @@ export const quickMessages = {
       ? `Đã khôi phục ${count(n)} thông tin`
       : `Đã khôi phục ${count(n)} thông tin · dán để dùng`) +
     (unknown ? ` · ${count(unknown)} mã lạ giữ nguyên` : ""),
-  /** The opt-in clipboard watch noticed something (decision 0095). */
-  offer: (n: number) =>
-    `Văn bản vừa sao chép có ${count(n)} thông tin nhạy cảm. Bấm Ẩn thông tin để ẩn trước khi dán.`,
   /** What a click on the circle will do, shown while it is hovered (decision 0096). */
   hintMask: "Ẩn thông tin",
   hintRestore: "Khôi phục thông tin",

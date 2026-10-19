@@ -2,6 +2,8 @@
 
 Date: 18 October 2026. Status: requested by the owner as item 5 of the convenience list in [0090](0090-clipboard-quick-actions.md), after the assistant had advised against it. Built opt-in, off by default, with the boundaries below; the PRD's deferred-scope wording is amended accordingly.
 
+**Withdrawn on 19 October 2026.** The owner: "I think this feature should be removed as well, it doesnt make much impact, since they use copy paste a lot, but not always AI". Most copies are not headed for an AI, so a nudge on each one is noise, and the selection circle and ⌘⇧M ([0096](0096-selection-popover.md)) already act on the text the user picks. Removed: the Settings row and its stored preference (a stored value is simply ignored), `src-tauri/src/clipboard_watch.rs` with its commands and event, the `windows-sys` dependency it alone used, the corner card's "Ẩn" offer and its styles, and the tests. OfflineMask again reads the clipboard only when the user asks. The rest of this record is kept as history.
+
 ## Behaviour
 
 Cài đặt › Thao tác nhanh › "Theo dõi clipboard", off until the user turns it on. While on, each time text is copied anywhere, OfflineMask checks it on the machine with the built-in rules only (email, phone, account and card numbers, identifiers, no model) and, if something is found, the floating panel flashes "Văn bản vừa sao chép có n thông tin nhạy cảm. Bấm Ẩn thông tin để ẩn trước khi dán." for nine seconds. One click on Ẩn thông tin masks the clipboard; doing nothing changes nothing.

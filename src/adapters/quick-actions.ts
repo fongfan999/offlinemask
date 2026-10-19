@@ -38,9 +38,9 @@ export interface PanelAnchor {
 }
 export interface QuickStatus {
   message: string;
-  /** `offer` is the clipboard watch's nudge and `select` the popover's question: both
-   * stay longer than a result and wait for a button. */
-  tone: "ok" | "error" | "busy" | "offer" | "select" | "preview" | "notice";
+  /** `select` is the popover's question: it stays longer than a result and waits for a
+   * click. */
+  tone: "ok" | "error" | "busy" | "select" | "preview" | "notice";
   anchor?: PanelAnchor;
   /** For a selection: what the circle's click does, and so which icon it shows. */
   action?: "mask" | "restore" | "unknown";
@@ -74,7 +74,6 @@ export const events = {
   command: "quick-command",
   status: "quick-status",
   service: "quick-service",
-  clipboardChanged: "clipboard-changed",
   dismiss: "quick-dismiss",
   selectionMade: "selection-made",
   selectionCleared: "selection-cleared",
@@ -114,10 +113,6 @@ export interface QuickActionsAdapter {
   onService(handler: (request: ServiceRequest) => void): Promise<() => void>;
   /** Bytes of a file a Service handed over; any other path is refused natively. */
   readServiceFile(path: string): Promise<Uint8Array<ArrayBuffer>>;
-  /** The opt-in clipboard watch (decision 0095): change notices only, no content. */
-  watchSupported(): Promise<boolean>;
-  setClipboardWatch(on: boolean): Promise<void>;
-  onClipboardChanged(handler: () => void): Promise<() => void>;
   /** The selection popover (decision 0096): mouse-button gestures in other apps. */
   selectionSupported(): Promise<boolean>;
   setSelectionWatch(on: boolean): Promise<void>;
@@ -175,10 +170,6 @@ export const nativeQuickActions: QuickActionsAdapter = {
     const bytes = await invoke<ArrayBuffer | number[]>("quick_read_service_file", { path });
     return bytes instanceof ArrayBuffer ? new Uint8Array(bytes) : Uint8Array.from(bytes);
   },
-  watchSupported: () =>
-    isTauri() ? invoke<boolean>("quick_watch_supported") : Promise.resolve(false),
-  setClipboardWatch: (on) => invoke("quick_watch_clipboard", { enabled: on }),
-  onClipboardChanged: (handler) => listen(events.clipboardChanged, () => handler()),
   selectionSupported: () =>
     isTauri() ? invoke<boolean>("quick_selection_supported") : Promise.resolve(false),
   setSelectionWatch: (on) => invoke("quick_selection_watch", { enabled: on }),
