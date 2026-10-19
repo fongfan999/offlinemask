@@ -69,11 +69,11 @@ export const quickMessages = {
     "Các mã thay thế này không thuộc văn bản nào trong lịch sử trên máy này, nên không khôi phục được.",
   /** Why the last selection got no circle, for Cài đặt › Thao tác nhanh. */
   skipped: {
-    plain: "văn bản chỉ đọc không có thông tin cần ẩn",
-    slow: "kiểm tra mất quá lâu (bộ nhận diện đang khởi động)",
+    plain: "đoạn đó không có thông tin cần ẩn",
+    slow: "OfflineMask cần thêm chút thời gian, hãy chọn lại",
     busy: "đang xử lý một văn bản khác",
     locked: "OfflineMask đang khóa",
-    empty: "không có chữ để ẩn",
+    empty: "chưa có chữ nào được chọn",
   },
   /** The restore preview's heading, the confirmation after its copy button, and the
    * case where the AI reply holds no alias of a session still known (decision 0096). */

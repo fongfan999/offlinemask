@@ -2684,14 +2684,6 @@ td.alias {
 .quick-error {
   color: var(--error);
 }
-.quick-last {
-  margin: 18px 0 0;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.6;
-}
 
 /* The floating quick-action window: its own small transparent window, same tokens.
    The window is sized to the shape plus an 8 px margin that holds the shadow. */

@@ -2,7 +2,7 @@
 import { quickShortcutLabel, trayLabel } from "../adapters/quick-actions.ts";
 import { quickKey, useProvided } from "../composables/context.ts";
 
-/** Quick actions (decisions 0090 to 0096): the shortcut, the circle and the clipboard watch. */
+/** Quick actions (decisions 0090 to 0097): the circle, its shortcut and the start at login. */
 const quick = useProvided(quickKey);
 </script>
 
@@ -10,8 +10,8 @@ const quick = useProvided(quickKey);
   <section class="app-settings glass glass-card" aria-labelledby="quick-title">
     <h2 id="quick-title" class="app-settings-title">Thao tác nhanh</h2>
     <p class="quick-intro">
-      Bôi đen văn bản trong ứng dụng khác là có một nút tròn nhỏ để ẩn hoặc khôi phục thông tin ngay
-      tại chỗ, không cần mở OfflineMask. Chỉ phần bạn đang chọn được đọc, không đọc phím bạn gõ.
+      Ẩn hoặc khôi phục thông tin ngay trong ứng dụng khác, không cần mở OfflineMask. Chỉ phần chữ
+      bạn bôi đen được đọc, và mọi thứ xử lý trên máy này.
     </p>
     <p v-if="!quick.desktop" class="quick-note">Chỉ có trên ứng dụng máy tính.</p>
 
@@ -25,14 +25,13 @@ const quick = useProvided(quickKey);
         <p id="quick-permission-help">
           {{
             quick.inputPermission.value === "unsupported"
-              ? "Hệ điều hành này không cho OfflineMask đọc phần bạn chọn trong ứng dụng khác."
-              : "macOS cần bạn cho phép OfflineMask (quyền Trợ năng) để đọc phần bạn bôi đen và thay kết quả vào chỗ đó. Chỉ khi bạn bôi đen hoặc nhấn phím tắt."
+              ? "Hệ điều hành này chưa cho OfflineMask đọc phần bạn chọn."
+              : "macOS cần quyền Trợ năng để OfflineMask đọc phần bạn bôi đen và đặt kết quả vào đó."
           }}
         </p>
         <p v-if="quick.inputPermission.value === 'denied'" class="quick-note">
-          Đã bật trong Cài đặt hệ thống mà dòng này vẫn còn? Trong danh sách Trợ năng, chọn
-          OfflineMask, bấm − để xóa, rồi bấm Cấp quyền ở đây một lần nữa. Dòng này tự biến mất khi
-          quyền có hiệu lực.
+          Đã bật mà vẫn thấy dòng này? Trong Cài đặt hệ thống › Trợ năng, chọn OfflineMask, bấm − để
+          xóa, rồi bấm Cấp quyền lại.
         </p>
       </div>
       <button
@@ -48,13 +47,13 @@ const quick = useProvided(quickKey);
     <template v-if="quick.desktop && quick.inputPermission.value === 'granted'">
       <div class="settings-tool-row">
         <div>
-          <h3 id="quick-popover-title">Nút tròn khi bôi đen</h3>
+          <h3 id="quick-popover-title">Ẩn nhanh khi bôi đen</h3>
           <p id="quick-popover-help">
-            Kéo chuột hoặc ⌘A để chọn: nút tròn hiện cạnh phần đã chọn, bấm một lần là xong. Ô nhập
-            được thay ngay tại chỗ; văn bản chỉ đọc mở bản xem trước để sao chép.
+            Bôi đen chữ rồi bấm nút OfflineMask hiện bên cạnh. Chữ trong ô nhập được thay ngay; chữ
+            không sửa được thì hiện bản xem trước để bạn sao chép.
           </p>
           <p v-if="!quick.popoverSupported.value" class="quick-note">
-            Hệ này chưa hỗ trợ (Linux sẽ có sau trên X11).
+            Hệ điều hành này chưa hỗ trợ.
           </p>
           <p v-if="quick.popoverFailure.value" class="quick-error" role="alert">
             {{ quick.popoverFailure.value }}
@@ -83,9 +82,11 @@ const quick = useProvided(quickKey);
             Phím tắt <kbd class="quick-key">{{ quickShortcutLabel }}</kbd>
           </h3>
           <p id="quick-shortcut-help">
-            Giống bấm nút tròn, không cần chờ nút hiện.<template v-if="!quick.popoverOn.value">
-              Bật nút tròn ở trên để dùng.</template
-            >
+            {{
+              quick.popoverOn.value
+                ? "Bôi đen rồi nhấn phím tắt, thay cho bấm nút."
+                : "Bật Ẩn nhanh ở trên để dùng."
+            }}
           </p>
           <p v-if="quick.shortcutFailure.value" class="quick-error" role="alert">
             {{ quick.shortcutFailure.value }}
@@ -97,7 +98,7 @@ const quick = useProvided(quickKey);
             class="app-switch"
             role="switch"
             aria-labelledby="quick-shortcut-title"
-            :checked="quick.shortcutOn.value"
+            :checked="quick.shortcutOn.value && quick.popoverOn.value"
             :disabled="!quick.popoverOn.value"
             aria-describedby="quick-shortcut-help"
             @change="quick.setShortcut(($event.target as HTMLInputElement).checked)"
@@ -110,8 +111,7 @@ const quick = useProvided(quickKey);
       <div>
         <h3 id="quick-launch-title">Khởi động cùng máy</h3>
         <p id="quick-launch-help">
-          Tự mở OfflineMask khi bạn bật máy, chạy nền ở {{ trayLabel }} để nút tròn và phím tắt dùng
-          được ngay, không hiện cửa sổ.
+          Mở sẵn OfflineMask ở {{ trayLabel }} khi bạn bật máy, để dùng Ẩn nhanh ngay.
         </p>
         <p v-if="quick.launchFailure.value" class="quick-error" role="alert">
           {{ quick.launchFailure.value }}
@@ -130,8 +130,5 @@ const quick = useProvided(quickKey);
         />
       </label>
     </div>
-    <p v-if="quick.lastStatus.value" class="quick-last" role="status">
-      Lần gần nhất: {{ quick.lastStatus.value.message }}
-    </p>
   </section>
 </template>

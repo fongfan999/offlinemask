@@ -23,15 +23,13 @@ export const popoverKey = "offlinemask.quick-popover.v1";
 /** Read-only text gets a masking circle only if the built-in rules find something to
  * hide within this time; otherwise selecting a sentence on a web page shows nothing. */
 const readOnlyProbeMs = 1500;
-export const popoverError = "Chưa bật được nút nổi khi bôi đen trên hệ này.";
-export const popoverPermission =
-  "Nút nổi khi bôi đen cần quyền Trợ năng (nút Cấp quyền ở trên) để đọc phần bạn chọn.";
+export const popoverError = "Chưa bật được Ẩn nhanh trên máy này.";
+export const popoverPermission = "Ẩn nhanh cần quyền Trợ năng. Bấm Cấp quyền ở trên.";
 export const serviceFileError = "Chưa đọc được tệp từ Finder. Hãy kéo tệp vào OfflineMask.";
 export const shortcutError =
   "Chưa đăng ký được phím tắt. Có thể một ứng dụng khác đang dùng tổ hợp này.";
 export const lockedMessage = "Mở khóa OfflineMask trước khi dùng thao tác nhanh.";
 export const workingMessage = "Đang ẩn thông tin…";
-/** Flashed in the panel when the main window is closed (decision 0092). */
 export const launchError = "Chưa đổi được cài đặt khởi động cùng máy. Vui lòng thử lại.";
 
 type PreferenceStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
