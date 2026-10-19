@@ -460,7 +460,8 @@ export function useQuickActions({
         return;
       }
       preview = null;
-      await show({ message: quickMessages.previewCopied, tone: "ok" });
+      // Confirmed on the preview's own copy icon, not with a card in the corner.
+      await show({ message: quickMessages.previewCopied, tone: "ok", copied: true });
       return;
     }
     if (current.sessionId && openSession) {

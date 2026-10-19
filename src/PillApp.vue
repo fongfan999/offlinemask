@@ -221,6 +221,7 @@ async function showNotice() {
 }
 async function showPreview() {
   stayVisible();
+  copied.value = false;
   startTips();
   expanded.value = false;
   stopHover();
@@ -231,8 +232,16 @@ async function showPreview() {
   await panel.show();
 }
 
+/** The preview's copy icon shows a check mark once the copy worked. */
+const copied = ref(false);
 async function present(next: PanelStatus) {
   stayVisible();
+  if (next.copied && mode.value === "preview") {
+    // Keep the preview's content; confirm on the icon, then let the card fade away.
+    copied.value = true;
+    hideLater(1200);
+    return;
+  }
   status.value = next;
   pinned.value = next.pinned;
   clearTimeout(hideTimer);
@@ -263,7 +272,7 @@ async function close() {
   await send("unpin");
 }
 
-/** Browser preview only: `pill.html?state=dot|hover|restore|unknown|circle-busy|circle-done|circle-error|preview|notice|toast|busy|offer|panel` shows
+/** Browser preview only: `pill.html?state=dot|hover|restore|unknown|circle-busy|circle-done|circle-error|preview|copied|notice|toast|busy|offer|panel` shows
  * one shape with sample text, so the design can be checked without the desktop app. */
 function preview() {
   const state = new URLSearchParams(location.search).get("state");
@@ -330,7 +339,8 @@ function preview() {
     },
     panel: { message: "Sao chép văn bản, rồi bấm một nút.", tone: "ok", pinned: true },
   };
-  status.value = samples[state] ?? null;
+  status.value = samples[state === "copied" ? "preview" : state] ?? null;
+  copied.value = state === "copied";
   pinned.value = state === "panel";
   hovered.value = state === "hover" || state === "restore" || state === "unknown";
   circleAction.value = state === "restore" || state === "unknown" ? state : "mask";
@@ -341,7 +351,9 @@ function preview() {
       ? "dot"
       : state === "panel" || state === "preview" || state === "notice"
         ? state
-        : "toast";
+        : state === "copied"
+          ? "preview"
+          : "toast";
 }
 
 onMounted(async () => {
@@ -473,11 +485,14 @@ onBeforeUnmount(() => {
              the system's tooltips do not show while OfflineMask is in the background. -->
         <button
           class="quick-icon is-primary"
-          aria-label="Sao chép"
-          data-tip="Sao chép"
+          :class="{ 'is-copied': copied }"
+          :aria-label="copied ? 'Đã sao chép' : 'Sao chép'"
+          :data-tip="copied ? 'Đã sao chép' : 'Sao chép'"
+          :disabled="copied"
           @click="send('copy')"
         >
-          <AppIcon name="copy" :size="15" />
+          <AppIcon v-if="copied" name="check" :size="15" />
+          <AppIcon v-else name="copy" :size="15" />
         </button>
         <button
           v-if="status?.preview?.canOpen"

@@ -2817,8 +2817,21 @@ td.alias {
   color: var(--on-accent);
   background: var(--accent);
 }
-.quick-icon.is-primary:hover {
+.quick-icon.is-primary:not(:disabled):hover {
   background: var(--accent-strong);
+}
+.quick-icon:disabled {
+  cursor: default;
+}
+/* Copied: the icon becomes a check mark that pops in, like the circle's. */
+.quick-icon.is-copied svg {
+  stroke-width: 2.6;
+  animation: quick-pop 0.28s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .quick-icon.is-copied svg {
+    animation: none;
+  }
 }
 /* The card's own tooltip under an icon (system tooltips need the app in front). */
 .quick-tip {

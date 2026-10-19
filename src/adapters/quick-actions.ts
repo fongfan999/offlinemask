@@ -52,6 +52,8 @@ export interface QuickStatus {
   /** Progress and result of a click on the circle that works in place: the circle itself
    * spins, then shows a check mark, instead of a card in the corner. */
   inPlace?: boolean;
+  /** The preview's copy worked: its copy icon turns into a check mark and the card fades. */
+  copied?: boolean;
   /** The restore preview of read-only text: the restored text, where each restored
    * value sits in it, and whether its session can be opened in the app. */
   preview?: { text: string; marks: { start: number; end: number }[]; canOpen: boolean };

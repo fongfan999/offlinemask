@@ -786,6 +786,8 @@ test("read-only text: no circle for plain text, a restore preview with copy and 
   await tick();
   assert.equal(adapter.clipboard, "Khách gọi từ 0901234567, gọi lại giúp.");
   assert.equal(quick.lastStatus.value.message, quickMessages.previewCopied);
+  // Confirmed on the preview's copy icon, not with a corner card.
+  assert.equal(quick.lastStatus.value.copied, true);
 
   // "Mở trong OfflineMask" opens that session and brings the window back.
   adapter.selectionHandler({ text: reply, bounds: null, pointer: { x: 1, y: 1 }, editable: false });
