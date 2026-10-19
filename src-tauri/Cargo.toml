@@ -102,6 +102,7 @@ windows = { version = "=0.62.2", features = [
 [target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
 tauri-plugin-autostart = "=2.7.0"
 tauri-plugin-global-shortcut = "=2.4.1"
+tauri-plugin-single-instance = "=2.5.4"
 
 [target.'cfg(target_os = "macos")'.dependencies]
 core-graphics = "=0.25.0"

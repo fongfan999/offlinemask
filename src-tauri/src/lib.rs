@@ -1,6 +1,17 @@
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let builder = tauri::Builder::default().setup(|app| {
+    let builder = tauri::Builder::default();
+    // One running copy (decision 0097): launching OfflineMask again while it sits in
+    // the tray brings its window back instead of starting a second process that
+    // would fight over the shortcut and the vault. Registered first, as required.
+    // A second login-item start (`--background`) changes nothing.
+    #[cfg(desktop)]
+    let builder = builder.plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
+        if !argv.iter().any(|arg| arg == background::BACKGROUND_FLAG) {
+            background::show_main(app);
+        }
+    }));
+    let builder = builder.setup(|app| {
         // Quick actions (decision 0090): one global shortcut; the clipboard is read
         // only when the user presses it or a panel button. Nothing watches it.
         #[cfg(desktop)]
