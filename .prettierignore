@@ -24,3 +24,6 @@ docs/evaluations/
 docs/
 .vscode/
 src-tauri/
+
+/dist-landing/
+/landing/.wrangler/

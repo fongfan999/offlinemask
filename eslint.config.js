@@ -10,6 +10,8 @@ export default [
   {
     ignores: [
       "dist/**",
+      "dist-landing/**",
+      "landing/.wrangler/**",
       "dist-desktop/**",
       "node_modules/**",
       "artifacts/**",

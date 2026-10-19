@@ -53,6 +53,10 @@ Only macOS on Apple Silicon has been built and tested so far. The CI workflow co
 
 Everything the app knows about its models is one file under [`packs/`](packs/). The TypeScript loaders, the Rust installer and the evaluation helpers all read it, so a different model, or a pack for another language, is a change to that file plus the files it pins. [packs/README.md](packs/README.md) walks through the contract (inputs, outputs, labels, offsets) and the checks a replacement has to pass: `pnpm test` for the code around the models and `pnpm test:models` for the models themselves.
 
+## Product landing page
+
+The standalone website lives in [`landing/`](landing/README.md). Run `mise exec -- pnpm landing:dev` for a local preview. It has its own Cloudflare Workers build and manual deployment workflow, with reusable content for the future Astro/EmDash product page.
+
 ## Repository layout
 
 | Path | Contents |

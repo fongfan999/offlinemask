@@ -29,7 +29,13 @@
     "desktop:build:native": "node scripts/build-native-desktop.mjs",
     "desktop:dev:native": "node scripts/dev-native-desktop.mjs",
     "lint": "eslint . && prettier --check .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "landing:dev": "vite --config landing/vite.config.mjs",
+    "landing:build": "vite build --config landing/vite.config.mjs",
+    "landing:preview": "vite preview --config landing/vite.config.mjs",
+    "landing:workers:dev": "pnpm landing:build && wrangler dev --config landing/wrangler.jsonc",
+    "landing:deploy": "pnpm landing:build && wrangler deploy --config landing/wrangler.jsonc",
+    "landing:deploy:check": "pnpm landing:build && wrangler deploy --dry-run --config landing/wrangler.jsonc"
   },
   "dependencies": {
     "@huggingface/transformers": "4.2.0",
@@ -60,10 +66,12 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-vue": "^10.11.1",
     "globals": "^17.13.0",
+    "gsap": "3.15.0",
     "prettier": "^3.9.9",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.71.1",
     "vite": "^8.0.16",
-    "vue-tsc": "^3.3.5"
+    "vue-tsc": "^3.3.5",
+    "wrangler": "4.147.0"
   }
 }

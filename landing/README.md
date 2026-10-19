@@ -1,0 +1,50 @@
+# OfflineMask landing page
+
+A standalone Vietnamese product page, prepared for Cloudflare Workers Static Assets and later reuse at `wotdafong.dev/products/offlinemask`. It does not load the desktop application, recognition models, Tauri, Vue or private user input. The interactive example contains fictional data only.
+
+## Local development
+
+From the repository root, use the versions pinned by mise:
+
+```sh
+mise exec -- pnpm install --frozen-lockfile
+mise exec -- pnpm landing:dev
+mise exec -- pnpm landing:build
+mise exec -- pnpm landing:preview
+mise exec -- pnpm landing:workers:dev
+mise exec -- pnpm landing:deploy:check
+```
+
+Development serves port 4322. `landing:preview` previews the production build. `landing:workers:dev` builds and serves using the local Workers runtime. `landing:deploy:check` builds and runs Wrangler's dry run without publishing. Build output goes to `dist-landing/`; the app's `dist/` and release workflow are separate. Unknown production paths return 404, rather than pretending to be a SPA route.
+
+## Cloudflare deployment
+
+The Worker is named `offlinemask-landing`; `landing/wrangler.jsonc` has no account identifier, custom domain or secrets. The static assets require no Worker script, storage binding or application server. Observability is disabled. No analytics or remote runtime assets are included.
+
+The repository's local-first release policy applies:
+
+1. Implement, verify and commit in the primary workspace.
+2. With authorization, compare and reconcile the primary workspace and GitHub `main`, then push the verified commit.
+3. Configure GitHub's `production` environment with `CLOUDFLARE_ACCOUNT_ID` and a `CLOUDFLARE_API_TOKEN` allowed to deploy Workers for that account. Do not commit credentials.
+4. Run the **Landing page** workflow on `main`, selecting **deploy**. Its verify job builds and dry-runs the selected revision. Its deploy job consumes the exact uploaded static artifact for that SHA, then publishes it through Wrangler.
+5. Verify the workflow, returned workers.dev URL, served HTML and asset hashes against the selected commit. Attach a custom domain through Cloudflare only when its destination is agreed.
+
+Pushes and pull requests run verification only. They never deploy automatically. `landing:deploy` is available for a maintainer's explicit manual deployment, but must not bypass the project's GitHub deployment order without an authorized exception. No version is hard-coded in the marketing page; the download button points to GitHub's latest release and includes platform qualification notes.
+
+## Reuse in the Astro / EmDash site
+
+The host repository currently uses Astro, EmDash and GSAP. No Vue integration, iframe or CMS migration is needed for this page.
+
+- `product.html` is the authoritative static, trusted source fragment, with a namespaced root, header, main and footer. It is injected **at build time**, so headings, links and FAQs remain available without JavaScript.
+- `product.css` scopes its rules to `om-` classes. It imports only the existing product mark through a relative asset URL.
+- `product.js` exports `initOfflineMask(root)`. It scopes animations/listeners to that root and returns a cleanup function. GSAP uses `matchMedia` to disable motion when reduced motion is requested, including preference changes.
+- `main.js`, `standalone.css`, `index.html`, the Vite config and Wrangler config belong only to the standalone host.
+- `src/theme.css` contains the existing app's exact shared palette and font tokens, extracted without changing their values. The wotdafong host already uses this palette; supply those theme variables there instead of importing desktop styles.
+
+For migration, vendor `product.html`, `product.css`, `product.js` and the referenced `brand/mark-mono-black.svg` together, preserving relative asset paths (or update the single CSS URL). Add an Astro route at `src/pages/products/offlinemask.astro`. Import the trusted fragment with `?raw`, render it using `<Fragment set:html={productHtml} />`, and import the CSS and initializer in Astro's bundled script. Do not inject CMS or user HTML through this raw-fragment boundary.
+
+Use a product document layout with `lang="vi"`, the page's title/description and the live destination's canonical URL. The existing blog `Base.astro` includes its own `<main>`, navigation and footer, so do **not** wrap this full fragment in it unchanged. Either use a product layout retaining the site's `EmDashHead`, `EmDashBodyStart`, `EmDashBodyEnd` and `createPublicPageContext` integration, or split the fragment's outer chrome from its product sections when adopting the blog chrome. Leave EmDash's generated environment types, content loaders and database alone.
+
+With Astro client navigation, call the returned disposer on `astro:before-swap`, then initialize the new root on `astro:page-load`. With ordinary document navigation, a single initialization is sufficient. The host already depends on GSAP, so reuse its installed version rather than loading a CDN copy.
+
+Before publishing at the future URL, verify the page inside the host's actual layout, set canonical/Open Graph URL metadata, and decide whether to redirect the standalone domain. No future URL is advertised as live now.

@@ -91,3 +91,7 @@ __pycache__/
 /docs/evaluations/pretrained-search-v1/previews.md
 /docs/evaluations/pretrained-search-v1/schema/previews.md
 /docs/evaluations/quality-first-v1/previews.md
+
+# Standalone marketing site
+/dist-landing/
+/landing/.wrangler/

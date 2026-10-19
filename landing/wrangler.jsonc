@@ -1,0 +1,10 @@
+{
+  "$schema": "../node_modules/wrangler/config-schema.json",
+  "name": "offlinemask-landing",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "../dist-landing",
+    "not_found_handling": "404-page",
+  },
+  "observability": { "enabled": false },
+}

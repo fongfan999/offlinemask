@@ -1,5 +1,7 @@
 allowBuilds:
   # Browser/WASM text inference needs no native postinstall downloads or image tooling.
+  esbuild: true
   onnxruntime-node: false
   protobufjs: false
   sharp: false
+  workerd: true
