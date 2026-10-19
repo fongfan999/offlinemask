@@ -27,3 +27,4 @@ src-tauri/
 
 /dist-landing/
 /landing/.wrangler/
+/.wrangler/

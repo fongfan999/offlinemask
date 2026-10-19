@@ -12,6 +12,7 @@ export default [
       "dist/**",
       "dist-landing/**",
       "landing/.wrangler/**",
+      ".wrangler/**",
       "dist-desktop/**",
       "node_modules/**",
       "artifacts/**",
