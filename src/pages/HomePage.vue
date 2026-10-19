@@ -8,6 +8,7 @@ import MaskingPreview from "../components/MaskingPreview.vue";
 import {
   docKey,
   packKey,
+  quickKey,
   runKey,
   sheetKey,
   useProvided,
@@ -18,7 +19,7 @@ import { sampleText } from "../core/review.ts";
 import { packProgress } from "../composables/useRecognitionPack.ts";
 
 const emit = defineEmits<{
-  /** A card or link: the format's page as the user last left it. */
+  /** A link: Cài đặt, or a format's page as the user last left it. */
   navigate: [destination: Page];
   /** The start box: the format's first step, where the file or text just went. */
   start: [destination: Page];
@@ -27,6 +28,11 @@ const pack = useProvided(packKey);
 const run = useProvided(runKey);
 const sheet = useProvided(sheetKey);
 const doc = useProvided(docKey);
+const quick = useProvided(quickKey);
+/** Ẩn nhanh, the way in from other apps (decision 0099): offered while it does not work. */
+const quickOffer = computed(
+  () => quick.desktop && quick.popoverSupported.value && !quick.quickReady.value,
+);
 
 /** One place to start (decision 0089): drop or choose any supported file, or paste
  * text anywhere on the page; the app opens the right page with it. */
@@ -141,10 +147,7 @@ const packNotice = computed<PackNotice | null>(() => {
       <BrandMark :size="38" />
     </span>
     <h1 ref="heading" tabindex="-1">Ẩn thông tin nhạy cảm<span>trước khi chia sẻ với AI.</span></h1>
-    <p>
-      Số tài khoản, số điện thoại, họ tên… được đổi thành mã thay thế ngay trên máy bạn, không cần
-      Internet.
-    </p>
+    <p>Số tài khoản, số điện thoại, họ tên… được đổi thành mã thay thế ngay trên máy bạn.</p>
     <MaskingPreview />
   </div>
   <section class="start-box" aria-label="Bắt đầu">
@@ -163,40 +166,26 @@ const packNotice = computed<PackNotice | null>(() => {
         Xem thử với ví dụ
       </button>
     </div>
-  </section>
-  <section class="format-grid" aria-labelledby="format-heading">
-    <h2 id="format-heading">Hoặc chọn loại nội dung</h2>
-    <button class="format-card glass" @click="emit('navigate', 'text')">
-      <span class="format-icon"><AppIcon name="text" :size="29" /></span
-      ><span class="format-title">Văn bản<AppIcon name="arrow" :size="20" /></span
-      ><span class="format-description">Dán email, tin nhắn</span
-      ><span class="format-types">TXT, MD</span>
-    </button>
-    <button class="format-card glass" @click="emit('navigate', 'excel')">
-      <span class="format-icon"><AppIcon name="table" :size="29" /></span
-      ><span class="format-title">Bảng tính<AppIcon name="arrow" :size="20" /></span
-      ><span class="format-description">Sao kê, danh sách</span
-      ><span class="format-types">XLSX, XLS, ODS, CSV</span>
-    </button>
-    <button class="format-card glass" @click="emit('navigate', 'word')">
-      <span class="format-icon"><AppIcon name="file" :size="29" /></span
-      ><span class="format-title">Tài liệu<AppIcon name="arrow" :size="20" /></span
-      ><span class="format-description">Hợp đồng, báo cáo</span
-      ><span class="format-types">DOCX, ODT</span>
-    </button>
-    <div v-if="packNotice" class="pack-notice" role="status">
-      <AppIcon :name="packNotice.icon" :size="16" />
-      <p>
-        {{ packNotice.title }}<span v-if="packNotice.detail">{{ packNotice.detail }}</span>
-      </p>
-      <button
-        v-if="packNotice.action"
-        class="quiet-button"
-        :disabled="pack.busy.value || (packNotice.action.needsDesktop && !desktopModels)"
-        @click="packNotice.action.run()"
-      >
-        {{ packNotice.action.label }}<AppIcon name="chevron" :size="12" />
+    <!-- The other way in, until it works (decision 0099). -->
+    <p v-if="quickOffer" class="start-quick">
+      <BrandMark :size="14" />Hoặc bôi đen chữ ngay trong ChatGPT, Zalo hay Word để ẩn tại chỗ.
+      <button type="button" class="link-button" @click="emit('navigate', 'settings')">
+        Bật Ẩn nhanh
       </button>
-    </div>
+    </p>
   </section>
+  <div v-if="packNotice" class="pack-notice" role="status">
+    <AppIcon :name="packNotice.icon" :size="16" />
+    <p>
+      {{ packNotice.title }}<span v-if="packNotice.detail">{{ packNotice.detail }}</span>
+    </p>
+    <button
+      v-if="packNotice.action"
+      class="quiet-button"
+      :disabled="pack.busy.value || (packNotice.action.needsDesktop && !desktopModels)"
+      @click="packNotice.action.run()"
+    >
+      {{ packNotice.action.label }}<AppIcon name="chevron" :size="12" />
+    </button>
+  </div>
 </template>

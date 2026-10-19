@@ -430,21 +430,6 @@ h1 {
   line-height: 1.7;
   text-wrap: pretty;
 }
-.format-grid {
-  display: grid;
-  /* Văn bản, Bảng tính, Word: three across when they fit, stacked on narrow windows. */
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 18px;
-}
-.format-grid h2 {
-  grid-column: 1 / -1;
-  margin: 0;
-  color: var(--muted);
-  font-size: 14px;
-  line-height: 1.5;
-  font-weight: 500;
-  text-align: center;
-}
 /* One place to start: drop or choose a file, or paste anywhere (decision 0089). */
 .start-box {
   margin-bottom: 26px;
@@ -472,76 +457,28 @@ h1 {
 .start-notes svg {
   color: var(--accent);
 }
-/* Icon beside title and description: the cards stay short enough to sit above the fold. */
-.format-card {
-  border-radius: 12px;
-  padding: 20px 22px;
-  text-align: left;
-  display: grid;
-  grid-template-columns: 48px 1fr;
-  column-gap: 16px;
-  align-items: center;
-  color: var(--ink);
-  transition:
-    border-color 0.16s,
-    box-shadow 0.16s,
-    translate 0.16s;
-}
-.format-card:hover {
-  border-color: var(--line-strong);
-  box-shadow: 4px 5px 0 var(--shadow);
-  translate: 0 -1px;
-}
-.format-icon {
-  grid-row: 1 / 4;
-  display: grid;
-  place-items: center;
-  width: 48px;
-  height: 48px;
-  background: var(--accent-soft);
-  border-radius: 11px;
-  color: var(--accent);
-}
-.format-title {
+/* Ẩn nhanh, offered quietly under the start box until it works (decision 0099). */
+.start-quick {
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
   align-items: center;
-  font-size: 20px;
-  font-weight: 500;
-  letter-spacing: -0.03em;
-}
-.format-title svg {
+  gap: 4px 8px;
+  margin: 12px 0 0;
   color: var(--muted);
-  transition: translate 0.18s;
+  font-size: 12px;
 }
-.format-card:hover .format-title svg {
-  translate: 3px 0;
+.start-quick > svg {
   color: var(--accent);
-}
-.format-description {
-  font-size: 13px;
-  color: var(--muted);
-  line-height: 1.6;
-  margin-top: 2px;
-}
-/* What each card is for comes first; the file types it opens sit quietly below. */
-.format-types {
-  margin-top: 4px;
-  color: var(--muted);
-  font: 10px var(--mono);
-  letter-spacing: 0.02em;
-  white-space: nowrap;
 }
 /* One-time pack download, said on the home page before the first click. */
 .pack-notice {
-  grid-column: 1 / -1;
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: 10px;
-  /* An optional upgrade, not a step: quieter than the start box and the cards. */
+  /* An optional upgrade, not a step: quieter than the start box. */
   color: var(--ink);
 }
 .pack-notice > svg {
@@ -1220,6 +1157,15 @@ th {
   justify-items: start;
   gap: 4px;
 }
+/* With the format cards gone it is the page's one action: a little more room. */
+.start-box .drop-zone.is-compact {
+  min-height: 120px;
+  padding: 28px 32px;
+  gap: 20px;
+}
+.start-box .drop-zone.is-compact strong {
+  font-size: 17px;
+}
 .drop-zone u {
   text-underline-offset: 3px;
 }
@@ -1626,9 +1572,6 @@ td.alias {
   }
 }
 @media (max-width: 440px) {
-  .format-grid {
-    grid-template-columns: 1fr;
-  }
   .pack-notice {
     flex-wrap: wrap;
   }
@@ -1637,9 +1580,6 @@ td.alias {
   }
   .pack-notice .quiet-button {
     margin-left: 28px;
-  }
-  .format-description br {
-    display: none;
   }
   .editor-heading {
     flex-direction: column;
@@ -1671,11 +1611,9 @@ td.alias {
   .step-line,
   .step,
   button,
-  .format-card,
   .brand-mark,
   .text-content,
   .changes-toggle svg:last-child,
-  .format-title svg,
   .primary-action svg:last-child {
     transition: none;
   }
