@@ -21,9 +21,8 @@ const quick = useProvided(quickKey);
           Phím tắt <kbd class="quick-key">{{ quickShortcutLabel }}</kbd>
         </h3>
         <p id="quick-shortcut-help">
-          Chọn văn bản trong ứng dụng khác rồi nhấn: văn bản thường được ẩn, câu trả lời của AI có
-          mã thay thế được khôi phục, và kết quả thay ngay vào chỗ đã chọn. Không chọn gì thì phím
-          tắt làm việc với clipboard.
+          Chọn văn bản trong ứng dụng khác rồi nhấn: giống hệt bấm nút tròn. Ô nhập được thay ngay
+          tại chỗ; văn bản chỉ đọc mở bản xem trước để sao chép.
         </p>
         <p v-if="quick.shortcutFailure.value" class="quick-error" role="alert">
           {{ quick.shortcutFailure.value }}

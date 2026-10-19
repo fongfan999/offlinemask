@@ -179,6 +179,8 @@ function fakeAdapter(clipboard = "") {
       return () => {};
     },
     dismissPanel: async () => calls.push(["dismiss"]),
+    current: null,
+    readSelection: async () => adapter.current,
   };
   return adapter;
 }
@@ -1213,4 +1215,84 @@ test("the preview opens just below its circle, or above it at the bottom of the 
   assert.deepEqual(previewSpot({ ...circle, y: 800 }, card, area), { x: 600, y: 632 });
   // Near the right edge: pulled left to stay on screen.
   assert.deepEqual(previewSpot({ ...circle, x: 1300 }, card, area), { x: 1084, y: 348 });
+});
+
+test("⌘⇧M does exactly what a click on the circle does, and nothing without a selection", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("clipboard cũ");
+  adapter.permission = "granted";
+  const run = fakeRun(sessions);
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+  const sent = [];
+  adapter.sendStatus = async (status) => sent.push(status);
+
+  // No readable selection: nothing at all, no clipboard flow.
+  adapter.current = null;
+  adapter.fire();
+  await tick();
+  assert.deepEqual(sent, []);
+  assert.deepEqual(run.texts, []);
+  assert.equal(adapter.clipboard, "clipboard cũ");
+
+  // Editable selection: the circle by the text, then in place with spinner and check.
+  const bounds = { x: 300, y: 200, width: 120, height: 18 };
+  adapter.current = { text: phoneText, bounds, pointer: { x: 5, y: 5 }, editable: true };
+  adapter.selection = phoneText;
+  adapter.fire();
+  await tick();
+  await tick();
+  await tick();
+  assert.equal(sent[0].tone, "select");
+  assert.equal(sent[0].action, "mask");
+  assert.deepEqual(sent[0].anchor, { bounds, pointer: { x: 5, y: 5 } });
+  assert.deepEqual(
+    sent.slice(1).map((status) => [status.tone, status.inPlace ?? false]),
+    [
+      ["busy", true],
+      ["ok", true],
+    ],
+  );
+  const alias = sessions.value[0].analysis.findings[0].alias;
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "paste"),
+    [["paste", `Gọi ${alias} giúp tôi.`]],
+  );
+
+  // Read-only text with that alias: the circle by the cursor, then the preview.
+  sent.length = 0;
+  adapter.current = {
+    text: `Gọi lại ${alias}`,
+    bounds,
+    pointer: { x: 7, y: 9 },
+    editable: false,
+  };
+  adapter.selection = `Gọi lại ${alias}`;
+  adapter.fire();
+  await tick();
+  await tick();
+  assert.equal(sent[0].action, "restore");
+  assert.deepEqual(sent[0].anchor, { bounds: undefined, pointer: { x: 7, y: 9 } });
+  assert.equal(sent.at(-1).tone, "preview");
+  assert.equal(sent.at(-1).preview.text, "Gọi lại 0901234567");
+  assert.equal(adapter.calls.filter((call) => call[0] === "paste").length, 1);
+
+  // Codes of no known session: the explanation card.
+  sent.length = 0;
+  adapter.current = {
+    text: "Mã [SDT_1_dead]",
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: false,
+  };
+  adapter.fire();
+  await tick();
+  assert.equal(sent.at(-1).tone, "notice");
 });

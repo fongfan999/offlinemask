@@ -321,7 +321,7 @@ export function useQuickActions({
     try {
       if (on) {
         registry.__offlinemaskShortcutOwner = owner;
-        await adapter.registerShortcut(() => void act("auto"));
+        await adapter.registerShortcut(() => void shortcut());
       } else if (registry.__offlinemaskShortcutOwner === owner) {
         registry.__offlinemaskShortcutOwner = undefined;
         await adapter.unregisterShortcut();
@@ -592,6 +592,30 @@ export function useQuickActions({
     if (exact) await act(command, exact, { replace: true, inPlace: true });
     else await act(command, selection.text);
   }
+  /** ⌘⇧M does exactly what a click on the circle does, no more and no less: the
+   * selection is read with its place and whether it can be typed in, the circle appears
+   * there and its action runs at once (in place for editable text, the preview for
+   * read-only text, the card for unknown codes). Without a readable selection, or while
+   * the app is locked or busy, nothing happens, as no circle would show. */
+  async function shortcut() {
+    if (locked() || busy.value) return;
+    const selection = await adapter.readSelection().catch(() => null);
+    const direction = selection ? quickDirection(selection.text, knownTables()) : "empty";
+    if (!selection || direction === "empty") return;
+    pendingSelection = null;
+    const action = direction;
+    await show({
+      message: action === "mask" ? quickMessages.selectMask : quickMessages.selectRestore,
+      tone: "select",
+      action,
+      anchor: {
+        bounds: selection.editable ? (selection.bounds ?? undefined) : undefined,
+        pointer: selection.pointer,
+      },
+    });
+    if (action === "unknown") await explainUnknown();
+    else await actOnSelection(action, { text: selection.text, editable: selection.editable });
+  }
   /** The muted circle's card: why these codes cannot be restored, and the way out. */
   async function explainUnknown() {
     const kept = historyKept?.() ?? false;
@@ -721,6 +745,7 @@ export function useQuickActions({
     popoverFailure,
     setPopover,
     act,
+    shortcut,
     setShortcut,
     setPinned,
     forget,

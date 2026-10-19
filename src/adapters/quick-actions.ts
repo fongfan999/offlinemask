@@ -132,6 +132,8 @@ export interface QuickActionsAdapter {
   onSelectionCleared(handler: () => void): Promise<() => void>;
   /** Hide the panel unless the user keeps it. */
   dismissPanel(): Promise<void>;
+  /** The front application's current selection, read once (for ⌘⇧M), or null. */
+  readSelection(): Promise<SelectionMade | null>;
 }
 
 export const nativeQuickActions: QuickActionsAdapter = {
@@ -192,4 +194,6 @@ export const nativeQuickActions: QuickActionsAdapter = {
     listen<SelectionMade>(events.selectionMade, (event) => handler(event.payload)),
   onSelectionCleared: (handler) => listen(events.selectionCleared, () => handler()),
   dismissPanel: () => emitTo(panelWindow, events.dismiss, {}),
+  readSelection: () =>
+    isTauri() ? invoke<SelectionMade | null>("quick_read_selection") : Promise.resolve(null),
 };

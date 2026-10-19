@@ -181,6 +181,19 @@ mod backend {
 pub fn quick_selection_supported() -> bool {
     backend::supported()
 }
+/// The front application's current selection, read once for ⌘⇧M so the shortcut can
+/// take the same path as a click on the circle (decision 0096). None when nothing
+/// usable is selected, a drag is still in progress, or the platform cannot read it.
+#[tauri::command]
+pub async fn quick_read_selection(app: AppHandle) -> Option<Selection> {
+    tauri::async_runtime::spawn_blocking(move || match backend::probe(&app) {
+        Probe::Found(selection) => Some(selection),
+        Probe::MouseDown | Probe::Nothing => None,
+    })
+    .await
+    .ok()
+    .flatten()
+}
 /// Turn the popover on or off. The backend starts on the first "on" and then only
 /// watches silently (gesture bookkeeping, no reads, no events) while it is off.
 #[tauri::command]

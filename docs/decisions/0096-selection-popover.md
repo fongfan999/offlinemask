@@ -125,3 +125,9 @@ The preview card now opens just below the circle that opened it, left-aligned to
 Verified on macOS with a read-only Safari page and a fresh session: circle at (684, 280), preview at (684, 325); a drag of the header by (−300, +200) moved the card by exactly that; its × closed it.
 
 The preview's hints blinked, and the copy check snapped in and left quickly (owner). The hint now has one source on the desktop, the pointer polling (the page's own hover events are used only in the browser preview), changes only when the pointer reaches a different button, appears after resting 350 ms, survives a 150 ms slip off the button, fades in, and stays hidden once the copy is confirmed. The check mark eases in over 0.42 s and holds 1.6 s before the card fades.
+
+## Follow-up: ⌘⇧M is a click on the circle (19 October)
+
+The owner: the shortcut "should work like we click on the circle", then "no fallback, just be the same as the circle clicking, no more no less". ⌘⇧M now reads the front application's selection once through the same native path as the popover (`quick_read_selection`: text, place, editable or not), shows the circle there and runs the circle's action at once: in place with the spinner and check mark for editable text, the preview beside the circle for read-only text, the explanation card for codes of an earlier launch. With no readable selection, or while the app is locked or busy, nothing happens. This supersedes the clipboard-first shortcut of [0090](0090-clipboard-quick-actions.md) and [0091](0091-in-place-replace.md): the shortcut no longer masks the clipboard's text or shows the corner card; the panel's buttons, the tray and the Services keep the clipboard flow.
+
+Verified live on macOS: ⌘⇧M in TextEdit showed the spinning circle by the text and replaced it in place; on a read-only Safari page holding a known alias it opened the preview beside the circle. 289 tests.
