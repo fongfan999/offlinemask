@@ -148,3 +148,5 @@ The owner: "keep it simple, dont make it dangerous, dont make users think". The 
 
 
 The owner then asked for a better name than "Nút tròn", which names a shape. The row is now "Ẩn nhanh khi bôi đen" and the sentences call the circle "nút OfflineMask", after the mark it shows, so it is clear the button belongs to OfflineMask and not to the application being used. The shortcut reads "Bôi đen rồi nhấn phím tắt, thay cho bấm nút." and, while the feature is off, "Bật Ẩn nhanh ở trên để dùng."; errors and the permission line say "Ẩn nhanh".
+
+Without the permission, the card shows one row under the feature's own name, "Ẩn nhanh khi bôi đen", with "Cần quyền Trợ năng của macOS để đọc chữ bạn bôi đen." and "Cấp quyền" (owner: "can you simplify the copy"). The stale-grant advice, now one line ("Đã cấp mà vẫn thấy dòng này? Xóa OfflineMask khỏi danh sách Trợ năng rồi cấp lại."), appears only after Cấp quyền was pressed in this launch, so a first-time user sees a single sentence and a button. The introduction is shortened to two plain sentences.

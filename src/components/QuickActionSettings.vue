@@ -1,17 +1,24 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { quickShortcutLabel, trayLabel } from "../adapters/quick-actions.ts";
 import { quickKey, useProvided } from "../composables/context.ts";
 
 /** Quick actions (decisions 0090 to 0097): the circle, its shortcut and the start at login. */
 const quick = useProvided(quickKey);
+/** The stale-grant advice is only for someone who already pressed Cấp quyền. */
+const asked = ref(false);
+function grant() {
+  asked.value = true;
+  void quick.checkInputPermission(true);
+}
 </script>
 
 <template>
   <section class="app-settings glass glass-card" aria-labelledby="quick-title">
     <h2 id="quick-title" class="app-settings-title">Thao tác nhanh</h2>
     <p class="quick-intro">
-      Ẩn hoặc khôi phục thông tin ngay trong ứng dụng khác, không cần mở OfflineMask. Chỉ phần chữ
-      bạn bôi đen được đọc, và mọi thứ xử lý trên máy này.
+      Ẩn hoặc khôi phục thông tin ngay trong ứng dụng khác. Chỉ đọc chữ bạn bôi đen, xử lý trên máy
+      này.
     </p>
     <p v-if="!quick.desktop" class="quick-note">Chỉ có trên ứng dụng máy tính.</p>
 
@@ -21,24 +28,23 @@ const quick = useProvided(quickKey);
       class="settings-tool-row"
     >
       <div>
-        <h3>Cho phép đọc phần bạn chọn</h3>
+        <h3>Ẩn nhanh khi bôi đen</h3>
         <p id="quick-permission-help">
           {{
             quick.inputPermission.value === "unsupported"
-              ? "Hệ điều hành này chưa cho OfflineMask đọc phần bạn chọn."
-              : "macOS cần quyền Trợ năng để OfflineMask đọc phần bạn bôi đen và đặt kết quả vào đó."
+              ? "Hệ điều hành này chưa hỗ trợ."
+              : "Cần quyền Trợ năng của macOS để đọc chữ bạn bôi đen."
           }}
         </p>
-        <p v-if="quick.inputPermission.value === 'denied'" class="quick-note">
-          Đã bật mà vẫn thấy dòng này? Trong Cài đặt hệ thống › Trợ năng, chọn OfflineMask, bấm − để
-          xóa, rồi bấm Cấp quyền lại.
+        <p v-if="asked && quick.inputPermission.value === 'denied'" class="quick-note">
+          Đã cấp mà vẫn thấy dòng này? Xóa OfflineMask khỏi danh sách Trợ năng rồi cấp lại.
         </p>
       </div>
       <button
         v-if="quick.inputPermission.value !== 'unsupported'"
         class="primary-action quick-grant"
         aria-describedby="quick-permission-help"
-        @click="quick.checkInputPermission(true)"
+        @click="grant"
       >
         Cấp quyền
       </button>
