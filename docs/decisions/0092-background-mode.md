@@ -42,3 +42,7 @@ The owner: closing should always leave the app in the tray "like a VPN app", and
 The owner, on the card shown at closing: "dont need to show the notification, and it hides from dock (mac) I guess, similarly to windows and linux". Closing (red button, ⌘W, ⌘Q) now hides the window silently through `quick_hide_main`, which on macOS also removes the Dock icon (`set_dock_visibility(false)`), so the app lives only in the menu bar; `show_main` (tray "Mở OfflineMask", the preview's open button) brings both back. A start at login hides the Dock icon too. On Windows and Linux a hidden window already leaves the taskbar, and the tray icon remains.
 
 A full menu bar can hide the icon under the MacBook notch (seen on the owner's machine: the item laid out at x = 777 pt). The owner chose to keep the Dock icon hidden anyway: opening OfflineMask again from Spotlight, Launchpad or Applications sends the reopen event, and `show_main` brings back the window and its Dock icon, as with VPN apps. Not checked on the dev binary, which is not a bundled .app.
+
+## Follow-up: ⌘W hides, ⌘Q quits (19 October)
+
+The owner, after trying it: "typically, cmd + W hides, cmd + Q exits completely". This reverses the ⌘Q part of the follow-up above. ⌘W and the red button hide the window (and its Dock icon); ⌘Q quits. The app menu still carries a custom item instead of the default Quit, now "Thoát OfflineMask" on ⌘Q, which goes through `request_quit` like the menu bar icon, so a pending vault save is written before the process ends; the default item calls `terminate:` and would skip it.

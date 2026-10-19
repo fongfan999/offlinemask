@@ -7,8 +7,8 @@ pub fn run() {
         app.handle()
             .plugin(tauri_plugin_global_shortcut::Builder::new().build())?;
         // Background mode (decision 0092): tray icon, optional login item that
-        // starts hidden. The window hides on close (and on ⌘Q) from the frontend;
-        // only the tray quits.
+        // starts hidden. The window hides on close from the frontend; ⌘Q and the
+        // tray quit.
         #[cfg(desktop)]
         {
             app.handle().plugin(tauri_plugin_autostart::init(
