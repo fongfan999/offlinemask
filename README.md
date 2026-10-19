@@ -22,7 +22,7 @@ Detection quality is evidence-based and recorded, not promised: the shipping pac
 
 ## Getting started
 
-Builds for each release are attached to the [GitHub releases](https://github.com/fongfan999/offlinemask/releases); they are not yet signed or notarized ([release notes](docs/release/macos-arm64.md)). To build from source, install [mise](https://mise.jdx.dev/getting-started.html) and the [Tauri 2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS (on macOS the Xcode Command Line Tools suffice), then:
+Builds for each release are attached to the [GitHub releases](https://github.com/fongfan999/offlinemask/releases) by the [release workflow](docs/release/github-actions.md): macOS Apple Silicon and Windows x64 with native recognition, macOS Intel and Linux x64 with WASM recognition. They are not yet signed or notarized ([release notes](docs/release/macos-arm64.md)). To build from source, install [mise](https://mise.jdx.dev/getting-started.html) and the [Tauri 2 prerequisites](https://v2.tauri.app/start/prerequisites/) for your OS (on macOS the Xcode Command Line Tools suffice), then:
 
 ```sh
 mise trust

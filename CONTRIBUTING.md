@@ -44,4 +44,4 @@ Do not add analytics, automatic error uploads, input logging, correction collect
 
 ## Changes and review
 
-Keep changes focused. Describe the user-visible problem, the final behaviour, what you verified and the known limitations. Update documentation with scope or architecture changes. Do not commit generated bundles, credentials, machine-specific paths or private data. Release signing, notarization and distribution are maintainer tasks; see [docs/release/macos-arm64.md](docs/release/macos-arm64.md).
+Keep changes focused. Describe the user-visible problem, the final behaviour, what you verified and the known limitations. Update documentation with scope or architecture changes. Do not commit generated bundles, credentials, machine-specific paths or private data. Releases are built by [the release workflow](docs/release/github-actions.md) when a maintainer pushes a version tag; signing and notarization are maintainer tasks, see [docs/release/macos-arm64.md](docs/release/macos-arm64.md).
