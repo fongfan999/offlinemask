@@ -25,7 +25,7 @@ The owner asked to improve the whole section. Its head now says what the feature
 
 ## Layout and a webview pitfall
 
-After the first look (owner: "anything we can improve this UI?") the card took the passcode offer's note style: soft cobalt background, the mark on the left, quiet buttons with the accent one outlined, and the illustration beside the text (stacked under 720 px). The sentence became "Bôi đen chữ trong ChatGPT, Zalo hay Word, bấm nút OfflineMask là xong.", and the illustration's sample reads like a request to an AI ("Tóm tắt giúp tôi: khách Nguyễn Văn An, số 0901 234 567").
+After the first look (owner: "anything we can improve this UI?") the card took the passcode offer's note style: soft cobalt background, the mark on the left, quiet buttons with the accent one outlined, and the illustration beside the text (stacked under 720 px). The sentence became "Bôi đen chữ trong ChatGPT, Zalo hay Word, bấm nút OfflineMask là xong.", and the illustration's sample reads like a request to an AI ("Tóm tắt giúp tôi: khách Phong Phan, số 0901 234 567").
 
 The card scrolls itself into view instantly. With `behavior: "smooth"` the macOS webview stopped delivering clicks and typing to the page after the scroll (a temporary event log on the card recorded no pointer events at all, while the page's script thread was idle); with an instant scroll the owner confirmed the buttons work.
 

@@ -19,7 +19,7 @@ import BrandMark from "./BrandMark.vue";
         Tóm tắt giúp tôi:<br />
         khách
         <span class="qd-sel"
-          ><span class="qd-before">Nguyễn Văn An, số 0901 234 567</span
+          ><span class="qd-before">Phong Phan, số 0901 234 567</span
           ><span class="qd-after"><b>[TEN_1_3030]</b>, số <b>[SDT_1_4821]</b></span
           ><span class="qd-dot"
             ><BrandMark class="qd-mark" :size="17" /><AppIcon
