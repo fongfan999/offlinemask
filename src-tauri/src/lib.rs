@@ -29,9 +29,7 @@ pub fn run() {
                 panel_macos::make_non_activating(&panel);
             }
             if background::started_in_background() {
-                if let Some(window) = app.get_webview_window(background::MAIN_WINDOW) {
-                    let _ = window.hide();
-                }
+                background::hide_main(app.handle());
             }
         }
         let root = app
@@ -89,6 +87,7 @@ pub fn run() {
         quick_input::quick_paste_result,
         background::quick_quit,
         background::quick_show_main,
+        background::quick_hide_main,
         background::quick_read_service_file,
         selection::quick_selection_supported,
         selection::quick_selection_watch,
@@ -115,6 +114,7 @@ pub fn run() {
         quick_input::quick_paste_result,
         background::quick_quit,
         background::quick_show_main,
+        background::quick_hide_main,
         background::quick_read_service_file,
         selection::quick_selection_supported,
         selection::quick_selection_watch,
@@ -144,6 +144,7 @@ pub fn run() {
         quick_input::quick_paste_result,
         background::quick_quit,
         background::quick_show_main,
+        background::quick_hide_main,
         background::quick_read_service_file,
         selection::quick_selection_supported,
         selection::quick_selection_watch,
@@ -177,6 +178,7 @@ pub fn run() {
         quick_input::quick_paste_result,
         background::quick_quit,
         background::quick_show_main,
+        background::quick_hide_main,
         background::quick_read_service_file,
         selection::quick_selection_supported,
         selection::quick_selection_watch,

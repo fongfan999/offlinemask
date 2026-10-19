@@ -1,6 +1,5 @@
 import { computed, ref, watch, type Ref } from "vue";
 import {
-  trayLabel,
   type InputPermission,
   type QuickActionsAdapter,
   type QuickCommand,
@@ -33,7 +32,6 @@ export const shortcutError =
 export const lockedMessage = "Mở khóa OfflineMask trước khi dùng thao tác nhanh.";
 export const workingMessage = "Đang ẩn thông tin…";
 /** Flashed in the panel when the main window is closed (decision 0092). */
-export const backgroundMessage = `OfflineMask vẫn chạy nền: phím tắt và nút tròn vẫn dùng được. Mở lại hoặc thoát hẳn từ biểu tượng OfflineMask ở ${trayLabel}.`;
 export const launchError = "Chưa đổi được cài đặt khởi động cùng máy. Vui lòng thử lại.";
 
 type PreferenceStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
@@ -141,9 +139,8 @@ export function useQuickActions({
       await readLaunchAtLogin();
     }
   }
-  /** Closing the window keeps the shortcut and panel alive; the panel says so. */
+  /** Closing the window keeps the circle and shortcut alive in the menu bar, quietly. */
   async function closeToBackground() {
-    await adapter.sendStatus({ message: backgroundMessage, tone: "ok" }).catch(() => {});
     await adapter.hideMainWindow().catch(() => {});
   }
   /** Whether ⌘⇧M may replace the selection in place (decision 0091); "unknown" until checked. */

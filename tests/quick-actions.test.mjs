@@ -10,7 +10,6 @@ import {
   sessionFindings,
 } from "../src/core/quick-actions.ts";
 import {
-  backgroundMessage,
   launchError,
   lockedMessage,
   popoverKey,
@@ -414,7 +413,7 @@ test("closing the window hides it and tells the panel; the login item mirrors th
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.deepEqual(
     adapter.calls.filter((call) => call[0] === "status" || call[0] === "hide-main"),
-    [["status", backgroundMessage, "ok"], ["hide-main"]],
+    [["hide-main"]],
   );
   await quick.setLaunchAtLogin(false);
   assert.equal(quick.launchAtLogin.value, false);

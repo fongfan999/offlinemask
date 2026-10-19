@@ -57,7 +57,11 @@ struct Command {
     command: &'static str,
 }
 
+/// The window comes back with its Dock icon; hidden, the app lives only in the menu
+/// bar, like a VPN app (decision 0092).
 pub fn show_main<R: Runtime>(app: &AppHandle<R>) {
+    #[cfg(target_os = "macos")]
+    let _ = app.set_dock_visibility(true);
     if let Some(window) = app.get_webview_window(MAIN_WINDOW) {
         let _ = window.unminimize();
         let _ = window.show();
@@ -189,6 +193,18 @@ pub fn request_quit<R: Runtime>(app: &AppHandle<R>) {
 #[tauri::command]
 pub fn quick_quit(app: AppHandle) {
     app.exit(0);
+}
+pub fn hide_main<R: Runtime>(app: &AppHandle<R>) {
+    if let Some(window) = app.get_webview_window(MAIN_WINDOW) {
+        let _ = window.hide();
+    }
+    #[cfg(target_os = "macos")]
+    let _ = app.set_dock_visibility(false);
+}
+/// Closing the window (red button, ⌘W, ⌘Q): hide it and its Dock icon, quietly.
+#[tauri::command]
+pub fn quick_hide_main(app: AppHandle) {
+    hide_main(&app);
 }
 /// "Mở trong OfflineMask" from the restore preview: bring the main window back.
 #[tauri::command]

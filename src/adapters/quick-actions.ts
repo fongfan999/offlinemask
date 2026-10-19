@@ -160,7 +160,7 @@ export const nativeQuickActions: QuickActionsAdapter = {
       event.preventDefault();
       handler();
     }),
-  hideMainWindow: () => getCurrentWindow().hide(),
+  hideMainWindow: () => invoke("quick_hide_main"),
   launchAtLogin: () => isEnabled(),
   setLaunchAtLogin: (on) => (on ? enable() : disable()),
   quit: () => invoke("quick_quit"),
