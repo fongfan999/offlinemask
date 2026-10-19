@@ -38,7 +38,7 @@ Read [product direction](docs/product-direction.md) before UI work; it records t
 
 ## Privacy and sample data
 
-Only synthetic fixtures belong in source control, tests, screenshots, logs and issues. Never submit real customer files or identifiers. The persisted history holds versioned sample references and mask/keep choices only; it is not an encrypted vault. Do not extend that storage to user text, workbook contents, private mappings or titles derived from private data. Real-input persistence needs the vault lifecycle described in the [PRD](PRD.md).
+Only synthetic fixtures belong in source control, tests, screenshots, logs and issues. Never submit real customer files or identifiers. The plain persisted history holds versioned sample references and mask/keep choices only. Do not extend that storage to user text, workbook contents, private mappings or titles derived from private data. Real input persists only through the passcode vault ([Decision 0062](docs/decisions/0062-passcode-vault.md)); changes to its format or key derivation need a decision and a migration.
 
 Do not add analytics, automatic error uploads, input logging, correction collection or background update checks to improve detection. Evaluation uses explicitly authored synthetic fixtures run locally by developers. Synthetic results measure those fixtures; whether they represent real documents is an unverified assumption, and a green suite is not an accuracy claim.
 

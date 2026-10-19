@@ -18,7 +18,7 @@ Out of scope: the frozen evaluation experiments under `scripts/` and `docs/evalu
 ## Design commitments
 
 - No telemetry, crash reporting, analytics or update checks. The only network activity is the user-initiated recognition pack download from pinned HTTPS URLs, verified by size and SHA-256 before use.
-- Private text and findings stay in memory and are gone when the app closes. Only synthetic sample sessions are stored.
+- Private text and findings stay in memory and are gone when the app closes, unless the user sets a passcode; then they are stored only in a locally encrypted vault (Argon2id-derived key, XChaCha20-Poly1305, no recovery). Synthetic sample sessions are the only history stored in plain form.
 - Model loading is restricted to the verified local pack; remote models and browser or filesystem model caches are disabled.
 
 Changes that weaken any of these need a documented decision, not just a pull request.

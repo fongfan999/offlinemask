@@ -3,7 +3,7 @@
 # `verify` is the required job and mirrors the local commands in CONTRIBUTING.md.
 # `portability` only compiles the Rust crate on the platforms the project has not
 # qualified yet; it is advisory until Windows/Linux builds are actually tested.
-# This workflow was authored without a hosted run; adjust runner details as needed.
+# Both jobs run on hosted runners on every push to main (see decision 0077 for the Windows job).
 name: CI
 
 on:
