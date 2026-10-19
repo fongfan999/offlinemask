@@ -843,6 +843,9 @@ h1 {
   background: var(--accent);
   color: var(--on-accent);
   font: 600 11px var(--mono);
+  line-height: 1;
+  /* Centre the digit's ink, not the font's line box, which reserves room for descenders. */
+  text-box: trim-both cap alphabetic;
 }
 .primary-action .step-number {
   background: var(--on-accent);
