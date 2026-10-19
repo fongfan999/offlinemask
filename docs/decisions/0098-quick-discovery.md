@@ -8,7 +8,7 @@ Date: 19 October 2026. Status: requested by the owner: "how to let users know we
 
 ## Decision
 
-- **An illustration of the feature** (`QuickDemo.vue`). A small window labelled "Ứng dụng bất kỳ" shows sample text being selected, the OfflineMask button appearing beside it, a click, a check mark, and the values turning into codes, in a 7 s loop. Plain HTML and CSS keyframes on sample text, in the brand tokens, light and dark; no image or video file, nothing from the user. With reduced motion it holds the moment before the click. It heads Cài đặt › Thao tác nhanh until Ẩn nhanh works (switched on and permitted), and appears in the card below.
+- **An illustration of the feature** (`QuickDemo.vue`). A small window labelled "Ứng dụng bất kỳ" shows sample text being selected, the OfflineMask button appearing beside it, a click, a check mark, and the values turning into codes, in a 7 s loop. Plain HTML and CSS keyframes on sample text, in the brand tokens, light and dark; no image or video file, nothing from the user. With reduced motion it holds the moment before the click. It sits in the head of Cài đặt › Thao tác nhanh (see below) and in the card below.
 - **A one-time card at the right moment** (`QuickIntro.vue`). After the first copy of a masked text in the Văn bản page, the trip Ẩn nhanh would have saved, a card under the result says "Lần sau, không cần dán vào đây", with the illustration, "Bật Ẩn nhanh" and "Để sau", and scrolls into view.
   - With the permission already there (Windows, or granted before), "Bật Ẩn nhanh" switches the feature on and says "Đã bật Ẩn nhanh. Thử bôi đen một đoạn trong ứng dụng khác.", which fades after 8 s.
   - Otherwise one sentence comes before macOS's dialog: "macOS sẽ hỏi quyền Trợ năng. OfflineMask chỉ dùng quyền này để đọc chữ bạn bôi đen và đặt kết quả vào đó, không gửi đi đâu." Only "Tiếp tục" opens the system prompt. While waiting, the card says where to switch it on; the existing two-second permission poll notices the grant and Ẩn nhanh turns itself on.
@@ -18,6 +18,10 @@ Date: 19 October 2026. Status: requested by the owner: "how to let users know we
 - **A quiet way back from the tray.** While Ẩn nhanh does not work, the menu bar / tray menu carries "Bật Ẩn nhanh…" under "Mở OfflineMask"; it opens Cài đặt. The frontend tells the native side when to add or remove it (`quick_tray_offer`).
 
 Not done on purpose: a welcome screen or a permission request at first launch, repeated reminders, a banner on the home page (the accepted baseline stays focused on paste or drop).
+
+## Cài đặt › Thao tác nhanh, reworked
+
+The owner asked to improve the whole section. Its head now says what the feature is once ("Bôi đen chữ trong ứng dụng bất kỳ, bấm nút OfflineMask để ẩn hoặc khôi phục ngay tại chỗ.", with "Chỉ đọc chữ bạn bôi đen, xử lý trên máy này." under it) beside the compact illustration, which stays in every state so the card does not change height when the permission arrives. The Ẩn nhanh row keeps only what the head does not say ("Ô nhập được thay ngay; chữ không sửa được thì hiện bản xem trước để sao chép.") and, once it works, says so: "Đang bật · thử bôi đen một đoạn trong ứng dụng khác." The illustration's text box no longer reserves room above the text for the button (it floats over the empty end of the first line) and its text cannot be selected.
 
 ## Layout and a webview pitfall
 

@@ -16,13 +16,18 @@ function grant() {
 
 <template>
   <section class="app-settings glass glass-card" aria-labelledby="quick-title">
-    <h2 id="quick-title" class="app-settings-title">Thao tác nhanh</h2>
-    <p class="quick-intro">
-      Ẩn hoặc khôi phục thông tin ngay trong ứng dụng khác. Chỉ đọc chữ bạn bôi đen, xử lý trên máy
-      này.
-    </p>
-    <!-- What Ẩn nhanh looks like, until it is on (decision 0098). -->
-    <QuickDemo v-if="!quick.quickReady.value" />
+    <!-- What it is, said once, with the illustration beside it (decision 0098). It stays
+         in every state so the card never changes height when the permission arrives. -->
+    <div class="quick-head">
+      <div>
+        <h2 id="quick-title" class="app-settings-title">Thao tác nhanh</h2>
+        <p class="quick-lead">
+          Bôi đen chữ trong ứng dụng bất kỳ, bấm nút OfflineMask để ẩn hoặc khôi phục ngay tại chỗ.
+        </p>
+        <p class="quick-intro">Chỉ đọc chữ bạn bôi đen, xử lý trên máy này.</p>
+      </div>
+      <QuickDemo class="is-compact" />
+    </div>
     <p v-if="!quick.desktop" class="quick-note">Chỉ có trên ứng dụng máy tính.</p>
 
     <!-- Step one: the permission. The circle and its shortcut only exist once granted. -->
@@ -58,8 +63,10 @@ function grant() {
         <div>
           <h3 id="quick-popover-title">Ẩn nhanh khi bôi đen</h3>
           <p id="quick-popover-help">
-            Bôi đen chữ rồi bấm nút OfflineMask hiện bên cạnh. Chữ trong ô nhập được thay ngay; chữ
-            không sửa được thì hiện bản xem trước để bạn sao chép.
+            Ô nhập được thay ngay; chữ không sửa được thì hiện bản xem trước để sao chép.
+          </p>
+          <p v-if="quick.quickReady.value && !quick.lastSkip.value" class="quick-ready">
+            Đang bật · thử bôi đen một đoạn trong ứng dụng khác.
           </p>
           <p v-if="!quick.popoverSupported.value" class="quick-note">
             Hệ điều hành này chưa hỗ trợ.

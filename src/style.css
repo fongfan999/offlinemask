@@ -2589,6 +2589,43 @@ td.alias {
   font-size: 12px;
   line-height: 1.7;
 }
+/* Cài đặt › Thao tác nhanh: what it is, beside the illustration (decision 0098). */
+.quick-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  margin-bottom: 6px;
+}
+.quick-head > div {
+  flex: 1;
+  min-width: 0;
+}
+.quick-lead {
+  margin: 0 0 4px;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.quick-head .quick-demo.is-compact {
+  flex: none;
+  width: 300px;
+  margin: 0;
+}
+.quick-ready {
+  margin: 6px 0 0;
+  color: var(--accent);
+  font-size: 12px;
+}
+@media (max-width: 760px) {
+  .quick-head {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .quick-head .quick-demo.is-compact {
+    width: 100%;
+    max-width: 360px;
+  }
+}
 /* The one-time Ẩn nhanh suggestion under a copied result (decision 0098): the
    passcode offer's note style, with the illustration beside the text. */
 .quick-intro-card {
@@ -2669,6 +2706,7 @@ td.alias {
    loop on sample text; the stages share the duration and are keyed by percentage. */
 .quick-demo {
   margin: 14px 0 4px;
+  user-select: none;
 }
 .qd-window {
   max-width: 460px;
@@ -2699,7 +2737,8 @@ td.alias {
 }
 .qd-line {
   margin: 0;
-  padding: 40px 16px 18px;
+  /* The button floats over the empty end of the first line, so no extra room. */
+  padding: 16px 16px 18px;
   color: var(--ink);
   font-size: 13.5px;
   line-height: 1.6;
@@ -2890,7 +2929,7 @@ td.alias {
   }
 }
 .quick-demo.is-compact .qd-line {
-  padding: 34px 14px 12px;
+  padding: 16px 14px 12px;
   font-size: 12.5px;
 }
 .quick-demo.is-compact .qd-after b {
