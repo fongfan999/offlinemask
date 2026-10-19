@@ -2,6 +2,7 @@ import { isTauri } from "@tauri-apps/api/core";
 import { emitTo, listen, type UnlistenFn } from "@tauri-apps/api/event";
 import {
   availableMonitors,
+  currentMonitor,
   cursorPosition,
   getCurrentWindow,
   LogicalSize,
@@ -56,6 +57,13 @@ export interface QuickPanelAdapter {
   placeDot(anchor: PanelAnchor, size: { width: number; height: number }): Promise<Spot | null>;
   /** The hover menu, growing out of the circle at `from`, kept on its screen. */
   placeFrom(from: Spot, size: { width: number; height: number }): Promise<void>;
+  /** The preview by the circle that opened it (`from` is the circle's spot and size). */
+  placePreview(
+    from: Spot & { width: number; height: number },
+    size: { width: number; height: number },
+  ): Promise<void>;
+  /** After a resize (expand), pull the window back inside its screen if it overflows. */
+  keepOnScreen(): Promise<void>;
   /** Whether the pointer is over the window; works while the app is in the background. */
   pointerInside(): Promise<boolean>;
   /** The pointer in the page's CSS pixels, or null when it is outside the window. */
@@ -108,6 +116,17 @@ export function dotSpot(
   let y = bounds.y - gapToSelection - size.height;
   if (y < area.y) y = bounds.y + bounds.height + gapToSelection;
   return clamp({ x, y }, size, area);
+}
+/** The preview card by its circle: just below it, left-aligned, or above it when the
+ * screen has no room below; always kept on the circle's screen. */
+export function previewSpot(
+  circle: { x: number; y: number; width: number; height: number },
+  size: { width: number; height: number },
+  area: Area,
+): { x: number; y: number } {
+  let y = circle.y + circle.height;
+  if (y + size.height > area.y + area.height) y = circle.y - size.height;
+  return clamp({ x: circle.x, y }, size, area);
 }
 /** A larger window growing out of a smaller one at `from`: same top-left corner,
  * shifted left only as far as the screen's right edge requires. */
@@ -214,6 +233,30 @@ export const nativeQuickPanel: QuickPanelAdapter = {
     await getCurrentWindow().setPosition(
       new PhysicalPosition(Math.round(spot.x * from.scale), Math.round(spot.y * from.scale)),
     );
+  },
+  async placePreview(from, size) {
+    if (!isTauri()) return;
+    const spot = previewSpot(from, size, from.area);
+    await getCurrentWindow().setPosition(
+      new PhysicalPosition(Math.round(spot.x * from.scale), Math.round(spot.y * from.scale)),
+    );
+  },
+  async keepOnScreen() {
+    if (!isTauri()) return;
+    const panel = getCurrentWindow();
+    const monitor = await currentMonitor();
+    if (!monitor) return;
+    const [position, size] = await Promise.all([panel.outerPosition(), panel.outerSize()]);
+    const work = monitor.workArea ?? monitor;
+    const x = Math.min(
+      Math.max(position.x, work.position.x),
+      work.position.x + work.size.width - size.width,
+    );
+    const y = Math.min(
+      Math.max(position.y, work.position.y),
+      work.position.y + work.size.height - size.height,
+    );
+    if (x !== position.x || y !== position.y) await panel.setPosition(new PhysicalPosition(x, y));
   },
   async pointerInPage() {
     if (!isTauri()) return null;

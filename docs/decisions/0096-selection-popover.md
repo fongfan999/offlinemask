@@ -117,3 +117,9 @@ The owner selected a sent ChatGPT message full of `_bb5d` codes and "nothing hap
 287 tests, all four covered; the circle and card checked in the browser preview, light and dark.
 
 The preview's actions became icons on its header row (owner: "I want the buttons just show icons with tooltip hint"): copy in cobalt, open in OfflineMask, expand, close. Each names itself in a small hint under it. The hint is drawn by the card, right-aligned to its button so it stays inside the window, and follows the pointer through the same position polling as the circle, because macOS shows no system tooltips for an application in the background, which OfflineMask always is here. Its title is now just "Đã khôi phục" (or "Đã ẩn" for a masked preview), without the count, to keep the card lean. Copying from the preview no longer shows a card in the corner (owner: "overkill"): the copy icon turns into a check mark that pops in, and the preview fades away 1.2 s later.
+
+## Follow-up: the preview opens by its circle and can be dragged (19 October)
+
+The preview card now opens just below the circle that opened it, left-aligned to it, and above it when the screen has no room below (`previewSpot`, unit-tested); the top-right corner is only the fallback when no circle opened it. Its header is a drag region (the mark, the title and the empty space; the icon buttons keep their clicks). Expanding keeps the card where it is, the user may have moved it, and only pulls it back inside its screen if the larger card would run off it. While read-only text is masked the circle itself spins, so no card flashes in the corner before the preview appears.
+
+Verified on macOS with a read-only Safari page and a fresh session: circle at (684, 280), preview at (684, 325); a drag of the header by (−300, +200) moved the card by exactly that; its × closed it.

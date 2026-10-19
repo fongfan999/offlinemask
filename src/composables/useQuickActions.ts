@@ -418,7 +418,8 @@ export function useQuickActions({
     if (busy.value) return show({ message: quickMessages.busy, tone: "error" });
     busy.value = true;
     try {
-      await show({ message: workingMessage, tone: "busy" });
+      // The circle spins where it stands; the preview then opens beside it.
+      await show({ message: workingMessage, tone: "busy", inPlace: true });
       const outcome = await run.maskText(text);
       if ("error" in outcome)
         return await show({

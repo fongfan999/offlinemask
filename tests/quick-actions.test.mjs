@@ -1202,3 +1202,15 @@ test("a slow read-only check gives up after 1.5 s and Settings says so", async (
   assert.equal(quick.lastStatus.value, null);
   assert.equal(quick.lastSkip.value, quickMessages.skipped.slow);
 });
+
+test("the preview opens just below its circle, or above it at the bottom of the screen", async () => {
+  const { previewSpot } = await import("../src/adapters/quick-panel.ts");
+  const area = { x: 0, y: 25, width: 1440, height: 875 };
+  const circle = { x: 600, y: 300, width: 48, height: 48 };
+  const card = { width: 356, height: 168 };
+  assert.deepEqual(previewSpot(circle, card, area), { x: 600, y: 348 });
+  // No room below: above the circle.
+  assert.deepEqual(previewSpot({ ...circle, y: 800 }, card, area), { x: 600, y: 632 });
+  // Near the right edge: pulled left to stay on screen.
+  assert.deepEqual(previewSpot({ ...circle, x: 1300 }, card, area), { x: 1084, y: 348 });
+});

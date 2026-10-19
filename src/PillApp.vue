@@ -45,6 +45,8 @@ const shortMessage = computed(() => (status.value?.message ?? "").split(/\.\s/)[
 const shape = useTemplateRef<HTMLElement>("shape");
 const busy = computed(() => status.value?.tone === "busy");
 let dot: Spot | null = null;
+/** Where the last circle stood, so its preview opens beside it. */
+let lastCircle: (Spot & { width: number; height: number }) | null = null;
 let hideTimer: ReturnType<typeof setTimeout> | undefined;
 let leaveTimer: ReturnType<typeof setTimeout> | undefined;
 let hoverPoll: ReturnType<typeof setInterval> | undefined;
@@ -112,6 +114,7 @@ async function showDot(anchor: NonNullable<PanelStatus["anchor"]>) {
   circleAction.value = status.value?.action ?? "mask";
   const size = await fit();
   dot = await panel.placeDot(anchor, size).catch(() => null);
+  lastCircle = dot ? { ...dot, ...size } : null;
   await panel.show();
   startHover();
 }
@@ -173,10 +176,12 @@ const previewParts = computed(() => {
 });
 /** The preview can grow for a long answer, keeping its top-right corner. */
 const expanded = ref(false);
+/** Expanding keeps the card where it is (the user may have dragged it), pulled back
+ * inside the screen if the larger card would run off it. */
 async function toggleExpanded() {
   expanded.value = !expanded.value;
   await fit();
-  await panel.placeTopRight().catch(() => {});
+  await panel.keepOnScreen().catch(() => {});
 }
 /** Hints for the preview's icon buttons. Hover is read from the pointer position, as
  * for the circle, and the element under it is looked up in the page. */
@@ -227,8 +232,10 @@ async function showPreview() {
   stopHover();
   dot = null;
   mode.value = "preview";
-  await fit();
-  await panel.placeTopRight().catch(() => {});
+  const size = await fit();
+  // Beside the circle that opened it; the top-right corner when there was none.
+  if (lastCircle) await panel.placePreview(lastCircle, size).catch(() => {});
+  else await panel.placeTopRight().catch(() => {});
   await panel.show();
 }
 
@@ -476,11 +483,14 @@ onBeforeUnmount(() => {
     >
       <header
         class="quick-preview-head"
+        data-tauri-drag-region
         @mouseover="tip = tipFor($event.target as Element)"
         @mouseleave="tip = null"
       >
-        <span class="quick-toast-mark" aria-hidden="true"><BrandMark :size="16" /></span>
-        <h1 class="quick-preview-title">{{ status?.message }}</h1>
+        <span class="quick-toast-mark" aria-hidden="true" data-tauri-drag-region
+          ><BrandMark :size="16" data-tauri-drag-region
+        /></span>
+        <h1 class="quick-preview-title" data-tauri-drag-region>{{ status?.message }}</h1>
         <!-- Icons only; each names itself in a hint drawn by the card (data-tip), since
              the system's tooltips do not show while OfflineMask is in the background. -->
         <button
