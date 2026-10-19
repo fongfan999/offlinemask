@@ -181,6 +181,7 @@ export function useQuickActions({
       clearInterval(permissionPoll);
       permissionPoll = undefined;
     }
+    if (started) await syncShortcut();
   }
 
   // Alias tables of every private session seen in this launch, RAM only. A session
@@ -328,10 +329,22 @@ export function useQuickActions({
       }
     }
   }
+  /** ⌘⇧M only reads the selection, which needs the same permission as the circle, so
+   * the combination is taken from other applications only once it can do something. */
+  let started = false;
+  let registered = false;
+  async function syncShortcut() {
+    // A sub-option of the circle: on only while the circle is on and can read selections.
+    const want = shortcutOn.value && popoverOn.value && inputPermission.value === "granted";
+    if (want === registered) return;
+    registered = want;
+    await applyShortcut(want);
+    if (want && !shortcutOn.value) registered = false;
+  }
   async function setShortcut(on: boolean) {
     shortcutOn.value = on;
     write(shortcutKey, on);
-    await applyShortcut(on);
+    await syncShortcut();
   }
   /** The popover: a fresh selection in another application. Its direction decides the
    * question; alias text from no known session and locked or busy states show nothing. */
@@ -486,6 +499,7 @@ export function useQuickActions({
       if (on) popoverFailure.value = popoverError;
     }
     if (!on) pendingSelection = null;
+    if (started) await syncShortcut();
   }
   /** The clipboard watch noticed a change: read once, check with the built-in rules,
    * and nudge. Our own output, alias text, empty and locked cases are left alone. */
@@ -669,7 +683,7 @@ export function useQuickActions({
       stopAll();
       return;
     }
-    if (shortcutOn.value) await applyShortcut(true);
+    started = true;
     if (typeof window !== "undefined") window.addEventListener("focus", recheck);
     await Promise.all([checkInputPermission(), readLaunchAtLogin()]);
     watchSupported.value = await adapter.watchSupported().catch(() => false);
@@ -709,7 +723,11 @@ export function useQuickActions({
     if (typeof window !== "undefined") window.removeEventListener("focus", recheck);
     if (permissionPoll) clearInterval(permissionPoll);
     permissionPoll = undefined;
-    if (shortcutOn.value) void applyShortcut(false);
+    started = false;
+    if (registered) {
+      registered = false;
+      void applyShortcut(false);
+    }
   }
 
   return {

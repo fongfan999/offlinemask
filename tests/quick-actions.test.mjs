@@ -206,17 +206,18 @@ function fakeRun(sessions) {
 test("the shortcut masks ordinary text and leaves the masked copy on the clipboard", async () => {
   const sessions = ref([]);
   const adapter = fakeAdapter(phoneText);
+  adapter.permission = "granted";
   const run = fakeRun(sessions);
   const quick = useQuickActions({
     adapter,
     run,
     sessions,
     locked: () => false,
-    storage: memoryStorage(),
+    storage: memoryStorage({ [popoverKey]: "on" }),
   });
   await quick.start();
-  // Start registers the shortcut and reads the keystroke permission once.
-  assert.deepEqual(adapter.calls, [["register"], ["permission", false]]);
+  // Start reads the permission once, then takes the shortcut because it is granted.
+  assert.deepEqual(adapter.calls, [["permission", false], ["register"], ["popover", true]]);
   const status = await quick.act("auto");
   assert.equal(status.tone, "ok");
   assert.equal(status.message, quickMessages.masked(1));
@@ -288,9 +289,10 @@ test("empty, foreign-alias, locked and busy cases change nothing on the clipboar
 });
 
 test("preferences persist as on/off flags; a failed registration turns the shortcut off", async () => {
-  const storage = memoryStorage();
+  const storage = memoryStorage({ [popoverKey]: "on" });
   const sessions = ref([]);
   const adapter = fakeAdapter("");
+  adapter.permission = "granted";
   adapter.registerShortcut = async () => {
     throw new Error("taken");
   };
@@ -607,7 +609,7 @@ test("the popover asks above a fresh selection and its button replaces that sele
 
   await quick.setPopover(true);
   assert.equal(storage.data.get(popoverKey), "on");
-  assert.deepEqual(adapter.calls.at(-1), ["popover", true]);
+  assert.ok(adapter.calls.some((call) => call[0] === "popover" && call[1] === true));
   const bounds = { x: 100, y: 200, width: 80, height: 18 };
   adapter.selectionHandler({
     text: phoneText,
@@ -1083,13 +1085,14 @@ test("read-only selections anchor the circle to the cursor, editable ones to the
 test("a replaced instance stopping late does not unregister the live shortcut", async () => {
   const sessions = ref([]);
   const adapter = fakeAdapter("");
+  adapter.permission = "granted";
   const make = () =>
     useQuickActions({
       adapter,
       run: fakeRun(sessions),
       sessions,
       locked: () => false,
-      storage: memoryStorage(),
+      storage: memoryStorage({ [popoverKey]: "on" }),
     });
   const old = make();
   await old.start();
@@ -1216,7 +1219,7 @@ test("⌘⇧M does exactly what a click on the circle does, and nothing without 
     run,
     sessions,
     locked: () => false,
-    storage: memoryStorage(),
+    storage: memoryStorage({ [popoverKey]: "on" }),
   });
   await quick.start();
   const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
@@ -1284,4 +1287,51 @@ test("⌘⇧M does exactly what a click on the circle does, and nothing without 
   adapter.fire();
   await tick();
   assert.equal(sent.at(-1).tone, "notice");
+});
+
+test("the shortcut is only taken once the permission is granted, and released when it goes", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  adapter.permission = "denied";
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage({ [popoverKey]: "on" }),
+  });
+  await quick.start();
+  assert.equal(adapter.calls.filter((call) => call[0] === "register").length, 0);
+  adapter.permission = "granted";
+  await quick.checkInputPermission();
+  assert.equal(adapter.calls.filter((call) => call[0] === "register").length, 1);
+  // Turned off by the user: released; on again: taken again.
+  await quick.setShortcut(false);
+  assert.deepEqual(adapter.calls.at(-1), ["unregister"]);
+  await quick.setShortcut(true);
+  assert.deepEqual(adapter.calls.at(-1), ["register"]);
+  quick.stop();
+});
+
+test("the shortcut is a sub-option of the circle: off with it, back with it", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  adapter.permission = "granted";
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage({ [popoverKey]: "on" }),
+  });
+  await quick.start();
+  const registers = () => adapter.calls.filter((call) => call[0] === "register").length;
+  assert.equal(registers(), 1);
+  await quick.setPopover(false);
+  assert.deepEqual(adapter.calls.at(-1), ["unregister"]);
+  // The preference itself is kept for when the circle comes back.
+  assert.equal(quick.shortcutOn.value, true);
+  await quick.setPopover(true);
+  assert.equal(registers(), 2);
+  quick.stop();
 });
