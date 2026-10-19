@@ -2789,7 +2789,49 @@ td.alias {
 .quick-preview-head {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+}
+.quick-preview-head .quick-toast-mark {
+  margin-right: 4px;
+}
+.quick-preview {
+  position: relative;
+}
+/* Icon buttons in the preview's header; copy, the usual next step, in cobalt. */
+.quick-icon {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: var(--muted);
+  background: transparent;
+}
+.quick-icon:hover {
+  color: var(--ink);
+  background: var(--paper-sunk);
+}
+.quick-icon.is-primary {
+  color: var(--on-accent);
+  background: var(--accent);
+}
+.quick-icon.is-primary:hover {
+  background: var(--accent-strong);
+}
+/* The card's own tooltip under an icon (system tooltips need the app in front). */
+.quick-tip {
+  position: absolute;
+  z-index: 1;
+  translate: -100% 0;
+  padding: 3px 8px;
+  border-radius: 6px;
+  color: var(--paper-raised);
+  background: var(--ink);
+  font-size: 11.5px;
+  white-space: nowrap;
+  pointer-events: none;
 }
 .quick-preview-title {
   flex: 1;

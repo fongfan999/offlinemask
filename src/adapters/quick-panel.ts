@@ -58,6 +58,8 @@ export interface QuickPanelAdapter {
   placeFrom(from: Spot, size: { width: number; height: number }): Promise<void>;
   /** Whether the pointer is over the window; works while the app is in the background. */
   pointerInside(): Promise<boolean>;
+  /** The pointer in the page's CSS pixels, or null when it is outside the window. */
+  pointerInPage(): Promise<{ x: number; y: number } | null>;
   rememberPosition(): Promise<void>;
 }
 
@@ -212,6 +214,20 @@ export const nativeQuickPanel: QuickPanelAdapter = {
     await getCurrentWindow().setPosition(
       new PhysicalPosition(Math.round(spot.x * from.scale), Math.round(spot.y * from.scale)),
     );
+  },
+  async pointerInPage() {
+    if (!isTauri()) return null;
+    const panel = getCurrentWindow();
+    const [pointer, position, size] = await Promise.all([
+      cursorPosition(),
+      panel.innerPosition(),
+      panel.innerSize(),
+    ]);
+    const x = pointer.x - position.x;
+    const y = pointer.y - position.y;
+    if (x < 0 || y < 0 || x >= size.width || y >= size.height) return null;
+    const ratio = window.devicePixelRatio || 1;
+    return { x: x / ratio, y: y / ratio };
   },
   async pointerInside() {
     if (!isTauri()) return false;

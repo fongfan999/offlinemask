@@ -770,7 +770,7 @@ test("read-only text: no circle for plain text, a restore preview with copy and 
   await tick();
   const preview = quick.lastStatus.value;
   assert.equal(preview.tone, "preview");
-  assert.equal(preview.message, quickMessages.previewTitle(1));
+  assert.equal(preview.message, quickMessages.previewTitle);
   assert.equal(preview.preview.text, "Khách gọi từ 0901234567, gọi lại giúp.");
   assert.deepEqual(preview.preview.marks, [{ start: 13, end: 23, kind: "value" }]);
   assert.equal(preview.preview.canOpen, true);
@@ -912,7 +912,7 @@ test("read-only plain text: a circle only when the rules find something; its cli
   const status = quick.lastStatus.value;
   const alias = sessions.value[0].analysis.findings[0].alias;
   assert.equal(status.tone, "preview");
-  assert.equal(status.message, quickMessages.maskedTitle(1));
+  assert.equal(status.message, quickMessages.maskedTitle);
   assert.equal(status.preview.text, `Gọi ${alias} giúp tôi.`);
   assert.deepEqual(status.preview.marks, [{ start: 4, end: 4 + alias.length }]);
   assert.equal(status.preview.canOpen, true);

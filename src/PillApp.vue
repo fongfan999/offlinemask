@@ -76,6 +76,7 @@ const fadeMs = 260;
 const leaving = ref(false);
 let fadeToken = 0;
 async function hide() {
+  stopTips();
   clearTimeout(hideTimer);
   clearTimeout(leaveTimer);
   stopHover();
@@ -95,6 +96,7 @@ function stayVisible() {
 }
 async function showCorner() {
   stayVisible();
+  stopTips();
   stopHover();
   mode.value = pinned.value ? "panel" : "toast";
   await fit();
@@ -103,6 +105,7 @@ async function showCorner() {
 }
 async function showDot(anchor: NonNullable<PanelStatus["anchor"]>) {
   stayVisible();
+  stopTips();
   mode.value = "dot";
   hovered.value = false;
   circle.value = "idle";
@@ -175,9 +178,40 @@ async function toggleExpanded() {
   await fit();
   await panel.placeTopRight().catch(() => {});
 }
+/** Hints for the preview's icon buttons. Hover is read from the pointer position, as
+ * for the circle, and the element under it is looked up in the page. */
+const tip = ref<{ text: string; x: number; y: number } | null>(null);
+let tipPoll: ReturnType<typeof setInterval> | undefined;
+function tipFor(target: Element | null) {
+  const button = target?.closest<HTMLElement>("[data-tip]");
+  const card = shape.value;
+  if (!button || !card) return null;
+  const box = button.getBoundingClientRect();
+  const frame = card.getBoundingClientRect();
+  // Right-aligned to the button: the icons sit at the card's right edge, so a
+  // centred hint would run past it and be cut off by the window.
+  return {
+    text: button.dataset.tip ?? "",
+    x: box.right - frame.left,
+    y: box.bottom - frame.top + 6,
+  };
+}
+function startTips() {
+  stopTips();
+  tipPoll = setInterval(async () => {
+    const point = await panel.pointerInPage().catch(() => null);
+    tip.value = point ? tipFor(document.elementFromPoint(point.x, point.y)) : null;
+  }, 100);
+}
+function stopTips() {
+  clearInterval(tipPoll);
+  tipPoll = undefined;
+  tip.value = null;
+}
 /** Codes from an earlier launch: a small card saying why nothing can be restored. */
 async function showNotice() {
   stayVisible();
+  stopTips();
   stopHover();
   dot = null;
   mode.value = "notice";
@@ -187,6 +221,7 @@ async function showNotice() {
 }
 async function showPreview() {
   stayVisible();
+  startTips();
   expanded.value = false;
   stopHover();
   dot = null;
@@ -275,7 +310,7 @@ function preview() {
     },
     toast: { message: "Đã ẩn 2 thông tin ngay tại chỗ bạn chọn.", tone: "ok", pinned: false },
     preview: {
-      message: "Đã khôi phục 2 thông tin",
+      message: "Đã khôi phục",
       tone: "preview",
       pinned: false,
       preview: {
@@ -343,6 +378,7 @@ onMounted(async () => {
 });
 onBeforeUnmount(() => {
   alive = false;
+  stopTips();
   clearTimeout(hideTimer);
   clearTimeout(leaveTimer);
   stopHover();
@@ -426,19 +462,42 @@ onBeforeUnmount(() => {
       :class="{ 'is-expanded': expanded }"
       aria-live="polite"
     >
-      <header class="quick-preview-head">
+      <header
+        class="quick-preview-head"
+        @mouseover="tip = tipFor($event.target as Element)"
+        @mouseleave="tip = null"
+      >
         <span class="quick-toast-mark" aria-hidden="true"><BrandMark :size="16" /></span>
         <h1 class="quick-preview-title">{{ status?.message }}</h1>
+        <!-- Icons only; each names itself in a hint drawn by the card (data-tip), since
+             the system's tooltips do not show while OfflineMask is in the background. -->
         <button
-          class="pill-close"
+          class="quick-icon is-primary"
+          aria-label="Sao chép"
+          data-tip="Sao chép"
+          @click="send('copy')"
+        >
+          <AppIcon name="copy" :size="15" />
+        </button>
+        <button
+          v-if="status?.preview?.canOpen"
+          class="quick-icon"
+          aria-label="Mở trong OfflineMask"
+          data-tip="Mở trong OfflineMask"
+          @click="send('open')"
+        >
+          <AppIcon name="external" :size="14" />
+        </button>
+        <button
+          class="quick-icon"
           :aria-label="expanded ? 'Thu gọn' : 'Xem rộng hơn'"
-          :title="expanded ? 'Thu gọn' : 'Xem rộng hơn'"
+          :data-tip="expanded ? 'Thu gọn' : 'Xem rộng hơn'"
           :aria-pressed="expanded"
           @click="toggleExpanded"
         >
           <AppIcon :name="expanded ? 'shrink' : 'expand'" :size="14" />
         </button>
-        <button class="pill-close" aria-label="Đóng" @click="send('close')">
+        <button class="quick-icon" aria-label="Đóng" data-tip="Đóng" @click="send('close')">
           <AppIcon name="close" :size="14" />
         </button>
       </header>
@@ -448,14 +507,9 @@ onBeforeUnmount(() => {
           ><template v-else>{{ part.text }}</template></template
         >
       </p>
-      <footer class="quick-preview-actions">
-        <button v-if="status?.preview?.canOpen" class="quick-flat" @click="send('open')">
-          Mở trong OfflineMask
-        </button>
-        <button class="primary-action quick-preview-copy" @click="send('copy')">
-          <AppIcon name="copy" :size="14" />Sao chép
-        </button>
-      </footer>
+      <span v-if="tip" class="quick-tip" :style="{ left: `${tip.x}px`, top: `${tip.y}px` }">
+        {{ tip.text }}
+      </span>
     </section>
 
     <!-- Progress and results: a small card in the corner. -->

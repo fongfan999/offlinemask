@@ -115,3 +115,5 @@ The owner selected a sent ChatGPT message full of `_bb5d` codes and "nothing hap
 - **"Why not?" in Settings.** Under the popover switch, "Lần chọn gần nhất không hiện nút vì …" names the rule that suppressed the last selection: read-only text without anything to hide, a check that took too long, a run in progress, the app locked, or no text. Selections the native side never reports (no permission, an application that answers nothing) are not covered.
 
 287 tests, all four covered; the circle and card checked in the browser preview, light and dark.
+
+The preview's actions became icons on its header row (owner: "I want the buttons just show icons with tooltip hint"): copy in cobalt, open in OfflineMask, expand, close. Each names itself in a small hint under it. The hint is drawn by the card, right-aligned to its button so it stays inside the window, and follows the pointer through the same position polling as the circle, because macOS shows no system tooltips for an application in the background, which OfflineMask always is here. Its title is now just "Đã khôi phục" (or "Đã ẩn" for a masked preview), without the count, to keep the card lean.

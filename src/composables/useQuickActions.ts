@@ -407,7 +407,7 @@ export function useQuickActions({
     preview = { text: result.text, sessionId };
     const canOpen = !!sessionId && !!openSession && sessions.value.some((s) => s.id === sessionId);
     await show({
-      message: quickMessages.previewTitle(result.restored),
+      message: quickMessages.previewTitle,
       tone: "preview",
       preview: { text: result.text, marks: result.marks, canOpen },
     });
@@ -431,7 +431,7 @@ export function useQuickActions({
       const masked = sessionOutput(session);
       preview = { text: masked, sessionId: session.id };
       await show({
-        message: quickMessages.maskedTitle(session.analysis.findings.length),
+        message: quickMessages.maskedTitle,
         tone: "preview",
         preview: {
           text: masked,

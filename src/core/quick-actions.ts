@@ -80,9 +80,8 @@ export const quickMessages = {
   },
   /** The restore preview's heading, the confirmation after its copy button, and the
    * case where the AI reply holds no alias of a session still known (decision 0096). */
-  previewTitle: (n: number) =>
-    n === 1 ? "Đã khôi phục 1 thông tin" : `Đã khôi phục ${count(n)} thông tin`,
-  maskedTitle: (n: number) => `Đã ẩn ${count(n)} thông tin`,
+  previewTitle: "Đã khôi phục",
+  maskedTitle: "Đã ẩn",
   previewCopied: "Đã sao chép. Dán vào nơi bạn cần.",
   /** The popover's question over a fresh selection (decision 0096). */
   selectMask: "Ẩn thông tin trong phần vừa chọn? Kết quả thay ngay tại chỗ.",
