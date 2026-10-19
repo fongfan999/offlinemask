@@ -357,20 +357,27 @@ GX0, GX1, GY0, GY1 = 6.0, 94.0, 30.0, 70.0
 
 def build_mark(weight=1.0):
     """Return {"band", "holes", "eyes"} for the chosen mark: both eyes are holes."""
-    return {"band": swipe(weight=weight), "holes": [dot(x, y, r * weight) for x, y, r in EYES], "eyes": []}
+    return {"band": swipe(weight=weight), "holes": [dot(x, y, r * weight) for x, y, r in EYES], "cuts": [], "strokes": []}
 
 
-# The restore mark: the same mask pushed up onto the forehead, a little askew
-# because it was just lifted, with the eyes out in the open below it. The eyes
-# are never holes here; in single colour everything is one fill.
-RESTORE_EYES = ((34.0, 65.5, 6.4), (66.0, 64.0, 6.2))
-RGX0, RGX1, RGY0, RGY1 = 7.0, 93.0, 13.0, 72.0
+# The restore mark: the mask, off. The same swipe and eyes with a brush slash
+# through it, the way an eye-off or mute icon is drawn: "mask off" is unmask.
+# "cuts" are always knocked out of the band (the gap around the slash), "holes"
+# are the eyes (ink dots on paper, holes in single colour), "strokes" are ink
+# only in two-colour use; in single colour the gap alone carries the slash.
+RGX0, RGX1, RGY0, RGY1 = 6.0, 94.0, 20.0, 80.0
+
+
+def _slash(w0, w1, weight=1.0):
+    pts = line((30, 79), (70, 21), n=50, bow=0.3)
+    return to_path(brush(pts, lambda t: (w0 + (w1 - w0) * t + wobble(t, 0.05)) * weight, start="round", end="round"))
 
 
 def build_restore(weight=1.0):
-    """Return {"band", "holes", "eyes"} for the lifted mask: no holes, both eyes free."""
-    return {"band": swipe(11, 89, 30, 14.0, 8.0, 0.4, weight), "holes": [],
-            "eyes": [dot(x, y, r * weight) for x, y, r in RESTORE_EYES]}
+    """Return {"band", "holes", "cuts", "strokes"} for the mask with a slash."""
+    m = build_mark(weight)
+    return {"band": m["band"], "holes": m["holes"],
+            "cuts": [_slash(7.4, 6.8, weight)], "strokes": [_slash(4.0, 3.4, weight)]}
 
 
 def sketch_mask(weight=1.0):

@@ -9,7 +9,7 @@ It was chosen from twelve sketches in two rounds (`sketches-round-1.png`, `sketc
 | Use | File |
 | --- | --- |
 | Mark on light backgrounds | `mark-ink.svg` (cobalt swipe, ink eyes) |
-| Restore action (the mask lifted, eyes in the open) | `mark-restore-ink.svg`, `-paper`, `-mono-black`, `-mono-white`; `BrandMark.vue` with `variant="restore"` |
+| Restore action (the mask, off: a slash through it) | `mark-restore-ink.svg`, `-paper`, `-mono-black`, `-mono-white`; `BrandMark.vue` with `variant="restore"` |
 | Mark on dark backgrounds | `mark-paper.svg` |
 | Single colour (eyes cut out) | `mark-mono-black.svg`, `mark-mono-white.svg` |
 | App icon artwork (macOS/Windows/Linux via `pnpm tauri icon brand/tile-cobalt.svg`) | `tile-cobalt.svg` — 824 px squircle, 22% radius, 100 px margin, paper mark at 84% |
@@ -42,7 +42,7 @@ Taken from the personal brand kit, so the two marks sit together on wotdafong.de
 ## Rules
 
 - The swipe is cobalt, the eyes are ink. On a cobalt tile or in single-colour use, the swipe is paper/white and the eyes are holes (even-odd fill) that show the background. Never draw the eyes as filled dots on a single-colour swipe.
-- The restore mark is the mask pushed up onto the forehead (tilt +8°, both eyes below, never holes). It is only ever an action icon, for "Khôi phục"; tiles, favicon and app icon are always the mask.
+- The restore mark is the mask with a slash through it, like an eye-off icon: ink slash in a gap cut from the band; in single colour the gap alone. It is only ever an action icon, for "Khôi phục"; tiles, favicon and app icon are always the mask.
 - The swipe tilts −4°, like the personal brand's sticker and tile; it is heavy where the pen lands on the left and eases off to the right. One eye sits a touch higher than the other. Do not straighten, level or redraw them by hand; change `make_mark.py`.
 - The wordmark is the product name set in the UI's system sans at 650 weight: **Offline** in ink, **Mask** in cobalt. The hidden part is the accent. Never colour the whole word, and never write it as "Offline Mask" or "offlinemask" in UI copy.
 - Lockup: tile or bare mark to the left of the wordmark, gap about a third of the mark's height, vertically centred on the x-height.

@@ -32,9 +32,10 @@ def mark(x, y, s, ink, accent, m=M, rotate=0.0):
     cut out, so the background shows through."""
     rot = f" rotate({rotate} 50 50)" if rotate else ""
     if ink == accent:
-        body = f'<path d="{m["band"]} {" ".join(m["holes"] + m["eyes"])}" fill-rule="evenodd" fill="{ink}"/>'
+        body = f'<path d="{m["band"]} {" ".join(m["holes"] + m["cuts"])}" fill-rule="evenodd" fill="{ink}"/>'
     else:
-        body = f'<path d="{m["band"]}" fill="{accent}"/>' + "".join(f'<path d="{d}" fill="{ink}"/>' for d in m["holes"] + m["eyes"])
+        body = (f'<path d="{m["band"]} {" ".join(m["cuts"])}" fill-rule="evenodd" fill="{accent}"/>'
+                + "".join(f'<path d="{d}" fill="{ink}"/>' for d in m["holes"] + m["strokes"]))
     return f'<g transform="translate({x:.2f} {y:.2f}) scale({s / 100:.4f}){rot}">{body}</g>'
 
 
@@ -74,7 +75,7 @@ write("brand/mark-ink.svg", mark_file(INK, COBALT, "OfflineMask mark — a brush
 write("brand/mark-paper.svg", mark_file(INK_DARK, COBALT_DARK, "OfflineMask mark on dark"))
 write("brand/mark-mono-black.svg", mark_file("#000", "#000", "OfflineMask mark, single colour"))
 write("brand/mark-mono-white.svg", mark_file("#fff", "#fff", "OfflineMask mark, single colour"))
-write("brand/mark-restore-ink.svg", mark_file(INK, COBALT, "OfflineMask restore mark — the mask lifted, eyes in the open", R))
+write("brand/mark-restore-ink.svg", mark_file(INK, COBALT, "OfflineMask restore mark — the mask, off: a slash through it", R))
 write("brand/mark-restore-paper.svg", mark_file(INK_DARK, COBALT_DARK, "OfflineMask restore mark on dark", R))
 write("brand/mark-restore-mono-black.svg", mark_file("#000", "#000", "OfflineMask restore mark, single colour", R))
 write("brand/mark-restore-mono-white.svg", mark_file("#fff", "#fff", "OfflineMask restore mark, single colour", R))
@@ -112,9 +113,11 @@ module = (
     "export const markViewBox = \"0 0 100 100\";\n"
     f"export const markBand =\n  \"{M['band']}\";\n"
     f"export const markEyes = [\n  \"{M['holes'][0]}\",\n  \"{M['holes'][1]}\",\n];\n"
-    "// The restore mark: the mask lifted onto the forehead, eyes in the open (no holes).\n"
-    f"export const restoreBand =\n  \"{R['band']}\";\n"
-    f"export const restoreEyes = [\n  \"{R['eyes'][0]}\",\n  \"{R['eyes'][1]}\",\n];\n"
+    "// The restore mark: the mask, off. The band, its eye holes and a gap for the\n"
+    "// slash are one even-odd path; the slash itself is drawn in ink on top.\n"
+    f"export const restoreBand =\n  \"{R['band']} {R['cuts'][0]}\";\n"
+    f"export const restoreEyes = [\n  \"{R['holes'][0]}\",\n  \"{R['holes'][1]}\",\n];\n"
+    f"export const restoreSlash =\n  \"{R['strokes'][0]}\";\n"
 )
 write("src/components/brand-paths.ts", module)
 
