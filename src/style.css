@@ -213,17 +213,19 @@ p {
 .about-lockup {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
+  margin: 0 0 4px;
+  font-size: 13px;
   font-weight: 650;
   letter-spacing: -0.2px;
 }
 .about-lockup .brand-mark {
-  width: 28px;
-  height: 28px;
+  width: 20px;
+  height: 20px;
 }
 .about-version {
   margin-left: 4px;
-  font: 500 12px var(--mono);
+  font: 500 11px var(--mono);
   color: var(--muted);
 }
 nav {

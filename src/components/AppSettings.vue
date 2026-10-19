@@ -29,7 +29,7 @@ const { theme, setTheme } = useTheme();
       <div>
         <h3>Cập nhật <ComingSoonBadge /></h3>
         <p class="about-lockup">
-          <span class="brand-mark"><BrandMark :size="20" /></span
+          <span class="brand-mark"><BrandMark :size="14" /></span
           ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
           <span class="about-version">Phiên bản {{ version }}</span>
         </p>
