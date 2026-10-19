@@ -599,8 +599,7 @@ h1 {
   color: var(--accent);
 }
 .step .step-number {
-  width: 26px;
-  height: 26px;
+  --badge-size: 26px;
   font-size: 12px;
   transition:
     background 0.25s,
@@ -623,6 +622,7 @@ h1 {
   color: var(--accent);
 }
 .step.is-upcoming .step-number {
+  --badge-border: 1.5px;
   background: transparent;
   border: 1.5px solid var(--line-strong);
   color: var(--muted);
@@ -836,18 +836,24 @@ h1 {
 }
 /* Step numbers tie the home page's three steps to the review screen. */
 .step-number {
+  --badge-size: 20px;
+  --badge-border: 0px;
   flex-shrink: 0;
-  display: inline-grid;
-  place-items: center;
-  width: 20px;
-  height: 20px;
+  display: inline-block;
+  box-sizing: border-box;
+  width: var(--badge-size);
+  height: var(--badge-size);
   border-radius: 50%;
   background: var(--accent);
   color: var(--on-accent);
   font: 600 11px var(--mono);
   line-height: 1;
-  /* Centre the digit's ink, not the font's line box, which reserves room for descenders. */
+  text-align: center;
+  /* Centre the digit's ink, not the font's line box, which reserves room for descenders:
+     trim the line to cap height and baseline, then pad it down to the middle. WebKit
+     ignores the trim inside grid and flex items, so this stays a plain block. */
   text-box: trim-both cap alphabetic;
+  padding-top: calc((var(--badge-size) - 1cap) / 2 - var(--badge-border));
 }
 .primary-action .step-number {
   background: var(--on-accent);
