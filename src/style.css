@@ -2716,6 +2716,26 @@ td.alias {
     opacity: 0;
   }
 }
+/* Codes of an earlier launch: a quiet circle, so it reads as "nothing to do here". */
+.quick-dot.is-unknown {
+  border-color: var(--line-strong);
+  color: var(--muted);
+  background: var(--paper-raised);
+}
+.quick-dot.is-unknown:not(:disabled):hover {
+  color: var(--ink);
+  background: var(--paper-sunk);
+}
+.quick-toast-mark.is-muted {
+  color: var(--muted);
+  background: var(--paper-sunk);
+}
+.quick-notice-text {
+  margin: 0;
+  color: var(--ink);
+  font-size: 12.5px;
+  line-height: 1.55;
+}
 .quick-dot.is-error {
   color: var(--paper-raised);
   background: var(--error);

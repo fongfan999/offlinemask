@@ -81,6 +81,9 @@ const quick = useProvided(quickKey);
         <p v-if="quick.popoverFailure.value" class="quick-error" role="alert">
           {{ quick.popoverFailure.value }}
         </p>
+        <p v-if="quick.popoverOn.value && quick.lastSkip.value" class="quick-note" role="status">
+          Lần chọn gần nhất không hiện nút vì {{ quick.lastSkip.value }}.
+        </p>
       </div>
       <label class="quick-toggle">
         <input

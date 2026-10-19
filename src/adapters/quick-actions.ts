@@ -23,7 +23,8 @@ export const trayLabel = /Mac|iPhone|iPad/.test(navigator.userAgent)
 
 /** Panel or tray → shell: a button in the panel, its close control, the tray's quit, or
  * the restore preview's two actions (decision 0096). */
-export type QuickCommand = "mask" | "restore" | "unpin" | "quit" | "copy" | "open" | "close";
+export type QuickCommand =
+  "mask" | "restore" | "unknown" | "unpin" | "quit" | "copy" | "open" | "close" | "settings";
 /** Logical screen points, top-left origin (decision 0096). */
 export interface ScreenPoint {
   x: number;
@@ -42,10 +43,10 @@ export interface QuickStatus {
   message: string;
   /** `offer` is the clipboard watch's nudge and `select` the popover's question: both
    * stay longer than a result and wait for a button. */
-  tone: "ok" | "error" | "busy" | "offer" | "select" | "preview";
+  tone: "ok" | "error" | "busy" | "offer" | "select" | "preview" | "notice";
   anchor?: PanelAnchor;
   /** For a selection: what the circle's click does, and so which icon it shows. */
-  action?: "mask" | "restore";
+  action?: "mask" | "restore" | "unknown";
   /** For a selection: what that click will do, in a few words, shown on hover. */
   hint?: string;
   /** Progress and result of a click on the circle that works in place: the circle itself
@@ -54,6 +55,9 @@ export interface QuickStatus {
   /** The restore preview of read-only text: the restored text, where each restored
    * value sits in it, and whether its session can be opened in the app. */
   preview?: { text: string; marks: { start: number; end: number }[]; canOpen: boolean };
+  /** An explanation card (codes from an earlier launch): its body, and whether it offers
+   * the way to the passcode setting. */
+  notice?: { body: string; settings: boolean };
 }
 /** Text the user just selected in another application (decision 0096). */
 export interface SelectionMade {

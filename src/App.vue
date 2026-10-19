@@ -64,6 +64,9 @@ const quick = useQuickActions({
     clearTimeout(saveTimer);
     if (vault.state.value === "unlocked") await vault.save(sessions.value);
   },
+  // The unknown-codes card leads to the passcode setting (decision 0096).
+  openSettings: () => void navigate("settings"),
+  historyKept: () => vault.state.value === "unlocked",
   // "Mở trong OfflineMask" in the restore preview (decision 0096).
   openSession: (id) => {
     const session = store.find(id);

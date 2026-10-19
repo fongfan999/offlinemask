@@ -105,3 +105,13 @@ Refined the same evening: for read-only text the circle is anchored to the curso
 The owner did not see the preview for read-only text and restated the rule: editable text is simply replaced, read-only text must show the result so the user can decide (copy, or view it more comfortably). Reproduced in a fresh process: a shortcut-masked session, its alias on a read-only Safari page, ⌘A, a click on the circle, and the preview opened top right (356 × 168). The missing preview, and a ⌘⇧M that did nothing, came from the development process after many hot reloads: a replaced instance stopping late unregistered the global shortcut its successor had just registered. The shortcut now has one owner per window (`globalThis.__offlinemaskShortcutOwner`) and only the owner unregisters it; unit-tested.
 
 The preview gains an expand button beside × (icons `expand` / `shrink`): the card grows from 340 to 560 px wide and the text from 180 to 440 px tall, keeping its top-right corner. A first try with a third text button in the footer overflowed the card and was moved to the header.
+
+## Follow-up: no more silent selections (19 October)
+
+The owner selected a sent ChatGPT message full of `_bb5d` codes and "nothing happened". The codes came from a session masked before a restart, which without a passcode is gone; the rule kept the circle hidden for codes of no known session, and plain read-only text got no circle when the rules' check ran past 400 ms, typically right after launch.
+
+- **Unknown codes get a muted circle.** Text holding OfflineMask's alias shapes is clearly the app's own output, so showing a circle is not random. It is quiet (paper background, muted restore mark), its hover hint reads "Không tìm thấy bản gốc", and its click opens a small card top right: why nothing can be restored ("được tạo trong một lần mở trước và chưa được lưu lại") with "Đặt mật mã", which opens Cài đặt in the main window. With a passcode set the card only says the codes belong to no session in this history. Nothing is copied, pasted or masked.
+- **The read-only check waits up to 1.5 s** instead of 400 ms, and turning the popover on (including at launch) wakes the detector with a throwaway check on synthetic text, so the first selection after launch is not lost to a cold start.
+- **"Why not?" in Settings.** Under the popover switch, "Lần chọn gần nhất không hiện nút vì …" names the rule that suppressed the last selection: read-only text without anything to hide, a check that took too long, a run in progress, the app locked, or no text. Selections the native side never reports (no permission, an application that answers nothing) are not covered.
+
+287 tests, all four covered; the circle and card checked in the browser preview, light and dark.

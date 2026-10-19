@@ -667,16 +667,12 @@ test("the popover asks above a fresh selection and its button replaces that sele
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(adapter.calls.filter((call) => call[0] === "paste").length, 1);
 
-  // Foreign alias text and empty selections show nothing.
-  adapter.selectionHandler({
-    text: "[SDT_1_dead]",
-    bounds: null,
-    pointer: { x: 1, y: 1 },
-    editable: true,
-  });
+  // An empty selection shows nothing, and says why in Settings.
+  const before = quick.lastStatus.value;
   adapter.selectionHandler({ text: "  ", bounds: null, pointer: { x: 1, y: 1 }, editable: true });
   await new Promise((resolve) => setTimeout(resolve, 0));
-  assert.notEqual(quick.lastStatus.value.tone, "select");
+  assert.equal(quick.lastStatus.value, before);
+  assert.equal(quick.lastSkip.value, quickMessages.skipped.empty);
 
   // Without the macOS permission the switch stays on but says what is missing.
   adapter.permission = "denied";
@@ -752,21 +748,16 @@ test("read-only text: no circle for plain text, a restore preview with copy and 
   await quick.setPopover(true);
   const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
-  // Plain read-only text, or a selection holding aliases of no known session: nothing.
+  // Plain read-only text the rules find nothing in: no circle, and Settings says why.
   adapter.selectionHandler({
     text: "Một đoạn văn bản bình thường.",
     bounds: null,
     pointer: { x: 1, y: 1 },
     editable: false,
   });
-  adapter.selectionHandler({
-    text: "Mã [SDT_1_dead]",
-    bounds: null,
-    pointer: { x: 1, y: 1 },
-    editable: false,
-  });
   await tick();
   assert.equal(quick.lastStatus.value, null);
+  assert.equal(quick.lastSkip.value, quickMessages.skipped.plain);
 
   // An AI reply with a known alias: the restore circle; its click opens the preview.
   const reply = `Khách gọi từ ${alias}, gọi lại giúp.`;
@@ -1120,4 +1111,92 @@ test("a replaced instance stopping late does not unregister the live shortcut", 
   fresh.stop();
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.deepEqual(adapter.calls.at(-1), ["unregister"]);
+});
+
+test("codes of an earlier launch get a muted circle whose click explains and leads to the passcode", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  const settings = [];
+  let kept = false;
+  const run = fakeRun(sessions);
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    openSettings: () => settings.push("open"),
+    historyKept: () => kept,
+    storage: memoryStorage(),
+  });
+  adapter.showMainWindow = async () => adapter.calls.push(["show-main"]);
+  await quick.start();
+  await quick.setPopover(true);
+  // Turning the popover on wakes the detector with a throwaway check.
+  assert.deepEqual(run.probed, ["a@example.com"]);
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+  for (const editable of [false, true]) {
+    adapter.selectionHandler({
+      text: "Mã [SDT_1_dead] cũ",
+      bounds: null,
+      pointer: { x: 1, y: 1 },
+      editable,
+    });
+    await tick();
+    assert.equal(quick.lastStatus.value.tone, "select");
+    assert.equal(quick.lastStatus.value.action, "unknown");
+    assert.equal(quick.lastStatus.value.hint, quickMessages.hintUnknown);
+  }
+  adapter.command("unknown");
+  await tick();
+  assert.equal(quick.lastStatus.value.tone, "notice");
+  assert.equal(quick.lastStatus.value.notice.body, quickMessages.unknownBody);
+  assert.equal(quick.lastStatus.value.notice.settings, true);
+  // Nothing was copied, pasted or masked.
+  assert.deepEqual(
+    adapter.calls.filter((call) => ["copy", "paste"].includes(call[0])),
+    [],
+  );
+  assert.deepEqual(run.texts, []);
+  adapter.command("settings");
+  await tick();
+  assert.deepEqual(settings, ["open"]);
+  assert.ok(adapter.calls.some((call) => call[0] === "show-main"));
+  // With history kept the card does not suggest a passcode.
+  kept = true;
+  adapter.selectionHandler({
+    text: "Mã [SDT_1_dead] cũ",
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: false,
+  });
+  await tick();
+  adapter.command("unknown");
+  await tick();
+  assert.equal(quick.lastStatus.value.notice.body, quickMessages.unknownBodySaved);
+  assert.equal(quick.lastStatus.value.notice.settings, false);
+});
+
+test("a slow read-only check gives up after 1.5 s and Settings says so", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  const run = fakeRun(sessions);
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  await quick.setPopover(true);
+  run.probe = () => new Promise(() => {});
+  adapter.selectionHandler({
+    text: phoneText,
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: false,
+  });
+  await new Promise((resolve) => setTimeout(resolve, 1600));
+  assert.equal(quick.lastStatus.value, null);
+  assert.equal(quick.lastSkip.value, quickMessages.skipped.slow);
 });

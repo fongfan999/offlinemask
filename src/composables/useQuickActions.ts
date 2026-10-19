@@ -25,7 +25,7 @@ export const watchKey = "offlinemask.quick-watch.v1";
 export const popoverKey = "offlinemask.quick-popover.v1";
 /** Read-only text gets a masking circle only if the built-in rules find something to
  * hide within this time; otherwise selecting a sentence on a web page shows nothing. */
-const readOnlyProbeMs = 400;
+const readOnlyProbeMs = 1500;
 export const popoverError = "Chưa bật được nút nổi khi bôi đen trên hệ này.";
 export const popoverPermission =
   "Nút nổi khi bôi đen cần quyền Trợ năng (nút Cấp quyền ở trên) để đọc phần bạn chọn.";
@@ -59,6 +59,10 @@ export interface QuickActionsDependencies {
   openFile?: (file: File) => Promise<string>;
   /** Opens a session on its page in the main window (the restore preview's second action). */
   openSession?: (id: string) => void;
+  /** Opens Cài đặt in the main window (the unknown-codes card's way to the passcode). */
+  openSettings?: () => void;
+  /** Whether history is kept (a passcode is set), for the unknown-codes explanation. */
+  historyKept?: () => boolean;
   sessions: Ref<readonly Session[]>;
   /** While the lock screen is up, nothing may be masked or restored. */
   locked: () => boolean;
@@ -79,6 +83,8 @@ export function useQuickActions({
   flush,
   openFile,
   openSession,
+  openSettings,
+  historyKept,
   storage = defaultStorage(),
 }: QuickActionsDependencies) {
   // Two preferences, no content: on/off for the shortcut and the panel.
@@ -107,7 +113,13 @@ export function useQuickActions({
   const popoverOn = ref(adapter.desktop && read(popoverKey, false));
   const popoverSupported = ref(false);
   const popoverFailure = ref("");
-  let pendingSelection: { text: string; editable: boolean } | null = null;
+  let pendingSelection: {
+    text: string;
+    editable: boolean;
+    action: "mask" | "restore" | "unknown";
+  } | null = null;
+  /** Why the last selection got no circle; shown in Settings to explain "nothing happened". */
+  const lastSkip = ref("");
   /** The restore preview on screen: its text for "Sao chép", its session for "Mở". */
   let preview: { text: string; sessionId: string | null } | null = null;
   /** The last text this app put on the clipboard: its own output is never offered back. */
@@ -338,9 +350,11 @@ export function useQuickActions({
    * text it only shows for known aliases, and its click opens a restore preview. Anything
    * else (plain read-only text, aliases of no known session) shows nothing. */
   async function selectionMade(selection: SelectionMade) {
-    if (!popoverOn.value || busy.value || locked()) return;
+    if (!popoverOn.value) return;
+    if (locked()) return void (lastSkip.value = quickMessages.skipped.locked);
+    if (busy.value) return void (lastSkip.value = quickMessages.skipped.busy);
     const direction = quickDirection(selection.text, knownTables());
-    if (direction !== "mask" && direction !== "restore") return;
+    if (direction === "empty") return void (lastSkip.value = quickMessages.skipped.empty);
     if (!selection.editable && direction === "mask") {
       // Plain read-only text: only worth a circle when the rules find something.
       let wait: ReturnType<typeof setTimeout> | undefined;
@@ -349,15 +363,24 @@ export function useQuickActions({
         new Promise<null>((resolve) => (wait = setTimeout(() => resolve(null), readOnlyProbeMs))),
       ]);
       clearTimeout(wait);
-      if (!probed?.count) return;
+      if (!probed) return void (lastSkip.value = quickMessages.skipped.slow);
+      if (!probed.count) return void (lastSkip.value = quickMessages.skipped.plain);
     }
-    const action = direction as "mask" | "restore";
-    pendingSelection = { text: selection.text, editable: selection.editable };
+    lastSkip.value = "";
+    // Codes of a session this launch does not know still get a (muted) circle: the text
+    // is clearly OfflineMask's, and silence looked like a bug.
+    const action = direction;
+    pendingSelection = { text: selection.text, editable: selection.editable, action };
     await show({
       message: action === "mask" ? quickMessages.selectMask : quickMessages.selectRestore,
       tone: "select",
       action,
-      hint: action === "mask" ? quickMessages.hintMask : quickMessages.hintRestore,
+      hint:
+        action === "mask"
+          ? quickMessages.hintMask
+          : action === "restore"
+            ? quickMessages.hintRestore
+            : quickMessages.hintUnknown,
       // Editable fields report the selection's own rectangle; read-only text (a chat
       // bubble, a page) often reports the whole block, so the cursor is the better spot.
       anchor: {
@@ -452,12 +475,18 @@ export function useQuickActions({
     pendingSelection = null;
     if (adapter.desktop) await adapter.dismissPanel().catch(() => {});
   }
+  /** The first read-only check after launch must not wait for the detector to start:
+   * one throwaway check (synthetic text) wakes it when the popover is turned on. */
+  function warmUp() {
+    void run.probe("a@example.com").catch(() => {});
+  }
   async function setPopover(on: boolean) {
     popoverFailure.value = "";
     try {
       await adapter.setSelectionWatch(on);
       popoverOn.value = on;
       write(popoverKey, on);
+      if (on) warmUp();
       if (on && inputPermission.value === "denied") popoverFailure.value = popoverPermission;
     } catch {
       popoverOn.value = false;
@@ -561,16 +590,35 @@ export function useQuickActions({
     if (exact) await act(command, exact, { replace: true, inPlace: true });
     else await act(command, selection.text);
   }
+  /** The muted circle's card: why these codes cannot be restored, and the way out. */
+  async function explainUnknown() {
+    const kept = historyKept?.() ?? false;
+    await show({
+      message: quickMessages.unknownTitle,
+      tone: "notice",
+      notice: {
+        body: kept ? quickMessages.unknownBodySaved : quickMessages.unknownBody,
+        settings: !kept && !!openSettings,
+      },
+    });
+  }
+  async function goToSettings() {
+    openSettings?.();
+    await adapter.showMainWindow().catch(() => {});
+    if (adapter.desktop) await adapter.dismissPanel().catch(() => {});
+  }
   function onCommand(command: QuickCommand) {
     if (command === "unpin") void setPinned(false);
     else if (command === "quit") void quit();
+    else if (command === "settings") void goToSettings();
     else if (command === "copy" || command === "open" || command === "close")
       void previewAction(command);
     else if (pendingSelection !== null) {
       const selection = pendingSelection;
       pendingSelection = null;
-      void actOnSelection(command, selection);
-    } else void act(command);
+      if (selection.action === "unknown" || command === "unknown") void explainUnknown();
+      else void actOnSelection(command as "mask" | "restore", selection);
+    } else if (command !== "unknown") void act(command);
   }
 
   let stopCommands: (() => void) | undefined;
@@ -666,6 +714,7 @@ export function useQuickActions({
     watchFailure,
     setClipboardWatch,
     popoverOn: computed(() => popoverOn.value),
+    lastSkip,
     popoverSupported: computed(() => popoverSupported.value),
     popoverFailure,
     setPopover,

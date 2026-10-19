@@ -19,7 +19,7 @@ import { nativeQuickPanel as panel, type Spot } from "./adapters/quick-panel.ts"
  *   open-in-app buttons; it stays until one is used or it is closed;
  * - `toast`: a small rounded card in the corner for progress and results;
  * - `panel`: the full panel with both buttons, when the user keeps it on screen. */
-type Mode = "dot" | "preview" | "toast" | "panel";
+type Mode = "dot" | "preview" | "notice" | "toast" | "panel";
 
 const flashMs = 3600;
 /** A question (a selection, the clipboard watch's nudge) waits longer for an answer. */
@@ -39,7 +39,7 @@ const hovered = ref(false);
  * exclamation mark with one short line when it could not be. */
 type Circle = "idle" | "busy" | "done" | "error";
 const circle = ref<Circle>("idle");
-const circleAction = ref<"mask" | "restore">("mask");
+const circleAction = ref<"mask" | "restore" | "unknown">("mask");
 /** The first sentence of a message is enough beside the circle. */
 const shortMessage = computed(() => (status.value?.message ?? "").split(/\.\s/)[0]);
 const shape = useTemplateRef<HTMLElement>("shape");
@@ -175,6 +175,16 @@ async function toggleExpanded() {
   await fit();
   await panel.placeTopRight().catch(() => {});
 }
+/** Codes from an earlier launch: a small card saying why nothing can be restored. */
+async function showNotice() {
+  stayVisible();
+  stopHover();
+  dot = null;
+  mode.value = "notice";
+  await fit();
+  await panel.placeTopRight().catch(() => {});
+  await panel.show();
+}
 async function showPreview() {
   stayVisible();
   expanded.value = false;
@@ -192,6 +202,7 @@ async function present(next: PanelStatus) {
   pinned.value = next.pinned;
   clearTimeout(hideTimer);
   if (next.tone === "preview") return showPreview();
+  if (next.tone === "notice") return showNotice();
   if (next.inPlace && mode.value === "dot") {
     stopHover();
     hovered.value = false;
@@ -217,13 +228,29 @@ async function close() {
   await send("unpin");
 }
 
-/** Browser preview only: `pill.html?state=dot|hover|restore|circle-busy|circle-done|circle-error|preview|toast|busy|offer|panel` shows
+/** Browser preview only: `pill.html?state=dot|hover|restore|unknown|circle-busy|circle-done|circle-error|preview|notice|toast|busy|offer|panel` shows
  * one shape with sample text, so the design can be checked without the desktop app. */
 function preview() {
   const state = new URLSearchParams(location.search).get("state");
   if (!state) return;
   const samples: Record<string, PanelStatus> = {
     dot: { message: "", tone: "select", action: "mask", pinned: false },
+    unknown: {
+      message: "",
+      tone: "select",
+      action: "unknown",
+      hint: "Không tìm thấy bản gốc",
+      pinned: false,
+    },
+    notice: {
+      message: "Không tìm thấy bản gốc",
+      tone: "notice",
+      pinned: false,
+      notice: {
+        body: "Các mã thay thế này được tạo trong một lần mở trước và chưa được lưu lại, nên không khôi phục được. Đặt mật mã để giữ lịch sử giữa các lần mở OfflineMask.",
+        settings: true,
+      },
+    },
     "circle-busy": { message: "Đang ẩn thông tin…", tone: "busy", inPlace: true, pinned: false },
     "circle-done": { message: "Đã ẩn 2 thông tin", tone: "ok", inPlace: true, pinned: false },
     "circle-error": {
@@ -270,17 +297,16 @@ function preview() {
   };
   status.value = samples[state] ?? null;
   pinned.value = state === "panel";
-  hovered.value = state === "hover" || state === "restore";
-  circleAction.value = state === "restore" ? "restore" : "mask";
+  hovered.value = state === "hover" || state === "restore" || state === "unknown";
+  circleAction.value = state === "restore" || state === "unknown" ? state : "mask";
   circle.value = state.startsWith("circle-") ? (state.slice(7) as Circle) : "idle";
+  const dotStates = ["dot", "restore", "hover", "unknown"];
   mode.value =
-    state === "dot" || state === "restore" || state === "hover" || state.startsWith("circle-")
+    dotStates.includes(state) || state.startsWith("circle-")
       ? "dot"
-      : state === "panel"
-        ? "panel"
-        : state === "preview"
-          ? "preview"
-          : "toast";
+      : state === "panel" || state === "preview" || state === "notice"
+        ? state
+        : "toast";
 }
 
 onMounted(async () => {
@@ -337,9 +363,15 @@ onBeforeUnmount(() => {
     >
       <button
         class="quick-dot"
-        :class="`is-${circle}`"
+        :class="[`is-${circle}`, { 'is-unknown': circleAction === 'unknown' }]"
         :disabled="circle !== 'idle'"
-        :aria-label="circleAction === 'mask' ? 'Ẩn thông tin' : 'Khôi phục thông tin'"
+        :aria-label="
+          circleAction === 'mask'
+            ? 'Ẩn thông tin'
+            : circleAction === 'restore'
+              ? 'Khôi phục thông tin'
+              : 'Không tìm thấy bản gốc'
+        "
         @click="send(circleAction)"
       >
         <span v-if="circle === 'busy'" class="quick-spinner" aria-hidden="true"></span>
@@ -360,6 +392,31 @@ onBeforeUnmount(() => {
       </span>
       <span v-else-if="circle !== 'idle'" class="sr-only" role="status">{{ status?.message }}</span>
     </div>
+
+    <!-- Codes from an earlier launch: why nothing can be restored, and the way out. -->
+    <section
+      v-else-if="mode === 'notice'"
+      ref="shape"
+      class="quick-preview quick-notice"
+      aria-live="polite"
+    >
+      <header class="quick-preview-head">
+        <span class="quick-toast-mark is-muted" aria-hidden="true">
+          <BrandMark variant="restore" :size="16" />
+        </span>
+        <h1 class="quick-preview-title">{{ status?.message }}</h1>
+        <button class="pill-close" aria-label="Đóng" @click="send('close')">
+          <AppIcon name="close" :size="14" />
+        </button>
+      </header>
+      <p class="quick-notice-text">{{ status?.notice?.body }}</p>
+      <footer class="quick-preview-actions">
+        <button v-if="status?.notice?.settings" class="quick-flat" @click="send('settings')">
+          Đặt mật mã
+        </button>
+        <button class="primary-action quick-preview-copy" @click="send('close')">Đã hiểu</button>
+      </footer>
+    </section>
 
     <!-- Read-only AI text with the real values back: copy it, or open its session. -->
     <section

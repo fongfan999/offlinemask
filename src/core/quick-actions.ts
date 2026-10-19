@@ -63,6 +63,21 @@ export const quickMessages = {
   /** What a click on the circle will do, shown while it is hovered (decision 0096). */
   hintMask: "Ẩn thông tin",
   hintRestore: "Khôi phục thông tin",
+  /** Codes of a session this launch does not know (decision 0096). */
+  hintUnknown: "Không tìm thấy bản gốc",
+  unknownTitle: "Không tìm thấy bản gốc",
+  unknownBody:
+    "Các mã thay thế này được tạo trong một lần mở trước và chưa được lưu lại, nên không khôi phục được. Đặt mật mã để giữ lịch sử giữa các lần mở OfflineMask.",
+  unknownBodySaved:
+    "Các mã thay thế này không thuộc văn bản nào trong lịch sử trên máy này, nên không khôi phục được.",
+  /** Why the last selection got no circle, for Cài đặt › Thao tác nhanh. */
+  skipped: {
+    plain: "văn bản chỉ đọc không có thông tin cần ẩn",
+    slow: "kiểm tra mất quá lâu (bộ nhận diện đang khởi động)",
+    busy: "đang xử lý một văn bản khác",
+    locked: "OfflineMask đang khóa",
+    empty: "không có chữ để ẩn",
+  },
   /** The restore preview's heading, the confirmation after its copy button, and the
    * case where the AI reply holds no alias of a session still known (decision 0096). */
   previewTitle: (n: number) =>
