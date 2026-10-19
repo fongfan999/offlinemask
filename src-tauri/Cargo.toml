@@ -78,10 +78,11 @@ opt-level = 3
 [profile.dev.package.blake2]
 opt-level = 3
 
-# Read the optimization guideline for more details: https://tauri.app/concept/size/#cargo-configuration
+# Thin LTO with Cargo's default 16 codegen units (decision 0104): the fat LTO from
+# Tauri's size guide (https://tauri.app/concept/size/#cargo-configuration) linked the
+# helper and the app single-threaded for most of each 11-16 minute release job.
 [profile.release]
-codegen-units = 1
-lto = true
+lto = "thin"
 opt-level = 3
 panic = "abort"
 strip = true

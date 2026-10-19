@@ -4,6 +4,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+### Changed
+
+- Release binaries are built with thin LTO instead of fat LTO, which roughly halves the build time; Linux releases ship `.deb` and `.rpm` only, the AppImage is withdrawn until the app has been tried on Linux ([0104](docs/decisions/0104-faster-release-builds.md)).
+
 ## [2.0.0] — 2026-10-19
 
 The first public release. The number starts at 2.0.0 by the owner's choice; there was no 1.0.0.

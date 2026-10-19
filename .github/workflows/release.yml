@@ -2,13 +2,14 @@
 # package.json builds the desktop app on every supported runner and attaches the
 # bundles and a SHA256SUMS.txt to the GitHub release for that tag (created as a draft
 # when it does not exist yet). "Run workflow" with a tag name rebuilds that tag using
-# the workflow as it is on the chosen branch.
+# the workflow as it is on the chosen branch; without a tag it is a dry run that builds
+# the chosen branch and keeps the bundles as run artifacts, attaching nothing.
 #
 # Per platform:
 #   macOS arm64   native recognition helper (decision 0049), the verified path.
 #   macOS Intel   WASM recognition: no native runtime is qualified for x86_64.
 #   Windows x64   native recognition helper (decision 0077), verified and smoke-tested.
-#   Linux x64     WASM recognition; deb, rpm and AppImage. Untested by hand.
+#   Linux x64     WASM recognition; deb and rpm (no AppImage, decision 0104). Untested.
 #
 # Without Apple secrets the macOS apps are signed ad hoc, so Apple Silicon does not
 # report them as damaged, but Gatekeeper still asks the user to allow them. With
@@ -24,12 +25,12 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to build and attach (vX.Y.Z)"
-        required: true
+        description: "Tag to build and attach (vX.Y.Z); empty builds this branch without attaching"
+        required: false
         type: string
 
 env:
-  TAG: ${{ inputs.tag || github.ref_name }}
+  TAG: ${{ inputs.tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
 
 permissions:
   contents: read
@@ -44,6 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
+      publish: ${{ steps.version.outputs.publish }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,13 +53,17 @@ jobs:
       - id: version
         shell: bash
         run: |
-          git fetch --depth=1 origin "refs/tags/$TAG:refs/tags/$TAG" || {
-            echo "::error::$TAG is not a tag on origin; push the tag first." >&2
-            exit 1
-          }
-          if [[ "$(git rev-parse HEAD)" != "$(git rev-parse "refs/tags/$TAG^{commit}")" ]]; then
-            echo "::error::Checked-out commit is not the one $TAG points at." >&2
-            exit 1
+          if [[ -n "$TAG" ]]; then
+            git fetch --depth=1 origin "refs/tags/$TAG:refs/tags/$TAG" || {
+              echo "::error::$TAG is not a tag on origin; push the tag first." >&2
+              exit 1
+            }
+            if [[ "$(git rev-parse HEAD)" != "$(git rev-parse "refs/tags/$TAG^{commit}")" ]]; then
+              echo "::error::Checked-out commit is not the one $TAG points at." >&2
+              exit 1
+            fi
+          else
+            echo "::notice::No tag given: dry run of $GITHUB_REF_NAME, nothing will be attached."
           fi
           package=$(node -p "require('./package.json').version")
           tauri=$(node -p "require('./src-tauri/tauri.conf.json').version")
@@ -67,11 +73,12 @@ jobs:
             echo "::error::The three manifests disagree; keep them on one version (docs/product-direction.md)." >&2
             exit 1
           fi
-          if [[ "$TAG" != "v$package" ]]; then
+          if [[ -n "$TAG" && "$TAG" != "v$package" ]]; then
             echo "::error::Tag $TAG does not match version $package; bump the manifests first (decision 0102)." >&2
             exit 1
           fi
           echo "version=$package" >> "$GITHUB_OUTPUT"
+          echo "publish=$([[ -n "$TAG" ]] && echo true || echo false)" >> "$GITHUB_OUTPUT"
 
   build:
     name: Build (${{ matrix.name }})
@@ -102,11 +109,10 @@ jobs:
               artifacts/native-desktop/provenance.json
           - name: linux-x64
             os: ubuntu-22.04
-            command: desktop:build
+            command: desktop:build --bundles deb,rpm
             bundles: |
               src-tauri/target/release/bundle/deb/*.deb
               src-tauri/target/release/bundle/rpm/*.rpm
-              src-tauri/target/release/bundle/appimage/*.AppImage
     steps:
       - uses: actions/checkout@v4
         with:
@@ -126,7 +132,13 @@ jobs:
       - uses: swatinem/rust-cache@v2
         with:
           workspaces: src-tauri -> target
-          shared-key: release-${{ matrix.name }}
+          # One key per platform that changes only with the pinned toolchain and the
+          # dependency graph. The action's own environment hash also covers every
+          # rustc preinstalled on the runner image, which drifts between runs and
+          # left the Linux cache unused (decision 0104).
+          key: release-${{ matrix.name }}-${{ hashFiles('mise.toml', 'src-tauri/Cargo.lock', 'src-tauri/Cargo.toml', '.cargo/config.toml') }}
+          add-job-id-key: false
+          add-rust-environment-hash-key: false
       - name: Install Tauri Linux prerequisites
         if: runner.os == 'Linux'
         run: |
@@ -200,6 +212,7 @@ jobs:
   publish:
     name: Attach to the release
     needs: [check, build]
+    if: needs.check.outputs.publish == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write
