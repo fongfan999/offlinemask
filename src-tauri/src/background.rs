@@ -140,6 +140,40 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     Ok(())
 }
 
+/// macOS: ⌘Q closes the window to the menu bar like ⌘W, the way VPN apps stay
+/// running (decision 0092); only the menu bar icon's "Thoát OfflineMask" quits.
+/// The default app menu is kept, with its Quit item swapped for this one.
+#[cfg(target_os = "macos")]
+const CLOSE_TO_TRAY: &str = "close-to-tray";
+#[cfg(target_os = "macos")]
+pub fn install_app_menu<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
+    let menu = Menu::default(app)?;
+    if let Some(tauri::menu::MenuItemKind::Submenu(app_menu)) = menu.items()?.into_iter().next() {
+        let last = app_menu.items()?.len();
+        if last > 0 {
+            app_menu.remove_at(last - 1)?;
+        }
+        app_menu.append(&MenuItem::with_id(
+            app,
+            CLOSE_TO_TRAY,
+            "Đóng OfflineMask",
+            true,
+            Some("CmdOrCtrl+Q"),
+        )?)?;
+    }
+    app.set_menu(menu)?;
+    app.on_menu_event(|app, event| {
+        if event.id.as_ref() == CLOSE_TO_TRAY {
+            // Closing goes through the frontend's close handler, which hides the
+            // window and says the app keeps running.
+            if let Some(window) = app.get_webview_window(MAIN_WINDOW) {
+                let _ = window.close();
+            }
+        }
+    });
+    Ok(())
+}
+
 /// Quitting goes through the frontend first, so a pending vault save (debounced
 /// 300 ms in the shell) is written before the process ends. The frontend answers
 /// with `quick_quit`; if it never does, the app exits anyway after a grace period.

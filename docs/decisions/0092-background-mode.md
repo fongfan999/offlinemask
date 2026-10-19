@@ -31,3 +31,10 @@ Consulted: the Tauri 2 system-tray guide (`TrayIconBuilder`, `MenuItem::with_id`
 ## Review follow-up (same day)
 
 "Thoát OfflineMask" no longer exits on the spot. The tray sends the `quit` command to the main window, which clears the shell's 300 ms vault-save debounce, awaits the save and then calls `quick_quit`; if the frontend never answers (window not loaded, script error) the native side exits anyway after two seconds. The unused `core:window:allow-show` grant on the main window was removed; reopening is done from Rust. ⌘Q on macOS still exits without this flush, as before this work.
+
+## Follow-up: ⌘Q closes to the menu bar; the row is only about starting with the machine (19 October)
+
+The owner: closing should always leave the app in the tray "like a VPN app", and "to quit … (cmd + Q) actually, they need to click on the tray menu"; and the Settings option "should allow users to start automatically when they start their machine, not relating to the thing above".
+
+- **⌘Q no longer quits on macOS.** Tauri's default app menu is kept, but its Quit item, which calls `terminate:` directly and cannot be intercepted, is replaced by "Đóng OfflineMask" on ⌘Q (`background::install_app_menu`). It closes the main window through the same frontend handler as ⌘W and the red button: the window hides and the corner card says the app keeps running. Only "Thoát OfflineMask" in the menu bar icon quits, still flushing the vault save first. Quitting from the Dock menu, logging out and shutting down still end the app, as they should. Windows and Linux have no app menu; closing the window already hides it.
+- **The Settings row is now "Khởi động cùng máy"** with one sentence about opening hidden at login. The close-to-tray behaviour is always on, so it needs no setting and is no longer described there; the card shown on closing explains it when it happens.
