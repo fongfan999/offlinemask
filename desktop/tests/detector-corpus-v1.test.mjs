@@ -10,7 +10,7 @@ import {
 import { parseRecord } from "../scripts/detector-feasibility/corpus.mjs";
 const capabilities = JSON.parse(
   readFileSync(
-    new URL("../docs/evaluations/detector-feasibility/capabilities.json", import.meta.url),
+    new URL("../../docs/evaluations/detector-feasibility/capabilities.json", import.meta.url),
   ),
 );
 const row = (id, split, annotated) => ({

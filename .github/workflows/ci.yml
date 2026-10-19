@@ -1,6 +1,8 @@
 # Continuous checks for the frontend and the native layer.
 #
 # `verify` is the required job and mirrors the local commands in CONTRIBUTING.md.
+# The repository is a pnpm workspace: lint runs at the root, the app's own checks
+# run in desktop/ (so its .cargo/config.toml applies); landing.yml covers landing/.
 # `portability` only compiles the Rust crate on the platforms the project has not
 # qualified yet; it is advisory until Windows/Linux builds are actually tested.
 # Both jobs run on hosted runners on every push to main (see decision 0077 for the Windows job).
@@ -24,10 +26,10 @@ jobs:
       - uses: jdx/mise-action@v2
       - run: mise exec -- pnpm install --frozen-lockfile
       - run: mise exec -- pnpm lint
-      - run: mise exec -- pnpm build
-      - run: mise exec -- pnpm test
-      - run: mise exec -- pnpm check:native
-      - run: mise exec -- cargo test --manifest-path src-tauri/Cargo.toml --locked
+      - run: mise exec -- pnpm -C desktop build
+      - run: mise exec -- pnpm -C desktop test
+      - run: mise exec -- pnpm -C desktop check:native
+      - run: mise exec -- pnpm -C desktop test:native
 
   portability:
     name: Native compile check (${{ matrix.os }})
@@ -47,5 +49,6 @@ jobs:
           sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file \
             libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
       - run: mise exec -- pnpm install --frozen-lockfile
-      - run: mise exec -- pnpm build
+      - run: mise exec -- pnpm -C desktop build
       - run: mise exec -- cargo check --manifest-path src-tauri/Cargo.toml --locked
+        working-directory: desktop

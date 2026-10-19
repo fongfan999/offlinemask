@@ -102,7 +102,7 @@ write("brand/tile-cobalt.svg", app_icon())
 # macOS menu bar template: the mark in black, eye holes transparent, in a tight square
 # (the status bar scales it to 18 pt high). Rendered to PNG by png.sh.
 write("brand/tray-template.svg", svg(92, 92, f'<g transform="translate(-4 -4)">{mark(0, 0, 100, "#000", "#000")}</g>', title="OfflineMask menu bar icon"))
-write("public/favicon.svg", svg(48, 48, tile_body(48, 0.22, COBALT, PAPER, PAPER, 0.84), title="OfflineMask"))
+write("desktop/public/favicon.svg", svg(48, 48, tile_body(48, 0.22, COBALT, PAPER, PAPER, 0.84), title="OfflineMask"))
 
 
 # 3. Path module for the app (sidebar tile, lock page, pill).
@@ -119,7 +119,7 @@ module = (
     f"export const restoreEyes = [\n  \"{R['holes'][0]}\",\n  \"{R['holes'][1]}\",\n];\n"
     f"export const restoreSlash =\n  \"{R['strokes'][0]}\";\n"
 )
-write("src/components/brand-paths.ts", module)
+write("desktop/src/components/brand-paths.ts", module)
 
 
 # ---------------------------------------------------------------------------
@@ -221,4 +221,4 @@ def preview_sheet():
 
 
 write("brand/preview-sheet.svg", preview_sheet())
-print("wrote brand files, public/favicon.svg and src/components/brand-paths.ts")
+print("wrote brand files, desktop/public/favicon.svg and desktop/src/components/brand-paths.ts")

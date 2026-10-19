@@ -6,7 +6,7 @@ import { records as second } from "../scripts/detector-corpus-v2/records.mjs";
 import { auditExpansion } from "../scripts/detector-corpus-v2/coverage.mjs";
 const capabilities = JSON.parse(
   readFileSync(
-    new URL("../docs/evaluations/detector-feasibility/capabilities.json", import.meta.url),
+    new URL("../../docs/evaluations/detector-feasibility/capabilities.json", import.meta.url),
   ),
 );
 const seed = JSON.parse(

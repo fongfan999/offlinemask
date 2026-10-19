@@ -10,10 +10,11 @@ Include the steps to reproduce, the platform and app version, and, if the proble
 
 ## Scope
 
-- The desktop application (`src/`, `src-tauri/`) and the optional recognition pack installer.
+- The desktop application (`desktop/`) and the optional recognition pack installer.
+- The product website (`landing/`), which serves static files only.
 - Build and release scripts that produce the distributed artifacts.
 
-Out of scope: the frozen evaluation experiments under `scripts/` and `docs/evaluations/`, which are not part of the application, and the quality of model detection itself (a missed name is a known limitation, not a vulnerability; report it as an ordinary issue with a synthetic example).
+Out of scope: the frozen evaluation experiments under `desktop/scripts/` and `docs/evaluations/`, which are not part of the application, and the quality of model detection itself (a missed name is a known limitation, not a vulnerability; report it as an ordinary issue with a synthetic example).
 
 ## Design commitments
 

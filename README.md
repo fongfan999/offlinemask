@@ -28,51 +28,52 @@ Builds for each release are attached to the [GitHub releases](https://github.com
 mise trust
 mise install
 mise exec -- pnpm install --frozen-lockfile
-mise exec -- pnpm desktop:dev
+mise exec -- pnpm -C desktop desktop:dev
 ```
 
-`mise.toml` pins Node, pnpm and Rust; `mise exec --` applies them even when mise is not activated in your shell. Downloading build dependencies needs a network connection; the application itself does not.
+`mise.toml` pins Node, pnpm and Rust; `mise exec --` applies them even when mise is not activated in your shell. The repository is a pnpm workspace with two packages: `desktop/` (the Tauri app) and `landing/` (the product website); `pnpm -C desktop …` and `pnpm -C landing …` run a package's scripts from the root, and `pnpm lint` at the root covers both. Downloading build dependencies needs a network connection; the application itself does not.
 
 | Command | Purpose |
 | --- | --- |
-| `mise exec -- pnpm dev` | Browser preview at localhost:1420 without native APIs (no pack download, built-in rules only). |
-| `mise exec -- pnpm desktop:dev` | The desktop app with hot reload. Recognition runs in WASM (slow on long input). |
-| `mise exec -- pnpm desktop:dev:native` | The same with the native recognition helper (macOS arm64, Windows x64): release-speed masking while developing. |
+| `mise exec -- pnpm -C desktop dev` | Browser preview at localhost:1420 without native APIs (no pack download, built-in rules only). |
+| `mise exec -- pnpm -C desktop desktop:dev` | The desktop app with hot reload. Recognition runs in WASM (slow on long input). |
+| `mise exec -- pnpm -C desktop desktop:dev:native` | The same with the native recognition helper (macOS arm64, Windows x64): release-speed masking while developing. |
 | `mise exec -- pnpm lint` | ESLint and Prettier; `pnpm format` rewrites. |
-| `mise exec -- pnpm typecheck` | Vue, TypeScript and Vite configuration. |
-| `mise exec -- pnpm test` | Fast tests: detection rules, transformations, sessions, storage boundaries, the pack contract. No model files needed. |
-| `mise exec -- pnpm build` | Production frontend without model weights. |
-| `mise exec -- pnpm check:native` | rustfmt and Clippy for the Rust layer; `cargo test --manifest-path src-tauri/Cargo.toml --locked` runs its tests. |
-| `mise exec -- pnpm test:models <pack root>` | Run the real recognition pack against the committed synthetic fixtures (see [packs/README.md](packs/README.md)). |
-| `mise exec -- pnpm desktop:build` | Desktop bundle for the current platform. macOS arm64 uses the verified native-inference path. |
-| `mise exec -- pnpm desktop:build:native` | Native-inference bundle on macOS arm64 or Windows x64 (Windows awaits qualification, [Decision 0077](docs/decisions/0077-native-recognition-windows.md)). |
+| `mise exec -- pnpm -C desktop typecheck` | Vue, TypeScript and Vite configuration. |
+| `mise exec -- pnpm -C desktop test` | Fast tests: detection rules, transformations, sessions, storage boundaries, the pack contract. No model files needed. |
+| `mise exec -- pnpm -C desktop build` | Production frontend without model weights. |
+| `mise exec -- pnpm -C desktop check:native` | rustfmt and Clippy for the Rust layer; `pnpm -C desktop test:native` runs its tests. |
+| `mise exec -- pnpm -C desktop test:models <pack root>` | Run the real recognition pack against the committed synthetic fixtures (see [packs/README.md](desktop/packs/README.md)). |
+| `mise exec -- pnpm -C desktop desktop:build` | Desktop bundle for the current platform. macOS arm64 uses the verified native-inference path. |
+| `mise exec -- pnpm -C desktop desktop:build:native` | Native-inference bundle on macOS arm64 or Windows x64 (Windows awaits qualification, [Decision 0077](docs/decisions/0077-native-recognition-windows.md)). |
 
 Only macOS on Apple Silicon has been built and tested so far. The CI workflow compiles the native layer on Linux and Windows as an advisory check, and a separate workflow builds and smoke-tests the Windows native package; Windows becomes qualified after the manual checklist in Decision 0077.
 
 ## Replacing the models
 
-Everything the app knows about its models is one file under [`packs/`](packs/). The TypeScript loaders, the Rust installer and the evaluation helpers all read it, so a different model, or a pack for another language, is a change to that file plus the files it pins. [packs/README.md](packs/README.md) walks through the contract (inputs, outputs, labels, offsets) and the checks a replacement has to pass: `pnpm test` for the code around the models and `pnpm test:models` for the models themselves.
+Everything the app knows about its models is one file under [`desktop/packs/`](desktop/packs/). The TypeScript loaders, the Rust installer and the evaluation helpers all read it, so a different model, or a pack for another language, is a change to that file plus the files it pins. [packs/README.md](desktop/packs/README.md) walks through the contract (inputs, outputs, labels, offsets) and the checks a replacement has to pass: `pnpm test` for the code around the models and `pnpm test:models` for the models themselves.
 
 ## Product landing page
 
-The standalone website lives in [`landing/`](landing/README.md). Run `mise exec -- pnpm landing:dev` for a local preview. It has its own Cloudflare Workers build and manual deployment workflow, with reusable content for the future Astro/EmDash product page.
+The standalone website lives in [`landing/`](landing/README.md). Run `mise exec -- pnpm -C landing dev` for a local preview. It has its own Cloudflare Workers build and manual deployment workflow, with reusable content for the future Astro/EmDash product page.
 
 ## Repository layout
 
 | Path | Contents |
 | --- | --- |
-| `src/core/` | Portable logic: detection rules, model policy, pack loading, aliases, sessions, restoration. No Vue or Tauri imports. |
-| `src/core/detection/` | The detection pipeline. `pack.ts` reads the pack, `recognition.ts` loads it, `policy.ts` merges model and rule evidence. |
-| `src/adapters/` | The only modules that talk to Tauri: the detection worker bridge, pack status and downloads, the website link. |
-| `src/workers/` | The detection web worker. |
-| `src/composables/`, `src/pages/`, `src/components/` | Vue state and screens. |
-| `src-tauri/` | Rust: pack download and verification, exact tokenizer offsets, opt-in native inference. |
-| `packs/` | Recognition pack definitions. |
-| `tests/` | Node test runner suites and synthetic fixtures. |
-| `scripts/` | Build tooling at the top level; frozen evaluation experiments in subdirectories ([index](scripts/README.md)). |
+| `desktop/src/core/` | Portable logic: detection rules, model policy, pack loading, aliases, sessions, restoration. No Vue or Tauri imports. |
+| `desktop/src/core/detection/` | The detection pipeline. `pack.ts` reads the pack, `recognition.ts` loads it, `policy.ts` merges model and rule evidence. |
+| `desktop/src/adapters/` | The only modules that talk to Tauri: the detection worker bridge, pack status and downloads, the website link. |
+| `desktop/src/workers/` | The detection web worker. |
+| `desktop/src/composables/`, `desktop/src/pages/`, `desktop/src/components/` | Vue state and screens. |
+| `desktop/src-tauri/` | Rust: pack download and verification, exact tokenizer offsets, opt-in native inference. |
+| `desktop/packs/` | Recognition pack definitions. |
+| `desktop/tests/` | Node test runner suites and synthetic fixtures. |
+| `desktop/scripts/` | Build tooling at the top level; frozen evaluation experiments in subdirectories ([index](desktop/scripts/README.md)). |
 | `docs/decisions/` | Architecture decision records, numbered. |
 | `docs/evaluations/` | Evaluation protocols and results; large raw outputs are kept out of git. |
-| `brand/` | The mark (a brush swipe with two eye holes), its generator, sketches and icon sources. |
+| `brand/` | The mark (a brush swipe with two eye holes), its generator, sketches and icon sources, and `theme.css`, the colour and type tokens shared by the app and the landing page. |
+| `landing/` | The product website: a static page for Cloudflare Workers, with its own [README](landing/README.md). |
 
 [docs/development.md](docs/development.md) has the detailed setup notes, module boundaries and the history of evaluation tooling.
 

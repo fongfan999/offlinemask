@@ -32,7 +32,7 @@ const notices = {
   'ThirdPartyNotices.txt': '0e07b95f3a8d6230037707c5c4a2b554d12c4cb67369669ac255635528ffcee2',
 };
 for (const [name, hash] of Object.entries(notices)) {
-  if (digest(await readFile(join(root, 'docs/licenses/onnxruntime-1.24.3', name))) !== hash) throw Error('Runtime notice verification failed');
+  if (digest(await readFile(join(root, '../docs/licenses/onnxruntime-1.24.3', name))) !== hash) throw Error('Runtime notice verification failed');
 }
 
 // ONNX Runtime for Windows links the Visual C++ C++ runtime dynamically. Copy the
@@ -83,7 +83,7 @@ const config = {
     ...(process.platform === 'darwin' ? { macOS: { signingIdentity } } : {}),
     resources: {
       ...Object.fromEntries(shipped.map(name => [join(native, name), 'native/' + name])),
-      [join(root, 'docs/licenses/')]: 'licenses/',
+      [join(root, '../docs/licenses/')]: 'licenses/',
     },
   },
 };

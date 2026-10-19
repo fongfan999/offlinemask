@@ -73,7 +73,7 @@ Detections must point at exact positions in the user's original text.
 
 ### Choosing `minScore`
 
-Optional, per model. A decoded span whose mean token probability is below `minScore` is dropped; absent means every span counts. Raise it only from a measured sweep that regresses no gate: `scripts/score-threshold/evaluate.mjs` runs the pack fixtures and the annotated corpora at several values. The shipped pack uses 0.3: at 0.4 an organization in the corpora was only partly covered ([decision 0079](../docs/decisions/0079-file-review-and-capital-names.md)).
+Optional, per model. A decoded span whose mean token probability is below `minScore` is dropped; absent means every span counts. Raise it only from a measured sweep that regresses no gate: `scripts/score-threshold/evaluate.mjs` runs the pack fixtures and the annotated corpora at several values. The shipped pack uses 0.3: at 0.4 an organization in the corpora was only partly covered ([decision 0079](../../docs/decisions/0079-file-review-and-capital-names.md)).
 
 ## Replacing the models, step by step
 
@@ -98,7 +98,7 @@ Optional, per model. A decoded span whose mean token probability is below `minSc
    `scripts/check-pack.mjs` verifies every pinned file, loads the pack on the Node CPU runtime with network access disabled, and masks the synthetic fixtures in `tests/fixtures/recognition-pack.json`: every `sensitive` value must be fully covered, every `retain` value must survive, and keeping all findings must reproduce the input exactly. A fixture marked `knownMiss` documents a limitation of the current pack; it is reported, not failed, unless you pass `--strict`. A replacement pack must pass every unmarked fixture and should remove `knownMiss` entries it fixes. Pass `--fixtures <file>` for additional synthetic cases; never add real customer text.
 
 6. **Try it in the app.** Copy the model directories into the app-local data directory under `models/<id>/` (macOS: `~/Library/Application Support/dev.offlinemask.desktop/models/<id>/<directory>/…`). The app verifies the hashes at startup and reports the pack as ready without downloading anything.
-7. **Publish.** Compress each file with Zstandard, upload the objects, and fill in `transport` (see [Decision 0041](../docs/decisions/0041-compressed-pack-installer-and-r2.md) and `scripts/build-r2-pack.mjs` for the shipping pack's procedure). Re-run `pnpm test`.
+7. **Publish.** Compress each file with Zstandard, upload the objects, and fill in `transport` (see [Decision 0041](../../docs/decisions/0041-compressed-pack-installer-and-r2.md) and `scripts/build-r2-pack.mjs` for the shipping pack's procedure). Re-run `pnpm test`.
 8. **Record the evidence.** Add a decision under `docs/decisions/` and an evaluation under `docs/evaluations/` stating what was measured on which fixtures. A green fixture run is a regression check, not an accuracy claim.
 
 ## What a pack cannot change

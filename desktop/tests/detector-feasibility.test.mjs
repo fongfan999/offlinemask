@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 import { parseRecord, auditCorpus } from "../scripts/detector-feasibility/corpus.mjs";
 const capabilities = JSON.parse(
   readFileSync(
-    new URL("../docs/evaluations/detector-feasibility/capabilities.json", import.meta.url),
+    new URL("../../docs/evaluations/detector-feasibility/capabilities.json", import.meta.url),
   ),
 );
 const seed = (id, split, annotated) => ({

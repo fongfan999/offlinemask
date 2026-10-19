@@ -4,7 +4,7 @@
 
 ## How to release
 
-1. Bump the version in `package.json`, `src-tauri/tauri.conf.json` and `src-tauri/Cargo.toml` (run `cargo metadata --locked` so `Cargo.lock` follows), add the section to `CHANGELOG.md`, commit.
+1. Bump the version in `desktop/package.json`, `desktop/src-tauri/tauri.conf.json` and `desktop/src-tauri/Cargo.toml` (run `cargo metadata --locked` in `desktop/` so `Cargo.lock` follows), add the section to `CHANGELOG.md`, commit.
 2. Tag and push:
 
 ```sh
@@ -27,10 +27,10 @@ gh workflow run release.yml --ref main
 
 | Runner | Command | Recognition | Files |
 | --- | --- | --- | --- |
-| `macos-latest` (Apple Silicon) | `pnpm desktop:build:native` | Native helper, verified and smoke-tested ([0049](../decisions/0049-native-release-packaging.md)) | `OfflineMask_<v>_aarch64.dmg`, `provenance-macos-arm64.json` |
-| `macos-15-intel` | `pnpm desktop:build` | WASM (no native runtime is pinned for x86_64) | `OfflineMask_<v>_x64.dmg` |
-| `windows-latest` | `pnpm desktop:build:native` | Native helper, verified and smoke-tested ([0077](../decisions/0077-native-recognition-windows.md)) | `OfflineMask_<v>_x64-setup.exe`, `OfflineMask_<v>_x64_en-US.msi`, `provenance-windows-x64.json` |
-| `ubuntu-22.04` | `pnpm desktop:build --bundles deb,rpm` | WASM | `.deb`, `.rpm` (no AppImage until Linux has been tried, [0104](../decisions/0104-faster-release-builds.md)) |
+| `macos-latest` (Apple Silicon) | `pnpm -C desktop desktop:build:native` | Native helper, verified and smoke-tested ([0049](../decisions/0049-native-release-packaging.md)) | `OfflineMask_<v>_aarch64.dmg`, `provenance-macos-arm64.json` |
+| `macos-15-intel` | `pnpm -C desktop desktop:build` | WASM (no native runtime is pinned for x86_64) | `OfflineMask_<v>_x64.dmg` |
+| `windows-latest` | `pnpm -C desktop desktop:build:native` | Native helper, verified and smoke-tested ([0077](../decisions/0077-native-recognition-windows.md)) | `OfflineMask_<v>_x64-setup.exe`, `OfflineMask_<v>_x64_en-US.msi`, `provenance-windows-x64.json` |
+| `ubuntu-22.04` | `pnpm -C desktop desktop:build --bundles deb,rpm` | WASM | `.deb`, `.rpm` (no AppImage until Linux has been tried, [0104](../decisions/0104-faster-release-builds.md)) |
 
 The publish job adds `SHA256SUMS.txt` over every attached file. Each platform keeps a Rust build cache keyed on `mise.toml`, the Cargo manifests and `.cargo/config.toml`; the release profile uses thin LTO so the link runs in parallel ([0104](../decisions/0104-faster-release-builds.md)). Ubuntu 22.04 is used on purpose: the bundles link against its glibc and WebKitGTK, so they run on distributions at least that old.
 

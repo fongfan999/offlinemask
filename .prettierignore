@@ -1,30 +1,28 @@
 # Generated or vendored output.
-dist/
-dist-desktop/
 node_modules/
 artifacts/
-public/
-src-tauri/target/
-src-tauri/gen/
 pnpm-lock.yaml
+desktop/dist/
+desktop/dist-desktop/
+desktop/public/
+desktop/src-tauri/target/
+desktop/src-tauri/gen/
+landing/dist/
+landing/.wrangler/
 
 # Frozen evaluation experiments. The protocols under docs/evaluations/ pin
 # SHA-256 fingerprints of these scripts; reformatting would invalidate recorded
 # evidence without changing behavior. Start a new versioned experiment instead.
-scripts/
-!scripts/prepare-*.mjs
-!scripts/build-*.mjs
-!scripts/verify-*.mjs
-!scripts/check-*.mjs
-tests/fixtures/
+desktop/scripts/
+!desktop/scripts/prepare-*.mjs
+!desktop/scripts/build-*.mjs
+!desktop/scripts/verify-*.mjs
+!desktop/scripts/check-*.mjs
+desktop/tests/fixtures/
 docs/evaluations/
 
 # Prose and native configuration keep their hand-written layout.
 *.md
 docs/
 .vscode/
-src-tauri/
-
-/dist-landing/
-/landing/.wrangler/
-/.wrangler/
+desktop/src-tauri/

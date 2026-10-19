@@ -3,7 +3,7 @@ import {readFile,writeFile,mkdir,copyFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 const base='https://pub-5b0280497d774b8f99417b3438d8bce8.r2.dev';
 const output='artifacts/r2-v1-upload';
-const results=JSON.parse(await readFile('docs/evaluations/pack-compression-v1/results.json'));
+const results=JSON.parse(await readFile('../docs/evaluations/pack-compression-v1/results.json'));
 const hash=b=>createHash('sha256').update(b).digest('hex');
 await mkdir(output,{recursive:true});
 const pack={assets:[]};
@@ -26,7 +26,7 @@ for(const row of results.rows.filter(r=>r.level===9)){
   bytes:row.size,sha256:row.sha256,transport});
 }
 await writeFile('scripts/release-pack-v1.json',JSON.stringify(pack,null,2)+'\n',{flag:'wx'});
-await copyFile('docs/licenses/models-Apache-2.0.txt',`${output}/LICENSE-Apache-2.0.txt`);
+await copyFile('../docs/licenses/models-Apache-2.0.txt',`${output}/LICENSE-Apache-2.0.txt`);
 await writeFile(`${output}/NOTICE-vietnamese-pii-v1.txt`,
  `OfflineMask Vietnamese recognition pack v1 candidate\n\nUnderthesea: undertheseanlp/vietnamese-ner-v1.4.0a2\nSource revision a51e05fc09e1b1f0800dbad8ae84e86ad311debd, Apache-2.0.\nModified: exported to ONNX and dynamically quantized INT8 by OfflineMask.\n\nOpenMed: OpenMed-PII-Vietnamese-mSuperClinical-Large-279M-v1-onnx-android\nSource revision eaac31560eef579a7ae6144377109969dbd1e83a, Apache-2.0.\nPublished INT8 graph and supporting files unchanged.\n\nDistribution adds lossless Zstandard compression and transport splitting only.\nSee LICENSE-Apache-2.0.txt.\nThis development pack is not a claim of complete detection or release qualification.\n`);
 await writeFile(`${output}/vietnamese-pii-v1.json`,JSON.stringify(pack,null,2)+'\n');

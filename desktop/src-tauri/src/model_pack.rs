@@ -410,7 +410,9 @@ impl Pack {
             let mut license =
                 File::create(staging.join(directory).join("LICENSE")).map_err(|_| "storage")?;
             license
-                .write_all(include_bytes!("../../docs/licenses/models-Apache-2.0.txt"))
+                .write_all(include_bytes!(
+                    "../../../docs/licenses/models-Apache-2.0.txt"
+                ))
                 .map_err(|_| "storage")?;
             license.sync_all().map_err(|_| "storage")?;
         }

@@ -1,0 +1,11 @@
+# Native build artifacts
+src-tauri/target/
+src-tauri/gen/
+
+# Reproducible, checksum-verified model/runtime assets (scripts/model-manifest.json).
+public/models/
+public/runtime/
+
+dist/
+dist-desktop/
+artifacts/

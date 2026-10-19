@@ -4,8 +4,14 @@
     {
       "name": "web",
       "runtimeExecutable": "mise",
-      "runtimeArgs": ["exec", "--", "pnpm", "dev"],
+      "runtimeArgs": ["exec", "--", "pnpm", "-C", "desktop", "dev"],
       "port": 1420
+    },
+    {
+      "name": "landing",
+      "runtimeExecutable": "mise",
+      "runtimeArgs": ["exec", "--", "pnpm", "-C", "landing", "dev"],
+      "port": 4322
     }
   ]
 }

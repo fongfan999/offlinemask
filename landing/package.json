@@ -1,0 +1,21 @@
+{
+  "name": "offlinemask-landing",
+  "private": true,
+  "type": "module",
+  "description": "Standalone product landing page for Cloudflare Workers static assets",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "workers:dev": "pnpm build && wrangler dev",
+    "deploy": "pnpm build && wrangler deploy",
+    "deploy:check": "pnpm build && wrangler deploy --dry-run"
+  },
+  "dependencies": {
+    "gsap": "3.15.0"
+  },
+  "devDependencies": {
+    "vite": "^8.0.16",
+    "wrangler": "4.147.0"
+  }
+}

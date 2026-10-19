@@ -1,4 +1,4 @@
-@import "./theme.css";
+@import "../../brand/theme.css";
 
 * {
   box-sizing: border-box;

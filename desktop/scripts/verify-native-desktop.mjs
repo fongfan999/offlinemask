@@ -14,7 +14,7 @@ const bundle = resolve(process.argv[2] ?? (windows ? 'src-tauri/target/release' 
 const resources = windows ? bundle : join(bundle, 'Contents/Resources');
 if (!windows) execFileSync('/usr/bin/codesign', ['--verify', '--deep', '--strict', '--all-architectures', bundle], { stdio: 'pipe' });
 for (const name of ['LICENSE.txt', 'ThirdPartyNotices.txt']) {
-  if (hash(await readFile(join(resources, 'licenses/onnxruntime-1.24.3', name))) !== hash(await readFile(new URL('../docs/licenses/onnxruntime-1.24.3/' + name, import.meta.url)))) throw Error('Missing or altered runtime notice');
+  if (hash(await readFile(join(resources, 'licenses/onnxruntime-1.24.3', name))) !== hash(await readFile(new URL('../../docs/licenses/onnxruntime-1.24.3/' + name, import.meta.url)))) throw Error('Missing or altered runtime notice');
 }
 const library = join(resources, 'native', runtime.file);
 const helper = join(resources, 'native', windows ? 'recognition-sidecar.exe' : 'recognition-sidecar');

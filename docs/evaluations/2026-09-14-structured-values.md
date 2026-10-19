@@ -38,7 +38,7 @@ The remaining incomplete single-model value is an unlabelled username in `mixed-
 
 - [Frozen protocol](2026-09-14-structured-values-protocol.json): implementation and fixture hashes, scope, unchanged criteria and limitations.
 - [Detailed results](2026-09-14-structured-values.json): aggregate comparisons, changed cases, regression checks, original changed source files and pinned model manifest.
-- [Fresh fixture](../../tests/fixtures/structured-values-holdout.json): all 24 annotated synthetic cases.
+- [Fresh fixture](../../desktop/tests/fixtures/structured-values-holdout.json): all 24 annotated synthetic cases.
 
 “Single” means the pinned mSuperClinical checkpoint. “Combined” means both existing pinned SuperClinical and mSuperClinical checkpoints. Native results use the existing developer prototype; WASM results use the production-version backend hosted in Node. This is not a packaged WebKit performance measurement. Inference-time fetch was blocked, verified local development files were used, and no detection request failed.
 

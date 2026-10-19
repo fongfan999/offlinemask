@@ -20,4 +20,4 @@ for (const object of inventory.objects) {
   console.log(`Verified ${rows.length}/${inventory.objects.length}: ${object.key}`);
 }
 const receipt = { verifiedAt: new Date().toISOString(), base: inventory.base, method: 'Full public HTTPS downloads: exact byte lengths and SHA-256; nonzero-offset Range requests.', totalBytes: rows.reduce((n, r) => n + r.bytes, 0), objects: rows };
-await writeFile('docs/evaluations/pack-compression-v1/r2-public-verification.json', JSON.stringify(receipt, null, 2) + '\n');
+await writeFile('../docs/evaluations/pack-compression-v1/r2-public-verification.json', JSON.stringify(receipt, null, 2) + '\n');

@@ -27,6 +27,8 @@ Use the commands in the [README](../README.md). `mise exec --` ensures the proje
 
 ## Structure and boundaries
 
+Since 20 October 2026 the repository is a pnpm workspace ([Decision 0106](decisions/0106-workspace-layout.md)): the desktop app lives in `desktop/`, the product website in `landing/`, and `brand/theme.css` holds the tokens both use. Paths below such as `src/`, `src-tauri/`, `tests/`, `scripts/` and `packs/` are under `desktop/`, and the commands in this document run from that directory (`pnpm -C desktop …`, or `cd desktop` first).
+
 - `src/App.vue`: shell only. Owns navigation and focus hand-off, and provides the three shared stores below to its pages.
 - `src/composables/`: `useRecognitionPack` (optional pack status and actions), `useSessions` (sidebar list and sample-only persistence), `useMaskingRun` (draft, category choices, one in-flight run), `useTextReview` (manual selection, hide, undo). Plain factories with injected dependencies; see [Decision 0051](decisions/0051-shell-refactor-and-tooling.md).
 - `src/pages/`: `HomePage`, `SettingsPage` and `WorkspacePage` (real text entry and table samples, explicit masking, original/masked views, individual choices, copying, session removal).
@@ -36,7 +38,7 @@ Use the commands in the [README](../README.md). `mise exec --` ensures the proje
 - `src/core/review.ts`: portable fixture types, explicit decisions, tokenization, sample alias replacements, and the final-copy gate.
 - `src/core/text.ts`: provider-span validation, overlap policy, aliases, and exact transformations.
 - `src/core/detection/`: contact, banking and labelled-field rules, token-bounded source windows, and the model pipeline. `pack.ts` validates the pack definition from `packs/`; `recognition.ts` loads every pack model through a `ModelBackend` (WASM by default, native when opted in); `policy.ts` is the one place model and rule evidence meet. See [Decision 0054](decisions/0054-replaceable-recognition-packs.md).
-- `packs/`: recognition pack definitions, the single source of truth for model directories, graph files, offset strategy, label maps and pinned downloads; [packs/README.md](../packs/README.md) is the contributor guide for replacing models.
+- `packs/`: recognition pack definitions, the single source of truth for model directories, graph files, offset strategy, label maps and pinned downloads; [packs/README.md](../desktop/packs/README.md) is the contributor guide for replacing models.
 - `src/workers/detection.worker.ts` and `src/adapters/text-detection.ts`: cancellable local inference. Exact tokenizer offsets for native-offset models are requested per model directory through the `recognition_encode` command.
 - `src/core/sessions.ts`: private in-memory text sessions, versioned sample records, sample-only persistence, and synthetic table transformations.
 - `tests/sessions.test.mjs`: history round trips, independent choices, serialization boundaries, invalid history, and table preservation.
@@ -70,15 +72,15 @@ The native `models` module downloads only the URLs pinned in the embedded pack d
 
 Once the installed pack reports ready, the app prepares it in the background using the same worker and loading promise as masking. This is local initialization, not a download or update check; preparation receives no source text and runs no inference.
 
-`mise exec -- cargo test --manifest-path src-tauri/Cargo.toml --locked` checks resume, cancellation, range rejection, corruption, incomplete installs and pack validation using a loopback test server. `pnpm test` covers local-only routing, selected-category scope and the pack contract without weights. `pnpm test:models <pack root>` runs the real pack against the committed synthetic fixtures; [packs/README.md](../packs/README.md) describes the pack contract and how to replace the models. See [Decision 0006](decisions/0006-optional-models.md) and [Decision 0054](decisions/0054-replaceable-recognition-packs.md).
+`mise exec -- cargo test --manifest-path src-tauri/Cargo.toml --locked` checks resume, cancellation, range rejection, corruption, incomplete installs and pack validation using a loopback test server. `pnpm test` covers local-only routing, selected-category scope and the pack contract without weights. `pnpm test:models <pack root>` runs the real pack against the committed synthetic fixtures; [packs/README.md](../desktop/packs/README.md) describes the pack contract and how to replace the models. See [Decision 0006](decisions/0006-optional-models.md) and [Decision 0054](decisions/0054-replaceable-recognition-packs.md).
 
 Manual review uses browser selection offsets mapped through aliases and textarea newline normalization. Tests must preserve untouched characters, keep choices, grapheme boundaries, non-reused aliases and the private-session serialization exclusion. Undo covers the last manual correction and does not rewind the session's alias counter.
 
 ## Reproducing evaluations
 
-Each evaluation under `docs/evaluations/` has a decision that states what it showed and what it did not. The scripts that produced them live in `scripts/` subdirectories and are frozen: their protocols pin SHA-256 fingerprints of the sources they ran against, so reproduce a historical result from its recorded sources in an isolated copy and start a new versioned experiment for new work ([scripts/README.md](../scripts/README.md)). All of them use local synthetic fixtures, block inference-time fetches and leave the installed user pack untouched. The commands below are the entry points; the linked reports hold prerequisites, artifact locations and limitations.
+Each evaluation under `docs/evaluations/` has a decision that states what it showed and what it did not. The scripts that produced them live in `scripts/` subdirectories and are frozen: their protocols pin SHA-256 fingerprints of the sources they ran against, so reproduce a historical result from its recorded sources in an isolated copy and start a new versioned experiment for new work ([scripts/README.md](../desktop/scripts/README.md)). All of them use local synthetic fixtures, block inference-time fetches and leave the installed user pack untouched. The commands below are the entry points; the linked reports hold prerequisites, artifact locations and limitations.
 
-**Current pack gate** ([packs/README.md](../packs/README.md), [Decision 0054](decisions/0054-replaceable-recognition-packs.md)):
+**Current pack gate** ([packs/README.md](../desktop/packs/README.md), [Decision 0054](decisions/0054-replaceable-recognition-packs.md)):
 
 ```sh
 mise exec -- cargo build --manifest-path src-tauri/Cargo.toml --release --features recognition-evaluation --bin recognition-tokenizer-check

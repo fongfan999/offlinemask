@@ -4,7 +4,7 @@ import {readFile,writeFile,mkdir,cp} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
 import {dirname} from 'node:path';
 const root=new URL('../',import.meta.url).pathname;
-const report=JSON.parse(await readFile(root+'docs/evaluations/2026-09-14-text-reliability.json'));
+const report=JSON.parse(await readFile(root+'../docs/evaluations/2026-09-14-text-reliability.json'));
 const hash=value=>createHash('sha256').update(value).digest('hex');
 assert.equal(hash(await readFile(root+'pnpm-lock.yaml')),report.dependencyLockSha256,'Use the evaluated dependency lockfile');
 for(const [file,expected] of Object.entries(report.finalProtocol.implementationHashes)) assert.equal(hash(await readFile(root+file)),expected,'Use the evaluated implementation: '+file);

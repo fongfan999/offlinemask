@@ -7,8 +7,8 @@
 - [ ] `pnpm lint`
 - [ ] `pnpm test`
 - [ ] `pnpm build`
-- [ ] `pnpm check:native` and `cargo test` (when touching `src-tauri/`)
-- [ ] `pnpm test:models` (when touching `packs/` or the detection pipeline)
+- [ ] `pnpm -C desktop check:native` and `pnpm -C desktop test:native` (when touching `desktop/src-tauri/`)
+- [ ] `pnpm -C desktop test:models` (when touching `desktop/packs/` or the detection pipeline)
 
 **Documentation**
 

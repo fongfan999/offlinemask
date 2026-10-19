@@ -12,10 +12,10 @@ on:
   push:
     branches: [main]
     paths:
-      - "src-tauri/**"
-      - "scripts/*native*"
-      - "scripts/build-desktop.mjs"
-      - ".cargo/**"
+      - "desktop/src-tauri/**"
+      - "desktop/scripts/*native*"
+      - "desktop/scripts/build-desktop.mjs"
+      - "desktop/.cargo/**"
       - ".github/workflows/windows-native.yml"
       - ".gitattributes"
       - "docs/licenses/**"
@@ -34,15 +34,16 @@ jobs:
       - uses: jdx/mise-action@v2
       - run: mise exec -- pnpm install --frozen-lockfile
       - run: mise exec -- cargo test --manifest-path src-tauri/Cargo.toml --locked --features recognition-native-sidecar
+        working-directory: desktop
       # Prepares resources, builds with the release feature, verifies the output and
       # starts the packaged helper (scripts/build-native-desktop.mjs).
-      - run: mise exec -- pnpm desktop:build:native
+      - run: mise exec -- pnpm -C desktop desktop:build:native
       - uses: actions/upload-artifact@v4
         with:
           name: offlinemask-windows-x64-native
           path: |
-            src-tauri/target/release/bundle/nsis/*.exe
-            src-tauri/target/release/bundle/msi/*.msi
-            artifacts/native-desktop/provenance.json
-            artifacts/native-desktop/native-sha256.txt
+            desktop/src-tauri/target/release/bundle/nsis/*.exe
+            desktop/src-tauri/target/release/bundle/msi/*.msi
+            desktop/artifacts/native-desktop/provenance.json
+            desktop/artifacts/native-desktop/native-sha256.txt
           if-no-files-found: error

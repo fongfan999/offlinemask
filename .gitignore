@@ -24,18 +24,10 @@ dist-ssr
 *.sln
 *.sw?
 
-# Native build artifacts
-src-tauri/target/
-src-tauri/gen/
 *.tsbuildinfo
-
-# Reproducible, checksum-verified model/runtime assets (scripts/model-manifest.json).
-public/models/
-public/runtime/
-
-dist-desktop/
 artifacts/
 __pycache__/
+# Package-specific build output is listed in desktop/.gitignore and landing/.gitignore.
 
 # Large raw synthetic evaluation outputs retained locally by owner request.
 /docs/evaluations/2026-09-10-address-policy.json
@@ -91,8 +83,3 @@ __pycache__/
 /docs/evaluations/pretrained-search-v1/previews.md
 /docs/evaluations/pretrained-search-v1/schema/previews.md
 /docs/evaluations/quality-first-v1/previews.md
-
-# Standalone marketing site
-/dist-landing/
-/landing/.wrangler/
-/.wrangler/

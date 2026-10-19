@@ -1,5 +1,5 @@
 # Release builds (decision 0103). Pushing a tag `vX.Y.Z` that matches the version in
-# package.json builds the desktop app on every supported runner and attaches the
+# desktop/package.json builds the desktop app on every supported runner and attaches the
 # bundles and a SHA256SUMS.txt to the GitHub release for that tag (created as a draft
 # when it does not exist yet). "Run workflow" with a tag name rebuilds that tag using
 # the workflow as it is on the chosen branch; without a tag it is a dry run that builds
@@ -65,10 +65,10 @@ jobs:
           else
             echo "::notice::No tag given: dry run of $GITHUB_REF_NAME, nothing will be attached."
           fi
-          package=$(node -p "require('./package.json').version")
-          tauri=$(node -p "require('./src-tauri/tauri.conf.json').version")
-          cargo=$(sed -n 's/^version = "\(.*\)"$/\1/p' src-tauri/Cargo.toml | head -1)
-          echo "package.json $package, tauri.conf.json $tauri, Cargo.toml $cargo, tag $TAG"
+          package=$(node -p "require('./desktop/package.json').version")
+          tauri=$(node -p "require('./desktop/src-tauri/tauri.conf.json').version")
+          cargo=$(sed -n 's/^version = "\(.*\)"$/\1/p' desktop/src-tauri/Cargo.toml | head -1)
+          echo "desktop/package.json $package, tauri.conf.json $tauri, Cargo.toml $cargo, tag $TAG"
           if [[ "$package" != "$tauri" || "$package" != "$cargo" ]]; then
             echo "::error::The three manifests disagree; keep them on one version (docs/product-direction.md)." >&2
             exit 1
@@ -93,26 +93,26 @@ jobs:
             os: macos-latest
             command: desktop:build:native
             bundles: |
-              src-tauri/target/release/bundle/dmg/*.dmg
-              artifacts/native-desktop/provenance.json
+              desktop/src-tauri/target/release/bundle/dmg/*.dmg
+              desktop/artifacts/native-desktop/provenance.json
           - name: macos-x64
             os: macos-15-intel
             command: desktop:build
             bundles: |
-              src-tauri/target/release/bundle/dmg/*.dmg
+              desktop/src-tauri/target/release/bundle/dmg/*.dmg
           - name: windows-x64
             os: windows-latest
             command: desktop:build:native
             bundles: |
-              src-tauri/target/release/bundle/nsis/*.exe
-              src-tauri/target/release/bundle/msi/*.msi
-              artifacts/native-desktop/provenance.json
+              desktop/src-tauri/target/release/bundle/nsis/*.exe
+              desktop/src-tauri/target/release/bundle/msi/*.msi
+              desktop/artifacts/native-desktop/provenance.json
           - name: linux-x64
             os: ubuntu-22.04
             command: desktop:build --bundles deb,rpm
             bundles: |
-              src-tauri/target/release/bundle/deb/*.deb
-              src-tauri/target/release/bundle/rpm/*.rpm
+              desktop/src-tauri/target/release/bundle/deb/*.deb
+              desktop/src-tauri/target/release/bundle/rpm/*.rpm
     steps:
       - uses: actions/checkout@v4
         with:
@@ -131,12 +131,12 @@ jobs:
           mise exec -- pnpm --version
       - uses: swatinem/rust-cache@v2
         with:
-          workspaces: src-tauri -> target
+          workspaces: desktop/src-tauri -> target
           # One key per platform that changes only with the pinned toolchain and the
           # dependency graph. The action's own environment hash also covers every
           # rustc preinstalled on the runner image, which drifts between runs and
           # left the Linux cache unused (decision 0104).
-          key: release-${{ matrix.name }}-${{ hashFiles('mise.toml', 'src-tauri/Cargo.lock', 'src-tauri/Cargo.toml', '.cargo/config.toml') }}
+          key: release-${{ matrix.name }}-${{ hashFiles('mise.toml', 'desktop/src-tauri/Cargo.lock', 'desktop/src-tauri/Cargo.toml', 'desktop/.cargo/config.toml') }}
           add-job-id-key: false
           add-rust-environment-hash-key: false
       - name: Install Tauri Linux prerequisites
@@ -189,7 +189,7 @@ jobs:
       - run: mise exec -- pnpm install --frozen-lockfile
         env:
           MISE_DISABLE_TOOLS: ${{ matrix.name == 'macos-x64' && 'pnpm' || '' }}
-      - run: mise exec -- pnpm ${{ matrix.command }}
+      - run: mise exec -- pnpm -C desktop ${{ matrix.command }}
         env:
           MISE_DISABLE_TOOLS: ${{ matrix.name == 'macos-x64' && 'pnpm' || '' }}
       - name: Collect bundles

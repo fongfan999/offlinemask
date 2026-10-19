@@ -1,14 +1,14 @@
 # Working on OfflineMask
 
-Read [docs/product-direction.md](docs/product-direction.md) before product or UI work. It records the owner's accepted boilerplate and feedback; preserve that baseline and apply subsequent feedback page by page. Read [CONTRIBUTING.md](CONTRIBUTING.md) for engineering conventions and the [PRD](PRD.md) for feature scope. Model or pack work starts at [packs/README.md](packs/README.md).
+Read [docs/product-direction.md](docs/product-direction.md) before product or UI work. It records the owner's accepted boilerplate and feedback; preserve that baseline and apply subsequent feedback page by page. Read [CONTRIBUTING.md](CONTRIBUTING.md) for engineering conventions and the [PRD](PRD.md) for feature scope. Model or pack work starts at [desktop/packs/README.md](desktop/packs/README.md). The repository is a pnpm workspace: `desktop/` is the Tauri app, `landing/` the product website; run a package's scripts with `pnpm -C desktop …` or `pnpm -C landing …`, and `pnpm lint` at the root.
 
 - Keep the experience straightforward, with secondary controls revealed only when needed.
-- Use the owner's personal brand theme (warm paper, ink, cobalt accent; light and dark via shared tokens in `src/style.css`); do not reintroduce purple/lavender or a dark-green primary palette.
+- Use the owner's personal brand theme (warm paper, ink, cobalt accent; light and dark via shared tokens in `brand/theme.css`, imported by `desktop/src/style.css` and the landing page); do not reintroduce purple/lavender or a dark-green primary palette.
 - Preserve the Text, Spreadsheet and Word entry points in the left sidebar. Reopenable conversion history appears there once a passcode is set; without one the list is hidden and nothing talks about saving (decision 0071).
 - Use mise-managed versions and `mise exec --` when running project tools. Keep both dependency lockfiles.
 - Follow standard Vue/TypeScript patterns and shared CSS tokens. The project is open source; document substantial choices and dependency provenance in `docs/decisions/`.
-- The recognition models are data: everything about them is in `packs/<id>.json`. Change the pack file rather than hard-coding model names, directories or labels in code, and keep `pnpm test` and `pnpm test:models` green.
-- `src/` is formatted and linted (`pnpm lint`); the frozen experiments under `scripts/` subdirectories are not edited retroactively.
+- The recognition models are data: everything about them is in `desktop/packs/<id>.json`. Change the pack file rather than hard-coding model names, directories or labels in code, and keep `pnpm test` and `pnpm test:models` green.
+- `desktop/src/`, `desktop/tests/` and `landing/` are formatted and linted (`pnpm lint` at the root); the frozen experiments under `desktop/scripts/` subdirectories are not edited retroactively.
 - Clearly distinguish sample behavior from production capabilities. Never persist real private input through sample history storage. Never add telemetry, automatic network access or input logging.
 - Do not broadly redesign the accepted boilerplate without new direction. Later explicit user instructions take precedence over these notes.
 

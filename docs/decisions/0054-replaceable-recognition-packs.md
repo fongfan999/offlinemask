@@ -12,7 +12,7 @@ The repository was also written for its owner: the README described acceptance h
 
 ### One pack definition file
 
-`packs/<id>.json` now describes a recognition pack completely: `id`, user-facing `name`, `attribution`, the ordered `models` (directory, provenance, graph file, offset strategy, optional label map) and the pinned `assets` with their transports. The shipping file is `packs/vietnamese-pii-v1.json`, moved from `scripts/release-pack-v1.json` with the `assets` array unchanged. [packs/README.md](../../packs/README.md) is the contributor guide.
+`packs/<id>.json` now describes a recognition pack completely: `id`, user-facing `name`, `attribution`, the ordered `models` (directory, provenance, graph file, offset strategy, optional label map) and the pinned `assets` with their transports. The shipping file is `packs/vietnamese-pii-v1.json`, moved from `scripts/release-pack-v1.json` with the `assets` array unchanged. [packs/README.md](../../desktop/packs/README.md) is the contributor guide.
 
 - `src/core/detection/pack.ts` validates the file at module load (`validatePackDefinition`) and exports `recognitionPack`. Settings reads the name, attribution and sizes from it.
 - `src-tauri/src/model_pack.rs` deserializes the same file with `deny_unknown_fields` and validates the model entries against the catalog in addition to the existing transport rules.
@@ -37,7 +37,7 @@ The worker's encode request and the `recognition_encode` command carry the model
 
 ### Formatting and the former source freeze
 
-`src/` is formatted and linted uniformly; the Prettier exclusion of `src/core/**`, `src/workers/**` and `src/adapters/text-detection.ts` is lifted and the regex-escape ESLint exemption narrowed to `src/core/detection/**`. The evaluation protocols under `docs/evaluations/` that fingerprint these sources remain valid for the commit they recorded; the last commit with the previous formatting and the old pack path is `3138fc2`. Frozen experiment scripts under `scripts/` subdirectories are unchanged and still reference `scripts/release-pack-v1.json`; reproduce them from history as [scripts/README.md](../../scripts/README.md) describes.
+`src/` is formatted and linted uniformly; the Prettier exclusion of `src/core/**`, `src/workers/**` and `src/adapters/text-detection.ts` is lifted and the regex-escape ESLint exemption narrowed to `src/core/detection/**`. The evaluation protocols under `docs/evaluations/` that fingerprint these sources remain valid for the commit they recorded; the last commit with the previous formatting and the old pack path is `3138fc2`. Frozen experiment scripts under `scripts/` subdirectories are unchanged and still reference `scripts/release-pack-v1.json`; reproduce them from history as [scripts/README.md](../../desktop/scripts/README.md) describes.
 
 ### Repository files for a public project
 
@@ -61,4 +61,4 @@ Not verified here: a packaged desktop run (the IPC change adds one argument to `
 
 ## Consequences
 
-Replacing or adding a model is a change to one JSON file, the files it pins, and the evidence that the two gates pass. Code changes are needed only when a model breaks the contract in [packs/README.md](../../packs/README.md) (input layout, label vocabulary, offsets). Future work that touches `src/core/**` formats normally; new evaluation evidence should pin the sources it ran against as before.
+Replacing or adding a model is a change to one JSON file, the files it pins, and the evidence that the two gates pass. Code changes are needed only when a model breaks the contract in [packs/README.md](../../desktop/packs/README.md) (input layout, label vocabulary, offsets). Future work that touches `src/core/**` formats normally; new evaluation evidence should pin the sources it ran against as before.

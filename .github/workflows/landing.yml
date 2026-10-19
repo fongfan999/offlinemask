@@ -3,25 +3,11 @@ name: Landing page
 on:
   pull_request:
     paths:
-      [
-        "landing/**",
-        "src/theme.css",
-        "brand/**",
-        "package.json",
-        "pnpm-lock.yaml",
-        ".github/workflows/landing.yml",
-      ]
+      ["landing/**", "brand/**", "package.json", "pnpm-lock.yaml", ".github/workflows/landing.yml"]
   push:
     branches: [main]
     paths:
-      [
-        "landing/**",
-        "src/theme.css",
-        "brand/**",
-        "package.json",
-        "pnpm-lock.yaml",
-        ".github/workflows/landing.yml",
-      ]
+      ["landing/**", "brand/**", "package.json", "pnpm-lock.yaml", ".github/workflows/landing.yml"]
   workflow_dispatch:
     inputs:
       deploy:
@@ -40,11 +26,11 @@ jobs:
       - uses: jdx/mise-action@v2
       - run: mise exec -- pnpm install --frozen-lockfile
       - run: mise exec -- pnpm lint
-      - run: mise exec -- pnpm landing:deploy:check
+      - run: mise exec -- pnpm -C landing deploy:check
       - uses: actions/upload-artifact@v4
         with:
           name: landing-${{ github.sha }}
-          path: dist-landing
+          path: landing/dist
   deploy:
     if: github.event_name == 'workflow_dispatch' && inputs.deploy && github.ref == 'refs/heads/main'
     needs: verify
@@ -60,8 +46,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: landing-${{ github.sha }}
-          path: dist-landing
-      - run: mise exec -- pnpm exec wrangler deploy --config landing/wrangler.jsonc
+          path: landing/dist
+      - run: mise exec -- pnpm -C landing exec wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

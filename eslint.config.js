@@ -9,22 +9,20 @@ import tseslint from "typescript-eslint";
 export default [
   {
     ignores: [
-      "dist/**",
-      "dist-landing/**",
-      "landing/.wrangler/**",
-      ".wrangler/**",
-      "dist-desktop/**",
-      "node_modules/**",
-      "artifacts/**",
-      "public/**",
-      "src-tauri/**",
+      "**/node_modules/**",
+      "**/artifacts/**",
+      "desktop/dist/**",
+      "desktop/dist-desktop/**",
+      "desktop/public/**",
+      "desktop/src-tauri/**",
       // Frozen evaluation tooling is reproduced from recorded sources, not linted.
-      "scripts/**",
-      "!scripts/prepare-*.mjs",
-      "!scripts/build-*.mjs",
-      "!scripts/verify-*.mjs",
-      "!scripts/check-*.mjs",
-      "scripts/**/node_modules/**",
+      "desktop/scripts/**",
+      "!desktop/scripts/prepare-*.mjs",
+      "!desktop/scripts/build-*.mjs",
+      "!desktop/scripts/verify-*.mjs",
+      "!desktop/scripts/check-*.mjs",
+      "landing/dist/**",
+      "landing/.wrangler/**",
     ],
   },
   js.configs.recommended,
@@ -45,11 +43,11 @@ export default [
   {
     // The detection rules escape `/` and `[` inside regex character classes for
     // readability; the escapes are harmless and the patterns are test-covered.
-    files: ["src/core/detection/**"],
+    files: ["desktop/src/core/detection/**"],
     rules: { "no-useless-escape": "off" },
   },
   {
-    files: ["src/vite-env.d.ts"],
+    files: ["desktop/src/vite-env.d.ts"],
     rules: {
       // Vue's own SFC module declaration shape.
       "@typescript-eslint/no-explicit-any": "off",

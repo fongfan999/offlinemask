@@ -1,3 +1,7 @@
+packages:
+  - desktop
+  - landing
+
 allowBuilds:
   # Browser/WASM text inference needs no native postinstall downloads or image tooling.
   esbuild: true

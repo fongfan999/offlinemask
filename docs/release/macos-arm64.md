@@ -16,13 +16,13 @@ These are the [Tauri 2 documented signing/notarization inputs](https://v2.tauri.
 Run a read-only preflight:
 
 ```sh
-mise exec -- node scripts/check-macos-release.mjs
+mise exec -- pnpm -C desktop exec node scripts/check-macos-release.mjs
 ```
 
 Once configured, this explicit command builds and submits the app to Apple's notarization service through Tauri, then validates its stapled ticket and Gatekeeper assessment:
 
 ```sh
-mise exec -- node scripts/build-macos-release.mjs
+mise exec -- pnpm -C desktop exec node scripts/build-macos-release.mjs
 ```
 
 It stops before building when signing prerequisites are missing. The normal local `desktop:build` remains available for ad hoc QA. A valid local signature alone is not a notarization result. Distribute only the exact verified artifact; record SHA-256, build commit, macOS/architecture, notarization outcome and hardware run. Do not publish automatically.

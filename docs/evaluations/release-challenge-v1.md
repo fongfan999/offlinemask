@@ -4,7 +4,7 @@
 
 ## What was tested
 
-The [specification](release-challenge-v1-spec.md), [fixtures](../../tests/fixtures/release-challenge-v1.json), scripts and dependency/core fingerprints were frozen before inference. Five existing configurations each ran twice in separate sequential Node CPU processes. All ten runs completed all 100 cases without request failures; each configuration produced identical outputs across its two runs. All 92 unit tests passed, including five new annotation/scoring tests.
+The [specification](release-challenge-v1-spec.md), [fixtures](../../desktop/tests/fixtures/release-challenge-v1.json), scripts and dependency/core fingerprints were frozen before inference. Five existing configurations each ran twice in separate sequential Node CPU processes. All ten runs completed all 100 cases without request failures; each configuration produced identical outputs across its two runs. All 92 unit tests passed, including five new annotation/scoring tests.
 
 The corpus has 142 annotated private-value occurrences across 17 types, 65 designated critical occurrences, and 24 ordinary negative cases. It contains 24 positive record families in prose, labelled text and simulated extraction, plus four long variants, and 24 negative families: **48 families, not 100 independent records**. All were authored by the developer. No independent reviewer or banking practitioner validated the annotations. It is now an observed challenge set, not available for future fresh-validation claims.
 
@@ -54,7 +54,7 @@ These counts apply the predeclared challenge categories, with the complete detec
 
 ## Scope differences and the actual lightweight path
 
-The challenge asks for labelled passport/tax identifiers and treats card numbers as banking information. The current [option definitions](../../src/core/detection/options.ts) promise only labelled accounts, CCCD/CMND, transaction and customer codes without a pack; they explicitly place card information under “other.” Consequently, the frozen card banking-category failure is a **challenge/UI policy mismatch**, not a claim that the current card behavior violates its documented category. Passport and tax identification are capability gaps against the broader challenge, not broken promises of the current lightweight description. No annotations or gates were changed after observing this mismatch.
+The challenge asks for labelled passport/tax identifiers and treats card numbers as banking information. The current [option definitions](../../desktop/src/core/detection/options.ts) promise only labelled accounts, CCCD/CMND, transaction and customer codes without a pack; they explicitly place card information under “other.” Consequently, the frozen card banking-category failure is a **challenge/UI policy mismatch**, not a claim that the current card behavior violates its documented category. Passport and tax identification are capability gaps against the broader challenge, not broken promises of the current lightweight description. No annotations or gates were changed after observing this mismatch.
 
 All four OpenMed configurations cover all three card occurrences when the currently documented “other” category is selected; Underthesea covers none. These are diagnostics from saved predictions, not a revised passing benchmark. The mismatch must be resolved in the supported-capability specification before release ranking.
 

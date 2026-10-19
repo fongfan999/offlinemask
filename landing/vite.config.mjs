@@ -23,5 +23,5 @@ export default defineConfig({
     },
   ],
   server: { port: 4322, strictPort: true },
-  build: { outDir: "../dist-landing", emptyOutDir: true },
+  build: { outDir: "dist", emptyOutDir: true },
 });
