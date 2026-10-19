@@ -16,4 +16,9 @@ Windows code signing; Linux arm64 and Windows arm64 runners (no evidence the app
 
 ## Checked
 
-`prettier --check` on the workflow, a YAML parse, and `bash -n` on each of its eight shell steps; the changelog extraction and the version comparison run against the repository as it is. The workflow itself is verified by its first run on `v2.0.0`, recorded below once it has happened.
+`prettier --check` on the workflow, a YAML parse, and `bash -n` on each of its eight shell steps; the changelog extraction and the version comparison run against the repository as it is. The workflow itself was verified by dispatching it twice for `v2.0.0` on 19 October 2026:
+
+- [Run 39286548372](https://github.com/fongfan999/offlinemask/actions/runs/39286548372): macOS arm64 (16.0 min), Windows x64 (12.5 min) and Linux x64 (6.6 min) built with cold caches; the Intel job failed in mise, which resolves pnpm from the aqua registry and finds no macOS x64 binary for pnpm 11. The attach job was skipped, as designed when any build fails.
+- [Run 39287812900](https://github.com/fongfan999/offlinemask/actions/runs/39287812900), after the Intel runner was switched to installing pnpm through npm: all four built (Linux 12.1, macOS arm64 14.3, Windows 11.2, macOS Intel 15.1 min) and the publish job attached ten files to the existing release: `OfflineMask_2.0.0_aarch64.dmg` (18.5 MB), `OfflineMask_2.0.0_x64.dmg` (9.5 MB), `OfflineMask_2.0.0_x64-setup.exe` (9.4 MB), `OfflineMask_2.0.0_x64_en-US.msi` (13.3 MB), `OfflineMask_2.0.0_amd64.deb` and `OfflineMask-2.0.0-1.x86_64.rpm` (10.2 MB each), `OfflineMask_2.0.0_amd64.AppImage` (84.9 MB), the two provenance files and `SHA256SUMS.txt`.
+
+Nearly all of each native job is the Rust release link: the profile uses fat LTO with one codegen unit, and the helper and the app are linked separately. The Rust cache restored on Windows (the build step went from 11.1 to 9.9 min) but not on Linux, whose key changed between the runs; the action hashes every rustc on the runner, including the image's preinstalled one. Speed-ups (thin LTO, a lockfile-only cache key, fewer Linux bundle formats) are a separate decision.
