@@ -5,10 +5,12 @@ import BrandMark from "../components/BrandMark.vue";
 import HighlightedText from "../components/HighlightedText.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import PasscodeSetup from "../components/PasscodeSetup.vue";
+import QuickIntro from "../components/QuickIntro.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import {
   packKey,
+  quickKey,
   runKey,
   sessionsKey,
   useProvided,
@@ -54,6 +56,7 @@ const {
 } = useProvided(runKey);
 const { save } = useProvided(sessionsKey);
 const vault = useProvided(vaultKey);
+const quick = useProvided(quickKey);
 /** History is a passcode feature (decision 0071). Without one nothing talks about
  * saving: the user chose not to keep anything, and the review screen offers it once. */
 const historyOn = computed(() => vault.state.value === "unlocked");
@@ -430,6 +433,8 @@ async function copy(restore = false) {
         ? "Đã sao chép. Dán vào ChatGPT, Gemini hoặc Claude; khi có câu trả lời, dán vào ô này."
         : "Đã sao chép. Bạn có thể dán vào nơi mình chọn.";
     if (restore && privateSession.value) openStep(3);
+    // The trip Ẩn nhanh saves: offer it once (decision 0098).
+    quick.offerIntro();
   } catch {
     if (session.value?.id !== sessionId || output.value !== text) return;
     view.value = "masked";
@@ -873,4 +878,6 @@ defineExpose({
   </section>
   <p v-if="processingError" class="storage-error" role="alert">{{ processingError }}</p>
   <p v-if="copyStatus" class="feedback" role="status">{{ copyStatus }}</p>
+  <!-- Belongs to the copied result: gone with it (decision 0098). -->
+  <QuickIntro v-if="copyStatus" />
 </template>

@@ -13,6 +13,7 @@ import {
   launchError,
   lockedMessage,
   popoverKey,
+  introKey,
   popoverPermission,
   serviceFileError,
   shortcutError,
@@ -127,6 +128,8 @@ function fakeAdapter(clipboard = "") {
       return () => calls.push(["unclose"]);
     },
     hideMainWindow: async () => calls.push(["hide-main"]),
+    trayOffers: [],
+    setTrayOffer: async (on) => adapter.trayOffers.push(on),
     launchAtLogin: async () => adapter.autostart,
     setLaunchAtLogin: async (on) => {
       calls.push(["autostart", on]);
@@ -1267,5 +1270,174 @@ test("the shortcut is a sub-option of the circle: off with it, back with it", as
   assert.equal(quick.shortcutOn.value, true);
   await quick.setPopover(true);
   assert.equal(registers(), 2);
+  quick.stop();
+});
+
+test("the tray offers Ẩn nhanh only while it is off", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  adapter.permission = "granted";
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  await nextTick();
+  assert.equal(adapter.trayOffers.at(-1), true);
+  await quick.setPopover(true);
+  await nextTick();
+  assert.equal(adapter.trayOffers.at(-1), false);
+  await quick.setPopover(false);
+  await nextTick();
+  assert.equal(adapter.trayOffers.at(-1), true);
+  quick.stop();
+});
+
+test("the one-time card primes the permission and turns Ẩn nhanh on once it is granted", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  adapter.permission = "denied";
+  const storage = memoryStorage();
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage,
+  });
+  await quick.start();
+  quick.offerIntro();
+  assert.equal(quick.introStage.value, "offer");
+  await quick.startIntro();
+  // A sentence first; the system dialog only on "Tiếp tục".
+  assert.equal(quick.introStage.value, "prime");
+  assert.equal(
+    adapter.calls.some((call) => call[0] === "permission" && call[1] === true),
+    false,
+  );
+  assert.equal(storage.data.get(introKey), "on");
+  await quick.grantAndEnable();
+  assert.equal(quick.introStage.value, "waiting");
+  assert.deepEqual(adapter.calls.filter((call) => call[0] === "permission").at(-1), [
+    "permission",
+    true,
+  ]);
+  assert.equal(quick.popoverOn.value, false);
+  adapter.permission = "granted";
+  await quick.checkInputPermission();
+  assert.equal(quick.popoverOn.value, true);
+  assert.equal(quick.introStage.value, "done");
+  quick.dismissIntro();
+  quick.offerIntro();
+  assert.equal(quick.introStage.value, null);
+  quick.stop();
+});
+
+test("with the permission already there the card turns Ẩn nhanh on at once", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  adapter.permission = "granted";
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  quick.offerIntro();
+  await quick.startIntro();
+  assert.equal(quick.popoverOn.value, true);
+  assert.equal(quick.introStage.value, "done");
+  quick.stop();
+});
+
+test("Để sau hides the card for good, and it never shows once Ẩn nhanh is on", async () => {
+  const sessions = ref([]);
+  const storage = memoryStorage();
+  const make = (permission, store) => {
+    const adapter = fakeAdapter("");
+    adapter.permission = permission;
+    return useQuickActions({
+      adapter,
+      run: fakeRun(sessions),
+      sessions,
+      locked: () => false,
+      storage: store,
+    });
+  };
+  const quick = make("denied", storage);
+  await quick.start();
+  quick.offerIntro();
+  quick.dismissIntro();
+  quick.offerIntro();
+  assert.equal(quick.introStage.value, null);
+  quick.stop();
+  const later = make("denied", storage);
+  await later.start();
+  later.offerIntro();
+  assert.equal(later.introStage.value, null);
+  later.stop();
+
+  const on = make("granted", memoryStorage({ [popoverKey]: "on" }));
+  await on.start();
+  on.offerIntro();
+  assert.equal(on.introStage.value, null);
+  on.stop();
+});
+
+test("switched on without the permission still counts as off for the offers", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  adapter.permission = "denied";
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage({ [popoverKey]: "on" }),
+  });
+  await quick.start();
+  await nextTick();
+  assert.equal(quick.popoverOn.value, true);
+  assert.equal(quick.quickReady.value, false);
+  assert.equal(adapter.trayOffers.at(-1), true);
+  quick.offerIntro();
+  assert.equal(quick.introStage.value, "offer");
+  await quick.startIntro();
+  await quick.grantAndEnable();
+  adapter.permission = "granted";
+  await quick.checkInputPermission();
+  await nextTick();
+  assert.equal(quick.quickReady.value, true);
+  assert.equal(quick.introStage.value, "done");
+  assert.equal(adapter.trayOffers.at(-1), false);
+  quick.stop();
+});
+
+test("the card goes with the result it sat under; an unanswered offer can come back", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  adapter.permission = "denied";
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  quick.offerIntro();
+  quick.closeIntro();
+  assert.equal(quick.introStage.value, null);
+  quick.offerIntro();
+  assert.equal(quick.introStage.value, "offer");
+  await quick.startIntro();
+  quick.closeIntro();
+  quick.offerIntro();
+  assert.equal(quick.introStage.value, null);
   quick.stop();
 });

@@ -20,6 +20,8 @@ import { isPrivate, sessionOutput, type Session, type TextSession } from "../cor
 
 export const shortcutKey = "offlinemask.quick-shortcut.v1";
 export const popoverKey = "offlinemask.quick-popover.v1";
+/** Set once the one-time Ẩn nhanh card was answered (decision 0098). */
+export const introKey = "offlinemask.quick-intro.v1";
 /** Read-only text gets a masking circle only if the built-in rules find something to
  * hide within this time; otherwise selecting a sentence on a web page shows nothing. */
 const readOnlyProbeMs = 1500;
@@ -143,6 +145,57 @@ export function useQuickActions({
   }
   /** Whether ⌘⇧M may replace the selection in place (decision 0091); "unknown" until checked. */
   const inputPermission = ref<InputPermission | "unknown">("unknown");
+  /** The one-time Ẩn nhanh card in the app (decision 0098): offered after the first
+   * masked copy, then a sentence before the system's permission dialog, a wait for
+   * the grant, and a short confirmation. */
+  const introSeen = ref(read(introKey, false));
+  const introStage = ref<"offer" | "prime" | "waiting" | "done" | null>(null);
+  let enableAfterGrant = false;
+  function markIntroSeen() {
+    if (introSeen.value) return;
+    introSeen.value = true;
+    write(introKey, true);
+  }
+  /** Ẩn nhanh actually works: switched on and able to read selections. */
+  const quickReady = computed(
+    () => popoverOn.value && popoverSupported.value && inputPermission.value === "granted",
+  );
+  // Working by any route (Settings, the card, a grant): the card has done its job.
+  watch(quickReady, (ready) => {
+    if (!ready) return;
+    markIntroSeen();
+    if (introStage.value === "offer" || introStage.value === "prime") introStage.value = null;
+  });
+  function offerIntro() {
+    if (!adapter.desktop || introSeen.value || introStage.value) return;
+    if (quickReady.value || !popoverSupported.value) return;
+    if (inputPermission.value === "unsupported") return;
+    introStage.value = "offer";
+  }
+  function dismissIntro() {
+    introStage.value = null;
+    markIntroSeen();
+  }
+  /** The result it sat under went away (new text, another page): hide the card. An
+   * unanswered offer may come back with the next copy; the later steps were answers. */
+  function closeIntro() {
+    if (introStage.value === "done") dismissIntro();
+    else introStage.value = null;
+  }
+  async function startIntro() {
+    markIntroSeen();
+    if (inputPermission.value === "granted") {
+      await setPopover(true);
+      introStage.value = popoverOn.value ? "done" : null;
+    } else introStage.value = "prime";
+  }
+  /** The system's permission prompt, asked for by the user; Ẩn nhanh turns on once
+   * the grant arrives (the poll below notices it). */
+  async function grantAndEnable() {
+    enableAfterGrant = true;
+    if (introStage.value === "prime") introStage.value = "waiting";
+    await checkInputPermission(true);
+  }
   let hinted = false;
   // The grant is given in System Settings while this window sits behind it, and a
   // window-focus event is not guaranteed on the way back, so while it is missing the
@@ -154,6 +207,12 @@ export function useQuickActions({
       inputPermission.value = await adapter.inputPermission(prompt);
     } catch {
       inputPermission.value = "unsupported";
+    }
+    // Granted after the user asked for Ẩn nhanh (the card or Cấp quyền): turn it on.
+    if (inputPermission.value === "granted" && enableAfterGrant) {
+      enableAfterGrant = false;
+      if (!popoverOn.value) await setPopover(true);
+      if (introStage.value === "waiting") introStage.value = popoverOn.value ? "done" : null;
     }
     if (inputPermission.value === "denied") {
       if (!permissionPoll) {
@@ -643,7 +702,14 @@ export function useQuickActions({
     await Promise.all([checkInputPermission(), readLaunchAtLogin()]);
     popoverSupported.value = await adapter.selectionSupported().catch(() => false);
     if (popoverOn.value) await setPopover(popoverSupported.value);
+    // While Ẩn nhanh is off, the tray menu offers it (decision 0098).
+    stopTrayOffer = watch(
+      () => popoverSupported.value && !quickReady.value,
+      (offer) => void adapter.setTrayOffer(offer).catch(() => {}),
+      { immediate: true },
+    );
   }
+  let stopTrayOffer: (() => void) | undefined;
   let stopped = false;
   function stopAll() {
     stopCommands?.();
@@ -669,6 +735,8 @@ export function useQuickActions({
     stopSelection = undefined;
     stopCleared?.();
     stopCleared = undefined;
+    stopTrayOffer?.();
+    stopTrayOffer = undefined;
     if (typeof window !== "undefined") window.removeEventListener("focus", recheck);
     if (permissionPoll) clearInterval(permissionPoll);
     permissionPoll = undefined;
@@ -691,6 +759,13 @@ export function useQuickActions({
     launchFailure,
     setLaunchAtLogin,
     popoverOn: computed(() => popoverOn.value),
+    quickReady,
+    introStage: computed(() => introStage.value),
+    offerIntro,
+    dismissIntro,
+    closeIntro,
+    startIntro,
+    grantAndEnable,
     lastSkip,
     popoverSupported: computed(() => popoverSupported.value),
     popoverFailure,

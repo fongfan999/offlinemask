@@ -109,6 +109,8 @@ export interface QuickActionsAdapter {
   quit(): Promise<void>;
   /** Bring the main window back, from wherever it is (decision 0096). */
   showMainWindow(): Promise<void>;
+  /** The tray menu's "Bật Ẩn nhanh…" item, shown while Ẩn nhanh is off (decision 0098). */
+  setTrayOffer(on: boolean): Promise<void>;
   /** Text or files from a macOS Service (decision 0094). */
   onService(handler: (request: ServiceRequest) => void): Promise<() => void>;
   /** Bytes of a file a Service handed over; any other path is refused natively. */
@@ -165,6 +167,7 @@ export const nativeQuickActions: QuickActionsAdapter = {
   setLaunchAtLogin: (on) => (on ? enable() : disable()),
   quit: () => invoke("quick_quit"),
   showMainWindow: () => invoke("quick_show_main"),
+  setTrayOffer: (on) => invoke("quick_tray_offer", { on }),
   onService: (handler) => listen<ServiceRequest>(events.service, (event) => handler(event.payload)),
   async readServiceFile(path) {
     const bytes = await invoke<ArrayBuffer | number[]>("quick_read_service_file", { path });

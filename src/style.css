@@ -2589,6 +2589,332 @@ td.alias {
   font-size: 12px;
   line-height: 1.7;
 }
+/* The one-time Ẩn nhanh suggestion under a copied result (decision 0098): the
+   passcode offer's note style, with the illustration beside the text. */
+.quick-intro-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+.quick-intro-mark {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--accent);
+}
+.quick-intro-body {
+  flex: 1;
+  min-width: 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+.quick-intro-body strong {
+  display: block;
+  font-weight: 600;
+}
+.quick-intro-body > span {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 12px;
+}
+.quick-intro-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.quick-intro-actions .quiet-button {
+  padding: 7px 10px;
+}
+.quick-intro-actions .quiet-button.accent {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.quick-intro-card .quick-demo.is-compact {
+  flex: none;
+  width: 300px;
+  margin: 0;
+}
+@media (max-width: 720px) {
+  .quick-intro-card.has-demo {
+    flex-wrap: wrap;
+  }
+  .quick-intro-card .quick-demo.is-compact {
+    width: 100%;
+    margin-left: 32px;
+  }
+}
+.quick-intro-fade-enter-active,
+.quick-intro-fade-leave-active {
+  transition:
+    opacity 0.2s,
+    translate 0.2s;
+}
+.quick-intro-fade-enter-from,
+.quick-intro-fade-leave-to {
+  opacity: 0;
+  translate: 0 6px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .quick-intro-fade-enter-from,
+  .quick-intro-fade-leave-to {
+    translate: none;
+  }
+}
+/* Ẩn nhanh illustrated (decision 0098): select, the OfflineMask button, done. One 7 s
+   loop on sample text; the stages share the duration and are keyed by percentage. */
+.quick-demo {
+  margin: 14px 0 4px;
+}
+.qd-window {
+  max-width: 460px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper-raised);
+  box-shadow: 0 6px 18px var(--shadow);
+}
+.qd-bar {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 7px 10px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper-sunk);
+}
+.qd-bar i {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--dot);
+}
+.qd-bar span {
+  margin-left: 6px;
+  color: var(--muted);
+  font-size: 11px;
+}
+.qd-line {
+  margin: 0;
+  padding: 40px 16px 18px;
+  color: var(--ink);
+  font-size: 13.5px;
+  line-height: 1.6;
+}
+.qd-sel {
+  position: relative;
+  display: inline-grid;
+  vertical-align: bottom;
+}
+.qd-before,
+.qd-after {
+  grid-area: 1 / 1;
+  white-space: nowrap;
+}
+.qd-before {
+  border-radius: 3px;
+  background: linear-gradient(
+      color-mix(in srgb, var(--accent) 24%, transparent),
+      color-mix(in srgb, var(--accent) 24%, transparent)
+    )
+    no-repeat left / 0% 0%;
+  animation: qd-before 7s infinite;
+}
+.qd-after {
+  opacity: 0;
+  animation: qd-after 7s infinite;
+}
+.qd-after b {
+  color: var(--accent);
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+}
+.qd-dot {
+  position: absolute;
+  top: -32px;
+  right: -10px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  color: var(--on-accent);
+  background: var(--accent);
+  box-shadow: 0 3px 10px var(--shadow);
+  opacity: 0;
+  scale: 0;
+  animation: qd-dot 7s infinite;
+}
+.qd-dot > * {
+  grid-area: 1 / 1;
+}
+.qd-mark {
+  animation: qd-mark 7s infinite;
+}
+.qd-check {
+  opacity: 0;
+  stroke-width: 2.6;
+  animation: qd-check 7s infinite;
+}
+.qd-pointer {
+  position: absolute;
+  top: -14px;
+  right: -20px;
+  fill: var(--ink);
+  stroke: var(--paper-raised);
+  stroke-width: 1.2;
+  opacity: 0;
+  animation: qd-pointer 7s infinite;
+}
+@keyframes qd-before {
+  0%,
+  8% {
+    background-size: 0% 0%;
+    opacity: 1;
+  }
+  8.1% {
+    background-size: 0% 100%;
+  }
+  30%,
+  54% {
+    background-size: 100% 100%;
+    opacity: 1;
+  }
+  60%,
+  96% {
+    background-size: 100% 100%;
+    opacity: 0;
+  }
+  96.1% {
+    background-size: 0% 0%;
+    opacity: 0;
+  }
+  100% {
+    background-size: 0% 0%;
+    opacity: 1;
+  }
+}
+@keyframes qd-after {
+  0%,
+  54% {
+    opacity: 0;
+  }
+  60%,
+  90% {
+    opacity: 1;
+  }
+  97%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes qd-dot {
+  0%,
+  30% {
+    opacity: 0;
+    scale: 0;
+  }
+  36%,
+  48% {
+    opacity: 1;
+    scale: 1;
+  }
+  51% {
+    scale: 0.86;
+  }
+  55%,
+  80% {
+    opacity: 1;
+    scale: 1;
+  }
+  86%,
+  100% {
+    opacity: 0;
+    scale: 0.8;
+  }
+}
+@keyframes qd-mark {
+  0%,
+  54% {
+    opacity: 1;
+  }
+  58%,
+  100% {
+    opacity: 0;
+  }
+}
+@keyframes qd-check {
+  0%,
+  56% {
+    opacity: 0;
+    scale: 0.4;
+  }
+  62%,
+  100% {
+    opacity: 1;
+    scale: 1;
+  }
+}
+@keyframes qd-pointer {
+  0%,
+  33% {
+    opacity: 0;
+    translate: 34px 30px;
+  }
+  37% {
+    opacity: 1;
+    translate: 34px 30px;
+  }
+  48% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  51% {
+    scale: 0.88;
+  }
+  55%,
+  68% {
+    opacity: 1;
+    translate: 0 0;
+    scale: 1;
+  }
+  74%,
+  100% {
+    opacity: 0;
+    translate: 0 0;
+  }
+}
+.quick-demo.is-compact .qd-line {
+  padding: 34px 14px 12px;
+  font-size: 12.5px;
+}
+.quick-demo.is-compact .qd-after b {
+  font-size: 11px;
+}
+/* Reduced motion: hold the moment before the click. */
+@media (prefers-reduced-motion: reduce) {
+  .qd-before,
+  .qd-after,
+  .qd-dot,
+  .qd-mark,
+  .qd-check,
+  .qd-pointer {
+    animation: none;
+  }
+  .qd-before {
+    background-size: 100% 100%;
+  }
+  .qd-dot,
+  .qd-pointer {
+    opacity: 1;
+    scale: 1;
+  }
+}
 .quick-note {
   margin-top: 6px;
   color: var(--warm);

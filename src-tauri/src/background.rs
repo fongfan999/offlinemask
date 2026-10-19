@@ -69,8 +69,35 @@ pub fn show_main<R: Runtime>(app: &AppHandle<R>) {
     }
 }
 
+/// "Bật Ẩn nhanh…" in the tray menu, present only while Ẩn nhanh is off; the
+/// frontend says when (decision 0098). It opens Cài đặt, where the feature lives.
+pub struct TrayOffer<R: Runtime> {
+    menu: Menu<R>,
+    item: MenuItem<R>,
+    shown: std::sync::Mutex<bool>,
+}
+#[tauri::command]
+pub fn quick_tray_offer(
+    offer: tauri::State<'_, TrayOffer<tauri::Wry>>,
+    on: bool,
+) -> Result<(), String> {
+    let mut shown = offer.shown.lock().map_err(|_| "io: poisoned".to_string())?;
+    if *shown == on {
+        return Ok(());
+    }
+    if on {
+        offer.menu.insert(&offer.item, 1)
+    } else {
+        offer.menu.remove(&offer.item)
+    }
+    .map_err(|error| error.to_string())?;
+    *shown = on;
+    Ok(())
+}
+
 pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let open = MenuItem::with_id(app, "open", "Mở OfflineMask", true, None::<&str>)?;
+    let enable = MenuItem::with_id(app, "enable", "Bật Ẩn nhanh…", true, None::<&str>)?;
     let mask = MenuItem::with_id(
         app,
         "mask",
@@ -109,6 +136,15 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
                 let _ = app.emit_to(MAIN_WINDOW, COMMAND_EVENT, Command { command: "restore" });
             }
             "quit" => request_quit(app),
+            "enable" => {
+                let _ = app.emit_to(
+                    MAIN_WINDOW,
+                    COMMAND_EVENT,
+                    Command {
+                        command: "settings",
+                    },
+                );
+            }
             _ => {}
         });
     // The macOS menu bar takes a template: the mark in black with the eye holes
@@ -141,6 +177,11 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
             });
     }
     tray.build(app)?;
+    app.manage(TrayOffer {
+        menu,
+        item: enable,
+        shown: std::sync::Mutex::new(false),
+    });
     Ok(())
 }
 

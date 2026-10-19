@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { quickShortcutLabel, trayLabel } from "../adapters/quick-actions.ts";
 import { quickKey, useProvided } from "../composables/context.ts";
+import QuickDemo from "./QuickDemo.vue";
 
 /** Quick actions (decisions 0090 to 0097): the circle, its shortcut and the start at login. */
 const quick = useProvided(quickKey);
@@ -9,7 +10,7 @@ const quick = useProvided(quickKey);
 const asked = ref(false);
 function grant() {
   asked.value = true;
-  void quick.checkInputPermission(true);
+  void quick.grantAndEnable();
 }
 </script>
 
@@ -20,6 +21,8 @@ function grant() {
       Ẩn hoặc khôi phục thông tin ngay trong ứng dụng khác. Chỉ đọc chữ bạn bôi đen, xử lý trên máy
       này.
     </p>
+    <!-- What Ẩn nhanh looks like, until it is on (decision 0098). -->
+    <QuickDemo v-if="!quick.quickReady.value" />
     <p v-if="!quick.desktop" class="quick-note">Chỉ có trên ứng dụng máy tính.</p>
 
     <!-- Step one: the permission. The circle and its shortcut only exist once granted. -->
