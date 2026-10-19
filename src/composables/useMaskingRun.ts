@@ -36,6 +36,7 @@ export type TextDetector = Pick<
   ReturnType<typeof createTextDetector>,
   "detect" | "prepare" | "cancel" | "destroy"
 >;
+type Detections = Awaited<ReturnType<TextDetector["detect"]>>;
 export interface MaskingRunDependencies {
   detector: TextDetector;
   pack: { ready: Ref<boolean>; readyRoot: Ref<string | null> };
@@ -99,6 +100,7 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     original: string,
     options: readonly DetectionOption[],
     adopt: (session: TextSession) => boolean = () => true,
+    known?: Detections,
   ): Promise<TextSession | undefined> {
     processing.value = true;
     processingError.value = "";
@@ -107,14 +109,16 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     progress.value = { stage: "loading", done: 0, total: 0, startedAt };
     try {
       const modelRoot = pack.readyRoot.value ?? undefined;
-      const detections = await detector.detect(
-        original,
-        (step) => {
-          if (run === currentRun) progress.value = textProgress(step, startedAt);
-        },
-        modelRoot,
-        [...options],
-      );
+      const detections =
+        known ??
+        (await detector.detect(
+          original,
+          (step) => {
+            if (run === currentRun) progress.value = textProgress(step, startedAt);
+          },
+          modelRoot,
+          [...options],
+        ));
       if (run !== currentRun) return;
       const session = createTextSession(original, sessions.value, detections, options);
       if (adopt(session)) onSession(session);
@@ -159,16 +163,16 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     const invalid = validateText(text);
     if (invalid) return { error: "invalid", message: invalid };
     if (processing.value) return { error: "busy", message: "" };
-    // Quick actions hide as much as possible (decision 0096): every category the machine
-    // can run, whatever is ticked on the text page; the built-in ones without the pack.
-    const options = pack.ready.value
-      ? detectionOptions.map((option) => option.id)
-      : [...localOptions];
+    const { options, key } = quickRun(text);
+    // The circle's check already ran this exact detection: use it (decision 0100).
+    const known = lastQuick?.key === key ? lastQuick.detections : undefined;
+    lastQuick = null;
     try {
       const session = await detectSession(
         text,
         options,
         (candidate) => candidate.analysis.findings.length > 0,
+        known,
       );
       if (!session) return { error: "busy", message: "" };
       return { session };
@@ -176,13 +180,31 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
       return { error: "failed", message: processingFailure };
     }
   }
-  /** How many values the built-in rules find, for the clipboard watch (decision
-   * 0094): no session, no progress, no draft, and a failure counts as nothing. */
+  /** Quick actions hide as much as possible (decision 0096): every category the
+   * machine can run, whatever is ticked on the text page; the built-in ones without
+   * the pack. The key ties a check to the exact run a click would make. */
+  function quickRun(text: string) {
+    const options: DetectionOption[] = pack.ready.value
+      ? detectionOptions.map((option) => option.id)
+      : [...localOptions];
+    const root = pack.readyRoot.value ?? undefined;
+    return { options, root, key: `${root ?? ""}\n${options.join(",")}\n${text}` };
+  }
+  /** The last check's detections, in memory only, for the click that usually follows. */
+  let lastQuick: { key: string; detections: Detections } | null = null;
+  /** How many values a click on the circle would hide (decision 0100): the very same
+   * detection as `maskText`, models included, so the two cannot disagree. No session,
+   * no progress, no draft; a failure counts as nothing. */
   async function probe(text: string): Promise<{ count: number; kinds: string[] }> {
     const nothing = { count: 0, kinds: [] };
     if (validateText(text)) return nothing;
+    const { options, root, key } = quickRun(text);
     try {
-      const detections = await detector.detect(text, () => {}, undefined, [...localOptions]);
+      const detections =
+        lastQuick?.key === key
+          ? lastQuick.detections
+          : await detector.detect(text, () => {}, root, [...options]);
+      lastQuick = { key, detections };
       // Distinct values, like the "Đã ẩn n thông tin" count after masking.
       const values = new Set(detections.map((d) => d.type + ":" + text.slice(d.start, d.end)));
       return { count: values.size, kinds: [...new Set(detections.map((d) => d.label))] };

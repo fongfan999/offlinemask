@@ -22,9 +22,10 @@ export const shortcutKey = "offlinemask.quick-shortcut.v1";
 export const popoverKey = "offlinemask.quick-popover.v1";
 /** Set once the one-time Ẩn nhanh card was answered (decision 0098). */
 export const introKey = "offlinemask.quick-intro.v1";
-/** Read-only text gets a masking circle only if the built-in rules find something to
- * hide within this time; otherwise selecting a sentence on a web page shows nothing. */
-const readOnlyProbeMs = 1500;
+/** A selection gets a masking circle only if the click's own detection finds something
+ * to hide (decision 0100). A check slower than this shows the circle anyway: a circle
+ * that finds nothing is better than one that quietly never appeared. */
+const probeMs = 1500;
 export const popoverError = "Chưa bật được Ẩn nhanh trên máy này.";
 export const popoverPermission = "Ẩn nhanh cần quyền Trợ năng. Bấm Cấp quyền ở trên.";
 export const serviceFileError = "Chưa đọc được tệp từ Finder. Hãy kéo tệp vào OfflineMask.";
@@ -397,22 +398,27 @@ export function useQuickActions({
    * (or restores, when the text holds known aliases) and replaces the text. In read-only
    * text it only shows for known aliases, and its click opens a restore preview. Anything
    * else (plain read-only text, aliases of no known session) shows nothing. */
+  /** Bumped by every selection and every clearing, so a slow check never shows a
+   * circle for a selection that is gone. */
+  let selectionSeq = 0;
   async function selectionMade(selection: SelectionMade) {
     if (!popoverOn.value) return;
     if (locked()) return void (lastSkip.value = quickMessages.skipped.locked);
     if (busy.value) return void (lastSkip.value = quickMessages.skipped.busy);
     const direction = quickDirection(selection.text, knownTables());
     if (direction === "empty") return void (lastSkip.value = quickMessages.skipped.empty);
-    if (!selection.editable && direction === "mask") {
-      // Plain read-only text: only worth a circle when the rules find something.
+    const seq = ++selectionSeq;
+    if (direction === "mask") {
+      // Any app, editable or not: a circle only when a click would hide something.
       let wait: ReturnType<typeof setTimeout> | undefined;
       const probed = await Promise.race([
         run.probe(selection.text),
-        new Promise<null>((resolve) => (wait = setTimeout(() => resolve(null), readOnlyProbeMs))),
+        new Promise<null>((resolve) => (wait = setTimeout(() => resolve(null), probeMs))),
       ]);
       clearTimeout(wait);
-      if (!probed) return void (lastSkip.value = quickMessages.skipped.slow);
-      if (!probed.count) return void (lastSkip.value = quickMessages.skipped.plain);
+      // A newer selection, or none any more, took over while the check ran.
+      if (seq !== selectionSeq || !popoverOn.value) return;
+      if (probed && !probed.count) return void (lastSkip.value = quickMessages.skipped.plain);
     }
     lastSkip.value = "";
     // Codes of a session this launch does not know still get a (muted) circle: the text
@@ -521,12 +527,13 @@ export function useQuickActions({
     if (adapter.desktop) await adapter.dismissPanel().catch(() => {});
   }
   async function selectionCleared() {
+    selectionSeq++;
     if (pendingSelection === null) return;
     pendingSelection = null;
     if (adapter.desktop) await adapter.dismissPanel().catch(() => {});
   }
-  /** The first read-only check after launch must not wait for the detector to start:
-   * one throwaway check (synthetic text) wakes it when the popover is turned on. */
+  /** The first check after launch must not wait for the detector (and the pack's models)
+   * to start: one throwaway check on synthetic text wakes it when Ẩn nhanh is turned on. */
   function warmUp() {
     void run.probe("a@example.com").catch(() => {});
   }

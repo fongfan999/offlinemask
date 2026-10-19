@@ -70,7 +70,6 @@ export const quickMessages = {
   /** Why the last selection got no circle, for Cài đặt › Thao tác nhanh. */
   skipped: {
     plain: "đoạn đó không có thông tin cần ẩn",
-    slow: "OfflineMask cần thêm chút thời gian, hãy chọn lại",
     busy: "đang xử lý một văn bản khác",
     locked: "OfflineMask đang khóa",
     empty: "chưa có chữ nào được chọn",

@@ -176,11 +176,13 @@ function fakeRun(sessions) {
     outcome: null,
     texts: [],
     probed: [],
-    found: 0,
+    // Like the real check: phone numbers and emails count, unless a test says otherwise.
+    found: null,
     kinds: [],
     async probe(text) {
       run.probed.push(text);
-      return { count: run.found, kinds: run.kinds };
+      const count = run.found ?? (/\d{9,}|@/.test(text) ? 1 : 0);
+      return { count, kinds: run.kinds };
     },
     async maskText(text) {
       run.texts.push(text);
@@ -1109,7 +1111,7 @@ test("codes of an earlier launch get a muted circle whose click explains and lea
   assert.equal(quick.lastStatus.value.notice.settings, false);
 });
 
-test("a slow read-only check gives up after 1.5 s and Settings says so", async () => {
+test("a check slower than 1.5 s shows the circle anyway; plain text in any field shows none", async () => {
   const sessions = ref([]);
   const adapter = fakeAdapter("");
   const run = fakeRun(sessions);
@@ -1122,16 +1124,109 @@ test("a slow read-only check gives up after 1.5 s and Settings says so", async (
   });
   await quick.start();
   await quick.setPopover(true);
+  // Nothing to hide, editable or not: no circle, and Settings says why.
+  for (const editable of [true, false]) {
+    adapter.selectionHandler({
+      text: "Cảm ơn anh, em gửi lại sau nhé",
+      bounds: null,
+      pointer: { x: 1, y: 1 },
+      editable,
+    });
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    assert.equal(quick.lastStatus.value, null);
+    assert.equal(quick.lastSkip.value, quickMessages.skipped.plain);
+  }
+  // A check that never answers in time: the circle appears rather than nothing.
   run.probe = () => new Promise(() => {});
   adapter.selectionHandler({
     text: phoneText,
     bounds: null,
     pointer: { x: 1, y: 1 },
-    editable: false,
+    editable: true,
   });
   await new Promise((resolve) => setTimeout(resolve, 1600));
+  assert.equal(quick.lastStatus.value.tone, "select");
+  assert.equal(quick.lastSkip.value, "");
+  quick.stop();
+});
+
+test("a selection cleared while its check runs gets no circle", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  const run = fakeRun(sessions);
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  await quick.setPopover(true);
+  let answer;
+  run.probe = () => new Promise((resolve) => (answer = resolve));
+  adapter.selectionHandler({
+    text: phoneText,
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: true,
+  });
+  adapter.clearedHandler();
+  answer({ count: 1, kinds: [] });
+  await new Promise((resolve) => setTimeout(resolve, 0));
   assert.equal(quick.lastStatus.value, null);
-  assert.equal(quick.lastSkip.value, quickMessages.skipped.slow);
+  quick.stop();
+});
+
+test("the circle's check is the click's own detection, models included, and the click reuses it", async () => {
+  const detector = {
+    calls: [],
+    prepare() {},
+    cancel() {},
+    destroy() {},
+    async detect(text, _progress, root, options) {
+      detector.calls.push({ text, root, options });
+      // A name only the pack's models find: the built-in rules would see nothing.
+      const start = text.indexOf("Phong Phan");
+      return start < 0
+        ? []
+        : [
+            {
+              start,
+              end: start + 10,
+              type: "TEN",
+              label: "Họ và tên",
+              source: "m",
+              reason: "m",
+              priority: 1,
+            },
+          ];
+    },
+  };
+  const { useMaskingRun } = await import("../src/composables/useMaskingRun.ts");
+  const { detectionOptions } = await import("../src/core/detection/options.ts");
+  const sessions = ref([]);
+  const run = useMaskingRun({
+    detector,
+    pack: { ready: ref(true), readyRoot: ref("/packs/vi") },
+    sessions,
+    onSession: (session) => (sessions.value = [session, ...sessions.value]),
+  });
+  const text = "Nhờ anh Phong Phan gọi lại";
+  const probed = await run.probe(text);
+  assert.equal(probed.count, 1);
+  assert.deepEqual(detector.calls[0], {
+    text,
+    root: "/packs/vi",
+    options: detectionOptions.map((option) => option.id),
+  });
+  const result = await run.maskText(text);
+  // One detection for the check and the click together.
+  assert.equal(detector.calls.length, 1);
+  assert.equal(result.session.analysis.findings[0].value, "Phong Phan");
+  // A different selection is detected afresh.
+  await run.maskText("Gọi Phong Phan");
+  assert.equal(detector.calls.length, 2);
 });
 
 test("the preview opens just below its circle, or above it at the bottom of the screen", async () => {
