@@ -112,6 +112,17 @@ jobs:
         with:
           ref: ${{ env.TAG }}
       - uses: jdx/mise-action@v2
+        env:
+          # mise installs pnpm from the aqua registry, which ships no macOS x64 binary
+          # for pnpm 11; that runner gets the same pinned version through npm below.
+          MISE_DISABLE_TOOLS: ${{ matrix.name == 'macos-x64' && 'pnpm' || '' }}
+      - name: Install pnpm through npm (macOS Intel only)
+        if: matrix.name == 'macos-x64'
+        env:
+          MISE_DISABLE_TOOLS: pnpm
+        run: |
+          mise exec -- npm install --global pnpm@$(node -p "require('./package.json').engines.pnpm")
+          mise exec -- pnpm --version
       - uses: swatinem/rust-cache@v2
         with:
           workspaces: src-tauri -> target
@@ -164,7 +175,11 @@ jobs:
             echo "No Apple certificate: signing ad hoc."
           fi
       - run: mise exec -- pnpm install --frozen-lockfile
+        env:
+          MISE_DISABLE_TOOLS: ${{ matrix.name == 'macos-x64' && 'pnpm' || '' }}
       - run: mise exec -- pnpm ${{ matrix.command }}
+        env:
+          MISE_DISABLE_TOOLS: ${{ matrix.name == 'macos-x64' && 'pnpm' || '' }}
       - name: Collect bundles
         shell: bash
         run: |
