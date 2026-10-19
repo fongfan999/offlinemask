@@ -187,8 +187,14 @@ async function toggleExpanded() {
  * for the circle, and the element under it is looked up in the page. */
 const tip = ref<{ text: string; x: number; y: number } | null>(null);
 let tipPoll: ReturnType<typeof setInterval> | undefined;
-function tipFor(target: Element | null) {
-  const button = target?.closest<HTMLElement>("[data-tip]");
+/** A hint shows after the pointer rests on a button, and stays through a brief slip
+ * off it, so passing over the icons never makes it flicker. */
+const tipDelayMs = 350;
+const tipGraceMs = 150;
+let hovering: HTMLElement | null = null;
+let hoverSince = 0;
+let leftAt = 0;
+function tipFor(button: HTMLElement | null) {
   const card = shape.value;
   if (!button || !card) return null;
   const box = button.getBoundingClientRect();
@@ -201,17 +207,49 @@ function tipFor(target: Element | null) {
     y: box.bottom - frame.top + 6,
   };
 }
+/** One step of the hint: `target` is the element under the pointer, or null. Only a
+ * change of button, the delay or the grace changes what is on screen. */
+function updateTip(target: Element | null, now = Date.now()) {
+  const button = copied.value ? null : (target?.closest<HTMLElement>("[data-tip]") ?? null);
+  if (button !== hovering) {
+    if (!button && hovering && now - leftAt < tipGraceMs) return;
+    if (!button && hovering && !leftAt) {
+      leftAt = now;
+      return;
+    }
+    hovering = button;
+    hoverSince = now;
+    leftAt = 0;
+    tip.value = null;
+    return;
+  }
+  leftAt = 0;
+  if (!button) return;
+  if (!tip.value && now - hoverSince >= tipDelayMs) tip.value = tipFor(button);
+  else if (tip.value && tip.value.text !== button.dataset.tip) tip.value = tipFor(button);
+}
 function startTips() {
   stopTips();
+  // The desktop window is in the background, so hover comes from the pointer position
+  // alone; the page's own mouse events are left to the browser preview.
   tipPoll = setInterval(async () => {
     const point = await panel.pointerInPage().catch(() => null);
-    tip.value = point ? tipFor(document.elementFromPoint(point.x, point.y)) : null;
-  }, 100);
+    updateTip(point ? document.elementFromPoint(point.x, point.y) : null);
+  }, 80);
 }
 function stopTips() {
   clearInterval(tipPoll);
   tipPoll = undefined;
+  hovering = null;
+  leftAt = 0;
   tip.value = null;
+}
+/** Browser preview only: there the page gets hover events and nothing polls. */
+function previewHover(target: EventTarget | null) {
+  if (panel.desktop) return;
+  tip.value = copied.value
+    ? null
+    : tipFor((target as Element | null)?.closest<HTMLElement>("[data-tip]") ?? null);
 }
 /** Codes from an earlier launch: a small card saying why nothing can be restored. */
 async function showNotice() {
@@ -246,7 +284,8 @@ async function present(next: PanelStatus) {
   if (next.copied && mode.value === "preview") {
     // Keep the preview's content; confirm on the icon, then let the card fade away.
     copied.value = true;
-    hideLater(1200);
+    tip.value = null;
+    hideLater(1600);
     return;
   }
   status.value = next;
@@ -484,8 +523,8 @@ onBeforeUnmount(() => {
       <header
         class="quick-preview-head"
         data-tauri-drag-region
-        @mouseover="tip = tipFor($event.target as Element)"
-        @mouseleave="tip = null"
+        @mouseover="previewHover($event.target)"
+        @mouseleave="previewHover(null)"
       >
         <span class="quick-toast-mark" aria-hidden="true" data-tauri-drag-region
           ><BrandMark :size="16" data-tauri-drag-region
