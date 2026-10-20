@@ -4,6 +4,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.0.1] — 2026-10-20
+
+Fixes the Windows app crashing on launch.
+
 ### Fixed
 
 - The Windows app no longer panics on launch. The native build passed Tauri its frontend folder as an absolute path, which Tauri reads as a URL on Windows (`D:` as the scheme), so resolving the quick-action panel's page failed; the 2.0.0 Windows installers are affected. Found by the new MSIX launch check ([0117](docs/decisions/0117-microsoft-store-msix.md)).
@@ -49,5 +53,6 @@ The first public release. The number starts at 2.0.0 by the owner's choice; ther
 - Builds are not yet signed or notarized ([release notes](docs/release/macos-arm64.md)).
 - Detection has documented misses and over-masking; review the result before sharing it ([evidence](docs/evaluations/recognition-production-v1/README.md)).
 
-[Unreleased]: https://github.com/fongfan999/offlinemask/compare/v2.0.0...HEAD
+[Unreleased]: https://github.com/fongfan999/offlinemask/compare/v2.0.1...HEAD
+[2.0.1]: https://github.com/fongfan999/offlinemask/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/fongfan999/offlinemask/releases/tag/v2.0.0
