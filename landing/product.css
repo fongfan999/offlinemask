@@ -211,7 +211,7 @@
   z-index: -1;
   overflow: hidden;
   background:
-    radial-gradient(70% 60% at 15% 20%, #5c78dd 0%, transparent 60%),
+    radial-gradient(60% 55% at 15% 15%, #4a68d2 0%, transparent 60%),
     radial-gradient(60% 70% at 85% 10%, var(--cobalt-deep) 0%, transparent 65%),
     radial-gradient(80% 70% at 60% 95%, #2a44a6 0%, transparent 70%), var(--cobalt);
 }
@@ -236,6 +236,7 @@
   left: -12%;
   top: -18%;
   background: var(--cobalt-light);
+  opacity: 0.42;
 }
 .om-wash i:nth-child(2) {
   right: -14%;
@@ -248,7 +249,7 @@
   left: 30%;
   bottom: -30%;
   background: #6f93f0;
-  opacity: 0.45;
+  opacity: 0.3;
   animation-duration: 38s;
   animation-delay: -14s;
 }
@@ -258,7 +259,7 @@
   width: 26vmax;
   height: 26vmax;
   background: #f7f5ee;
-  opacity: 0.16;
+  opacity: 0.08;
   animation-duration: 44s;
 }
 @keyframes om-drift {
@@ -306,7 +307,12 @@
   margin: 18px auto 0 !important;
   font-size: clamp(16px, 1.4vw, 19px);
   line-height: 1.6;
-  color: color-mix(in srgb, var(--on-cobalt) 86%, transparent);
+  color: var(--on-cobalt);
+}
+/* The nudge toward the video: the accent's light cobalt, so it reads as a pointer. */
+.om-hero-nudge {
+  color: #c2cfff;
+  font-weight: 500;
 }
 .om-window {
   position: relative;
@@ -490,9 +496,10 @@
   gap: 10px;
   margin-top: 26px;
   padding: 10px 20px 10px 12px;
-  border: 1px solid rgba(247, 245, 238, 0.45);
+  border: 1px solid rgba(247, 245, 238, 0.75);
   border-radius: 999px;
-  background: rgba(247, 245, 238, 0.1);
+  background: rgba(247, 245, 238, 0.16);
+  box-shadow: 0 10px 24px -14px rgba(11, 21, 74, 0.8);
   color: var(--on-cobalt);
   font: 600 15px var(--sans);
   cursor: pointer;
