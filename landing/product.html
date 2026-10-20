@@ -15,84 +15,139 @@
     <section class="om-hero om-wrap" aria-labelledby="om-title">
       <div class="om-hero-copy">
         <p class="om-eyebrow" data-om-enter>
-          <span class="om-dot"></span> THÔNG TIN RIÊNG. GIỮ Ở MÁY MÌNH.
+          <span class="om-dot"></span> CÔNG CỤ CHUẨN BỊ DỮ LIỆU CHO AI
         </p>
-        <h1 id="om-title" data-om-enter>Dùng AI.<br />Giữ <em>riêng tư.</em></h1>
-        <p class="om-lead" data-om-enter>Công việc cần AI.<br />Thông tin nhạy cảm thì không.</p>
+        <h1 id="om-title" data-om-enter>Dùng AI. <em>Giữ riêng tư.</em></h1>
+        <p class="om-lead" data-om-enter>Ẩn thông tin nhạy cảm trước khi gửi cho AI.</p>
         <p class="om-description" data-om-enter>
-          Ẩn tên, số tài khoản và những điều riêng tư trước khi chia sẻ. Khôi phục khi nhận kết quả.
-          Tất cả xử lý ngay trên máy bạn.
+          Đổi tên, số tài khoản và thông tin riêng thành mã thay thế. Bạn kiểm tra, gửi bản đã ẩn
+          cho AI, rồi đưa kết quả về để khôi phục. Ngay trên máy của bạn.
         </p>
         <div class="om-actions" data-om-enter>
           <a class="om-button" href="#om-download"
             >Tải OfflineMask <span aria-hidden="true">↗</span></a
-          ><a class="om-text-link" href="#om-how"
-            >Xem cách hoạt động <span aria-hidden="true">↓</span></a
+          ><a class="om-text-link" href="#om-demo"
+            >Thử quy trình bên dưới <span aria-hidden="true">↓</span></a
           >
         </div>
-        <p class="om-hero-note" data-om-enter>Không tài khoản. Không gửi dữ liệu lên máy chủ.</p>
+        <p class="om-hero-note" data-om-enter>
+          Không cần tài khoản · Không máy chủ xử lý · Bạn luôn kiểm tra trước khi chia sẻ
+        </p>
       </div>
-      <div class="om-demo-scene" data-om-enter>
-        <div class="om-demo-label">
-          <span>THỬ MỘT CHÚT NHÉ</span><span aria-hidden="true">↙</span>
+      <div class="om-demo-scene" id="om-demo" data-om-enter>
+        <div class="om-demo-topline">
+          <span class="om-eyebrow">TỪ NỘI DUNG GỐC ĐẾN KẾT QUẢ HOÀN CHỈNH</span
+          ><button type="button" class="om-play" data-om-play hidden>▷ Xem trọn quy trình</button>
         </div>
-        <div class="om-demo">
+        <div class="om-demo" data-om-stage="masked">
           <div class="om-window-bar">
             <span class="om-window-dots" aria-hidden="true">● ● ●</span><span>OfflineMask</span
-            ><span class="om-local"><span class="om-dot"></span> Trên máy bạn</span>
+            ><span class="om-local"><span class="om-dot"></span> Xử lý trên thiết bị</span>
           </div>
-          <div class="om-demo-body">
-            <div class="om-document-heading">
-              <span class="om-file-icon" aria-hidden="true">T<span>↗</span></span>
-              <div><strong>Nội dung gửi AI</strong><span>Văn bản · Ví dụ minh họa</span></div>
-              <span class="om-document-number">01</span>
-            </div>
-            <div class="om-document" data-om-document>
-              <p>Tóm tắt giao dịch sau:</p>
-              <p>
-                Khách hàng
-                <span class="om-value" data-original="Nguyễn Minh An" data-alias="[HỌ_TÊN_1]"
-                  >[HỌ_TÊN_1]</span
-                >
-                chuyển <strong>12.500.000 đồng</strong> từ tài khoản
-                <span class="om-value" data-original="012345678901" data-alias="[TÀI_KHOẢN_1]"
-                  >[TÀI_KHOẢN_1]</span
-                >.
-              </p>
-              <p>
-                Liên hệ:
-                <span class="om-value" data-original="an@example.com" data-alias="[EMAIL_1]"
-                  >[EMAIL_1]</span
-                >
-              </p>
-              <div class="om-document-rule"></div>
-              <p class="om-document-footnote">Nội dung vẫn rõ. Thông tin riêng đã ẩn.</p>
-            </div>
-            <div class="om-demo-status">
-              <span class="om-dot"></span
-              ><span data-om-status role="status" aria-live="polite"
-                >Đã ẩn 3 thông tin trong ví dụ.</span
+          <div class="om-app-layout">
+            <aside class="om-app-sidebar" aria-label="Minh họa thanh bên ứng dụng">
+              <span class="om-mark" aria-hidden="true"></span
+              ><span class="om-sidebar-label">NỘI DUNG</span>
+              <span class="om-sidebar-active">Tt <b>Văn bản</b></span
+              ><span>▦ Bảng tính</span><span>▤ Tài liệu</span>
+              <span class="om-sidebar-bottom">Ví dụ tương tác<br />Dữ liệu giả lập</span>
+            </aside>
+            <div class="om-demo-body">
+              <div
+                class="om-demo-controls"
+                role="group"
+                aria-label="Các bước trong ví dụ"
+                hidden
+                data-om-controls
               >
-            </div>
-            <div
-              class="om-demo-controls"
-              role="group"
-              aria-label="Trạng thái ví dụ"
-              hidden
-              data-om-controls
-            >
-              <button type="button" data-om-mode="original" aria-pressed="false">Bản gốc</button
-              ><button type="button" data-om-mode="masked" aria-pressed="true">Ẩn thông tin</button
-              ><button type="button" data-om-mode="restored" aria-pressed="false">
-                Khôi phục <span aria-hidden="true">↶</span>
-              </button>
+                <button type="button" data-om-mode="original" aria-pressed="false">
+                  <span>01</span> Bản gốc
+                </button>
+                <button type="button" data-om-mode="masked" aria-pressed="true">
+                  <span>02</span> Ẩn & kiểm tra
+                </button>
+                <button type="button" data-om-mode="reply" aria-pressed="false">
+                  <span>03</span> AI trả lời
+                </button>
+                <button type="button" data-om-mode="restored" aria-pressed="false">
+                  <span>04</span> Khôi phục
+                </button>
+              </div>
+              <div class="om-demo-heading">
+                <div>
+                  <p class="om-eyebrow" data-om-kicker>BƯỚC 02 / CHUẨN BỊ BẢN CHIA SẺ</p>
+                  <h2 data-om-demo-title>Ẩn thông tin. Giữ ngữ cảnh.</h2>
+                </div>
+                <span class="om-example-badge">MINH HỌA</span>
+              </div>
+              <div class="om-document-pair">
+                <div class="om-source-sheet">
+                  <div class="om-sheet-label">
+                    <span>Bản gốc</span><span>Chỉ trên máy bạn</span>
+                  </div>
+                  <p>Tóm tắt giao dịch sau:</p>
+                  <p>
+                    Khách hàng <mark>Nguyễn Minh An</mark> chuyển
+                    <strong>12.500.000 đồng</strong> từ tài khoản <mark>012345678901</mark>.
+                  </p>
+                  <p>Liên hệ: <mark>an@example.com</mark></p>
+                  <div class="om-sheet-bottom">
+                    <span aria-hidden="true">↳</span> Thông tin riêng cần được kiểm tra.
+                  </div>
+                </div>
+                <div class="om-output-sheet">
+                  <div class="om-sheet-label">
+                    <span data-om-output-label>Bản đã ẩn</span
+                    ><span data-om-output-tag>Bạn tự gửi cho AI</span>
+                  </div>
+                  <div class="om-document" data-om-document>
+                    <p data-om-prompt>Tóm tắt giao dịch sau:</p>
+                    <p>
+                      <span data-om-prefix>Khách hàng </span
+                      ><span
+                        class="om-value"
+                        data-original="Nguyễn Minh An"
+                        data-alias="[TEN_1_3030]"
+                        >[TEN_1_3030]</span
+                      ><span data-om-verb> chuyển </span><strong>12.500.000 đồng</strong
+                      ><span data-om-account-prefix> từ tài khoản </span
+                      ><span class="om-value" data-original="012345678901" data-alias="[STK_1_3030]"
+                        >[STK_1_3030]</span
+                      >.
+                    </p>
+                    <p>
+                      <span data-om-contact-prefix>Liên hệ: </span
+                      ><span
+                        class="om-value"
+                        data-original="an@example.com"
+                        data-alias="[EMAIL_1_3030]"
+                        >[EMAIL_1_3030]</span
+                      >
+                    </p>
+                  </div>
+                  <div class="om-sheet-bottom" data-om-detail>
+                    Số tiền vẫn giữ nguyên. Ba thông tin riêng được thay bằng mã.
+                  </div>
+                </div>
+              </div>
+              <div class="om-demo-bottom">
+                <div class="om-demo-status">
+                  <span class="om-dot"></span
+                  ><span data-om-status role="status" aria-live="polite"
+                    >Kiểm tra bản đã ẩn trước khi sao chép sang AI.</span
+                  >
+                </div>
+                <button type="button" class="om-demo-next" data-om-next hidden>
+                  Tiếp: AI trả lời →
+                </button>
+              </div>
             </div>
           </div>
         </div>
-        <div class="om-demo-sticker">
-          <span aria-hidden="true">↳</span> Chỉ bản đã ẩn mới được bạn chia sẻ.
-        </div>
-        <p class="om-demo-caption">Dữ liệu giả lập · Bạn luôn kiểm tra trước khi gửi.</p>
+        <p class="om-demo-caption">
+          Mô phỏng quy trình trong ứng dụng · Phản hồi AI được viết sẵn · Không gửi dữ liệu hay gọi
+          AI.
+        </p>
       </div>
     </section>
     <div class="om-principles om-wrap">
@@ -113,7 +168,7 @@
         <article data-om-reveal>
           <span class="om-step-index">01 — ẨN</span>
           <div class="om-step-visual" aria-hidden="true">
-            <span>Nguyễn Minh An</span><span>↓</span><code>[HỌ_TÊN_1]</code>
+            <span>Nguyễn Minh An</span><span>↓</span><code>[TEN_1_3030]</code>
           </div>
           <h3>Đưa vào. Chọn ẩn.</h3>
           <p>
@@ -135,7 +190,7 @@
         <article data-om-reveal>
           <span class="om-step-index">03 — KHÔI PHỤC</span>
           <div class="om-step-visual" aria-hidden="true">
-            <code>[HỌ_TÊN_1]</code><span>↓</span><span>Nguyễn Minh An <b>↶</b></span>
+            <code>[TEN_1_3030]</code><span>↓</span><span>Nguyễn Minh An <b>↶</b></span>
           </div>
           <h3>Nhận lại bản đầy đủ.</h3>
           <p>

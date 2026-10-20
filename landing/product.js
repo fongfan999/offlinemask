@@ -1,84 +1,163 @@
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { demoStates, demoSteps } from "./demo.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
-/** Mount on one page root; call the returned disposer before replacing that root. */
+/** Mount on one page root; dispose before replacing that root (including Astro navigation). */
 export function initOfflineMask(root) {
   if (!root) return () => {};
   const media = gsap.matchMedia();
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const controls = root.querySelector("[data-om-controls]");
+  const play = root.querySelector("[data-om-play]");
+  const next = root.querySelector("[data-om-next]");
+  const demo = root.querySelector("[data-om-stage]");
+  const output = root.querySelector(".om-output-sheet");
   const values = [...root.querySelectorAll("[data-original]")];
-  const status = root.querySelector("[data-om-status]");
+  const fields = {
+    kicker: "kicker",
+    title: "demo-title",
+    label: "output-label",
+    tag: "output-tag",
+    prompt: "prompt",
+    prefix: "prefix",
+    verb: "verb",
+    accountPrefix: "account-prefix",
+    contactPrefix: "contact-prefix",
+    detail: "detail",
+    status: "status",
+    next: "next",
+  };
   let mode = "masked";
   let feedback;
-  controls.hidden = false;
+  let playback;
+  controls.hidden = play.hidden = next.hidden = false;
 
-  const changeMode = (event) => {
-    const button = event.target.closest("[data-om-mode]");
-    if (!button || !controls.contains(button) || button.dataset.omMode === mode) return;
-    mode = button.dataset.omMode;
+  function stop() {
+    playback?.kill();
+    playback = undefined;
+    play.textContent = "▷ Xem trọn quy trình";
+    play.setAttribute("aria-label", "Xem trọn quy trình minh họa");
+  }
+  function showMode(destination, animate = true) {
+    if (!demoStates[destination]) return;
     feedback?.revert();
-    for (const value of values) {
-      value.textContent = mode === "masked" ? value.dataset.alias : value.dataset.original;
-      value.classList.toggle("om-original", mode !== "masked");
+    mode = destination;
+    const state = demoStates[mode];
+    demo.dataset.omStage = mode;
+    for (const [field, attribute] of Object.entries(fields)) {
+      root.querySelector(`[data-om-${attribute}]`).textContent = state[field];
     }
-    controls.querySelectorAll("button").forEach((item) => {
-      item.setAttribute("aria-pressed", String(item === button));
-    });
-    root.querySelector(".om-document-footnote").textContent =
-      mode === "masked"
-        ? "Nội dung vẫn rõ. Thông tin riêng đã ẩn."
-        : "Ví dụ giả lập. Thông tin gốc đang hiển thị.";
-    status.textContent = {
-      original: "Bản gốc minh họa · 3 thông tin cần xem xét.",
-      masked: "Đã ẩn 3 thông tin trong ví dụ.",
-      restored: "Đã khôi phục 3 thông tin từ mã thay thế.",
-    }[mode];
-    if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    for (const value of values) {
+      value.textContent = state.aliases ? value.dataset.alias : value.dataset.original;
+      value.classList.toggle("om-original", !state.aliases);
+    }
+    controls
+      .querySelectorAll("button")
+      .forEach((button) =>
+        button.setAttribute("aria-pressed", String(button.dataset.omMode === mode)),
+      );
+    if (animate && !reduceMotion.matches) {
       feedback = gsap.context(() => {
         gsap.fromTo(
+          output,
+          { y: 9 },
+          { y: 0, duration: 0.45, ease: "power3.out", clearProps: "transform" },
+        );
+        gsap.fromTo(
           values,
-          { y: 4 },
-          { y: 0, duration: 0.3, stagger: 0.06, clearProps: "transform" },
+          { backgroundColor: "transparent" },
+          {
+            backgroundColor: state.aliases ? "var(--accent-soft)" : "var(--paper-sunk)",
+            duration: 0.65,
+            stagger: 0.1,
+            clearProps: "backgroundColor",
+          },
         );
       }, root);
     }
-  };
-  controls.addEventListener("click", changeMode);
+  }
+  function select(event) {
+    const button = event.target.closest("[data-om-mode]");
+    if (!button || !controls.contains(button)) return;
+    stop();
+    showMode(button.dataset.omMode);
+  }
+  function advance() {
+    stop();
+    showMode(demoSteps[(demoSteps.indexOf(mode) + 1) % demoSteps.length]);
+  }
+  function togglePlayback() {
+    if (playback) {
+      stop();
+      return;
+    }
+    showMode("original");
+    play.textContent = "Ⅱ Dừng minh họa";
+    play.setAttribute("aria-label", "Dừng quy trình minh họa");
+    // One finite, user-started sequence. Each stage can also be selected directly.
+    playback = gsap.timeline({ onComplete: stop });
+    playback
+      .call(() => showMode("masked"), [], 3.5)
+      .call(() => showMode("reply"), [], 7)
+      .call(() => showMode("restored"), [], 10.5)
+      .call(() => {}, [], 14);
+  }
+  function stopOnHidden() {
+    if (document.hidden) stop();
+  }
+  function stopForPreference() {
+    stop();
+    feedback?.revert();
+  }
+  controls.addEventListener("click", select);
+  play.addEventListener("click", togglePlayback);
+  next.addEventListener("click", advance);
+  document.addEventListener("visibilitychange", stopOnHidden);
+  reduceMotion.addEventListener("change", stopForPreference);
+  showMode("masked", false);
+
   media.add(
     "(prefers-reduced-motion: no-preference)",
     () => {
-      gsap.from(root.querySelectorAll("[data-om-enter]"), {
-        y: 25,
+      gsap.from(root.querySelectorAll(".om-hero-copy [data-om-enter]"), {
+        y: 22,
         duration: 0.85,
-        stagger: 0.07,
+        stagger: 0.08,
         ease: "power3.out",
         clearProps: "transform",
       });
-      root.querySelectorAll("[data-om-reveal]").forEach((element) => {
+      gsap.from(demo, {
+        y: 45,
+        rotateX: 3,
+        transformPerspective: 1200,
+        duration: 1,
+        ease: "power3.out",
+        clearProps: "transform",
+        scrollTrigger: { trigger: demo, start: "top 95%", once: true },
+      });
+      root.querySelectorAll("[data-om-reveal]").forEach((element) =>
         gsap.from(element, {
-          y: 30,
-          duration: 0.75,
+          y: 24,
+          duration: 0.7,
           ease: "power2.out",
           clearProps: "transform",
           scrollTrigger: { trigger: element, start: "top 92%", once: true },
-        });
-      });
-      gsap.from(".om-demo-sticker", { rotation: 0, x: 15, duration: 1, ease: "power3.out" });
+        }),
+      );
     },
     root,
   );
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const stopFeedback = () => {
-    if (reduceMotion.matches) feedback?.revert();
-  };
-  reduceMotion.addEventListener("change", stopFeedback);
   return () => {
-    media.revert();
+    stop();
     feedback?.revert();
-    controls.removeEventListener("click", changeMode);
-    reduceMotion.removeEventListener("change", stopFeedback);
-    controls.hidden = true;
+    media.revert();
+    controls.removeEventListener("click", select);
+    play.removeEventListener("click", togglePlayback);
+    next.removeEventListener("click", advance);
+    document.removeEventListener("visibilitychange", stopOnHidden);
+    reduceMotion.removeEventListener("change", stopForPreference);
+    controls.hidden = play.hidden = next.hidden = true;
   };
 }
