@@ -11,7 +11,7 @@ name = "offlinemask"
 version.workspace = true
 description = "Offline desktop workspace for reviewing sensitive data"
 edition = "2021"
-default-run = "offlinemask"
+default-run = "OfflineMask"
 
 [features]
 recognition-evaluation = []
@@ -21,6 +21,11 @@ recognition-native-release = ["recognition-native-sidecar"]
 native-inference-prototype = ["dep:ort"]
 minilm-desktop-prototype = ["dep:minilm-tokenizer"]
 minilm-native-desktop-prototype = ["minilm-desktop-prototype", "dep:ort"]
+
+# The app binary carries the product name: an unbundled `tauri dev` run shows it in the Dock.
+[[bin]]
+name = "OfflineMask"
+path = "src/main.rs"
 
 [[bin]]
 name = "offlinemask-native-prototype"
