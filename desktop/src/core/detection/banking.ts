@@ -12,7 +12,7 @@ const rules: readonly Rule[] = [
     type: "STK",
     label: "Số tài khoản",
     pattern:
-      /(?<![\p{L}\p{N}_])(?:số tài khoản|tài khoản|stk|account(?: number)?)\s*[:：#-]?\s*(\d(?:[ -]?\d){5,19})(?![\p{L}\p{N}_]|[ -]?\d)/giu,
+      /(?<![\p{L}\p{N}_])(?:số tài khoản|tài khoản|stk|account(?: number)?)(?:\s+số)?\s*[:：#-]?\s*(\d(?:[ -]?\d){5,19})(?![\p{L}\p{N}_]|[ -]?\d)/giu,
     reason: "Dãy số sau nhãn tài khoản; cần kiểm tra lại theo ngữ cảnh.",
   },
   {

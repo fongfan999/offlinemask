@@ -171,3 +171,23 @@ test("payment fields stay other; account table works without a pack and does not
     /Models required/,
   );
 });
+
+test("account labels followed by “số” still mask the account number", async () => {
+  const { detectBankingIdentifiers } = await import("../src/core/detection/banking.ts");
+  for (const [text, value] of [
+    ["thanh toán vào tài khoản số 0071000123456 tại Vietcombank.", "0071000123456"],
+    ["Tài khoản số: 0071000123456", "0071000123456"],
+    ["STK số 0071000123456", "0071000123456"],
+  ]) {
+    assert.deepEqual(structured(text), [["STK", value]], text);
+    assert.deepEqual(
+      detectBankingIdentifiers(text).map((d) => [d.type, text.slice(d.start, d.end)]),
+      [["STK", value]],
+      text,
+    );
+  }
+  for (const text of ["Có 3 tài khoản số dư âm", "Tài khoản số 2 đã khóa"]) {
+    assert.deepEqual(structured(text), [], text);
+    assert.deepEqual(detectBankingIdentifiers(text), [], text);
+  }
+});

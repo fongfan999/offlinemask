@@ -29,7 +29,7 @@ const specifications = [
     label: "Số tài khoản",
     type: "STK",
     pattern:
-      "(?:so tai khoan|tai khoan|stk)(?: nguoi nhan| thu huong| nguoi gui| nhan)?|account number",
+      "(?:so tai khoan|tai khoan|stk)(?: nguoi nhan| thu huong| nguoi gui| nhan)?(?: so)?|account number",
     kind: "account",
   },
   {
