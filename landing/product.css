@@ -485,11 +485,6 @@
   top: 34%;
   transform: rotate(2deg);
 }
-.om-hero-caption {
-  margin-top: 22px !important;
-  color: var(--muted);
-  font-size: 13px;
-}
 
 /* Intro video: a quiet button in the hero and a native modal; nothing loads until opened. */
 .om-video-open {
