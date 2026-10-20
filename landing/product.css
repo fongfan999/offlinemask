@@ -604,6 +604,18 @@
 .om-why {
   padding-top: 170px;
 }
+/* The heading's rhyme pair (AI / lại) carries the swash instead of the whole second line. */
+.om-rhyme em {
+  background: none;
+}
+.om-rhyme-word {
+  padding-bottom: 0.08em;
+  background: var(--swash) left bottom / 100% 0.16em no-repeat;
+}
+/* The sans line has no descenders, so its swash sits higher to stay with the word. */
+.om-rhyme > .om-rhyme-word {
+  background-position: left 0 bottom 0.12em;
+}
 .om-composer {
   max-width: 880px;
   margin: 56px auto 0;
