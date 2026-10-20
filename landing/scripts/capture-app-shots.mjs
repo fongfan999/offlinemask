@@ -2,6 +2,12 @@
 // protocol. With the desktop web dev server on :1420, run
 // `node landing/scripts/capture-app-shots.mjs <dir> [light|dark]`, then convert the PNGs into
 // landing/shots/ with `magick <name>.png -resize 2048x -quality 82 <name>.webp`.
+//
+// The published text-*.webp shots come from the desktop app with the Vietnamese recognition pack,
+// so the name is masked too: size the window to 1280x788, run the same letter with a "Họ và tên"
+// line, capture the window below its title bar and crop with
+// `magick <frame>.png -crop 2528x1500+16+0 +repage -resize '2048x1216!' -quality 82 <name>.webp`.
+// The text flow below is the web-build fallback without a name.
 import { spawn } from "node:child_process";
 import { writeFileSync, mkdirSync } from "node:fs";
 
