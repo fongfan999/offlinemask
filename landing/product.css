@@ -604,162 +604,6 @@
   text-align: center;
 }
 
-/* Why: one message to AI per role; its private details turn into codes before it is sent. */
-.om-why {
-  padding-top: 170px;
-}
-/* The product name inside a sentence, set as the wordmark (brand/README.md, Logo rules). */
-.om-name {
-  color: var(--ink);
-  font-family: var(--sans);
-  font-weight: 750;
-  letter-spacing: -0.04em;
-  white-space: nowrap;
-}
-.om-name span {
-  color: var(--accent);
-}
-.om-composer {
-  max-width: 880px;
-  margin: 56px auto 0;
-}
-.om-roles {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 18px;
-}
-.om-role {
-  position: relative;
-  overflow: hidden;
-  padding: 9px 18px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--paper-raised);
-  color: var(--muted);
-  font: 500 15px var(--sans);
-  cursor: pointer;
-  transition:
-    background 0.3s,
-    color 0.3s,
-    border-color 0.3s;
-}
-.om-role:hover {
-  border-color: var(--line-strong);
-  color: var(--ink);
-}
-.om-role[aria-selected="true"] {
-  border-color: var(--ink);
-  background: var(--ink);
-  color: var(--paper);
-}
-.om-role-bar {
-  position: absolute;
-  inset: auto 0 0;
-  height: 2px;
-  background: #b3c3ff;
-  transform: scaleX(0);
-  transform-origin: left;
-}
-.om-composer-box {
-  padding: 24px 30px 18px;
-  border: 1px solid var(--line);
-  border-radius: 24px;
-  background: var(--paper-raised);
-  box-shadow: 0 30px 60px -36px #0b154a59;
-}
-.om-composer-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 14px;
-}
-.om-composer-label svg {
-  width: 16px;
-  height: 16px;
-  color: var(--accent);
-}
-.om-asks {
-  display: grid;
-  gap: 18px;
-  margin-top: 12px;
-}
-.om-ask {
-  font-size: clamp(19px, 2vw, 23px);
-  line-height: 1.8;
-}
-/* Once the script runs, the asks share one cell so switching roles never shifts the layout. */
-.om-composer.om-ready .om-ask {
-  grid-area: 1 / 1;
-}
-.om-composer.om-ready .om-ask:not(.om-current) {
-  visibility: hidden;
-}
-.om-pv {
-  padding: 0.08em 0.3em;
-  border-radius: 5px;
-  background: color-mix(in srgb, var(--warm) 18%, transparent);
-  box-shadow: inset 0 -2px 0 var(--warm);
-  white-space: nowrap;
-  transition:
-    background 0.4s,
-    box-shadow 0.4s,
-    color 0.4s;
-}
-.om-pv.om-coded {
-  background: var(--accent-soft);
-  box-shadow: none;
-  color: var(--accent);
-  font-family: var(--code);
-  font-size: 0.82em;
-}
-.om-composer-foot {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 20px;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-}
-.om-composer-status {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 14px;
-  transition: color 0.4s;
-}
-.om-composer-status svg {
-  flex: none;
-  width: 18px;
-  height: 20px;
-}
-.om-composer-status.om-safe {
-  color: var(--accent);
-  font-weight: 600;
-}
-.om-send {
-  display: grid;
-  flex: none;
-  place-items: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--line);
-  color: var(--paper-raised);
-  transition: background 0.4s;
-}
-.om-send svg {
-  width: 20px;
-  height: 20px;
-}
-.om-send.om-on {
-  background: var(--accent);
-}
-
 /* How it works (Dia-style): a compact list where only the active step opens, beside one large
    illustration built in HTML. On wide screens the section scrolls through the steps while the
    stage stays pinned; on phones, and without the script, each step is followed by its card. */
@@ -800,6 +644,49 @@
   line-height: 1.6;
 }
 
+/* The product name inside a sentence, set as the wordmark (brand/README.md, Logo rules). */
+.om-name {
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+.om-name span {
+  color: var(--accent);
+}
+/* Example roles above the steps: switching one changes all three illustrations. */
+.om-roles {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  gap: 8px;
+  margin-bottom: 32px;
+}
+.om-role {
+  position: relative;
+  overflow: hidden;
+  padding: 9px 18px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: var(--muted);
+  font: 500 15px var(--sans);
+  cursor: pointer;
+  transition:
+    background 0.3s,
+    color 0.3s,
+    border-color 0.3s;
+}
+.om-role:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+.om-role[aria-selected="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
 /* Illustration scenes */
 .om-scene {
   overflow: hidden;
@@ -924,6 +811,10 @@
   white-space: nowrap;
 }
 .om-scene-quote {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
   padding: 12px 14px;
   border-radius: 12px;
   background: var(--paper-sunk);
@@ -1002,7 +893,8 @@
     position: sticky;
     top: 0;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
     height: 100vh;
   }
   .om-js .om-how-steps {
@@ -1691,7 +1583,6 @@
   .om-float-b {
     right: -6px;
   }
-  .om-why,
   .om-story,
   .om-features {
     padding-top: 110px;
@@ -1757,16 +1648,6 @@
     flex: none;
     padding: 8px 14px;
     font-size: 14px;
-  }
-  .om-composer-box {
-    padding: 18px 18px 14px;
-    border-radius: 20px;
-  }
-  .om-ask {
-    font-size: 17px;
-  }
-  .om-pv {
-    white-space: normal;
   }
   .om-view-toggle button {
     padding: 2px 9px;
