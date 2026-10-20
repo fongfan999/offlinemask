@@ -889,13 +889,11 @@
   .om-js .om-how {
     height: 280vh;
   }
+  /* The stage is as tall as its content and sticks centred on screen (never under the nav), so
+     it starts right below the section heading. */
   .om-js .om-how-stage {
     position: sticky;
-    top: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    height: 100vh;
+    top: max(96px, calc(50vh - 260px));
   }
   .om-js .om-how-steps {
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);

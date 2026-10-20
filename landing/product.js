@@ -114,6 +114,9 @@ function setupHow(root, motion) {
   const how = root.querySelector("[data-om-how]");
   const steps = [...how.querySelectorAll("[data-om-step]")];
   const heads = steps.map((step) => step.querySelector("[data-om-step-head]"));
+  const stage = how.querySelector(".om-how-stage");
+  // Mirrors the stage's CSS `top: max(96px, calc(50vh - 260px))`.
+  const stickyTop = () => Math.max(96, window.innerHeight / 2 - 260);
   let current = -1;
   let play;
 
@@ -161,8 +164,9 @@ function setupHow(root, motion) {
   }
   const scroller = ScrollTrigger.create({
     trigger: how,
-    start: "top top",
-    end: "bottom bottom",
+    // The pin runs from when the stage reaches its sticky offset until the section's end.
+    start: () => `top ${stickyTop()}px`,
+    end: () => `bottom ${stickyTop() + stage.offsetHeight}px`,
     onUpdate: (self) =>
       activate(Math.min(steps.length - 1, Math.floor(self.progress * steps.length))),
   });
