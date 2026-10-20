@@ -226,7 +226,7 @@ export function initOfflineMask(root) {
     if (disposed || !link) return;
     for (const download of downloads) {
       download.link.href = link.href;
-      download.label.textContent = downloadLabels[platform];
+      download.label.textContent = link.dataset.omLabel ?? downloadLabels[platform];
     }
     detail.textContent = `${link.textContent} · Máy khác? Xem tất cả bản tải về`;
   });

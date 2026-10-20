@@ -7,6 +7,19 @@ const fragment = new URL("./product.html", import.meta.url);
 const { version } = JSON.parse(
   readFileSync(new URL("../desktop/package.json", import.meta.url), "utf8"),
 );
+// Once the Microsoft Store listing is live, its ID switches the Windows download from the
+// GitHub installers to the Store (decision 0117). Each variant sits between
+// <!-- windows-direct --> or <!-- windows-store --> markers in product.html.
+const { storeId } = JSON.parse(
+  readFileSync(new URL("../desktop/store/microsoft-store.json", import.meta.url), "utf8"),
+);
+const dropped = storeId ? "windows-direct" : "windows-store";
+const productPage = () =>
+  readFileSync(fragment, "utf8")
+    .replace(new RegExp(`\\s*<!-- ${dropped} -->[\\s\\S]*?<!-- /${dropped} -->`, "g"), "")
+    .replace(/\s*<!-- \/?windows-(direct|store) -->/g, "")
+    .replaceAll("__OM_VERSION__", version)
+    .replaceAll("__OM_STORE_ID__", storeId);
 export default defineConfig({
   root: fileURLToPath(new URL(".", import.meta.url)),
   base: "./",
@@ -16,11 +29,7 @@ export default defineConfig({
       name: "offlinemask-product-page",
       transformIndexHtml: {
         order: "pre",
-        handler: (html) =>
-          html.replace(
-            "<!-- product-page -->",
-            readFileSync(fragment, "utf8").replaceAll("__OM_VERSION__", version),
-          ),
+        handler: (html) => html.replace("<!-- product-page -->", productPage()),
       },
       generateBundle() {
         this.emitFile({

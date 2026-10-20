@@ -8,7 +8,8 @@
 # Per platform:
 #   macOS arm64   native recognition helper (decision 0049), the verified path.
 #   macOS Intel   WASM recognition: no native runtime is qualified for x86_64.
-#   Windows x64   native recognition helper (decision 0077), verified and smoke-tested.
+#   Windows x64   native recognition helper (decision 0077), verified and smoke-tested;
+#                 also an MSIX for the Microsoft Store, kept as a run artifact (0117).
 #   Linux x64     WASM recognition; deb and rpm (no AppImage, decision 0104). Untested.
 #
 # Without Apple secrets the macOS apps are signed ad hoc, so Apple Silicon does not
@@ -192,6 +193,58 @@ jobs:
       - run: mise exec -- pnpm -C desktop ${{ matrix.command }}
         env:
           MISE_DISABLE_TOOLS: ${{ matrix.name == 'macos-x64' && 'pnpm' || '' }}
+      # Microsoft Store package (decision 0117). The unsigned .msix is what Partner Center
+      # takes; it is kept as a run artifact, not attached to the GitHub release, because
+      # Windows will not install an unsigned MSIX. A test-signed copy is installed and
+      # started here, and kept with its .cer for a manual test on a real PC.
+      - name: MSIX package (Windows)
+        if: matrix.name == 'windows-x64'
+        run: mise exec -- node desktop/scripts/build-msix.mjs --test-sign
+      - name: Install and start the test-signed MSIX (Windows)
+        if: matrix.name == 'windows-x64'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $signed = Get-ChildItem desktop/artifacts/msix/*_test-signed.msix | Select-Object -First 1
+          $cer = Get-ChildItem desktop/artifacts/msix/*_test-signed.cer | Select-Object -First 1
+          Import-Certificate -FilePath $cer.FullName -CertStoreLocation Cert:\LocalMachine\TrustedPeople | Out-Null
+          Add-AppxPackage -Path $signed.FullName
+          $package = Get-AppxPackage | Where-Object { $_.Name -like 'OfflineMask*' } | Select-Object -First 1
+          if (-not $package) { throw 'The MSIX did not install' }
+          "Installed $($package.PackageFullName) at $($package.InstallLocation)"
+          # The bundled helper must load its runtime from the read-only package folder.
+          mise exec -- node desktop/scripts/smoke-native-helper.mjs (Join-Path $package.InstallLocation 'native')
+          Start-Process "shell:AppsFolder\$($package.PackageFamilyName)!OfflineMask"
+          Start-Sleep -Seconds 20
+          $running = Get-Process -Name OfflineMask -ErrorAction SilentlyContinue
+          if (-not $running) { throw 'OfflineMask was not running 20 s after launch from the package' }
+          "OfflineMask is running (pid $($running.Id -join ', '))"
+          $running | Stop-Process -Force
+          Remove-AppxPackage -Package $package.PackageFullName
+      - name: Windows App Certification Kit (Windows, report only)
+        if: matrix.name == 'windows-x64'
+        shell: pwsh
+        run: |
+          $appcert = 'C:\Program Files (x86)\Windows Kits\10\App Certification Kit\appcert.exe'
+          if (-not (Test-Path $appcert)) { "::warning::appcert.exe is not on this runner; run WACK on a Windows PC before submitting."; exit 0 }
+          $signed = Get-ChildItem desktop/artifacts/msix/*_test-signed.msix | Select-Object -First 1
+          $report = Join-Path (Resolve-Path desktop/artifacts/msix) 'wack-report.xml'
+          & $appcert reset
+          & $appcert test -appxpackagepath $signed.FullName -reportoutputpath $report
+          if (Test-Path $report) {
+            [xml]$xml = Get-Content $report
+            "Overall: $($xml.REPORT.OVERALL_RESULT)"
+            $xml.SelectNodes('//TEST[RESULT="FAIL"]') | ForEach-Object { "::warning::WACK failed: $($_.NAME)" }
+          } else { "::warning::WACK wrote no report" }
+      - uses: actions/upload-artifact@v4
+        if: matrix.name == 'windows-x64'
+        with:
+          name: msix-windows-x64
+          path: |
+            desktop/artifacts/msix/*.msix
+            desktop/artifacts/msix/*.cer
+            desktop/artifacts/msix/wack-report.xml
+          if-no-files-found: error
       - name: Collect bundles
         shell: bash
         run: |
@@ -223,6 +276,8 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           path: bundles
+          # Release bundles only; the MSIX artifact goes to Partner Center, not here.
+          pattern: offlinemask-*
       - name: Checksums and release notes
         shell: bash
         env:
