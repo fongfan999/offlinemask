@@ -566,7 +566,7 @@
 .om-page {
   --swash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'%3E%3Cpath d='M3 9c28-6 58-7 92-5s68 4 102-3' fill='none' stroke='%233453b6' stroke-width='4' stroke-linecap='round' opacity='.5'/%3E%3C/svg%3E");
 }
-:is(.om-tagline, .om-display, .om-why-answer, .om-proofs-title) em {
+:is(.om-tagline, .om-display, .om-proofs-title) em {
   padding-bottom: 0.08em;
   color: var(--accent);
   font-family: var(--serif);
@@ -600,32 +600,87 @@
   text-align: center;
 }
 
-/* Why: everyday prompts whose identifying values turn into codes */
+/* Why: one message to AI per role; its private details turn into codes before it is sent. */
 .om-why {
   padding-top: 170px;
 }
-.om-prompts {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
-  margin-top: 56px;
+.om-composer {
+  max-width: 880px;
+  margin: 56px auto 0;
 }
-.om-prompt {
+.om-roles {
   display: flex;
-  flex-direction: column;
-  gap: 16px;
-  padding: 28px 30px 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.om-role {
+  position: relative;
+  overflow: hidden;
+  padding: 9px 18px;
   border: 1px solid var(--line);
-  border-radius: 18px;
+  border-radius: 999px;
   background: var(--paper-raised);
-}
-.om-prompt p {
-  font-size: 19px;
-  line-height: 1.85;
-}
-.om-prompt p::before {
-  content: "↗ ";
   color: var(--muted);
+  font: 500 15px var(--sans);
+  cursor: pointer;
+  transition:
+    background 0.3s,
+    color 0.3s,
+    border-color 0.3s;
+}
+.om-role:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+.om-role[aria-selected="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+.om-role-bar {
+  position: absolute;
+  inset: auto 0 0;
+  height: 2px;
+  background: #b3c3ff;
+  transform: scaleX(0);
+  transform-origin: left;
+}
+.om-composer-box {
+  padding: 24px 30px 18px;
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  background: var(--paper-raised);
+  box-shadow: 0 30px 60px -36px #0b154a59;
+}
+.om-composer-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+}
+.om-composer-label svg {
+  width: 16px;
+  height: 16px;
+  color: var(--accent);
+}
+.om-asks {
+  display: grid;
+  gap: 18px;
+  margin-top: 12px;
+}
+.om-ask {
+  font-size: clamp(19px, 2vw, 23px);
+  line-height: 1.8;
+}
+/* Once the script runs, the asks share one cell so switching roles never shifts the layout. */
+.om-composer.om-ready .om-ask {
+  grid-area: 1 / 1;
+}
+.om-composer.om-ready .om-ask:not(.om-current) {
+  visibility: hidden;
 }
 .om-pv {
   padding: 0.08em 0.3em;
@@ -645,11 +700,52 @@
   font-family: var(--code);
   font-size: 0.82em;
 }
-.om-why-answer {
-  margin-top: 64px !important;
-  font: 500 clamp(26px, 3vw, 40px) / 1.3 var(--sans);
-  letter-spacing: -0.02em;
-  text-align: center;
+.om-composer-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+}
+.om-composer-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 14px;
+  transition: color 0.4s;
+}
+.om-composer-status svg {
+  flex: none;
+  width: 18px;
+  height: 20px;
+}
+.om-composer-status.om-safe {
+  color: var(--accent);
+  font-weight: 600;
+}
+.om-send {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--line);
+  color: var(--paper-raised);
+  transition: background 0.4s;
+}
+.om-send svg {
+  width: 20px;
+  height: 20px;
+}
+.om-send.om-on {
+  background: var(--accent);
+}
+.om-why .om-fine {
+  margin-top: 22px !important;
 }
 
 /* Scroll story: sticky window, steps scroll past */
@@ -1258,8 +1354,7 @@
     border-radius: 12px;
     box-shadow: 0 24px 48px -30px #0f1a4a73;
   }
-  .om-cards,
-  .om-prompts {
+  .om-cards {
     grid-template-columns: 1fr;
   }
   .om-footer-grid {
@@ -1380,10 +1475,24 @@
     width: 100%;
     justify-content: center;
   }
-  .om-prompt {
-    padding: 22px;
+  .om-roles {
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    overflow-x: auto;
+    margin-inline: calc(-1 * var(--gutter));
+    padding-inline: var(--gutter);
+    scrollbar-width: none;
   }
-  .om-prompt p {
+  .om-role {
+    flex: none;
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+  .om-composer-box {
+    padding: 18px 18px 14px;
+    border-radius: 20px;
+  }
+  .om-ask {
     font-size: 17px;
   }
   .om-pv {

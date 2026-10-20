@@ -82,55 +82,148 @@
 
     <section class="om-why om-wrap" id="om-why" aria-labelledby="om-why-title">
       <h2 id="om-why-title" class="om-display" data-om-reveal>
-        Hôm nay bạn đã dán gì<br /><em>vào AI?</em>
+        Nhờ AI mọi việc.<br /><em>Không cần kèm tên&nbsp;ai.</em>
       </h2>
       <p class="om-display-sub" data-om-reveal>
-        Bảng lương, hợp đồng, email khách hàng: AI (ChatGPT, Claude, Gemini…) giúp bạn làm những
-        việc này rất nhanh. Chỉ là trong đó thường có tên, số điện thoại hay số tài khoản mà bạn
-        không cần gửi đi.
+        Thư mời nhận việc, đối chiếu thanh toán, trả lời khách, rà soát hợp đồng… OfflineMask ẩn
+        thông tin riêng trước, để bạn hỏi AI như mọi khi.
       </p>
-      <div class="om-prompts" data-om-prompts>
-        <figure class="om-prompt">
-          <figcaption class="om-pill">Nhân sự</figcaption>
-          <p>
-            Soạn thư mời nhận việc cho
-            <span class="om-pv" data-code="[TEN_1_a3f9]">Lê Thu Hà</span>, CCCD
-            <span class="om-pv" data-code="[CCCD_1_a3f9]">079198004521</span>, gửi tới
-            <span class="om-pv" data-code="[EMAIL_1_a3f9]">ha.le@example.com</span>.
+      <div class="om-composer" data-om-composer data-om-reveal>
+        <div class="om-roles" role="tablist" aria-label="Ví dụ theo công việc" hidden data-om-roles>
+          <button
+            type="button"
+            class="om-role"
+            role="tab"
+            id="om-role-hr"
+            aria-controls="om-ask-hr"
+            aria-selected="true"
+            data-om-role
+          >
+            Nhân sự<span class="om-role-bar" aria-hidden="true"></span>
+          </button>
+          <button
+            type="button"
+            class="om-role"
+            role="tab"
+            id="om-role-acc"
+            aria-controls="om-ask-acc"
+            aria-selected="false"
+            data-om-role
+          >
+            Kế toán<span class="om-role-bar" aria-hidden="true"></span>
+          </button>
+          <button
+            type="button"
+            class="om-role"
+            role="tab"
+            id="om-role-cs"
+            aria-controls="om-ask-cs"
+            aria-selected="false"
+            data-om-role
+          >
+            Chăm sóc khách hàng<span class="om-role-bar" aria-hidden="true"></span>
+          </button>
+          <button
+            type="button"
+            class="om-role"
+            role="tab"
+            id="om-role-legal"
+            aria-controls="om-ask-legal"
+            aria-selected="false"
+            data-om-role
+          >
+            Pháp lý<span class="om-role-bar" aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="om-composer-box">
+          <p class="om-composer-label">
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+              <path
+                d="M12 2.5c.5 4.6 2.9 7 7.5 7.5-4.6.5-7 2.9-7.5 7.5-.5-4.6-2.9-7-7.5-7.5 4.6-.5 7-2.9 7.5-7.5Z"
+              />
+            </svg>
+            Tin nhắn gửi AI
           </p>
-        </figure>
-        <figure class="om-prompt">
-          <figcaption class="om-pill">Kế toán</figcaption>
-          <p>
-            Đối chiếu khoản 45.000.000 đ của công ty MST
-            <span class="om-pv" data-code="[MST_1_a3f9]">0312345678</span> chuyển vào tài khoản
-            <span class="om-pv" data-code="[STK_1_a3f9]">0071000123456</span>.
-          </p>
-        </figure>
-        <figure class="om-prompt">
-          <figcaption class="om-pill">Chăm sóc khách hàng</figcaption>
-          <p>
-            Viết lời xin lỗi chị <span class="om-pv" data-code="[TEN_2_a3f9]">Phạm Mai</span>, số
-            <span class="om-pv" data-code="[SDT_1_a3f9]">0912 345 678</span>, vì đơn hàng giao chậm
-            ba ngày.
-          </p>
-        </figure>
-        <figure class="om-prompt">
-          <figcaption class="om-pill">Pháp lý</figcaption>
-          <p>
-            Rà soát hợp đồng thuê nhà của ông
-            <span class="om-pv" data-code="[TEN_3_a3f9]">Trần Quốc Bảo</span>, CCCD
-            <span class="om-pv" data-code="[CCCD_2_a3f9]">079085001122</span>, và chỉ ra điều khoản
-            bất lợi.
-          </p>
-        </figure>
+          <div class="om-asks">
+            <p
+              class="om-ask"
+              role="tabpanel"
+              id="om-ask-hr"
+              aria-labelledby="om-role-hr"
+              data-om-ask
+            >
+              Soạn thư mời nhận việc cho
+              <span class="om-pv" data-code="[TEN_1_a3f9]">Lê Thu Hà</span>, CCCD
+              <span class="om-pv" data-code="[CCCD_1_a3f9]">079198004521</span>, gửi tới
+              <span class="om-pv" data-code="[EMAIL_1_a3f9]">ha.le@example.com</span>. Giọng văn
+              thân thiện, ngắn gọn.
+            </p>
+            <p
+              class="om-ask"
+              role="tabpanel"
+              id="om-ask-acc"
+              aria-labelledby="om-role-acc"
+              data-om-ask
+            >
+              Đối chiếu khoản 45.000.000 đ của công ty MST
+              <span class="om-pv" data-code="[MST_1_a3f9]">0312345678</span> chuyển vào tài khoản
+              <span class="om-pv" data-code="[STK_1_a3f9]">0071000123456</span>, rồi soạn thư xác
+              nhận.
+            </p>
+            <p
+              class="om-ask"
+              role="tabpanel"
+              id="om-ask-cs"
+              aria-labelledby="om-role-cs"
+              data-om-ask
+            >
+              Viết lời xin lỗi chị <span class="om-pv" data-code="[TEN_2_a3f9]">Phạm Mai</span>, số
+              <span class="om-pv" data-code="[SDT_1_a3f9]">0912 345 678</span>, vì đơn hàng giao
+              chậm ba ngày.
+            </p>
+            <p
+              class="om-ask"
+              role="tabpanel"
+              id="om-ask-legal"
+              aria-labelledby="om-role-legal"
+              data-om-ask
+            >
+              Rà soát hợp đồng thuê nhà của ông
+              <span class="om-pv" data-code="[TEN_3_a3f9]">Trần Quốc Bảo</span>, CCCD
+              <span class="om-pv" data-code="[CCCD_2_a3f9]">079085001122</span>, và chỉ ra điều
+              khoản bất lợi.
+            </p>
+          </div>
+          <div class="om-composer-foot">
+            <p class="om-composer-status" aria-live="polite" data-om-status>
+              <svg
+                viewBox="0 0 24 26"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+                aria-hidden="true"
+              >
+                <path d="M12 2 3 5.5v6.2c0 5.6 3.8 10.2 9 12.3 5.2-2.1 9-6.7 9-12.3V5.5Z" />
+                <path d="m8.2 12.8 2.6 2.6 5-5.2" /></svg
+              ><span data-om-status-text>OfflineMask ẩn phần được tô trước khi bạn gửi.</span>
+            </p>
+            <span class="om-send" aria-hidden="true" data-om-send
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M12 19V5M6 11l6-6 6 6" /></svg
+            ></span>
+          </div>
+        </div>
       </div>
-      <p class="om-why-answer" data-om-reveal>
-        Với OfflineMask, AI vẫn làm đúng việc đó,<br /><em>chỉ là không thấy tên thật.</em>
-      </p>
-      <p class="om-fine">
-        Ví dụ minh họa. Họ tên được nhận ra khi cài gói tiếng Việt tùy chọn, hoặc khi bạn tự chọn.
-      </p>
+      <p class="om-fine">Ví dụ minh họa với thông tin hư cấu.</p>
     </section>
 
     <section class="om-story om-wrap" id="om-how" aria-labelledby="om-how-title">

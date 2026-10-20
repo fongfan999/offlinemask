@@ -105,32 +105,140 @@ function setupScan(root, motion) {
   };
 }
 
-/** Everyday prompts: each card's identifying values turn into codes once it has been read. */
-function animatePrompts(root) {
-  const values = [...root.querySelectorAll("[data-om-prompts] .om-pv")];
-  const originals = values.map((value) => value.textContent);
-  root.querySelectorAll(".om-prompt").forEach((prompt) =>
-    ScrollTrigger.create({
-      trigger: prompt,
-      start: "bottom 70%",
-      once: true,
-      onEnter: () =>
-        prompt.querySelectorAll(".om-pv").forEach((value, index) =>
-          gsap.to(value, {
-            delay: 0.5 + index * 0.15,
-            duration: 0.8,
-            ease: "none",
-            scrambleText: { text: value.dataset.code, chars: "█▓▒░", speed: 0.5 },
-            onStart: () => value.classList.add("om-coded"),
-          }),
-        ),
-    }),
-  );
-  return () =>
-    values.forEach((value, index) => {
-      value.textContent = originals[index];
+/**
+ * The "message to AI" box: one fictional request per role. Its private details turn into codes,
+ * then the next role plays while the box is on screen. Choosing a role stops the autoplay. With
+ * reduced motion nothing plays and each request is shown already coded.
+ */
+function setupComposer(root, motion) {
+  const box = root.querySelector("[data-om-composer]");
+  const roles = box.querySelector("[data-om-roles]");
+  const tabs = [...roles.querySelectorAll("[data-om-role]")];
+  const asks = [...box.querySelectorAll("[data-om-ask]")];
+  const status = box.querySelector("[data-om-status]");
+  const statusText = box.querySelector("[data-om-status-text]");
+  const send = box.querySelector("[data-om-send]");
+  const values = asks.map((ask) => [...ask.querySelectorAll(".om-pv")]);
+  const originals = values.map((list) => list.map((value) => value.textContent));
+  const statusDefault = statusText.textContent;
+  let current = 0;
+  let autoplay = motion;
+  let cycle;
+
+  const setSafe = (count, safe) => {
+    status.classList.toggle("om-safe", safe);
+    send.classList.toggle("om-on", safe);
+    statusText.textContent = safe
+      ? `Đã ẩn ${count} thông tin riêng`
+      : `Có ${count} thông tin riêng trong tin nhắn`;
+  };
+  const reset = (index) =>
+    values[index].forEach((value, k) => {
+      value.textContent = originals[index][k];
       value.classList.remove("om-coded");
     });
+  const code = (value) => {
+    value.classList.add("om-coded");
+    value.textContent = value.dataset.code;
+  };
+
+  function show(index) {
+    cycle?.kill();
+    reset(current);
+    // The fade-in leaves inline visibility behind; clear it so the stylesheet hides this request.
+    gsap.set(asks[current], { clearProps: "opacity,visibility,transform" });
+    current = index;
+    tabs.forEach((tab, k) => {
+      tab.setAttribute("aria-selected", String(k === index));
+      tab.tabIndex = k === index ? 0 : -1;
+      gsap.set(tab.querySelector(".om-role-bar"), { scaleX: 0 });
+    });
+    asks.forEach((ask, k) => ask.classList.toggle("om-current", k === index));
+    const list = values[index];
+    if (!motion) {
+      list.forEach(code);
+      setSafe(list.length, true);
+      return;
+    }
+    setSafe(list.length, false);
+    const masked = 1.8 + list.length * 0.18 + 0.5;
+    cycle = gsap.timeline({
+      paused: !watch?.isActive,
+      onComplete: () => autoplay && show((index + 1) % asks.length),
+    });
+    cycle.fromTo(asks[index], { y: 10, autoAlpha: 0 }, { y: 0, autoAlpha: 1, duration: 0.5 }, 0);
+    list.forEach((value, k) =>
+      cycle.to(
+        value,
+        {
+          duration: 0.7,
+          ease: "none",
+          scrambleText: { text: value.dataset.code, chars: "█▓▒░", speed: 0.5 },
+          onStart: () => value.classList.add("om-coded"),
+        },
+        1.8 + k * 0.18,
+      ),
+    );
+    cycle.call(() => setSafe(list.length, true), [], masked);
+    if (autoplay)
+      cycle.fromTo(
+        tabs[index].querySelector(".om-role-bar"),
+        { scaleX: 0 },
+        { scaleX: 1, duration: masked + 3, ease: "none" },
+        0,
+      );
+    else cycle.to({}, { duration: 0 }, masked);
+  }
+
+  function choose(event) {
+    const tab = event.target.closest("[data-om-role]");
+    if (!tab) return;
+    autoplay = false;
+    show(tabs.indexOf(tab));
+    cycle?.play();
+  }
+  function arrows(event) {
+    const step = { ArrowRight: 1, ArrowLeft: -1 }[event.key];
+    if (!step) return;
+    const next = (current + step + tabs.length) % tabs.length;
+    tabs[next].focus();
+    tabs[next].click();
+  }
+
+  const watch = motion
+    ? ScrollTrigger.create({
+        trigger: box,
+        start: "top 80%",
+        end: "bottom top",
+        onToggle: (self) => (self.isActive ? cycle?.play() : cycle?.pause()),
+      })
+    : undefined;
+  box.classList.add("om-ready");
+  roles.hidden = false;
+  roles.addEventListener("click", choose);
+  roles.addEventListener("keydown", arrows);
+  show(0);
+  return () => {
+    cycle?.kill();
+    watch?.kill();
+    roles.removeEventListener("click", choose);
+    roles.removeEventListener("keydown", arrows);
+    roles.hidden = true;
+    box.classList.remove("om-ready");
+    values.forEach((_, index) => reset(index));
+    asks.forEach((ask) => {
+      ask.classList.remove("om-current");
+      gsap.set(ask, { clearProps: "all" });
+    });
+    tabs.forEach((tab, k) => {
+      tab.setAttribute("aria-selected", String(k === 0));
+      tab.removeAttribute("tabindex");
+      gsap.set(tab.querySelector(".om-role-bar"), { clearProps: "transform" });
+    });
+    status.classList.remove("om-safe");
+    send.classList.remove("om-on");
+    statusText.textContent = statusDefault;
+  };
 }
 
 /** Values cross the boundary as codes once the diagram scrolls into view. */
@@ -236,7 +344,14 @@ export function initOfflineMask(root) {
       motion: "(prefers-reduced-motion: no-preference)",
       reduce: "(prefers-reduced-motion: reduce)",
     },
-    (context) => setupScan(root, context.conditions.motion),
+    (context) => {
+      const undoScan = setupScan(root, context.conditions.motion);
+      const undoComposer = setupComposer(root, context.conditions.motion);
+      return () => {
+        undoScan();
+        undoComposer();
+      };
+    },
   );
   media.add(
     "(prefers-reduced-motion: no-preference)",
@@ -319,11 +434,7 @@ export function initOfflineMask(root) {
         }),
       );
       animateBoundary(root);
-      const restorePrompts = animatePrompts(root);
-      return () => {
-        undo();
-        restorePrompts();
-      };
+      return undo;
     },
     root,
   );
