@@ -85,9 +85,12 @@ if (testSign) {
     `Export-Certificate -Cert $cert -FilePath '${cer}' | Out-Null;`,
     `Remove-Item -Path ('Cert:\\CurrentUser\\My\\' + $cert.Thumbprint)`,
   ].join(" ");
+  // Windows PowerShell must not inherit PowerShell 7's module path (CI steps run in pwsh),
+  // or its PKI module and the Cert: drive fail to load.
+  const env = Object.fromEntries(Object.entries(process.env).filter(([key]) => !/^psmodulepath$/i.test(key)));
   execFileSync("powershell.exe", ["-NoProfile", "-Command", script], {
     stdio: "inherit",
-    env: { ...process.env, MSIX_TEST_PASSWORD: password },
+    env: { ...env, MSIX_TEST_PASSWORD: password },
   });
   await cp(unsigned, signed);
   execFileSync(tool("signtool.exe"), ["sign", "/fd", "SHA256", "/f", pfx, "/p", password, signed], { stdio: "inherit" });
