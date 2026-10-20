@@ -293,6 +293,11 @@ export function initOfflineMask(root) {
   let disposed = false;
 
   root.classList.add("om-js");
+  // Drifting blots are only animated while their wash is on screen.
+  const washWatch = new IntersectionObserver((entries) =>
+    entries.forEach((entry) => entry.target.classList.toggle("om-idle", !entry.isIntersecting)),
+  );
+  root.querySelectorAll(".om-wash").forEach((wash) => washWatch.observe(wash));
   // Intro video: opens in a native modal and plays; closing pauses it.
   const videoOpen = root.querySelector("[data-om-video-open]");
   const videoDialog = root.querySelector("[data-om-video]");
@@ -452,6 +457,8 @@ export function initOfflineMask(root) {
     dock.classList.remove("om-hidden");
     navDownload.classList.remove("om-visible");
     root.classList.remove("om-js");
+    washWatch.disconnect();
+    root.querySelectorAll(".om-wash").forEach((wash) => wash.classList.remove("om-idle"));
     videoOpen.hidden = true;
     videoOpen.removeEventListener("click", openVideo);
     videoDialog.removeEventListener("click", backdropClose);

@@ -122,9 +122,8 @@
 .om-nav-download {
   pointer-events: auto;
   border: 1px solid color-mix(in srgb, var(--line-strong) 70%, transparent);
-  background: color-mix(in srgb, var(--paper-raised) 86%, transparent);
-  backdrop-filter: blur(14px) saturate(1.4);
-  -webkit-backdrop-filter: blur(14px) saturate(1.4);
+  /* Near-opaque instead of a live backdrop blur, which re-blurs the page on every scroll frame. */
+  background: color-mix(in srgb, var(--paper-raised) 96%, transparent);
   box-shadow: 0 6px 24px -10px #0f1a4a40;
 }
 .om-nav-pill {
@@ -228,27 +227,32 @@
   width: 46vmax;
   height: 46vmax;
   border-radius: 50%;
-  filter: blur(70px);
+  /* A soft-edged gradient reads like a blurred disc without a costly blur filter. */
+  background: radial-gradient(closest-side, var(--blob) 45%, transparent);
   opacity: 0.75;
   animation: om-drift 26s ease-in-out infinite alternate;
+}
+/* The blots pause while their wash is off screen. */
+.om-wash.om-idle i {
+  animation-play-state: paused;
 }
 .om-wash i:nth-child(1) {
   left: -12%;
   top: -18%;
-  background: var(--cobalt-light);
+  --blob: var(--cobalt-light);
   opacity: 0.42;
 }
 .om-wash i:nth-child(2) {
   right: -14%;
   top: 10%;
-  background: #1a2c7a;
+  --blob: #1a2c7a;
   animation-duration: 32s;
   animation-delay: -8s;
 }
 .om-wash i:nth-child(3) {
   left: 30%;
   bottom: -30%;
-  background: #6f93f0;
+  --blob: #6f93f0;
   opacity: 0.3;
   animation-duration: 38s;
   animation-delay: -14s;
@@ -258,7 +262,7 @@
   bottom: -20%;
   width: 26vmax;
   height: 26vmax;
-  background: #f7f5ee;
+  --blob: #f7f5ee;
   opacity: 0.08;
   animation-duration: 44s;
 }
@@ -892,6 +896,7 @@
   /* The stage is as tall as its content and sticks centred on screen (never under the nav), so
      it starts right below the section heading. */
   .om-js .om-how-stage {
+    will-change: transform;
     position: sticky;
     top: max(96px, calc(50vh - 260px));
   }
