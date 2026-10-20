@@ -3,6 +3,10 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 
 const fragment = new URL("./product.html", import.meta.url);
+// Download links name the desktop release this page ships beside; the four manifests share it.
+const { version } = JSON.parse(
+  readFileSync(new URL("../desktop/package.json", import.meta.url), "utf8"),
+);
 export default defineConfig({
   root: fileURLToPath(new URL(".", import.meta.url)),
   base: "./",
@@ -12,7 +16,11 @@ export default defineConfig({
       name: "offlinemask-product-page",
       transformIndexHtml: {
         order: "pre",
-        handler: (html) => html.replace("<!-- product-page -->", readFileSync(fragment, "utf8")),
+        handler: (html) =>
+          html.replace(
+            "<!-- product-page -->",
+            readFileSync(fragment, "utf8").replaceAll("__OM_VERSION__", version),
+          ),
       },
       generateBundle() {
         this.emitFile({

@@ -4,6 +4,27 @@ import { demoStates, demoSteps } from "./demo.js";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const downloadLabels = {
+  "mac-arm": "Tải cho macOS",
+  "mac-intel": "Tải cho macOS",
+  windows: "Tải cho Windows",
+};
+
+/** The visitor's desktop build, or undefined where one button cannot choose (Linux, phones). */
+async function detectPlatform() {
+  const hints = navigator.userAgentData;
+  const platform = hints?.platform ?? navigator.platform ?? "";
+  if (/^win/i.test(platform)) return "windows";
+  // iPadOS reports a Mac platform but has touch input.
+  if (!/^mac/i.test(platform) || navigator.maxTouchPoints > 1) return undefined;
+  try {
+    const { architecture } = (await hints?.getHighEntropyValues(["architecture"])) ?? {};
+    return architecture === "x86" ? "mac-intel" : "mac-arm";
+  } catch {
+    return "mac-arm";
+  }
+}
+
 /** Mount on one page root; dispose before replacing that root (including Astro navigation). */
 export function initOfflineMask(root) {
   if (!root) return () => {};
@@ -29,6 +50,15 @@ export function initOfflineMask(root) {
     status: "status",
     next: "next",
   };
+  const download = root.querySelector("[data-om-download]");
+  const downloadLabel = root.querySelector("[data-om-download-label]");
+  const downloadDetail = root.querySelector("[data-om-download-detail]");
+  const downloadFallback = [
+    download.getAttribute("href"),
+    downloadLabel.textContent,
+    downloadDetail.textContent,
+  ];
+  let disposed = false;
   let mode = "masked";
   let feedback;
   let playback;
@@ -117,6 +147,14 @@ export function initOfflineMask(root) {
   document.addEventListener("visibilitychange", stopOnHidden);
   reduceMotion.addEventListener("change", stopForPreference);
   showMode("masked", false);
+  // Without JavaScript, or on an undetected platform, the button opens the release page.
+  detectPlatform().then((platform) => {
+    const link = platform && root.querySelector(`[data-om-platform="${platform}"]`);
+    if (disposed || !link) return;
+    download.href = link.href;
+    downloadLabel.textContent = downloadLabels[platform];
+    downloadDetail.textContent = `${link.textContent} · Máy khác? Xem tất cả bản tải về`;
+  });
 
   media.add(
     "(prefers-reduced-motion: no-preference)",
@@ -150,6 +188,9 @@ export function initOfflineMask(root) {
     root,
   );
   return () => {
+    disposed = true;
+    download.setAttribute("href", downloadFallback[0]);
+    [downloadLabel.textContent, downloadDetail.textContent] = downloadFallback.slice(1);
     stop();
     feedback?.revert();
     media.revert();

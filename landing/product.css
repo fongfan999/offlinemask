@@ -18,6 +18,9 @@
 .om-page :where(h1, h2, h3, p) {
   margin: 0;
 }
+.om-page :where(h1, h2) {
+  text-wrap: balance;
+}
 .om-page :where(a) {
   color: inherit;
   text-decoration: none;
@@ -129,12 +132,6 @@
   font-weight: 400;
   letter-spacing: -0.025em;
 }
-.om-lead {
-  font-size: 21px;
-  line-height: 1.55;
-  font-weight: 500;
-  letter-spacing: -0.5px;
-}
 .om-description {
   color: var(--muted);
   font-size: 15px;
@@ -172,7 +169,7 @@
   transform: translateY(-2px);
   box-shadow: 0 8px 20px var(--shadow);
 }
-.om-button span {
+.om-button span[aria-hidden="true"] {
   font-size: 21px;
   line-height: 1;
   font-weight: 400;
@@ -191,25 +188,35 @@
   margin-top: 20px !important;
 }
 
-.om-principles {
+.om-uses {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 20px;
-  padding-block: 26px;
+  gap: 14px 28px;
+  padding-block: 24px;
   border-block: 1px solid var(--line);
+  font-size: 13px;
+}
+.om-uses p {
   color: var(--muted);
-  font: 11px/1.6 var(--mono);
+  font: 11px/1.5 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  flex-shrink: 0;
 }
-.om-principles b {
-  color: var(--accent);
-  margin-right: 8px;
-  font-size: 16px;
+.om-uses ul,
+.om-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
 }
-.om-principles a {
-  color: var(--accent);
-  text-decoration: underline;
-  text-underline-offset: 4px;
+.om-uses li {
+  padding: 6px 14px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper-raised);
 }
 .om-workflow,
 .om-formats,
@@ -303,6 +310,42 @@
 .om-prompt-visual i:last-child {
   width: 55%;
 }
+.om-detects {
+  border-top: 1px solid var(--line);
+  display: grid;
+  grid-template-columns: 0.9fr 1.3fr;
+  gap: 30px 80px;
+  padding-block: 100px;
+}
+.om-detect-groups {
+  display: grid;
+  gap: 36px;
+}
+.om-detect-groups h3 {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  font-size: 18px;
+  font-weight: 550;
+  margin-bottom: 14px;
+}
+.om-detect-groups h3 span {
+  color: var(--muted);
+  font: 11px var(--mono);
+  font-weight: 400;
+}
+.om-chips li {
+  padding: 5px 12px;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 14px;
+}
+.om-detect-note {
+  color: var(--muted);
+  font-size: 13px;
+}
 .om-formats {
   border-top: 1px solid var(--line);
   display: grid;
@@ -340,11 +383,12 @@
   max-width: 290px;
 }
 .om-extension {
-  writing-mode: vertical-rl;
-  font: 11px var(--mono);
+  font: 11px/1.8 var(--mono);
   margin-left: auto;
   color: var(--muted);
   letter-spacing: 0.5px;
+  text-align: right;
+  max-width: 130px;
 }
 .om-format-note {
   grid-column: 2;
@@ -456,6 +500,53 @@
   font: 11px var(--mono);
   margin-top: 20px;
 }
+.om-platforms {
+  max-width: 520px;
+  margin: 18px auto 0;
+  font-size: 13px;
+}
+.om-platforms summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 13px;
+}
+.om-platforms dl {
+  margin: 16px 0 12px;
+  text-align: left;
+  border-top: 1px solid var(--line);
+}
+.om-platforms dl > div {
+  display: flex;
+  gap: 16px;
+  padding-block: 10px;
+  border-bottom: 1px solid var(--line);
+}
+.om-platforms dt {
+  width: 80px;
+  flex-shrink: 0;
+  color: var(--muted);
+}
+.om-platforms dd {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 18px;
+  margin: 0;
+}
+.om-platforms a,
+.om-questions details p a,
+.om-privacy-points p a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.om-platforms a:hover,
+.om-questions details p a:hover {
+  color: var(--accent);
+}
+.om-platforms > p {
+  color: var(--muted);
+  font-size: 12px;
+}
 .om-download .om-release-note {
   max-width: 540px;
   font-size: 12px !important;
@@ -511,6 +602,7 @@
   .om-steps {
     gap: 40px;
   }
+  .om-detects,
   .om-formats,
   .om-faq,
   .om-privacy-inner {
@@ -547,13 +639,12 @@
     max-width: 480px;
   }
 
-  .om-principles {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px 10px;
-    font-size: 11px;
+  .om-uses {
+    flex-direction: column;
+    align-items: flex-start;
   }
   .om-workflow,
+  .om-detects,
   .om-formats,
   .om-faq {
     padding-block: 65px;
@@ -574,6 +665,7 @@
   .om-prompt-visual {
     padding: 10px;
   }
+  .om-detects,
   .om-formats,
   .om-faq,
   .om-privacy-inner {
@@ -584,9 +676,7 @@
     grid-column: 1;
   }
   .om-extension {
-    writing-mode: horizontal-tb;
     max-width: 80px;
-    line-height: 1.8;
   }
   .om-privacy-inner {
     padding-block: 60px;
@@ -635,9 +725,6 @@
   }
   .om-steps p {
     grid-column: 1;
-  }
-  .om-lead {
-    font-size: 20px;
   }
 
   .om-format-list article {
@@ -691,15 +778,10 @@
   letter-spacing: -0.045em;
   margin: 24px 0 28px;
 }
-.om-lead {
-  font-size: 19px;
-  letter-spacing: -0.3px;
-}
 .om-description {
-  font-size: 15px;
-  max-width: 435px;
-  line-height: 1.85;
-  margin-top: 12px !important;
+  font-size: 17px;
+  max-width: 500px;
+  line-height: 1.8;
 }
 .om-actions {
   gap: 20px;
@@ -929,10 +1011,6 @@
 .om-page [hidden] {
   display: none !important;
 }
-.om-principles {
-  font-size: 12px;
-  padding-block: 28px;
-}
 .om-workflow {
   grid-template-columns: 1fr;
   gap: 38px;
@@ -1080,9 +1158,6 @@
   .om-hero-copy .om-eyebrow {
     font-size: 11px;
   }
-  .om-lead {
-    font-size: 17px;
-  }
   .om-description {
     font-size: 14px;
   }
@@ -1148,8 +1223,5 @@
   }
   .om-steps h3 {
     margin-top: 20px;
-  }
-  .om-principles {
-    font-size: 11px;
   }
 }
