@@ -29,3 +29,13 @@ No telemetry, storage or runtime network requests are added. The page grows by a
 ## Verification
 
 `pnpm lint` and `pnpm -C landing build` pass. Scroll-through captures with Chrome DevTools at 1440×900 (light and dark) and 390×844 confirmed several things. The hero intro plays. The story window switches with the active step. The dock hides over the download band. The phone layout stacks the story with inline screenshots, and there is no horizontal overflow at 390 px. Safari and real devices were not exercised.
+
+## Follow-up — copy and polish before the first production push
+
+The owner gave full freedom over copy and design before rolling out to offlinemask.com.
+
+- **One idea throughout:** "AI không cần biết khách hàng của bạn là ai." It is the `h1`, the page title and the share image. Section headings were rewritten to match: "Ba bước. Tất cả trên máy bạn.", "Thứ AI thấy. Thứ ở lại với bạn.", "Hỏi AI thoải mái. Giữ khách hàng cho riêng bạn."
+- **Hero scan:** the hero window holds the original and masked screenshots of the same sample session. A cobalt scan line sweeps across, revealing the masked screen over the original, while the hero is on screen. The "Bản gốc / Bản gửi AI" toggle in the title bar stops the loop and shows either screen; it also works with reduced motion, where nothing loops.
+- **New "Vì sao" section:** "Hôm nay bạn đã dán gì vào ChatGPT?" Four role-based prompts (HR, accounting, customer support, legal) carry warm-highlighted values that scramble into codes as each card is read, then the line "AI vẫn làm đúng việc đó. Chỉ là không biết đó là ai." The values are fictional and limited to types the app suggests. A note says names need the optional Vietnamese pack or manual selection. The data-handling sentence is hedged ("tùy dịch vụ và cài đặt") rather than naming any provider.
+- **Footer:** columns for product, resources and author, over a large pale wordmark.
+- **Share image:** `landing/og/og.png` is re-rendered from `og/card.html` in the new hero style.

@@ -48,6 +48,91 @@ function splitWordmark(wordmark) {
   return { letters, undo: () => wordmark.replaceChildren(...original) };
 }
 
+/**
+ * The hero window shows the original screen and, behind a sweeping line, the masked one. It loops
+ * while the hero is on screen; the toggle stops it and shows the chosen screen.
+ */
+function setupScan(root, motion) {
+  const stage = root.querySelector("[data-om-scan]");
+  const line = stage.querySelector(".om-scan-line");
+  const toggle = root.querySelector("[data-om-view-toggle]");
+  const buttons = [...toggle.querySelectorAll("[data-om-view]")];
+  const press = (view) =>
+    buttons.forEach((button) =>
+      button.setAttribute("aria-pressed", String(button.dataset.omView === view)),
+    );
+  let loop;
+  let watch;
+  if (motion) {
+    gsap.set(stage, { "--om-scan": "0%" });
+    loop = gsap
+      .timeline({ repeat: -1, delay: 1.6, defaults: { ease: "power2.inOut" } })
+      .call(() => press("original"))
+      .to(line, { opacity: 1, duration: 0.25 }, 0.9)
+      .to(stage, { "--om-scan": "100%", duration: 2 }, 0.9)
+      .call(() => press("masked"), [], 2.9)
+      .to(line, { opacity: 0, duration: 0.3 }, 2.9)
+      .to(line, { opacity: 1, duration: 0.2 }, 6)
+      .to(stage, { "--om-scan": "0%", duration: 1.1 }, 6)
+      .to(line, { opacity: 0, duration: 0.2 }, 7.1);
+    watch = ScrollTrigger.create({
+      trigger: stage,
+      start: "top bottom",
+      end: "bottom top",
+      onToggle: (self) => (self.isActive ? loop?.play() : loop?.pause()),
+    });
+  }
+  function choose(event) {
+    const button = event.target.closest("[data-om-view]");
+    if (!button) return;
+    loop?.kill();
+    loop = undefined;
+    const view = button.dataset.omView;
+    press(view);
+    gsap.set(line, { opacity: 0 });
+    gsap.to(stage, { "--om-scan": view === "masked" ? "100%" : "0%", duration: motion ? 0.6 : 0 });
+  }
+  toggle.hidden = false;
+  toggle.addEventListener("click", choose);
+  return () => {
+    loop?.kill();
+    watch?.kill();
+    toggle.removeEventListener("click", choose);
+    toggle.hidden = true;
+    press("masked");
+    gsap.set(stage, { clearProps: "--om-scan" });
+    gsap.set(line, { clearProps: "opacity" });
+  };
+}
+
+/** Everyday prompts: each card's identifying values turn into codes once it has been read. */
+function animatePrompts(root) {
+  const values = [...root.querySelectorAll("[data-om-prompts] .om-pv")];
+  const originals = values.map((value) => value.textContent);
+  root.querySelectorAll(".om-prompt").forEach((prompt) =>
+    ScrollTrigger.create({
+      trigger: prompt,
+      start: "bottom 70%",
+      once: true,
+      onEnter: () =>
+        prompt.querySelectorAll(".om-pv").forEach((value, index) =>
+          gsap.to(value, {
+            delay: 0.5 + index * 0.15,
+            duration: 0.8,
+            ease: "none",
+            scrambleText: { text: value.dataset.code, chars: "█▓▒░", speed: 0.5 },
+            onStart: () => value.classList.add("om-coded"),
+          }),
+        ),
+    }),
+  );
+  return () =>
+    values.forEach((value, index) => {
+      value.textContent = originals[index];
+      value.classList.remove("om-coded");
+    });
+}
+
 /** Values cross the boundary as codes once the diagram scrolls into view. */
 function animateBoundary(root) {
   const split = root.querySelector("[data-om-split]");
@@ -104,11 +189,11 @@ export function initOfflineMask(root) {
         onToggle: (self) => self.isActive && activate(index),
       }),
     ),
-    // The dock steps aside where the full download section is on screen.
+    // The dock steps aside from the full download section to the end of the page.
     ScrollTrigger.create({
       trigger: "#om-download",
       start: "top 90%",
-      end: "bottom top",
+      end: () => ScrollTrigger.maxScroll(window) + 1,
       onToggle: (self) => dock.classList.toggle("om-hidden", self.isActive),
     }),
     ScrollTrigger.create({
@@ -129,6 +214,13 @@ export function initOfflineMask(root) {
     detail.textContent = `${link.textContent} · Máy khác? Xem tất cả bản tải về`;
   });
 
+  media.add(
+    {
+      motion: "(prefers-reduced-motion: no-preference)",
+      reduce: "(prefers-reduced-motion: reduce)",
+    },
+    (context) => setupScan(root, context.conditions.motion),
+  );
   media.add(
     "(prefers-reduced-motion: no-preference)",
     () => {
@@ -210,7 +302,11 @@ export function initOfflineMask(root) {
         }),
       );
       animateBoundary(root);
-      return undo;
+      const restorePrompts = animatePrompts(root);
+      return () => {
+        undo();
+        restorePrompts();
+      };
     },
     root,
   );
