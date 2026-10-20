@@ -28,6 +28,11 @@ export default defineConfig({
           fileName: "font-licenses.txt",
           source: readFileSync(new URL("./font-licenses.txt", import.meta.url), "utf8"),
         });
+        this.emitFile({
+          type: "asset",
+          fileName: "og.png",
+          source: readFileSync(new URL("./og/og.png", import.meta.url)),
+        });
       },
       configureServer(server) {
         server.watcher.add(fileURLToPath(fragment));

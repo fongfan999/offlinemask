@@ -1,255 +1,236 @@
 <div class="om-page" lang="vi" data-om-page>
   <a class="om-skip" href="#om-main">Đến nội dung chính</a>
-  <header class="om-nav om-wrap">
-    <a class="om-brand" href="#om-main" aria-label="OfflineMask — về đầu trang"
-      ><span class="om-mark" aria-hidden="true"></span><span>Offline<span>Mask</span></span></a
-    >
-    <nav aria-label="Điều hướng sản phẩm">
-      <a href="#om-how">Cách hoạt động</a><a href="#om-faq">Câu hỏi</a
-      ><a class="om-nav-download" href="#om-download">Tải ứng dụng</a>
+  <header class="om-nav">
+    <nav class="om-nav-pill" aria-label="Điều hướng sản phẩm">
+      <a class="om-brand" href="#om-main" aria-label="OfflineMask — về đầu trang"
+        ><span class="om-mark" aria-hidden="true"></span
+      ></a>
+      <a href="#om-how">Cách hoạt động</a><a href="#om-privacy">Riêng tư</a
+      ><a href="#om-faq">Câu hỏi</a>
     </nav>
+    <a class="om-nav-download" href="#om-download" data-om-nav-download>Tải về</a>
   </header>
   <main id="om-main">
-    <section class="om-hero om-wrap" aria-labelledby="om-title">
-      <p class="om-label" data-om-enter>Ứng dụng cho máy tính · Chạy hoàn toàn offline</p>
-      <h1 id="om-title" data-om-enter>
-        Dùng AI với dữ liệu thật.<br /><em>Không lộ thông tin.</em>
-      </h1>
-      <p class="om-lead" data-om-enter>
-        OfflineMask thay tên, số tài khoản, CCCD… bằng mã trước khi bạn hỏi ChatGPT, rồi đổi lại
-        trong câu trả lời. Mọi thứ diễn ra trên máy bạn.
-      </p>
-      <div class="om-actions" data-om-enter>
-        <a class="om-button" href="#om-download"
-          >Tải OfflineMask <span aria-hidden="true">↓</span></a
-        ><a class="om-button om-button-quiet" href="#om-how">Cách hoạt động</a>
-      </div>
-      <p class="om-hero-note" data-om-enter>
-        <span>Không cần tài khoản</span><span>Chạy khi tắt mạng</span><span>Mã nguồn mở</span>
-      </p>
-    </section>
-
-    <section class="om-desk om-wrap" id="om-demo" aria-label="Ví dụ minh họa" data-om-enter>
-      <div class="om-desk-bar">
-        <div class="om-tabs" role="group" aria-label="Các bước trong ví dụ" hidden data-om-controls>
-          <button type="button" data-om-mode="original" aria-pressed="false">
-            <span>1</span> Bản của bạn<i aria-hidden="true"></i>
-          </button>
-          <button type="button" data-om-mode="masked" aria-pressed="true">
-            <span>2</span> Gửi cho AI<i aria-hidden="true"></i>
-          </button>
-          <button type="button" data-om-mode="restored" aria-pressed="false">
-            <span>3</span> Nhận kết quả<i aria-hidden="true"></i>
-          </button>
-        </div>
-        <button type="button" class="om-play" data-om-play hidden>Xem lại</button>
-      </div>
-      <article class="om-sheet" data-om-stage="masked">
-        <header class="om-sheet-head">
-          <span class="om-where" data-om-where>Bản gửi AI</span
-          ><span class="om-file" data-om-file>yeu-cau · đã ẩn</span>
-        </header>
-        <div class="om-sheet-body" data-om-document>
-          <p>Tóm tắt giao dịch sau và soạn email xác nhận cho khách:</p>
-          <p>
-            Khách hàng <span class="om-v" data-kind="Họ tên">[TEN_1_3030]</span> (CCCD
-            <span class="om-v" data-kind="CCCD">[CCCD_1_3030]</span>) chuyển
-            <strong>12.500.000 đồng</strong> từ tài khoản
-            <span class="om-v" data-kind="Số tài khoản">[STK_1_3030]</span>.
-          </p>
-          <p>
-            Liên hệ: <span class="om-v" data-kind="Email">[EMAIL_1_3030]</span> ·
-            <span class="om-v" data-kind="Số điện thoại">[SDT_1_3030]</span>
-          </p>
-        </div>
-        <footer class="om-sheet-foot">
-          <span class="om-dot"></span
-          ><span data-om-note role="status" aria-live="polite"
-            >AI vẫn hiểu: một khách hàng chuyển 12,5 triệu đồng. Nhưng không biết là ai.</span
-          >
-        </footer>
-      </article>
-      <p class="om-desk-caption">Ví dụ minh họa với dữ liệu giả · Phản hồi AI viết sẵn</p>
-    </section>
-
-    <section class="om-section om-wrap" id="om-how" aria-labelledby="om-how-title">
-      <header class="om-heading" data-om-reveal>
-        <p class="om-label">Cách hoạt động</p>
-        <h2 id="om-how-title">Thông tin thật<br /><em>ở lại trên máy bạn.</em></h2>
-        <p>
-          Chỉ bản đã thay mã đi tới AI. Bảng đối chiếu để đổi mã về thông tin thật không bao giờ rời
-          máy.
+    <section class="om-hero" aria-labelledby="om-title">
+      <div class="om-wash" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="om-hero-copy">
+        <h1 id="om-title" class="om-tagline" data-om-enter>
+          Dùng AI với dữ liệu thật. Không lộ thông tin.
+        </h1>
+        <p class="om-wordmark" aria-hidden="true" data-om-wordmark>Offline<em>Mask</em></p>
+        <p class="om-hero-sub" data-om-enter>
+          Ẩn tên, số tài khoản, CCCD… ngay trên máy trước khi bạn hỏi ChatGPT. Khi có câu trả lời,
+          thông tin thật được đổi lại.
         </p>
-      </header>
-      <div class="om-split" data-om-split>
-        <div class="om-side om-side-local">
-          <p class="om-side-label"><span class="om-dot"></span> Máy của bạn</p>
-          <h3>Bảng đối chiếu</h3>
-          <ul class="om-pairs">
-            <li><span>Nguyễn Minh An</span><code>[TEN_1_3030]</code></li>
-            <li><span>079203001234</span><code>[CCCD_1_3030]</code></li>
-            <li><span>012345678901</span><code>[STK_1_3030]</code></li>
-            <li><span>an@example.com</span><code>[EMAIL_1_3030]</code></li>
-          </ul>
-          <p class="om-side-foot">Chỉ ở trong bộ nhớ, hoặc trong kho mã hóa nếu bạn đặt mật mã.</p>
-        </div>
-        <div class="om-channel" aria-hidden="true"><span>Ranh giới</span></div>
-        <div class="om-side om-side-ai">
-          <p class="om-side-label">ChatGPT · Claude · Gemini…</p>
-          <h3>AI chỉ thấy</h3>
-          <p class="om-ai-text">
-            Khách hàng <code>[TEN_1_3030]</code> (CCCD <code>[CCCD_1_3030]</code>) chuyển 12.500.000
-            đồng từ tài khoản <code>[STK_1_3030]</code>. Liên hệ:
-            <code>[EMAIL_1_3030]</code>
-          </p>
-          <p class="om-side-foot">
-            Bạn tự sao chép hoặc tải lên. OfflineMask không kết nối với AI nào.
-          </p>
-        </div>
       </div>
-      <ol class="om-steps">
-        <li data-om-reveal>
-          <h3>Ẩn và kiểm tra</h3>
-          <p>
-            Dán văn bản hoặc mở tệp. Xem các gợi ý, giữ lại phần cần thiết, tự chọn thêm phần muốn
-            ẩn.
-          </p>
-        </li>
-        <li data-om-reveal>
-          <h3>Làm việc với AI</h3>
-          <p>
-            Sao chép bản đã ẩn sang công cụ AI bạn thích. Ngữ cảnh đủ để AI làm tốt việc của nó.
-          </p>
-        </li>
-        <li data-om-reveal>
-          <h3>Khôi phục</h3>
-          <p>Dán câu trả lời về cùng phiên. Mã còn nguyên được đổi lại thành thông tin thật.</p>
-        </li>
-      </ol>
+      <figure class="om-window om-hero-window" data-om-hero-window>
+        <div class="om-window-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+        <img
+          src="./shots/text-masked.webp"
+          width="2048"
+          height="1280"
+          fetchpriority="high"
+          alt="Ứng dụng OfflineMask với một thư mẫu: tên, số tài khoản, mã giao dịch, số điện thoại và email đã được thay bằng mã như [STK_1_625f]."
+        />
+        <span class="om-sticker" aria-hidden="true" data-om-sticker>Chạy<br />offline</span>
+        <span class="om-float om-float-a" aria-hidden="true" data-om-float
+          ><s>001234567890</s><b data-om-code>[STK_1_625f]</b></span
+        >
+        <span class="om-float om-float-b" aria-hidden="true" data-om-float
+          ><s>minh.anh@example.com</s><b data-om-code>[EMAIL_1_625f]</b></span
+        >
+      </figure>
+      <p class="om-hero-caption">Ảnh chụp ứng dụng thật, với văn bản mẫu có sẵn trong ứng dụng.</p>
     </section>
 
-    <section class="om-section om-wrap" id="om-detects" aria-labelledby="om-detects-title">
-      <header class="om-heading" data-om-reveal>
-        <p class="om-label">Nhận diện</p>
-        <h2 id="om-detects-title">Gợi ý sẵn.<br /><em>Bạn quyết định.</em></h2>
-        <p>
-          OfflineMask đánh dấu những gì trông giống thông tin định danh. Bạn bỏ chọn phần cần giữ,
-          và tự chọn thêm phần còn sót.
-        </p>
-      </header>
-      <div class="om-detect-grid">
-        <div class="om-card" data-om-reveal>
-          <h3>Có sẵn khi cài</h3>
+    <section class="om-story om-wrap" id="om-how" aria-labelledby="om-how-title">
+      <h2 id="om-how-title" class="om-display" data-om-reveal>
+        Ẩn trước khi hỏi.<br /><em>Đổi lại khi có câu trả lời.</em>
+      </h2>
+      <div class="om-story-grid" data-om-story>
+        <ol class="om-story-steps">
+          <li data-om-step>
+            <span class="om-step-number">01</span>
+            <h3>Ẩn những gì AI không cần biết</h3>
+            <p>
+              Dán văn bản hoặc mở tệp. OfflineMask đánh dấu tên, số tài khoản, số điện thoại, email…
+              Bạn xem lại, bỏ chọn, hoặc tự chọn thêm phần còn sót.
+            </p>
+            <img
+              class="om-step-shot"
+              src="./shots/text-original.webp"
+              width="2048"
+              height="1280"
+              loading="lazy"
+              alt="Bản gốc trong OfflineMask, các thông tin định danh được tô sáng."
+            />
+          </li>
+          <li data-om-step>
+            <span class="om-step-number">02</span>
+            <h3>Hỏi AI bằng bản đã thay mã</h3>
+            <p>
+              Mỗi thông tin thành một mã như [STK_1_625f]. AI vẫn đủ ngữ cảnh để tóm tắt, soạn thư
+              hay phân tích, nhưng không biết đó là ai.
+            </p>
+            <img
+              class="om-step-shot"
+              src="./shots/text-masked.webp"
+              width="2048"
+              height="1280"
+              loading="lazy"
+              alt="Bản đã ẩn trong OfflineMask, sẵn sàng sao chép sang AI."
+            />
+          </li>
+          <li data-om-step>
+            <span class="om-step-number">03</span>
+            <h3>Dán câu trả lời, nhận lại thông tin thật</h3>
+            <p>
+              Mã trong câu trả lời của AI được đổi lại ngay trên máy. Bảng đối chiếu không bao giờ
+              rời thiết bị của bạn.
+            </p>
+            <img
+              class="om-step-shot"
+              src="./shots/text-restored.webp"
+              width="2048"
+              height="1280"
+              loading="lazy"
+              alt="Bước khôi phục: câu trả lời của AI có mã được đổi lại thành thông tin thật."
+            />
+          </li>
+        </ol>
+        <div class="om-story-stage" aria-hidden="true">
+          <figure class="om-window">
+            <div class="om-window-bar"><i></i><i></i><i></i></div>
+            <div class="om-story-shots">
+              <img
+                src="./shots/text-original.webp"
+                width="2048"
+                height="1280"
+                alt=""
+                data-om-shot
+              />
+              <img src="./shots/text-masked.webp" width="2048" height="1280" alt="" data-om-shot />
+              <img
+                src="./shots/text-restored.webp"
+                width="2048"
+                height="1280"
+                alt=""
+                data-om-shot
+              />
+            </div>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <section class="om-features om-wrap" aria-labelledby="om-features-title">
+      <h2 id="om-features-title" class="om-display" data-om-reveal>
+        Hợp với cách<br /><em>bạn đang làm việc.</em>
+      </h2>
+      <div class="om-cards">
+        <article class="om-card om-card-wide" data-om-reveal>
+          <p class="om-pill">Bảng tính</p>
+          <p>
+            Mở XLSX, XLS, ODS hay CSV. Ẩn cả cột họ tên, số điện thoại, số tài khoản rồi xuất một
+            bản riêng để gửi AI.
+          </p>
+          <figure class="om-window om-card-shot">
+            <img
+              src="./shots/sheet-masked.webp"
+              width="2048"
+              height="1280"
+              loading="lazy"
+              alt="Bảng tính mẫu 30 dòng trong OfflineMask: các cột họ tên, điện thoại, email, tài khoản và địa chỉ đã được thay bằng mã."
+            />
+          </figure>
+        </article>
+        <article class="om-card" data-om-reveal>
+          <p class="om-pill">Tài liệu</p>
+          <p>Hợp đồng, biên bản dạng DOCX hay ODT. Giữ định dạng, lưu một bản đã xử lý.</p>
+        </article>
+        <article class="om-card" data-om-reveal>
+          <p class="om-pill">Nhận diện</p>
           <ul class="om-chips">
             <li>Email</li>
-            <li>Số điện thoại</li>
+            <li>Điện thoại</li>
             <li>Số tài khoản</li>
-            <li>Số thẻ, CVV, mã PIN</li>
-            <li>CCCD / CMND</li>
+            <li>Số thẻ</li>
+            <li>CCCD</li>
             <li>Hộ chiếu</li>
             <li>Mã số thuế</li>
-            <li>Mật khẩu & khóa API</li>
-            <li>Mã giao dịch, mã khách hàng</li>
+            <li>Mật khẩu</li>
           </ul>
           <p class="om-card-note">
-            Nhiều mục được nhận ra nhờ nhãn đi kèm, như “STK:” hay “CCCD:”.
+            Thêm họ tên, địa chỉ, tổ chức với gói tiếng Việt tùy chọn. Bạn luôn xem lại trước khi
+            gửi.
           </p>
-        </div>
-        <div class="om-card" data-om-reveal>
-          <h3>Thêm với gói tiếng Việt</h3>
-          <ul class="om-chips">
-            <li>Họ tên</li>
-            <li>Địa chỉ</li>
-            <li>Tổ chức</li>
-          </ul>
-          <p class="om-card-note">Tùy chọn. Chỉ tải khi bạn yêu cầu, rồi chạy offline.</p>
-        </div>
+        </article>
+        <article class="om-card" data-om-reveal>
+          <p class="om-pill">Lịch sử mã hóa</p>
+          <p>
+            Đặt mật mã để giữ lịch sử trong kho mã hóa trên máy. Chưa đặt? Mọi thứ chỉ ở trong bộ
+            nhớ.
+          </p>
+        </article>
+        <article class="om-card" data-om-reveal>
+          <p class="om-pill">Không tài khoản</p>
+          <p>Không đăng ký, không đăng nhập, không máy chủ. Mở ứng dụng là dùng được ngay.</p>
+        </article>
+        <article class="om-card" data-om-reveal>
+          <p class="om-pill">Tự kiểm chứng</p>
+          <p>
+            Cài xong, tắt Wi‑Fi rồi dùng thử: ẩn và khôi phục vẫn chạy. Mã nguồn công khai trên
+            <a href="https://github.com/fongfan999/offlinemask">GitHub ↗</a>.
+          </p>
+        </article>
       </div>
-      <ul class="om-formats" aria-label="Định dạng hỗ trợ">
-        <li data-om-reveal>
-          <span class="om-preview om-preview-text" aria-hidden="true" data-om-preview
-            ><i></i><i><b></b></i><i></i><i><b></b></i
-          ></span>
-          <h3>Văn bản</h3>
-          <p>Dán trực tiếp email, ghi chú, câu hỏi cho AI.</p>
-        </li>
-        <li data-om-reveal>
-          <span class="om-preview om-preview-sheet" aria-hidden="true" data-om-preview
-            ><i></i><i></i><i></i><i></i><i><b></b></i><i></i><i></i><i><b></b></i><i></i><i></i
-            ><i><b></b></i><i></i
-          ></span>
-          <h3>Bảng tính</h3>
-          <p>XLSX, XLS, ODS, CSV. Ẩn cả cột, xuất một bản riêng.</p>
-        </li>
-        <li data-om-reveal>
-          <span class="om-preview om-preview-doc" aria-hidden="true" data-om-preview
-            ><i></i><i><b></b></i><i></i><i></i><i><b></b></i><i></i
-          ></span>
-          <h3>Tài liệu</h3>
-          <p>DOCX, ODT. Giữ định dạng, lưu bản đã xử lý.</p>
-        </li>
-      </ul>
       <p class="om-fine">
         PDF và hình ảnh chưa được hỗ trợ. Luôn kiểm tra bản xuất trước khi chia sẻ.
       </p>
     </section>
 
-    <section class="om-privacy" aria-labelledby="om-privacy-title">
-      <div class="om-wrap om-privacy-inner">
-        <div data-om-reveal>
-          <p class="om-label">Riêng tư</p>
-          <h2 id="om-privacy-title">
-            Máy của bạn.<br />Dữ liệu của bạn.<br /><em>Quyền chọn của bạn.</em>
-          </h2>
-        </div>
-        <div class="om-privacy-points">
-          <article data-om-reveal>
-            <div>
-              <h3>Không đi vòng qua đám mây.</h3>
-              <p>
-                Nhận diện, ẩn và khôi phục ngay trên thiết bị. Không máy chủ xử lý, không theo dõi
-                cách bạn dùng.
-              </p>
-            </div>
-          </article>
-          <article data-om-reveal>
-            <div>
-              <h3>Lưu lại, khi bạn muốn.</h3>
-              <p>
-                Đặt mật mã để giữ lịch sử trong kho mã hóa cục bộ. Chưa đặt mật mã? Phiên riêng tư
-                chỉ ở trong bộ nhớ.
-              </p>
-            </div>
-          </article>
-          <article data-om-reveal>
-            <div>
-              <h3>Thêm nhận diện. Vẫn offline.</h3>
-              <p>
-                Quy tắc cơ bản dùng ngay. Gói nhận diện tiếng Việt tùy chọn giúp gợi ý thêm tên, địa
-                chỉ và tổ chức; chỉ tải khi bạn yêu cầu.
-              </p>
-            </div>
-          </article>
-          <article data-om-reveal>
-            <div>
-              <h3>Tự kiểm chứng.</h3>
-              <p>
-                Cài xong, tắt Wi‑Fi rồi dùng thử: ẩn và khôi phục vẫn chạy. Mã nguồn công khai để ai
-                cũng có thể xem ứng dụng làm gì.
-                <a href="https://github.com/fongfan999/offlinemask"
-                  >Xem mã nguồn <span aria-hidden="true">↗</span></a
-                >
-              </p>
-            </div>
-          </article>
+    <section class="om-privacy" id="om-privacy" aria-labelledby="om-privacy-title">
+      <div class="om-wrap">
+        <h2 id="om-privacy-title" class="om-display" data-om-reveal>
+          Thông tin thật<br /><em>ở lại trên máy bạn.</em>
+        </h2>
+        <p class="om-display-sub" data-om-reveal>
+          Chỉ bản đã thay mã đi tới AI. Không máy chủ, không tài khoản, không theo dõi.
+        </p>
+        <div class="om-split" data-om-split>
+          <div class="om-side om-side-local">
+            <p class="om-side-label"><span class="om-dot"></span> Máy của bạn</p>
+            <h3>Bảng đối chiếu</h3>
+            <ul class="om-pairs">
+              <li><span>Nguyễn Minh Anh</span><code>[AN_THEM_1_625f]</code></li>
+              <li><span>001234567890</span><code>[STK_1_625f]</code></li>
+              <li><span>0901234567</span><code>[SDT_1_625f]</code></li>
+              <li><span>minh.anh@example.com</span><code>[EMAIL_1_625f]</code></li>
+            </ul>
+            <p class="om-side-foot">
+              Chỉ ở trong bộ nhớ, hoặc trong kho mã hóa nếu bạn đặt mật mã.
+            </p>
+          </div>
+          <div class="om-channel" aria-hidden="true"><span>Ranh giới</span></div>
+          <div class="om-side om-side-ai">
+            <p class="om-side-label">ChatGPT · Claude · Gemini…</p>
+            <h3>AI chỉ thấy</h3>
+            <p class="om-ai-text">
+              Tôi là <code>[AN_THEM_1_625f]</code>, chủ tài khoản <code>[STK_1_625f]</code>. Có thể
+              liên hệ qua số <code>[SDT_1_625f]</code> hoặc email <code>[EMAIL_1_625f]</code>.
+            </p>
+            <p class="om-side-foot">
+              Bạn tự sao chép hoặc tải lên. OfflineMask không kết nối với AI nào.
+            </p>
+          </div>
         </div>
       </div>
     </section>
-    <section class="om-section om-faq om-wrap" id="om-faq" aria-labelledby="om-faq-title">
-      <div class="om-heading" data-om-reveal>
-        <p class="om-label">Câu hỏi</p>
-        <h2 id="om-faq-title">Một vài điều<br /><em>bạn nên biết.</em></h2>
-      </div>
+
+    <section class="om-faq om-wrap" id="om-faq" aria-labelledby="om-faq-title">
+      <h2 id="om-faq-title" class="om-display" data-om-reveal>
+        Một vài điều<br /><em>bạn nên biết.</em>
+      </h2>
       <div class="om-questions" data-om-reveal>
         <details>
           <summary>Có cần Internet để sử dụng không?<span aria-hidden="true">+</span></summary>
@@ -300,90 +281,97 @@
         </details>
       </div>
     </section>
-    <section
-      class="om-download om-wrap"
-      id="om-download"
-      aria-labelledby="om-download-title"
-      data-om-reveal
-    >
-      <p class="om-label">Tải về</p>
-      <h2 id="om-download-title">Thêm AI vào công việc.<br /><em>Giữ riêng tư ở lại.</em></h2>
-      <p>Phiên bản __OM_VERSION__ · Mã nguồn mở · Không cần tài khoản</p>
-      <a
-        class="om-button"
-        href="https://github.com/fongfan999/offlinemask/releases/latest"
-        data-om-download
-        ><span data-om-download-label>Chọn bản tải về</span> <span aria-hidden="true">↗</span></a
-      >
-      <p class="om-download-platforms" data-om-download-detail>macOS · Windows · Linux</p>
-      <details class="om-platforms">
-        <summary>Tất cả bản tải về</summary>
-        <dl>
-          <div>
-            <dt>macOS</dt>
-            <dd>
-              <a
-                href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___aarch64.dmg"
-                data-om-platform="mac-arm"
-                >Apple Silicon · .dmg</a
-              ><a
-                href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___x64.dmg"
-                data-om-platform="mac-intel"
-                >Intel · .dmg</a
-              >
-            </dd>
-          </div>
-          <div>
-            <dt>Windows</dt>
-            <dd>
-              <a
-                href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___x64-setup.exe"
-                data-om-platform="windows"
-                >Bộ cài .exe</a
-              ><a
-                href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___x64_en-US.msi"
-                >.msi</a
-              >
-            </dd>
-          </div>
-          <div>
-            <dt>Linux</dt>
-            <dd>
-              <a
-                href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___amd64.AppImage"
-                >.AppImage</a
-              ><a
-                href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___amd64.deb"
-                >.deb</a
-              ><a
-                href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask-__OM_VERSION__-1.x86_64.rpm"
-                >.rpm</a
-              >
-            </dd>
-          </div>
-        </dl>
-        <p>
-          <a
-            href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/SHA256SUMS.txt"
-            >SHA256SUMS.txt</a
-          >
-          để đối chiếu tệp tải về ·
-          <a href="https://github.com/fongfan999/offlinemask/releases/tag/v__OM_VERSION__"
-            >Ghi chú phát hành ↗</a
+
+    <section class="om-download" id="om-download" aria-labelledby="om-download-title">
+      <div class="om-wash" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+      <div class="om-download-inner om-wrap" data-om-reveal>
+        <h2 id="om-download-title" class="om-display">
+          Thêm AI vào công việc.<br /><em>Giữ riêng tư ở lại.</em>
+        </h2>
+        <p>Phiên bản __OM_VERSION__ · Mã nguồn mở · Không cần tài khoản</p>
+        <a
+          class="om-button"
+          href="https://github.com/fongfan999/offlinemask/releases/latest"
+          data-om-download
+          ><span data-om-download-label>Chọn bản tải về</span> <span aria-hidden="true">↓</span></a
+        >
+        <p class="om-download-platforms" data-om-download-detail>macOS · Windows · Linux</p>
+        <details class="om-platforms">
+          <summary>Tất cả bản tải về</summary>
+          <dl>
+            <div>
+              <dt>macOS</dt>
+              <dd>
+                <a
+                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___aarch64.dmg"
+                  data-om-platform="mac-arm"
+                  >Apple Silicon · .dmg</a
+                ><a
+                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___x64.dmg"
+                  data-om-platform="mac-intel"
+                  >Intel · .dmg</a
+                >
+              </dd>
+            </div>
+            <div>
+              <dt>Windows</dt>
+              <dd>
+                <a
+                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___x64-setup.exe"
+                  data-om-platform="windows"
+                  >Bộ cài .exe</a
+                ><a
+                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___x64_en-US.msi"
+                  >.msi</a
+                >
+              </dd>
+            </div>
+            <div>
+              <dt>Linux</dt>
+              <dd>
+                <a
+                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___amd64.AppImage"
+                  >.AppImage</a
+                ><a
+                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___amd64.deb"
+                  >.deb</a
+                ><a
+                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask-__OM_VERSION__-1.x86_64.rpm"
+                  >.rpm</a
+                >
+              </dd>
+            </div>
+          </dl>
+          <p>
+            <a
+              href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/SHA256SUMS.txt"
+              >SHA256SUMS.txt</a
+            >
+            để đối chiếu tệp tải về ·
+            <a href="https://github.com/fongfan999/offlinemask/releases/tag/v__OM_VERSION__"
+              >Ghi chú phát hành ↗</a
+            >
+          </p>
+        </details>
+        <p class="om-release-note">
+          Đã kiểm thử thủ công trên macOS Apple Silicon; các bản khác chưa được kiểm thử đầy đủ. Bản
+          phát hành chưa được ký số, nên máy có thể hỏi lại trước khi mở lần đầu.
+          <a href="https://github.com/fongfan999/offlinemask/blob/main/docs/install.md"
+            >Cách cài và kiểm tra tệp ↗</a
           >
         </p>
-      </details>
-      <p class="om-release-note">
-        Đã kiểm thử thủ công trên macOS Apple Silicon; các bản khác chưa được kiểm thử đầy đủ. Bản
-        phát hành chưa được ký số, nên máy có thể hỏi lại trước khi mở lần đầu.
-      </p>
-      <a
-        class="om-text-link"
-        href="https://github.com/fongfan999/offlinemask/blob/main/docs/install.md"
-        >Cách cài, mở lần đầu và kiểm tra tệp <span aria-hidden="true">↗</span></a
-      >
+      </div>
     </section>
   </main>
+  <div class="om-dock" data-om-dock>
+    <a
+      class="om-dock-button"
+      href="https://github.com/fongfan999/offlinemask/releases/latest"
+      data-om-download
+      ><span data-om-download-label>Tải OfflineMask</span> <span aria-hidden="true">↓</span></a
+    >
+    <p>macOS · Windows · Linux · Mã nguồn mở</p>
+  </div>
   <footer class="om-footer om-wrap">
     <a class="om-brand" href="#om-main"
       ><span class="om-mark" aria-hidden="true"></span><span>Offline<span>Mask</span></span></a

@@ -1,14 +1,8 @@
 import { gsap } from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { demoStages, demoValues } from "./demo.js";
 
 gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
-
-// Values pass through redaction blocks on their way to and from their codes.
-const redaction = "█▓▒░";
-const morph = (text) => ({ text, chars: redaction, speed: 0.5 });
-const stageHold = 3.6;
 
 const downloadLabels = {
   "mac-arm": "Tải cho macOS",
@@ -31,31 +25,27 @@ async function detectPlatform() {
   }
 }
 
-/** Builds a stage's document from trusted static parts; no HTML strings are parsed. */
-function renderDocument(container, stage, aliases) {
-  container.replaceChildren(
-    ...stage.document.map((parts) => {
-      const paragraph = document.createElement("p");
-      for (const part of parts) {
-        if (typeof part === "string") {
-          paragraph.append(part);
-        } else if (part.strong) {
-          const strong = document.createElement("strong");
-          strong.textContent = part.strong;
-          paragraph.append(strong);
-        } else {
-          const { real, alias, kind } = demoValues[part.value];
-          const value = document.createElement("span");
-          value.className = "om-v";
-          Object.assign(value.dataset, { real, alias, kind });
-          value.textContent = aliases ? alias : real;
-          paragraph.append(value);
-        }
+/** Wraps each letter of the decorative wordmark so it can rise in; returns an undo. */
+function splitWordmark(wordmark) {
+  const original = [...wordmark.childNodes].map((node) => node.cloneNode(true));
+  const letters = [];
+  const split = (node) => {
+    for (const child of [...node.childNodes]) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        const spans = [...child.textContent].map((letter) => {
+          const span = document.createElement("span");
+          span.textContent = letter;
+          letters.push(span);
+          return span;
+        });
+        child.replaceWith(...spans);
+      } else {
+        split(child);
       }
-      return paragraph;
-    }),
-  );
-  return [...container.querySelectorAll(".om-v")];
+    }
+  };
+  split(wordmark);
+  return { letters, undo: () => wordmark.replaceChildren(...original) };
 }
 
 /** Values cross the boundary as codes once the diagram scrolls into view. */
@@ -78,204 +68,165 @@ function animateBoundary(root) {
     );
 }
 
-/** Each format preview sweeps its redaction marks in once it scrolls into view. */
-function animateFormatPreviews(root) {
-  root.querySelectorAll("[data-om-preview]").forEach((preview) =>
-    gsap.from(preview.querySelectorAll("b"), {
-      scaleX: 0,
-      transformOrigin: "left center",
-      duration: 0.45,
-      stagger: 0.08,
-      ease: "power2.out",
-      delay: 0.2,
-      scrollTrigger: { trigger: preview, start: "top 88%", once: true },
-    }),
-  );
-}
-
 /** Mount on one page root; dispose before replacing that root (including Astro navigation). */
 export function initOfflineMask(root) {
   if (!root) return () => {};
   const media = gsap.matchMedia();
-  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const controls = root.querySelector("[data-om-controls]");
-  const tabs = [...controls.querySelectorAll("[data-om-mode]")];
-  const bars = tabs.map((tab) => tab.querySelector("i"));
-  const play = root.querySelector("[data-om-play]");
-  const sheet = root.querySelector("[data-om-stage]");
-  const documentBody = sheet.querySelector("[data-om-document]");
-  const where = sheet.querySelector("[data-om-where]");
-  const file = sheet.querySelector("[data-om-file]");
-  const note = sheet.querySelector("[data-om-note]");
-  const staticDocument = [...documentBody.childNodes];
-  const download = root.querySelector("[data-om-download]");
-  const downloadLabel = root.querySelector("[data-om-download-label]");
-  const downloadDetail = root.querySelector("[data-om-download-detail]");
-  const downloadFallback = [
-    download.getAttribute("href"),
-    downloadLabel.textContent,
-    downloadDetail.textContent,
-  ];
+  const hero = root.querySelector(".om-hero");
+  const heroWindow = root.querySelector("[data-om-hero-window]");
+  const wordmark = root.querySelector("[data-om-wordmark]");
+  const dock = root.querySelector("[data-om-dock]");
+  const navDownload = root.querySelector("[data-om-nav-download]");
+  const steps = [...root.querySelectorAll("[data-om-step]")];
+  const shots = [...root.querySelectorAll("[data-om-shot]")];
+  const downloads = [...root.querySelectorAll("[data-om-download]")].map((link) => ({
+    link,
+    href: link.getAttribute("href"),
+    label: link.querySelector("[data-om-download-label]"),
+    text: link.querySelector("[data-om-download-label]").textContent,
+  }));
+  const detail = root.querySelector("[data-om-download-detail]");
+  const detailText = detail.textContent;
   let disposed = false;
-  let current = demoStages.find((stage) => stage.id === "masked");
-  let feedback;
-  let playback;
-  let interacted = false;
-  controls.hidden = play.hidden = false;
 
-  function stop() {
-    playback?.kill();
-    playback = undefined;
-    gsap.set(bars, { scaleX: 0 });
-    play.textContent = "↻ Xem lại";
-    play.setAttribute("aria-label", "Xem lại toàn bộ ví dụ");
+  root.classList.add("om-js");
+  function activate(index) {
+    steps.forEach((step, i) => step.classList.toggle("om-active", i === index));
+    shots.forEach((shot, i) => shot.classList.toggle("om-shown", i === index));
   }
-  function showStage(destination, animate = true) {
-    const stage = demoStages.find(({ id }) => id === destination);
-    if (!stage) return;
-    feedback?.revert();
-    const previous = current;
-    const motion = animate && !reduceMotion.matches;
-    current = stage;
-    sheet.dataset.omStage = stage.id;
-    where.textContent = stage.where;
-    file.textContent = stage.file;
-    note.textContent = stage.note;
-    tabs.forEach((tab) =>
-      tab.setAttribute("aria-pressed", String(tab.dataset.omMode === stage.id)),
-    );
+  activate(0);
+  const triggers = [
+    ...steps.map((step, index) =>
+      ScrollTrigger.create({
+        trigger: step,
+        start: "top 60%",
+        end: "bottom 60%",
+        onToggle: (self) => self.isActive && activate(index),
+      }),
+    ),
+    // The dock steps aside where the full download section is on screen.
+    ScrollTrigger.create({
+      trigger: "#om-download",
+      start: "top 90%",
+      end: "bottom top",
+      onToggle: (self) => dock.classList.toggle("om-hidden", self.isActive),
+    }),
+    ScrollTrigger.create({
+      trigger: hero,
+      start: "55% top",
+      onToggle: (self) => navDownload.classList.toggle("om-visible", self.isActive),
+    }),
+  ];
 
-    // Masking and unmasking happen in place; a reply arrives in codes and is then restored.
-    const inPlace = motion && previous.document === stage.document && previous !== stage;
-    const restoring = motion && !inPlace && stage.id === "restored";
-    const values = inPlace
-      ? [...documentBody.querySelectorAll(".om-v")]
-      : renderDocument(documentBody, stage, stage.masked || restoring);
-    values.forEach((value) => {
-      value.classList.toggle("om-masked", restoring);
-      value.classList.toggle("om-restored", stage.id === "restored" && !restoring);
-    });
-    if (!motion) return;
-    feedback = gsap.context(() => {
-      gsap.fromTo(
-        sheet,
-        { y: 6 },
-        { y: 0, duration: 0.4, ease: "power3.out", clearProps: "transform" },
-      );
-      if (inPlace || restoring)
-        gsap.to(values, {
-          scrambleText: (index, value) =>
-            morph(stage.masked ? value.dataset.alias : value.dataset.real),
-          duration: 0.75,
-          stagger: 0.1,
-          delay: restoring ? 0.7 : 0,
-          ease: "none",
-          onComplete() {
-            if (restoring)
-              values.forEach((value) => value.classList.replace("om-masked", "om-restored"));
-          },
-        });
-    }, root);
-  }
-  // One finite sequence, started by the visitor or once on first view. Each stage can also be
-  // selected directly, and any control stops it.
-  function startPlayback() {
-    showStage("original");
-    play.textContent = "❚❚ Dừng";
-    play.setAttribute("aria-label", "Dừng ví dụ");
-    playback = gsap.timeline({ onComplete: stop });
-    demoStages.forEach((stage, index) => {
-      const start = index * stageHold;
-      if (index) playback.call(() => showStage(stage.id), [], start);
-      playback
-        .fromTo(bars[index], { scaleX: 0 }, { scaleX: 1, duration: stageHold, ease: "none" }, start)
-        .set(bars[index], { scaleX: 0 }, start + stageHold);
-    });
-  }
-  function select(event) {
-    const tab = event.target.closest("[data-om-mode]");
-    if (!tab) return;
-    interacted = true;
-    stop();
-    showStage(tab.dataset.omMode);
-  }
-  function togglePlayback() {
-    interacted = true;
-    if (playback) stop();
-    else startPlayback();
-  }
-  function autoplay() {
-    if (!disposed && !interacted && !playback && !reduceMotion.matches && !document.hidden)
-      startPlayback();
-  }
-  function stopOnHidden() {
-    if (document.hidden) stop();
-  }
-  function stopForPreference() {
-    stop();
-    feedback?.revert();
-    showStage(current.id, false);
-  }
-  controls.addEventListener("click", select);
-  play.addEventListener("click", togglePlayback);
-  document.addEventListener("visibilitychange", stopOnHidden);
-  reduceMotion.addEventListener("change", stopForPreference);
-  stop();
-  showStage(current.id, false);
-  // Without JavaScript, or on an undetected platform, the button opens the release page.
+  // Without JavaScript, or on an undetected platform, the buttons open the release page.
   detectPlatform().then((platform) => {
     const link = platform && root.querySelector(`[data-om-platform="${platform}"]`);
     if (disposed || !link) return;
-    download.href = link.href;
-    downloadLabel.textContent = downloadLabels[platform];
-    downloadDetail.textContent = `${link.textContent} · Máy khác? Xem tất cả bản tải về`;
+    for (const download of downloads) {
+      download.link.href = link.href;
+      download.label.textContent = downloadLabels[platform];
+    }
+    detail.textContent = `${link.textContent} · Máy khác? Xem tất cả bản tải về`;
   });
 
   media.add(
     "(prefers-reduced-motion: no-preference)",
     () => {
-      gsap.from(root.querySelectorAll("[data-om-enter]"), {
-        y: 24,
-        autoAlpha: 0,
-        duration: 0.9,
-        stagger: 0.08,
-        ease: "power3.out",
-        clearProps: "transform,opacity,visibility",
+      const { letters, undo } = splitWordmark(wordmark);
+      const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
+      intro
+        .from(root.querySelectorAll(".om-hero [data-om-enter]"), {
+          y: 18,
+          autoAlpha: 0,
+          duration: 1,
+          stagger: 0.12,
+        })
+        .from(
+          letters,
+          { yPercent: 70, autoAlpha: 0, rotate: 6, duration: 1.2, stagger: 0.035 },
+          0.1,
+        )
+        .from(
+          heroWindow,
+          {
+            y: 160,
+            rotateX: 16,
+            scale: 0.92,
+            autoAlpha: 0,
+            transformPerspective: 1600,
+            duration: 1.6,
+            clearProps: "transform,opacity,visibility",
+          },
+          0.35,
+        )
+        .from(
+          "[data-om-sticker]",
+          { scale: 0, rotate: -80, duration: 0.9, ease: "back.out(2.2)" },
+          1.1,
+        )
+        .from("[data-om-float]", { y: 24, autoAlpha: 0, duration: 0.8, stagger: 0.18 }, 1.25)
+        .from(
+          "[data-om-code]",
+          {
+            scrambleText: { text: "████████", chars: "█▓▒░", speed: 0.6 },
+            duration: 1,
+            stagger: 0.18,
+          },
+          1.35,
+        );
+      // Gentle idle drift so the hero never feels frozen.
+      gsap.to("[data-om-sticker]", {
+        rotate: 22,
+        duration: 5,
+        ease: "sine.inOut",
+        yoyo: true,
+        repeat: -1,
+        delay: 2,
       });
-      ScrollTrigger.create({
-        trigger: sheet,
-        start: "top 85%",
-        once: true,
-        onEnter: () => gsap.delayedCall(0.8, autoplay),
+      gsap.utils.toArray(root.querySelectorAll("[data-om-float]")).forEach((float, index) =>
+        gsap.to(float, {
+          y: index ? 10 : -10,
+          duration: 3.4 + index,
+          ease: "sine.inOut",
+          yoyo: true,
+          repeat: -1,
+          delay: 2.2,
+        }),
+      );
+      // Scroll: the wordmark sinks behind the window as the page moves on.
+      gsap.to(wordmark, {
+        yPercent: 35,
+        autoAlpha: 0.25,
+        ease: "none",
+        scrollTrigger: { trigger: hero, start: "top top", end: "60% top", scrub: true },
       });
       root.querySelectorAll("[data-om-reveal]").forEach((element) =>
         gsap.from(element, {
-          y: 24,
-          duration: 0.7,
-          ease: "power2.out",
-          clearProps: "transform",
-          scrollTrigger: { trigger: element, start: "top 92%", once: true },
+          y: 30,
+          autoAlpha: 0,
+          duration: 0.9,
+          ease: "expo.out",
+          scrollTrigger: { trigger: element, start: "top 88%", once: true },
         }),
       );
       animateBoundary(root);
-      animateFormatPreviews(root);
+      return undo;
     },
     root,
   );
   return () => {
     disposed = true;
-    gsap.killTweensOf(autoplay);
-    download.setAttribute("href", downloadFallback[0]);
-    [downloadLabel.textContent, downloadDetail.textContent] = downloadFallback.slice(1);
-    stop();
-    feedback?.revert();
+    triggers.forEach((trigger) => trigger.kill());
     media.revert();
-    controls.removeEventListener("click", select);
-    play.removeEventListener("click", togglePlayback);
-    document.removeEventListener("visibilitychange", stopOnHidden);
-    reduceMotion.removeEventListener("change", stopForPreference);
-    sheet.dataset.omStage = "masked";
-    documentBody.replaceChildren(...staticDocument);
-    controls.hidden = play.hidden = true;
+    for (const download of downloads) {
+      download.link.setAttribute("href", download.href);
+      download.label.textContent = download.text;
+    }
+    detail.textContent = detailText;
+    dock.classList.remove("om-hidden");
+    navDownload.classList.remove("om-visible");
+    steps.forEach((step) => step.classList.remove("om-active"));
+    shots.forEach((shot) => shot.classList.remove("om-shown"));
+    root.classList.remove("om-js");
   };
 }
