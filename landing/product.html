@@ -234,51 +234,54 @@
         <ol class="om-story-steps">
           <li data-om-step>
             <span class="om-step-number">01</span>
-            <h3>Ẩn những gì AI không cần biết</h3>
+            <h3>Ẩn thông tin riêng</h3>
             <p>
-              Dán văn bản hoặc mở tệp. OfflineMask tô sáng tên, số điện thoại, số tài khoản…; bạn
-              xem lại và chọn những gì muốn ẩn.
+              Dán văn bản hoặc mở tệp. OfflineMask tô sáng tên, số điện thoại, số tài khoản… để bạn
+              xem lại trước khi ẩn.
             </p>
-            <img
-              class="om-step-shot"
-              src="./shots/text-original.webp"
-              width="2048"
-              height="1216"
-              loading="lazy"
-              alt="Bản gốc trong OfflineMask: họ tên, số tài khoản, số điện thoại và email được tô sáng."
-            />
+            <div class="om-step-crop" style="--fx: 75%; --fy: 94%">
+              <img
+                src="./shots/text-original.webp"
+                width="2048"
+                height="1216"
+                loading="lazy"
+                alt="Bản gốc trong OfflineMask: họ tên, số tài khoản, số điện thoại và email được tô sáng."
+              />
+            </div>
           </li>
           <li data-om-step>
             <span class="om-step-number">02</span>
             <h3>Hỏi AI như mọi khi</h3>
             <p>
-              Sao chép bản đã thay mã sang công cụ AI bạn dùng (ChatGPT, Claude, Gemini…). AI vẫn đủ
-              ngữ cảnh để tóm tắt, soạn thư hay phân tích.
+              Sao chép bản đã thay mã sang AI bạn hay dùng. AI vẫn đủ ý để tóm tắt, soạn thư hay
+              phân tích.
             </p>
-            <img
-              class="om-step-shot"
-              src="./shots/text-masked.webp"
-              width="2048"
-              height="1216"
-              loading="lazy"
-              alt="Bản đã ẩn trong OfflineMask, sẵn sàng sao chép sang AI."
-            />
+            <div class="om-step-crop" style="--fx: 75%; --fy: 94%">
+              <img
+                src="./shots/text-masked.webp"
+                width="2048"
+                height="1216"
+                loading="lazy"
+                alt="Bản đã ẩn trong OfflineMask: các thông tin được thay bằng mã, sẵn sàng sao chép sang AI."
+              />
+            </div>
           </li>
           <li data-om-step>
             <span class="om-step-number">03</span>
             <h3>Nhận lại bản đầy đủ</h3>
             <p>
-              Dán câu trả lời vào lại. Mỗi mã được đổi về thông tin thật, ngay trên máy, sẵn sàng để
-              dùng tiếp.
+              Dán câu trả lời vào OfflineMask. Mã được đổi lại thành thông tin thật, sẵn sàng dùng
+              tiếp.
             </p>
-            <img
-              class="om-step-shot"
-              src="./shots/text-restored.webp"
-              width="2048"
-              height="1216"
-              loading="lazy"
-              alt="Bước khôi phục: câu trả lời của AI có mã được đổi lại thành thông tin thật."
-            />
+            <div class="om-step-crop" style="--fx: 75%; --fy: 85%">
+              <img
+                src="./shots/text-restored.webp"
+                width="2048"
+                height="1216"
+                loading="lazy"
+                alt="Bước khôi phục: câu trả lời của AI có mã được đổi lại thành thông tin thật."
+              />
+            </div>
           </li>
         </ol>
         <div class="om-story-stage" aria-hidden="true">
@@ -290,14 +293,23 @@
                 width="2048"
                 height="1216"
                 alt=""
+                style="--fx: 75%; --fy: 94%"
                 data-om-shot
               />
-              <img src="./shots/text-masked.webp" width="2048" height="1216" alt="" data-om-shot />
+              <img
+                src="./shots/text-masked.webp"
+                width="2048"
+                height="1216"
+                alt=""
+                style="--fx: 75%; --fy: 94%"
+                data-om-shot
+              />
               <img
                 src="./shots/text-restored.webp"
                 width="2048"
                 height="1216"
                 alt=""
+                style="--fx: 75%; --fy: 85%"
                 data-om-shot
               />
             </div>

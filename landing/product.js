@@ -310,8 +310,10 @@ export function initOfflineMask(root) {
       ScrollTrigger.create({
         trigger: step,
         start: "top 60%",
-        end: "bottom 60%",
-        onToggle: (self) => self.isActive && activate(index),
+        // Entering (also on a load or jump past it) selects the step; scrolling back above it
+        // returns to the one before.
+        onEnter: () => activate(index),
+        onLeaveBack: () => activate(Math.max(index - 1, 0)),
       }),
     ),
     // The dock steps aside from the full download section to the end of the page.

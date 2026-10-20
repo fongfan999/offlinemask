@@ -771,7 +771,7 @@
   margin-top: 40px;
 }
 .om-story-steps li {
-  min-height: 72vh;
+  min-height: 60vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -796,14 +796,18 @@
   color: var(--muted);
   font-size: 17px;
 }
-.om-step-shot {
-  display: none !important;
+.om-step-crop {
+  display: none;
 }
+/* The window stays centred on screen while the steps scroll past it. Its height follows from
+   the column width (1.25 of 2 fractions, less the gap), the shots' 2048x1216 ratio and the bar. */
 .om-story-stage {
+  --stage-h: calc((min(1200px, 100vw - 2 * var(--gutter)) - 64px) * 0.625 * 0.594 + 37px);
   position: sticky;
-  top: 16vh;
+  top: max(16px, calc(50vh - var(--stage-h) / 2));
   align-self: start;
-  margin-block: 24vh;
+  /* The first step's text is centred 30vh into the list; start the window centred beside it. */
+  margin-top: max(0px, 30vh - var(--stage-h) / 2);
 }
 .om-story-stage .om-window {
   border-color: var(--line-strong);
@@ -811,8 +815,15 @@
     0 40px 80px -36px #0f1a4a59,
     14px 14px 0 var(--accent-soft);
 }
+/* Each screenshot is zoomed towards its text panel (--fx, --fy) so the change is readable. */
 .om-story-shots {
   display: grid;
+  overflow: hidden;
+}
+.om-story-shots img,
+.om-step-crop img {
+  scale: 1.45;
+  transform-origin: var(--fx) var(--fy);
 }
 .om-story-shots img {
   grid-area: 1 / 1;
@@ -1359,8 +1370,9 @@
   .om-js .om-story-steps li:not(.om-active) {
     opacity: 1;
   }
-  .om-step-shot {
-    display: block !important;
+  .om-step-crop {
+    display: block;
+    overflow: hidden;
     margin-top: 22px;
     border: 1px solid var(--line-strong);
     border-radius: 12px;
