@@ -1,0 +1,77 @@
+# Repackages the latest Windows release build as an MSIX and checks it (decision 0117),
+# without rebuilding the app: it takes the windows-app-x64 artifact that the release
+# workflow uploads, so a change to the packaging is checked in minutes. The release
+# workflow still builds and checks the MSIX from source for every release.
+name: "Windows: MSIX check"
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Release workflow run to take the built app from; empty takes the newest"
+        required: false
+        type: string
+  push:
+    branches: [main]
+    paths:
+      - "desktop/store/**"
+      - "desktop/scripts/build-msix.mjs"
+      - "desktop/scripts/check-msix.ps1"
+      - ".github/workflows/msix.yml"
+
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  msix:
+    name: Package and check (windows-latest)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+        with:
+          install_args: node
+      - name: Find the built app
+        id: source
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RUN_ID: ${{ inputs.run_id }}
+        run: |
+          if [[ -z "$RUN_ID" ]]; then
+            RUN_ID=$(gh api "repos/$GITHUB_REPOSITORY/actions/artifacts?name=windows-app-x64&per_page=1" --jq '.artifacts[0].workflow_run.id // empty')
+          fi
+          if [[ -z "$RUN_ID" ]]; then
+            echo "::notice::No windows-app-x64 artifact yet; run the release workflow once. Nothing to check."
+            exit 0
+          fi
+          echo "Using the app built by https://github.com/$GITHUB_REPOSITORY/actions/runs/$RUN_ID"
+          echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
+      - uses: actions/download-artifact@v4
+        if: steps.source.outputs.run_id
+        with:
+          name: windows-app-x64
+          run-id: ${{ steps.source.outputs.run_id }}
+          github-token: ${{ github.token }}
+          path: desktop/src-tauri/target/release
+      - run: mise exec -- node desktop/scripts/build-msix.mjs --test-sign
+        if: steps.source.outputs.run_id
+      - name: Install, start and certify the MSIX
+        if: steps.source.outputs.run_id
+        shell: pwsh
+        run: ./desktop/scripts/check-msix.ps1
+      - uses: actions/upload-artifact@v4
+        if: always() && steps.source.outputs.run_id
+        with:
+          name: msix-windows-x64
+          path: |
+            desktop/artifacts/msix/*.msix
+            desktop/artifacts/msix/*.cer
+            desktop/artifacts/msix/wack-report.xml
+          if-no-files-found: warn

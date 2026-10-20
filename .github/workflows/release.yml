@@ -193,6 +193,18 @@ jobs:
       - run: mise exec -- pnpm -C desktop ${{ matrix.command }}
         env:
           MISE_DISABLE_TOOLS: ${{ matrix.name == 'macos-x64' && 'pnpm' || '' }}
+      # The built app before packaging, so the "Windows: MSIX check" workflow can repackage
+      # it in minutes instead of rebuilding (decision 0117).
+      - uses: actions/upload-artifact@v4
+        if: matrix.name == 'windows-x64'
+        with:
+          name: windows-app-x64
+          path: |
+            desktop/src-tauri/target/release/OfflineMask.exe
+            desktop/src-tauri/target/release/native/
+            desktop/src-tauri/target/release/licenses/
+          if-no-files-found: error
+          retention-days: 30
       # Microsoft Store package (decision 0117). The unsigned .msix is what Partner Center
       # takes; it is kept as a run artifact, not attached to the GitHub release, because
       # Windows will not install an unsigned MSIX. A test-signed copy is installed and
@@ -200,42 +212,10 @@ jobs:
       - name: MSIX package (Windows)
         if: matrix.name == 'windows-x64'
         run: mise exec -- node desktop/scripts/build-msix.mjs --test-sign
-      - name: Install and start the test-signed MSIX (Windows)
+      - name: Install, start and certify the MSIX (Windows)
         if: matrix.name == 'windows-x64'
         shell: pwsh
-        run: |
-          $ErrorActionPreference = 'Stop'
-          $signed = Get-ChildItem desktop/artifacts/msix/*_test-signed.msix | Select-Object -First 1
-          $cer = Get-ChildItem desktop/artifacts/msix/*_test-signed.cer | Select-Object -First 1
-          Import-Certificate -FilePath $cer.FullName -CertStoreLocation Cert:\LocalMachine\TrustedPeople | Out-Null
-          Add-AppxPackage -Path $signed.FullName
-          $package = Get-AppxPackage | Where-Object { $_.Name -like '*OfflineMask*' } | Select-Object -First 1
-          if (-not $package) { throw 'The MSIX did not install' }
-          "Installed $($package.PackageFullName) at $($package.InstallLocation)"
-          # The bundled helper must load its runtime from the read-only package folder.
-          mise exec -- node desktop/scripts/smoke-native-helper.mjs (Join-Path $package.InstallLocation 'native')
-          Start-Process "shell:AppsFolder\$($package.PackageFamilyName)!OfflineMask"
-          Start-Sleep -Seconds 20
-          $running = Get-Process -Name OfflineMask -ErrorAction SilentlyContinue
-          if (-not $running) { throw 'OfflineMask was not running 20 s after launch from the package' }
-          "OfflineMask is running (pid $($running.Id -join ', '))"
-          $running | Stop-Process -Force
-          Remove-AppxPackage -Package $package.PackageFullName
-      - name: Windows App Certification Kit (Windows, report only)
-        if: matrix.name == 'windows-x64'
-        shell: pwsh
-        run: |
-          $appcert = 'C:\Program Files (x86)\Windows Kits\10\App Certification Kit\appcert.exe'
-          if (-not (Test-Path $appcert)) { "::warning::appcert.exe is not on this runner; run WACK on a Windows PC before submitting."; exit 0 }
-          $signed = Get-ChildItem desktop/artifacts/msix/*_test-signed.msix | Select-Object -First 1
-          $report = Join-Path (Resolve-Path desktop/artifacts/msix) 'wack-report.xml'
-          & $appcert reset
-          & $appcert test -appxpackagepath $signed.FullName -reportoutputpath $report
-          if (Test-Path $report) {
-            [xml]$xml = Get-Content $report
-            "Overall: $($xml.REPORT.OVERALL_RESULT)"
-            $xml.SelectNodes('//TEST[RESULT="FAIL"]') | ForEach-Object { "::warning::WACK failed: $($_.NAME)" }
-          } else { "::warning::WACK wrote no report" }
+        run: ./desktop/scripts/check-msix.ps1
       - uses: actions/upload-artifact@v4
         if: matrix.name == 'windows-x64'
         with:
