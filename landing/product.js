@@ -106,6 +106,91 @@ function setupScan(root, motion) {
 }
 
 /**
+ * "Cách hoạt động" on wide screens: the stage is pinned while the section scrolls, and the scroll
+ * position picks the step. Choosing a step title scrolls to it. With motion, each card plays a
+ * short entrance: highlights appear, the AI reply arrives, codes turn back into real values.
+ */
+function setupHow(root, motion) {
+  const how = root.querySelector("[data-om-how]");
+  const steps = [...how.querySelectorAll("[data-om-step]")];
+  const heads = steps.map((step) => step.querySelector("[data-om-step-head]"));
+  const highlights = [...steps[0].querySelectorAll(".om-v")];
+  const reply = steps[1].querySelector("[data-om-ai]");
+  const restored = [...steps[2].querySelectorAll("[data-om-restored] .om-r")];
+  const realValues = restored.map((value) => value.textContent);
+  const codes = ["[TEN_1_4e8c]", "[GD_1_4e8c]", "[STK_1_4e8c]"];
+  let current = -1;
+  let play;
+
+  function enter(index) {
+    play?.kill();
+    if (!motion) return;
+    if (index === 0) {
+      highlights.forEach((value) => value.classList.add("om-dim"));
+      play = gsap.timeline({ delay: 0.35 });
+      highlights.forEach((value, k) =>
+        play.call(() => value.classList.remove("om-dim"), [], k * 0.18),
+      );
+    } else if (index === 1) {
+      play = gsap.fromTo(
+        reply,
+        { autoAlpha: 0, y: 12 },
+        { autoAlpha: 1, y: 0, duration: 0.6, delay: 0.7, ease: "expo.out" },
+      );
+    } else {
+      play = gsap.timeline({ delay: 0.45 });
+      restored.forEach((value, k) => {
+        value.textContent = codes[k];
+        play.to(
+          value,
+          {
+            duration: 0.8,
+            ease: "none",
+            scrambleText: { text: realValues[k], chars: "█▓▒░", speed: 0.5 },
+          },
+          k * 0.2,
+        );
+      });
+    }
+  }
+  function activate(index) {
+    if (index === current) return;
+    current = index;
+    steps.forEach((step, k) => step.classList.toggle("om-active", k === index));
+    heads.forEach((head, k) => head.setAttribute("aria-expanded", String(k === index)));
+    enter(index);
+  }
+  const scroller = ScrollTrigger.create({
+    trigger: how,
+    start: "top top",
+    end: "bottom bottom",
+    onUpdate: (self) =>
+      activate(Math.min(steps.length - 1, Math.floor(self.progress * steps.length))),
+  });
+  function choose(event) {
+    const index = heads.indexOf(event.target.closest("[data-om-step-head]"));
+    if (index < 0) return;
+    const span = scroller.end - scroller.start;
+    window.scrollTo({
+      top: scroller.start + ((index + 0.5) / steps.length) * span,
+      behavior: motion ? "smooth" : "auto",
+    });
+  }
+  activate(Math.min(steps.length - 1, Math.floor(scroller.progress * steps.length)));
+  how.addEventListener("click", choose);
+  return () => {
+    play?.kill();
+    scroller.kill();
+    how.removeEventListener("click", choose);
+    steps.forEach((step, k) => step.classList.toggle("om-active", k === 0));
+    heads.forEach((head) => head.removeAttribute("aria-expanded"));
+    highlights.forEach((value) => value.classList.remove("om-dim"));
+    gsap.set(reply, { clearProps: "all" });
+    restored.forEach((value, k) => (value.textContent = realValues[k]));
+  };
+}
+
+/**
  * The "message to AI" box: one fictional request per role. Its private details turn into codes,
  * then the next role plays while the box is on screen. Choosing a role stops the autoplay. With
  * reduced motion nothing plays and each request is shown already coded.
@@ -270,8 +355,6 @@ export function initOfflineMask(root) {
   const wordmark = root.querySelector("[data-om-wordmark]");
   const dock = root.querySelector("[data-om-dock]");
   const navDownload = root.querySelector("[data-om-nav-download]");
-  const steps = [...root.querySelectorAll("[data-om-step]")];
-  const shots = [...root.querySelectorAll("[data-om-shot]")];
   const downloads = [...root.querySelectorAll("[data-om-download]")].map((link) => ({
     link,
     href: link.getAttribute("href"),
@@ -300,22 +383,7 @@ export function initOfflineMask(root) {
   videoClose.addEventListener("click", closeVideo);
   videoDialog.addEventListener("click", backdropClose);
   videoDialog.addEventListener("close", pauseVideo);
-  function activate(index) {
-    steps.forEach((step, i) => step.classList.toggle("om-active", i === index));
-    shots.forEach((shot, i) => shot.classList.toggle("om-shown", i === index));
-  }
-  activate(0);
   const triggers = [
-    ...steps.map((step, index) =>
-      ScrollTrigger.create({
-        trigger: step,
-        start: "top 60%",
-        // Entering (also on a load or jump past it) selects the step; scrolling back above it
-        // returns to the one before.
-        onEnter: () => activate(index),
-        onLeaveBack: () => activate(Math.max(index - 1, 0)),
-      }),
-    ),
     // The dock steps aside from the full download section to the end of the page.
     ScrollTrigger.create({
       trigger: "#om-download",
@@ -345,12 +413,17 @@ export function initOfflineMask(root) {
     {
       motion: "(prefers-reduced-motion: no-preference)",
       reduce: "(prefers-reduced-motion: reduce)",
+      wide: "(min-width: 861px)",
     },
     (context) => {
       const undoScan = setupScan(root, context.conditions.motion);
+      const undoHow = context.conditions.wide
+        ? setupHow(root, context.conditions.motion)
+        : () => {};
       const undoComposer = setupComposer(root, context.conditions.motion);
       return () => {
         undoScan();
+        undoHow();
         undoComposer();
       };
     },
@@ -451,8 +524,6 @@ export function initOfflineMask(root) {
     detail.textContent = detailText;
     dock.classList.remove("om-hidden");
     navDownload.classList.remove("om-visible");
-    steps.forEach((step) => step.classList.remove("om-active"));
-    shots.forEach((shot) => shot.classList.remove("om-shown"));
     root.classList.remove("om-js");
     videoOpen.hidden = true;
     videoOpen.removeEventListener("click", openVideo);

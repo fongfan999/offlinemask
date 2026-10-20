@@ -230,90 +230,156 @@
       <h2 id="om-how-title" class="om-display" data-om-reveal>
         Ba bước.<br /><em>Tất cả trên máy bạn.</em>
       </h2>
-      <div class="om-story-grid" data-om-story>
-        <ol class="om-story-steps">
-          <li data-om-step>
-            <span class="om-step-number">01</span>
-            <h3>Ẩn thông tin riêng</h3>
-            <p>
-              Dán văn bản hoặc mở tệp. OfflineMask tô sáng tên, số điện thoại, số tài khoản… để bạn
-              xem lại trước khi ẩn.
-            </p>
-            <div class="om-step-crop" style="--fx: 75%; --fy: 94%">
-              <img
-                src="./shots/text-original.webp"
-                width="2048"
-                height="1216"
-                loading="lazy"
-                alt="Bản gốc trong OfflineMask: họ tên, số tài khoản, số điện thoại và email được tô sáng."
-              />
-            </div>
-          </li>
-          <li data-om-step>
-            <span class="om-step-number">02</span>
-            <h3>Hỏi AI như mọi khi</h3>
-            <p>
-              Sao chép bản đã thay mã sang AI bạn hay dùng. AI vẫn đủ ý để tóm tắt, soạn thư hay
-              phân tích.
-            </p>
-            <div class="om-step-crop" style="--fx: 75%; --fy: 94%">
-              <img
-                src="./shots/text-masked.webp"
-                width="2048"
-                height="1216"
-                loading="lazy"
-                alt="Bản đã ẩn trong OfflineMask: các thông tin được thay bằng mã, sẵn sàng sao chép sang AI."
-              />
-            </div>
-          </li>
-          <li data-om-step>
-            <span class="om-step-number">03</span>
-            <h3>Nhận lại bản đầy đủ</h3>
-            <p>
-              Dán câu trả lời vào OfflineMask. Mã được đổi lại thành thông tin thật, sẵn sàng dùng
-              tiếp.
-            </p>
-            <div class="om-step-crop" style="--fx: 75%; --fy: 85%">
-              <img
-                src="./shots/text-restored.webp"
-                width="2048"
-                height="1216"
-                loading="lazy"
-                alt="Bước khôi phục: câu trả lời của AI có mã được đổi lại thành thông tin thật."
-              />
-            </div>
-          </li>
-        </ol>
-        <div class="om-story-stage" aria-hidden="true">
-          <figure class="om-window">
-            <div class="om-window-bar"><i></i><i></i><i></i></div>
-            <div class="om-story-shots">
-              <img
-                src="./shots/text-original.webp"
-                width="2048"
-                height="1216"
-                alt=""
-                style="--fx: 75%; --fy: 94%"
-                data-om-shot
-              />
-              <img
-                src="./shots/text-masked.webp"
-                width="2048"
-                height="1216"
-                alt=""
-                style="--fx: 75%; --fy: 94%"
-                data-om-shot
-              />
-              <img
-                src="./shots/text-restored.webp"
-                width="2048"
-                height="1216"
-                alt=""
-                style="--fx: 75%; --fy: 85%"
-                data-om-shot
-              />
-            </div>
-          </figure>
+      <div class="om-how" data-om-how>
+        <div class="om-how-stage">
+          <ol class="om-how-steps">
+            <li class="om-how-step om-active" data-om-step>
+              <button type="button" class="om-how-head" data-om-step-head>
+                <span class="om-step-number">01</span>
+                <span class="om-how-title">Ẩn thông tin riêng</span>
+              </button>
+              <div class="om-how-body">
+                <p>
+                  Dán văn bản hoặc mở tệp. OfflineMask tô sáng tên, số điện thoại, số tài khoản… để
+                  bạn xem lại trước khi ẩn.
+                </p>
+              </div>
+              <figure
+                class="om-scene"
+                data-om-scene
+                aria-label="Minh họa: thư gốc với các thông tin riêng được tô sáng"
+              >
+                <div class="om-scene-bar">
+                  <span class="om-tile" aria-hidden="true"></span>
+                  <span class="om-scene-crumb"
+                    >OfflineMask <i>/</i> <b>Thư gửi bộ phận hỗ trợ</b></span
+                  >
+                  <span class="om-scene-pill om-scene-pill-warm">Tìm thấy 5 thông tin</span>
+                </div>
+                <div class="om-scene-body">
+                  <p class="om-scene-kicker">Bản gốc</p>
+                  <div class="om-scene-doc">
+                    <p>Kính gửi bộ phận hỗ trợ,</p>
+                    <p>
+                      Tôi là <mark class="om-v">Nguyễn Minh Anh</mark>, chủ tài khoản
+                      <mark class="om-v">001234567890</mark>. Ngày 08/09 tôi chuyển 2.500.000 đồng
+                      nhưng người nhận chưa nhận được, mã giao dịch
+                      <mark class="om-v">GD202609080126</mark>.
+                    </p>
+                    <p>
+                      Xin liên hệ qua số <mark class="om-v">0901234567</mark> hoặc
+                      <mark class="om-v">minh.anh@example.com</mark>.
+                    </p>
+                  </div>
+                </div>
+                <div class="om-scene-foot">
+                  <span class="om-scene-note">Bạn xem lại trước khi ẩn</span>
+                  <span class="om-scene-button">Ẩn thông tin</span>
+                </div>
+              </figure>
+            </li>
+            <li class="om-how-step" data-om-step>
+              <button type="button" class="om-how-head" data-om-step-head>
+                <span class="om-step-number">02</span>
+                <span class="om-how-title">Hỏi AI như mọi khi</span>
+              </button>
+              <div class="om-how-body">
+                <p>
+                  Sao chép bản đã thay mã sang AI bạn hay dùng. AI vẫn đủ ý để tóm tắt, soạn thư hay
+                  phân tích.
+                </p>
+              </div>
+              <figure
+                class="om-scene om-scene-chat"
+                data-om-scene
+                aria-label="Minh họa: cuộc trò chuyện với AI chỉ chứa mã thay thế"
+              >
+                <div class="om-scene-bar">
+                  <span class="om-scene-spark"
+                    ><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                      <path
+                        d="M12 2.5c.5 4.6 2.9 7 7.5 7.5-4.6.5-7 2.9-7.5 7.5-.5-4.6-2.9-7-7.5-7.5 4.6-.5 7-2.9 7.5-7.5Z"
+                      /></svg
+                  ></span>
+                  <span class="om-scene-crumb"><b>Công cụ AI của bạn</b></span>
+                  <span class="om-scene-pill">ChatGPT, Claude, Gemini…</span>
+                </div>
+                <div class="om-scene-body">
+                  <p class="om-bubble om-bubble-me">
+                    Khách hàng <code class="om-c">[TEN_1_4e8c]</code>, tài khoản
+                    <code class="om-c">[STK_1_4e8c]</code>, báo chưa nhận được giao dịch
+                    <code class="om-c">[GD_1_4e8c]</code>. Soạn giúp thư trả lời ngắn gọn.
+                  </p>
+                  <p class="om-bubble om-bubble-ai" data-om-ai>
+                    Chào chị <code class="om-c">[TEN_1_4e8c]</code>, chúng tôi đã kiểm tra giao dịch
+                    <code class="om-c">[GD_1_4e8c]</code> từ tài khoản
+                    <code class="om-c">[STK_1_4e8c]</code>: tiền đang được hoàn lại trong 24 giờ.
+                  </p>
+                </div>
+                <div class="om-scene-foot">
+                  <span class="om-scene-note om-scene-safe"
+                    ><svg
+                      viewBox="0 0 24 26"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linejoin="round"
+                      stroke-linecap="round"
+                      aria-hidden="true"
+                    >
+                      <path d="M12 2 3 5.5v6.2c0 5.6 3.8 10.2 9 12.3 5.2-2.1 9-6.7 9-12.3V5.5Z" />
+                      <path d="m8.2 12.8 2.6 2.6 5-5.2" /></svg
+                    >AI chỉ thấy mã, không thấy tên thật</span
+                  >
+                </div>
+              </figure>
+            </li>
+            <li class="om-how-step" data-om-step>
+              <button type="button" class="om-how-head" data-om-step-head>
+                <span class="om-step-number">03</span>
+                <span class="om-how-title">Nhận lại bản đầy đủ</span>
+              </button>
+              <div class="om-how-body">
+                <p>
+                  Dán câu trả lời vào OfflineMask. Mã được đổi lại thành thông tin thật, sẵn sàng
+                  dùng tiếp.
+                </p>
+              </div>
+              <figure
+                class="om-scene"
+                data-om-scene
+                aria-label="Minh họa: câu trả lời của AI được đổi mã về thông tin thật"
+              >
+                <div class="om-scene-bar">
+                  <span class="om-tile" aria-hidden="true"></span>
+                  <span class="om-scene-crumb">OfflineMask <i>/</i> <b>Khôi phục</b></span>
+                  <span class="om-scene-pill om-scene-pill-cobalt">Đã khôi phục 3 mã</span>
+                </div>
+                <div class="om-scene-body">
+                  <p class="om-scene-kicker">Câu trả lời của AI</p>
+                  <p class="om-scene-quote">
+                    Chào chị <code class="om-c">[TEN_1_4e8c]</code>, chúng tôi đã kiểm tra giao dịch
+                    <code class="om-c">[GD_1_4e8c]</code> từ tài khoản
+                    <code class="om-c">[STK_1_4e8c]</code>…
+                  </p>
+                  <p class="om-scene-kicker om-scene-kicker-cobalt">
+                    Bản đầy đủ, ngay trên máy bạn
+                  </p>
+                  <div class="om-scene-doc">
+                    <p data-om-restored>
+                      Chào chị <mark class="om-r">Nguyễn Minh Anh</mark>, chúng tôi đã kiểm tra giao
+                      dịch <mark class="om-r">GD202609080126</mark> từ tài khoản
+                      <mark class="om-r">001234567890</mark>: tiền đang được hoàn lại trong 24 giờ.
+                    </p>
+                  </div>
+                </div>
+                <div class="om-scene-foot">
+                  <span class="om-scene-note">Không cần dò lại từng mã</span>
+                  <span class="om-scene-button">Sao chép bản đầy đủ</span>
+                </div>
+              </figure>
+            </li>
+          </ol>
         </div>
       </div>
     </section>
