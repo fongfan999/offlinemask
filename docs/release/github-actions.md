@@ -48,7 +48,7 @@ With these repository secrets the macOS builds are signed with Developer ID and 
 | `APPLE_ID`, `APPLE_PASSWORD`, `APPLE_TEAM_ID` | Notarization with an Apple ID and an app-specific password |
 | `APPLE_API_ISSUER`, `APPLE_API_KEY`, `APPLE_API_KEY_CONTENT` | Or notarization with an App Store Connect key; the content is written to a file and passed as `APPLE_API_KEY_PATH` |
 
-The workflow imports the certificate into a temporary keychain before building, because the native build signs the recognition helper itself before the Tauri CLI runs. Only variables that are set are exported, so an unset secret never reaches the build as an empty string. Windows code signing is not configured.
+The workflow imports the certificate into a temporary keychain before building, because the native build signs the recognition helper itself before the Tauri CLI runs. Only variables that are set are exported, so an unset secret never reaches the build as an empty string. Windows code signing is not configured. The owner checklist for obtaining credentials and choosing a Windows certificate is [signing.md](signing.md).
 
 ## What the workflow does not prove
 

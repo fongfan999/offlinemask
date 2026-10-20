@@ -37,7 +37,7 @@ async function visitWebsite(event: MouseEvent) {
   try {
     await openProductWebsite(event);
   } catch {
-    websiteError.value = "Chưa mở được trình duyệt. Bạn có thể truy cập offlinemask.com.";
+    websiteError.value = "Chưa mở được trình duyệt. Bạn có thể truy cập OfflineMask.com.";
   }
 }
 function dateLabel(value: string) {
@@ -145,7 +145,7 @@ defineExpose({
     </nav>
     <footer class="sidebar-footer">
       <a :href="productWebsite" target="_blank" rel="noopener noreferrer" @click="visitWebsite">
-        offlinemask.com<AppIcon name="external" :size="12" />
+        OfflineMask.com<AppIcon name="external" :size="12" />
       </a>
       <span class="app-version" :aria-label="`Phiên bản ${version}`">{{ version }}</span>
       <p v-if="websiteError" class="website-error" role="alert">{{ websiteError }}</p>

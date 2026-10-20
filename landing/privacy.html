@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="OfflineMask không thu thập dữ liệu. Những gì ứng dụng lưu, nơi lưu, và lúc nào nó dùng mạng."
+    />
+    <meta name="theme-color" content="#f7f5ee" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#151713" media="(prefers-color-scheme: dark)" />
+    <link rel="canonical" href="https://offlinemask.com/privacy" />
+    <link rel="icon" href="../brand/mark-ink.svg" type="image/svg+xml" />
+    <title>Quyền riêng tư — OfflineMask</title>
+    <link rel="stylesheet" href="./standalone.css" />
+  </head>
+  <body>
+    <div class="om-page om-doc-page" lang="vi">
+      <header class="om-doc-header om-wrap">
+        <a class="om-brand" href="./"
+          ><span class="om-mark" aria-hidden="true"></span><span>Offline<span>Mask</span></span></a
+        >
+        <a class="om-text-link" href="./">← Về trang chủ</a>
+      </header>
+      <main class="om-doc om-wrap">
+        <p class="om-maker-label">Cập nhật ngày 20 tháng 10 năm 2026</p>
+        <h1>Quyền riêng tư</h1>
+        <p class="om-doc-lead">
+          Ngắn gọn: OfflineMask không thu thập gì. Văn bản, tệp và bảng đối chiếu của bạn ở trên máy
+          bạn. Không tài khoản, không máy chủ, không thống kê sử dụng.
+        </p>
+
+        <h2>Ứng dụng xử lý dữ liệu ở đâu</h2>
+        <p>
+          Nhận diện, ẩn và khôi phục chạy hoàn toàn trên máy tính của bạn. Nội dung bạn dán hoặc mở
+          không được gửi tới chúng tôi hay bất kỳ ai. Bạn tự quyết định sao chép bản đã thay mã sang
+          công cụ AI nào; khi đó, cách dịch vụ đó xử lý nội dung tuân theo chính sách của họ.
+        </p>
+
+        <h2>Ứng dụng lưu gì</h2>
+        <ul>
+          <li>
+            <strong>Khi chưa đặt mật mã:</strong> các phiên làm việc chỉ ở trong bộ nhớ và mất khi
+            bạn đóng ứng dụng.
+          </li>
+          <li>
+            <strong>Khi đã đặt mật mã:</strong> các phiên được lưu trong một tệp mã hóa
+            (<code>sessions.vault</code>) trong thư mục dữ liệu của ứng dụng. Khóa được tạo từ mật
+            mã 6 chữ số bằng Argon2id và nội dung được niêm phong bằng XChaCha20-Poly1305. Mật mã
+            không được lưu ở đâu cả; quên mật mã thì chỉ có thể xóa và bắt đầu lại.
+          </li>
+          <li>
+            <strong>Gói nhận diện tiếng Việt (tùy chọn):</strong> các tệp mô hình nằm trong thư mục
+            dữ liệu của ứng dụng sau khi bạn tải.
+          </li>
+          <li>
+            <strong>Cài đặt:</strong> giao diện sáng hoặc tối và tùy chọn thao tác nhanh, lưu trên
+            máy.
+          </li>
+          <li><strong>Ví dụ mẫu:</strong> văn bản và tệp mẫu có sẵn chỉ chứa dữ liệu giả.</li>
+        </ul>
+
+        <h2>Khi nào ứng dụng dùng mạng</h2>
+        <ul>
+          <li>
+            <strong>Tải gói nhận diện tiếng Việt</strong>, chỉ khi bạn bấm tải trong Cài đặt. Địa
+            chỉ tải và mã SHA-256 của từng tệp được ghi cố định trong
+            <a
+              href="https://github.com/fongfan999/offlinemask/blob/main/desktop/packs/vietnamese-pii-v1.json"
+              >tệp mô tả gói</a
+            >.
+          </li>
+          <li>
+            <strong>Mở OfflineMask.com</strong> trong trình duyệt của bạn, chỉ khi bạn bấm liên kết.
+          </li>
+        </ul>
+        <p>
+          Ngoài ra không có gì khác: không cập nhật tự động, không báo lỗi, không thống kê. Giao
+          diện ứng dụng bị chặn kết nối ra ngoài bởi
+          <a
+            href="https://github.com/fongfan999/offlinemask/blob/main/desktop/src-tauri/tauri.conf.json"
+            >chính sách bảo mật nội dung</a
+          >.
+        </p>
+
+        <h2>Bộ nhớ tạm và phím tắt</h2>
+        <p>
+          Nếu bạn bật thao tác nhanh, ứng dụng chỉ đọc bộ nhớ tạm khi bạn nhấn phím tắt hoặc bấm nút
+          trên bảng nổi, rồi ghi kết quả trở lại. Không có gì được đọc ngầm.
+        </p>
+
+        <h2>Trang web này</h2>
+        <p>
+          OfflineMask.com là trang tĩnh, phục vụ qua Cloudflare. Trang không dùng cookie, không có
+          công cụ phân tích, và tự lưu trữ phông chữ, không tải tài nguyên từ bên thứ ba. Như mọi
+          nhà cung cấp hạ tầng, Cloudflare xử lý địa chỉ IP và thông tin kỹ thuật của yêu cầu để
+          phục vụ trang, theo
+          <a href="https://www.cloudflare.com/privacypolicy/">chính sách của Cloudflare</a>.
+        </p>
+
+        <h2>Kiểm chứng</h2>
+        <p>
+          Mã nguồn công khai trên
+          <a href="https://github.com/fongfan999/offlinemask">GitHub</a>. Bạn có thể tắt Wi‑Fi rồi
+          dùng thử, hoặc theo dõi kết nối bằng Little Snitch hay LuLu. Câu hỏi hoặc phát hiện vấn
+          đề, hãy mở một
+          <a href="https://github.com/fongfan999/offlinemask/issues">issue trên GitHub</a>.
+        </p>
+      </main>
+      <footer class="om-doc-footer om-wrap">
+        <span>© 2026 Phong Phan</span><a href="./">OfflineMask.com</a
+        ><a href="https://github.com/fongfan999/offlinemask/blob/main/LICENSE.md"
+          >Giấy phép O’Saasy ↗</a
+        >
+      </footer>
+    </div>
+    <script type="module" src="./privacy.js"></script>
+  </body>
+</html>

@@ -158,8 +158,8 @@ const errorMessage = computed(() => {
               class="placeholder-link"
               role="link"
               aria-disabled="true"
-              aria-label="offlinemask.com — trang tải gói sắp có"
-              >offlinemask.com</span
+              aria-label="OfflineMask.com — trang tải gói sắp có"
+              >OfflineMask.com</span
             >, rồi chọn tệp để cài.
           </p>
           <button class="quiet-button" disabled aria-describedby="offline-install-hint">

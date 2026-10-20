@@ -1,0 +1,55 @@
+/* The privacy page: a plain reading layout on the product's tokens. */
+.om-doc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding-block: 28px;
+}
+.om-doc {
+  max-width: 720px;
+  padding-block: 56px 96px;
+}
+.om-doc h1 {
+  margin-top: 10px;
+  font: 400 clamp(40px, 5vw, 64px) / 1.1 var(--serif);
+  letter-spacing: -0.03em;
+}
+.om-doc-lead {
+  margin-top: 22px !important;
+  font: 400 clamp(20px, 2vw, 24px) / 1.5 var(--serif);
+}
+.om-doc h2 {
+  margin-top: 48px;
+  font: 400 28px/1.25 var(--serif);
+  letter-spacing: -0.015em;
+}
+.om-doc p,
+.om-doc ul {
+  margin-top: 14px;
+  color: var(--muted);
+}
+.om-doc ul {
+  display: grid;
+  gap: 12px;
+  padding-left: 20px;
+  list-style: disc;
+}
+.om-doc strong {
+  color: var(--ink);
+  font-weight: 600;
+}
+.om-doc a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.om-doc-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 28px;
+  padding-block: 28px 48px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 14px;
+}

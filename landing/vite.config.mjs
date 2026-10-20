@@ -43,5 +43,14 @@ export default defineConfig({
     },
   ],
   server: { port: 4322, strictPort: true },
-  build: { outDir: "dist", emptyOutDir: true },
+  build: {
+    outDir: "dist",
+    emptyOutDir: true,
+    rollupOptions: {
+      input: {
+        index: fileURLToPath(new URL("./index.html", import.meta.url)),
+        privacy: fileURLToPath(new URL("./privacy.html", import.meta.url)),
+      },
+    },
+  },
 });
