@@ -188,7 +188,8 @@ export function initOfflineMask(root) {
   const backdropClose = (event) => event.target === videoDialog && closeVideo();
   videoOpen.hidden = false;
   videoOpen.addEventListener("click", openVideo);
-  videoDialog.querySelector("[data-om-video-close]").addEventListener("click", closeVideo);
+  const videoClose = videoDialog.querySelector("[data-om-video-close]");
+  videoClose.addEventListener("click", closeVideo);
   videoDialog.addEventListener("click", backdropClose);
   videoDialog.addEventListener("close", pauseVideo);
   function activate(index) {
@@ -343,6 +344,7 @@ export function initOfflineMask(root) {
     videoOpen.hidden = true;
     videoOpen.removeEventListener("click", openVideo);
     videoDialog.removeEventListener("click", backdropClose);
+    videoClose.removeEventListener("click", closeVideo);
     videoDialog.removeEventListener("close", pauseVideo);
     if (videoDialog.open) closeVideo();
   };
