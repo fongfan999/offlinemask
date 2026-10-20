@@ -310,6 +310,10 @@
   color: var(--on-cobalt);
 }
 /* The nudge toward the video: the accent's light cobalt, so it reads as a pointer. */
+/* Keeps a short clause on one line, so a phone breaks the line before it. */
+.om-keep {
+  display: inline-block;
+}
 .om-hero-nudge {
   color: #c2cfff;
   font-weight: 500;
