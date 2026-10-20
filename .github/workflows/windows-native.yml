@@ -19,6 +19,9 @@ on:
       - ".github/workflows/windows-native.yml"
       - ".gitattributes"
       - "docs/licenses/**"
+      - "desktop/package.json"
+      - "pnpm-lock.yaml"
+      - "mise.toml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

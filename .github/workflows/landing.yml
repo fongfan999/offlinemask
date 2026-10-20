@@ -1,19 +1,32 @@
+# Verifies the landing page. Cloudflare's GitHub integration builds and deploys
+# offlinemask.com from main on its own (landing/README.md), so this workflow never deploys.
 name: Landing page
 
 on:
   pull_request:
     paths:
-      ["landing/**", "brand/**", "package.json", "pnpm-lock.yaml", ".github/workflows/landing.yml"]
+      - "landing/**"
+      - "brand/**"
+      - "desktop/package.json"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "mise.toml"
+      - "eslint.config.js"
+      - ".github/workflows/landing.yml"
   push:
     branches: [main]
     paths:
-      ["landing/**", "brand/**", "package.json", "pnpm-lock.yaml", ".github/workflows/landing.yml"]
+      - "landing/**"
+      - "brand/**"
+      - "desktop/package.json"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "mise.toml"
+      - "eslint.config.js"
+      - ".github/workflows/landing.yml"
   workflow_dispatch:
-    inputs:
-      deploy:
-        description: Deploy this verified GitHub revision to Cloudflare Workers
-        type: boolean
-        default: false
 
 permissions:
   contents: read
@@ -27,28 +40,3 @@ jobs:
       - run: mise exec -- pnpm install --frozen-lockfile
       - run: mise exec -- pnpm lint
       - run: mise exec -- pnpm -C landing deploy:check
-      - uses: actions/upload-artifact@v4
-        with:
-          name: landing-${{ github.sha }}
-          path: landing/dist
-  deploy:
-    if: github.event_name == 'workflow_dispatch' && inputs.deploy && github.ref == 'refs/heads/main'
-    needs: verify
-    runs-on: ubuntu-latest
-    environment: production
-    concurrency:
-      group: offlinemask-landing-production
-      cancel-in-progress: false
-    steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
-      - run: mise exec -- pnpm install --frozen-lockfile
-      - uses: actions/download-artifact@v4
-        with:
-          name: landing-${{ github.sha }}
-          path: landing/dist
-      - run: mise exec -- pnpm -C landing exec wrangler deploy
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          WRANGLER_SEND_METRICS: "false"

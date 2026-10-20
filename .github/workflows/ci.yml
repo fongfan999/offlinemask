@@ -3,15 +3,28 @@
 # `verify` is the required job and mirrors the local commands in CONTRIBUTING.md.
 # The repository is a pnpm workspace: lint runs at the root, the app's own checks
 # run in desktop/ (so its .cargo/config.toml applies); landing.yml covers landing/.
-# `portability` only compiles the Rust crate on the platforms the project has not
-# qualified yet; it is advisory until Windows/Linux builds are actually tested.
-# Both jobs run on hosted runners on every push to main (see decision 0077 for the Windows job).
+# `portability` only compiles the Rust crate on Linux, which is not qualified yet; it is
+# advisory. Windows is compiled, tested and packaged by windows-native.yml (decision 0077).
+# Changes that only touch the landing page or documentation skip this workflow: landing.yml
+# verifies landing/, and docs/licenses/ still counts because native builds bundle it.
 name: CI
 
 on:
   push:
     branches: [main]
+    paths:
+      - "**"
+      - "!landing/**"
+      - "!docs/**"
+      - "!*.md"
+      - "docs/licenses/**"
   pull_request:
+    paths:
+      - "**"
+      - "!landing/**"
+      - "!docs/**"
+      - "!*.md"
+      - "docs/licenses/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -38,7 +51,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest]
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
