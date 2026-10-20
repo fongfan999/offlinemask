@@ -36,7 +36,7 @@ import BrandMark from "./BrandMark.vue";
         <div class="preview-step"><span class="step-number">2</span>Gửi bản đã ẩn cho AI</div>
         <div class="preview-label"><AppIcon name="sparkle" :size="14" />AI của bạn</div>
         <strong>Hỏi AI như bình thường</strong>
-        <small>ChatGPT, Gemini, Claude, Perplexity…</small>
+        <small>ChatGPT, Claude, Gemini…</small>
       </div>
     </div>
     <figcaption class="preview-return">

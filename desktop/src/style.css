@@ -1,5 +1,16 @@
 @import "../../brand/theme.css";
 
+/* The wordmark's own face (logo rule, brand/README.md): bundled Noto Sans, so the logo
+   reads the same on every system and on offlinemask.com. Latin only; used for nothing else. */
+@font-face {
+  font-family: "OfflineMask Wordmark";
+  font-style: normal;
+  font-display: block;
+  font-weight: 100 900;
+  src: url(@fontsource-variable/noto-sans/files/noto-sans-latin-wght-normal.woff2)
+    format("woff2-variations");
+}
+
 * {
   box-sizing: border-box;
 }
@@ -110,6 +121,9 @@ p {
 /* Wordmark: "Offline" in ink, "Mask" in cobalt — the hidden part is the accent. */
 .brand-name {
   white-space: nowrap;
+  font-family: "OfflineMask Wordmark", var(--sans);
+  font-weight: 750;
+  letter-spacing: -0.04em;
 }
 .brand-accent {
   color: var(--accent);

@@ -90,6 +90,25 @@
   flex-shrink: 0;
 }
 
+/* Logo lockup (brand/README.md): the mark on a cobalt tile, as in the app. */
+.om-brand .om-mark {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 22%;
+  background: var(--accent);
+  -webkit-mask: none;
+  mask: none;
+}
+.om-brand .om-mark::after {
+  content: "";
+  position: absolute;
+  inset: 15%;
+  background: var(--on-accent);
+  -webkit-mask: url("../brand/mark-mono-black.svg") center / contain no-repeat;
+  mask: url("../brand/mark-mono-black.svg") center / contain no-repeat;
+}
+
 /* Floating navigation */
 .om-nav {
   position: fixed;
@@ -1137,6 +1156,7 @@
 }
 .om-footer-about .om-mark {
   width: 30px;
+  height: 30px;
 }
 .om-footer-about p {
   max-width: 280px;

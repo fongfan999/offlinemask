@@ -146,7 +146,7 @@ const packNotice = computed<PackNotice | null>(() => {
     <span class="hero-logo brand-mark" aria-hidden="true">
       <BrandMark :size="38" />
     </span>
-    <h1 ref="heading" tabindex="-1">Ẩn thông tin nhạy cảm<span>trước khi chia sẻ với AI.</span></h1>
+    <h1 ref="heading" tabindex="-1">Ẩn thông tin riêng<span>trước khi chia sẻ với AI.</span></h1>
     <p>Số tài khoản, số điện thoại, họ tên… được đổi thành mã thay thế ngay trên máy bạn.</p>
     <MaskingPreview />
   </div>
