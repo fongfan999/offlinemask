@@ -415,13 +415,16 @@
   top: -42px;
   right: -36px;
   display: grid;
-  place-items: center;
+  place-content: center;
+  justify-items: center;
+  gap: 6px;
   width: 128px;
   height: 128px;
-  background: var(--warm);
-  color: #fffaf2;
-  font: italic 600 21px/1.05 var(--serif);
-  text-align: center;
+  background: #b3c3ff;
+  color: #1c2a66;
+  font: 700 12px/1 var(--sans);
+  letter-spacing: 0.14em;
+  text-indent: 0.14em;
   clip-path: polygon(
     50% 0%,
     61% 12%,
@@ -449,6 +452,10 @@
     39% 12%
   );
   transform: rotate(12deg);
+}
+.om-sticker svg {
+  width: 34px;
+  height: 38px;
 }
 .om-float {
   position: absolute;
@@ -1306,9 +1313,14 @@
   .om-sticker {
     top: -36px;
     right: -6px;
+    gap: 4px;
     width: 86px;
     height: 86px;
-    font-size: 14px;
+    font-size: 9px;
+  }
+  .om-sticker svg {
+    width: 22px;
+    height: 25px;
   }
   .om-float {
     padding: 6px 10px;
