@@ -85,4 +85,4 @@ Only synthetic data belongs in this repository, in issues and in screenshots. Th
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for conventions and the checks to run, and [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for expectations. Agents working in this repository follow [AGENTS.md](AGENTS.md).
 
-OfflineMask is source available under the [O’Saasy License Agreement](LICENSE.md). Copyright © 2026, Phong Phan. Third-party code and the recognition models keep their own licenses, recorded under [`docs/licenses/`](docs/licenses/) and in the pack attribution. See the [license decision](docs/decisions/0050-osaasy-license.md).
+OfflineMask is open source under the [MIT License](LICENSE.md). Copyright © 2026, Phong Phan. Third-party code and the recognition models keep their own licenses, recorded under [`docs/licenses/`](docs/licenses/) and in the pack attribution. See the [license decision](docs/decisions/0116-mit-license.md).

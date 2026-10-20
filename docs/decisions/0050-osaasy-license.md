@@ -1,6 +1,6 @@
 # O’Saasy license choice
 
-Recorded: 8 October 2026. Status: implemented.
+Recorded: 8 October 2026. Status: superseded by [0116](0116-mit-license.md) on 20 October 2026.
 
 The owner selected the [O’Saasy License Agreement](https://osaasy.dev/) for OfflineMask. This supersedes earlier documentation saying the project license had not been selected.
 

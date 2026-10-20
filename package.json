@@ -2,7 +2,7 @@
   "name": "offlinemask",
   "private": true,
   "description": "OfflineMask workspace: the desktop app (desktop/) and the product landing page (landing/)",
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@11.18.0",
   "engines": {
