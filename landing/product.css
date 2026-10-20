@@ -1007,7 +1007,8 @@
   }
   .om-js .om-how-steps {
     grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
-    grid-template-rows: 1fr repeat(6, auto) 1fr;
+    /* The list is anchored to the top of the card, so opening a step never re-centres it. */
+    grid-template-rows: repeat(6, auto) 1fr;
     gap: 0 72px;
     width: 100%;
   }
@@ -1026,22 +1027,22 @@
     cursor: pointer;
   }
   .om-js .om-how-step:nth-child(1) .om-how-head {
-    grid-row: 2;
+    grid-row: 1;
   }
   .om-js .om-how-step:nth-child(1) .om-how-body {
-    grid-row: 3;
+    grid-row: 2;
   }
   .om-js .om-how-step:nth-child(2) .om-how-head {
-    grid-row: 4;
+    grid-row: 3;
   }
   .om-js .om-how-step:nth-child(2) .om-how-body {
-    grid-row: 5;
+    grid-row: 4;
   }
   .om-js .om-how-step:nth-child(3) .om-how-head {
-    grid-row: 6;
+    grid-row: 5;
   }
   .om-js .om-how-step:nth-child(3) .om-how-body {
-    grid-row: 7;
+    grid-row: 6;
   }
   .om-js .om-how-title {
     color: var(--muted);
@@ -1081,7 +1082,7 @@
   .om-js .om-scene {
     grid-column: 2;
     grid-row: 1 / -1;
-    align-self: center;
+    align-self: start;
     margin: 0;
     opacity: 0;
     visibility: hidden;
