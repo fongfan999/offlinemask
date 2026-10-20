@@ -15,4 +15,13 @@ The two runs recorded in [0103](0103-release-workflow.md) took 11 to 16 minutes 
 
 ## Measured
 
-Recorded below from the dry run on `main` after this change, against run 39287812900 (fat LTO, v2.0.0).
+Build step of each job in minutes, same source (v2.0.0), from [run 39287812900](https://github.com/fongfan999/offlinemask/actions/runs/39287812900) (fat LTO, cold), the first dry run [39292520677](https://github.com/fongfan999/offlinemask/actions/runs/39292520677) (thin LTO, cold: the new cache key had nothing to restore yet) and the second dry run [39295314812](https://github.com/fongfan999/offlinemask/actions/runs/39295314812) (thin LTO, warm cache):
+
+| Platform | Fat LTO, cold | Thin LTO, cold | Thin LTO, warm |
+| --- | --- | --- | --- |
+| Linux x64 | 10.8 | 7.0 | 2.2 |
+| macOS Intel | 12.6 | 13.9 | 4.9 |
+| Windows x64 | 9.9 | 14.0 | 7.2 |
+| macOS arm64 | 13.2 | 11.3 | 8.8 |
+
+The cache key was the lever: cold runs differ by runner noise more than by the LTO mode, warm runs are two to five times faster, and every release after the first is warm unless `mise.toml` or the Cargo manifests change. Thin LTO made the bundles 4 to 7 % larger (deb 10.2 to 10.9 MB, arm64 dmg 18.5 to 18.9 MB, msi 13.3 to 13.6 MB, Intel dmg 9.5 to 9.9 MB) and is kept for the parallel link on cold runs. Of the warm Windows step, 0.6 minutes were the typecheck, 1.7 the helper build, 3.3 the app build and 0.6 the installers, verifier and smoke test; the two Rust builds are addressed in [0107](0107-helper-crate.md).

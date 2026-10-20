@@ -6,6 +6,7 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ### Changed
 
+- The native recognition helper is its own Cargo package in the `src-tauri` workspace, so a release build compiles the app library once; the three macOS Services items no longer warn as dead code on Windows and Linux ([0107](docs/decisions/0107-helper-crate.md)).
 - The repository is a pnpm workspace: the desktop app lives in `desktop/`, the product website in `landing/`, and the shared colour and type tokens in `brand/theme.css` ([0106](docs/decisions/0106-workspace-layout.md)). Package scripts run as `pnpm -C desktop …` and `pnpm -C landing …`.
 - Release binaries are built with thin LTO instead of fat LTO, which roughly halves the build time; Linux releases ship `.deb` and `.rpm` only, the AppImage is withdrawn until the app has been tried on Linux ([0104](docs/decisions/0104-faster-release-builds.md)).
 

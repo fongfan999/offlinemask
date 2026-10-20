@@ -20,4 +20,4 @@ Moving `docs/` into the app, a shared package for the theme (one CSS file does n
 
 ## Checked
 
-Recorded below after the move: `pnpm lint`, `pnpm -C desktop typecheck`, `pnpm -C desktop test`, `pnpm -C desktop build`, `cargo check` in `desktop/`, `pnpm -C landing deploy:check`, and the first CI run on the restructured `main`.
+After the move, locally: `pnpm install --frozen-lockfile`, `pnpm lint`, `pnpm -C desktop typecheck`, `pnpm -C desktop test` (299), `pnpm -C desktop check:native`, `cargo check --all-targets` in `desktop/`, `pnpm -C desktop build`, `pnpm -C landing deploy:check` (Wrangler dry run over `landing/dist`); both built stylesheets contain the tokens from `brand/theme.css`. On GitHub, commit `20a7bed`: [CI](https://github.com/fongfan999/offlinemask/actions/runs/39296364978) (lint, test, build on macOS; native compile checks on Ubuntu and Windows) and the [landing page](https://github.com/fongfan999/offlinemask/actions/runs/39296365398) verify job passed.

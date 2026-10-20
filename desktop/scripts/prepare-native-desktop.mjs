@@ -56,7 +56,7 @@ if (windows) {
   }
 }
 
-execFileSync('cargo', ['build', '--manifest-path', join(root, 'src-tauri/Cargo.toml'), '--locked', '--release', '--features', 'native-inference-prototype', '--bin', 'recognition-sidecar'], { cwd: root, stdio: 'inherit' });
+execFileSync('cargo', ['build', '--manifest-path', join(root, 'src-tauri/Cargo.toml'), '--locked', '--release', '--package', 'recognition-sidecar'], { cwd: root, stdio: 'inherit' });
 const helper = windows ? 'recognition-sidecar.exe' : 'recognition-sidecar';
 await cp(join(root, 'src-tauri/target/release', helper), join(native, helper));
 const signingIdentity = process.env.APPLE_SIGNING_IDENTITY || '-';

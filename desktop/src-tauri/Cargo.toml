@@ -1,6 +1,14 @@
+# Cargo workspace: this app package and the recognition helper (decision 0107).
+# The version lives once, under [workspace.package]; the release workflow reads it there.
+[workspace]
+members = ["recognition-sidecar"]
+
+[workspace.package]
+version = "2.0.0"
+
 [package]
 name = "offlinemask"
-version = "2.0.0"
+version.workspace = true
 description = "Offline desktop workspace for reviewing sensitive data"
 edition = "2021"
 default-run = "offlinemask"
@@ -22,11 +30,6 @@ required-features = ["native-inference-prototype"]
 [[bin]]
 name = "recognition-native-check"
 path = "src/bin/recognition_native_check.rs"
-required-features = ["native-inference-prototype"]
-
-[[bin]]
-name = "recognition-sidecar"
-path = "src/bin/recognition_sidecar.rs"
 required-features = ["native-inference-prototype"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

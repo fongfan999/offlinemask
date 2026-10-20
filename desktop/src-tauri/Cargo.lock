@@ -3785,6 +3785,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "recognition-sidecar"
+version = "2.0.0"
+dependencies = [
+ "ort",
+ "serde",
+ "serde_json",
+ "sha2",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.5.18"
 source = "registry+https://github.com/rust-lang/crates.io-index"

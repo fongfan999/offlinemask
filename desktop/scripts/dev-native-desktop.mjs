@@ -34,7 +34,7 @@ if (windows) {
   }
 }
 // Release profile: the helper runs inference, and a debug build would hide the speed-up.
-execFileSync('cargo', ['build', '--manifest-path', join(root, 'src-tauri/Cargo.toml'), '--locked', '--release', '--features', 'native-inference-prototype', '--bin', 'recognition-sidecar'], { cwd: root, stdio: 'inherit' });
+execFileSync('cargo', ['build', '--manifest-path', join(root, 'src-tauri/Cargo.toml'), '--locked', '--release', '--package', 'recognition-sidecar'], { cwd: root, stdio: 'inherit' });
 const helper = windows ? 'recognition-sidecar.exe' : 'recognition-sidecar';
 await cp(join(root, 'src-tauri/target/release', helper), join(native, helper));
 shipped.push(helper);

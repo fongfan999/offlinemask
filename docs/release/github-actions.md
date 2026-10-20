@@ -32,7 +32,7 @@ gh workflow run release.yml --ref main
 | `windows-latest` | `pnpm -C desktop desktop:build:native` | Native helper, verified and smoke-tested ([0077](../decisions/0077-native-recognition-windows.md)) | `OfflineMask_<v>_x64-setup.exe`, `OfflineMask_<v>_x64_en-US.msi`, `provenance-windows-x64.json` |
 | `ubuntu-22.04` | `pnpm -C desktop desktop:build --bundles deb,rpm` | WASM | `.deb`, `.rpm` (no AppImage until Linux has been tried, [0104](../decisions/0104-faster-release-builds.md)) |
 
-The publish job adds `SHA256SUMS.txt` over every attached file. Each platform keeps a Rust build cache keyed on `mise.toml`, the Cargo manifests and `.cargo/config.toml`; the release profile uses thin LTO so the link runs in parallel ([0104](../decisions/0104-faster-release-builds.md)). Ubuntu 22.04 is used on purpose: the bundles link against its glibc and WebKitGTK, so they run on distributions at least that old.
+The publish job adds `SHA256SUMS.txt` over every attached file. Each platform keeps a Rust build cache keyed on `mise.toml`, the Cargo manifests and `.cargo/config.toml`; the release profile uses thin LTO so the link runs in parallel ([0104](../decisions/0104-faster-release-builds.md)). With a warm cache a release takes about 2 (Linux) to 9 (macOS arm64) minutes per platform, all in parallel. The native helper is its own crate in the `src-tauri` Cargo workspace, so a native job compiles the app library once ([0107](../decisions/0107-helper-crate.md)). Ubuntu 22.04 is used on purpose: the bundles link against its glibc and WebKitGTK, so they run on distributions at least that old.
 
 ## Signing
 

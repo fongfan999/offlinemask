@@ -1,0 +1,19 @@
+# The isolated native recognition helper (decisions 0048, 0107). It links ONNX
+# Runtime dynamically and shares nothing with the app crate, so it is its own
+# package: building it no longer compiles the app library a second time.
+[package]
+name = "recognition-sidecar"
+version.workspace = true
+description = "OfflineMask's isolated native recognition helper"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "recognition-sidecar"
+path = "src/main.rs"
+
+[dependencies]
+ort = { version = "=2.0.0-rc.10", default-features = false, features = ["std", "load-dynamic"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"

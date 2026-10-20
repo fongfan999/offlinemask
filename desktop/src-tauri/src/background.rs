@@ -10,9 +10,11 @@ pub const MAIN_WINDOW: &str = "main";
 /// Same event and payload as the floating panel's buttons; the frontend handles both.
 const COMMAND_EVENT: &str = "quick-command";
 /// Text or files handed over by a macOS Service (decision 0094).
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub const SERVICE_EVENT: &str = "quick-service";
 #[derive(Serialize, Clone)]
 #[serde(tag = "kind", rename_all = "lowercase")]
+#[cfg_attr(not(target_os = "macos"), allow(dead_code))]
 pub enum ServiceRequest {
     Text { text: String },
     Files { paths: Vec<String> },
@@ -22,6 +24,7 @@ pub enum ServiceRequest {
 #[derive(Default)]
 pub struct ServiceFiles(std::sync::Mutex<Vec<String>>);
 impl ServiceFiles {
+    #[cfg_attr(not(target_os = "macos"), allow(dead_code))]
     pub fn offer(&self, paths: &[String]) {
         if let Ok(mut list) = self.0.lock() {
             list.extend(paths.iter().cloned());
