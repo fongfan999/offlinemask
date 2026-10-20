@@ -247,7 +247,7 @@
   display: inline-block;
 }
 .om-hero-sub {
-  max-width: 620px;
+  max-width: 700px;
   margin: 18px auto 0 !important;
   font-size: clamp(16px, 1.4vw, 19px);
   line-height: 1.6;
@@ -1017,13 +1017,6 @@
 .om-dock-button:hover {
   transform: translateY(-2px);
 }
-.om-dock p {
-  padding: 2px 10px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--paper) 80%, transparent);
-  color: var(--muted);
-  font-size: 12px;
-}
 
 /* Footer */
 .om-footer {
@@ -1067,7 +1060,7 @@
 .om-footer-mark {
   margin: 56px 0 -0.22em !important;
   color: var(--accent-soft);
-  font: 400 18.4vw/0.8 var(--serif);
+  font: 400 16vw/0.8 var(--serif);
   letter-spacing: -0.05em;
   text-align: center;
   white-space: nowrap;
@@ -1228,9 +1221,6 @@
   }
   .om-dock {
     width: calc(100% - 28px);
-  }
-  .om-dock p {
-    display: none;
   }
   .om-dock-button {
     width: 100%;
