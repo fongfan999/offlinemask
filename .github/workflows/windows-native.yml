@@ -5,7 +5,7 @@
 # loads onnxruntime.dll and the app-local Visual C++ runtime. The installers are
 # uploaded for a manual check on a Windows PC with the recognition pack installed;
 # that check, not this job, is what qualifies Windows for the default build.
-name: Windows native build
+name: "Desktop: Windows native build"
 
 on:
   workflow_dispatch:

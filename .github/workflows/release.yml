@@ -17,7 +17,7 @@
 # and one notarization set (APPLE_ID, APPLE_PASSWORD, APPLE_TEAM_ID, or APPLE_API_ISSUER,
 # APPLE_API_KEY, APPLE_API_KEY_PATH) they are signed with Developer ID and notarized
 # by the Tauri CLI (https://v2.tauri.app/distribute/sign/macos/).
-name: Release
+name: "Desktop: Release"
 
 on:
   push:
@@ -41,7 +41,7 @@ concurrency:
 
 jobs:
   check:
-    name: Tag matches the version
+    name: Check tag matches version (ubuntu-latest)
     runs-on: ubuntu-latest
     outputs:
       version: ${{ steps.version.outputs.version }}
@@ -210,7 +210,7 @@ jobs:
           if-no-files-found: error
 
   publish:
-    name: Attach to the release
+    name: Attach to release (ubuntu-latest)
     needs: [check, build]
     if: needs.check.outputs.publish == 'true'
     runs-on: ubuntu-latest

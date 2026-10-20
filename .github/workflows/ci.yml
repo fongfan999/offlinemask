@@ -7,7 +7,7 @@
 # advisory. Windows is compiled, tested and packaged by windows-native.yml (decision 0077).
 # Changes that only touch the landing page or documentation skip this workflow: landing.yml
 # verifies landing/, and docs/licenses/ still counts because native builds bundle it.
-name: CI
+name: "Desktop: Verify"
 
 on:
   push:
@@ -32,7 +32,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Lint, test, build (macOS)
+    name: Lint, test and build (macos-latest)
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4

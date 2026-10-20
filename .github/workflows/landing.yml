@@ -1,6 +1,6 @@
 # Verifies the landing page. Cloudflare's GitHub integration builds and deploys
 # offlinemask.com from main on its own (landing/README.md), so this workflow never deploys.
-name: Landing page
+name: "Landing: Verify"
 
 on:
   pull_request:
@@ -33,6 +33,7 @@ permissions:
 
 jobs:
   verify:
+    name: Lint and build check (ubuntu-latest)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
