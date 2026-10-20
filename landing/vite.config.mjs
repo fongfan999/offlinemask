@@ -50,6 +50,7 @@ export default defineConfig({
       input: {
         index: fileURLToPath(new URL("./index.html", import.meta.url)),
         privacy: fileURLToPath(new URL("./privacy.html", import.meta.url)),
+        "code-signing": fileURLToPath(new URL("./code-signing.html", import.meta.url)),
       },
     },
   },

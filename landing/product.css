@@ -428,6 +428,72 @@
   font-size: 13px;
 }
 
+/* Intro video: a quiet button in the hero and a native modal; nothing loads until opened. */
+.om-video-open {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 26px;
+  padding: 10px 20px 10px 12px;
+  border: 1px solid rgba(247, 245, 238, 0.45);
+  border-radius: 999px;
+  background: rgba(247, 245, 238, 0.1);
+  color: var(--on-cobalt);
+  font: 600 15px var(--sans);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.om-video-open:hover {
+  background: rgba(247, 245, 238, 0.2);
+}
+.om-video-open span {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--on-cobalt);
+  color: var(--cobalt);
+  font-size: 11px;
+  padding-left: 2px;
+}
+.om-page [hidden].om-video-open {
+  display: none;
+}
+.om-video {
+  width: min(1200px, calc(100vw - 32px));
+  padding: 0;
+  border: 0;
+  border-radius: 18px;
+  overflow: hidden;
+  background: #0b154a;
+  box-shadow: 0 40px 120px -20px #000000a6;
+}
+.om-video::backdrop {
+  background: rgba(11, 21, 74, 0.72);
+  backdrop-filter: blur(6px);
+}
+.om-video video {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  background: #0b154a;
+}
+.om-video-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(247, 245, 238, 0.9);
+  color: #262a25;
+  font-size: 16px;
+  cursor: pointer;
+}
+
 /* Display type */
 .om-display {
   font: 400 clamp(40px, 5.2vw, 76px) / 1.08 var(--serif);

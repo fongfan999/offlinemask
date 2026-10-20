@@ -9,7 +9,7 @@ Mask and restore sensitive data, entirely on your device.
 
 OfflineMask is a desktop app for preparing sensitive text before pasting it into an external AI tool. You paste text, the app replaces names, account numbers, phone numbers and other private values with consistent aliases on your machine, you review the result, copy it to the AI of your choice, and paste the reply back to restore the original values. Nothing leaves the device: there is no server, no telemetry and no automatic update check. The first language focus is Vietnamese banking workflows; the detection pipeline is designed so that other languages and models can be added as packs.
 
-**Status: 2.0.0 is the first public release.** Pasted text, spreadsheets (XLSX, XLS, ODS, CSV), documents (DOCX, ODT) and plain-text files are masked, reviewed and restored. Once a passcode is set, history is kept in an encrypted vault on the device. On macOS and Windows, Ẩn nhanh masks or restores text selected in any application. PDF and image input are not implemented. Only macOS on Apple Silicon has been built and tested by hand; Windows x64 builds in CI and awaits manual qualification; Linux is untested. Builds are not yet signed or notarized. Detection is rule-based plus an optional model pack and has documented misses; always review the result before sharing it. See the [changelog](CHANGELOG.md) for what each release contains, the [product requirements](PRD.md) for the intended scope and [product direction](docs/product-direction.md) for the decisions behind the current experience.
+**Status: 2.0.0 is the first public release.** Pasted text, spreadsheets (XLSX, XLS, ODS, CSV), documents (DOCX, ODT) and plain-text files are masked, reviewed and restored. Once a passcode is set, history is kept in an encrypted vault on the device. On macOS and Windows, Ẩn nhanh masks or restores text selected in any application. PDF and image input are not implemented. Only macOS on Apple Silicon has been built and tested by hand; Windows x64 builds in CI and awaits manual qualification; Linux is untested. Builds are not yet signed or notarized; Windows signing through SignPath Foundation is pending (see [Code signing policy](#code-signing-policy)). Detection is rule-based plus an optional model pack and has documented misses; always review the result before sharing it. See the [changelog](CHANGELOG.md) for what each release contains, the [product requirements](PRD.md) for the intended scope and [product direction](docs/product-direction.md) for the decisions behind the current experience.
 
 ## How it works
 
@@ -80,6 +80,16 @@ The standalone website lives in [`landing/`](landing/README.md). Run `mise exec 
 ## Privacy principles
 
 Only synthetic data belongs in this repository, in issues and in screenshots. The app stores no private text, collects no corrections and sends nothing anywhere; the sample history on disk holds references to public fixtures and mask/keep choices only. Changes that would relax any of this need a recorded decision. Vulnerabilities are reported privately as described in [SECURITY.md](SECURITY.md).
+
+## Code signing policy
+
+Free code signing provided by [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/). The application is pending; releases up to 2.0.0 are unsigned.
+
+- Only artifacts built by the [release workflow](.github/workflows/release.yml) from a version tag in this repository are signed, and every signing request is approved by hand.
+- Committers and reviewers: [Phong Phan](https://github.com/fongfan999). Approvers: [Phong Phan](https://github.com/fongfan999).
+- Privacy: this program will not transfer any information to other networked systems unless specifically requested by the user or the person installing or operating it. See the [privacy policy](https://offlinemask.com/privacy).
+
+The full policy is at [offlinemask.com/code-signing](https://offlinemask.com/code-signing); uninstall steps are in the [install guide](docs/install.md#gỡ-cài-đặt).
 
 ## Contributing and license
 

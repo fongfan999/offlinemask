@@ -175,6 +175,22 @@ export function initOfflineMask(root) {
   let disposed = false;
 
   root.classList.add("om-js");
+  // Intro video: opens in a native modal and plays; closing pauses it.
+  const videoOpen = root.querySelector("[data-om-video-open]");
+  const videoDialog = root.querySelector("[data-om-video]");
+  const video = videoDialog.querySelector("video");
+  const openVideo = () => {
+    videoDialog.showModal();
+    video.play().catch(() => {});
+  };
+  const closeVideo = () => videoDialog.close();
+  const pauseVideo = () => video.pause();
+  const backdropClose = (event) => event.target === videoDialog && closeVideo();
+  videoOpen.hidden = false;
+  videoOpen.addEventListener("click", openVideo);
+  videoDialog.querySelector("[data-om-video-close]").addEventListener("click", closeVideo);
+  videoDialog.addEventListener("click", backdropClose);
+  videoDialog.addEventListener("close", pauseVideo);
   function activate(index) {
     steps.forEach((step, i) => step.classList.toggle("om-active", i === index));
     shots.forEach((shot, i) => shot.classList.toggle("om-shown", i === index));
@@ -324,5 +340,10 @@ export function initOfflineMask(root) {
     steps.forEach((step) => step.classList.remove("om-active"));
     shots.forEach((shot) => shot.classList.remove("om-shown"));
     root.classList.remove("om-js");
+    videoOpen.hidden = true;
+    videoOpen.removeEventListener("click", openVideo);
+    videoDialog.removeEventListener("click", backdropClose);
+    videoDialog.removeEventListener("close", pauseVideo);
+    if (videoDialog.open) closeVideo();
   };
 }

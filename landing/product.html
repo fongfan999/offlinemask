@@ -22,6 +22,9 @@
           OfflineMask thay tên, số tài khoản, CCCD… bằng mã ngay trên máy, trước khi bạn hỏi AI
           (ChatGPT, Claude, Gemini…). Dán câu trả lời vào lại, thông tin thật trở về đúng chỗ.
         </p>
+        <button type="button" class="om-video-open" hidden data-om-enter data-om-video-open>
+          <span aria-hidden="true">▶</span> Xem video 22 giây
+        </button>
       </div>
       <figure class="om-window om-hero-window" data-om-hero-window>
         <div class="om-window-bar">
@@ -385,8 +388,11 @@
           </summary>
           <p>
             Bản phát hành hiện chưa được ký số bằng chứng chỉ của Apple hay Microsoft, nên macOS và
-            Windows hỏi lại trước khi mở lần đầu. Bạn có thể đối chiếu tệp với SHA256SUMS.txt của
-            bản phát hành, rồi làm theo
+            Windows hỏi lại trước khi mở lần đầu. Bản Windows sẽ được ký qua SignPath Foundation (<a
+              href="./code-signing.html"
+              >code signing policy</a
+            >). Trong lúc chờ, bạn có thể đối chiếu tệp với SHA256SUMS.txt của bản phát hành, rồi
+            làm theo
             <a href="https://github.com/fongfan999/offlinemask/blob/main/docs/install.md"
               >hướng dẫn cài đặt ↗</a
             >.
@@ -475,18 +481,33 @@
             <a href="https://github.com/fongfan999/offlinemask/releases/tag/v__OM_VERSION__"
               >Ghi chú phát hành ↗</a
             >
+            · <a href="./code-signing.html">Code signing policy</a>
           </p>
         </details>
         <p class="om-release-note">
           Đã kiểm thử thủ công trên macOS Apple Silicon; các bản khác chưa được kiểm thử đầy đủ. Bản
-          phát hành chưa được ký số, nên máy có thể hỏi lại trước khi mở lần đầu.
+          phát hành chưa được ký số, nên máy có thể hỏi lại trước khi mở lần đầu; bản Windows sẽ
+          được ký miễn phí qua SignPath Foundation.
           <a href="https://github.com/fongfan999/offlinemask/blob/main/docs/install.md"
             >Cách cài và kiểm tra tệp ↗</a
           >
+          · <a href="./code-signing.html">Code signing policy</a>
         </p>
       </div>
     </section>
   </main>
+  <dialog class="om-video" aria-label="Video giới thiệu OfflineMask" data-om-video>
+    <video
+      controls
+      playsinline
+      preload="none"
+      poster="./media/offlinemask-intro-poster.webp"
+      src="./media/offlinemask-intro.mp4"
+    ></video>
+    <button type="button" class="om-video-close" aria-label="Đóng video" data-om-video-close>
+      ✕
+    </button>
+  </dialog>
   <div class="om-dock" data-om-dock>
     <a
       class="om-dock-button"
@@ -514,6 +535,7 @@
         ><a href="https://github.com/fongfan999/offlinemask/blob/main/docs/install.md"
           >Hướng dẫn cài đặt ↗</a
         ><a href="./privacy.html">Quyền riêng tư</a
+        ><a href="./code-signing.html">Code signing policy</a
         ><a href="https://github.com/fongfan999/offlinemask/releases">Ghi chú phát hành ↗</a
         ><a href="https://github.com/fongfan999/offlinemask/blob/main/LICENSE.md"
           >Giấy phép MIT ↗</a

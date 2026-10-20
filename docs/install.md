@@ -1,6 +1,6 @@
 # Cài đặt OfflineMask
 
-Tải bản phù hợp với máy từ [trang phát hành](https://github.com/fongfan999/offlinemask/releases/latest). Bản phát hành chưa được ký số bằng chứng chỉ Apple Developer ID hay Microsoft, nên hệ điều hành sẽ hỏi lại trước khi mở lần đầu. Đã kiểm thử thủ công trên macOS Apple Silicon; các bản khác chưa được kiểm thử đầy đủ.
+Tải bản phù hợp với máy từ [trang phát hành](https://github.com/fongfan999/offlinemask/releases/latest). Bản phát hành chưa được ký số bằng chứng chỉ Apple Developer ID hay Microsoft, nên hệ điều hành sẽ hỏi lại trước khi mở lần đầu. Bản Windows sẽ được ký qua SignPath Foundation; xem [code signing policy](https://offlinemask.com/code-signing). Đã kiểm thử thủ công trên macOS Apple Silicon; các bản khác chưa được kiểm thử đầy đủ.
 
 ## Kiểm tra tệp tải về
 
@@ -39,6 +39,18 @@ Chỉ cần làm một lần cho mỗi phiên bản.
 - `.deb`: `sudo apt install ./OfflineMask_<phiên bản>_amd64.deb`
 - `.rpm`: `sudo dnf install ./OfflineMask-<phiên bản>-1.x86_64.rpm`
 - `.AppImage`: `chmod +x OfflineMask_<phiên bản>_amd64.AppImage`, rồi chạy tệp.
+
+## Gỡ cài đặt
+
+- **macOS:** kéo OfflineMask từ **Applications** vào Thùng rác.
+- **Windows:** **Cài đặt → Ứng dụng → Ứng dụng đã cài**, chọn OfflineMask → **Gỡ cài đặt**.
+- **Linux:** `sudo apt remove offline-mask` hoặc `sudo dnf remove offline-mask` (xem tên gói bằng `apt list --installed | grep -i offline` hoặc `dnf list installed | grep -i offline`); với `.AppImage`, xóa tệp.
+
+Gỡ ứng dụng không xóa dữ liệu của nó (kho phiên đã mã hóa, gói nhận diện, cài đặt). Để xóa hẳn, xóa thư mục `dev.offlinemask.desktop` trong:
+
+- macOS: `~/Library/Application Support/`
+- Windows: `%LOCALAPPDATA%\`
+- Linux: `~/.local/share/`
 
 ## Tự kiểm chứng xử lý offline
 

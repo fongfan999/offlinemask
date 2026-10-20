@@ -245,7 +245,7 @@ jobs:
             echo "::warning::CHANGELOG.md has no section for $VERSION; using the tag name only."
             echo "OfflineMask $VERSION." > notes.md
           fi
-          printf '\n%s\n' "macOS Apple Silicon and Windows x64 ship the native recognition helper; macOS Intel and Linux use WASM recognition, which is slower on long input. Only macOS Apple Silicon has been tested by hand. Verify a download against \`SHA256SUMS.txt\`." >> notes.md
+          printf '\n%s\n' "macOS Apple Silicon and Windows x64 ship the native recognition helper; macOS Intel and Linux use WASM recognition, which is slower on long input. Only macOS Apple Silicon has been tested by hand. Verify a download against \`SHA256SUMS.txt\`. Code signing policy: https://offlinemask.com/code-signing" >> notes.md
       - name: Create or update the release
         shell: bash
         env:
