@@ -766,6 +766,12 @@ h1 {
   text-box: trim-both cap alphabetic;
   padding-top: calc((var(--badge-size) - 1cap) / 2 - var(--badge-border));
 }
+/* A check or spinner has no text metrics to trim; centre its box instead. */
+.step-number:has(> *) {
+  display: inline-grid;
+  place-items: center;
+  padding-top: 0;
+}
 .primary-action .step-number {
   background: var(--on-accent);
   color: var(--accent);
