@@ -35,9 +35,12 @@ if (-not $running) {
   $plain = Resolve-Path 'desktop/src-tauri/target/release/OfflineMask.exe' -ErrorAction SilentlyContinue
   if ($plain) {
     '--- The same build started unpackaged'
-    $process = Start-Process -FilePath $plain -PassThru
+    $env:RUST_BACKTRACE = '1'
+    $process = Start-Process -FilePath $plain -PassThru -RedirectStandardError "$env:RUNNER_TEMP\app-stderr.txt" -RedirectStandardOutput "$env:RUNNER_TEMP\app-stdout.txt"
     Start-Sleep -Seconds 20
     if ($process.HasExited) { "Unpackaged app exited with code $($process.ExitCode)" } else { 'Unpackaged app is running'; $process | Stop-Process -Force }
+    '--- Its output'
+    Get-Content "$env:RUNNER_TEMP\app-stderr.txt", "$env:RUNNER_TEMP\app-stdout.txt" -ErrorAction SilentlyContinue | Select-Object -First 60
   }
   throw 'OfflineMask was not running 20 s after launch from the package'
 }
