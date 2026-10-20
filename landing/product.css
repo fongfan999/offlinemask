@@ -604,6 +604,17 @@
 .om-why {
   padding-top: 170px;
 }
+/* The product name inside a sentence, set as the wordmark (brand/README.md, Logo rules). */
+.om-name {
+  color: var(--ink);
+  font-family: var(--sans);
+  font-weight: 750;
+  letter-spacing: -0.04em;
+  white-space: nowrap;
+}
+.om-name span {
+  color: var(--accent);
+}
 /* The heading's rhyme pair (AI / lại) carries the swash instead of the whole second line. */
 .om-rhyme em {
   background: none;

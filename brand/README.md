@@ -37,6 +37,7 @@ One logo everywhere: in the app, on offlinemask.com, in share images and in vide
 - **Wordmark:** "Offline" in ink and "Mask" in cobalt, set in **Noto Sans at weight 750 and −0.04em tracking**. It never depends on the system font: the app bundles the Latin file of `@fontsource-variable/noto-sans` 5.3.0 as the "OfflineMask Wordmark" face, and the website uses the same package. On cobalt, "Offline" is paper and "Mask" is a light cobalt (`#b3c3ff`).
 - **Large wordmarks** (the website hero, the footer, share images) use the same lettering at size; tracking may tighten to −0.055em at display sizes. Never set the name in the serif or in italics. The serif (Noto Serif) is for headlines, not for the brand name.
 - In body text, write the name as plain text, "OfflineMask", and the website as "OfflineMask.com"; links stay lowercase.
+- On the website, a lead sentence whose subject is the product may set the name as the inline wordmark (weight 750, "Mask" in cobalt) so it stands out. Everywhere else in body text it stays plain.
 
 ## Colours
 
