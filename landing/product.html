@@ -146,40 +146,79 @@
         <h2 id="om-how-title">Giữ ý nghĩa.<br /><em>Ẩn danh tính.</em></h2>
         <p>Vẫn đủ ngữ cảnh để làm việc.<br />Ít thông tin riêng tư phải chia sẻ hơn.</p>
       </div>
-      <div class="om-steps">
-        <article data-om-reveal>
-          <span class="om-step-index">01 — ẨN</span>
-          <div class="om-step-visual" aria-hidden="true">
-            <span>Nguyễn Minh An</span><span>↓</span><code>[TEN_1_3030]</code>
+      <div class="om-journey" data-om-journey>
+        <div class="om-boundary" aria-hidden="true">
+          <div class="om-zone om-zone-local">
+            <p class="om-zone-label"><span class="om-dot"></span> Máy của bạn · OfflineMask</p>
+            <div class="om-vault" data-om-vault>
+              <p>Bảng đối chiếu · không rời máy</p>
+              <span><code>[TEN_1_3030]</code> Nguyễn Minh An</span>
+              <span><code>[STK_1_3030]</code> 012345678901</span>
+              <span><code>[EMAIL_1_3030]</code> an@example.com</span>
+            </div>
           </div>
-          <h3>Đưa vào. Chọn ẩn.</h3>
-          <p>
-            Dán văn bản hoặc mở tệp. Kiểm tra gợi ý, giữ lại phần cần thiết và tự chọn thêm thông
-            tin muốn ẩn.
-          </p>
-        </article>
-        <article data-om-reveal>
-          <span class="om-step-index">02 — LÀM VIỆC</span>
-          <div class="om-step-visual om-prompt-visual" aria-hidden="true">
-            <span>↗ Tóm tắt nội dung này…</span><i></i><i></i><i></i>
+          <div class="om-line"><span>Ranh giới</span></div>
+          <div class="om-zone om-zone-ai">
+            <p class="om-zone-label">Công cụ AI bạn chọn</p>
           </div>
-          <h3>Dùng AI bạn thích.</h3>
-          <p>
-            Tự sao chép hoặc gửi bản đã ẩn sang công cụ AI của bạn. OfflineMask không tự gửi nội
-            dung đi đâu.
-          </p>
-        </article>
-        <article data-om-reveal>
-          <span class="om-step-index">03 — KHÔI PHỤC</span>
-          <div class="om-step-visual" aria-hidden="true">
-            <code>[TEN_1_3030]</code><span>↓</span><span>Nguyễn Minh An <b>↶</b></span>
+          <div class="om-packet" data-om-packet>
+            <p class="om-packet-head">
+              <span data-om-packet-title>Bản gốc</span><span data-om-packet-title>Bản đã ẩn</span
+              ><span data-om-packet-title>Phản hồi AI</span
+              ><span data-om-packet-title>Bản đã khôi phục</span>
+            </p>
+            <p>
+              Khách hàng
+              <span
+                class="om-packet-value"
+                data-om-real="Nguyễn Minh An"
+                data-om-alias="[TEN_1_3030]"
+                >[TEN_1_3030]</span
+              >
+            </p>
+            <p>
+              Tài khoản
+              <span class="om-packet-value" data-om-real="012345678901" data-om-alias="[STK_1_3030]"
+                >[STK_1_3030]</span
+              >
+            </p>
+            <p>
+              Email
+              <span
+                class="om-packet-value"
+                data-om-real="an@example.com"
+                data-om-alias="[EMAIL_1_3030]"
+                >[EMAIL_1_3030]</span
+              >
+            </p>
           </div>
-          <h3>Nhận lại bản đầy đủ.</h3>
-          <p>
-            Đưa kết quả về cùng phiên. Những mã thay thế còn nguyên được đổi lại thành thông tin ban
-            đầu.
-          </p>
-        </article>
+        </div>
+        <div class="om-steps">
+          <article data-om-reveal>
+            <span class="om-step-index">01 — ẨN</span>
+            <h3>Đưa vào. Chọn ẩn.</h3>
+            <p>
+              Dán văn bản hoặc mở tệp. Kiểm tra gợi ý, giữ lại phần cần thiết và tự chọn thêm thông
+              tin muốn ẩn.
+            </p>
+          </article>
+          <article data-om-reveal>
+            <span class="om-step-index">02 — LÀM VIỆC</span>
+            <h3>Dùng AI bạn thích.</h3>
+            <p>
+              Tự sao chép hoặc gửi bản đã ẩn sang công cụ AI của bạn. OfflineMask không tự gửi nội
+              dung đi đâu.
+            </p>
+          </article>
+          <article data-om-reveal>
+            <span class="om-step-index">03 — KHÔI PHỤC</span>
+            <h3>Nhận lại bản đầy đủ.</h3>
+            <p>
+              Đưa kết quả về cùng phiên. Những mã thay thế còn nguyên được đổi lại thành thông tin
+              ban đầu.
+            </p>
+          </article>
+        </div>
       </div>
     </section>
     <section class="om-detects om-wrap" id="om-detects" aria-labelledby="om-detects-title">
@@ -223,7 +262,9 @@
       </div>
       <div class="om-format-list">
         <article data-om-reveal>
-          <span class="om-format-symbol" aria-hidden="true">Tt</span>
+          <span class="om-preview om-preview-text" aria-hidden="true" data-om-preview
+            ><i></i><i><b></b></i><i></i><i><b></b></i
+          ></span>
           <div>
             <h3>Văn bản</h3>
             <p>Email, ghi chú, nội dung cần hỏi AI. Dán vào và chọn thông tin cần ẩn.</p>
@@ -231,7 +272,10 @@
           <span class="om-extension">TXT · DÁN TRỰC TIẾP</span>
         </article>
         <article data-om-reveal>
-          <span class="om-format-symbol" aria-hidden="true">▦</span>
+          <span class="om-preview om-preview-sheet" aria-hidden="true" data-om-preview
+            ><i></i><i></i><i></i><i></i><i><b></b></i><i></i><i></i><i><b></b></i><i></i><i></i
+            ><i><b></b></i><i></i
+          ></span>
           <div>
             <h3>Bảng tính</h3>
             <p>Rà soát thông tin trong bảng, ẩn giá trị đã chọn và xuất một bản riêng.</p>
@@ -239,7 +283,9 @@
           <span class="om-extension">XLSX · XLS · ODS · CSV</span>
         </article>
         <article data-om-reveal>
-          <span class="om-format-symbol om-serif" aria-hidden="true">W</span>
+          <span class="om-preview om-preview-doc" aria-hidden="true" data-om-preview
+            ><i></i><i><b></b></i><i></i><i></i><i><b></b></i><i></i
+          ></span>
           <div>
             <h3>Tài liệu</h3>
             <p>Ẩn thông tin trong tài liệu được hỗ trợ, kiểm tra rồi lưu bản đã xử lý.</p>
