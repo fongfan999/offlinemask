@@ -573,11 +573,6 @@
 :is(.om-hero, .om-download) em {
   color: #b3c3ff;
 }
-@media (prefers-color-scheme: dark) {
-  .om-page {
-    --swash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'%3E%3Cpath d='M3 9c28-6 58-7 92-5s68 4 102-3' fill='none' stroke='%2393a9ff' stroke-width='4' stroke-linecap='round' opacity='.5'/%3E%3C/svg%3E");
-  }
-}
 
 /* Display type */
 .om-display {
