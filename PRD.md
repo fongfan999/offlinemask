@@ -245,11 +245,11 @@ The owner-requested product website link is a deliberate external-browser action
 
 Reversible masking is pseudonymisation. Retained transaction facts and contextual details can still be sensitive or identify someone. The product must describe what it changed and checked without promising anonymity, universal compliance, or permission to upload the result.
 
-### Open-source development
+### Source-available development
 
-OfflineMask is released as an open-source project under the MIT License (decision 0116, superseding the earlier O’Saasy choice). Use standard, maintainable framework patterns, reproducible mise-based setup, committed dependency lockfiles, documented architecture and dependency provenance, focused tests, and clear contributor guidance. Evaluate dependency and bundled-resource licenses before public distribution. Keep demo behavior distinguishable from production capabilities. Do not include private data or machine-specific configuration in public artifacts.
+OfflineMask is intended to be released as a source-available project under the owner-selected O’Saasy License Agreement. Use standard, maintainable framework patterns, reproducible mise-based setup, committed dependency lockfiles, documented architecture and dependency provenance, focused tests, and clear contributor guidance. Evaluate dependency and bundled-resource licenses before public distribution. Keep demo behavior distinguishable from production capabilities. Do not include private data or machine-specific configuration in public artifacts.
 
-The [MIT License](LICENSE.md) is in place with copyright attributed to Phong Phan; see [Decision 0116](docs/decisions/0116-mit-license.md), which supersedes the O’Saasy choice of [Decision 0050](docs/decisions/0050-osaasy-license.md). Third-party redistribution review, private vulnerability reporting, public repository hosting, and release/CI setup remain required before publication. See [CONTRIBUTING.md](CONTRIBUTING.md).
+The [O’Saasy license](LICENSE.md) is in place with copyright attributed to Phong Phan; see [Decision 0050](docs/decisions/0050-osaasy-license.md). Third-party redistribution review, private vulnerability reporting, public repository hosting, and release/CI setup remain required before publication. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ### Workspace and session navigation
 

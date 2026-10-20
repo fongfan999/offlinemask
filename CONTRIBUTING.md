@@ -1,6 +1,6 @@
 # Contributing to OfflineMask
 
-Thank you for helping. OfflineMask is open source under the [MIT License](LICENSE.md); by contributing you agree that your contribution is licensed under the same terms. Security problems go through [SECURITY.md](SECURITY.md), not public issues.
+Thank you for helping. OfflineMask is source available under the [O’Saasy License Agreement](LICENSE.md); by contributing you agree that your contribution is licensed under the same terms. Security problems go through [SECURITY.md](SECURITY.md), not public issues.
 
 ## Local setup
 

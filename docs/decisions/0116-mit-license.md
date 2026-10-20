@@ -1,6 +1,6 @@
 # 0116 — MIT License
 
-Date: 20 October 2026. Status: implemented. Supersedes [0050](0050-osaasy-license.md).
+Date: 20 October 2026. Status: reverted the same day; [0050](0050-osaasy-license.md) (O’Saasy) applies again.
 
 ## Context
 
@@ -17,7 +17,10 @@ Windows warns about unsigned installers, and macOS signing costs a yearly fee. T
 
 The restriction on offering OfflineMask as a competing hosted service is gone. For an offline desktop app the owner judged free Windows signing worth more. Releases published before this change remain under O’Saasy for anyone who obtained them then.
 
-
 ## Outcome (same day)
 
 The owner applied to SignPath Foundation. The application was declined for lack of public adoption signals, with an invitation to reapply later. The code-signing policy page added for the application was withdrawn. The owner kept the MIT License.
+
+## Reverted
+
+With SignPath declined, the owner returned the project to the O’Saasy License Agreement ([0050](0050-osaasy-license.md)): `LICENSE.md`, the manifests, README, CONTRIBUTING, PRD and the site footers are back to their earlier text. Contributions are all the owner's, so no third-party code was received under MIT. Windows distribution without a paid certificate is being looked at through the Microsoft Store instead.
