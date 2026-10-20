@@ -12,6 +12,8 @@
     "deploy:check": "pnpm build && wrangler deploy --dry-run"
   },
   "dependencies": {
+    "@fontsource-variable/noto-sans": "5.3.0",
+    "@fontsource-variable/noto-serif": "5.3.0",
     "gsap": "3.15.0"
   },
   "devDependencies": {

@@ -14,6 +14,13 @@ export default defineConfig({
         order: "pre",
         handler: (html) => html.replace("<!-- product-page -->", readFileSync(fragment, "utf8")),
       },
+      generateBundle() {
+        this.emitFile({
+          type: "asset",
+          fileName: "font-licenses.txt",
+          source: readFileSync(new URL("./font-licenses.txt", import.meta.url), "utf8"),
+        });
+      },
       configureServer(server) {
         server.watcher.add(fileURLToPath(fragment));
         server.watcher.on("change", (path) => {
