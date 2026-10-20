@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- MSIX manifest for the Microsoft Store build (decision 0117). scripts/build-msix.mjs
-     fills the {{placeholders}} from store/microsoft-store.json and the app version. -->
+     fills the double-brace fields from store/microsoft-store.json and the app version. -->
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
