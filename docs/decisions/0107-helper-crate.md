@@ -18,4 +18,13 @@ Separately, three items in `background.rs` (`SERVICE_EVENT`, `ServiceRequest`, `
 
 ## Checked
 
-Locally on macOS arm64: `pnpm -C desktop check:native` (rustfmt and Clippy over both packages, the helper included for the first time), `pnpm -C desktop test:native`, `cargo metadata --locked` after the lockfile gained the member, and `pnpm -C desktop desktop:build:native`: the helper compiled in 13 s on its own, the app once in 2 min 23 s, the verifier passed and the packaged helper loaded the runtime in the smoke test; the dmg is 18.9 MB as before. The CI numbers for the native jobs are recorded with the next dry run of the release workflow.
+Locally on macOS arm64: `pnpm -C desktop check:native` (rustfmt and Clippy over both packages, the helper included for the first time), `pnpm -C desktop test:native`, `cargo metadata --locked` after the lockfile gained the member, and `pnpm -C desktop desktop:build:native`: the helper compiled in 13 s on its own, the app once in 2 min 23 s, the verifier passed and the packaged helper loaded the runtime in the smoke test; the dmg is 18.9 MB as before. On GitHub, commit `171cf9a`: CI passed, and two dry runs of the release workflow measured the build step per platform in minutes ([39350887681](https://github.com/fongfan999/offlinemask/actions/runs/39350887681), cold because the manifests changed the cache key, and [39352421204](https://github.com/fongfan999/offlinemask/actions/runs/39352421204), warm), against the warm figures in [0104](0104-faster-release-builds.md):
+
+| Platform | 0104, warm | Cold on this change | Warm on this change |
+| --- | --- | --- | --- |
+| Windows x64 | 7.2 | 12.7 | 5.9 |
+| macOS arm64 | 8.8 | 7.2 | 5.7 |
+| macOS Intel | 4.9 | 12.8 | 3.9 |
+| Linux x64 | 2.2 | 6.9 | 1.6 |
+
+On the warm Windows job the helper compiled in 11 s instead of 1.7 min and the app once in 3 min 52 s; the whole matrix now finishes in about 7 minutes of wall-clock on a warm cache. Intel and Linux build no helper; their change is runner noise.
