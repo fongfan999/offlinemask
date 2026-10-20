@@ -21,3 +21,11 @@ Keep stage copy in `landing/demo.js` beside the portable product fragment, style
 ## Verification boundary
 
 The native masking and restoration flow was exercised locally. Final browser screenshot and interaction verification of this landing revision was interrupted because the browser tool reported that local browser access was disabled in Work settings. Build and source checks are separate from visual validation; the latter remains required before publishing.
+
+## Follow-up — stronger visual hierarchy
+
+The owner judged the first revision insufficiently improved. Replace the centered hero and oversized imitation desktop window with a split composition: a direct benefit and download action beside a compact interactive example. Remove the decorative sidebar and duplicate source panel. Keep the original-content stage available through the existing controls.
+
+Use larger workflow cards and readable supporting text, softer button styling, and a contained download section. Preserve the shared palette, Vietnamese fonts, four-stage GSAP behavior and cleanup contract. Stack the hero and cards at narrower widths. No desktop changes or new dependencies are needed.
+
+Browser access still reports disabled despite the owner's screenshot showing it enabled. This follow-up requires visual and interaction verification once access is available; build success alone does not establish visual quality.
