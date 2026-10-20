@@ -755,9 +755,6 @@
 .om-send.om-on {
   background: var(--accent);
 }
-.om-why .om-fine {
-  margin-top: 22px !important;
-}
 
 /* Scroll story: sticky window, steps scroll past */
 .om-story {
