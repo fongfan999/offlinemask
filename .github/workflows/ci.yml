@@ -7,6 +7,7 @@
 # advisory. Windows is compiled, tested and packaged by windows-native.yml (decision 0077).
 # Changes that only touch the landing page or documentation skip this workflow: landing.yml
 # verifies landing/, and docs/licenses/ still counts because native builds bundle it.
+# Markdown is skipped in every folder (a brand/README.md edit once ran the app checks).
 name: "Desktop: Verify"
 
 on:
@@ -16,14 +17,14 @@ on:
       - "**"
       - "!landing/**"
       - "!docs/**"
-      - "!*.md"
+      - "!**/*.md"
       - "docs/licenses/**"
   pull_request:
     paths:
       - "**"
       - "!landing/**"
       - "!docs/**"
-      - "!*.md"
+      - "!**/*.md"
       - "docs/licenses/**"
 
 concurrency:
