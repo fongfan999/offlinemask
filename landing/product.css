@@ -131,6 +131,42 @@
 .om-brand > span > span {
   color: var(--accent);
 }
+/* The logo is the home link: on hover or focus the mark tips and the name slides out. */
+.om-nav-pill .om-brand {
+  gap: 0;
+  padding: 4px 6px;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+.om-nav-pill .om-brand:hover,
+.om-nav-pill .om-brand:focus-visible {
+  background: var(--accent-soft);
+}
+.om-nav-pill .om-mark {
+  transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.om-nav-pill .om-brand:hover .om-mark,
+.om-nav-pill .om-brand:focus-visible .om-mark {
+  transform: rotate(-10deg) scale(1.08);
+}
+.om-brand-name {
+  display: inline-block;
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  opacity: 0;
+  font-size: 16px;
+  transition:
+    max-width 0.35s ease,
+    opacity 0.25s ease,
+    padding 0.35s ease;
+}
+.om-nav-pill .om-brand:hover .om-brand-name,
+.om-nav-pill .om-brand:focus-visible .om-brand-name {
+  max-width: 130px;
+  padding-left: 8px;
+  opacity: 1;
+}
 .om-nav-download {
   position: absolute;
   right: 0;

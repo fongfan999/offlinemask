@@ -4,9 +4,10 @@
     <nav class="om-nav-pill" aria-label="Điều hướng sản phẩm">
       <a class="om-brand" href="#om-main" aria-label="OfflineMask — về đầu trang"
         ><span class="om-mark" aria-hidden="true"></span
-      ></a>
-      <a href="#om-why">Vì sao</a><a href="#om-how">Cách hoạt động</a
-      ><a href="#om-privacy">Riêng tư</a><a href="#om-faq">Câu hỏi</a>
+        ><span class="om-brand-name" aria-hidden="true">Offline<span>Mask</span></span></a
+      >
+      <a href="#om-why">Giới thiệu</a><a href="#om-how">Cách dùng</a
+      ><a href="#om-privacy">Riêng tư</a><a href="#om-faq">Hỏi đáp</a>
     </nav>
     <a class="om-nav-download" href="#om-download" data-om-nav-download>Tải về</a>
   </header>
@@ -69,9 +70,9 @@
         Hôm nay bạn đã dán gì<br /><em>vào AI?</em>
       </h2>
       <p class="om-display-sub" data-om-reveal>
-        Bảng lương, hợp đồng, email khách hàng: AI (ChatGPT, Claude, Gemini…) làm những việc này rất
-        giỏi, nhưng chúng chứa đầy thông tin không nên rời khỏi công ty. Tùy dịch vụ và cài đặt, nội
-        dung bạn gửi có thể được lưu lại, được người xem, hoặc dùng để cải thiện mô hình.
+        Bảng lương, hợp đồng, email khách hàng: AI (ChatGPT, Claude, Gemini…) giúp bạn làm những
+        việc này rất nhanh. Chỉ là trong đó thường có tên, số điện thoại hay số tài khoản mà bạn
+        không cần gửi đi.
       </p>
       <div class="om-prompts" data-om-prompts>
         <figure class="om-prompt">
@@ -127,8 +128,8 @@
             <span class="om-step-number">01</span>
             <h3>Ẩn những gì AI không cần biết</h3>
             <p>
-              Dán văn bản hoặc mở tệp. OfflineMask đánh dấu thông tin định danh; bạn xem lại, bỏ
-              chọn phần cần giữ, và tự chọn thêm phần còn sót.
+              Dán văn bản hoặc mở tệp. OfflineMask tô sáng tên, số điện thoại, số tài khoản…; bạn
+              xem lại và chọn những gì muốn ẩn.
             </p>
             <img
               class="om-step-shot"
@@ -240,10 +241,10 @@
           </p>
         </article>
         <article class="om-card" data-om-reveal>
-          <p class="om-pill">Lịch sử mã hóa</p>
+          <p class="om-pill">Lưu lịch sử</p>
           <p>
-            Đặt mật mã để giữ lịch sử trong kho mã hóa trên máy. Chưa đặt? Mọi thứ chỉ ở trong bộ
-            nhớ.
+            Muốn mở lại việc cũ? Đặt mật mã 6 số để lưu lịch sử trên máy. Không đặt thì đóng ứng
+            dụng là xong.
           </p>
         </article>
         <article class="om-card" data-om-reveal>
@@ -253,8 +254,8 @@
         <article class="om-card" data-om-reveal>
           <p class="om-pill">Ẩn nhanh khi bôi đen</p>
           <p>
-            Bôi đen chữ trong ứng dụng khác rồi bấm nút nổi hoặc ⌘⇧M: thông tin được ẩn mà không cần
-            mở cửa sổ. Bật trong Cài đặt; trên macOS cần quyền Trợ năng.
+            Bôi đen chữ ở bất kỳ đâu rồi bấm nút OfflineMask: thông tin được ẩn ngay tại chỗ, không
+            cần mở cửa sổ. Bật trong Cài đặt.
           </p>
         </article>
       </div>
@@ -269,8 +270,7 @@
           Thứ AI thấy.<br /><em>Thứ ở lại với bạn.</em>
         </h2>
         <p class="om-display-sub" data-om-reveal>
-          Chỉ bản đã thay mã đi tới AI. Bảng đối chiếu không bao giờ rời máy. Không máy chủ, không
-          tài khoản, không theo dõi.
+          Bản gửi AI chỉ có mã. Tên thật và bảng đối chiếu nằm yên trên máy bạn.
         </p>
         <div class="om-split" data-om-split>
           <div class="om-side om-side-local">
@@ -282,9 +282,7 @@
               <li><span>0901234567</span><code>[SDT_1_625f]</code></li>
               <li><span>minh.anh@example.com</span><code>[EMAIL_1_625f]</code></li>
             </ul>
-            <p class="om-side-foot">
-              Chỉ ở trong bộ nhớ, hoặc trong kho mã hóa nếu bạn đặt mật mã.
-            </p>
+            <p class="om-side-foot">Nằm trên máy bạn. Đặt mật mã nếu muốn lưu lại.</p>
           </div>
           <div class="om-channel" aria-hidden="true"><span>Ranh giới</span></div>
           <div class="om-side om-side-ai">
@@ -300,31 +298,23 @@
           </div>
         </div>
         <div class="om-proofs" data-om-reveal>
-          <h3 class="om-proofs-title">Đừng tin lời chúng tôi.<br /><em>Hãy kiểm chứng.</em></h3>
+          <h3 class="om-proofs-title">Muốn chắc chắn?<br /><em>Tự kiểm tra dễ dàng.</em></h3>
           <ul>
             <li>
-              <strong>Cửa sổ ứng dụng không thể kết nối ra ngoài.</strong> Chính sách bảo mật nội
-              dung (CSP) chỉ cho phép kết nối nội bộ giữa giao diện và ứng dụng.
-              <a
-                href="https://github.com/fongfan999/offlinemask/blob/main/desktop/src-tauri/tauri.conf.json"
-                >Xem cấu hình ↗</a
-              >
+              <strong>Không cần Internet.</strong> Tắt Wi‑Fi rồi dùng thử: ẩn và khôi phục vẫn chạy
+              bình thường.
             </li>
             <li>
-              <strong>Chỉ một việc dùng mạng: tải gói nhận diện tiếng Việt.</strong> Chỉ khi bạn bấm
-              tải trong Cài đặt, từ địa chỉ cố định, và mỗi tệp được đối chiếu SHA-256.
-              <a
-                href="https://github.com/fongfan999/offlinemask/blob/main/desktop/packs/vietnamese-pii-v1.json"
-                >Xem danh sách tệp ↗</a
-              >
+              <strong>Không gửi dữ liệu đi đâu.</strong> Không tài khoản, không thống kê sử dụng,
+              không tự cập nhật.
             </li>
             <li>
-              <strong>Không cập nhật tự động, không thống kê sử dụng.</strong> Ứng dụng không có mã
-              nào gửi dữ liệu sử dụng hay báo lỗi về đâu cả.
+              <strong>Chỉ tải thêm khi bạn bấm.</strong> Gói nhận diện tiếng Việt là tùy chọn, tải
+              một lần trong Cài đặt.
             </li>
             <li>
-              <strong>Tự kiểm tra trong một phút.</strong> Tắt Wi‑Fi, hoặc mở Little Snitch hay LuLu
-              trên macOS: khi ẩn và khôi phục, OfflineMask không mở kết nối nào.
+              <strong>Mã nguồn công khai.</strong> Ai cũng có thể xem ứng dụng làm gì.
+              <a href="https://github.com/fongfan999/offlinemask">Xem trên GitHub ↗</a>
             </li>
           </ul>
           <a class="om-text-link" href="./privacy.html">Đọc chính sách quyền riêng tư →</a>
@@ -341,8 +331,7 @@
           <blockquote>“Technology is the medium. People are the point.”</blockquote>
           <p>
             OfflineMask do Phong Phan làm, một CTO nhiều năm xây dựng phần mềm và dẫn dắt đội ngũ.
-            Mã nguồn công khai trên GitHub, nên bạn không cần tin lời ai: mọi thay đổi đều xem lại
-            được.
+            Mã nguồn công khai trên GitHub để ai cũng có thể xem.
           </p>
           <p class="om-maker-links">
             <a href="https://wotdafong.dev">wotdafong.dev ↗</a
@@ -360,26 +349,24 @@
         <details>
           <summary>Có cần Internet để sử dụng không?<span aria-hidden="true">+</span></summary>
           <p>
-            Xử lý nội dung không cần Internet. Bạn cần mạng để tải ứng dụng và, nếu muốn, tải gói
-            nhận diện tiếng Việt từ Cài đặt. Sau khi cài, gói chạy trên máy. Không có kiểm tra cập
-            nhật tự động.
+            Không cần. OfflineMask chạy hoàn toàn trên máy. Bạn chỉ cần mạng để tải ứng dụng và, nếu
+            muốn, gói nhận diện tiếng Việt.
           </p>
         </details>
         <details>
           <summary>
-            Có tự động tìm được mọi thông tin nhạy cảm?<span aria-hidden="true">+</span>
+            OfflineMask có tìm ra hết thông tin cần ẩn không?<span aria-hidden="true">+</span>
           </summary>
           <p>
-            Không. Nhận diện có thể bỏ sót hoặc chọn nhầm. Hãy rà soát gợi ý, tự ẩn thêm và kiểm tra
-            bản xuất trước khi chia sẻ. Ẩn định danh không bảo đảm rằng ngữ cảnh còn lại không thể
-            nhận diện một người.
+            Phần lớn, nhưng không phải lúc nào cũng đủ. Hãy xem lại các gợi ý và tự chọn thêm phần
+            còn sót trước khi gửi.
           </p>
         </details>
         <details>
           <summary>Khôi phục thông tin hoạt động thế nào?<span aria-hidden="true">+</span></summary>
           <p>
-            Mỗi thông tin được thay bằng một mã nhất quán trong phiên. Đưa kết quả về cùng phiên để
-            khôi phục mã còn nguyên. Nếu AI sửa hoặc xóa mã, ứng dụng không thể đoán lại thông tin.
+            Mỗi thông tin được thay bằng một mã. Khi bạn dán câu trả lời của AI vào lại, các mã còn
+            nguyên được đổi về thông tin thật. Nếu AI sửa mã, phần đó sẽ không đổi lại được.
           </p>
         </details>
         <details>
@@ -387,12 +374,12 @@
             Vì sao máy báo ứng dụng chưa được xác minh?<span aria-hidden="true">+</span>
           </summary>
           <p>
-            Bản phát hành hiện chưa được ký số bằng chứng chỉ của Apple hay Microsoft, nên macOS và
-            Windows hỏi lại trước khi mở lần đầu. Bạn có thể đối chiếu tệp với SHA256SUMS.txt của
-            bản phát hành, rồi làm theo
+            OfflineMask chưa đăng ký chứng chỉ với Apple và Microsoft, nên lần mở đầu tiên máy sẽ
+            hỏi lại. Làm theo
             <a href="https://github.com/fongfan999/offlinemask/blob/main/docs/install.md"
               >hướng dẫn cài đặt ↗</a
-            >.
+            >
+            để mở ứng dụng.
           </p>
         </details>
         <details>
@@ -402,8 +389,8 @@
             >
           </summary>
           <p>
-            Không có kết nối tự động. Bạn chủ động sao chép hoặc tải bản đã ẩn lên công cụ mình
-            chọn, rồi đưa kết quả về OfflineMask khi cần khôi phục.
+            Không. Bạn tự sao chép bản đã ẩn sang công cụ AI mình dùng, rồi dán câu trả lời về
+            OfflineMask.
           </p>
         </details>
       </div>
@@ -481,8 +468,8 @@
           </p>
         </details>
         <p class="om-release-note">
-          Đã kiểm thử thủ công trên macOS Apple Silicon; các bản khác chưa được kiểm thử đầy đủ. Bản
-          phát hành chưa được ký số, nên máy có thể hỏi lại trước khi mở lần đầu.
+          Đã thử kỹ trên máy Mac chip Apple; bản cho Windows và Linux đang được thử thêm. Lần mở đầu
+          tiên, máy có thể hỏi lại.
           <a href="https://github.com/fongfan999/offlinemask/blob/main/docs/install.md"
             >Cách cài và kiểm tra tệp ↗</a
           >
@@ -520,8 +507,8 @@
       </div>
       <nav aria-label="Sản phẩm">
         <p>Sản phẩm</p>
-        <a href="#om-why">Vì sao</a><a href="#om-how">Cách hoạt động</a
-        ><a href="#om-privacy">Riêng tư</a><a href="#om-faq">Câu hỏi</a>
+        <a href="#om-why">Giới thiệu</a><a href="#om-how">Cách dùng</a
+        ><a href="#om-privacy">Riêng tư</a><a href="#om-faq">Hỏi đáp</a>
       </nav>
       <nav aria-label="Tài nguyên">
         <p>Tài nguyên</p>
