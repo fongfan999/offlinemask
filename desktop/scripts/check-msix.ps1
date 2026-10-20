@@ -18,10 +18,29 @@ if (-not $package) { throw 'The MSIX did not install' }
 foreach ($file in 'native\recognition-sidecar.exe', 'native\onnxruntime.dll') {
   if (-not (Test-Path (Join-Path $package.InstallLocation $file))) { throw "The package is missing $file" }
 }
+$launched = Get-Date
 Start-Process "shell:AppsFolder\$($package.PackageFamilyName)!OfflineMask"
 Start-Sleep -Seconds 20
 $running = Get-Process -Name OfflineMask -ErrorAction SilentlyContinue
-if (-not $running) { throw 'OfflineMask was not running 20 s after launch from the package' }
+if (-not $running) {
+  # Tell a crash in the package from a runner that cannot activate packaged apps.
+  '--- Application errors since launch'
+  Get-WinEvent -FilterHashtable @{ LogName = 'Application'; Level = 1, 2; StartTime = $launched } -ErrorAction SilentlyContinue |
+    Select-Object -First 10 | ForEach-Object { "$($_.ProviderName): $($_.Message)" }
+  '--- Activation events since launch'
+  foreach ($log in 'Microsoft-Windows-TWinUI/Operational', 'Microsoft-Windows-AppModel-Runtime/Admin', 'Microsoft-Windows-AppXDeploymentServer/Operational') {
+    Get-WinEvent -FilterHashtable @{ LogName = $log; StartTime = $launched } -ErrorAction SilentlyContinue |
+      Where-Object { $_.Level -le 3 } | Select-Object -First 10 | ForEach-Object { "$log $($_.Id): $($_.Message)" }
+  }
+  $plain = Resolve-Path 'desktop/src-tauri/target/release/OfflineMask.exe' -ErrorAction SilentlyContinue
+  if ($plain) {
+    '--- The same build started unpackaged'
+    $process = Start-Process -FilePath $plain -PassThru
+    Start-Sleep -Seconds 20
+    if ($process.HasExited) { "Unpackaged app exited with code $($process.ExitCode)" } else { 'Unpackaged app is running'; $process | Stop-Process -Force }
+  }
+  throw 'OfflineMask was not running 20 s after launch from the package'
+}
 "OfflineMask is running (pid $($running.Id -join ', '))"
 $running | Stop-Process -Force
 Remove-AppxPackage -Package $package.PackageFullName
