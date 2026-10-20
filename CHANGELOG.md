@@ -4,6 +4,14 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+### Fixed
+
+- The Windows app no longer panics on launch. The native build passed Tauri its frontend folder as an absolute path, which Tauri reads as a URL on Windows (`D:` as the scheme), so resolving the quick-action panel's page failed; the 2.0.0 Windows installers are affected. Found by the new MSIX launch check ([0117](docs/decisions/0117-microsoft-store-msix.md)).
+
+### Added
+
+- A Microsoft Store package (MSIX) built and launch-checked by the release workflow ([0117](docs/decisions/0117-microsoft-store-msix.md)).
+
 ### Changed
 
 - The native recognition helper is its own Cargo package in the `src-tauri` workspace, so a release build compiles the app library once; the three macOS Services items no longer warn as dead code on Windows and Linux ([0107](docs/decisions/0107-helper-crate.md)).

@@ -3,7 +3,7 @@
 // checks, or user-data access.
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative, sep } from 'node:path';
 import { cp, mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
@@ -78,7 +78,10 @@ for (const name of await readdir(join(root, 'public'))) {
 const shipped = [runtime.file, ...companions.map(file => file.name), helper];
 const config = {
   ...(qa ? { productName: 'OfflineMask Release QA', identifier: 'dev.offlinemask.releaseqa20260921' } : {}),
-  build: { beforeBuildCommand: '', frontendDist: frontend },
+  // Relative to src-tauri, with forward slashes: Tauri reads frontendDist as a URL first,
+  // and an absolute Windows path such as D:\a\... parses as one (scheme "d"), which made
+  // the packaged app panic on launch resolving pill.html.
+  build: { beforeBuildCommand: '', frontendDist: relative(join(root, 'src-tauri'), frontend).split(sep).join('/') },
   bundle: {
     ...(process.platform === 'darwin' ? { macOS: { signingIdentity } } : {}),
     resources: {
