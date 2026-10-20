@@ -209,7 +209,7 @@ jobs:
           $cer = Get-ChildItem desktop/artifacts/msix/*_test-signed.cer | Select-Object -First 1
           Import-Certificate -FilePath $cer.FullName -CertStoreLocation Cert:\LocalMachine\TrustedPeople | Out-Null
           Add-AppxPackage -Path $signed.FullName
-          $package = Get-AppxPackage | Where-Object { $_.Name -like 'OfflineMask*' } | Select-Object -First 1
+          $package = Get-AppxPackage | Where-Object { $_.Name -like '*OfflineMask*' } | Select-Object -First 1
           if (-not $package) { throw 'The MSIX did not install' }
           "Installed $($package.PackageFullName) at $($package.InstallLocation)"
           # The bundled helper must load its runtime from the read-only package folder.

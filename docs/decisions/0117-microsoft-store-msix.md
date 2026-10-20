@@ -22,7 +22,7 @@ Unsigned Windows installers trigger SmartScreen, a paid certificate costs more t
 
 ## Release order
 
-1. Owner: reserve "OfflineMask" in Partner Center (MSIX or PWA app) and copy the identity values into `microsoft-store.json`, without `storeId`.
+1. Owner: reserve "OfflineMask" in Partner Center (MSIX or PWA app) and copy the identity values into `microsoft-store.json`, without `storeId`. Done 20 October 2026: `WotDaFong.OfflineMask`, publisher display name "Wot Da Fong".
 2. Dry-run the release workflow (Run workflow, no tag) and install the test-signed MSIX on a Windows PC: trust the `.cer` in Local Machine → Trusted People, open the `.msix`. Check masking, files, the recognition pack download, quick actions, the vault, start at login and uninstall.
 3. Owner: submit the unsigned MSIX with the listing, age rating, privacy URL (`https://offlinemask.com/privacy`) and the runFullTrust justification. Certification takes up to three business days; there are no hot fixes after that point, only new submissions.
 4. After the listing is live: set `storeId`, add the Store to `docs/install.md`, push to deploy the landing page.
