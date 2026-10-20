@@ -1,4 +1,4 @@
-// Capture real OfflineMask UI states (built-in sample data only) at 2x via the Chrome DevTools
+// Capture real OfflineMask UI states (built-in or fictional sample data only) at 2x via the Chrome DevTools
 // protocol. With the desktop web dev server on :1420, run
 // `node landing/scripts/capture-app-shots.mjs <dir> [light|dark]`, then convert the PNGs into
 // landing/shots/ with `magick <name>.png -resize 2048x -quality 82 <name>.webp`.
@@ -91,49 +91,92 @@ await send("Emulation.setEmulatedMedia", {
   ],
 });
 
-// Text: built-in sample, masked, remaining name masked too.
+// Text: a fictional support message with no personal name, so everything the built-in rules
+// catch is masked and no name code appears (names need the recognition pack, which the web build
+// cannot run). Shot at 1280x760 so the text panel fills the frame.
+await send("Emulation.setDeviceMetricsOverride", {
+  width: 1280,
+  height: 760,
+  deviceScaleFactor: 2,
+  mobile: false,
+});
+const TEXT = `Kính gửi bộ phận hỗ trợ,
+
+Mã khách hàng: KH20931
+Số CCCD: 079198004521
+Số tài khoản: 001234567890
+Số điện thoại: 0901234567
+Email: lienhe.kh20931@example.com
+
+Ngày 08/09/2026, tôi chuyển 2.500.000 đồng nhưng người nhận chưa nhận được tiền. Vui lòng kiểm tra giúp giao dịch có mã GD202609080126.
+
+Trân trọng.`;
+const setArea = (selector, value) =>
+  evaluate(`(() => {
+    const area = document.querySelector(${JSON.stringify(selector)});
+    if (!area) return 'no area';
+    const set = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set;
+    set.call(area, ${JSON.stringify(value)});
+    area.dispatchEvent(new Event('input', { bubbles: true }));
+    return 'set';
+  })()`);
+// Frame the text panel: scroll so the step card sits near the top of the view.
+const frame = () =>
+  evaluate(`(() => {
+    const steps = document.querySelector('[aria-label="Bước 1: Ẩn thông tin"]');
+    if (!steps) return 'no steps';
+    const box = steps.parentElement.parentElement;
+    let el = box;
+    while (el && el !== document.body) {
+      const s = getComputedStyle(el);
+      if (/(auto|scroll)/.test(s.overflowY) && el.scrollHeight > el.clientHeight) break;
+      el = el.parentElement;
+    }
+    const top = box.getBoundingClientRect().top - 24;
+    if (el && el !== document.body) el.scrollTop += top; else window.scrollBy(0, top);
+    return 'framed';
+  })()`);
+
 await fresh();
-await shot("home");
-console.log(await click("Xem thử với ví dụ"));
-await sleep(1200);
+console.log(await click("Văn bản"));
+await sleep(1000);
+console.log(await setArea("textarea", TEXT));
+await sleep(500);
 console.log(
   await evaluate(`(() => {
     const el = [...document.querySelectorAll('button')].find(e =>
       e.textContent.includes('Ẩn thông tin') && !(e.getAttribute('aria-label')||'').startsWith('Bước'));
-    el.click(); return 'masked';
+    if (!el) return 'no mask button'; el.click(); return 'masked';
   })()`),
 );
 await sleep(2500);
-console.log(await click("Ẩn “"));
-await sleep(1500);
-await shot("text-masked");
-console.log(await click("Bản gốc"));
-await sleep(1000);
-await shot("text-original");
-console.log(await click("Bản đã ẩn"));
-await sleep(800);
 const codes = await evaluate(
   `[...new Set(document.querySelector('main').innerText.match(/\\[[A-Z_]+_\\d+_[a-z0-9]+\\]/g) || [])]`,
 );
 console.log("codes", codes);
-
-// Restore a fictional AI reply that uses those codes.
+console.log(await frame());
+await sleep(600);
+await shot("text-masked");
+console.log(await click("Bản gốc"));
+await sleep(800);
+await shot("text-original");
+console.log(await click("Bản đã ẩn"));
+await sleep(500);
 const code = (prefix) => codes.find((c) => c.startsWith(`[${prefix}_`));
-const name = codes.find((c) => !/^\[(STK|GD|SDT|EMAIL)_/.test(c));
-const reply = `Tóm tắt: Khách hàng ${name} (tài khoản ${code("STK")}) chuyển 2.500.000 đồng ngày 08/09/2026; giao dịch ${code("GD")} chưa đến người nhận.\n\nĐề xuất: gọi lại ${code("SDT")} trong hôm nay và gửi xác nhận tới ${code("EMAIL")}.`;
+const reply = `Chào quý khách ${code("KH")}, chúng tôi đã kiểm tra giao dịch ${code("GD")} từ tài khoản ${code("STK")}: tiền đang được hoàn lại trong 24 giờ.\n\nChúng tôi sẽ gọi lại số ${code("SDT")} và gửi xác nhận tới ${code("EMAIL")}.`;
 await evaluate(`document.querySelector('[aria-label="Bước 3: Khôi phục"]').click()`);
-await sleep(1200);
-console.log(
-  await evaluate(`(() => {
-    const area = document.querySelector('textarea[placeholder^="Dán phản hồi"]');
-    const set = Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value').set;
-    set.call(area, ${JSON.stringify(reply)});
-    area.dispatchEvent(new Event('input', { bubbles: true }));
-    return 'reply';
-  })()`),
-);
+await sleep(1000);
+console.log(await setArea('textarea[placeholder^="Dán phản hồi"]', reply));
 await sleep(1500);
+console.log(await frame());
+await sleep(600);
 await shot("text-restored");
+await send("Emulation.setDeviceMetricsOverride", {
+  width: 1280,
+  height: 800,
+  deviceScaleFactor: 2,
+  mobile: false,
+});
 
 // Spreadsheet sample.
 await fresh();

@@ -365,17 +365,17 @@
   left: 50%;
   translate: -50% -50%;
   display: inline-flex;
-  padding: 3px;
+  padding: 2px;
   border-radius: 999px;
-  background: #e3e1d8;
+  background: #e6e4db;
 }
 .om-view-toggle button {
-  padding: 3px 14px;
+  padding: 2px 11px;
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: #595d54;
-  font: 500 13px var(--sans);
+  color: #6b6f66;
+  font: 500 12px var(--sans);
   cursor: pointer;
 }
 .om-view-toggle button[aria-pressed="true"] {
@@ -473,14 +473,16 @@
   text-decoration-color: var(--warm);
   text-decoration-thickness: 2px;
 }
+/* Chips hang off the window edge over empty UI: the sidebar's blank space and the text panel's
+   right margin. */
 .om-float-a {
-  left: -48px;
-  top: 34%;
+  left: -56px;
+  top: 58%;
   transform: rotate(-3deg);
 }
 .om-float-b {
-  right: -40px;
-  bottom: 14%;
+  right: -44px;
+  top: 34%;
   transform: rotate(2deg);
 }
 .om-hero-caption {
