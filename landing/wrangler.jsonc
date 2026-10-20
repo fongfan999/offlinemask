@@ -2,6 +2,12 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "offlinemask-landing",
   "compatibility_date": "2026-10-01",
+  // offlinemask.com is registered at Cloudflare (20 October 2026). A deploy binds the
+  // Worker to the apex and www as custom domains and creates their DNS records.
+  "routes": [
+    { "pattern": "offlinemask.com", "custom_domain": true },
+    { "pattern": "www.offlinemask.com", "custom_domain": true },
+  ],
   "assets": {
     "directory": "./dist",
     "not_found_handling": "404-page",
