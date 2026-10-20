@@ -55,8 +55,8 @@ Signed installers show your name instead of "Unknown publisher". Windows SmartSc
 | Option | Fits OfflineMask? |
 | --- | --- |
 | **Azure Artifact Signing** (formerly Trusted Signing; cheap, works well with Tauri) | **Not available.** Microsoft accepts individual developers only from the United States and Canada, and organizations only from a short list of countries that excludes Vietnam. |
-| **SignPath Foundation** (free signing for open-source projects) | Unlikely. It requires an OSI-approved license, and the O’Saasy license is not one. |
-| **OV code-signing certificate with cloud signing**, such as SSL.com eSigner | **Recommended.** Since June 2023 private keys must live in hardware, and a cloud signing service is the way to use one from GitHub Actions. Individual validation needs a government ID. |
+| **SignPath Foundation** (free signing for open-source projects) | **Recommended, now that the project is MIT-licensed** (decision 0116). Apply at <https://signpath.org/>. They review the project, and releases must be built in GitHub Actions from this public repository. Installers are signed with SignPath Foundation's certificate, so Windows names "SignPath Foundation" as the publisher, not you. |
+| **OV code-signing certificate with cloud signing**, such as SSL.com eSigner | **The paid alternative**, if you want your own name as the publisher. Since June 2023 private keys must live in hardware, and a cloud signing service is the way to use one from GitHub Actions. Individual validation needs a government ID. |
 | **Certum Open Source Code Signing** | Cheapest for open-source developers, but its SimplySign cloud key needs an interactive login, so signing would be a manual step on a Windows machine rather than CI. |
 
 Once you have chosen and been validated, the workflow needs one addition. Set a `signCommand` for Windows through `tauri build --config` only when the signing secrets exist, so unsigned dry runs keep working. Tauri's guide covers custom sign commands: <https://v2.tauri.app/distribute/sign/windows/>. Share the provider and the secret names, and the workflow change is a small, reviewable diff.
