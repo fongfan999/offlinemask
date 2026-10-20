@@ -24,6 +24,11 @@
         font-weight: 100 900;
         src: url(../node_modules/@fontsource-variable/noto-serif/files/noto-serif-latin-wght-italic.woff2);
       }
+      @font-face {
+        font-family: "Noto Sans";
+        font-weight: 100 900;
+        src: url(../node_modules/@fontsource-variable/noto-sans/files/noto-sans-latin-wght-normal.woff2);
+      }
       html,
       body {
         margin: 0;
@@ -46,13 +51,14 @@
         font-size: 36px;
       }
       .mark {
-        margin: 0;
-        font-size: 196px;
-        line-height: 1;
-        letter-spacing: -0.045em;
+        margin: 6px 0 0;
+        font:
+          750 172px/1 "Noto Sans",
+          sans-serif;
+        letter-spacing: -0.055em;
       }
-      .mark em {
-        font-style: italic;
+      .mark span {
+        color: #b3c3ff;
       }
       .window {
         position: absolute;
@@ -78,7 +84,7 @@
   </head>
   <body>
     <p class="tagline">AI không cần biết khách hàng của bạn là ai.</p>
-    <p class="mark">Offline<em>Mask</em></p>
+    <p class="mark">Offline<span>Mask</span></p>
     <div class="window">
       <div class="bar"></div>
       <img src="../shots/text-masked.webp" alt="" />

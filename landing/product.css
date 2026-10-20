@@ -269,15 +269,15 @@
   font: 400 clamp(22px, 2.4vw, 34px) / 1.3 var(--serif);
   letter-spacing: -0.01em;
 }
+/* The wordmark is drawn like the logo: bold sans, tight, "Mask" in a lighter cobalt. */
 .om-wordmark {
-  margin-top: 6px !important;
-  font: 400 clamp(76px, 15.5vw, 236px) / 0.95 var(--serif);
-  letter-spacing: -0.045em;
+  margin-top: 14px !important;
+  font: 750 clamp(64px, 13vw, 200px) / 1 var(--sans);
+  letter-spacing: -0.055em;
   white-space: nowrap;
 }
-.om-wordmark em {
-  font-style: italic;
-  letter-spacing: -0.035em;
+.om-wordmark-mask {
+  color: #b3c3ff;
 }
 .om-wordmark span {
   display: inline-block;
@@ -1162,13 +1162,13 @@
 .om-footer-mark {
   margin: 56px 0 -0.22em !important;
   color: var(--accent-soft);
-  font: 400 16vw/0.8 var(--serif);
-  letter-spacing: -0.05em;
+  font: 750 14.5vw/0.8 var(--sans);
+  letter-spacing: -0.055em;
   text-align: center;
   white-space: nowrap;
 }
-.om-footer-mark em {
-  font-style: italic;
+.om-footer-mark span {
+  color: color-mix(in srgb, var(--accent) 30%, var(--accent-soft));
 }
 
 @media (max-width: 1100px) {
@@ -1186,7 +1186,8 @@
   }
 }
 @media (max-width: 860px) {
-  .om-nav-pill a[href="#om-privacy"] {
+  .om-nav-pill a[href="#om-privacy"],
+  .om-nav-pill a[href="#om-features"] {
     display: none;
   }
   .om-story-grid {
@@ -1258,7 +1259,7 @@
     border-radius: 0 0 50% 50% / 0 0 36px 36px;
   }
   .om-wordmark {
-    font-size: 15.2vw;
+    font-size: 14vw;
   }
   .om-hero-window {
     margin-top: 36px;
