@@ -1,66 +1,69 @@
 /** Fixed synthetic narrative, not a detector or an AI integration. */
-export const demoSteps = ["original", "masked", "reply", "restored"];
-export const demoStates = {
-  original: {
-    kicker: "BƯỚC 01 / NỘI DUNG CẦN XỬ LÝ",
-    title: "Có những điều AI không cần biết.",
-    label: "Trước khi ẩn",
-    tag: "Thông tin riêng đang hiển thị",
-    prompt: "Tóm tắt giao dịch sau:",
-    prefix: "Khách hàng ",
-    verb: " chuyển ",
-    accountPrefix: " từ tài khoản ",
-    contactPrefix: "Liên hệ: ",
-    detail: "Tên, số tài khoản và email là những thông tin cần xem xét trước khi gửi.",
-    status: "Bắt đầu từ văn bản hoặc tệp của bạn. Bản gốc vẫn được giữ lại.",
-    next: "Tiếp: Ẩn & kiểm tra →",
-    aliases: false,
-  },
-  masked: {
-    kicker: "BƯỚC 02 / CHUẨN BỊ BẢN CHIA SẺ",
-    title: "Ẩn thông tin. Giữ ngữ cảnh.",
-    label: "Bản đã ẩn",
-    tag: "Bạn tự gửi cho AI",
-    prompt: "Tóm tắt giao dịch sau:",
-    prefix: "Khách hàng ",
-    verb: " chuyển ",
-    accountPrefix: " từ tài khoản ",
-    contactPrefix: "Liên hệ: ",
-    detail:
-      "Số tiền vẫn giữ nguyên. Tên trong ví dụ đã được chọn ẩn; bạn có thể tự ẩn phần còn sót.",
-    status: "Kiểm tra bản đã ẩn trước khi sao chép sang AI.",
-    next: "Tiếp: AI trả lời →",
-    aliases: true,
-  },
-  reply: {
-    kicker: "BƯỚC 03 / PHẢN HỒI AI MINH HỌA",
-    title: "AI làm việc với bản đã ẩn.",
-    label: "Phản hồi AI giả lập",
-    tag: "Không kết nối AI",
-    prompt: "Tóm tắt giao dịch",
-    prefix: "Người chuyển: ",
-    verb: ". Số tiền: ",
-    accountPrefix: ". Tài khoản: ",
-    contactPrefix: "Email liên hệ: ",
-    detail: "Bạn dùng công cụ AI mình chọn, rồi đưa phản hồi về cùng phiên OfflineMask.",
-    status: "Đây là phản hồi viết sẵn. Các mã thay thế còn nguyên để khôi phục.",
-    next: "Tiếp: Khôi phục →",
-    aliases: true,
-  },
-  restored: {
-    kicker: "BƯỚC 04 / TRỞ LẠI OFFLINEMASK",
-    title: "Kết quả hữu ích. Thông tin đầy đủ.",
-    label: "Bản đã khôi phục",
-    tag: "Trở lại trên máy bạn",
-    prompt: "Tóm tắt giao dịch",
-    prefix: "Người chuyển: ",
-    verb: ". Số tiền: ",
-    accountPrefix: ". Tài khoản: ",
-    contactPrefix: "Email liên hệ: ",
-    detail:
-      "Thông tin thật trở lại trong bản tóm tắt. Mã bị AI sửa hoặc xóa không thể khôi phục bằng cách đoán.",
-    status: "Đã khôi phục 3 mã trong ví dụ, ngay trên thiết bị.",
-    next: "Xem lại từ đầu ↶",
-    aliases: false,
-  },
+export const demoValues = {
+  name: { real: "Nguyễn Minh An", alias: "[TEN_1_3030]", kind: "Họ tên" },
+  id: { real: "079203001234", alias: "[CCCD_1_3030]", kind: "CCCD" },
+  account: { real: "012345678901", alias: "[STK_1_3030]", kind: "Số tài khoản" },
+  email: { real: "an@example.com", alias: "[EMAIL_1_3030]", kind: "Email" },
+  phone: { real: "0903 123 456", alias: "[SDT_1_3030]", kind: "Số điện thoại" },
 };
+
+// Paragraphs of plain strings, { value } references and { strong } emphasis.
+const request = [
+  ["Tóm tắt giao dịch sau và soạn email xác nhận cho khách:"],
+  [
+    "Khách hàng ",
+    { value: "name" },
+    " (CCCD ",
+    { value: "id" },
+    ") chuyển ",
+    { strong: "12.500.000 đồng" },
+    " từ tài khoản ",
+    { value: "account" },
+    ".",
+  ],
+  ["Liên hệ: ", { value: "email" }, " · ", { value: "phone" }],
+];
+const reply = [
+  [
+    { strong: "Tóm tắt. " },
+    { value: "name" },
+    " chuyển 12.500.000 đồng từ tài khoản ",
+    { value: "account" },
+    ".",
+  ],
+  [
+    { strong: "Email. " },
+    "Gửi ",
+    { value: "email" },
+    ": “Chào anh/chị ",
+    { value: "name" },
+    ", chúng tôi xác nhận đã nhận khoản chuyển 12.500.000 đồng của anh/chị…”",
+  ],
+];
+
+export const demoStages = [
+  {
+    id: "original",
+    where: "Trên máy bạn",
+    file: "yeu-cau.txt",
+    document: request,
+    masked: false,
+    note: "5 thông tin định danh. AI không cần biết chúng để làm việc.",
+  },
+  {
+    id: "masked",
+    where: "Bản gửi AI",
+    file: "yeu-cau · đã ẩn",
+    document: request,
+    masked: true,
+    note: "AI vẫn hiểu: một khách hàng chuyển 12,5 triệu đồng. Nhưng không biết là ai.",
+  },
+  {
+    id: "restored",
+    where: "Trở lại máy bạn",
+    file: "phan-hoi · đã khôi phục",
+    document: reply,
+    masked: false,
+    note: "AI trả lời bằng mã. OfflineMask đổi mã về thông tin thật, ngay trên máy.",
+  },
+];

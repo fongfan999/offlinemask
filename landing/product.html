@@ -6,228 +6,139 @@
     >
     <nav aria-label="Điều hướng sản phẩm">
       <a href="#om-how">Cách hoạt động</a><a href="#om-faq">Câu hỏi</a
-      ><a class="om-nav-download" href="#om-download"
-        >Tải ứng dụng <span aria-hidden="true">↗</span></a
-      >
+      ><a class="om-nav-download" href="#om-download">Tải ứng dụng</a>
     </nav>
   </header>
   <main id="om-main">
     <section class="om-hero om-wrap" aria-labelledby="om-title">
-      <div class="om-hero-copy">
-        <p class="om-eyebrow" data-om-enter>
-          <span class="om-dot"></span> ẨN DỮ LIỆU RIÊNG TRƯỚC KHI HỎI AI
-        </p>
-        <h1 id="om-title" data-om-enter>
-          Dùng AI với dữ liệu thật.<br /><em>Không lộ thông tin.</em>
-        </h1>
-        <p class="om-description" data-om-enter>
-          Trước khi dán bảng lương, hợp đồng hay sao kê vào ChatGPT, OfflineMask thay tên, số tài
-          khoản, CCCD… bằng mã thay thế. AI vẫn đủ ngữ cảnh để làm việc; khi có kết quả, thông tin
-          thật được đổi lại — ngay trên máy bạn.
-        </p>
-        <div class="om-actions" data-om-enter>
-          <a class="om-button" href="#om-download"
-            >Tải OfflineMask <span aria-hidden="true">↗</span></a
-          ><a class="om-text-link" href="#om-demo"
-            >Xem cách hoạt động <span aria-hidden="true">↓</span></a
+      <p class="om-label" data-om-enter>Ứng dụng cho máy tính · Chạy hoàn toàn offline</p>
+      <h1 id="om-title" data-om-enter>
+        Dùng AI với dữ liệu thật.<br /><em>Không lộ thông tin.</em>
+      </h1>
+      <p class="om-lead" data-om-enter>
+        OfflineMask thay tên, số tài khoản, CCCD… bằng mã trước khi bạn hỏi ChatGPT, rồi đổi lại
+        trong câu trả lời. Mọi thứ diễn ra trên máy bạn.
+      </p>
+      <div class="om-actions" data-om-enter>
+        <a class="om-button" href="#om-download"
+          >Tải OfflineMask <span aria-hidden="true">↓</span></a
+        ><a class="om-button om-button-quiet" href="#om-how">Cách hoạt động</a>
+      </div>
+      <p class="om-hero-note" data-om-enter>
+        <span>Không cần tài khoản</span><span>Chạy khi tắt mạng</span><span>Mã nguồn mở</span>
+      </p>
+    </section>
+
+    <section class="om-desk om-wrap" id="om-demo" aria-label="Ví dụ minh họa" data-om-enter>
+      <div class="om-desk-bar">
+        <div class="om-tabs" role="group" aria-label="Các bước trong ví dụ" hidden data-om-controls>
+          <button type="button" data-om-mode="original" aria-pressed="false">
+            <span>1</span> Bản của bạn<i aria-hidden="true"></i>
+          </button>
+          <button type="button" data-om-mode="masked" aria-pressed="true">
+            <span>2</span> Gửi cho AI<i aria-hidden="true"></i>
+          </button>
+          <button type="button" data-om-mode="restored" aria-pressed="false">
+            <span>3</span> Nhận kết quả<i aria-hidden="true"></i>
+          </button>
+        </div>
+        <button type="button" class="om-play" data-om-play hidden>Xem lại</button>
+      </div>
+      <article class="om-sheet" data-om-stage="masked">
+        <header class="om-sheet-head">
+          <span class="om-where" data-om-where>Bản gửi AI</span
+          ><span class="om-file" data-om-file>yeu-cau · đã ẩn</span>
+        </header>
+        <div class="om-sheet-body" data-om-document>
+          <p>Tóm tắt giao dịch sau và soạn email xác nhận cho khách:</p>
+          <p>
+            Khách hàng <span class="om-v" data-kind="Họ tên">[TEN_1_3030]</span> (CCCD
+            <span class="om-v" data-kind="CCCD">[CCCD_1_3030]</span>) chuyển
+            <strong>12.500.000 đồng</strong> từ tài khoản
+            <span class="om-v" data-kind="Số tài khoản">[STK_1_3030]</span>.
+          </p>
+          <p>
+            Liên hệ: <span class="om-v" data-kind="Email">[EMAIL_1_3030]</span> ·
+            <span class="om-v" data-kind="Số điện thoại">[SDT_1_3030]</span>
+          </p>
+        </div>
+        <footer class="om-sheet-foot">
+          <span class="om-dot"></span
+          ><span data-om-note role="status" aria-live="polite"
+            >AI vẫn hiểu: một khách hàng chuyển 12,5 triệu đồng. Nhưng không biết là ai.</span
           >
-        </div>
-        <p class="om-hero-note" data-om-enter>
-          <span>Không cần tài khoản</span><span>Chạy được khi tắt mạng</span
-          ><span>Mã nguồn mở</span>
+        </footer>
+      </article>
+      <p class="om-desk-caption">Ví dụ minh họa với dữ liệu giả · Phản hồi AI viết sẵn</p>
+    </section>
+
+    <section class="om-section om-wrap" id="om-how" aria-labelledby="om-how-title">
+      <header class="om-heading" data-om-reveal>
+        <p class="om-label">Cách hoạt động</p>
+        <h2 id="om-how-title">Thông tin thật<br /><em>ở lại trên máy bạn.</em></h2>
+        <p>
+          Chỉ bản đã thay mã đi tới AI. Bảng đối chiếu để đổi mã về thông tin thật không bao giờ rời
+          máy.
         </p>
-      </div>
-      <div class="om-demo-scene" id="om-demo" data-om-enter>
-        <div class="om-demo-topline">
-          <span class="om-eyebrow">THỬ MỘT VÍ DỤ</span
-          ><button type="button" class="om-play" data-om-play hidden>▷ Xem trọn quy trình</button>
+      </header>
+      <div class="om-split" data-om-split>
+        <div class="om-side om-side-local">
+          <p class="om-side-label"><span class="om-dot"></span> Máy của bạn</p>
+          <h3>Bảng đối chiếu</h3>
+          <ul class="om-pairs">
+            <li><span>Nguyễn Minh An</span><code>[TEN_1_3030]</code></li>
+            <li><span>079203001234</span><code>[CCCD_1_3030]</code></li>
+            <li><span>012345678901</span><code>[STK_1_3030]</code></li>
+            <li><span>an@example.com</span><code>[EMAIL_1_3030]</code></li>
+          </ul>
+          <p class="om-side-foot">Chỉ ở trong bộ nhớ, hoặc trong kho mã hóa nếu bạn đặt mật mã.</p>
         </div>
-        <div class="om-demo" data-om-stage="masked">
-          <div class="om-window-bar">
-            <span class="om-window-dots" aria-hidden="true">● ● ●</span><span>OfflineMask</span
-            ><span class="om-local"><span class="om-dot"></span> Xử lý trên thiết bị</span>
-          </div>
-          <div class="om-app-layout">
-            <div class="om-demo-body">
-              <div
-                class="om-demo-controls"
-                role="group"
-                aria-label="Các bước trong ví dụ"
-                hidden
-                data-om-controls
-              >
-                <button type="button" data-om-mode="original" aria-pressed="false">
-                  <span>01</span> Bản gốc
-                </button>
-                <button type="button" data-om-mode="masked" aria-pressed="true">
-                  <span>02</span> Ẩn & kiểm tra
-                </button>
-                <button type="button" data-om-mode="reply" aria-pressed="false">
-                  <span>03</span> AI trả lời
-                </button>
-                <button type="button" data-om-mode="restored" aria-pressed="false">
-                  <span>04</span> Khôi phục
-                </button>
-              </div>
-              <div class="om-demo-heading">
-                <div>
-                  <p class="om-eyebrow" data-om-kicker>BƯỚC 02 / CHUẨN BỊ BẢN CHIA SẺ</p>
-                  <h2 data-om-demo-title>Ẩn thông tin. Giữ ngữ cảnh.</h2>
-                </div>
-                <span class="om-example-badge">MINH HỌA</span>
-              </div>
-              <div class="om-document-pair">
-                <div class="om-output-sheet">
-                  <div class="om-sheet-label">
-                    <span data-om-output-label>Bản đã ẩn</span
-                    ><span data-om-output-tag>Bạn tự gửi cho AI</span>
-                  </div>
-                  <div class="om-document" data-om-document>
-                    <p data-om-prompt>Tóm tắt giao dịch sau:</p>
-                    <p>
-                      <span data-om-prefix>Khách hàng </span
-                      ><span
-                        class="om-value"
-                        data-original="Nguyễn Minh An"
-                        data-alias="[TEN_1_3030]"
-                        >[TEN_1_3030]</span
-                      ><span data-om-verb> chuyển </span><strong>12.500.000 đồng</strong
-                      ><span data-om-account-prefix> từ tài khoản </span
-                      ><span class="om-value" data-original="012345678901" data-alias="[STK_1_3030]"
-                        >[STK_1_3030]</span
-                      >.
-                    </p>
-                    <p>
-                      <span data-om-contact-prefix>Liên hệ: </span
-                      ><span
-                        class="om-value"
-                        data-original="an@example.com"
-                        data-alias="[EMAIL_1_3030]"
-                        >[EMAIL_1_3030]</span
-                      >
-                    </p>
-                  </div>
-                  <div class="om-sheet-bottom" data-om-detail>
-                    Số tiền vẫn giữ nguyên. Bạn kiểm tra và chọn thêm thông tin cần ẩn trước khi
-                    chia sẻ.
-                  </div>
-                </div>
-              </div>
-              <div class="om-demo-bottom">
-                <div class="om-demo-status">
-                  <span class="om-dot"></span
-                  ><span data-om-status role="status" aria-live="polite"
-                    >Kiểm tra bản đã ẩn trước khi sao chép sang AI.</span
-                  >
-                </div>
-                <button type="button" class="om-demo-next" data-om-next hidden>
-                  Tiếp: AI trả lời →
-                </button>
-              </div>
-            </div>
-          </div>
+        <div class="om-channel" aria-hidden="true"><span>Ranh giới</span></div>
+        <div class="om-side om-side-ai">
+          <p class="om-side-label">ChatGPT · Claude · Gemini…</p>
+          <h3>AI chỉ thấy</h3>
+          <p class="om-ai-text">
+            Khách hàng <code>[TEN_1_3030]</code> (CCCD <code>[CCCD_1_3030]</code>) chuyển 12.500.000
+            đồng từ tài khoản <code>[STK_1_3030]</code>. Liên hệ:
+            <code>[EMAIL_1_3030]</code>
+          </p>
+          <p class="om-side-foot">
+            Bạn tự sao chép hoặc tải lên. OfflineMask không kết nối với AI nào.
+          </p>
         </div>
-        <p class="om-demo-caption">Ví dụ giả lập · Không gửi dữ liệu · Phản hồi AI viết sẵn</p>
       </div>
+      <ol class="om-steps">
+        <li data-om-reveal>
+          <h3>Ẩn và kiểm tra</h3>
+          <p>
+            Dán văn bản hoặc mở tệp. Xem các gợi ý, giữ lại phần cần thiết, tự chọn thêm phần muốn
+            ẩn.
+          </p>
+        </li>
+        <li data-om-reveal>
+          <h3>Làm việc với AI</h3>
+          <p>
+            Sao chép bản đã ẩn sang công cụ AI bạn thích. Ngữ cảnh đủ để AI làm tốt việc của nó.
+          </p>
+        </li>
+        <li data-om-reveal>
+          <h3>Khôi phục</h3>
+          <p>Dán câu trả lời về cùng phiên. Mã còn nguyên được đổi lại thành thông tin thật.</p>
+        </li>
+      </ol>
     </section>
-    <div class="om-uses om-wrap">
-      <p>Thường dùng cho</p>
-      <ul>
-        <li>Bảng lương & hồ sơ nhân sự</li>
-        <li>Hợp đồng</li>
-        <li>Sao kê & giao dịch</li>
-        <li>Email khách hàng</li>
-        <li>Phiếu hỗ trợ</li>
-      </ul>
-    </div>
-    <section class="om-workflow om-wrap" id="om-how" aria-labelledby="om-how-title">
-      <div class="om-section-heading" data-om-reveal>
-        <p class="om-eyebrow">01 / MỘT BƯỚC NHỎ TRƯỚC AI</p>
-        <h2 id="om-how-title">Giữ ý nghĩa.<br /><em>Ẩn danh tính.</em></h2>
-        <p>Vẫn đủ ngữ cảnh để làm việc.<br />Ít thông tin riêng tư phải chia sẻ hơn.</p>
-      </div>
-      <div class="om-journey" data-om-journey>
-        <div class="om-boundary" aria-hidden="true">
-          <div class="om-zone om-zone-local">
-            <p class="om-zone-label"><span class="om-dot"></span> Máy của bạn · OfflineMask</p>
-            <div class="om-vault" data-om-vault>
-              <p>Bảng đối chiếu · không rời máy</p>
-              <span><code>[TEN_1_3030]</code> Nguyễn Minh An</span>
-              <span><code>[STK_1_3030]</code> 012345678901</span>
-              <span><code>[EMAIL_1_3030]</code> an@example.com</span>
-            </div>
-          </div>
-          <div class="om-line"><span>Ranh giới</span></div>
-          <div class="om-zone om-zone-ai">
-            <p class="om-zone-label">Công cụ AI bạn chọn</p>
-          </div>
-          <div class="om-packet" data-om-packet>
-            <p class="om-packet-head">
-              <span data-om-packet-title>Bản gốc</span><span data-om-packet-title>Bản đã ẩn</span
-              ><span data-om-packet-title>Phản hồi AI</span
-              ><span data-om-packet-title>Bản đã khôi phục</span>
-            </p>
-            <p>
-              Khách hàng
-              <span
-                class="om-packet-value"
-                data-om-real="Nguyễn Minh An"
-                data-om-alias="[TEN_1_3030]"
-                >[TEN_1_3030]</span
-              >
-            </p>
-            <p>
-              Tài khoản
-              <span class="om-packet-value" data-om-real="012345678901" data-om-alias="[STK_1_3030]"
-                >[STK_1_3030]</span
-              >
-            </p>
-            <p>
-              Email
-              <span
-                class="om-packet-value"
-                data-om-real="an@example.com"
-                data-om-alias="[EMAIL_1_3030]"
-                >[EMAIL_1_3030]</span
-              >
-            </p>
-          </div>
-        </div>
-        <div class="om-steps">
-          <article data-om-reveal>
-            <span class="om-step-index">01 — ẨN</span>
-            <h3>Đưa vào. Chọn ẩn.</h3>
-            <p>
-              Dán văn bản hoặc mở tệp. Kiểm tra gợi ý, giữ lại phần cần thiết và tự chọn thêm thông
-              tin muốn ẩn.
-            </p>
-          </article>
-          <article data-om-reveal>
-            <span class="om-step-index">02 — LÀM VIỆC</span>
-            <h3>Dùng AI bạn thích.</h3>
-            <p>
-              Tự sao chép hoặc gửi bản đã ẩn sang công cụ AI của bạn. OfflineMask không tự gửi nội
-              dung đi đâu.
-            </p>
-          </article>
-          <article data-om-reveal>
-            <span class="om-step-index">03 — KHÔI PHỤC</span>
-            <h3>Nhận lại bản đầy đủ.</h3>
-            <p>
-              Đưa kết quả về cùng phiên. Những mã thay thế còn nguyên được đổi lại thành thông tin
-              ban đầu.
-            </p>
-          </article>
-        </div>
-      </div>
-    </section>
-    <section class="om-detects om-wrap" id="om-detects" aria-labelledby="om-detects-title">
-      <div class="om-section-heading" data-om-reveal>
-        <p class="om-eyebrow">02 / NHỮNG GÌ ĐƯỢC GỢI Ý ẨN</p>
+
+    <section class="om-section om-wrap" id="om-detects" aria-labelledby="om-detects-title">
+      <header class="om-heading" data-om-reveal>
+        <p class="om-label">Nhận diện</p>
         <h2 id="om-detects-title">Gợi ý sẵn.<br /><em>Bạn quyết định.</em></h2>
-      </div>
-      <div class="om-detect-groups">
-        <div data-om-reveal>
+        <p>
+          OfflineMask đánh dấu những gì trông giống thông tin định danh. Bạn bỏ chọn phần cần giữ,
+          và tự chọn thêm phần còn sót.
+        </p>
+      </header>
+      <div class="om-detect-grid">
+        <div class="om-card" data-om-reveal>
           <h3>Có sẵn khi cài</h3>
           <ul class="om-chips">
             <li>Email</li>
@@ -240,75 +151,59 @@
             <li>Mật khẩu & khóa API</li>
             <li>Mã giao dịch, mã khách hàng</li>
           </ul>
+          <p class="om-card-note">
+            Nhiều mục được nhận ra nhờ nhãn đi kèm, như “STK:” hay “CCCD:”.
+          </p>
         </div>
-        <div data-om-reveal>
-          <h3>Thêm với gói nhận diện tiếng Việt <span>Tùy chọn · tải khi bạn yêu cầu</span></h3>
+        <div class="om-card" data-om-reveal>
+          <h3>Thêm với gói tiếng Việt</h3>
           <ul class="om-chips">
             <li>Họ tên</li>
             <li>Địa chỉ</li>
             <li>Tổ chức</li>
           </ul>
+          <p class="om-card-note">Tùy chọn. Chỉ tải khi bạn yêu cầu, rồi chạy offline.</p>
         </div>
-        <p class="om-detect-note">
-          Nhiều mục được nhận ra nhờ nhãn đi kèm, như “STK:” hay “CCCD:”. Phần còn sót, bạn tự chọn
-          để ẩn trước khi chia sẻ.
-        </p>
       </div>
-    </section>
-    <section class="om-formats om-wrap" aria-labelledby="om-formats-title">
-      <div class="om-section-heading" data-om-reveal>
-        <p class="om-eyebrow">03 / TỪ MỘT ĐOẠN CHAT ĐẾN CẢ TỆP</p>
-        <h2 id="om-formats-title">Công việc của bạn.<br /><em>Định dạng quen thuộc.</em></h2>
-      </div>
-      <div class="om-format-list">
-        <article data-om-reveal>
+      <ul class="om-formats" aria-label="Định dạng hỗ trợ">
+        <li data-om-reveal>
           <span class="om-preview om-preview-text" aria-hidden="true" data-om-preview
             ><i></i><i><b></b></i><i></i><i><b></b></i
           ></span>
-          <div>
-            <h3>Văn bản</h3>
-            <p>Email, ghi chú, nội dung cần hỏi AI. Dán vào và chọn thông tin cần ẩn.</p>
-          </div>
-          <span class="om-extension">TXT · DÁN TRỰC TIẾP</span>
-        </article>
-        <article data-om-reveal>
+          <h3>Văn bản</h3>
+          <p>Dán trực tiếp email, ghi chú, câu hỏi cho AI.</p>
+        </li>
+        <li data-om-reveal>
           <span class="om-preview om-preview-sheet" aria-hidden="true" data-om-preview
             ><i></i><i></i><i></i><i></i><i><b></b></i><i></i><i></i><i><b></b></i><i></i><i></i
             ><i><b></b></i><i></i
           ></span>
-          <div>
-            <h3>Bảng tính</h3>
-            <p>Rà soát thông tin trong bảng, ẩn giá trị đã chọn và xuất một bản riêng.</p>
-          </div>
-          <span class="om-extension">XLSX · XLS · ODS · CSV</span>
-        </article>
-        <article data-om-reveal>
+          <h3>Bảng tính</h3>
+          <p>XLSX, XLS, ODS, CSV. Ẩn cả cột, xuất một bản riêng.</p>
+        </li>
+        <li data-om-reveal>
           <span class="om-preview om-preview-doc" aria-hidden="true" data-om-preview
             ><i></i><i><b></b></i><i></i><i></i><i><b></b></i><i></i
           ></span>
-          <div>
-            <h3>Tài liệu</h3>
-            <p>Ẩn thông tin trong tài liệu được hỗ trợ, kiểm tra rồi lưu bản đã xử lý.</p>
-          </div>
-          <span class="om-extension">DOCX · ODT</span>
-        </article>
-      </div>
-      <p class="om-format-note">
-        PDF và hình ảnh chưa được hỗ trợ. Luôn kiểm tra nội dung và định dạng của bản xuất.
+          <h3>Tài liệu</h3>
+          <p>DOCX, ODT. Giữ định dạng, lưu bản đã xử lý.</p>
+        </li>
+      </ul>
+      <p class="om-fine">
+        PDF và hình ảnh chưa được hỗ trợ. Luôn kiểm tra bản xuất trước khi chia sẻ.
       </p>
     </section>
+
     <section class="om-privacy" aria-labelledby="om-privacy-title">
       <div class="om-wrap om-privacy-inner">
         <div data-om-reveal>
-          <p class="om-eyebrow">04 / RIÊNG TƯ LÀ CÁCH NÓ HOẠT ĐỘNG</p>
+          <p class="om-label">Riêng tư</p>
           <h2 id="om-privacy-title">
             Máy của bạn.<br />Dữ liệu của bạn.<br /><em>Quyền chọn của bạn.</em>
           </h2>
-          <span class="om-privacy-mark om-mark" aria-hidden="true"></span>
         </div>
         <div class="om-privacy-points">
           <article data-om-reveal>
-            <span>01</span>
             <div>
               <h3>Không đi vòng qua đám mây.</h3>
               <p>
@@ -318,7 +213,6 @@
             </div>
           </article>
           <article data-om-reveal>
-            <span>02</span>
             <div>
               <h3>Lưu lại, khi bạn muốn.</h3>
               <p>
@@ -328,7 +222,6 @@
             </div>
           </article>
           <article data-om-reveal>
-            <span>03</span>
             <div>
               <h3>Thêm nhận diện. Vẫn offline.</h3>
               <p>
@@ -338,7 +231,6 @@
             </div>
           </article>
           <article data-om-reveal>
-            <span>04</span>
             <div>
               <h3>Tự kiểm chứng.</h3>
               <p>
@@ -353,9 +245,9 @@
         </div>
       </div>
     </section>
-    <section class="om-faq om-wrap" id="om-faq" aria-labelledby="om-faq-title">
-      <div class="om-section-heading" data-om-reveal>
-        <p class="om-eyebrow">05 / TRƯỚC KHI BẮT ĐẦU</p>
+    <section class="om-section om-faq om-wrap" id="om-faq" aria-labelledby="om-faq-title">
+      <div class="om-heading" data-om-reveal>
+        <p class="om-label">Câu hỏi</p>
         <h2 id="om-faq-title">Một vài điều<br /><em>bạn nên biết.</em></h2>
       </div>
       <div class="om-questions" data-om-reveal>
@@ -414,7 +306,7 @@
       aria-labelledby="om-download-title"
       data-om-reveal
     >
-      <p class="om-eyebrow">SẴN SÀNG CHO CÔNG VIỆC TIẾP THEO</p>
+      <p class="om-label">Tải về</p>
       <h2 id="om-download-title">Thêm AI vào công việc.<br /><em>Giữ riêng tư ở lại.</em></h2>
       <p>Phiên bản __OM_VERSION__ · Mã nguồn mở · Không cần tài khoản</p>
       <a
