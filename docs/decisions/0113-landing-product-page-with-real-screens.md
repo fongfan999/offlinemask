@@ -143,3 +143,11 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   Every statement was checked against the code and decisions.
 - **Maker card removed:** the "Người làm OfflineMask" card did not help visitors decide, and the footer already credits "Phong Phan ↗" (wotdafong.dev). Privacy now leads straight into the FAQ. Only the small `.om-maker-label` style stays, because the privacy page uses it for its date line.
 - **One download button while scrolling:** the nav's "Tải về" pill, which faded in past the hero, duplicated the floating "Tải cho macOS" button and sat apart from the nav. It was removed with its styles and trigger, so the floating button is the only persistent download, as on Dia.
+- **FAQ reworked (October 2026):** the heading is a 4+4 pair with a matching rhyme, "Băn khoăn gì không? / Đọc qua là thông." (không–thông). The questions now cover what visitors still wonder after the page:
+  - Internet;
+  - whether everything is found, and how to add what is missed;
+  - what happens if AI changes a code (unchanged codes are restored, altered ones are left for you);
+  - why Ẩn nhanh needs the macOS Accessibility permission (mouse only, never keys, nothing sent);
+  - which machines it runs on (macOS Apple Silicon and Intel, Windows, Linux without the selection button);
+  - why the system asks to verify the app (both Windows variants kept).
+  "Có kết nối với công cụ AI không?" was dropped because the privacy section answers it.
