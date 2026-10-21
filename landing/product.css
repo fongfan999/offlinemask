@@ -1562,12 +1562,6 @@
   font-size: 19px;
   line-height: 1.6;
 }
-.om-safe-text a {
-  color: var(--ink);
-  text-decoration: underline;
-  text-decoration-color: var(--line-strong);
-  text-underline-offset: 3px;
-}
 .om-safe-button {
   display: inline-flex;
   align-items: center;
