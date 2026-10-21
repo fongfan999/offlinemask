@@ -151,3 +151,4 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   - which machines it runs on (macOS Apple Silicon and Intel, Windows, Linux without the selection button);
   - why the system asks to verify the app (both Windows variants kept).
   "Có kết nối với công cụ AI không?" was dropped because the privacy section answers it.
+- **FAQ as an accordion:** the questions share `name="om-faq"` on their `<details>`, so opening one closes the others natively. Where the browser supports `::details-content` and `interpolate-size`, the answer slides open in 0.3s; elsewhere it opens instantly.

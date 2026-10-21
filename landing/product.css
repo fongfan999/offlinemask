@@ -1602,6 +1602,20 @@
   font-weight: 300;
   transition: transform 0.2s;
 }
+/* One answer open at a time (details[name]); where supported, the answer slides open. */
+.om-questions {
+  interpolate-size: allow-keywords;
+}
+.om-questions details::details-content {
+  block-size: 0;
+  overflow: hidden;
+  transition:
+    block-size 0.3s cubic-bezier(0.5, 1, 0.89, 1),
+    content-visibility 0.3s allow-discrete;
+}
+.om-questions details[open]::details-content {
+  block-size: auto;
+}
 .om-questions details[open] summary span {
   transform: rotate(45deg);
 }
