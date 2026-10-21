@@ -9,6 +9,7 @@ Read [docs/product-direction.md](docs/product-direction.md) before product or UI
 - Follow standard Vue/TypeScript patterns and shared CSS tokens. The project is open source; document substantial choices and dependency provenance in `docs/decisions/`.
 - The recognition models are data: everything about them is in `desktop/packs/<id>.json`. Change the pack file rather than hard-coding model names, directories or labels in code, and keep `pnpm test` and `pnpm test:models` green.
 - `desktop/src/`, `desktop/tests/` and `landing/` are formatted and linted (`pnpm lint` at the root); the frozen experiments under `desktop/scripts/` subdirectories are not edited retroactively.
+- `landing/privacy.html` is a promise to users. Any change to networking, what is stored or where, system permissions, input observation or Ẩn nhanh must update that page and its "Cập nhật ngày …" line in the same change. `desktop/tests/privacy-contract.test.mjs` (part of `pnpm test`) fails when those facts change; update the page first, then the expectation.
 - Clearly distinguish sample behavior from production capabilities. Never persist real private input through sample history storage. Never add telemetry, automatic network access or input logging.
 - Do not broadly redesign the accepted boilerplate without new direction. Later explicit user instructions take precedence over these notes.
 
