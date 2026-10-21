@@ -647,70 +647,118 @@
 
     <section class="om-faq om-wrap" id="om-faq" aria-labelledby="om-faq-title">
       <h2 id="om-faq-title" class="om-display" data-om-reveal>Câu hỏi thường gặp</h2>
-      <div class="om-questions" data-om-reveal>
-        <details name="om-faq">
-          <summary>Dùng được trên máy nào?<span aria-hidden="true">+</span></summary>
-          <p>
-            macOS (Apple Silicon và Intel) và Windows. Có cả bản Linux, nhưng Ẩn nhanh chưa có trên
-            Linux.
-          </p>
-        </details>
-        <details name="om-faq">
-          <summary>Có mất phí không?<span aria-hidden="true">+</span></summary>
-          <p>Không. OfflineMask miễn phí, không quảng cáo, không gói trả phí.</p>
-        </details>
-        <details name="om-faq">
-          <summary>Có cần Internet không?<span aria-hidden="true">+</span></summary>
-          <p>
-            Không. Ẩn và khôi phục chạy hoàn toàn trên máy. Bạn chỉ cần mạng để tải ứng dụng và, nếu
-            muốn, gói nhận diện tiếng Việt.
-          </p>
-        </details>
-        <details name="om-faq">
-          <summary>
-            OfflineMask có tìm ra hết thông tin cần ẩn không?<span aria-hidden="true">+</span>
-          </summary>
-          <p>
-            Phần lớn: số điện thoại, số tài khoản, email, CCCD… và cả họ tên, địa chỉ khi có gói
-            tiếng Việt. Còn sót chỗ nào, bôi đen là ẩn thêm. Hãy luôn xem lại trước khi gửi.
-          </p>
-        </details>
-        <details name="om-faq">
-          <summary>Nếu AI sửa hoặc bỏ mất mã thì sao?<span aria-hidden="true">+</span></summary>
-          <p>
-            Mã còn nguyên sẽ được đổi về thông tin thật. Mã bị sửa thì được giữ nguyên để bạn tự xem
-            lại, OfflineMask không đoán thay bạn.
-          </p>
-        </details>
-        <details name="om-faq">
-          <summary>
-            Vì sao Ẩn nhanh cần quyền Trợ năng trên Mac?<span aria-hidden="true">+</span>
-          </summary>
-          <p>
-            macOS bảo vệ người dùng rất kỹ: ứng dụng muốn biết bạn vừa bôi đen chữ ở đâu thì phải
-            được bạn cho phép. Quyền Trợ năng giúp OfflineMask nhận ra lúc bạn bôi đen để hiện nút
-            Ẩn nhanh ngay cạnh đó. Trên Windows không cần bước này.
-          </p>
-        </details>
-        <details name="om-faq">
-          <summary>
-            Lần đầu mở, máy hiện cảnh báo. Có sao không?<span aria-hidden="true">+</span>
-          </summary>
-          <!-- windows-direct -->
-          <p>
-            Không sao, đây là bước kiểm tra quen thuộc khi mở một ứng dụng mới tải về. Bạn chỉ cần
-            xác nhận mở một lần.
-            <a href="./install.html" target="_blank" rel="noopener">Xem hướng dẫn từng bước</a>.
-          </p>
-          <!-- /windows-direct -->
-          <!-- windows-store -->
-          <p>
-            Không sao. Bản từ Microsoft Store mở ngay. Trên Mac, đây là bước kiểm tra quen thuộc khi
-            mở một ứng dụng mới tải về; bạn chỉ cần xác nhận mở một lần.
-            <a href="./install.html" target="_blank" rel="noopener">Xem hướng dẫn từng bước</a>.
-          </p>
-          <!-- /windows-store -->
-        </details>
+      <div class="om-questions" data-om-reveal data-om-faq>
+        <div class="om-q" data-om-q>
+          <h3>
+            <button type="button" id="om-q-1" aria-expanded="false" aria-controls="om-a-1">
+              Dùng được trên máy nào?<span aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div class="om-a" id="om-a-1" role="region" aria-labelledby="om-q-1">
+            <div>
+              <p>
+                macOS (Apple Silicon và Intel) và Windows. Có cả bản Linux, nhưng Ẩn nhanh chưa có
+                trên Linux.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="om-q" data-om-q>
+          <h3>
+            <button type="button" id="om-q-2" aria-expanded="false" aria-controls="om-a-2">
+              Có mất phí không?<span aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div class="om-a" id="om-a-2" role="region" aria-labelledby="om-q-2">
+            <div><p>Không. OfflineMask miễn phí, không quảng cáo, không gói trả phí.</p></div>
+          </div>
+        </div>
+        <div class="om-q" data-om-q>
+          <h3>
+            <button type="button" id="om-q-3" aria-expanded="false" aria-controls="om-a-3">
+              Có cần Internet không?<span aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div class="om-a" id="om-a-3" role="region" aria-labelledby="om-q-3">
+            <div>
+              <p>
+                Không. Ẩn và khôi phục chạy hoàn toàn trên máy. Bạn chỉ cần mạng để tải ứng dụng và,
+                nếu muốn, gói nhận diện tiếng Việt.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="om-q" data-om-q>
+          <h3>
+            <button type="button" id="om-q-4" aria-expanded="false" aria-controls="om-a-4">
+              OfflineMask có tìm ra hết thông tin cần ẩn không?<span aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div class="om-a" id="om-a-4" role="region" aria-labelledby="om-q-4">
+            <div>
+              <p>
+                Phần lớn: số điện thoại, số tài khoản, email, CCCD… và cả họ tên, địa chỉ khi có gói
+                tiếng Việt. Còn sót chỗ nào, bôi đen là ẩn thêm. Hãy luôn xem lại trước khi gửi.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="om-q" data-om-q>
+          <h3>
+            <button type="button" id="om-q-5" aria-expanded="false" aria-controls="om-a-5">
+              Nếu AI sửa hoặc bỏ mất mã thì sao?<span aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div class="om-a" id="om-a-5" role="region" aria-labelledby="om-q-5">
+            <div>
+              <p>
+                Mã còn nguyên sẽ được đổi về thông tin thật. Mã bị sửa thì được giữ nguyên để bạn tự
+                xem lại, OfflineMask không đoán thay bạn.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="om-q" data-om-q>
+          <h3>
+            <button type="button" id="om-q-6" aria-expanded="false" aria-controls="om-a-6">
+              Vì sao Ẩn nhanh cần quyền Trợ năng trên Mac?<span aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div class="om-a" id="om-a-6" role="region" aria-labelledby="om-q-6">
+            <div>
+              <p>
+                macOS bảo vệ người dùng rất kỹ: ứng dụng muốn biết bạn vừa bôi đen chữ ở đâu thì
+                phải được bạn cho phép. Quyền Trợ năng giúp OfflineMask nhận ra lúc bạn bôi đen để
+                hiện nút Ẩn nhanh ngay cạnh đó. Trên Windows không cần bước này.
+              </p>
+            </div>
+          </div>
+        </div>
+        <div class="om-q" data-om-q>
+          <h3>
+            <button type="button" id="om-q-7" aria-expanded="false" aria-controls="om-a-7">
+              Lần đầu mở, máy hiện cảnh báo. Có sao không?<span aria-hidden="true">+</span>
+            </button>
+          </h3>
+          <div class="om-a" id="om-a-7" role="region" aria-labelledby="om-q-7">
+            <div>
+              <!-- windows-direct -->
+              <p>
+                Không sao, đây là bước kiểm tra quen thuộc khi mở một ứng dụng mới tải về. Bạn chỉ
+                cần xác nhận mở một lần.
+                <a href="./install.html" target="_blank" rel="noopener">Xem hướng dẫn từng bước</a>.
+              </p>
+              <!-- /windows-direct -->
+              <!-- windows-store -->
+              <p>
+                Không sao. Bản từ Microsoft Store mở ngay. Trên Mac, đây là bước kiểm tra quen thuộc
+                khi mở một ứng dụng mới tải về; bạn chỉ cần xác nhận mở một lần.
+                <a href="./install.html" target="_blank" rel="noopener">Xem hướng dẫn từng bước</a>.
+              </p>
+              <!-- /windows-store -->
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 

@@ -106,6 +106,24 @@ function setupScan(root, motion) {
 }
 
 /**
+ * A light text swap for the looping illustrations: the value fades out, the new text is set once,
+ * and it fades back in. Unlike a scramble, which rewrites the text on every frame, this costs one
+ * layout per swap, so loops stay cheap in browsers that struggle to keep 120 fps.
+ */
+function swapText(tl, el, text, at, onSwap) {
+  tl.to(el, { opacity: 0, duration: 0.14, ease: "power1.in" }, at)
+    .call(
+      () => {
+        el.textContent = text;
+        onSwap?.();
+      },
+      [],
+      at + 0.14,
+    )
+    .to(el, { opacity: 1, duration: 0.22, ease: "power1.out" }, at + 0.14);
+}
+
+/**
  * "Cách hoạt động" on wide screens: the step list is sticky and the illustrations scroll past
  * natively; the step whose illustration crosses the middle of the screen opens. Choosing a step
  * title scrolls its illustration into view. The illustrations' animation is setupSceneLoops.
@@ -198,6 +216,7 @@ function setupSceneLoops(root, motion) {
         value.textContent = value.dataset.real;
         value.classList.remove("om-coded");
         value.classList.add("om-dim");
+        gsap.set(value, { clearProps: "opacity" });
       });
       setDocState(scene, values.length, false);
     } else if (index === 1) gsap.set(scene.querySelector("[data-om-ai]"), { autoAlpha: 0, y: 12 });
@@ -205,6 +224,7 @@ function setupSceneLoops(root, motion) {
       scene.querySelectorAll("[data-om-restored] .om-r").forEach((value) => {
         value.dataset.real ??= value.textContent;
         value.textContent = value.dataset.code;
+        gsap.set(value, { clearProps: "opacity" });
       });
   }
   // One pass of an illustration's animation, from its "before" state.
@@ -218,15 +238,8 @@ function setupSceneLoops(root, motion) {
       const press = values.length * 0.14 + 0.7;
       tl.to(button, { scale: 0.94, duration: 0.12, yoyo: true, repeat: 1 }, press);
       values.forEach((value, k) =>
-        tl.to(
-          value,
-          {
-            duration: 0.6,
-            ease: "none",
-            scrambleText: { text: value.dataset.code, chars: "█▓▒░", speed: 0.5 },
-            onStart: () => value.classList.add("om-coded"),
-          },
-          press + 0.2 + k * 0.1,
+        swapText(tl, value, value.dataset.code, press + 0.2 + k * 0.1, () =>
+          value.classList.add("om-coded"),
         ),
       );
       tl.call(() => setDocState(scene, values.length, true), [], press + 0.3);
@@ -239,17 +252,9 @@ function setupSceneLoops(root, motion) {
         ease: "expo.out",
       });
     } else {
-      scene.querySelectorAll("[data-om-restored] .om-r").forEach((value, k) =>
-        tl.to(
-          value,
-          {
-            duration: 0.8,
-            ease: "none",
-            scrambleText: { text: value.dataset.real, chars: "█▓▒░", speed: 0.5 },
-          },
-          0.4 + k * 0.2,
-        ),
-      );
+      scene
+        .querySelectorAll("[data-om-restored] .om-r")
+        .forEach((value, k) => swapText(tl, value, value.dataset.real, 0.4 + k * 0.2));
     }
     return tl;
   }
@@ -317,6 +322,7 @@ function setupQuick(root, motion) {
     status.classList.toggle("om-scene-safe", safe);
   };
   const reset = () => {
+    gsap.set([...askValues, ...replyValues], { clearProps: "opacity" });
     askValues.forEach((value) => {
       value.textContent = value.dataset.real;
       value.classList.remove("om-coded");
@@ -332,15 +338,8 @@ function setupQuick(root, motion) {
   };
   const scramble = (values, key, className) => (tween, at) =>
     values.forEach((value, k) =>
-      tween.to(
-        value,
-        {
-          duration: 0.6,
-          ease: "none",
-          scrambleText: { text: value.dataset[key], chars: "█▓▒░", speed: 0.5 },
-          onStart: () => value.classList.add(className),
-        },
-        at + k * 0.15,
+      swapText(tween, value, value.dataset[key], at + k * 0.15, () =>
+        value.classList.add(className),
       ),
     );
   const select = { backgroundSize: "100% 100%", duration: 0.7, ease: "power1.inOut" };
@@ -396,6 +395,7 @@ function setupSheet(root, motion) {
   const texts = { pill: pill.textContent, note: note.textContent };
   cells.forEach((cell) => (cell.dataset.code = cell.textContent));
   const prime = () => {
+    gsap.set(cells, { clearProps: "opacity" });
     cells.forEach((cell) => {
       cell.textContent = cell.dataset.real;
       cell.classList.add("om-plain");
@@ -411,15 +411,8 @@ function setupSheet(root, motion) {
       cells
         .filter((_, k) => k % 3 === column)
         .forEach((cell, row) =>
-          play.to(
-            cell,
-            {
-              duration: 0.55,
-              ease: "none",
-              scrambleText: { text: cell.dataset.code, chars: "█▓▒░", speed: 0.5 },
-              onStart: () => cell.classList.remove("om-plain"),
-            },
-            column * 0.45 + row * 0.08,
+          swapText(play, cell, cell.dataset.code, column * 0.45 + row * 0.08, () =>
+            cell.classList.remove("om-plain"),
           ),
         );
     play.call(() => {
@@ -449,6 +442,27 @@ function setupSheet(root, motion) {
     pill.textContent = texts.pill;
     pill.classList.replace("om-scene-pill-warm", "om-scene-pill-cobalt");
     note.textContent = texts.note;
+  };
+}
+
+/** FAQ: one answer open at a time; the CSS unfolds it like the step list. */
+function setupFaq(root) {
+  const list = root.querySelector("[data-om-faq]");
+  const items = [...list.querySelectorAll("[data-om-q]")];
+  const set = (item, open) => {
+    item.classList.toggle("om-open", open);
+    item.querySelector("button").setAttribute("aria-expanded", String(open));
+  };
+  function toggle(event) {
+    const item = event.target.closest("[data-om-q]");
+    if (!item || !event.target.closest("button")) return;
+    const open = !item.classList.contains("om-open");
+    items.forEach((other) => set(other, other === item && open));
+  }
+  list.addEventListener("click", toggle);
+  return () => {
+    list.removeEventListener("click", toggle);
+    items.forEach((item) => set(item, false));
   };
 }
 
@@ -581,6 +595,7 @@ export function initOfflineMask(root) {
         ? setupHow(root, context.conditions.motion)
         : () => {};
       const undoRoles = setupRoles(root);
+      const undoFaq = setupFaq(root);
       const undoQuick = setupQuick(root, context.conditions.motion);
       const undoSheet = setupSheet(root, context.conditions.motion);
       const undoLoops = setupSceneLoops(root, context.conditions.motion);
@@ -588,6 +603,7 @@ export function initOfflineMask(root) {
         undoScan();
         undoHow();
         undoRoles();
+        undoFaq();
         undoQuick();
         undoSheet();
         undoLoops();
