@@ -55,3 +55,9 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   - Lazy screenshots decode asynchronously.
   In a 4× CPU-throttled headless benchmark of scrolling from the top to the features section, the worst frame fell from 167ms to about 65ms on a cold first pass, with a steady 60 fps afterwards. Headless Chrome cannot measure GPU compositing, so the owner's own browser is the final check.
 - **Scroll-linked steps:** the owner found the pinned steps unsmooth to scroll. While pinned, nothing moved until the next step snapped in. A progress rail beside the list now fills with the scroll down through the open step and replaces the static ink bar. The active illustration drifts up to 8px with the scroll. The pin is shorter (240vh instead of 280vh). Both update every frame while pinned and are eased with `gsap.quickTo`. With reduced motion the rail is set directly and nothing drifts.
+- **Native scrolling, like Dia (October 2026):** the pinned stage that swapped illustrations in place still felt unsmooth, so the section now works the way diabrowser.com's does:
+  - Wide screens: the step list (with the role tabs and the progress rail) is `position: sticky` in column one, and the three illustrations form a normal column in column two that scrolls past natively, 16vh apart.
+  - The step whose illustration crosses mid-screen opens, and the rail fills through it. Clicking a step scrolls its illustration to the centre.
+  - Each illustration waits in its "before" state (no highlights, AI reply not yet arrived, codes not yet restored) and plays its entrance once on reaching mid-screen. Switching role primes them again.
+  - Phones: the two columns dissolve (`display: contents` with `order`), so each step is followed by its illustration.
+  The pinned height, the in-place swapping and the card drift were removed. The sticky layout also works without the script; it then shows every step's description.

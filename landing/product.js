@@ -106,55 +106,69 @@ function setupScan(root, motion) {
 }
 
 /**
- * "Cách hoạt động" on wide screens: the stage is pinned while the section scrolls, and the scroll
- * position picks the step. Choosing a step title scrolls to it. With motion, each card plays a
- * short entrance: highlights appear, the AI reply arrives, codes turn back into real values.
+ * "Cách hoạt động" on wide screens: the step list is sticky and the illustrations scroll past
+ * natively; the step whose illustration crosses the middle of the screen opens, and a rail beside
+ * the list fills with the scroll. Choosing a step title scrolls its illustration into view. With
+ * motion, each illustration plays a short entrance: highlights appear, the AI reply arrives, codes
+ * turn back into real values.
  */
 function setupHow(root, motion) {
   const how = root.querySelector("[data-om-how]");
   const steps = [...how.querySelectorAll("[data-om-step]")];
   const heads = steps.map((step) => step.querySelector("[data-om-step-head]"));
-  const stage = how.querySelector(".om-how-stage");
   const bodies = steps.map((step) => step.querySelector(".om-how-body"));
-  const scenes = steps.map((step) => step.querySelector(".om-scene"));
+  const scenes = [...how.querySelectorAll("[data-om-scene]")];
   const rail = how.querySelector(".om-how-rail");
   const fill = rail.querySelector("i");
-  const ease = { duration: 0.35, ease: "power3" };
-  const toFill = motion ? gsap.quickTo(fill, "scaleY", ease) : (v) => gsap.set(fill, { scaleY: v });
-  const drifts = scenes.map((scene) =>
-    motion ? gsap.quickTo(scene, "y", { duration: 0.5, ease: "power3" }) : () => {},
-  );
-  // How far through the current step the scroll is (0–1).
-  let local = 0;
-  // Mirrors the stage's CSS `top: max(96px, calc(50vh - 260px))`.
-  const stickyTop = () => Math.max(96, window.innerHeight / 2 - 260);
+  const toFill = motion
+    ? gsap.quickTo(fill, "scaleY", { duration: 0.3, ease: "power3" })
+    : (value) => gsap.set(fill, { scaleY: value });
   let current = -1;
-  let play;
+  let local = 0;
+  const plays = [];
 
-  // The illustrations' content changes with the example role, so look it up on each entrance.
-  function enter(index) {
-    play?.kill();
+  // Each illustration waits in its "before" state (no highlights, no AI reply yet, codes not yet
+  // restored) and plays once when it first opens; switching the example role primes them again.
+  // Content changes with the role, so it is looked up each time.
+  const played = scenes.map(() => false);
+  function prime(index) {
+    played[index] = false;
     if (!motion) return;
-    if (index === 0) {
-      const highlights = [...steps[0].querySelectorAll(".om-v")];
-      highlights.forEach((value) => value.classList.add("om-dim"));
-      play = gsap.timeline({ delay: 0.35 });
-      highlights.forEach((value, k) =>
-        play.call(() => value.classList.remove("om-dim"), [], k * 0.18),
-      );
-    } else if (index === 1) {
-      play = gsap.fromTo(
-        steps[1].querySelector("[data-om-ai]"),
-        { autoAlpha: 0, y: 12 },
-        { autoAlpha: 1, y: 0, duration: 0.6, delay: 0.7, ease: "expo.out" },
-      );
-    } else {
-      const restored = [...steps[2].querySelectorAll("[data-om-restored] .om-r")];
-      play = gsap.timeline({ delay: 0.45 });
-      restored.forEach((value, k) => {
+    const scene = scenes[index];
+    if (index === 0)
+      scene.querySelectorAll(".om-v").forEach((value) => value.classList.add("om-dim"));
+    else if (index === 1) gsap.set(scene.querySelector("[data-om-ai]"), { autoAlpha: 0, y: 12 });
+    else
+      scene.querySelectorAll("[data-om-restored] .om-r").forEach((value) => {
         value.dataset.real ??= value.textContent;
         value.textContent = value.dataset.code;
-        play.to(
+      });
+  }
+  function enter(index) {
+    if (!motion || played[index]) return;
+    played[index] = true;
+    const scene = scenes[index];
+    if (index === 0) {
+      const highlights = [...scene.querySelectorAll(".om-v")];
+      const reveal = gsap.timeline({ delay: 0.2 });
+      highlights.forEach((value, k) =>
+        reveal.call(() => value.classList.remove("om-dim"), [], k * 0.16),
+      );
+      plays.push(reveal);
+    } else if (index === 1) {
+      plays.push(
+        gsap.to(scene.querySelector("[data-om-ai]"), {
+          autoAlpha: 1,
+          y: 0,
+          duration: 0.6,
+          delay: 0.4,
+          ease: "expo.out",
+        }),
+      );
+    } else {
+      const restore = gsap.timeline({ delay: 0.3 });
+      scene.querySelectorAll("[data-om-restored] .om-r").forEach((value, k) =>
+        restore.to(
           value,
           {
             duration: 0.8,
@@ -162,20 +176,10 @@ function setupHow(root, motion) {
             scrambleText: { text: value.dataset.real, chars: "█▓▒░", speed: 0.5 },
           },
           k * 0.2,
-        );
-      });
+        ),
+      );
+      plays.push(restore);
     }
-  }
-  // Every frame while pinned: the rail fills down through the open step (whose height animates
-  // as it opens), and the active illustration drifts gently with the scroll.
-  function follow() {
-    if (current < 0) return;
-    const track = rail.getBoundingClientRect();
-    const top = heads[current].getBoundingClientRect().top;
-    const bottom = bodies[current].getBoundingClientRect().bottom;
-    const y = top + (bottom - top) * local;
-    toFill(gsap.utils.clamp(0, 1, (y - track.top) / track.height));
-    drifts[current]((0.5 - local) * 16);
   }
   function activate(index) {
     if (index === current) return;
@@ -184,38 +188,63 @@ function setupHow(root, motion) {
     heads.forEach((head, k) => head.setAttribute("aria-expanded", String(k === index)));
     enter(index);
   }
-  const scroller = ScrollTrigger.create({
+  // The rail fills down through the open step, whose height animates as it opens.
+  function follow() {
+    if (current < 0) return;
+    const track = rail.getBoundingClientRect();
+    const top = heads[current].getBoundingClientRect().top;
+    const bottom = bodies[current].getBoundingClientRect().bottom;
+    toFill(gsap.utils.clamp(0, 1, (top + (bottom - top) * local - track.top) / track.height));
+  }
+  // Each illustration owns the stretch of scroll from its top to the next one's top passing
+  // mid-screen; the last one owns until its bottom does.
+  const triggers = scenes.map((scene, index) =>
+    ScrollTrigger.create({
+      trigger: scene,
+      start: "top center",
+      endTrigger: scenes[index + 1] ?? scene,
+      end: scenes[index + 1] ? "top center" : "bottom center",
+      onUpdate: (self) => {
+        if (self.isActive) {
+          activate(index);
+          local = self.progress;
+        }
+      },
+      onToggle: (self) => self.isActive && activate(index),
+    }),
+  );
+  const watch = ScrollTrigger.create({
     trigger: how,
-    // The pin runs from when the stage reaches its sticky offset until the section's end.
-    start: () => `top ${stickyTop()}px`,
-    end: () => `bottom ${stickyTop() + stage.offsetHeight}px`,
-    onUpdate: (self) => {
-      const position = self.progress * steps.length;
-      activate(Math.min(steps.length - 1, Math.floor(position)));
-      local = Math.min(1, position - current);
-    },
+    start: "top bottom",
+    end: "bottom top",
     onToggle: (self) => (self.isActive ? gsap.ticker.add(follow) : gsap.ticker.remove(follow)),
   });
   function choose(event) {
     const index = heads.indexOf(event.target.closest("[data-om-step-head]"));
-    if (index < 0) return;
-    const span = scroller.end - scroller.start;
-    window.scrollTo({
-      top: scroller.start + ((index + 0.5) / steps.length) * span,
-      behavior: motion ? "smooth" : "auto",
-    });
+    if (index >= 0)
+      scenes[index].scrollIntoView({ behavior: motion ? "smooth" : "auto", block: "center" });
   }
-  const replay = () => enter(current);
-  activate(Math.min(steps.length - 1, Math.floor(scroller.progress * steps.length)));
-  local = Math.min(1, scroller.progress * steps.length - current);
+  const replay = () => {
+    plays.forEach((tween) => tween.kill());
+    scenes.forEach((_, index) => prime(index));
+    enter(current);
+  };
+  scenes.forEach((_, index) => prime(index));
+  activate(
+    Math.max(
+      0,
+      triggers.findLastIndex((trigger) => trigger.progress > 0),
+    ),
+  );
   follow();
   how.addEventListener("click", choose);
   how.addEventListener("om-role", replay);
   return () => {
-    play?.kill();
-    scroller.kill();
+    plays.forEach((tween) => tween.kill());
+    triggers.forEach((trigger) => trigger.kill());
+    watch.kill();
     gsap.ticker.remove(follow);
-    gsap.set([fill, ...scenes], { clearProps: "transform" });
+    gsap.set(fill, { clearProps: "transform" });
     how.removeEventListener("click", choose);
     how.removeEventListener("om-role", replay);
     steps.forEach((step, k) => step.classList.toggle("om-active", k === 0));
