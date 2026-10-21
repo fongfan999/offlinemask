@@ -25,96 +25,62 @@
         <p class="om-maker-label">Hướng dẫn cài đặt</p>
         <h1>Cài đặt OfflineMask</h1>
         <p class="om-doc-lead">
-          Chỉ mất khoảng một phút. Lần đầu mở, máy sẽ hỏi lại một lần. Đó là chuyện bình thường, và
-          bên dưới có hướng dẫn từng bước.
+          Chỉ mất khoảng một phút. Lần đầu mở, máy sẽ hỏi bạn có muốn mở ứng dụng mới tải về không.
+          Đó là bước kiểm tra quen thuộc, bạn chỉ cần xác nhận một lần.
         </p>
-
-        <section class="om-doc-summary" aria-labelledby="om-why-warning">
-          <h2 id="om-why-warning">Vì sao máy hỏi lại?</h2>
-          <p>
-            Máy Mac và Windows cảnh báo với mọi ứng dụng chưa đăng ký với Apple hay Microsoft.
-            OfflineMask là dự án miễn phí và chưa đăng ký, nên lần đầu bạn chỉ cần xác nhận là muốn
-            mở. Các lần sau ứng dụng mở bình thường.
-          </p>
-        </section>
 
         <nav class="om-doc-toc" aria-label="Mục lục">
           <ol>
-            <li><a href="#macos">macOS</a></li>
+            <li><a href="#macos">Máy Mac</a></li>
             <li><a href="#windows">Windows</a></li>
             <li><a href="#linux">Linux</a></li>
-            <li><a href="#kiem-tra">Kiểm tra tệp tải về (không bắt buộc)</a></li>
           </ol>
         </nav>
 
-        <h2 id="macos"><span>1</span>macOS</h2>
+        <h2 id="macos"><span>1</span>Máy Mac</h2>
         <ol class="om-doc-flow">
           <li>
-            <strong>Mở tệp vừa tải</strong> (đuôi <code>.dmg</code>) rồi kéo biểu tượng OfflineMask
-            vào thư mục <strong>Applications</strong>.
+            <strong>Mở tệp vừa tải</strong>, rồi kéo biểu tượng OfflineMask vào thư mục
+            <strong>Applications</strong>.
           </li>
           <li>
-            <strong>Mở OfflineMask.</strong> Máy báo không thể xác minh nhà phát triển: chọn
-            <strong>Xong</strong>.
+            <strong>Mở OfflineMask.</strong> Khi máy hiện thông báo, chọn <strong>Xong</strong>.
           </li>
           <li>
-            <strong>Vào Cài đặt hệ thống › Quyền riêng tư &amp; Bảo mật</strong>, cuộn xuống, bấm
-            <strong>Vẫn mở</strong> cạnh dòng nói về OfflineMask, rồi xác nhận.
+            <strong>Mở Cài đặt hệ thống › Quyền riêng tư &amp; Bảo mật</strong>, cuộn xuống và bấm
+            <strong>Vẫn mở</strong> cạnh dòng nói về OfflineMask.
           </li>
         </ol>
-        <p>
-          Xong. Mỗi phiên bản mới chỉ cần làm một lần. Nút tải trên trang chủ đã chọn đúng bản cho
-          máy bạn (chip Apple hoặc Intel).
-        </p>
+        <p>Xong. Từ lần sau, OfflineMask mở như mọi ứng dụng khác.</p>
 
         <h2 id="windows"><span>2</span>Windows</h2>
         <ol class="om-doc-flow">
-          <li><strong>Mở tệp cài đặt vừa tải</strong> (đuôi <code>.exe</code>).</li>
+          <li><strong>Mở tệp cài đặt vừa tải.</strong></li>
           <li>
             Nếu hiện <strong>“Windows đã bảo vệ PC của bạn”</strong>, bấm
             <strong>Thông tin thêm</strong> rồi <strong>Vẫn chạy</strong>.
           </li>
-          <li><strong>Làm theo trình cài đặt</strong> như mọi ứng dụng khác.</li>
+          <li><strong>Cài như mọi ứng dụng khác.</strong></li>
         </ol>
+        <p>Tải từ Microsoft Store thì không cần bước 2: ứng dụng mở ngay.</p>
 
         <h2 id="linux"><span>3</span>Linux</h2>
         <p>
-          Tải bản phù hợp từ
-          <a href="https://github.com/fongfan999/offlinemask/releases/latest">trang phát hành</a>,
-          rồi:
+          Tải bản cho Linux từ
+          <a href="https://github.com/fongfan999/offlinemask/releases/latest">trang phát hành</a> và
+          cài như các ứng dụng khác trên máy bạn.
         </p>
-        <ul>
-          <li>
-            <strong>Ubuntu, Debian:</strong> mở tệp <code>.deb</code> bằng trình cài phần mềm, hoặc
-            chạy <code>sudo apt install ./OfflineMask_*.deb</code>.
-          </li>
-          <li><strong>Fedora:</strong> <code>sudo dnf install ./OfflineMask-*.rpm</code>.</li>
-          <li>
-            <strong>Bản chạy ngay:</strong> cho tệp <code>.AppImage</code> quyền chạy (<code
-              >chmod +x</code
-            >), rồi mở.
-          </li>
-        </ul>
 
-        <h2 id="kiem-tra"><span>4</span>Kiểm tra tệp tải về (không bắt buộc)</h2>
+        <h2 id="tiep-theo"><span>4</span>Sau khi cài</h2>
         <p>
-          Muốn chắc tệp bạn tải giống hệt tệp được phát hành? Mỗi bản phát hành có tệp
-          <code>SHA256SUMS.txt</code>. Tải tệp đó vào cùng thư mục với bản cài, rồi chạy:
+          Mở OfflineMask, dán một đoạn văn bản hoặc mở một tệp để thử. Muốn tự thấy ứng dụng chạy
+          offline? Tắt Wi‑Fi rồi dùng thử. Xem thêm về <a href="./privacy.html">quyền riêng tư</a>.
         </p>
-        <pre><code><i># macOS</i>
-shasum -a 256 -c SHA256SUMS.txt --ignore-missing
-
-<i># Linux</i>
-sha256sum -c SHA256SUMS.txt --ignore-missing
-
-<i># Windows (PowerShell): so mã in ra với dòng tương ứng</i>
-Get-FileHash .\OfflineMask_*_x64-setup.exe -Algorithm SHA256</code></pre>
-        <p>Kết quả <code>OK</code>, hoặc mã trùng khớp, nghĩa là tệp đúng như bản phát hành.</p>
-
-        <h2 id="tiep-theo"><span>5</span>Sau khi cài</h2>
-        <p>
-          Muốn tự thấy OfflineMask chạy offline? Tắt Wi‑Fi rồi dùng thử. Xem thêm về
-          <a href="./privacy.html">quyền riêng tư</a>.
+        <p class="om-doc-note">
+          Dành cho người muốn kiểm tra kỹ tệp tải về: xem
+          <a href="https://github.com/fongfan999/offlinemask/blob/main/docs/install.md"
+            >hướng dẫn kỹ thuật ↗</a
+          >.
         </p>
       </main>
       <footer class="om-doc-footer om-wrap">

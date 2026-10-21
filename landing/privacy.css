@@ -181,6 +181,12 @@
 .om-doc-summary p {
   margin-top: 10px;
 }
+.om-doc-note {
+  margin-top: 40px !important;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  font-size: 14px;
+}
 .om-doc pre {
   overflow-x: auto;
   margin-top: 14px;
