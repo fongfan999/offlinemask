@@ -1055,21 +1055,21 @@
   /* An accordion: the closing and opening rows share one duration and curve, so at every frame
      one gives up exactly the space the other takes (the script pads the descriptions to one
      height) and nothing below moves. */
-  .om-js .om-how-body {
-    display: grid;
-    grid-template-rows: 0fr;
-    opacity: 0;
-    /* Fast start that eases off (ease-out quad), 150ms. */
-    transition:
-      grid-template-rows 0.15s cubic-bezier(0.5, 1, 0.89, 1),
-      opacity 0.15s cubic-bezier(0.5, 1, 0.89, 1);
+  /* The same technique as the FAQ answers: the description's real height animates from 0 to
+     auto (interpolate-size), with the FAQ's 0.3s curve. */
+  .om-js .om-how-steps {
+    interpolate-size: allow-keywords;
   }
-  .om-js .om-how-body > div {
+  .om-js .om-how-body {
     overflow: hidden;
-    min-height: 0;
+    block-size: 0;
+    opacity: 0;
+    transition:
+      block-size 0.3s cubic-bezier(0.5, 1, 0.89, 1),
+      opacity 0.3s cubic-bezier(0.5, 1, 0.89, 1);
   }
   .om-js .om-active .om-how-body {
-    grid-template-rows: 1fr;
+    block-size: auto;
     opacity: 1;
   }
 }
