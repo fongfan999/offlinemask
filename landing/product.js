@@ -123,13 +123,28 @@ function setupHow(root, motion) {
   // restored) and plays once when it first opens; switching the example role primes them again.
   // Content changes with the role, so it is looked up each time.
   const played = scenes.map(() => false);
+  // Step 1's card before and after masking: its pill and label follow the values.
+  function setDocState(scene, count, masked) {
+    const pill = scene.querySelector('[data-om-part="doc-count"]');
+    pill.textContent = masked ? `Đã ẩn ${count} thông tin` : `Tìm thấy ${count} thông tin`;
+    pill.classList.toggle("om-scene-pill-warm", !masked);
+    pill.classList.toggle("om-scene-pill-cobalt", masked);
+    scene.querySelector("[data-om-doc-kicker]").textContent = masked ? "Bản đã ẩn" : "Bản gốc";
+  }
   function prime(index) {
     played[index] = false;
     if (!motion) return;
     const scene = scenes[index];
-    if (index === 0)
-      scene.querySelectorAll(".om-v").forEach((value) => value.classList.add("om-dim"));
-    else if (index === 1) gsap.set(scene.querySelector("[data-om-ai]"), { autoAlpha: 0, y: 12 });
+    if (index === 0) {
+      const values = [...scene.querySelectorAll(".om-v")];
+      values.forEach((value) => {
+        value.dataset.real ??= value.textContent;
+        value.textContent = value.dataset.real;
+        value.classList.remove("om-coded");
+        value.classList.add("om-dim");
+      });
+      setDocState(scene, values.length, false);
+    } else if (index === 1) gsap.set(scene.querySelector("[data-om-ai]"), { autoAlpha: 0, y: 12 });
     else
       scene.querySelectorAll("[data-om-restored] .om-r").forEach((value) => {
         value.dataset.real ??= value.textContent;
@@ -141,11 +156,28 @@ function setupHow(root, motion) {
     played[index] = true;
     const scene = scenes[index];
     if (index === 0) {
-      const highlights = [...scene.querySelectorAll(".om-v")];
+      // Highlights appear one by one, the button is pressed, and the values become codes.
+      const values = [...scene.querySelectorAll(".om-v")];
+      const button = scene.querySelector("[data-om-doc-button]");
       const reveal = gsap.timeline({ delay: 0.2 });
-      highlights.forEach((value, k) =>
-        reveal.call(() => value.classList.remove("om-dim"), [], k * 0.16),
+      values.forEach((value, k) =>
+        reveal.call(() => value.classList.remove("om-dim"), [], k * 0.14),
       );
+      const press = values.length * 0.14 + 0.7;
+      reveal.to(button, { scale: 0.94, duration: 0.12, yoyo: true, repeat: 1 }, press);
+      values.forEach((value, k) =>
+        reveal.to(
+          value,
+          {
+            duration: 0.6,
+            ease: "none",
+            scrambleText: { text: value.dataset.code, chars: "█▓▒░", speed: 0.5 },
+            onStart: () => value.classList.add("om-coded"),
+          },
+          press + 0.2 + k * 0.1,
+        ),
+      );
+      reveal.call(() => setDocState(scene, values.length, true), [], press + 0.3);
       plays.push(reveal);
     } else if (index === 1) {
       plays.push(
@@ -233,7 +265,12 @@ function setupHow(root, motion) {
     how.removeEventListener("om-role", replay);
     steps.forEach((step, k) => step.classList.toggle("om-active", k === 0));
     heads.forEach((head) => head.removeAttribute("aria-expanded"));
-    how.querySelectorAll(".om-v").forEach((value) => value.classList.remove("om-dim"));
+    how.querySelectorAll(".om-v").forEach((value) => {
+      value.classList.remove("om-dim", "om-coded");
+      if (value.dataset.real) value.textContent = value.dataset.real;
+    });
+    setDocState(scenes[0], scenes[0].querySelectorAll(".om-v").length, false);
+    gsap.set(scenes[0].querySelector("[data-om-doc-button]"), { clearProps: "all" });
     gsap.set(how.querySelector("[data-om-ai]"), { clearProps: "all" });
     how.querySelectorAll(".om-r").forEach((value) => {
       if (value.dataset.real) value.textContent = value.dataset.real;

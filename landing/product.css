@@ -818,7 +818,6 @@
   text-transform: uppercase;
 }
 .om-scene-kicker-cobalt {
-  margin-top: 6px;
   color: var(--accent);
 }
 .om-scene-doc {
@@ -836,6 +835,15 @@
   transition:
     background 0.5s,
     box-shadow 0.5s;
+}
+.om-v.om-coded {
+  padding: 0.1em 0.35em;
+  border-radius: 5px;
+  background: var(--accent-soft);
+  box-shadow: none;
+  color: var(--accent);
+  font: 500 0.82em var(--code);
+  white-space: nowrap;
 }
 .om-v.om-dim {
   background: transparent;
@@ -918,8 +926,66 @@
   color: var(--paper);
 }
 .om-bubble-me .om-c {
-  background: #ffffff24;
-  color: #c2cfff;
+  background: #ffffff33;
+  color: #e4eafe;
+}
+/* Step 2's card reads as a chat: the note on what is sent, and a message box at the bottom. */
+.om-chat-safe {
+  display: flex;
+  align-items: center;
+  justify-self: end;
+  gap: 6px;
+  margin-top: -8px;
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.om-chat-safe svg {
+  width: 14px;
+  height: 16px;
+}
+.om-chat-input {
+  gap: 10px;
+}
+.om-chat-field {
+  flex: 1;
+  padding: 9px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: var(--muted);
+  font-size: 14px;
+}
+.om-chat-send {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+}
+.om-chat-send svg {
+  width: 18px;
+  height: 18px;
+}
+/* Step 3's card marks the change between the AI's reply and the full version. */
+.om-scene-swap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+.om-scene-swap::before,
+.om-scene-swap::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--line);
 }
 .om-bubble-ai {
   justify-self: start;

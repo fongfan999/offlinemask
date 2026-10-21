@@ -201,24 +201,25 @@
                 >
               </div>
               <div class="om-scene-body">
-                <p class="om-scene-kicker">Bản gốc</p>
+                <p class="om-scene-kicker" data-om-doc-kicker>Bản gốc</p>
                 <div class="om-scene-doc" data-om-part="doc">
                   <p>Kính gửi bộ phận hỗ trợ,</p>
                   <p>
-                    Tôi là <mark class="om-v">Nguyễn Minh Anh</mark>, chủ tài khoản
-                    <mark class="om-v">001234567890</mark>. Ngày 08/09 tôi chuyển 2.500.000 đồng
-                    nhưng người nhận chưa nhận được, mã giao dịch
-                    <mark class="om-v">GD202609080126</mark>.
+                    Tôi là <mark class="om-v" data-code="[TEN_1_4e8c]">Nguyễn Minh Anh</mark>, chủ
+                    tài khoản <mark class="om-v" data-code="[STK_1_4e8c]">001234567890</mark>. Ngày
+                    08/09 tôi chuyển 2.500.000 đồng nhưng người nhận chưa nhận được, mã giao dịch
+                    <mark class="om-v" data-code="[GD_1_4e8c]">GD202609080126</mark>.
                   </p>
                   <p>
-                    Xin liên hệ qua số <mark class="om-v">0901234567</mark> hoặc
-                    <mark class="om-v">minh.anh@example.com</mark>.
+                    Xin liên hệ qua số
+                    <mark class="om-v" data-code="[SDT_1_4e8c]">0901234567</mark> hoặc
+                    <mark class="om-v" data-code="[EMAIL_1_4e8c]">minh.anh@example.com</mark>.
                   </p>
                 </div>
               </div>
               <div class="om-scene-foot">
                 <span class="om-scene-note">Còn sót chỗ nào? Bôi đen là ẩn thêm.</span>
-                <span class="om-scene-button">Ẩn thông tin</span>
+                <span class="om-scene-button" data-om-doc-button>Ẩn thông tin</span>
               </div>
             </figure>
             <figure
@@ -242,15 +243,8 @@
                   <code class="om-c">[STK_1_4e8c]</code>, báo chưa nhận được giao dịch
                   <code class="om-c">[GD_1_4e8c]</code>. Soạn giúp thư trả lời ngắn gọn.
                 </p>
-                <p class="om-bubble om-bubble-ai" data-om-part="ai" data-om-ai>
-                  Chào chị <code class="om-c">[TEN_1_4e8c]</code>, chúng tôi đã kiểm tra giao dịch
-                  <code class="om-c">[GD_1_4e8c]</code> từ tài khoản
-                  <code class="om-c">[STK_1_4e8c]</code>: tiền đang được hoàn lại trong 24 giờ.
-                </p>
-              </div>
-              <div class="om-scene-foot">
-                <span class="om-scene-note om-scene-safe"
-                  ><svg
+                <p class="om-chat-safe">
+                  <svg
                     viewBox="0 0 24 26"
                     fill="none"
                     stroke="currentColor"
@@ -261,8 +255,27 @@
                   >
                     <path d="M12 2 3 5.5v6.2c0 5.6 3.8 10.2 9 12.3 5.2-2.1 9-6.7 9-12.3V5.5Z" />
                     <path d="m8.2 12.8 2.6 2.6 5-5.2" /></svg
-                  >AI chỉ thấy mã, không thấy tên thật</span
-                >
+                  >AI chỉ thấy mã, không thấy tên thật
+                </p>
+                <p class="om-bubble om-bubble-ai" data-om-part="ai" data-om-ai>
+                  Chào chị <code class="om-c">[TEN_1_4e8c]</code>, chúng tôi đã kiểm tra giao dịch
+                  <code class="om-c">[GD_1_4e8c]</code> từ tài khoản
+                  <code class="om-c">[STK_1_4e8c]</code>: tiền đang được hoàn lại trong 24 giờ.
+                </p>
+              </div>
+              <div class="om-scene-foot om-chat-input" aria-hidden="true">
+                <span class="om-chat-field">Nhắn cho AI…</span>
+                <span class="om-chat-send"
+                  ><svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M12 19V5M6 11l6-6 6 6" /></svg
+                ></span>
               </div>
             </figure>
             <figure
@@ -283,6 +296,9 @@
                   Chào chị <code class="om-c">[TEN_1_4e8c]</code>, chúng tôi đã kiểm tra giao dịch
                   <code class="om-c">[GD_1_4e8c]</code> từ tài khoản
                   <code class="om-c">[STK_1_4e8c]</code>: tiền đang được hoàn lại trong 24 giờ.
+                </p>
+                <p class="om-scene-swap" aria-hidden="true">
+                  <span>↓ Đổi mã về thông tin thật</span>
                 </p>
                 <p class="om-scene-kicker om-scene-kicker-cobalt">Bản đầy đủ</p>
                 <div class="om-scene-doc">
@@ -308,13 +324,13 @@
         <div data-om-part="doc-count">Tìm thấy 4 thông tin</div>
         <div data-om-part="doc">
           <p>
-            Ứng viên: <mark class="om-v">Lê Thu Hà</mark>, CCCD
-            <mark class="om-v">079198004521</mark>.
+            Ứng viên: <mark class="om-v" data-code="[TEN_1_4e8c]">Lê Thu Hà</mark>, CCCD
+            <mark class="om-v" data-code="[CCCD_1_4e8c]">079198004521</mark>.
           </p>
           <p>Vị trí: chuyên viên kế toán, bắt đầu từ 01/11, lương thử việc 15.000.000 đồng.</p>
           <p>
-            Liên hệ: <mark class="om-v">0912345678</mark>,
-            <mark class="om-v">ha.le@example.com</mark>.
+            Liên hệ: <mark class="om-v" data-code="[SDT_1_4e8c]">0912345678</mark>,
+            <mark class="om-v" data-code="[EMAIL_1_4e8c]">ha.le@example.com</mark>.
           </p>
         </div>
         <div data-om-part="me">
@@ -344,10 +360,14 @@
         <div data-om-part="doc-count">Tìm thấy 3 thông tin</div>
         <div data-om-part="doc">
           <p>
-            Ngày 05/10, công ty có MST <mark class="om-v">0312345678</mark> chuyển 45.000.000 đồng
-            vào tài khoản <mark class="om-v">0071000123456</mark>.
+            Ngày 05/10, công ty có MST
+            <mark class="om-v" data-code="[MST_1_4e8c]">0312345678</mark> chuyển 45.000.000 đồng vào
+            tài khoản <mark class="om-v" data-code="[STK_1_4e8c]">0071000123456</mark>.
           </p>
-          <p>Người liên hệ: bà <mark class="om-v">Phạm Mai</mark>, kế toán trưởng.</p>
+          <p>
+            Người liên hệ: bà <mark class="om-v" data-code="[TEN_1_4e8c]">Phạm Mai</mark>, kế toán
+            trưởng.
+          </p>
         </div>
         <div data-om-part="me">
           Đối chiếu khoản 45.000.000 đồng từ công ty MST <code class="om-c">[MST_1_4e8c]</code> vào
@@ -377,8 +397,9 @@
         <div data-om-part="doc-count">Tìm thấy 3 thông tin</div>
         <div data-om-part="doc">
           <p>
-            Bên thuê: ông <mark class="om-v">Trần Quốc Bảo</mark>, CCCD
-            <mark class="om-v">079085001122</mark>, điện thoại <mark class="om-v">0987654321</mark>.
+            Bên thuê: ông <mark class="om-v" data-code="[TEN_1_4e8c]">Trần Quốc Bảo</mark>, CCCD
+            <mark class="om-v" data-code="[CCCD_1_4e8c]">079085001122</mark>, điện thoại
+            <mark class="om-v" data-code="[SDT_1_4e8c]">0987654321</mark>.
           </p>
           <p>Thời hạn 12 tháng, đặt cọc 2 tháng tiền nhà, phạt chấm dứt sớm 3 tháng tiền nhà.</p>
         </div>
