@@ -312,7 +312,7 @@ function setupQuick(root, motion) {
     gsap.set([askSel, replySel], { backgroundSize: "0% 100%" });
     gsap.set([askCircle, replyCircle], { scale: 0 });
     gsap.set(reply, { autoAlpha: 0, y: 10 });
-    say("Bôi đen đoạn có thông tin riêng…", false);
+    say("Bôi đen cả tin nhắn…", false);
   };
   const scramble = (values, key, className) => (tween, at) =>
     values.forEach((value, k) =>

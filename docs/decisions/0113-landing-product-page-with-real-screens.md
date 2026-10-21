@@ -99,3 +99,10 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   - The Ẩn nhanh illustration on its own, large and centred (`.om-showcase`, still `#om-quick` for the pointer from the steps), with the note "Trên macOS và Windows · Bật trong Cài đặt › Thao tác nhanh".
   - Three equal cards, each with a small picture on a sunk panel: "Hoặc chỉ cần sao chép" (⌘⇧M keycaps), "Cả bảng tính và tài liệu" (a two-column masked sheet, plus the PDF note), and "Tự nhận ra thông tin riêng" (the detection chips).
   The lead card, the wide files card and its large HTML sheet were removed.
+- **Back to Dia's bento, with clearer copy (October 2026):** the owner pointed out that the centred showcase had dropped the Dia feature grid that worked. The explanation also implied picking out exactly the private words, and masking inside Word or Zalo, which has no point. "Tính năng" is now a 12-column bento of outlined cards, each with a pill, a short paragraph and a picture at the bottom, with wide cards alternating sides:
+  - **Ẩn nhanh** (wide): "Trong ô chat với AI, bôi đen cả tin nhắn rồi bấm nút OfflineMask. Chỉ thông tin riêng thành mã, phần còn lại giữ nguyên. Không cần chọn từng chữ." The demo now selects the whole message and the whole reply; only the values change.
+  - **Đổi mã về**: restoring in Word, Zalo or email, with a code → name picture.
+  - **Phím tắt**: copy, ⌘⇧M, paste, with keycaps.
+  - **Bảng tính và tài liệu** (wide): the HTML sample sheet again.
+  - **Nhận diện** (full width): the detection chips.
+  The heading stays "Vẫn ứng dụng quen. / Chỉ cần bôi đen." with no subtitle, and one fine line covers platforms, where to switch it on and the PDF gap.
