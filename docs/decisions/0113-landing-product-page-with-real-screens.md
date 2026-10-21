@@ -141,3 +141,4 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   8. How to check for yourself.
   9. Changes and contact.
   Every statement was checked against the code and decisions.
+- **Maker card removed:** the "Người làm OfflineMask" card did not help visitors decide, and the footer already credits "Phong Phan ↗" (wotdafong.dev). Privacy now leads straight into the FAQ. Only the small `.om-maker-label` style stays, because the privacy page uses it for its date line.

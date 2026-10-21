@@ -1432,8 +1432,7 @@
   font: 0.8em var(--code);
   white-space: nowrap;
 }
-.om-bento-text a,
-.om-maker a {
+.om-bento-text a {
   color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 3px;
@@ -1578,55 +1577,13 @@
   background: var(--line);
 }
 
-/* Maker */
-.om-maker {
-  padding-top: 150px;
-}
-.om-maker-card {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 36px;
-  max-width: 860px;
-  margin-inline: auto;
-}
-.om-avatar {
-  display: grid;
-  place-items: center;
-  width: 104px;
-  height: 104px;
-  border-radius: 50%;
-  background: var(--accent);
-  color: var(--on-accent);
-  font: italic 400 38px var(--serif);
-  box-shadow: 8px 8px 0 var(--accent-soft);
-}
+/* Small uppercase label (used by the privacy page's date line). */
 .om-maker-label {
   color: var(--muted);
   font-size: 13px;
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-}
-.om-maker h2 {
-  margin-top: 6px;
-  font: 500 clamp(32px, 3.4vw, 44px) / 1.1 var(--sans);
-  letter-spacing: -0.02em;
-}
-.om-maker blockquote {
-  margin: 18px 0 0;
-  color: var(--accent);
-  font: italic 400 clamp(22px, 2.2vw, 28px) / 1.35 var(--serif);
-}
-.om-maker-card p:not([class]) {
-  margin-top: 16px;
-  max-width: 560px;
-  color: var(--muted);
-}
-.om-maker-links {
-  display: flex;
-  gap: 22px;
-  margin-top: 16px !important;
-  font-size: 15px;
 }
 
 /* FAQ */
@@ -1989,18 +1946,6 @@
   }
   .om-card {
     padding: 22px;
-  }
-  .om-maker {
-    padding-top: 110px;
-  }
-  .om-maker-card {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  .om-avatar {
-    width: 76px;
-    height: 76px;
-    font-size: 28px;
   }
   .om-privacy {
     margin-top: 110px;
