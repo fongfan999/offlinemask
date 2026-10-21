@@ -114,12 +114,11 @@
 .om-doc h2 {
   display: flex;
   align-items: baseline;
-  gap: 14px;
+  gap: 0.4em;
   scroll-margin-top: 24px;
 }
 /* Section numbers share the heading's size and weight, in cobalt, so they read as part of it. */
 .om-doc h2 > span {
-  min-width: 1.1em;
   color: var(--accent);
   font: inherit;
   font-variant-numeric: tabular-nums;
