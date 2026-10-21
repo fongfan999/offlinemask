@@ -94,3 +94,8 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   - The grid is the Ẩn nhanh lead card, then the files card beside "Nhận diện".
   - The order rules that interleave the steps and illustrations on phones are scoped to `.om-how-scenes`, so they no longer reorder other `.om-scene` figures.
 - **Smaller section headings:** with longer lục bát couplets the section headings (`.om-display`) felt oversized at up to 70px; they are now `clamp(30px, 3.6vw, 52px)` with 1.15 line height, closer to Dia's scale. On phones the features couplet breaks after "Đem vào là ẩn,".
+- **"Tính năng" redesigned around its heading (October 2026):** the owner picked the 4+4 couplet "Vẫn ứng dụng quen. / Chỉ cần bôi đen." (quen–đen). The section now follows it:
+  - A one-paragraph explanation under the heading (plain prose).
+  - The Ẩn nhanh illustration on its own, large and centred (`.om-showcase`, still `#om-quick` for the pointer from the steps), with the note "Trên macOS và Windows · Bật trong Cài đặt › Thao tác nhanh".
+  - Three equal cards, each with a small picture on a sunk panel: "Hoặc chỉ cần sao chép" (⌘⇧M keycaps), "Cả bảng tính và tài liệu" (a two-column masked sheet, plus the PDF note), and "Tự nhận ra thông tin riêng" (the detection chips).
+  The lead card, the wide files card and its large HTML sheet were removed.
