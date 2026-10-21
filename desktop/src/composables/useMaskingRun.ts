@@ -32,6 +32,9 @@ export function textProgress(progress: DetectionProgress, startedAt: number): Sh
       };
 }
 
+/** Synthetic, so the warm-up never touches real input: every model sees a name and an address. */
+const warmUpText = "Nguyễn Văn An, 12 Lê Lợi, Quận 1, TP. Hồ Chí Minh, a@example.com";
+
 export type TextDetector = Pick<
   ReturnType<typeof createTextDetector>,
   "detect" | "prepare" | "cancel" | "destroy"
@@ -78,6 +81,17 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
       if (preparedRoot !== root) {
         preparedRoot = root;
         detector.prepare(root);
+        // Loaded weights still pay for their first inference and the native tokenizer:
+        // one throwaway run on synthetic text, so the user's first mask does not wait for it.
+        // Queued like any request; nothing is kept.
+        void detector
+          .detect(
+            warmUpText,
+            () => {},
+            root,
+            detectionOptions.map((option) => option.id),
+          )
+          .catch(() => {});
       }
     },
     { immediate: true },

@@ -295,7 +295,11 @@ test("run: a ready pack is prepared once and selects every category unless the u
   readyRoot.value = "asset://pack";
   ready.value = true;
   await nextTick();
-  assert.deepEqual(detector.calls, [["prepare", "asset://pack"]]);
+  // Loaded, then warmed with one synthetic run so the first real mask is not slower.
+  assert.deepEqual(detector.calls.slice(0, 2), [
+    ["prepare", "asset://pack"],
+    ["detect", "Nguyễn Văn An, 12 Lê Lợi, Quận 1, TP. Hồ Chí Minh, a@example.com"],
+  ]);
   assert.equal(run.selectedOptions.value.length, 6);
   assert.equal(run.missingSelectedModels.value, false);
   readyRoot.value = null;
@@ -306,7 +310,7 @@ test("run: a ready pack is prepared once and selects every category unless the u
   readyRoot.value = "asset://pack";
   ready.value = true;
   await nextTick();
-  assert.equal(detector.calls.length, 3);
+  assert.equal(detector.calls.length, 5);
 
   const edited = useMaskingRun({
     detector: fakeDetector(),

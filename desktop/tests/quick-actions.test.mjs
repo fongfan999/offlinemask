@@ -1212,6 +1212,8 @@ test("the circle's check is the click's own detection, models included, and the 
     sessions,
     onSession: (session) => (sessions.value = [session, ...sessions.value]),
   });
+  // The ready pack's warm-up run is not part of this check.
+  detector.calls.length = 0;
   const text = "Nhờ anh Phong Phan gọi lại";
   const probed = await run.probe(text);
   assert.equal(probed.count, 1);
