@@ -591,7 +591,7 @@
       </div>
     </section>
 
-    <section class="om-privacy" id="om-privacy" aria-labelledby="om-privacy-title">
+    <section class="om-privacy om-trust" id="om-privacy" aria-labelledby="om-privacy-title">
       <div class="om-wrap">
         <h2 id="om-privacy-title" class="om-display" data-om-reveal>
           AI chỉ thấy mã.<br /><em>Tên thật vẫn ở&nbsp;nhà.</em>
@@ -599,89 +599,117 @@
         <p class="om-display-sub" data-om-reveal>
           OfflineMask không có máy chủ, không kết nối với AI nào. Mọi việc diễn ra trên máy bạn.
         </p>
-        <div class="om-bento">
-          <article class="om-bento-card om-bento-wide" data-om-reveal>
-            <p class="om-pill">Chạy offline</p>
-            <p class="om-bento-text">
-              Tắt Wi‑Fi rồi dùng thử: ẩn và khôi phục vẫn chạy bình thường. Không gì rời khỏi máy
-              bạn.
-            </p>
-            <div class="om-bento-art om-art-offline" aria-hidden="true">
-              <span class="om-offline-icon"
-                ><svg
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                >
-                  <path d="M2 8.8a15 15 0 0 1 20 0" />
-                  <path d="M5 12.6a10 10 0 0 1 14 0" />
-                  <path d="M8.5 16.3a5 5 0 0 1 7 0" />
-                  <circle cx="12" cy="19.8" r="0.9" fill="currentColor" />
-                  <path d="M3 3l18 18" /></svg
-              ></span>
-              <p class="om-offline-status">
-                <b>Không có mạng</b><span>Vẫn ẩn được 5 thông tin</span>
-              </p>
-            </div>
-          </article>
-          <article class="om-bento-card" data-om-reveal>
-            <p class="om-pill">Bảng đối chiếu</p>
-            <p class="om-bento-text">
-              Tên thật và mã của nó nằm trên máy bạn. AI không bao giờ thấy bảng này.
-            </p>
-            <div class="om-bento-art om-art-pairs" aria-hidden="true">
-              <ul class="om-pairs">
-                <li><span>Nguyễn Minh Anh</span><code>[TEN_1_4e8c]</code></li>
-                <li><span>001234567890</span><code>[STK_1_4e8c]</code></li>
-                <li><span>0901234567</span><code>[SDT_1_4e8c]</code></li>
-              </ul>
-            </div>
-          </article>
-          <article class="om-bento-card" data-om-reveal>
-            <p class="om-pill">Không tài khoản</p>
-            <p class="om-bento-text">
-              Không đăng ký, không đăng nhập, không thống kê sử dụng. Mở ứng dụng là dùng được ngay.
-            </p>
-            <div class="om-bento-art om-art-none" aria-hidden="true">
-              <s>Tài khoản</s><s>Máy chủ</s><s>Thống kê</s><s>Tự cập nhật</s>
-            </div>
-          </article>
-          <article class="om-bento-card om-bento-wide" data-om-reveal>
-            <p class="om-pill">Mã nguồn công khai</p>
-            <p class="om-bento-text">
-              Ai cũng có thể xem ứng dụng làm gì, từng dòng.
+        <ul class="om-trust-list">
+          <li data-om-reveal>
+            <span class="om-trust-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M2 8.8a15 15 0 0 1 20 0" />
+                <path d="M5 12.6a10 10 0 0 1 14 0" />
+                <path d="M8.5 16.3a5 5 0 0 1 7 0" />
+                <path d="M12 19.8h.01" />
+                <path d="M3 3l18 18" /></svg
+            ></span>
+            <h3>Chạy không cần mạng</h3>
+            <p>Tắt Wi‑Fi rồi dùng thử: ẩn và khôi phục vẫn chạy bình thường.</p>
+          </li>
+          <li data-om-reveal>
+            <span class="om-trust-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="3" y="4" width="18" height="16" rx="2" />
+                <path d="M3 10h18M10 4v16" /></svg
+            ></span>
+            <h3>Bảng đối chiếu ở lại máy</h3>
+            <p>Tên thật và mã của nó nằm trên máy bạn. AI không bao giờ thấy bảng này.</p>
+          </li>
+          <li data-om-reveal>
+            <span class="om-trust-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <circle cx="9" cy="8" r="4" />
+                <path d="M2 21a7 7 0 0 1 14 0" />
+                <path d="M17 8l5 5M22 8l-5 5" /></svg
+            ></span>
+            <h3>Không tài khoản, không máy chủ</h3>
+            <p>Không đăng ký, không đăng nhập, không thống kê sử dụng, không tự cập nhật.</p>
+          </li>
+          <li data-om-reveal>
+            <span class="om-trust-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M8 6l-6 6 6 6M16 6l6 6-6 6" /></svg
+            ></span>
+            <h3>Mã nguồn công khai</h3>
+            <p>
+              Ai cũng có thể xem ứng dụng làm gì.
               <a href="https://github.com/fongfan999/offlinemask">Xem trên GitHub ↗</a>
             </p>
-            <div class="om-bento-art om-art-repo" aria-hidden="true">
-              <div class="om-repo">
-                <p class="om-repo-name">
-                  <span class="om-tile"></span><span>fongfan999 / <b>offlinemask</b></span>
-                </p>
-                <ul class="om-repo-tags">
-                  <li>Tauri</li>
-                  <li>Rust</li>
-                  <li>Vue</li>
-                  <li>TypeScript</li>
-                </ul>
-                <p class="om-repo-license">Giấy phép O’Saasy · xem, tự build, tự kiểm tra</p>
-              </div>
-            </div>
-          </article>
-          <article class="om-bento-card om-bento-full" data-om-reveal>
-            <p class="om-pill">Chỉ khi bạn muốn</p>
-            <p class="om-bento-text">
-              Lịch sử chỉ được lưu khi bạn đặt mật mã 6 số; không đặt thì đóng ứng dụng là xong. Gói
-              nhận diện tiếng Việt chỉ tải khi bạn bấm.
-            </p>
-            <div class="om-bento-art om-art-pin" aria-hidden="true">
-              <span class="om-pin"><i></i><i></i><i></i><i></i><i></i><i></i></span>
-            </div>
-          </article>
-        </div>
-        <p class="om-fine">
+          </li>
+          <li data-om-reveal>
+            <span class="om-trust-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <rect x="4" y="10" width="16" height="11" rx="2" />
+                <path d="M8 10V7a4 4 0 0 1 8 0v3" /></svg
+            ></span>
+            <h3>Lịch sử có mật mã</h3>
+            <p>Chỉ lưu việc cũ khi bạn đặt mật mã 6 số. Không đặt thì đóng ứng dụng là xong.</p>
+          </li>
+          <li data-om-reveal>
+            <span class="om-trust-icon"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.8"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M12 3v12M7 10l5 5 5-5" />
+                <path d="M4 20h16" /></svg
+            ></span>
+            <h3>Chỉ tải khi bạn bấm</h3>
+            <p>Gói nhận diện tiếng Việt là tùy chọn, tải một lần trong Cài đặt.</p>
+          </li>
+        </ul>
+        <p class="om-trust-link">
           <a class="om-text-link" href="./privacy.html">Đọc chính sách quyền riêng tư →</a>
         </p>
       </div>
