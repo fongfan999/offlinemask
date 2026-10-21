@@ -77,3 +77,4 @@ The owner gave full freedom over copy and design before rolling out to offlinema
 - **Back to 300ms:** after trying 200ms the owner settled on Dia's 300ms.
 - **Cleaner step list:** the owner found the grey tint and short bars ugly. The bar sat on the box's rounded edge, and a 5% ink tint reads as dirty on warm paper. The open step is now a raised paper card (paper-raised, hairline border, soft shadow) like the illustrations, and closed steps are plain text aligned with its content. Type is closer to Dia's proportions: titles 20–22px, descriptions 15.5px, numbers 12px. The accordion motion is unchanged.
 - **200ms with the card style:** with the raised-card step list, the owner preferred 0.2s for the accordion, the card's border, background and shadow, and the colours.
+- **400ms:** after trying 200ms with the card style, the owner asked for 400–500ms; the step transitions now take 0.4s.
