@@ -507,26 +507,6 @@ function setupRoles(root) {
   };
 }
 
-/** Values cross the boundary as codes once the diagram scrolls into view. */
-function animateBoundary(root) {
-  const split = root.querySelector("[data-om-split]");
-  gsap
-    .timeline({ scrollTrigger: { trigger: split, start: "top 72%", once: true } })
-    .from(split.querySelectorAll(".om-pairs li"), {
-      x: -16,
-      autoAlpha: 0,
-      duration: 0.45,
-      stagger: 0.08,
-      ease: "power2.out",
-    })
-    .from(split.querySelector(".om-channel span"), { scale: 0.6, autoAlpha: 0, duration: 0.3 })
-    .from(
-      split.querySelectorAll(".om-ai-text code"),
-      { x: -70, autoAlpha: 0, duration: 0.6, stagger: 0.12, ease: "power3.out" },
-      "-=0.1",
-    );
-}
-
 /** Mount on one page root; dispose before replacing that root (including Astro navigation). */
 export function initOfflineMask(root) {
   if (!root) return () => {};
@@ -700,7 +680,6 @@ export function initOfflineMask(root) {
           scrollTrigger: { trigger: element, start: "top 88%", once: true },
         }),
       );
-      animateBoundary(root);
       return undo;
     },
     root,

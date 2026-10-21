@@ -594,66 +594,96 @@
     <section class="om-privacy" id="om-privacy" aria-labelledby="om-privacy-title">
       <div class="om-wrap">
         <h2 id="om-privacy-title" class="om-display" data-om-reveal>
-          Thứ AI thấy.<br /><em>Thứ ở lại với bạn.</em>
+          AI chỉ thấy mã.<br /><em>Tên thật vẫn ở&nbsp;nhà.</em>
         </h2>
         <p class="om-display-sub" data-om-reveal>
-          Bản gửi AI chỉ có mã. Tên thật và bảng đối chiếu nằm yên trên máy bạn.
+          OfflineMask không có máy chủ, không kết nối với AI nào. Mọi việc diễn ra trên máy bạn.
         </p>
-        <div class="om-split" data-om-split>
-          <div class="om-side om-side-local">
-            <p class="om-side-label"><span class="om-dot"></span> Máy của bạn</p>
-            <h3>Bảng đối chiếu</h3>
-            <ul class="om-pairs">
-              <li><span>Nguyễn Minh Anh</span><code>[TEN_1_4e8c]</code></li>
-              <li><span>001234567890</span><code>[STK_1_4e8c]</code></li>
-              <li><span>0901234567</span><code>[SDT_1_4e8c]</code></li>
-              <li><span>minh.anh@example.com</span><code>[EMAIL_1_4e8c]</code></li>
-            </ul>
-            <p class="om-side-foot">Nằm trên máy bạn. Đặt mật mã nếu muốn lưu lại.</p>
-          </div>
-          <div class="om-channel" aria-hidden="true"><span>Ranh giới</span></div>
-          <div class="om-side om-side-ai">
-            <p class="om-side-label">Công cụ AI (ChatGPT, Claude, Gemini…)</p>
-            <h3>AI chỉ thấy</h3>
-            <p class="om-ai-text">
-              Tôi là <code>[TEN_1_4e8c]</code>, chủ tài khoản <code>[STK_1_4e8c]</code>. Có thể liên
-              hệ qua số <code>[SDT_1_4e8c]</code> hoặc email <code>[EMAIL_1_4e8c]</code>.
+        <div class="om-bento">
+          <article class="om-bento-card om-bento-wide" data-om-reveal>
+            <p class="om-pill">Chạy offline</p>
+            <p class="om-bento-text">
+              Tắt Wi‑Fi rồi dùng thử: ẩn và khôi phục vẫn chạy bình thường. Không gì rời khỏi máy
+              bạn.
             </p>
-            <p class="om-side-foot">
-              Bạn tự sao chép hoặc tải lên. OfflineMask không kết nối với AI nào.
+            <div class="om-bento-art om-art-offline" aria-hidden="true">
+              <span class="om-offline-icon"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M2 8.8a15 15 0 0 1 20 0" />
+                  <path d="M5 12.6a10 10 0 0 1 14 0" />
+                  <path d="M8.5 16.3a5 5 0 0 1 7 0" />
+                  <circle cx="12" cy="19.8" r="0.9" fill="currentColor" />
+                  <path d="M3 3l18 18" /></svg
+              ></span>
+              <p class="om-offline-status">
+                <b>Không có mạng</b><span>Vẫn ẩn được 5 thông tin</span>
+              </p>
+            </div>
+          </article>
+          <article class="om-bento-card" data-om-reveal>
+            <p class="om-pill">Bảng đối chiếu</p>
+            <p class="om-bento-text">
+              Tên thật và mã của nó nằm trên máy bạn. AI không bao giờ thấy bảng này.
             </p>
-          </div>
-        </div>
-        <div class="om-proofs" data-om-reveal>
-          <h3 class="om-proofs-title">Muốn chắc chắn?<br /><em>Tự kiểm tra dễ dàng.</em></h3>
-          <ul>
-            <li>
-              <strong>Không cần Internet.</strong> Tắt Wi‑Fi rồi dùng thử: ẩn và khôi phục vẫn chạy
-              bình thường.
-            </li>
-            <li>
-              <strong>Không gửi dữ liệu đi đâu.</strong> Không thống kê sử dụng, không tự cập nhật,
-              không kết nối với AI nào.
-            </li>
-            <li>
-              <strong>Chỉ tải thêm khi bạn bấm.</strong> Gói nhận diện tiếng Việt là tùy chọn, tải
-              một lần trong Cài đặt.
-            </li>
-            <li>
-              <strong>Mã nguồn công khai.</strong> Ai cũng có thể xem ứng dụng làm gì.
+            <div class="om-bento-art om-art-pairs" aria-hidden="true">
+              <ul class="om-pairs">
+                <li><span>Nguyễn Minh Anh</span><code>[TEN_1_4e8c]</code></li>
+                <li><span>001234567890</span><code>[STK_1_4e8c]</code></li>
+                <li><span>0901234567</span><code>[SDT_1_4e8c]</code></li>
+              </ul>
+            </div>
+          </article>
+          <article class="om-bento-card" data-om-reveal>
+            <p class="om-pill">Không tài khoản</p>
+            <p class="om-bento-text">
+              Không đăng ký, không đăng nhập, không thống kê sử dụng. Mở ứng dụng là dùng được ngay.
+            </p>
+            <div class="om-bento-art om-art-none" aria-hidden="true">
+              <s>Tài khoản</s><s>Máy chủ</s><s>Thống kê</s><s>Tự cập nhật</s>
+            </div>
+          </article>
+          <article class="om-bento-card om-bento-wide" data-om-reveal>
+            <p class="om-pill">Mã nguồn công khai</p>
+            <p class="om-bento-text">
+              Ai cũng có thể xem ứng dụng làm gì, từng dòng.
               <a href="https://github.com/fongfan999/offlinemask">Xem trên GitHub ↗</a>
-            </li>
-            <li>
-              <strong>Không tài khoản.</strong> Không đăng ký, không đăng nhập, không máy chủ. Mở
-              ứng dụng là dùng được ngay.
-            </li>
-            <li>
-              <strong>Lịch sử chỉ khi bạn muốn.</strong> Đặt mật mã 6 số để lưu việc cũ trên máy.
-              Không đặt thì đóng ứng dụng là xong.
-            </li>
-          </ul>
-          <a class="om-text-link" href="./privacy.html">Đọc chính sách quyền riêng tư →</a>
+            </p>
+            <div class="om-bento-art om-art-repo" aria-hidden="true">
+              <div class="om-repo">
+                <p class="om-repo-name">
+                  <span class="om-tile"></span>fongfan999 / <b>offlinemask</b>
+                </p>
+                <ul class="om-repo-tags">
+                  <li>Tauri</li>
+                  <li>Rust</li>
+                  <li>Vue</li>
+                  <li>TypeScript</li>
+                </ul>
+                <p class="om-repo-license">Giấy phép O’Saasy · xem, tự build, tự kiểm tra</p>
+              </div>
+            </div>
+          </article>
+          <article class="om-bento-card om-bento-full" data-om-reveal>
+            <p class="om-pill">Chỉ khi bạn muốn</p>
+            <p class="om-bento-text">
+              Lịch sử chỉ được lưu khi bạn đặt mật mã 6 số; không đặt thì đóng ứng dụng là xong. Gói
+              nhận diện tiếng Việt chỉ tải khi bạn bấm.
+            </p>
+            <div class="om-bento-art om-art-pin" aria-hidden="true">
+              <span class="om-pin"><i></i><i></i><i></i><i></i><i></i><i></i></span>
+            </div>
+          </article>
         </div>
+        <p class="om-fine">
+          <a class="om-text-link" href="./privacy.html">Đọc chính sách quyền riêng tư →</a>
+        </p>
       </div>
     </section>
 

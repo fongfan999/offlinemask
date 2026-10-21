@@ -574,7 +574,7 @@
 .om-page {
   --swash: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'%3E%3Cpath d='M3 9c28-6 58-7 92-5s68 4 102-3' fill='none' stroke='%233453b6' stroke-width='4' stroke-linecap='round' opacity='.5'/%3E%3C/svg%3E");
 }
-:is(.om-tagline, .om-display, .om-proofs-title) em {
+:is(.om-tagline, .om-display) em {
   padding-bottom: 0.08em;
   color: var(--accent);
   font-family: var(--serif);
@@ -1134,6 +1134,9 @@
 .om-bento-wide {
   grid-column: span 7;
 }
+.om-bento-full {
+  grid-column: 1 / -1;
+}
 /* A short muted fact under a bento card's text. */
 .om-bento-meta {
   margin-top: -8px !important;
@@ -1421,41 +1424,6 @@
   background: var(--paper-sunk);
   border-block: 1px solid var(--line);
 }
-.om-split {
-  display: grid;
-  grid-template-columns: 1fr 88px 1fr;
-  margin-top: 60px;
-}
-.om-side {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  padding: 32px;
-  border-radius: 18px;
-}
-.om-side-local {
-  border: 1px solid var(--line-strong);
-  background: var(--paper-raised);
-  box-shadow: 10px 10px 0 color-mix(in srgb, var(--warm) 22%, transparent);
-}
-.om-side-ai {
-  border: 1px dashed var(--line-strong);
-  background: var(--paper);
-}
-.om-side-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--muted);
-  font-size: 14px;
-  font-weight: 500;
-}
-.om-side-local .om-dot {
-  color: var(--warm);
-}
-.om-side h3 {
-  font: 500 26px/1.25 var(--sans);
-}
 .om-pairs li {
   display: flex;
   align-items: center;
@@ -1476,83 +1444,7 @@
   font: 0.8em var(--code);
   white-space: nowrap;
 }
-.om-ai-text {
-  font-size: 18px;
-  line-height: 2.05;
-}
-.om-ai-text code {
-  display: inline-block;
-  line-height: 1.5;
-}
-.om-side-foot {
-  margin-top: auto !important;
-  padding-top: 8px;
-  color: var(--muted);
-  font-size: 14px;
-}
-.om-channel {
-  position: relative;
-  display: grid;
-  place-items: center;
-}
-.om-channel::before {
-  content: "";
-  position: absolute;
-  inset: 8px auto 8px 50%;
-  border-left: 2px dashed var(--line-strong);
-}
-.om-channel span {
-  position: relative;
-  padding: 6px 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: 999px;
-  background: var(--paper-sunk);
-  color: var(--muted);
-  font-size: 13px;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-/* Offline proof */
-.om-proofs {
-  margin-top: 56px;
-  padding: 40px;
-  border: 1px solid var(--line-strong);
-  border-radius: 18px;
-  background: var(--paper-raised);
-}
-.om-proofs-title {
-  font: 500 clamp(26px, 2.6vw, 36px) / 1.25 var(--sans);
-  letter-spacing: -0.02em;
-}
-
-.om-proofs ul {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 28px 40px;
-  margin: 30px 0 28px;
-}
-.om-proofs li {
-  padding-left: 30px;
-  position: relative;
-  color: var(--muted);
-  font-size: 16px;
-}
-.om-proofs li::before {
-  content: "✓";
-  position: absolute;
-  left: 0;
-  top: 0;
-  color: var(--accent);
-  font-weight: 700;
-}
-.om-proofs strong {
-  display: block;
-  margin-bottom: 4px;
-  color: var(--ink);
-  font-weight: 600;
-}
-.om-proofs li a,
+.om-bento-text a,
 .om-maker a {
   color: var(--accent);
   text-decoration: underline;
@@ -1562,6 +1454,117 @@
   font-weight: 600;
   text-decoration: underline;
   text-underline-offset: 4px;
+}
+
+/* Privacy: a trust bento, with the same cards as "Tính năng". */
+.om-privacy .om-bento-card {
+  background: var(--paper);
+}
+.om-privacy .om-fine {
+  margin-top: 28px !important;
+}
+.om-art-offline {
+  grid-auto-flow: column;
+  align-items: center;
+  gap: 18px;
+}
+.om-offline-icon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--paper-raised);
+  box-shadow: 0 10px 24px -14px #0f1a4a66;
+  color: var(--muted);
+}
+.om-offline-icon svg {
+  width: 34px;
+  height: 34px;
+}
+.om-offline-status {
+  display: grid;
+  gap: 4px;
+}
+.om-offline-status b {
+  font-weight: 600;
+}
+.om-offline-status span {
+  color: var(--accent);
+  font-size: 15px;
+  font-weight: 600;
+}
+.om-art-pairs {
+  place-content: center stretch;
+}
+.om-art-pairs .om-pairs {
+  width: 100%;
+}
+.om-art-none {
+  grid-template-columns: repeat(2, auto);
+  gap: 10px;
+}
+.om-art-none s {
+  padding: 7px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: var(--muted);
+  font-size: 15px;
+  text-align: center;
+  text-decoration-color: var(--warm);
+  text-decoration-thickness: 2px;
+}
+.om-repo {
+  display: grid;
+  gap: 14px;
+  width: min(100%, 420px);
+  padding: 20px 22px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper-raised);
+}
+.om-repo-name {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--muted);
+}
+.om-repo-name b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.om-repo-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.om-repo-tags li {
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  font: 500 12px var(--code);
+}
+.om-repo-license {
+  color: var(--muted);
+  font-size: 14px;
+}
+.om-art-pin {
+  min-height: 140px;
+}
+.om-pin {
+  display: flex;
+  gap: 14px;
+}
+.om-pin i {
+  width: 18px;
+  height: 18px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+}
+.om-pin i:nth-child(-n + 4) {
+  background: var(--accent);
 }
 
 /* Maker */
@@ -1905,18 +1908,6 @@
   .om-footer-about {
     grid-column: 1 / -1;
   }
-  .om-split {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 72px auto;
-  }
-  .om-proofs ul {
-    grid-template-columns: 1fr;
-  }
-  .om-channel::before {
-    inset: 50% 8px auto;
-    border-left: 0;
-    border-top: 2px dashed var(--line-strong);
-  }
 }
 @media (max-width: 640px) {
   .om-page {
@@ -1972,9 +1963,7 @@
   .om-features {
     padding-top: 110px;
   }
-  .om-card,
-  .om-side,
-  .om-proofs {
+  .om-card {
     padding: 22px;
   }
   .om-maker {
@@ -1995,9 +1984,6 @@
   }
   .om-pairs li {
     font-size: 14px;
-  }
-  .om-ai-text {
-    font-size: 16px;
   }
   .om-questions summary {
     font-size: 17px;
