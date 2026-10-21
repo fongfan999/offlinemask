@@ -1134,6 +1134,22 @@
 .om-bento-wide {
   grid-column: span 7;
 }
+/* The full-width card puts its text beside the picture. */
+.om-bento-split {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  align-items: center;
+  gap: 40px;
+}
+.om-bento-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.om-bento-split > .om-scene {
+  margin: 0;
+}
 .om-bento-text {
   max-width: 560px;
   font-size: 18px;
@@ -1156,23 +1172,6 @@
 .om-art-chips .om-chips {
   justify-content: center;
   max-width: 300px;
-}
-.om-art-keys {
-  grid-auto-flow: column;
-  gap: 10px;
-}
-.om-art-keys kbd {
-  display: grid;
-  place-items: center;
-  min-width: 60px;
-  height: 60px;
-  padding: 0 12px;
-  border: 1px solid var(--line-strong);
-  border-bottom-width: 4px;
-  border-radius: 12px;
-  background: var(--paper-raised);
-  color: var(--ink);
-  font: 600 24px var(--sans);
 }
 /* The files card's illustration: a masked sample sheet, built in HTML like the step cards. */
 .om-sheet {
@@ -1790,9 +1789,14 @@
     gap: 16px;
   }
   .om-bento-card,
-  .om-bento-wide {
+  .om-bento-wide,
+  .om-bento-split {
     grid-column: auto;
     padding: 22px;
+  }
+  .om-bento-split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 18px;
   }
   .om-bento-text {
     font-size: 16px;
