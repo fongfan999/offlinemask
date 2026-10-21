@@ -107,8 +107,7 @@ function setupScan(root, motion) {
 
 /**
  * "Cách hoạt động" on wide screens: the step list is sticky and the illustrations scroll past
- * natively; the step whose illustration crosses the middle of the screen opens, and a bar beside
- * the list slides to it. Choosing a step title scrolls its illustration into view. With
+ * natively; the step whose illustration crosses the middle of the screen opens. Choosing a step title scrolls its illustration into view. With
  * motion, each illustration plays a short entrance: highlights appear, the AI reply arrives, codes
  * turn back into real values.
  */
@@ -116,12 +115,7 @@ function setupHow(root, motion) {
   const how = root.querySelector("[data-om-how]");
   const steps = [...how.querySelectorAll("[data-om-step]")];
   const heads = steps.map((step) => step.querySelector("[data-om-step-head]"));
-  const bodies = steps.map((step) => step.querySelector(".om-how-body"));
   const scenes = [...how.querySelectorAll("[data-om-scene]")];
-  const rail = how.querySelector(".om-how-rail");
-  const fill = rail.querySelector("i");
-  // Opening a step, closing the last one and moving the bar share one duration and easing.
-  const glide = { duration: motion ? 0.45 : 0, ease: "power2.inOut", overwrite: true };
   let current = -1;
   const plays = [];
 
@@ -179,47 +173,14 @@ function setupHow(root, motion) {
       plays.push(restore);
     }
   }
-  // Where the bar ends up: the rail starts at the first step's number, and once the change is
-  // done every step above the open one is closed, so its offset is the sum of their heads.
-  function barFor(index) {
-    const top = heads.slice(0, index).reduce((sum, head) => sum + head.offsetHeight, 0);
-    return { y: top, height: heads[index].offsetHeight - 18 + bodies[index].scrollHeight };
-  }
+  // Opening a step is a class change; the CSS unfolds it (see "As on diabrowser.com").
   function activate(index) {
     if (index === current) return;
-    const previous = current;
-    const from = bodies.map((body) => body.offsetHeight);
     current = index;
     steps.forEach((step, k) => step.classList.toggle("om-active", k === index));
     heads.forEach((head, k) => head.setAttribute("aria-expanded", String(k === index)));
-    if (previous < 0) {
-      gsap.set(fill, barFor(index));
-    } else {
-      gsap.fromTo(
-        bodies[previous],
-        { height: from[previous], opacity: 1 },
-        {
-          height: 0,
-          opacity: 0,
-          ...glide,
-          onComplete: () => gsap.set(bodies[previous], { clearProps: "height,opacity" }),
-        },
-      );
-      gsap.fromTo(
-        bodies[index],
-        { height: from[index], opacity: 0 },
-        {
-          height: bodies[index].scrollHeight,
-          opacity: 1,
-          ...glide,
-          onComplete: () => gsap.set(bodies[index], { clearProps: "height,opacity" }),
-        },
-      );
-      gsap.to(fill, { ...barFor(index), ...glide });
-    }
     enter(index);
   }
-  const relayout = () => current >= 0 && gsap.set(fill, barFor(current));
   // Each illustration owns the stretch of scroll from its top to the next one's top passing
   // mid-screen; the last one owns until its bottom does.
   const triggers = scenes.map((scene, index) =>
@@ -232,7 +193,6 @@ function setupHow(root, motion) {
       onToggle: (self) => self.isActive && activate(index),
     }),
   );
-  ScrollTrigger.addEventListener("refresh", relayout);
   function choose(event) {
     const index = heads.indexOf(event.target.closest("[data-om-step-head]"));
     if (index >= 0)
@@ -255,9 +215,6 @@ function setupHow(root, motion) {
   return () => {
     plays.forEach((tween) => tween.kill());
     triggers.forEach((trigger) => trigger.kill());
-    ScrollTrigger.removeEventListener("refresh", relayout);
-    gsap.killTweensOf([fill, ...bodies]);
-    gsap.set([fill, ...bodies], { clearProps: "transform,height,opacity" });
     how.removeEventListener("click", choose);
     how.removeEventListener("om-role", replay);
     steps.forEach((step, k) => step.classList.toggle("om-active", k === 0));

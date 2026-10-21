@@ -648,9 +648,6 @@
 .om-how-step:not(:first-child) {
   margin-top: 44px;
 }
-.om-how-rail {
-  display: none;
-}
 .om-how-head {
   display: grid;
   gap: 8px;
@@ -671,7 +668,7 @@
 }
 .om-how-body p {
   max-width: 440px;
-  margin-top: 12px;
+  padding-top: 10px;
   color: var(--muted);
   font-size: 17px;
   line-height: 1.6;
@@ -968,29 +965,33 @@
   .om-scene {
     margin: 0;
   }
-  .om-how-head,
-  .om-how-body,
+  /* As on diabrowser.com: each step is a rounded item with its own short bar. The open one is
+     tinted and its bar inked; its description unfolds over 300ms with an ease-out curve. Pure
+     CSS: nothing is measured, and opening and closing rows trade space in step. */
+  .om-how-step {
+    position: relative;
+    padding: 18px 22px;
+    border-radius: 16px;
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .om-how-step::before {
+    content: "";
+    position: absolute;
+    top: 16%;
+    bottom: 16%;
+    left: 0;
+    width: 3px;
+    border-radius: 3px;
+    background: color-mix(in srgb, var(--ink) 15%, transparent);
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
   .om-how-tip {
-    padding-left: 26px;
+    padding-left: 22px;
   }
-  .om-how-head {
-    padding-top: 18px;
+  .om-js .om-how-step.om-active {
+    background: color-mix(in srgb, var(--ink) 5%, transparent);
   }
-  /* A light rail beside the list, with an ink bar that spans the open step and glides between
-     steps (positioned by the script). */
-  .om-js .om-how-rail {
-    position: absolute;
-    inset: 18px auto 0 0;
-    display: block;
-    width: 2px;
-    border-radius: 2px;
-    background: var(--line);
-  }
-  .om-js .om-how-rail i {
-    position: absolute;
-    inset: 0 0 auto;
-    height: 0;
-    border-radius: inherit;
+  .om-js .om-how-step.om-active::before {
     background: var(--ink);
   }
   .om-js .om-how-head {
@@ -999,28 +1000,34 @@
   /* Closed steps stay readable (muted at full opacity) and step back by colour alone. */
   .om-js .om-how-title {
     color: var(--muted);
-    transition: color 0.4s;
+    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .om-js .om-how-head:hover .om-how-title {
     color: var(--ink);
   }
   .om-js .om-step-number {
-    transition: color 0.4s;
+    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   .om-js .om-active .om-step-number {
     color: var(--accent);
   }
-  /* Closed descriptions have no height; the script animates the change from measured heights. */
-  .om-js .om-how-body {
-    overflow: hidden;
-    height: 0;
-    opacity: 0;
-  }
   .om-js .om-active .om-how-title {
     color: var(--ink);
   }
+  .om-js .om-how-body {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition:
+      grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .om-js .om-how-body > p {
+    overflow: hidden;
+    min-height: 0;
+  }
   .om-js .om-active .om-how-body {
-    height: auto;
+    grid-template-rows: 1fr;
     opacity: 1;
   }
 }
