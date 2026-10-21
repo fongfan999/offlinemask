@@ -1014,13 +1014,15 @@
   .om-js .om-active .om-how-title {
     color: var(--ink);
   }
+  /* Text is never seen half uncovered: a closing description fades out at once while its row
+     folds, and an opening one fades in only as its row finishes opening. */
   .om-js .om-how-body {
     display: grid;
     grid-template-rows: 0fr;
     opacity: 0;
     transition:
       grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1),
-      opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity 0.12s linear;
   }
   .om-js .om-how-body > p {
     overflow: hidden;
@@ -1029,6 +1031,9 @@
   .om-js .om-active .om-how-body {
     grid-template-rows: 1fr;
     opacity: 1;
+    transition:
+      grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.25s 0.18s ease-out;
   }
 }
 
