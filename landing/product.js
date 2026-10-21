@@ -107,8 +107,8 @@ function setupScan(root, motion) {
 
 /**
  * "Cách hoạt động" on wide screens: the step list is sticky and the illustrations scroll past
- * natively; the step whose illustration crosses the middle of the screen opens, and a rail beside
- * the list fills with the scroll. Choosing a step title scrolls its illustration into view. With
+ * natively; the step whose illustration crosses the middle of the screen opens, and a bar beside
+ * the list slides to it. Choosing a step title scrolls its illustration into view. With
  * motion, each illustration plays a short entrance: highlights appear, the AI reply arrives, codes
  * turn back into real values.
  */
@@ -120,11 +120,12 @@ function setupHow(root, motion) {
   const scenes = [...how.querySelectorAll("[data-om-scene]")];
   const rail = how.querySelector(".om-how-rail");
   const fill = rail.querySelector("i");
-  const toFill = motion
-    ? gsap.quickTo(fill, "scaleY", { duration: 0.3, ease: "power3" })
-    : (value) => gsap.set(fill, { scaleY: value });
+  const glide = { duration: 0.45, ease: "power3" };
+  const toY = motion ? gsap.quickTo(fill, "y", glide) : (value) => gsap.set(fill, { y: value });
+  const toHeight = motion
+    ? gsap.quickTo(fill, "height", glide)
+    : (value) => gsap.set(fill, { height: value });
   let current = -1;
-  let local = 0;
   const plays = [];
 
   // Each illustration waits in its "before" state (no highlights, no AI reply yet, codes not yet
@@ -188,13 +189,14 @@ function setupHow(root, motion) {
     heads.forEach((head, k) => head.setAttribute("aria-expanded", String(k === index)));
     enter(index);
   }
-  // The rail fills down through the open step, whose height animates as it opens.
+  // The bar spans the open step (from its number to the end of its description, which animates
+  // as it opens) and glides to the next step when that one opens.
   function follow() {
     if (current < 0) return;
-    const track = rail.getBoundingClientRect();
-    const top = heads[current].getBoundingClientRect().top;
-    const bottom = bodies[current].getBoundingClientRect().bottom;
-    toFill(gsap.utils.clamp(0, 1, (top + (bottom - top) * local - track.top) / track.height));
+    const track = rail.getBoundingClientRect().top;
+    const top = heads[current].getBoundingClientRect().top + 18;
+    toY(top - track);
+    toHeight(bodies[current].getBoundingClientRect().bottom - top);
   }
   // Each illustration owns the stretch of scroll from its top to the next one's top passing
   // mid-screen; the last one owns until its bottom does.
@@ -204,12 +206,7 @@ function setupHow(root, motion) {
       start: "top center",
       endTrigger: scenes[index + 1] ?? scene,
       end: scenes[index + 1] ? "top center" : "bottom center",
-      onUpdate: (self) => {
-        if (self.isActive) {
-          activate(index);
-          local = self.progress;
-        }
-      },
+      onUpdate: (self) => self.isActive && activate(index),
       onToggle: (self) => self.isActive && activate(index),
     }),
   );
@@ -244,7 +241,7 @@ function setupHow(root, motion) {
     triggers.forEach((trigger) => trigger.kill());
     watch.kill();
     gsap.ticker.remove(follow);
-    gsap.set(fill, { clearProps: "transform" });
+    gsap.set(fill, { clearProps: "transform,height" });
     how.removeEventListener("click", choose);
     how.removeEventListener("om-role", replay);
     steps.forEach((step, k) => step.classList.toggle("om-active", k === 0));

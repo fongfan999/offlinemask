@@ -666,7 +666,7 @@
   font: 500 13px var(--code);
 }
 .om-how-title {
-  font: 500 clamp(24px, 2.2vw, 30px) / 1.25 var(--sans);
+  font: 500 clamp(22px, 1.9vw, 26px) / 1.25 var(--sans);
   letter-spacing: -0.02em;
 }
 .om-how-body p {
@@ -960,7 +960,8 @@
   .om-how-head {
     padding-top: 18px;
   }
-  /* A rail beside the list fills with the scroll, down through the open step. */
+  /* A light rail beside the list, with an ink bar that spans the open step and glides between
+     steps (positioned by the script). */
   .om-js .om-how-rail {
     position: absolute;
     inset: 18px auto 0 0;
@@ -971,24 +972,27 @@
   }
   .om-js .om-how-rail i {
     position: absolute;
-    inset: 0;
+    inset: 0 0 auto;
+    height: 0;
     border-radius: inherit;
     background: var(--ink);
-    transform: scaleY(0);
-    transform-origin: top;
   }
   .om-js .om-how-head {
     cursor: pointer;
   }
+  /* Closed steps stay readable (muted at full opacity) and step back by colour alone. */
   .om-js .om-how-title {
     color: var(--muted);
-    opacity: 0.7;
-    transition:
-      color 0.4s,
-      opacity 0.4s;
+    transition: color 0.4s;
   }
   .om-js .om-how-head:hover .om-how-title {
-    opacity: 1;
+    color: var(--ink);
+  }
+  .om-js .om-step-number {
+    transition: color 0.4s;
+  }
+  .om-js .om-active .om-step-number {
+    color: var(--accent);
   }
   .om-js .om-how-body {
     display: grid;
@@ -1004,7 +1008,6 @@
   }
   .om-js .om-active .om-how-title {
     color: var(--ink);
-    opacity: 1;
   }
   .om-js .om-active .om-how-body {
     grid-template-rows: 1fr;
