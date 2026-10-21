@@ -53,3 +53,134 @@
   color: var(--muted);
   font-size: 14px;
 }
+
+/* Whitepaper structure: a summary card, a numbered contents list, numbered sections, a flow and
+   plain tables. */
+.om-doc-summary {
+  margin-top: 36px;
+  padding: 26px 28px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--paper-raised);
+}
+.om-doc-summary h2 {
+  margin-top: 0;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.om-doc-summary ul {
+  gap: 10px;
+  padding-left: 0;
+  list-style: none;
+}
+.om-doc-summary li {
+  position: relative;
+  padding-left: 26px;
+}
+.om-doc-summary li::before {
+  content: "✓";
+  position: absolute;
+  left: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+.om-doc-toc {
+  margin-top: 32px;
+  padding-block: 20px;
+  border-block: 1px solid var(--line);
+}
+.om-doc-toc ol {
+  list-style: decimal;
+  columns: 2;
+  column-gap: 32px;
+  padding-left: 20px;
+  color: var(--muted);
+  font-size: 15px;
+}
+.om-doc-toc li {
+  padding-block: 4px;
+  break-inside: avoid;
+}
+.om-doc-toc a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.om-doc-toc a:hover {
+  color: var(--accent);
+}
+.om-doc h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  scroll-margin-top: 24px;
+}
+.om-doc h2 > span {
+  color: var(--accent);
+  font: 500 14px var(--code);
+}
+.om-doc-flow {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding-left: 0;
+  list-style: none;
+  counter-reset: flow;
+  color: var(--muted);
+}
+.om-doc-flow li {
+  position: relative;
+  padding-left: 40px;
+  counter-increment: flow;
+}
+.om-doc-flow li::before {
+  content: counter(flow);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font: 600 13px var(--sans);
+}
+.om-doc-table {
+  overflow-x: auto;
+  margin-top: 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.om-doc-table table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.om-doc-table th {
+  padding: 12px 16px;
+  background: var(--paper-sunk);
+  color: var(--ink);
+  font-weight: 600;
+  text-align: left;
+}
+.om-doc-table td {
+  padding: 12px 16px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  vertical-align: top;
+}
+.om-doc-table td:first-child {
+  color: var(--ink);
+}
+@media (max-width: 640px) {
+  .om-doc-toc ol {
+    columns: 1;
+  }
+  .om-doc-table table {
+    min-width: 560px;
+  }
+}

@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="OfflineMask không thu thập dữ liệu. Những gì ứng dụng lưu, nơi lưu, và lúc nào nó dùng mạng."
+      content="OfflineMask xử lý mọi thứ trên máy bạn và không thu thập dữ liệu. Ứng dụng lưu gì, ở đâu, và khi nào dùng mạng."
     />
     <meta name="theme-color" content="#f7f5ee" />
     <link rel="canonical" href="https://offlinemask.com/privacy" />
@@ -22,87 +22,231 @@
         <a class="om-text-link" href="./">← Về trang chủ</a>
       </header>
       <main class="om-doc om-wrap">
-        <p class="om-maker-label">Cập nhật ngày 20 tháng 10 năm 2026</p>
+        <p class="om-maker-label">Cập nhật ngày 21 tháng 10 năm 2026</p>
         <h1>Quyền riêng tư</h1>
         <p class="om-doc-lead">
-          Ngắn gọn: OfflineMask không thu thập gì. Văn bản, tệp và bảng đối chiếu của bạn ở trên máy
-          bạn. Không tài khoản, không máy chủ, không thống kê sử dụng.
+          OfflineMask được làm để thông tin riêng không phải rời khỏi máy bạn. Trang này nói rõ ứng
+          dụng làm gì với dữ liệu, lưu gì, ở đâu, và khi nào dùng mạng.
         </p>
 
-        <h2>Ứng dụng xử lý dữ liệu ở đâu</h2>
+        <section class="om-doc-summary" aria-labelledby="om-summary">
+          <h2 id="om-summary">Tóm tắt</h2>
+          <ul>
+            <li>
+              <strong>Xử lý trên máy.</strong> Nhận diện, ẩn và khôi phục chạy trên máy tính của
+              bạn.
+            </li>
+            <li>
+              <strong>Không thu thập.</strong> Không tài khoản, không thống kê sử dụng, không quảng
+              cáo.
+            </li>
+            <li>
+              <strong>AI chỉ thấy mã.</strong> Bạn tự gửi bản đã ẩn; OfflineMask không kết nối với
+              AI nào.
+            </li>
+            <li>
+              <strong>Lưu khi bạn muốn.</strong> Lịch sử chỉ được lưu, có mã hóa, khi bạn đặt mật
+              mã.
+            </li>
+          </ul>
+        </section>
+
+        <nav class="om-doc-toc" aria-label="Mục lục">
+          <ol>
+            <li><a href="#nguyen-tac">Nguyên tắc</a></li>
+            <li><a href="#luong-du-lieu">Dữ liệu đi qua ứng dụng thế nào</a></li>
+            <li><a href="#luu-tru">Ứng dụng lưu gì, ở đâu</a></li>
+            <li><a href="#mang">Khi nào ứng dụng dùng mạng</a></li>
+            <li><a href="#an-nhanh">Ẩn nhanh và quyền hệ thống</a></li>
+            <li><a href="#cong-cu-ai">Công cụ AI bạn dùng</a></li>
+            <li><a href="#trang-web">Trang web này</a></li>
+            <li><a href="#kiem-chung">Tự kiểm chứng</a></li>
+            <li><a href="#thay-doi">Thay đổi và liên hệ</a></li>
+          </ol>
+        </nav>
+
+        <h2 id="nguyen-tac"><span>1</span>Nguyên tắc</h2>
+        <ul>
+          <li>
+            <strong>Trên máy trước tiên.</strong> Mọi bước xử lý nội dung đều chạy trên máy bạn, kể
+            cả khi không có mạng.
+          </li>
+          <li>
+            <strong>Không giữ những gì không cần.</strong> Ứng dụng không có máy chủ để gửi dữ liệu
+            về, và không ghi lại những gì bạn làm.
+          </li>
+          <li>
+            <strong>Bạn quyết định.</strong> Gửi gì cho AI, có lưu lịch sử hay không, có tải gói
+            tiếng Việt hay không: đều do bạn chọn.
+          </li>
+        </ul>
+
+        <h2 id="luong-du-lieu"><span>2</span>Dữ liệu đi qua ứng dụng thế nào</h2>
+        <ol class="om-doc-flow">
+          <li>
+            <strong>Bạn đưa nội dung vào:</strong> dán văn bản, mở tệp, hoặc bôi đen chữ trong ứng
+            dụng khác.
+          </li>
+          <li>
+            <strong>OfflineMask nhận diện</strong> số điện thoại, số tài khoản, email, CCCD… (và họ
+            tên, địa chỉ nếu có gói tiếng Việt), ngay trên máy.
+          </li>
+          <li>
+            <strong>Thông tin riêng được thay bằng mã</strong> như <code>[SDT_1_4e8c]</code>. Bảng
+            đối chiếu giữa mã và thông tin thật ở lại trên máy.
+          </li>
+          <li><strong>Bạn tự gửi bản đã ẩn</strong> sang công cụ AI bạn chọn.</li>
+          <li>
+            <strong>Khôi phục:</strong> khi đưa câu trả lời vào lại, mã được đổi về thông tin thật,
+            cũng ngay trên máy.
+          </li>
+        </ol>
+
+        <h2 id="luu-tru"><span>3</span>Ứng dụng lưu gì, ở đâu</h2>
+        <div class="om-doc-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Dữ liệu</th>
+                <th>Nơi lưu</th>
+                <th>Giữ trong bao lâu</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Văn bản, tệp và bảng đối chiếu (chưa đặt mật mã)</td>
+                <td>Bộ nhớ của ứng dụng</td>
+                <td>Đến khi bạn thoát ứng dụng</td>
+              </tr>
+              <tr>
+                <td>Lịch sử (đã đặt mật mã)</td>
+                <td>Tệp mã hóa <code>sessions.vault</code> trong thư mục dữ liệu của ứng dụng</td>
+                <td>Đến khi bạn xóa</td>
+              </tr>
+              <tr>
+                <td>Gói nhận diện tiếng Việt (tùy chọn)</td>
+                <td>Thư mục dữ liệu của ứng dụng</td>
+                <td>Đến khi bạn gỡ</td>
+              </tr>
+              <tr>
+                <td>Cài đặt (giao diện, thao tác nhanh)</td>
+                <td>Trên máy</td>
+                <td>Đến khi bạn thay đổi</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <p>
-          Nhận diện, ẩn và khôi phục chạy hoàn toàn trên máy tính của bạn. Nội dung bạn dán hoặc mở
-          không được gửi tới chúng tôi hay bất kỳ ai. Bạn tự quyết định sao chép bản đã thay mã sang
-          công cụ AI nào; khi đó, cách dịch vụ đó xử lý nội dung tuân theo chính sách của họ.
+          <strong>Về mã hóa lịch sử:</strong> khóa được tạo từ mật mã 6 chữ số của bạn bằng
+          Argon2id, nội dung được niêm phong bằng XChaCha20-Poly1305. Mật mã không được lưu ở đâu
+          cả, nên quên mật mã thì không ai mở lại được, kể cả chúng tôi; khi đó bạn chỉ có thể xóa
+          lịch sử và bắt đầu lại.
         </p>
 
-        <h2>Ứng dụng lưu gì</h2>
-        <ul>
-          <li>
-            <strong>Khi chưa đặt mật mã:</strong> các phiên làm việc chỉ ở trong bộ nhớ và mất khi
-            bạn đóng ứng dụng.
-          </li>
-          <li>
-            <strong>Khi đã đặt mật mã:</strong> các phiên được lưu trong một tệp mã hóa
-            (<code>sessions.vault</code>) trong thư mục dữ liệu của ứng dụng. Khóa được tạo từ mật
-            mã 6 chữ số bằng Argon2id và nội dung được niêm phong bằng XChaCha20-Poly1305. Mật mã
-            không được lưu ở đâu cả; quên mật mã thì chỉ có thể xóa và bắt đầu lại.
-          </li>
-          <li>
-            <strong>Gói nhận diện tiếng Việt (tùy chọn):</strong> các tệp mô hình nằm trong thư mục
-            dữ liệu của ứng dụng sau khi bạn tải.
-          </li>
-          <li>
-            <strong>Cài đặt:</strong> giao diện sáng hoặc tối và tùy chọn thao tác nhanh, lưu trên
-            máy.
-          </li>
-          <li><strong>Ví dụ mẫu:</strong> văn bản và tệp mẫu có sẵn chỉ chứa dữ liệu giả.</li>
-        </ul>
-
-        <h2>Khi nào ứng dụng dùng mạng</h2>
-        <ul>
-          <li>
-            <strong>Tải gói nhận diện tiếng Việt</strong>, chỉ khi bạn bấm tải trong Cài đặt. Địa
-            chỉ tải và mã SHA-256 của từng tệp được ghi cố định trong
-            <a
-              href="https://github.com/fongfan999/offlinemask/blob/main/desktop/packs/vietnamese-pii-v1.json"
-              >tệp mô tả gói</a
-            >.
-          </li>
-          <li>
-            <strong>Mở OfflineMask.com</strong> trong trình duyệt của bạn, chỉ khi bạn bấm liên kết.
-          </li>
-        </ul>
+        <h2 id="mang"><span>4</span>Khi nào ứng dụng dùng mạng</h2>
+        <p>Chỉ trong ba trường hợp, và đều do bạn bấm:</p>
+        <div class="om-doc-table">
+          <table>
+            <thead>
+              <tr>
+                <th>Khi nào</th>
+                <th>Kết nối tới</th>
+                <th>Gửi đi những gì</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Bạn tải ứng dụng</td>
+                <td>GitHub (trang phát hành)</td>
+                <td>Yêu cầu tải tệp thông thường</td>
+              </tr>
+              <tr>
+                <td>Bạn tải gói tiếng Việt trong Cài đặt</td>
+                <td>Kho tệp của dự án (Cloudflare R2)</td>
+                <td>Yêu cầu tải tệp; không kèm nội dung hay thông tin của bạn</td>
+              </tr>
+              <tr>
+                <td>Bạn bấm một liên kết trong ứng dụng</td>
+                <td>Trang đó, mở trong trình duyệt của bạn</td>
+                <td>Như khi bạn tự mở trang</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <p>
-          Ngoài ra không có gì khác: không cập nhật tự động, không báo lỗi, không thống kê. Giao
-          diện ứng dụng bị chặn kết nối ra ngoài bởi
+          Địa chỉ và mã SHA-256 của từng tệp trong gói được ghi cố định trong
+          <a
+            href="https://github.com/fongfan999/offlinemask/blob/main/desktop/packs/vietnamese-pii-v1.json"
+            >tệp mô tả gói</a
+          >, nên ứng dụng chỉ nhận đúng tệp đã công bố. Ngoài ra không có kết nối nào khác: không tự
+          cập nhật, không báo lỗi tự động, không thống kê. Giao diện ứng dụng còn bị chặn kết nối ra
+          ngoài bởi
           <a
             href="https://github.com/fongfan999/offlinemask/blob/main/desktop/src-tauri/tauri.conf.json"
             >chính sách bảo mật nội dung</a
           >.
         </p>
 
-        <h2>Bộ nhớ tạm và phím tắt</h2>
+        <h2 id="an-nhanh"><span>5</span>Ẩn nhanh và quyền hệ thống</h2>
         <p>
-          Nếu bạn bật thao tác nhanh, ứng dụng chỉ đọc bộ nhớ tạm khi bạn nhấn phím tắt hoặc bấm nút
-          trên bảng nổi, rồi ghi kết quả trở lại. Không có gì được đọc ngầm.
+          Ẩn nhanh cho phép bôi đen chữ trong ứng dụng khác rồi bấm nút OfflineMask hoặc ⌘⇧M
+          (Ctrl+Shift+M). Để làm được, ứng dụng cần một số quyền, và dùng chúng hẹp nhất có thể:
+        </p>
+        <ul>
+          <li>
+            <strong>Đọc phần bạn bôi đen</strong>, mỗi lần bạn bôi đen, chỉ khi nút nổi đang bật.
+            Trên macOS cần quyền Trợ năng; trên Windows dùng UI Automation của hệ thống.
+          </li>
+          <li>
+            <strong>Chỉ theo dõi thao tác chuột</strong> để biết khi nào bạn vừa bôi đen xong. Ứng
+            dụng không bao giờ ghi lại phím bạn gõ.
+          </li>
+          <li>
+            <strong>Thay chữ tại chỗ</strong> bằng một lần sao chép và một lần dán khi bạn bấm ⌘⇧M.
+            Kết quả cũng nằm trong bộ nhớ tạm để bạn dán lại nếu cần.
+          </li>
+          <li>
+            <strong>Không đọc ngầm.</strong> Bộ nhớ tạm và phần bôi đen chỉ được đọc khi bạn ra
+            lệnh, và không được lưu lại.
+          </li>
+        </ul>
+        <p>
+          OfflineMask không đọc ô mật khẩu và chính cửa sổ của nó. Bạn có thể tắt mọi thao tác nhanh
+          trong Cài đặt › Thao tác nhanh, hoặc thu hồi quyền Trợ năng trong Cài đặt hệ thống bất cứ
+          lúc nào.
         </p>
 
-        <h2>Trang web này</h2>
+        <h2 id="cong-cu-ai"><span>6</span>Công cụ AI bạn dùng</h2>
+        <p>
+          OfflineMask không kết nối với ChatGPT, Claude, Gemini hay công cụ AI nào. Bạn tự sao chép
+          bản đã ẩn sang đó, và dịch vụ ấy xử lý nội dung theo chính sách của họ. Vì thế hãy xem lại
+          bản đã ẩn trước khi gửi: OfflineMask tự nhận diện phần lớn thông tin riêng, nhưng bạn luôn
+          là người quyết định cuối cùng.
+        </p>
+
+        <h2 id="trang-web"><span>7</span>Trang web này</h2>
         <p>
           OfflineMask.com là trang tĩnh, phục vụ qua Cloudflare. Trang không dùng cookie, không có
-          công cụ phân tích, và tự lưu trữ phông chữ, không tải tài nguyên từ bên thứ ba. Như mọi
-          nhà cung cấp hạ tầng, Cloudflare xử lý địa chỉ IP và thông tin kỹ thuật của yêu cầu để
-          phục vụ trang, theo
+          công cụ phân tích và tự lưu trữ phông chữ, không tải tài nguyên từ bên thứ ba. Như mọi nhà
+          cung cấp hạ tầng, Cloudflare xử lý địa chỉ IP và thông tin kỹ thuật của yêu cầu để phục vụ
+          trang, theo
           <a href="https://www.cloudflare.com/privacypolicy/">chính sách của Cloudflare</a>.
         </p>
 
-        <h2>Kiểm chứng</h2>
+        <h2 id="kiem-chung"><span>8</span>Tự kiểm chứng</h2>
+        <ul>
+          <li><strong>Tắt Wi‑Fi rồi dùng thử:</strong> ẩn và khôi phục vẫn chạy bình thường.</li>
+          <li><strong>Theo dõi kết nối</strong> bằng công cụ như Little Snitch hay LuLu.</li>
+          <li>
+            <strong>Đọc mã nguồn</strong> công khai trên
+            <a href="https://github.com/fongfan999/offlinemask">GitHub</a>.
+          </li>
+        </ul>
+
+        <h2 id="thay-doi"><span>9</span>Thay đổi và liên hệ</h2>
         <p>
-          Mã nguồn công khai trên
-          <a href="https://github.com/fongfan999/offlinemask">GitHub</a>. Bạn có thể tắt Wi‑Fi rồi
-          dùng thử, hoặc theo dõi kết nối bằng Little Snitch hay LuLu. Câu hỏi hoặc phát hiện vấn
-          đề, hãy mở một
+          Khi cách ứng dụng xử lý dữ liệu thay đổi, trang này được cập nhật cùng ngày, và mọi thay
+          đổi đều xem được trong lịch sử mã nguồn. Câu hỏi hoặc phát hiện vấn đề, hãy mở một
           <a href="https://github.com/fongfan999/offlinemask/issues">issue trên GitHub</a>.
         </p>
       </main>

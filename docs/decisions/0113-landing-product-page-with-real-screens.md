@@ -130,3 +130,14 @@ The owner gave full freedom over copy and design before rolling out to offlinema
 - **Privacy text adds proof instead of repeating the pills:** "Muốn chắc chắn? Tắt Wi‑Fi rồi dùng thử, mọi thứ vẫn chạy. Mã nguồn công khai trên GitHub, ai cũng có thể xem." (GitHub is linked.)
 - **Privacy text:** "Thông tin của khách hàng, đồng nghiệp hay người thân là của họ. OfflineMask giúp bạn giữ điều đó khi dùng AI." It frames privacy as care for the people in your documents, which none of the pills say.
 - **Privacy button:** "Đọc chính sách quyền riêng tư" sounded like legal reading. It is now the shorter "Đọc thêm về quyền riêng tư →", still leading to privacy.html.
+- **Privacy page as a short whitepaper (21 October 2026):** the "Đọc thêm về quyền riêng tư" button opens privacy.html in a new tab. The page was out of date: it described only the clipboard shortcut, from before Ẩn nhanh read selected text ([0096](0096-selection-popover.md)). It is rewritten as a simple whitepaper: a "Tóm tắt" card with four points, a numbered contents list, and nine numbered sections:
+  1. Principles.
+  2. How data flows, in five steps.
+  3. What is stored where and for how long (a table), with the vault's Argon2id and XChaCha20-Poly1305 in plain words.
+  4. When the app uses the network: three user-initiated cases in a table (GitHub releases, the pack from the project's Cloudflare R2 store with pinned SHA-256, links), plus the CSP.
+  5. Ẩn nhanh and system permissions: reads the selection only when asked, watches mouse buttons only, never keys, one copy and one paste for in-place replace, skips password fields.
+  6. The AI tools you use.
+  7. This website (Cloudflare, no cookies or analytics).
+  8. How to check for yourself.
+  9. Changes and contact.
+  Every statement was checked against the code and decisions.
