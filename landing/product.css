@@ -677,6 +677,21 @@
   line-height: 1.6;
 }
 
+/* A one-line pointer from the steps down to Ẩn nhanh. */
+.om-how-tip {
+  order: 7;
+  margin-top: 32px;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+.om-how-tip a {
+  color: var(--accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 /* The product name inside a sentence, set as the wordmark (brand/README.md, Logo rules). */
 .om-name {
   color: var(--ink);
@@ -954,7 +969,8 @@
     margin: 0;
   }
   .om-how-head,
-  .om-how-body {
+  .om-how-body,
+  .om-how-tip {
     padding-left: 26px;
   }
   .om-how-head {
@@ -1038,6 +1054,109 @@
 .om-card-wide {
   grid-column: span 2;
   grid-row: span 2;
+}
+.om-card-span {
+  grid-column: span 2;
+}
+
+/* Lead feature: Ẩn nhanh, with an illustration of selecting text in another app. */
+.om-card-lead {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  align-items: center;
+  gap: 44px;
+  padding: 40px;
+}
+.om-lead-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.om-lead-title {
+  font: 500 clamp(26px, 2.4vw, 34px) / 1.2 var(--sans);
+  letter-spacing: -0.02em;
+}
+.om-card-lead .om-scene {
+  margin: 0;
+}
+.om-quick-dots {
+  display: flex;
+  gap: 6px;
+}
+.om-quick-dots i {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+.om-quick .om-scene-body {
+  gap: 14px;
+  background: var(--paper);
+}
+/* The selection highlight grows from the left (background-size is animated). */
+.om-sel {
+  border-radius: 3px;
+  background: linear-gradient(#b4cdfe, #b4cdfe) left / 100% 100% no-repeat;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.om-bubble-me .om-sel {
+  background-image: linear-gradient(#4f6fd8, #4f6fd8);
+}
+.om-quick-reply .om-sel {
+  background-size: 0% 100%;
+}
+/* The round OfflineMask button sits just after the end of the selection, as in the app. */
+.om-anchor {
+  position: relative;
+  display: inline-block;
+  width: 0;
+  height: 1em;
+}
+.om-circle {
+  position: absolute;
+  top: calc(0.5em - 15px);
+  left: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow:
+    0 0 0 3px var(--paper-raised),
+    0 8px 18px -6px #0b154a99;
+}
+.om-circle::after {
+  content: "";
+  position: absolute;
+  inset: 24%;
+  background: var(--on-accent);
+  -webkit-mask: url("../brand/mark-mono-black.svg") center / contain no-repeat;
+  mask: url("../brand/mark-mono-black.svg") center / contain no-repeat;
+}
+.om-quick-reply .om-circle {
+  transform: scale(0);
+}
+.om-qv {
+  white-space: nowrap;
+}
+.om-qv.om-coded,
+.om-quick-reply .om-qv {
+  padding: 0.1em 0.3em;
+  border-radius: 4px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font: 500 0.82em var(--code);
+}
+.om-bubble-me .om-qv.om-coded {
+  background: #ffffff24;
+  color: #c2cfff;
+}
+.om-quick-reply .om-qv.om-real {
+  padding: 0;
+  background: none;
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--accent) 45%, transparent);
+  font: inherit;
 }
 .om-card a {
   text-decoration: underline;
@@ -1540,6 +1659,14 @@
   .om-card-wide {
     grid-column: auto;
     grid-row: auto;
+  }
+  .om-card-span {
+    grid-column: auto;
+  }
+  .om-card-lead {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 24px;
+    padding: 22px;
   }
   .om-split {
     grid-template-columns: 1fr;

@@ -255,6 +255,94 @@ function setupHow(root, motion) {
 }
 
 /**
+ * Ẩn nhanh illustration: text selected in another app, the round OfflineMask button, a click, and
+ * the values turn into codes in place; then the AI reply is selected and its codes turn back into
+ * real values. It loops while on screen. Without motion the static markup shows the moment
+ * before the click.
+ */
+function setupQuick(root, motion) {
+  if (!motion) return () => {};
+  const quick = root.querySelector("[data-om-quick]");
+  const [askSel, replySel] = quick.querySelectorAll("[data-om-sel]");
+  const [askCircle, replyCircle] = quick.querySelectorAll("[data-om-circle]");
+  const reply = quick.querySelector("[data-om-quick-reply]");
+  const status = quick.querySelector("[data-om-quick-status]");
+  const statusText = status.textContent;
+  const askValues = [...askSel.querySelectorAll(".om-qv")];
+  const replyValues = [...replySel.querySelectorAll(".om-qv")];
+  askValues.forEach((value) => (value.dataset.real = value.textContent));
+  replyValues.forEach((value) => (value.dataset.code = value.textContent));
+  const say = (text, safe) => {
+    status.textContent = text;
+    status.classList.toggle("om-scene-safe", safe);
+  };
+  const reset = () => {
+    askValues.forEach((value) => {
+      value.textContent = value.dataset.real;
+      value.classList.remove("om-coded");
+    });
+    replyValues.forEach((value) => {
+      value.textContent = value.dataset.code;
+      value.classList.remove("om-real");
+    });
+    gsap.set([askSel, replySel], { backgroundSize: "0% 100%" });
+    gsap.set([askCircle, replyCircle], { scale: 0 });
+    gsap.set(reply, { autoAlpha: 0, y: 10 });
+    say("Bôi đen đoạn có thông tin riêng…", false);
+  };
+  const scramble = (values, key, className) => (tween, at) =>
+    values.forEach((value, k) =>
+      tween.to(
+        value,
+        {
+          duration: 0.6,
+          ease: "none",
+          scrambleText: { text: value.dataset[key], chars: "█▓▒░", speed: 0.5 },
+          onStart: () => value.classList.add(className),
+        },
+        at + k * 0.15,
+      ),
+    );
+  const select = { backgroundSize: "100% 100%", duration: 0.7, ease: "power1.inOut" };
+  const pop = { scale: 1, duration: 0.35, ease: "back.out(2.2)" };
+  const press = { scale: 0.82, duration: 0.12, yoyo: true, repeat: 1 };
+  const loop = gsap.timeline({ paused: true, repeat: -1, repeatDelay: 0.6, onRepeat: reset });
+  loop
+    .call(reset, [], 0)
+    .to(askSel, select, 0.6)
+    .to(askCircle, pop, 1.4)
+    .to(askCircle, press, 2.2)
+    .to(askSel, { backgroundSize: "0% 100%", duration: 0.3 }, 2.5)
+    .to(askCircle, { scale: 0, duration: 0.25 }, 2.5)
+    .call(() => say("Đã ẩn 2 thông tin ngay tại chỗ", true), [], 2.6);
+  scramble(askValues, "code", "om-coded")(loop, 2.5);
+  loop
+    .to(reply, { autoAlpha: 1, y: 0, duration: 0.5, ease: "expo.out" }, 3.9)
+    .call(() => say("Bôi đen câu trả lời có mã…", false), [], 4.6)
+    .to(replySel, select, 4.8)
+    .to(replyCircle, pop, 5.6)
+    .to(replyCircle, press, 6.4)
+    .to(replySel, { backgroundSize: "0% 100%", duration: 0.3 }, 6.7)
+    .to(replyCircle, { scale: 0, duration: 0.25 }, 6.7)
+    .call(() => say("Đã khôi phục 2 mã ngay tại chỗ", true), [], 6.8);
+  scramble(replyValues, "real", "om-real")(loop, 6.7);
+  loop.to({}, { duration: 2.4 }, 7.6);
+  const watch = ScrollTrigger.create({
+    trigger: quick,
+    start: "top bottom",
+    end: "bottom top",
+    onToggle: (self) => (self.isActive ? loop.play() : loop.pause()),
+  });
+  return () => {
+    loop.kill();
+    watch.kill();
+    reset();
+    gsap.set([askSel, replySel, askCircle, replyCircle, reply], { clearProps: "all" });
+    say(statusText, true);
+  };
+}
+
+/**
  * Example roles for "Cách hoạt động": each tab swaps the content of all three illustrations
  * (from the <template data-om-scenes> blocks; the default role is what the page ships with).
  * Works on every width and with reduced motion.
@@ -409,10 +497,12 @@ export function initOfflineMask(root) {
         ? setupHow(root, context.conditions.motion)
         : () => {};
       const undoRoles = setupRoles(root);
+      const undoQuick = setupQuick(root, context.conditions.motion);
       return () => {
         undoScan();
         undoHow();
         undoRoles();
+        undoQuick();
       };
     },
   );
