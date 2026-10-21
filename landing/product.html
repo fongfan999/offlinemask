@@ -501,67 +501,90 @@
           <div class="om-bento-copy">
             <p class="om-pill">Bảng tính và tài liệu</p>
             <p class="om-bento-text">
-              Mở XLSX, XLS, ODS, CSV hay DOCX, ODT. Ẩn cả cột họ tên, số điện thoại, số tài khoản,
-              giữ nguyên định dạng, rồi xuất một bản riêng để gửi AI.
+              Ẩn cả cột họ tên, số điện thoại, số tài khoản trong một lần bấm. Định dạng giữ nguyên,
+              xuất bản riêng để gửi AI.
             </p>
+            <ul class="om-formats" aria-label="Định dạng hỗ trợ">
+              <li>XLSX</li>
+              <li>XLS</li>
+              <li>ODS</li>
+              <li>CSV</li>
+              <li>DOCX</li>
+              <li>ODT</li>
+            </ul>
           </div>
-          <figure
-            class="om-scene om-sheet"
-            aria-label="Minh họa: bảng tính mẫu với các cột họ tên, điện thoại và số tài khoản đã được thay bằng mã"
-          >
-            <div class="om-scene-bar">
-              <span class="om-tile" aria-hidden="true"></span>
-              <span class="om-scene-crumb">OfflineMask <i>/</i> <b>Giao dịch mẫu.csv</b></span>
-              <span class="om-scene-pill om-scene-pill-cobalt">Đã ẩn 3 cột</span>
+          <div class="om-sheet-stack">
+            <div class="om-doc-peek" aria-hidden="true">
+              <div class="om-scene-bar">
+                <span class="om-tile"></span>
+                <span class="om-scene-crumb"
+                  >OfflineMask <i>/</i> <b>Hợp đồng thuê nhà.docx</b></span
+                >
+              </div>
             </div>
-            <div class="om-sheet-wrap">
-              <table>
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Họ tên</th>
-                    <th>Điện thoại</th>
-                    <th>Số tài khoản</th>
-                    <th>Số tiền</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>1</td>
-                    <td><code class="om-c">[TEN_1_5c2a]</code></td>
-                    <td><code class="om-c">[SDT_1_5c2a]</code></td>
-                    <td><code class="om-c">[STK_1_5c2a]</code></td>
-                    <td>2.500.000</td>
-                  </tr>
-                  <tr>
-                    <td>2</td>
-                    <td><code class="om-c">[TEN_2_5c2a]</code></td>
-                    <td><code class="om-c">[SDT_2_5c2a]</code></td>
-                    <td><code class="om-c">[STK_2_5c2a]</code></td>
-                    <td>15.000.000</td>
-                  </tr>
-                  <tr>
-                    <td>3</td>
-                    <td><code class="om-c">[TEN_3_5c2a]</code></td>
-                    <td><code class="om-c">[SDT_3_5c2a]</code></td>
-                    <td><code class="om-c">[STK_3_5c2a]</code></td>
-                    <td>45.000.000</td>
-                  </tr>
-                  <tr>
-                    <td>4</td>
-                    <td><code class="om-c">[TEN_4_5c2a]</code></td>
-                    <td><code class="om-c">[SDT_4_5c2a]</code></td>
-                    <td><code class="om-c">[STK_4_5c2a]</code></td>
-                    <td>7.200.000</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="om-scene-foot">
-              <span class="om-scene-note">30 dòng · 90 thông tin đã thay mã</span>
-              <span class="om-scene-button">Xuất bản đã ẩn</span>
-            </div>
-          </figure>
+            <figure
+              data-om-sheet
+              class="om-scene om-sheet"
+              aria-label="Minh họa: bảng tính mẫu với các cột họ tên, điện thoại và số tài khoản đã được thay bằng mã"
+            >
+              <div class="om-scene-bar">
+                <span class="om-tile" aria-hidden="true"></span>
+                <span class="om-scene-crumb">OfflineMask <i>/</i> <b>Giao dịch mẫu.csv</b></span>
+                <span class="om-scene-pill om-scene-pill-cobalt" data-om-sheet-pill
+                  >Đã ẩn 3 cột</span
+                >
+              </div>
+              <div class="om-sheet-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Họ tên</th>
+                      <th>Điện thoại</th>
+                      <th>Số tài khoản</th>
+                      <th>Số tiền</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1</td>
+                      <td><code class="om-c" data-real="Nguyễn Minh Anh">[TEN_1_5c2a]</code></td>
+                      <td><code class="om-c" data-real="0901 234 567">[SDT_1_5c2a]</code></td>
+                      <td><code class="om-c" data-real="001234567890">[STK_1_5c2a]</code></td>
+                      <td>2.500.000</td>
+                    </tr>
+                    <tr>
+                      <td>2</td>
+                      <td><code class="om-c" data-real="Lê Thu Hà">[TEN_2_5c2a]</code></td>
+                      <td><code class="om-c" data-real="0912 345 678">[SDT_2_5c2a]</code></td>
+                      <td><code class="om-c" data-real="0071000123456">[STK_2_5c2a]</code></td>
+                      <td>15.000.000</td>
+                    </tr>
+                    <tr>
+                      <td>3</td>
+                      <td><code class="om-c" data-real="Phạm Mai">[TEN_3_5c2a]</code></td>
+                      <td><code class="om-c" data-real="0987 654 321">[SDT_3_5c2a]</code></td>
+                      <td><code class="om-c" data-real="190300112233">[STK_3_5c2a]</code></td>
+                      <td>45.000.000</td>
+                    </tr>
+                    <tr>
+                      <td>4</td>
+                      <td><code class="om-c" data-real="Trần Quốc Bảo">[TEN_4_5c2a]</code></td>
+                      <td><code class="om-c" data-real="0903 112 233">[SDT_4_5c2a]</code></td>
+                      <td><code class="om-c" data-real="0451000778899">[STK_4_5c2a]</code></td>
+                      <td>7.200.000</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="om-scene-foot">
+                <span class="om-scene-note" data-om-sheet-note
+                  >30 dòng · 90 thông tin đã thay mã</span
+                >
+                <span class="om-scene-button">Xuất bản đã ẩn</span>
+              </div>
+            </figure>
+          </div>
         </article>
       </div>
       <p class="om-fine">

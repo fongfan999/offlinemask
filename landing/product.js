@@ -367,6 +367,74 @@ function setupQuick(root, motion) {
 }
 
 /**
+ * The files card's sample sheet: it shows real (fictional) values, then each column scrambles into
+ * codes when the sheet comes into view; scrolling back above it resets it. Without motion the
+ * static markup shows the masked sheet.
+ */
+function setupSheet(root, motion) {
+  if (!motion) return () => {};
+  const sheet = root.querySelector("[data-om-sheet]");
+  const pill = sheet.querySelector("[data-om-sheet-pill]");
+  const note = sheet.querySelector("[data-om-sheet-note]");
+  const cells = [...sheet.querySelectorAll("code[data-real]")];
+  const texts = { pill: pill.textContent, note: note.textContent };
+  cells.forEach((cell) => (cell.dataset.code = cell.textContent));
+  let play;
+  const prime = () => {
+    play?.kill();
+    cells.forEach((cell) => {
+      cell.textContent = cell.dataset.real;
+      cell.classList.add("om-plain");
+    });
+    pill.textContent = "Tìm thấy 3 cột";
+    pill.classList.replace("om-scene-pill-cobalt", "om-scene-pill-warm");
+    note.textContent = "30 dòng · 90 thông tin riêng";
+  };
+  const mask = () => {
+    play = gsap.timeline({ delay: 0.5 });
+    // Column by column: names, then phones, then accounts.
+    for (let column = 0; column < 3; column++)
+      cells
+        .filter((_, k) => k % 3 === column)
+        .forEach((cell, row) =>
+          play.to(
+            cell,
+            {
+              duration: 0.55,
+              ease: "none",
+              scrambleText: { text: cell.dataset.code, chars: "█▓▒░", speed: 0.5 },
+              onStart: () => cell.classList.remove("om-plain"),
+            },
+            column * 0.45 + row * 0.08,
+          ),
+        );
+    play.call(() => {
+      pill.textContent = texts.pill;
+      pill.classList.replace("om-scene-pill-warm", "om-scene-pill-cobalt");
+      note.textContent = texts.note;
+    });
+  };
+  prime();
+  const watch = ScrollTrigger.create({
+    trigger: sheet,
+    start: "top 75%",
+    onEnter: mask,
+    onLeaveBack: prime,
+  });
+  return () => {
+    play?.kill();
+    watch.kill();
+    cells.forEach((cell) => {
+      cell.textContent = cell.dataset.code;
+      cell.classList.remove("om-plain");
+    });
+    pill.textContent = texts.pill;
+    pill.classList.replace("om-scene-pill-warm", "om-scene-pill-cobalt");
+    note.textContent = texts.note;
+  };
+}
+
+/**
  * Example roles for "Cách hoạt động": each tab swaps the content of all three illustrations
  * (from the <template data-om-scenes> blocks; the default role is what the page ships with).
  * Works on every width and with reduced motion.
@@ -522,11 +590,13 @@ export function initOfflineMask(root) {
         : () => {};
       const undoRoles = setupRoles(root);
       const undoQuick = setupQuick(root, context.conditions.motion);
+      const undoSheet = setupSheet(root, context.conditions.motion);
       return () => {
         undoScan();
         undoHow();
         undoRoles();
         undoQuick();
+        undoSheet();
       };
     },
   );

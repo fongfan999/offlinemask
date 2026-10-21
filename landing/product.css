@@ -1134,6 +1134,44 @@
 .om-bento-wide {
   grid-column: span 7;
 }
+/* File types under the files card's text. */
+.om-formats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.om-formats li {
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  font: 500 12px var(--code);
+}
+/* A document peeks out behind the sheet, so the picture says "spreadsheets and documents". */
+.om-sheet-stack {
+  position: relative;
+  padding-top: 18px;
+}
+.om-doc-peek {
+  position: absolute;
+  inset: 0 -14px 40px 28px;
+  overflow: hidden;
+  border: 1px solid var(--line-strong);
+  border-radius: 20px;
+  background: var(--paper-raised);
+  transform: rotate(2.2deg);
+  transform-origin: top right;
+}
+.om-sheet-stack > .om-scene {
+  position: relative;
+}
+/* Before masking, the sheet's values read as plain text. */
+.om-sheet .om-c.om-plain {
+  padding: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+}
 /* The full-width card puts its text beside the picture. */
 .om-bento-split {
   display: grid;
