@@ -715,6 +715,11 @@
   color: var(--paper);
 }
 /* Illustration scenes */
+/* Their looping text changes stay inside them, so a loop never re-lays out the sticky step list
+   or the page around it. */
+.om-scene {
+  contain: layout;
+}
 .om-scene {
   overflow: hidden;
   margin: 22px 0 0;
@@ -1577,6 +1582,7 @@
   margin: 48px auto 0;
 }
 .om-questions details {
+  contain: layout;
   border-bottom: 1px solid var(--line);
 }
 .om-questions details:first-child {
