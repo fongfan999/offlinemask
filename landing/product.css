@@ -1010,23 +1010,17 @@
   .om-js .om-active .om-step-number {
     color: var(--accent);
   }
+  /* Closed descriptions have no height; the script animates the change from measured heights. */
   .om-js .om-how-body {
-    display: grid;
-    grid-template-rows: 0fr;
-    opacity: 0;
-    transition:
-      grid-template-rows 0.5s ease,
-      opacity 0.4s;
-  }
-  .om-js .om-how-body p {
     overflow: hidden;
-    min-height: 0;
+    height: 0;
+    opacity: 0;
   }
   .om-js .om-active .om-how-title {
     color: var(--ink);
   }
   .om-js .om-active .om-how-body {
-    grid-template-rows: 1fr;
+    height: auto;
     opacity: 1;
   }
 }
