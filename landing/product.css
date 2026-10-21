@@ -1519,30 +1519,41 @@
     transform: translateX(-50%);
   }
 }
+/* Each pill is a setting: Tắt in grey, Bật in cobalt, so the colour carries the meaning. */
 .om-status {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  padding: 7px 7px 7px 16px;
+  padding: 6px 6px 6px 15px;
   border-radius: 999px;
   background: var(--paper-sunk);
   color: var(--ink);
-  font: 500 15px var(--code);
+  font: 500 15px var(--sans);
   letter-spacing: 0;
   white-space: nowrap;
 }
 .om-status i {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
+  background: var(--line-strong);
+}
+.om-status b {
+  min-width: 42px;
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: var(--muted);
+  font-weight: 600;
+  text-align: center;
+}
+.om-status.om-on i {
   background: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
-.om-status b {
-  padding: 3px 10px;
-  border-radius: 999px;
-  background: var(--paper-raised);
-  font-weight: 500;
+.om-status.om-on b {
+  background: var(--accent);
+  color: var(--on-accent);
 }
 .om-safe-text {
   max-width: 600px;
