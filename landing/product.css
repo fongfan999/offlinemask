@@ -636,13 +636,13 @@
 .om-how-step:nth-child(3) {
   order: 5;
 }
-.om-scene:nth-child(1) {
+.om-how-scenes > .om-scene:nth-child(1) {
   order: 2;
 }
-.om-scene:nth-child(2) {
+.om-how-scenes > .om-scene:nth-child(2) {
   order: 4;
 }
-.om-scene:nth-child(3) {
+.om-how-scenes > .om-scene:nth-child(3) {
   order: 6;
 }
 .om-how-step:not(:first-child) {
@@ -1104,6 +1104,7 @@
 }
 .om-card {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 16px;
   padding: 28px;
@@ -1114,10 +1115,45 @@
 }
 .om-card-wide {
   grid-column: span 2;
-  grid-row: span 2;
 }
-.om-card-span {
-  grid-column: span 2;
+/* The files card's illustration: a masked sample sheet, built in HTML like the step cards. */
+.om-sheet {
+  margin: auto 0 0;
+}
+.om-sheet-wrap {
+  overflow-x: auto;
+  padding: 18px 20px 6px;
+}
+.om-sheet table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  white-space: nowrap;
+}
+.om-sheet th {
+  padding: 0 10px 10px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font: 600 11px var(--code);
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+.om-sheet td {
+  padding: 9px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 60%, transparent);
+}
+.om-sheet td:first-child,
+.om-sheet th:first-child {
+  color: var(--muted);
+  width: 1%;
+}
+.om-sheet td:last-child {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.om-sheet th:last-child {
+  text-align: right;
 }
 
 /* Lead feature: Ẩn nhanh, with an illustration of selecting text in another app. */
@@ -1709,7 +1745,24 @@
     display: none;
   }
   .om-cards {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* The sample sheet keeps its three masked columns on a phone. */
+  .om-sheet th:first-child,
+  .om-sheet td:first-child,
+  .om-sheet th:last-child,
+  .om-sheet td:last-child {
+    display: none;
+  }
+  .om-sheet-wrap {
+    padding-inline: 8px;
+  }
+  .om-sheet th,
+  .om-sheet td {
+    padding-inline: 5px;
+  }
+  .om-sheet .om-c {
+    font-size: 10.5px;
   }
   .om-footer-grid {
     grid-template-columns: 1fr 1fr;
@@ -1720,9 +1773,6 @@
   .om-card-wide {
     grid-column: auto;
     grid-row: auto;
-  }
-  .om-card-span {
-    grid-column: auto;
   }
   .om-card-lead {
     grid-template-columns: minmax(0, 1fr);

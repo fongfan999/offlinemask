@@ -428,7 +428,9 @@
 
     <section class="om-features om-wrap" id="om-features" aria-labelledby="om-features-title">
       <h2 id="om-features-title" class="om-display" data-om-reveal>
-        Làm việc với<br /><em>những gì bạn đã có.</em>
+        Thư từ, bảng&nbsp;tính, hợp&nbsp;đồng.<br /><em
+          >Đem vào là ẩn, khỏi&nbsp;công chép&nbsp;tay.</em
+        >
       </h2>
       <div class="om-cards">
         <article class="om-card om-card-lead" id="om-quick" data-om-reveal>
@@ -479,25 +481,71 @@
           </figure>
         </article>
         <article class="om-card om-card-wide" data-om-reveal>
-          <p class="om-pill">Bảng tính</p>
+          <p class="om-pill">Bảng tính và tài liệu</p>
           <p>
-            Mở XLSX, XLS, ODS hay CSV. Ẩn cả cột họ tên, số điện thoại, số tài khoản rồi xuất một
-            bản riêng để gửi AI.
+            Mở XLSX, XLS, ODS, CSV hay DOCX, ODT. Ẩn cả cột họ tên, số điện thoại, số tài khoản, giữ
+            nguyên định dạng, rồi xuất một bản riêng để gửi AI.
           </p>
-          <figure class="om-window om-card-shot">
-            <img
-              src="./shots/sheet-masked.webp"
-              width="2048"
-              height="1280"
-              loading="lazy"
-              decoding="async"
-              alt="Bảng tính mẫu 30 dòng trong OfflineMask: các cột họ tên, điện thoại, email, tài khoản và địa chỉ đã được thay bằng mã."
-            />
+          <figure
+            class="om-scene om-sheet"
+            aria-label="Minh họa: bảng tính mẫu với các cột họ tên, điện thoại và số tài khoản đã được thay bằng mã"
+          >
+            <div class="om-scene-bar">
+              <span class="om-tile" aria-hidden="true"></span>
+              <span class="om-scene-crumb">OfflineMask <i>/</i> <b>Giao dịch mẫu.csv</b></span>
+              <span class="om-scene-pill om-scene-pill-cobalt">Đã ẩn 3 cột</span>
+            </div>
+            <div class="om-sheet-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Họ tên</th>
+                    <th>Điện thoại</th>
+                    <th>Số tài khoản</th>
+                    <th>Số tiền</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>1</td>
+                    <td><code class="om-c">[TEN_1_5c2a]</code></td>
+                    <td><code class="om-c">[SDT_1_5c2a]</code></td>
+                    <td><code class="om-c">[STK_1_5c2a]</code></td>
+                    <td>2.500.000</td>
+                  </tr>
+                  <tr>
+                    <td>2</td>
+                    <td><code class="om-c">[TEN_2_5c2a]</code></td>
+                    <td><code class="om-c">[SDT_2_5c2a]</code></td>
+                    <td><code class="om-c">[STK_2_5c2a]</code></td>
+                    <td>15.000.000</td>
+                  </tr>
+                  <tr>
+                    <td>3</td>
+                    <td><code class="om-c">[TEN_3_5c2a]</code></td>
+                    <td><code class="om-c">[SDT_3_5c2a]</code></td>
+                    <td><code class="om-c">[STK_3_5c2a]</code></td>
+                    <td>45.000.000</td>
+                  </tr>
+                  <tr>
+                    <td>4</td>
+                    <td><code class="om-c">[TEN_4_5c2a]</code></td>
+                    <td><code class="om-c">[SDT_4_5c2a]</code></td>
+                    <td><code class="om-c">[STK_4_5c2a]</code></td>
+                    <td>7.200.000</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div class="om-scene-foot">
+              <span class="om-scene-note">30 dòng · 90 thông tin đã thay mã</span>
+              <span class="om-scene-button">Xuất bản đã ẩn</span>
+            </div>
           </figure>
-        </article>
-        <article class="om-card" data-om-reveal>
-          <p class="om-pill">Tài liệu</p>
-          <p>Hợp đồng, biên bản dạng DOCX hay ODT. Giữ định dạng, lưu một bản đã xử lý.</p>
+          <p class="om-card-note">
+            PDF và hình ảnh chưa được hỗ trợ. Luôn kiểm tra bản xuất trước khi chia sẻ.
+          </p>
         </article>
         <article class="om-card" data-om-reveal>
           <p class="om-pill">Nhận diện</p>
@@ -516,21 +564,7 @@
             gửi.
           </p>
         </article>
-        <article class="om-card" data-om-reveal>
-          <p class="om-pill">Lưu lịch sử</p>
-          <p>
-            Muốn mở lại việc cũ? Đặt mật mã 6 số để lưu lịch sử trên máy. Không đặt thì đóng ứng
-            dụng là xong.
-          </p>
-        </article>
-        <article class="om-card om-card-span" data-om-reveal>
-          <p class="om-pill">Không tài khoản</p>
-          <p>Không đăng ký, không đăng nhập, không máy chủ. Mở ứng dụng là dùng được ngay.</p>
-        </article>
       </div>
-      <p class="om-fine">
-        PDF và hình ảnh chưa được hỗ trợ. Luôn kiểm tra bản xuất trước khi chia sẻ.
-      </p>
     </section>
 
     <section class="om-privacy" id="om-privacy" aria-labelledby="om-privacy-title">
@@ -574,8 +608,8 @@
               bình thường.
             </li>
             <li>
-              <strong>Không gửi dữ liệu đi đâu.</strong> Không tài khoản, không thống kê sử dụng,
-              không tự cập nhật.
+              <strong>Không gửi dữ liệu đi đâu.</strong> Không thống kê sử dụng, không tự cập nhật,
+              không kết nối với AI nào.
             </li>
             <li>
               <strong>Chỉ tải thêm khi bạn bấm.</strong> Gói nhận diện tiếng Việt là tùy chọn, tải
@@ -584,6 +618,14 @@
             <li>
               <strong>Mã nguồn công khai.</strong> Ai cũng có thể xem ứng dụng làm gì.
               <a href="https://github.com/fongfan999/offlinemask">Xem trên GitHub ↗</a>
+            </li>
+            <li>
+              <strong>Không tài khoản.</strong> Không đăng ký, không đăng nhập, không máy chủ. Mở
+              ứng dụng là dùng được ngay.
+            </li>
+            <li>
+              <strong>Lịch sử chỉ khi bạn muốn.</strong> Đặt mật mã 6 số để lưu việc cũ trên máy.
+              Không đặt thì đóng ứng dụng là xong.
             </li>
           </ul>
           <a class="om-text-link" href="./privacy.html">Đọc chính sách quyền riêng tư →</a>
