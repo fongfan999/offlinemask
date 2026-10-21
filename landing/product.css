@@ -118,8 +118,7 @@
   justify-content: center;
   pointer-events: none;
 }
-.om-nav-pill,
-.om-nav-download {
+.om-nav-pill {
   pointer-events: auto;
   border: 1px solid color-mix(in srgb, var(--line-strong) 70%, transparent);
   /* Near-opaque instead of a live backdrop blur, which re-blurs the page on every scroll frame. */
@@ -184,23 +183,6 @@
   max-width: 130px;
   padding-left: 8px;
   opacity: 1;
-}
-.om-nav-download {
-  position: absolute;
-  right: 0;
-  top: 0;
-  padding: 10px 18px;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 600;
-  transition:
-    opacity 0.3s,
-    transform 0.3s;
-}
-.om-js .om-nav-download:not(.om-visible) {
-  opacity: 0;
-  transform: translateY(-8px);
-  pointer-events: none;
 }
 
 /* Cobalt wash: layered light on cobalt with slowly drifting blots of colour */

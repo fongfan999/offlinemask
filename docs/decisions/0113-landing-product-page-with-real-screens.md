@@ -142,3 +142,4 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   9. Changes and contact.
   Every statement was checked against the code and decisions.
 - **Maker card removed:** the "Người làm OfflineMask" card did not help visitors decide, and the footer already credits "Phong Phan ↗" (wotdafong.dev). Privacy now leads straight into the FAQ. Only the small `.om-maker-label` style stays, because the privacy page uses it for its date line.
+- **One download button while scrolling:** the nav's "Tải về" pill, which faded in past the hero, duplicated the floating "Tải cho macOS" button and sat apart from the nav. It was removed with its styles and trigger, so the floating button is the only persistent download, as on Dia.

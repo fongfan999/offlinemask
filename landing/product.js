@@ -515,7 +515,6 @@ export function initOfflineMask(root) {
   const heroWindow = root.querySelector("[data-om-hero-window]");
   const wordmark = root.querySelector("[data-om-wordmark]");
   const dock = root.querySelector("[data-om-dock]");
-  const navDownload = root.querySelector("[data-om-nav-download]");
   const downloads = [...root.querySelectorAll("[data-om-download]")].map((link) => ({
     link,
     href: link.getAttribute("href"),
@@ -556,11 +555,6 @@ export function initOfflineMask(root) {
       start: "top 90%",
       end: () => ScrollTrigger.maxScroll(window) + 1,
       onToggle: (self) => dock.classList.toggle("om-hidden", self.isActive),
-    }),
-    ScrollTrigger.create({
-      trigger: hero,
-      start: "55% top",
-      onToggle: (self) => navDownload.classList.toggle("om-visible", self.isActive),
     }),
   ];
 
@@ -694,7 +688,6 @@ export function initOfflineMask(root) {
     }
     detail.textContent = detailText;
     dock.classList.remove("om-hidden");
-    navDownload.classList.remove("om-visible");
     root.classList.remove("om-js");
     washWatch.disconnect();
     root.querySelectorAll(".om-wash").forEach((wash) => wash.classList.remove("om-idle"));
