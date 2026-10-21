@@ -173,7 +173,19 @@ function setupHow(root, motion) {
       plays.push(restore);
     }
   }
-  // Opening a step is a class change; the CSS unfolds it (see "As on diabrowser.com").
+  // The descriptions are padded to the tallest one's height, so the accordion trades exactly
+  // equal space and the list keeps its height. Measured again whenever ScrollTrigger refreshes
+  // (on resize).
+  const texts = steps.map((step) => step.querySelector(".om-how-body p"));
+  function equalize() {
+    texts.forEach((text) => (text.style.paddingBottom = ""));
+    const heights = texts.map((text) => text.scrollHeight);
+    const tallest = Math.max(...heights);
+    texts.forEach((text, k) => (text.style.paddingBottom = `${tallest - heights[k]}px`));
+  }
+  equalize();
+  ScrollTrigger.addEventListener("refreshInit", equalize);
+  // Opening a step is a class change; the CSS unfolds it (see "An accordion").
   function activate(index) {
     if (index === current) return;
     current = index;
@@ -214,6 +226,8 @@ function setupHow(root, motion) {
   how.addEventListener("om-role", replay);
   return () => {
     plays.forEach((tween) => tween.kill());
+    ScrollTrigger.removeEventListener("refreshInit", equalize);
+    texts.forEach((text) => (text.style.paddingBottom = ""));
     triggers.forEach((trigger) => trigger.kill());
     how.removeEventListener("click", choose);
     how.removeEventListener("om-role", replay);

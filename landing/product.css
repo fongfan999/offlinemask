@@ -1014,26 +1014,24 @@
   .om-js .om-active .om-how-title {
     color: var(--ink);
   }
-  /* As on Dia: the old step folds away fast and the new one opens more slowly, settling gently.
-     The closing text fades at once; the opening text fades in as its row gets going. */
+  /* An accordion: the closing and opening rows share one duration and curve, so at every frame
+     one gives up exactly the space the other takes (the script pads the descriptions to one
+     height) and nothing below moves. */
   .om-js .om-how-body {
     display: grid;
     grid-template-rows: 0fr;
     opacity: 0;
     transition:
-      grid-template-rows 0.22s cubic-bezier(0.4, 0, 0.6, 1),
-      opacity 0.12s linear;
+      grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+      opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .om-js .om-how-body > p {
+  .om-js .om-how-body > div {
     overflow: hidden;
     min-height: 0;
   }
   .om-js .om-active .om-how-body {
     grid-template-rows: 1fr;
     opacity: 1;
-    transition:
-      grid-template-rows 0.48s cubic-bezier(0.22, 1, 0.36, 1),
-      opacity 0.32s 0.1s ease-out;
   }
 }
 
