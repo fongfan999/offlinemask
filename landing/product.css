@@ -1169,9 +1169,38 @@
   border-radius: 14px;
   background: var(--paper-sunk);
 }
-.om-art-chips .om-chips {
-  justify-content: center;
-  max-width: 300px;
+/* Detection: built-in types as filled chips, the optional pack's types as dashed ones. */
+.om-art-detect {
+  flex: 1;
+  place-content: center start;
+  justify-items: start;
+  gap: 12px;
+  padding: 28px;
+}
+.om-detect-label {
+  color: var(--muted);
+  font: 600 11px var(--code);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.om-detect-label span {
+  letter-spacing: 0;
+  text-transform: none;
+  font: 400 12px var(--sans);
+}
+.om-art-detect .om-chips + .om-detect-label {
+  margin-top: 10px;
+}
+.om-art-detect .om-chips {
+  gap: 8px;
+}
+.om-art-detect .om-chips li {
+  padding: 7px 14px;
+  font-size: 15px;
+}
+.om-chips.om-chips-pack li {
+  border: 1px dashed color-mix(in srgb, var(--accent) 55%, transparent);
+  background: transparent;
 }
 /* The files card's illustration: a masked sample sheet, built in HTML like the step cards. */
 .om-sheet {
