@@ -595,7 +595,7 @@
 
 /* Display type */
 .om-display {
-  font: 500 clamp(38px, 4.8vw, 70px) / 1.1 var(--sans);
+  font: 500 clamp(30px, 3.6vw, 52px) / 1.15 var(--sans);
   letter-spacing: -0.04em;
   text-align: center;
 }

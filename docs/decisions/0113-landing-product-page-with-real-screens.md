@@ -93,3 +93,4 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   - "Lưu lịch sử" and "Không tài khoản" were privacy facts rather than features, so they moved into the "Muốn chắc chắn?" list as "Không tài khoản." and "Lịch sử chỉ khi bạn muốn.". The "Không gửi dữ liệu đi đâu." item now says it connects to no AI.
   - The grid is the Ẩn nhanh lead card, then the files card beside "Nhận diện".
   - The order rules that interleave the steps and illustrations on phones are scoped to `.om-how-scenes`, so they no longer reorder other `.om-scene` figures.
+- **Smaller section headings:** with longer lục bát couplets the section headings (`.om-display`) felt oversized at up to 70px; they are now `clamp(30px, 3.6vw, 52px)` with 1.15 line height, closer to Dia's scale. On phones the features couplet breaks after "Đem vào là ẩn,".
