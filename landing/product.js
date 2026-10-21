@@ -107,9 +107,8 @@ function setupScan(root, motion) {
 
 /**
  * "Cách hoạt động" on wide screens: the step list is sticky and the illustrations scroll past
- * natively; the step whose illustration crosses the middle of the screen opens. Choosing a step title scrolls its illustration into view. With
- * motion, each illustration plays a short entrance: highlights appear, the AI reply arrives, codes
- * turn back into real values.
+ * natively; the step whose illustration crosses the middle of the screen opens. Choosing a step
+ * title scrolls its illustration into view. The illustrations' animation is setupSceneLoops.
  */
 function setupHow(root, motion) {
   const how = root.querySelector("[data-om-how]");
@@ -117,94 +116,7 @@ function setupHow(root, motion) {
   const heads = steps.map((step) => step.querySelector("[data-om-step-head]"));
   const scenes = [...how.querySelectorAll("[data-om-scene]")];
   let current = -1;
-  const plays = [];
 
-  // Each illustration waits in its "before" state (no highlights, no AI reply yet, codes not yet
-  // restored) and plays once when it first opens; switching the example role primes them again.
-  // Content changes with the role, so it is looked up each time.
-  const played = scenes.map(() => false);
-  // Step 1's card before and after masking: its pill and label follow the values.
-  function setDocState(scene, count, masked) {
-    const pill = scene.querySelector('[data-om-part="doc-count"]');
-    pill.textContent = masked ? `Đã ẩn ${count} thông tin` : `Tìm thấy ${count} thông tin`;
-    pill.classList.toggle("om-scene-pill-warm", !masked);
-    pill.classList.toggle("om-scene-pill-cobalt", masked);
-    scene.querySelector("[data-om-doc-kicker]").textContent = masked ? "Bản đã ẩn" : "Bản gốc";
-  }
-  function prime(index) {
-    played[index] = false;
-    if (!motion) return;
-    const scene = scenes[index];
-    if (index === 0) {
-      const values = [...scene.querySelectorAll(".om-v")];
-      values.forEach((value) => {
-        value.dataset.real ??= value.textContent;
-        value.textContent = value.dataset.real;
-        value.classList.remove("om-coded");
-        value.classList.add("om-dim");
-      });
-      setDocState(scene, values.length, false);
-    } else if (index === 1) gsap.set(scene.querySelector("[data-om-ai]"), { autoAlpha: 0, y: 12 });
-    else
-      scene.querySelectorAll("[data-om-restored] .om-r").forEach((value) => {
-        value.dataset.real ??= value.textContent;
-        value.textContent = value.dataset.code;
-      });
-  }
-  function enter(index) {
-    if (!motion || played[index]) return;
-    played[index] = true;
-    const scene = scenes[index];
-    if (index === 0) {
-      // Highlights appear one by one, the button is pressed, and the values become codes.
-      const values = [...scene.querySelectorAll(".om-v")];
-      const button = scene.querySelector("[data-om-doc-button]");
-      const reveal = gsap.timeline({ delay: 0.2 });
-      values.forEach((value, k) =>
-        reveal.call(() => value.classList.remove("om-dim"), [], k * 0.14),
-      );
-      const press = values.length * 0.14 + 0.7;
-      reveal.to(button, { scale: 0.94, duration: 0.12, yoyo: true, repeat: 1 }, press);
-      values.forEach((value, k) =>
-        reveal.to(
-          value,
-          {
-            duration: 0.6,
-            ease: "none",
-            scrambleText: { text: value.dataset.code, chars: "█▓▒░", speed: 0.5 },
-            onStart: () => value.classList.add("om-coded"),
-          },
-          press + 0.2 + k * 0.1,
-        ),
-      );
-      reveal.call(() => setDocState(scene, values.length, true), [], press + 0.3);
-      plays.push(reveal);
-    } else if (index === 1) {
-      plays.push(
-        gsap.to(scene.querySelector("[data-om-ai]"), {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.6,
-          delay: 0.4,
-          ease: "expo.out",
-        }),
-      );
-    } else {
-      const restore = gsap.timeline({ delay: 0.3 });
-      scene.querySelectorAll("[data-om-restored] .om-r").forEach((value, k) =>
-        restore.to(
-          value,
-          {
-            duration: 0.8,
-            ease: "none",
-            scrambleText: { text: value.dataset.real, chars: "█▓▒░", speed: 0.5 },
-          },
-          k * 0.2,
-        ),
-      );
-      plays.push(restore);
-    }
-  }
   // The descriptions are padded to the tallest one's height, so the accordion trades exactly
   // equal space and the list keeps its height. Measured again whenever ScrollTrigger refreshes
   // (on resize).
@@ -223,7 +135,6 @@ function setupHow(root, motion) {
     current = index;
     steps.forEach((step, k) => step.classList.toggle("om-active", k === index));
     heads.forEach((head, k) => head.setAttribute("aria-expanded", String(k === index)));
-    enter(index);
   }
   // Each illustration owns the stretch of scroll from its top to the next one's top passing
   // mid-screen; the last one owns until its bottom does.
@@ -242,12 +153,6 @@ function setupHow(root, motion) {
     if (index >= 0)
       scenes[index].scrollIntoView({ behavior: motion ? "smooth" : "auto", block: "center" });
   }
-  const replay = () => {
-    plays.forEach((tween) => tween.kill());
-    scenes.forEach((_, index) => prime(index));
-    enter(current);
-  };
-  scenes.forEach((_, index) => prime(index));
   activate(
     Math.max(
       0,
@@ -255,16 +160,127 @@ function setupHow(root, motion) {
     ),
   );
   how.addEventListener("click", choose);
-  how.addEventListener("om-role", replay);
   return () => {
-    plays.forEach((tween) => tween.kill());
     ScrollTrigger.removeEventListener("refreshInit", equalize);
     texts.forEach((text) => (text.style.paddingBottom = ""));
     triggers.forEach((trigger) => trigger.kill());
     how.removeEventListener("click", choose);
-    how.removeEventListener("om-role", replay);
     steps.forEach((step, k) => step.classList.toggle("om-active", k === 0));
     heads.forEach((head) => head.removeAttribute("aria-expanded"));
+  };
+}
+
+/**
+ * The three "Cách hoạt động" illustrations loop while on screen, on every width, so a visitor can
+ * watch them again: step 1's highlights appear and turn into codes, step 2's AI reply arrives,
+ * step 3's codes turn back into real values. Switching the example role rebuilds the loops,
+ * because the content changes. Without motion the static markup shows each end state.
+ */
+function setupSceneLoops(root, motion) {
+  if (!motion) return () => {};
+  const how = root.querySelector("[data-om-how]");
+  const scenes = [...how.querySelectorAll("[data-om-scene]")];
+  // Step 1's card before and after masking: its pill and label follow the values.
+  function setDocState(scene, count, masked) {
+    const pill = scene.querySelector('[data-om-part="doc-count"]');
+    pill.textContent = masked ? `Đã ẩn ${count} thông tin` : `Tìm thấy ${count} thông tin`;
+    pill.classList.toggle("om-scene-pill-warm", !masked);
+    pill.classList.toggle("om-scene-pill-cobalt", masked);
+    scene.querySelector("[data-om-doc-kicker]").textContent = masked ? "Bản đã ẩn" : "Bản gốc";
+  }
+  // The "before" state of each illustration.
+  function prime(index) {
+    const scene = scenes[index];
+    if (index === 0) {
+      const values = [...scene.querySelectorAll(".om-v")];
+      values.forEach((value) => {
+        value.dataset.real ??= value.textContent;
+        value.textContent = value.dataset.real;
+        value.classList.remove("om-coded");
+        value.classList.add("om-dim");
+      });
+      setDocState(scene, values.length, false);
+    } else if (index === 1) gsap.set(scene.querySelector("[data-om-ai]"), { autoAlpha: 0, y: 12 });
+    else
+      scene.querySelectorAll("[data-om-restored] .om-r").forEach((value) => {
+        value.dataset.real ??= value.textContent;
+        value.textContent = value.dataset.code;
+      });
+  }
+  // One pass of an illustration's animation, from its "before" state.
+  function pass(index) {
+    const scene = scenes[index];
+    const tl = gsap.timeline();
+    if (index === 0) {
+      const values = [...scene.querySelectorAll(".om-v")];
+      const button = scene.querySelector("[data-om-doc-button]");
+      values.forEach((value, k) => tl.call(() => value.classList.remove("om-dim"), [], k * 0.14));
+      const press = values.length * 0.14 + 0.7;
+      tl.to(button, { scale: 0.94, duration: 0.12, yoyo: true, repeat: 1 }, press);
+      values.forEach((value, k) =>
+        tl.to(
+          value,
+          {
+            duration: 0.6,
+            ease: "none",
+            scrambleText: { text: value.dataset.code, chars: "█▓▒░", speed: 0.5 },
+            onStart: () => value.classList.add("om-coded"),
+          },
+          press + 0.2 + k * 0.1,
+        ),
+      );
+      tl.call(() => setDocState(scene, values.length, true), [], press + 0.3);
+    } else if (index === 1) {
+      tl.to(scene.querySelector("[data-om-ai]"), {
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.6,
+        delay: 0.6,
+        ease: "expo.out",
+      });
+    } else {
+      scene.querySelectorAll("[data-om-restored] .om-r").forEach((value, k) =>
+        tl.to(
+          value,
+          {
+            duration: 0.8,
+            ease: "none",
+            scrambleText: { text: value.dataset.real, chars: "█▓▒░", speed: 0.5 },
+          },
+          0.4 + k * 0.2,
+        ),
+      );
+    }
+    return tl;
+  }
+  let loops = [];
+  let watches = [];
+  function build() {
+    loops.forEach((loop) => loop.kill());
+    watches.forEach((watch) => watch.kill());
+    loops = scenes.map((scene, index) => {
+      prime(index);
+      const loop = gsap.timeline({ paused: true, repeat: -1 });
+      loop.call(() => prime(index), [], 0).add(pass(index), 0.3);
+      // Hold the finished state, then start again.
+      loop.to({}, { duration: 2.6 });
+      return loop;
+    });
+    watches = scenes.map((scene, index) =>
+      ScrollTrigger.create({
+        trigger: scene,
+        start: "top bottom",
+        end: "bottom top",
+        onToggle: (self) => (self.isActive ? loops[index].play() : loops[index].pause()),
+      }),
+    );
+  }
+  build();
+  how.addEventListener("om-role", build);
+  return () => {
+    loops.forEach((loop) => loop.kill());
+    watches.forEach((watch) => watch.kill());
+    how.removeEventListener("om-role", build);
     how.querySelectorAll(".om-v").forEach((value) => {
       value.classList.remove("om-dim", "om-coded");
       if (value.dataset.real) value.textContent = value.dataset.real;
@@ -367,9 +383,9 @@ function setupQuick(root, motion) {
 }
 
 /**
- * The files card's sample sheet: it shows real (fictional) values, then each column scrambles into
- * codes when the sheet comes into view; scrolling back above it resets it. Without motion the
- * static markup shows the masked sheet.
+ * The files card's sample sheet loops while on screen: real (fictional) values, then each column
+ * scrambles into codes, a pause, and again. Without motion the static markup shows the masked
+ * sheet.
  */
 function setupSheet(root, motion) {
   if (!motion) return () => {};
@@ -379,9 +395,7 @@ function setupSheet(root, motion) {
   const cells = [...sheet.querySelectorAll("code[data-real]")];
   const texts = { pill: pill.textContent, note: note.textContent };
   cells.forEach((cell) => (cell.dataset.code = cell.textContent));
-  let play;
   const prime = () => {
-    play?.kill();
     cells.forEach((cell) => {
       cell.textContent = cell.dataset.real;
       cell.classList.add("om-plain");
@@ -390,8 +404,8 @@ function setupSheet(root, motion) {
     pill.classList.replace("om-scene-pill-cobalt", "om-scene-pill-warm");
     note.textContent = "30 dòng · 90 thông tin riêng";
   };
-  const mask = () => {
-    play = gsap.timeline({ delay: 0.5 });
+  const maskPass = () => {
+    const play = gsap.timeline();
     // Column by column: names, then phones, then accounts.
     for (let column = 0; column < 3; column++)
       cells
@@ -413,16 +427,20 @@ function setupSheet(root, motion) {
       pill.classList.replace("om-scene-pill-warm", "om-scene-pill-cobalt");
       note.textContent = texts.note;
     });
+    return play;
   };
+  // Loop while on screen: real values, column by column into codes, hold, start again.
+  const loop = gsap.timeline({ paused: true, repeat: -1 });
+  loop.call(prime, [], 0).add(maskPass(), 0.8).to({}, { duration: 2.6 });
   prime();
   const watch = ScrollTrigger.create({
     trigger: sheet,
-    start: "top 75%",
-    onEnter: mask,
-    onLeaveBack: prime,
+    start: "top bottom",
+    end: "bottom top",
+    onToggle: (self) => (self.isActive ? loop.play() : loop.pause()),
   });
   return () => {
-    play?.kill();
+    loop.kill();
     watch.kill();
     cells.forEach((cell) => {
       cell.textContent = cell.dataset.code;
@@ -591,12 +609,14 @@ export function initOfflineMask(root) {
       const undoRoles = setupRoles(root);
       const undoQuick = setupQuick(root, context.conditions.motion);
       const undoSheet = setupSheet(root, context.conditions.motion);
+      const undoLoops = setupSceneLoops(root, context.conditions.motion);
       return () => {
         undoScan();
         undoHow();
         undoRoles();
         undoQuick();
         undoSheet();
+        undoLoops();
       };
     },
   );
