@@ -143,7 +143,7 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   Every statement was checked against the code and decisions.
 - **Maker card removed:** the "Người làm OfflineMask" card did not help visitors decide, and the footer already credits "Phong Phan ↗" (wotdafong.dev). Privacy now leads straight into the FAQ. Only the small `.om-maker-label` style stays, because the privacy page uses it for its date line.
 - **One download button while scrolling:** the nav's "Tải về" pill, which faded in past the hero, duplicated the floating "Tải cho macOS" button and sat apart from the nav. It was removed with its styles and trigger, so the floating button is the only persistent download, as on Dia.
-- **FAQ reworked (October 2026):** the heading is a 4+4 pair with a matching rhyme, "Băn khoăn gì không? / Đọc qua là thông." (không–thông). The questions now cover what visitors still wonder after the page:
+- **FAQ reworked (October 2026):** the heading is simply "Câu hỏi thường gặp" (a rhyme was tried and dropped: an FAQ heading should just say what it is). The questions now cover what visitors still wonder after the page:
   - Internet;
   - whether everything is found, and how to add what is missed;
   - what happens if AI changes a code (unchanged codes are restored, altered ones are left for you);
