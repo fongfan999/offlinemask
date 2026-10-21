@@ -160,4 +160,5 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   - detection;
   - what happens if AI changes a code;
   - why Ẩn nhanh needs Accessibility on Mac (now adding that Windows needs no permission);
-  - "Vì sao lần đầu mở, máy hỏi lại?", which replaces the alarming "chưa được xác minh". It says "chứng chỉ nhà phát triển" and points to the install guide, which also explains checking the download.
+  - "Lần đầu mở, máy hiện cảnh báo. Có sao không?" (answered "Không sao. …"), which replaces the alarming "chưa được xác minh". It says "chứng chỉ nhà phát triển" and points to the install guide, which also explains checking the download.
+- **FAQ wording:** the machines answer says "Ẩn nhanh chưa có trên Linux" instead of the internal term "nút nổi".
