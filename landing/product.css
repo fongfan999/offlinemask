@@ -1134,6 +1134,12 @@
 .om-bento-wide {
   grid-column: span 7;
 }
+/* A short muted fact under a bento card's text. */
+.om-bento-meta {
+  margin-top: -8px !important;
+  color: var(--muted);
+  font-size: 14px;
+}
 /* File types under the files card's text. */
 .om-formats {
   display: flex;
