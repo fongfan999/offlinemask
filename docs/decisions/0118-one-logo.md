@@ -23,7 +23,7 @@ To apply them:
 - **Desktop:** add `@fontsource-variable/noto-sans` 5.3.0 (OFL-1.1, the version and lockfile entry the website already uses; no new network access). `style.css` registers only its Latin file as "OfflineMask Wordmark", about 36 KB, and `.brand-name` uses it at 750 / −0.04em. Nothing else in the app changes typeface.
 - **Website:** the hero, footer and share-image wordmarks use the logo lettering, and the nav, footer and privacy page show the tile lockup.
 
-The intro video's end card still uses the serif wordmark and needs a re-export after the film is updated.
+The intro video's end card still uses the serif wordmark and needs a re-export after the film is updated. (Done 21 October 2026: the rebuilt film ends on the tile and the logo lettering; see [0113](0113-landing-product-page-with-real-screens.md).)
 
 The same pass applied the owner's wording rules to the app: the copy confirmation now says "công cụ AI bạn dùng (ChatGPT, Claude, Gemini…)", the preview lists "ChatGPT, Claude, Gemini…", and the home headline says "thông tin riêng" instead of "thông tin nhạy cảm".
 
