@@ -1191,6 +1191,11 @@
 .om-art-detect .om-chips + .om-detect-label {
   margin-top: 10px;
 }
+.om-detect-soon {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13px;
+}
 .om-art-detect .om-chips {
   gap: 8px;
 }
