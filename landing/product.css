@@ -1488,6 +1488,7 @@
   width: max-content;
   animation: om-marquee 46s linear infinite;
 }
+.om-marquee.om-idle .om-marquee-track,
 .om-marquee:hover .om-marquee-track {
   animation-play-state: paused;
 }

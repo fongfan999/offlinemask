@@ -540,11 +540,11 @@ export function initOfflineMask(root) {
   let disposed = false;
 
   root.classList.add("om-js");
-  // Drifting blots are only animated while their wash is on screen.
+  // Looping CSS animations (the washes' blots, the privacy pills) run only while on screen.
   const washWatch = new IntersectionObserver((entries) =>
     entries.forEach((entry) => entry.target.classList.toggle("om-idle", !entry.isIntersecting)),
   );
-  root.querySelectorAll(".om-wash").forEach((wash) => washWatch.observe(wash));
+  root.querySelectorAll(".om-wash, .om-marquee").forEach((element) => washWatch.observe(element));
   // Intro video: opens in a native modal and plays; closing pauses it.
   const videoOpen = root.querySelector("[data-om-video-open]");
   const videoDialog = root.querySelector("[data-om-video]");
@@ -655,25 +655,36 @@ export function initOfflineMask(root) {
           },
           1.35,
         );
-      // Gentle idle drift so the hero never feels frozen.
-      gsap.to("[data-om-sticker]", {
-        rotate: 22,
-        duration: 5,
-        ease: "sine.inOut",
-        yoyo: true,
-        repeat: -1,
-        delay: 2,
-      });
-      gsap.utils.toArray(root.querySelectorAll("[data-om-float]")).forEach((float, index) =>
-        gsap.to(float, {
-          y: index ? 10 : -10,
-          duration: 3.4 + index,
+      // Gentle idle drift so the hero never feels frozen. It runs only while the hero is on
+      // screen: an animation that never stops keeps the page producing frames, and some
+      // Chromium-based browsers (Dia) then stall on every frame, which makes other motion jerky.
+      const drifts = [
+        gsap.to("[data-om-sticker]", {
+          rotate: 22,
+          duration: 5,
           ease: "sine.inOut",
           yoyo: true,
           repeat: -1,
-          delay: 2.2,
+          delay: 2,
         }),
-      );
+        ...gsap.utils.toArray(root.querySelectorAll("[data-om-float]")).map((float, index) =>
+          gsap.to(float, {
+            y: index ? 10 : -10,
+            duration: 3.4 + index,
+            ease: "sine.inOut",
+            yoyo: true,
+            repeat: -1,
+            delay: 2.2,
+          }),
+        ),
+      ];
+      ScrollTrigger.create({
+        trigger: hero,
+        start: "top bottom",
+        end: "bottom top",
+        onToggle: (self) =>
+          drifts.forEach((tween) => (self.isActive ? tween.resume() : tween.pause())),
+      });
       // Scroll: the wordmark sinks behind the window as the page moves on.
       gsap.to(wordmark, {
         yPercent: 35,
@@ -706,7 +717,9 @@ export function initOfflineMask(root) {
     dock.classList.remove("om-hidden");
     root.classList.remove("om-js");
     washWatch.disconnect();
-    root.querySelectorAll(".om-wash").forEach((wash) => wash.classList.remove("om-idle"));
+    root
+      .querySelectorAll(".om-wash, .om-marquee")
+      .forEach((element) => element.classList.remove("om-idle"));
     videoOpen.hidden = true;
     videoOpen.removeEventListener("click", openVideo);
     videoDialog.removeEventListener("click", backdropClose);
