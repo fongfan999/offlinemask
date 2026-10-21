@@ -79,3 +79,4 @@ The owner gave full freedom over copy and design before rolling out to offlinema
 - **200ms with the card style:** with the raised-card step list, the owner preferred 0.2s for the accordion, the card's border, background and shadow, and the colours.
 - **400ms:** after trying 200ms with the card style, the owner asked for 400–500ms; the step transitions now take 0.4s.
 - **500ms:** the owner tried 500ms next; the step transitions now take 0.5s.
+- **Step copy, second pass:** step 1 no longer leads with names, which are detected only with the optional pack: "Dán văn bản hoặc mở tệp. OfflineMask tự tìm số điện thoại, số tài khoản, email… để bạn xem lại rồi ẩn." Its card footer adds something new: "Còn sót chỗ nào? Bôi đen là ẩn thêm." Step 2 names concrete jobs and leaves "AI chỉ thấy mã" to its card: "Dán bản đã ẩn vào AI bạn hay dùng. AI vẫn hiểu đủ ý để tóm tắt, soạn thư hay phân tích." Step 3 says "Dán" like step 1, and its card label is just "Bản đầy đủ".
