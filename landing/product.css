@@ -1072,6 +1072,25 @@
     block-size: auto;
     opacity: 1;
   }
+  /* Browsers without interpolate-size (Safari, some Chromium-based shells) would snap from 0 to
+     auto; they unfold a grid row instead, which animates everywhere. */
+  @supports not (interpolate-size: allow-keywords) {
+    .om-js .om-how-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      block-size: auto;
+      transition:
+        grid-template-rows 0.3s cubic-bezier(0.5, 1, 0.89, 1),
+        opacity 0.3s cubic-bezier(0.5, 1, 0.89, 1);
+    }
+    .om-js .om-how-body > div {
+      overflow: hidden;
+      min-height: 0;
+    }
+    .om-js .om-active .om-how-body {
+      grid-template-rows: 1fr;
+    }
+  }
 }
 
 /* Feature cards */
