@@ -622,6 +622,9 @@
   grid-template-columns: minmax(0, 1fr);
   gap: 44px;
 }
+.om-how-rail {
+  display: none;
+}
 .om-how-head {
   display: grid;
   gap: 8px;
@@ -891,7 +894,7 @@
    position picks the step. Steps lie in column one and all cards share column two. */
 @media (min-width: 861px) {
   .om-js .om-how {
-    height: 280vh;
+    height: 240vh;
   }
   /* The stage is as tall as its content and sticks centred on screen (never under the nav), so
      it starts right below the section heading. */
@@ -914,8 +917,6 @@
   .om-js .om-how-body {
     grid-column: 1;
     padding-left: 26px;
-    border-left: 2px solid transparent;
-    transition: border-color 0.4s;
   }
   .om-js .om-how-head {
     padding-top: 18px;
@@ -962,9 +963,25 @@
     overflow: hidden;
     min-height: 0;
   }
-  .om-js .om-active .om-how-head,
-  .om-js .om-active .om-how-body {
-    border-left-color: var(--ink);
+  /* A rail beside the list fills with the scroll, down through the open step. */
+  .om-js .om-how-rail {
+    position: relative;
+    display: block;
+    grid-column: 1;
+    grid-row: 1 / 7;
+    justify-self: start;
+    width: 2px;
+    margin-top: 18px;
+    border-radius: 2px;
+    background: var(--line);
+  }
+  .om-js .om-how-rail i {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: var(--ink);
+    transform: scaleY(0);
+    transform-origin: top;
   }
   .om-js .om-active .om-how-title {
     color: var(--ink);

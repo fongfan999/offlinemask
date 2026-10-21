@@ -115,6 +115,17 @@ function setupHow(root, motion) {
   const steps = [...how.querySelectorAll("[data-om-step]")];
   const heads = steps.map((step) => step.querySelector("[data-om-step-head]"));
   const stage = how.querySelector(".om-how-stage");
+  const bodies = steps.map((step) => step.querySelector(".om-how-body"));
+  const scenes = steps.map((step) => step.querySelector(".om-scene"));
+  const rail = how.querySelector(".om-how-rail");
+  const fill = rail.querySelector("i");
+  const ease = { duration: 0.35, ease: "power3" };
+  const toFill = motion ? gsap.quickTo(fill, "scaleY", ease) : (v) => gsap.set(fill, { scaleY: v });
+  const drifts = scenes.map((scene) =>
+    motion ? gsap.quickTo(scene, "y", { duration: 0.5, ease: "power3" }) : () => {},
+  );
+  // How far through the current step the scroll is (0–1).
+  let local = 0;
   // Mirrors the stage's CSS `top: max(96px, calc(50vh - 260px))`.
   const stickyTop = () => Math.max(96, window.innerHeight / 2 - 260);
   let current = -1;
@@ -155,6 +166,17 @@ function setupHow(root, motion) {
       });
     }
   }
+  // Every frame while pinned: the rail fills down through the open step (whose height animates
+  // as it opens), and the active illustration drifts gently with the scroll.
+  function follow() {
+    if (current < 0) return;
+    const track = rail.getBoundingClientRect();
+    const top = heads[current].getBoundingClientRect().top;
+    const bottom = bodies[current].getBoundingClientRect().bottom;
+    const y = top + (bottom - top) * local;
+    toFill(gsap.utils.clamp(0, 1, (y - track.top) / track.height));
+    drifts[current]((0.5 - local) * 16);
+  }
   function activate(index) {
     if (index === current) return;
     current = index;
@@ -167,8 +189,12 @@ function setupHow(root, motion) {
     // The pin runs from when the stage reaches its sticky offset until the section's end.
     start: () => `top ${stickyTop()}px`,
     end: () => `bottom ${stickyTop() + stage.offsetHeight}px`,
-    onUpdate: (self) =>
-      activate(Math.min(steps.length - 1, Math.floor(self.progress * steps.length))),
+    onUpdate: (self) => {
+      const position = self.progress * steps.length;
+      activate(Math.min(steps.length - 1, Math.floor(position)));
+      local = Math.min(1, position - current);
+    },
+    onToggle: (self) => (self.isActive ? gsap.ticker.add(follow) : gsap.ticker.remove(follow)),
   });
   function choose(event) {
     const index = heads.indexOf(event.target.closest("[data-om-step-head]"));
@@ -181,11 +207,15 @@ function setupHow(root, motion) {
   }
   const replay = () => enter(current);
   activate(Math.min(steps.length - 1, Math.floor(scroller.progress * steps.length)));
+  local = Math.min(1, scroller.progress * steps.length - current);
+  follow();
   how.addEventListener("click", choose);
   how.addEventListener("om-role", replay);
   return () => {
     play?.kill();
     scroller.kill();
+    gsap.ticker.remove(follow);
+    gsap.set([fill, ...scenes], { clearProps: "transform" });
     how.removeEventListener("click", choose);
     how.removeEventListener("om-role", replay);
     steps.forEach((step, k) => step.classList.toggle("om-active", k === 0));
