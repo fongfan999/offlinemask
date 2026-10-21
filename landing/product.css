@@ -972,9 +972,9 @@
     border: 1px solid transparent;
     border-radius: 14px;
     transition:
-      background-color 0.4s cubic-bezier(0.5, 1, 0.89, 1),
-      border-color 0.4s cubic-bezier(0.5, 1, 0.89, 1),
-      box-shadow 0.4s cubic-bezier(0.5, 1, 0.89, 1);
+      background-color 0.5s cubic-bezier(0.5, 1, 0.89, 1),
+      border-color 0.5s cubic-bezier(0.5, 1, 0.89, 1),
+      box-shadow 0.5s cubic-bezier(0.5, 1, 0.89, 1);
   }
   .om-how-tip {
     padding-left: 21px;
@@ -990,13 +990,13 @@
   /* Closed steps stay readable (muted at full opacity) and step back by colour alone. */
   .om-js .om-how-title {
     color: var(--muted);
-    transition: color 0.4s cubic-bezier(0.5, 1, 0.89, 1);
+    transition: color 0.5s cubic-bezier(0.5, 1, 0.89, 1);
   }
   .om-js .om-how-head:hover .om-how-title {
     color: var(--ink);
   }
   .om-js .om-step-number {
-    transition: color 0.4s cubic-bezier(0.5, 1, 0.89, 1);
+    transition: color 0.5s cubic-bezier(0.5, 1, 0.89, 1);
   }
   .om-js .om-active .om-step-number {
     color: var(--accent);
@@ -1011,10 +1011,10 @@
     display: grid;
     grid-template-rows: 0fr;
     opacity: 0;
-    /* Fast start that eases off (ease-out quad), 400ms. */
+    /* Fast start that eases off (ease-out quad), 500ms. */
     transition:
-      grid-template-rows 0.4s cubic-bezier(0.5, 1, 0.89, 1),
-      opacity 0.4s cubic-bezier(0.5, 1, 0.89, 1);
+      grid-template-rows 0.5s cubic-bezier(0.5, 1, 0.89, 1),
+      opacity 0.5s cubic-bezier(0.5, 1, 0.89, 1);
   }
   .om-js .om-how-body > div {
     overflow: hidden;
