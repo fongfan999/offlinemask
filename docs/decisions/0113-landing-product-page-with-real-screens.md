@@ -106,3 +106,4 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   - **Bảng tính và tài liệu** (wide): the HTML sample sheet again.
   - **Nhận diện** (full width): the detection chips.
   The heading stays "Vẫn ứng dụng quen. / Chỉ cần bôi đen." with no subtitle, and one fine line covers platforms, where to switch it on and the PDF gap.
+- **Four bento cards:** the "Đổi mã về" card showed how the product works (the steps already cover restoring) rather than a feature, so it was removed. Its point is one sentence in the Ẩn nhanh card. The bento is Ẩn nhanh (wide) with Phím tắt, then Nhận diện with Bảng tính và tài liệu (wide), as on Dia. The detection chips sit on the same bottom panel as the other pictures.

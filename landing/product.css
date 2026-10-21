@@ -1134,9 +1134,6 @@
 .om-bento-wide {
   grid-column: span 7;
 }
-.om-bento-full {
-  grid-column: 1 / -1;
-}
 .om-bento-text {
   max-width: 560px;
   font-size: 18px;
@@ -1156,16 +1153,9 @@
   border-radius: 14px;
   background: var(--paper-sunk);
 }
-.om-art-restore {
-  gap: 6px;
-  font-size: 20px;
-}
-.om-art-restore .om-c {
-  font-size: 15px;
-}
-.om-art-arrow {
-  color: var(--accent);
-  font-weight: 600;
+.om-art-chips .om-chips {
+  justify-content: center;
+  max-width: 300px;
 }
 .om-art-keys {
   grid-auto-flow: column;
