@@ -178,6 +178,28 @@
 .om-doc-table td:first-child {
   color: var(--ink);
 }
+.om-doc-summary p {
+  margin-top: 10px;
+}
+.om-doc pre {
+  overflow-x: auto;
+  margin-top: 14px;
+  padding: 18px 20px;
+  border-radius: 12px;
+  background: var(--paper-sunk);
+  font: 14px / 1.7 var(--code);
+}
+.om-doc pre code {
+  padding: 0;
+  white-space: pre;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+}
+.om-doc pre i {
+  color: var(--muted);
+  font-style: normal;
+}
 @media (max-width: 640px) {
   .om-doc-toc ol {
     columns: 1;

@@ -162,3 +162,9 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   - why Ẩn nhanh needs Accessibility on Mac (now adding that Windows needs no permission);
   - "Lần đầu mở, máy hiện cảnh báo. Có sao không?" (answered "Không sao. …"), which replaces the alarming "chưa được xác minh". It says "chứng chỉ nhà phát triển" and points to the install guide, which also explains checking the download.
 - **FAQ wording:** the machines answer says "Ẩn nhanh chưa có trên Linux" instead of the internal term "nút nổi".
+- **Install guide on the site (21 October 2026):** the FAQ and download links pointed to `docs/install.md` on GitHub, which took visitors off the site to a technical page. The site now has `install.html`, a plain-language guide on the privacy page's layout:
+  - why the computer asks once ("Máy Mac và Windows cảnh báo với mọi ứng dụng chưa đăng ký với Apple hay Microsoft…");
+  - numbered steps for macOS and Windows;
+  - short Linux notes;
+  - an optional "Kiểm tra tệp tải về" section with the checksum commands.
+  The FAQ answer now reads "Không sao. Máy Mac và Windows cảnh báo với mọi ứng dụng chưa đăng ký… lần đầu bạn chỉ cần xác nhận là muốn mở", with "Xem hướng dẫn từng bước" opening the guide in a new tab. The download band, the release note and the footer link to it too. `docs/install.md` stays for the repository and says to keep both in step.

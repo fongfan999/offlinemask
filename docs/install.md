@@ -1,5 +1,7 @@
 # Cài đặt OfflineMask
 
+Hướng dẫn từng bước cho người dùng có trên [OfflineMask.com/install](https://offlinemask.com/install) (`landing/install.html`). Khi đổi các bước cài đặt, cập nhật cả hai.
+
 Tải bản phù hợp với máy từ [trang phát hành](https://github.com/fongfan999/offlinemask/releases/latest). Bản phát hành chưa được ký số bằng chứng chỉ Apple Developer ID hay Microsoft, nên hệ điều hành sẽ hỏi lại trước khi mở lần đầu. Đã kiểm thử thủ công trên macOS Apple Silicon; các bản khác chưa được kiểm thử đầy đủ.
 
 ## Kiểm tra tệp tải về
