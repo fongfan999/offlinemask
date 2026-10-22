@@ -4,10 +4,13 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.0.3] — 2026-10-22
+
+Fixes the saved history after unlocking and the Ẩn nhanh circle on Windows.
+
 ### Fixed
 
 - Unlocking with the passcode shows the saved history again. The lock page closed before it could hand the decrypted items over, so the list stayed empty, and the next masked text would have replaced the stored history ([0123](docs/decisions/0123-unlock-loads-history.md)).
-
 - On Windows, clicking the OfflineMask circle after selecting text in another app replaces the selection again. The click was taken for a click elsewhere, because the circle is drawn by WebView2's own process, so the selection was dropped and only the clipboard was used; Ctrl+Shift+M was not affected. Selecting text inside OfflineMask no longer shows the circle there ([0122](docs/decisions/0122-windows-popover-own-window.md)).
 
 ## [2.0.2] — 2026-10-22
@@ -72,7 +75,8 @@ The first public release. The number starts at 2.0.0 by the owner's choice; ther
 - Builds are not yet signed or notarized ([release notes](docs/release/macos-arm64.md)).
 - Detection has documented misses and over-masking; review the result before sharing it ([evidence](docs/evaluations/recognition-production-v1/README.md)).
 
-[Unreleased]: https://github.com/fongfan999/offlinemask/compare/v2.0.2...HEAD
+[Unreleased]: https://github.com/fongfan999/offlinemask/compare/v2.0.3...HEAD
+[2.0.3]: https://github.com/fongfan999/offlinemask/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/fongfan999/offlinemask/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/fongfan999/offlinemask/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/fongfan999/offlinemask/releases/tag/v2.0.0

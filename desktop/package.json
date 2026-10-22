@@ -1,7 +1,7 @@
 {
   "name": "offlinemask-desktop",
   "private": true,
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "Offline desktop workspace for reviewing sensitive data",
   "license": "SEE LICENSE IN LICENSE.md",
   "type": "module",
