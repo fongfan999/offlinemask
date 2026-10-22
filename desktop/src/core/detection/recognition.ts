@@ -24,16 +24,29 @@ export interface ModelSession {
 /** Loads one pack model from the verified pack root. The runtime (WASM, native…) lives here. */
 export type ModelBackend = (model: PackModel, root: string) => Promise<ModelSession>;
 
+/** Where Transformers.js thinks the pack lives. It skips its local-file checks for http(s)
+ * paths, and Windows serves the pack from `http://asset.localhost/`, so the tokenizer looked
+ * missing there. A path that is not http keeps those checks on every platform. */
+export const localPackPath = "offlinemask-pack:/";
+
+/** The pack URL for a path under `localPackPath`; anything else is returned unchanged. */
+export function packFileUrl(url: string, root: string): string {
+  if (!url.startsWith(localPackPath)) return url;
+  return `${root}/${url.slice(localPackPath.length).replace(/^\/+/, "")}`;
+}
+
 /** Transformers.js reads only the installed pack; no Hub, CDN or cache is ever consulted. */
 export function configureLocalModels(root: string) {
   env.allowRemoteModels = false;
   env.allowLocalModels = true;
-  env.localModelPath = root + "/";
+  env.localModelPath = localPackPath;
   env.useFSCache = false;
   env.useBrowserCache = false;
   env.useWasmCache = false;
   // Pack files arrive in ranges so the desktop host never copies a whole model in one call.
-  env.fetch = createRangedFetch({ shouldRange: (url) => url.startsWith(root) });
+  const ranged = createRangedFetch({ shouldRange: (url) => url.startsWith(root) });
+  env.fetch = (input, init) =>
+    ranged(typeof input === "string" ? packFileUrl(input, root) : input, init);
 }
 
 /** The default runtime: the pinned ONNX Runtime WASM build inside the detection worker. */

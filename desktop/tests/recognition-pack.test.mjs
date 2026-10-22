@@ -7,7 +7,12 @@ import {
   recognitionPack,
   validatePackDefinition,
 } from "../src/core/detection/pack.ts";
-import { createRecognition, loadPackRecognition } from "../src/core/detection/recognition.ts";
+import {
+  createRecognition,
+  loadPackRecognition,
+  localPackPath,
+  packFileUrl,
+} from "../src/core/detection/recognition.ts";
 import { loadNativeRecognition } from "../src/core/detection/native-recognition.ts";
 import { createModelRunner } from "../src/core/detection/model-runner.ts";
 
@@ -30,6 +35,18 @@ const minimal = () => ({
   attribution: "Synthetic fixtures only.",
   models: [{ directory: "one", source: "One", graph: "model", offsets: "sequential" }],
   assets: modelFiles("one"),
+});
+
+test("pack files resolve through a non-http alias on every platform's asset URL", () => {
+  // Transformers.js skips local files whose path parses as http(s); Windows serves the pack
+  // from http://asset.localhost, which made the tokenizer look missing.
+  assert.ok(!["http:", "https:"].includes(new URL(`${localPackPath}one/tokenizer.json`).protocol));
+  // Single or doubled slash after the alias, both resolve under the pack root.
+  for (const root of ["http://asset.localhost/C%3A%5Cpack", "asset://localhost/%2Fpack"]) {
+    for (const path of ["offlinemask-pack:/one/tokenizer.json", "offlinemask-pack://one/x"])
+      assert.equal(packFileUrl(path, root), `${root}/one/${path.split("/").pop()}`);
+    assert.equal(packFileUrl("/runtime/ort.wasm", root), "/runtime/ort.wasm");
+  }
 });
 
 test("the shipping pack definition is valid and self-consistent", async () => {
