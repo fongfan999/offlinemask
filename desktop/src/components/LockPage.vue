@@ -3,11 +3,9 @@ import { nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef, watch } from
 import BrandMark from "./BrandMark.vue";
 import PasscodeField from "./PasscodeField.vue";
 import { sessionsKey, useProvided, vaultKey } from "../composables/context.ts";
-import type { PrivateSession } from "../core/sessions.ts";
 
 /** Shown at launch when a passcode exists. It unlocks on the sixth digit, like a
  * phone; there is no button to press. Forgetting the passcode wipes the vault. */
-const emit = defineEmits<{ unlocked: [sessions: PrivateSession[]] }>();
 const vault = useProvided(vaultKey);
 const store = useProvided(sessionsKey);
 const passcode = ref("");
@@ -34,7 +32,10 @@ async function unlock() {
   if (passcode.value.length !== 6 || vault.busy.value) return;
   const sessions = await vault.unlock(passcode.value);
   passcode.value = "";
-  if (sessions) emit("unlocked", sessions);
+  // Loaded here, not emitted: the unlock already swapped this page out, and Vue
+  // drops events from an unmounted component, so the history never opened
+  // (decision 0123).
+  if (sessions) store.load(sessions);
   else {
     shake.value++;
     // The field is re-enabled on the next render; focus it after that.

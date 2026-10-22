@@ -35,7 +35,7 @@ import { useDocRun } from "./composables/useDocRun.ts";
 import { useSheetRun } from "./composables/useSheetRun.ts";
 import { useVault } from "./composables/useVault.ts";
 import { fileKind, fileKindErrors } from "./core/file-kind.ts";
-import type { Format, PrivateSession, Session } from "./core/sessions.ts";
+import type { Format, Session } from "./core/sessions.ts";
 import HomePage from "./pages/HomePage.vue";
 import DocPage from "./pages/DocPage.vue";
 import SettingsPage from "./pages/SettingsPage.vue";
@@ -113,9 +113,6 @@ watch(
   },
   { deep: true },
 );
-function openVault(privateSessions: PrivateSession[]) {
-  store.load(privateSessions);
-}
 
 const page = ref<Page>("home");
 const activeId = ref<string | null>(null);
@@ -229,7 +226,7 @@ async function closeSidebar() {
 
 <template>
   <div class="ambient" aria-hidden="true"></div>
-  <LockPage v-if="vault.state.value === 'locked'" @unlocked="openVault" />
+  <LockPage v-if="vault.state.value === 'locked'" />
   <div v-else-if="vault.checked.value" class="app-shell">
     <button
       v-if="sidebarOpen"
