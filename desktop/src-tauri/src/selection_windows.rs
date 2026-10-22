@@ -29,9 +29,9 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
     GetAsyncKeyState, GetDoubleClickTime, VK_LBUTTON,
 };
 use windows::Win32::UI::WindowsAndMessaging::{
-    CallNextHookEx, DispatchMessageW, GetCursorPos, GetMessageW, GetWindowThreadProcessId,
-    SetWindowsHookExW, TranslateMessage, WindowFromPoint, HHOOK, MSG, MSLLHOOKSTRUCT, WH_MOUSE_LL,
-    WM_LBUTTONDOWN, WM_LBUTTONUP,
+    CallNextHookEx, DispatchMessageW, GetAncestor, GetCursorPos, GetMessageW,
+    GetWindowThreadProcessId, SetWindowsHookExW, TranslateMessage, WindowFromPoint, GA_ROOT,
+    HHOOK, MSG, MSLLHOOKSTRUCT, WH_MOUSE_LL, WM_LBUTTONDOWN, WM_LBUTTONUP,
 };
 
 use crate::selection::{
@@ -76,7 +76,11 @@ fn scale_at(point: POINT) -> f64 {
 fn own_window(point: POINT) -> bool {
     // SAFETY: plain queries; a null window yields process id 0.
     unsafe {
-        let hwnd: HWND = WindowFromPoint(point);
+        // The window under the pointer is WebView2's render child, owned by the
+        // msedgewebview2 process; its top-level window is ours. Without the root, a
+        // click on the circle counted as a click elsewhere and cleared the selection
+        // just before the circle's command arrived (decision 0122).
+        let hwnd: HWND = GetAncestor(WindowFromPoint(point), GA_ROOT);
         let mut pid = 0u32;
         GetWindowThreadProcessId(hwnd, Some(&mut pid));
         pid == GetCurrentProcessId()

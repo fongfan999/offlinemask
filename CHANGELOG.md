@@ -4,6 +4,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+### Fixed
+
+- On Windows, clicking the OfflineMask circle after selecting text in another app replaces the selection again. The click was taken for a click elsewhere, because the circle is drawn by WebView2's own process, so the selection was dropped and only the clipboard was used; Ctrl+Shift+M was not affected. Selecting text inside OfflineMask no longer shows the circle there ([0122](docs/decisions/0122-windows-popover-own-window.md)).
+
 ## [2.0.2] — 2026-10-22
 
 Fixes masking with the Vietnamese pack and the passcode settings on Windows.
