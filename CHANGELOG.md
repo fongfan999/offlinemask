@@ -4,6 +4,19 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.0.2] — 2026-10-22
+
+Fixes masking with the Vietnamese pack and the passcode settings on Windows.
+
+### Fixed
+
+- Masking with the Vietnamese recognition pack works on Windows. The pack's tokenizer looked missing because Windows serves the pack from an `http://asset.localhost` address, where Transformers.js skips its local-file check; every Windows build since 2.0.0 reported "Chưa xử lý được văn bản trên thiết bị" after loading the models ([0121](docs/decisions/0121-windows-pack-path-and-window-order.md)).
+- Settings no longer says passcode and history exist only in the desktop app when the desktop app starts slowly. The windows were built before the app's state was ready, so the first passcode check could fail for the whole launch; the windows are now created after it ([0121](docs/decisions/0121-windows-pack-path-and-window-order.md)).
+
+### Changed
+
+- The recognition pack warms up in the background once it is ready, and again when the window comes back after a while, so the first mask does not wait for the first inference.
+
 ## [2.0.1] — 2026-10-20
 
 Fixes the Windows app crashing on launch.
@@ -53,6 +66,7 @@ The first public release. The number starts at 2.0.0 by the owner's choice; ther
 - Builds are not yet signed or notarized ([release notes](docs/release/macos-arm64.md)).
 - Detection has documented misses and over-masking; review the result before sharing it ([evidence](docs/evaluations/recognition-production-v1/README.md)).
 
-[Unreleased]: https://github.com/fongfan999/offlinemask/compare/v2.0.1...HEAD
+[Unreleased]: https://github.com/fongfan999/offlinemask/compare/v2.0.2...HEAD
+[2.0.2]: https://github.com/fongfan999/offlinemask/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/fongfan999/offlinemask/compare/v2.0.0...v2.0.1
 [2.0.0]: https://github.com/fongfan999/offlinemask/releases/tag/v2.0.0
