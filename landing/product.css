@@ -5,7 +5,7 @@
    paper, ink and cobalt. A cobalt wash frames the real app; serif display type on paper. */
 .om-page {
   --sans: "Noto Sans Variable", system-ui, sans-serif;
-  --serif: "Noto Serif Variable", Georgia, serif;
+  --serif: "Noto Serif", Georgia, serif;
   --code: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --cobalt: #3453b6;
   --cobalt-deep: #1d3184;
@@ -197,12 +197,15 @@
   background: var(--cobalt) url("./media/wash.webp") 0 0 / 100% 100% no-repeat;
 }
 /* Film grain as a small pre-rendered tile at low opacity. A blend mode or an SVG noise filter
-   here made Dia redraw the hero on every frame anywhere on the page. */
+   here made Dia redraw the hero on every frame anywhere on the page. At 3% it is felt rather than
+   seen, so it waits for the script (.om-js) instead of taking bandwidth from the first paint. */
 .om-wash::after {
   content: "";
   position: absolute;
   inset: 0;
   opacity: 0.03;
+}
+.om-js .om-wash::after {
   background: url("./media/grain.webp") repeat;
 }
 .om-wash i {
@@ -267,6 +270,23 @@
   bottom: 30%;
   border-radius: 0 0 50% 50% / 0 0 72px 72px;
 }
+/* The hero's blots are placed from the top in viewport units rather than in percentages of the
+   wash: the wash follows the hero's height, which changes when the web fonts arrive, and blots
+   that moved then counted as a layout shift. The values match the percentages on common screens. */
+.om-hero > .om-wash i:nth-child(1) {
+  top: -12vmax;
+}
+.om-hero > .om-wash i:nth-child(2) {
+  top: 6.6vmax;
+}
+.om-hero > .om-wash i:nth-child(3) {
+  top: calc(150px + 26.4vmax);
+  bottom: auto;
+}
+.om-hero > .om-wash i:nth-child(4) {
+  top: calc(138px + 40.8vmax);
+  bottom: auto;
+}
 .om-hero-copy {
   position: relative;
   width: min(1200px, calc(100% - 2 * var(--gutter)));
@@ -275,6 +295,13 @@
 .om-tagline {
   font: 500 clamp(22px, 2.4vw, 34px) / 1.3 var(--sans);
   letter-spacing: -0.01em;
+}
+/* On a phone the tagline breaks where Noto Sans would wrap it anyway. A fixed break keeps it two
+   lines in the fallback font too, so nothing below moves when the web font arrives. */
+@media (min-width: 430px) {
+  .om-tagline-break {
+    display: none;
+  }
 }
 /* The wordmark is drawn like the logo: bold sans, tight, "Mask" in a lighter cobalt. */
 .om-wordmark {
@@ -365,7 +392,7 @@
   border: 0;
   border-radius: 999px;
   background: transparent;
-  color: #6b6f66;
+  color: #595d54;
   font: 500 12px var(--sans);
   cursor: pointer;
 }
@@ -484,6 +511,70 @@
   transform: rotate(2deg);
 }
 
+/* Hero intro: the copy rises in, the wordmark's letters follow, the window tilts up into place,
+   then the sticker and the chips land. It is CSS so it starts with the first paint; the script,
+   which arrives after the page has loaded, only adds the chips' redaction and the idle drift.
+   Individual translate/rotate/scale properties leave each element's own transform alone. The
+   curves match GSAP's expo.out and back.out(2.2). */
+@media (prefers-reduced-motion: no-preference) {
+  .om-hero [data-om-enter] {
+    animation: om-rise 1s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+  }
+  .om-hero-sub[data-om-enter] {
+    animation-delay: 0.12s;
+  }
+  .om-video-open[data-om-enter] {
+    animation-delay: 0.24s;
+  }
+  .om-wordmark > span > span,
+  .om-wordmark > span:not(.om-wordmark-mask) {
+    animation: om-letter 1.2s cubic-bezier(0.16, 1, 0.3, 1) calc(0.1s + var(--i) * 0.035s) backwards;
+  }
+  .om-hero-window {
+    animation: om-tilt-up 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.35s backwards;
+  }
+  .om-sticker {
+    animation: om-stamp 0.9s cubic-bezier(0.18, 0.9, 0.3, 1.45) 1.1s backwards;
+  }
+  .om-float {
+    animation: om-rise 0.8s cubic-bezier(0.16, 1, 0.3, 1) 1.25s backwards;
+    --om-rise: 24px;
+  }
+  .om-float-b {
+    animation-delay: 1.43s;
+  }
+  /* The window opens on the original screen; the script's scan then reveals the masked one.
+     Without the script (see the noscript style in product.html) the masked one stays. */
+  .om-scan-stage {
+    --om-scan: 0%;
+  }
+}
+@keyframes om-rise {
+  from {
+    translate: 0 var(--om-rise, 18px);
+    opacity: 0;
+  }
+}
+@keyframes om-letter {
+  from {
+    translate: 0 70%;
+    rotate: 6deg;
+    opacity: 0;
+  }
+}
+@keyframes om-tilt-up {
+  from {
+    transform: perspective(1600px) translateY(160px) rotateX(16deg) scale(0.92);
+    opacity: 0;
+  }
+}
+@keyframes om-stamp {
+  from {
+    scale: 0;
+    rotate: -92deg;
+  }
+}
+
 /* Intro video: a quiet button in the hero and a native modal; nothing loads until opened. */
 .om-video-open {
   display: inline-flex;
@@ -514,8 +605,10 @@
   font-size: 11px;
   padding-left: 2px;
 }
+/* Until the script makes it work, the button keeps its place unseen, so the window below does
+   not move down (a layout shift) when it appears. */
 .om-page [hidden].om-video-open {
-  display: none;
+  visibility: hidden;
 }
 .om-video {
   width: min(1200px, calc(100vw - 32px));
@@ -760,7 +853,8 @@
 .om-scene-pill-warm {
   border-color: color-mix(in srgb, var(--warm) 35%, transparent);
   background: color-mix(in srgb, var(--warm) 10%, var(--paper-raised));
-  color: var(--warm);
+  /* Deepened toward ink so the small label reads at 4.5:1 on its tint. */
+  color: color-mix(in srgb, var(--warm) 75%, var(--ink));
 }
 .om-scene-pill-cobalt {
   border-color: transparent;
@@ -1813,7 +1907,13 @@
   text-align: center;
   white-space: nowrap;
 }
-.om-footer-mark span {
+/* A logotype, drawn as generated content: purely decorative, so it stays out of the text that
+   contrast checks read (logotypes have no contrast requirement). */
+.om-footer-mark::before {
+  content: "Offline";
+}
+.om-footer-mark::after {
+  content: "Mask";
   color: color-mix(in srgb, var(--accent) 30%, var(--accent-soft));
 }
 

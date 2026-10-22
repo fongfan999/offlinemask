@@ -1,6 +1,7 @@
 import { gsap } from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import introPoster from "./media/offlinemask-intro-poster.webp";
 
 gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
 
@@ -23,29 +24,6 @@ async function detectPlatform() {
   } catch {
     return "mac-arm";
   }
-}
-
-/** Wraps each letter of the decorative wordmark so it can rise in; returns an undo. */
-function splitWordmark(wordmark) {
-  const original = [...wordmark.childNodes].map((node) => node.cloneNode(true));
-  const letters = [];
-  const split = (node) => {
-    for (const child of [...node.childNodes]) {
-      if (child.nodeType === Node.TEXT_NODE) {
-        const spans = [...child.textContent].map((letter) => {
-          const span = document.createElement("span");
-          span.textContent = letter;
-          letters.push(span);
-          return span;
-        });
-        child.replaceWith(...spans);
-      } else {
-        split(child);
-      }
-    }
-  };
-  split(wordmark);
-  return { letters, undo: () => wordmark.replaceChildren(...original) };
 }
 
 /**
@@ -526,7 +504,6 @@ export function initOfflineMask(root) {
   if (!root) return () => {};
   const media = gsap.matchMedia();
   const hero = root.querySelector(".om-hero");
-  const heroWindow = root.querySelector("[data-om-hero-window]");
   const wordmark = root.querySelector("[data-om-wordmark]");
   const dock = root.querySelector("[data-om-dock]");
   const downloads = [...root.querySelectorAll("[data-om-download]")].map((link) => ({
@@ -549,7 +526,9 @@ export function initOfflineMask(root) {
   const videoOpen = root.querySelector("[data-om-video-open]");
   const videoDialog = root.querySelector("[data-om-video]");
   const video = videoDialog.querySelector("video");
+  // The poster is set on first open, so a closed dialog downloads nothing.
   const openVideo = () => {
+    video.poster ||= introPoster;
     videoDialog.showModal();
     video.play().catch(() => {});
   };
@@ -613,48 +592,16 @@ export function initOfflineMask(root) {
   media.add(
     "(prefers-reduced-motion: no-preference)",
     () => {
-      const { letters, undo } = splitWordmark(wordmark);
-      const intro = gsap.timeline({ defaults: { ease: "expo.out" } });
-      intro
-        .from(root.querySelectorAll(".om-hero [data-om-enter]"), {
-          y: 18,
-          autoAlpha: 0,
+      // The intro itself is CSS (see "Hero intro" in product.css). The chips' codes are redacted
+      // as they land, if the script is here in time to catch them.
+      const landing = 1.35 - performance.now() / 1000;
+      if (landing > 0)
+        gsap.from("[data-om-code]", {
+          scrambleText: { text: "████████", chars: "█▓▒░", speed: 0.6 },
           duration: 1,
-          stagger: 0.12,
-        })
-        .from(
-          letters,
-          { yPercent: 70, autoAlpha: 0, rotate: 6, duration: 1.2, stagger: 0.035 },
-          0.1,
-        )
-        .from(
-          heroWindow,
-          {
-            y: 160,
-            rotateX: 16,
-            scale: 0.92,
-            autoAlpha: 0,
-            transformPerspective: 1600,
-            duration: 1.6,
-            clearProps: "transform,opacity,visibility",
-          },
-          0.35,
-        )
-        .from(
-          "[data-om-sticker]",
-          { scale: 0, rotate: -80, duration: 0.9, ease: "back.out(2.2)" },
-          1.1,
-        )
-        .from("[data-om-float]", { y: 24, autoAlpha: 0, duration: 0.8, stagger: 0.18 }, 1.25)
-        .from(
-          "[data-om-code]",
-          {
-            scrambleText: { text: "████████", chars: "█▓▒░", speed: 0.6 },
-            duration: 1,
-            stagger: 0.18,
-          },
-          1.35,
-        );
+          stagger: 0.18,
+          delay: landing,
+        });
       // Gentle idle drift so the hero never feels frozen. It runs only while the hero is on
       // screen: an animation that never stops keeps the page producing frames, and some
       // Chromium-based browsers (Dia) then stall on every frame, which makes other motion jerky.
@@ -701,7 +648,6 @@ export function initOfflineMask(root) {
           scrollTrigger: { trigger: element, start: "top 88%", once: true },
         }),
       );
-      return undo;
     },
     root,
   );

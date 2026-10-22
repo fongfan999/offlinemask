@@ -1,4 +1,16 @@
 <div class="om-page" lang="vi" data-om-page>
+  <noscript
+    ><style>
+      /* Without the script the masked screen stays in view, and the video button, which needs
+         the script, takes no room. */
+      .om-scan-stage {
+        --om-scan: 100% !important;
+      }
+      .om-page [hidden].om-video-open {
+        display: none;
+      }
+    </style></noscript
+  >
   <a class="om-skip" href="#om-main">Đến nội dung chính</a>
   <header class="om-nav">
     <nav class="om-nav-pill" aria-label="Điều hướng sản phẩm">
@@ -15,10 +27,18 @@
       <div class="om-wash" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
       <div class="om-hero-copy">
         <h1 id="om-title" class="om-tagline" data-om-enter>
-          <em>AI</em> không nên biết bạn đang nói về <em>ai</em>.
+          <em>AI</em> không nên biết<br class="om-tagline-break" />
+          bạn đang nói về <em>ai</em>.
         </h1>
+        <!-- One span per letter, so the letters can rise in one after another (--i staggers them). -->
         <p class="om-wordmark" aria-hidden="true" data-om-wordmark>
-          Offline<span class="om-wordmark-mask">Mask</span>
+          <span style="--i: 0">O</span><span style="--i: 1">f</span><span style="--i: 2">f</span
+          ><span style="--i: 3">l</span><span style="--i: 4">i</span><span style="--i: 5">n</span
+          ><span style="--i: 6">e</span
+          ><span class="om-wordmark-mask"
+            ><span style="--i: 7">M</span><span style="--i: 8">a</span><span style="--i: 9">s</span
+            ><span style="--i: 10">k</span></span
+          >
         </p>
         <p class="om-hero-sub" data-om-enter>
           Ẩn thông tin riêng trước khi hỏi AI, nhận lại bản đầy đủ khi AI trả lời.<br /><span
@@ -31,7 +51,7 @@
           <span aria-hidden="true">▶</span> Xem video
         </button>
       </div>
-      <figure class="om-window om-hero-window" data-om-hero-window>
+      <figure class="om-window om-hero-window">
         <div class="om-window-bar">
           <i aria-hidden="true"></i><i aria-hidden="true"></i><i aria-hidden="true"></i>
           <div class="om-view-toggle" role="group" aria-label="Xem bản" hidden data-om-view-toggle>
@@ -43,6 +63,12 @@
           <img
             class="om-scan-under"
             src="./shots/text-original.webp"
+            srcset="
+              ./shots/text-original-800.webp   800w,
+              ./shots/text-original-1280.webp 1280w,
+              ./shots/text-original.webp      2048w
+            "
+            sizes="(min-width: 1200px) 1120px, 92vw"
             width="2048"
             height="1216"
             alt=""
@@ -51,6 +77,12 @@
           <img
             class="om-scan-over"
             src="./shots/text-masked.webp"
+            srcset="
+              ./shots/text-masked-800.webp   800w,
+              ./shots/text-masked-1280.webp 1280w,
+              ./shots/text-masked.webp      2048w
+            "
+            sizes="(min-width: 1200px) 1120px, 92vw"
             width="2048"
             height="1216"
             fetchpriority="high"
@@ -852,13 +884,7 @@
     </section>
   </main>
   <dialog class="om-video" aria-label="Video giới thiệu OfflineMask" data-om-video>
-    <video
-      controls
-      playsinline
-      preload="none"
-      poster="./media/offlinemask-intro-poster.webp"
-      src="./media/offlinemask-intro.mp4"
-    ></video>
+    <video controls playsinline preload="none" src="./media/offlinemask-intro.mp4"></video>
     <button type="button" class="om-video-close" aria-label="Đóng video" data-om-video-close>
       ✕
     </button>
@@ -898,6 +924,6 @@
         <a href="https://wotdafong.dev">Phong Phan ↗</a><a href="#om-main">Lên đầu trang ↑</a>
       </nav>
     </div>
-    <p class="om-footer-mark" aria-hidden="true">Offline<span>Mask</span></p>
+    <p class="om-footer-mark" aria-hidden="true"></p>
   </footer>
 </div>

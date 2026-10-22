@@ -7,6 +7,8 @@
 // so the name is masked too: size the window to 1280x788, run the same letter with a "Họ và tên"
 // line, capture the window below its title bar and crop with
 // `magick <frame>.png -crop 2528x1500+16+0 +repage -resize '2048x1216!' -quality 82 <name>.webp`.
+// Then add the hero's smaller sizes for its srcset: `magick <name>.webp -resize 800x -quality 82
+// <name>-800.webp`, and the same for 1280.
 // The text flow below is the web-build fallback without a name.
 import { spawn } from "node:child_process";
 import { writeFileSync, mkdirSync } from "node:fs";

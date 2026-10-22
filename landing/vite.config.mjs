@@ -50,6 +50,47 @@ export default defineConfig({
         });
       },
     },
+    {
+      // Each page's stylesheet goes inline, so the first paint waits on the HTML alone rather than
+      // a second request; every page has its own small stylesheet, so nothing is lost to caching.
+      // The scripts only animate and enhance pages that already read without them, so they are
+      // fetched at low priority and the fonts and images they would compete with come first
+      // (the home page's main script also waits for the load event; see main.js).
+      name: "offlinemask-first-paint",
+      apply: "build",
+      enforce: "post",
+      transformIndexHtml: {
+        order: "post",
+        handler(html, { filename, bundle }) {
+          // The home page's hero uses all four font files; asking for them up front means they
+          // usually arrive before the first paint rather than swapping in after it.
+          const fonts = filename.endsWith("index.html")
+            ? Object.keys(bundle)
+                .filter((file) => file.endsWith(".woff2"))
+                .map(
+                  (file) =>
+                    `<link rel="preload" href="./${file}" as="font" type="font/woff2" crossorigin>`,
+                )
+                .join("")
+            : "";
+          return html
+            .replace("</title>", `</title>${fonts}`)
+            .replace(
+              /<link rel="stylesheet"[^>]*href="\.\/(assets\/[^"]+\.css)"[^>]*>/g,
+              (_, file) =>
+                // The stylesheet's URLs are relative to assets/; the page sits one level up.
+                `<style>${bundle[file].source.replace(/url\(\.\//g, "url(./assets/")}</style>`,
+            )
+            .replace(
+              /<(script type="module"|link rel="modulepreload") /g,
+              '<$1 fetchpriority="low" ',
+            );
+        },
+      },
+      generateBundle(_, bundle) {
+        for (const file of Object.keys(bundle)) if (file.endsWith(".css")) delete bundle[file];
+      },
+    },
   ],
   server: { port: 4322, strictPort: true },
   build: {
