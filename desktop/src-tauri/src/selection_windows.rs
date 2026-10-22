@@ -30,8 +30,8 @@ use windows::Win32::UI::Input::KeyboardAndMouse::{
 };
 use windows::Win32::UI::WindowsAndMessaging::{
     CallNextHookEx, DispatchMessageW, GetAncestor, GetCursorPos, GetMessageW,
-    GetWindowThreadProcessId, SetWindowsHookExW, TranslateMessage, WindowFromPoint, GA_ROOT,
-    HHOOK, MSG, MSLLHOOKSTRUCT, WH_MOUSE_LL, WM_LBUTTONDOWN, WM_LBUTTONUP,
+    GetWindowThreadProcessId, SetWindowsHookExW, TranslateMessage, WindowFromPoint, GA_ROOT, HHOOK,
+    MSG, MSLLHOOKSTRUCT, WH_MOUSE_LL, WM_LBUTTONDOWN, WM_LBUTTONUP,
 };
 
 use crate::selection::{
