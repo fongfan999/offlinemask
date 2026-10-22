@@ -32,6 +32,7 @@ export function textProgress(progress: DetectionProgress, startedAt: number): Sh
       };
 }
 
+const warmUpInterval = 60_000;
 /** Synthetic, so the warm-up never touches real input: every model sees a name and an address. */
 const warmUpText = "Nguyễn Văn An, 12 Lê Lợi, Quận 1, TP. Hồ Chí Minh, a@example.com";
 
@@ -64,6 +65,7 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
   );
   let currentRun = 0;
   let preparedRoot: string | null = null;
+  let lastWarmUp = 0;
 
   // Prepare installed weights as soon as they are verified, and offer every
   // category once, unless the user already made their own selection.
@@ -81,22 +83,30 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
       if (preparedRoot !== root) {
         preparedRoot = root;
         detector.prepare(root);
-        // Loaded weights still pay for their first inference and the native tokenizer:
-        // one throwaway run on synthetic text, so the user's first mask does not wait for it.
-        // Queued like any request; nothing is kept.
-        void detector
-          .detect(
-            warmUpText,
-            () => {},
-            root,
-            detectionOptions.map((option) => option.id),
-          )
-          .catch(() => {});
+        lastWarmUp = 0;
+        warmUp();
       }
     },
     { immediate: true },
   );
 
+  /** Loaded weights still pay for their first inference and the native tokenizer, and
+   * macOS compresses the idle model memory: one throwaway run on synthetic text puts
+   * them back before the user masks. Runs once the pack is ready and when the window
+   * comes back to the front, at most once a minute; queued like any request, nothing kept. */
+  function warmUp() {
+    const root = pack.readyRoot.value;
+    if (!root || processing.value || Date.now() - lastWarmUp < warmUpInterval) return;
+    lastWarmUp = Date.now();
+    void detector
+      .detect(
+        warmUpText,
+        () => {},
+        root,
+        detectionOptions.map((option) => option.id),
+      )
+      .catch(() => {});
+  }
   function cancel(preserveModels = false) {
     currentRun++;
     detector.cancel(preserveModels);
@@ -252,6 +262,7 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     mask,
     maskText,
     probe,
+    warmUp,
     cancel,
     destroy,
   };

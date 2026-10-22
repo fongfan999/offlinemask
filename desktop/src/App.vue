@@ -153,12 +153,20 @@ const pageRef = useTemplateRef<PageHandle>("pageRef");
 const sidebar = useTemplateRef<InstanceType<typeof AppSidebar>>("sidebar");
 const sidebarToggle = useTemplateRef<HTMLButtonElement>("sidebarToggle");
 
+/** Back to the front: the models may have been paged out while the app sat idle. */
+function warmWhenVisible() {
+  if (document.visibilityState === "visible") run.warmUp();
+}
 onMounted(() => {
+  window.addEventListener("focus", run.warmUp);
+  document.addEventListener("visibilitychange", warmWhenVisible);
   void pack.start();
   void vault.start();
   void quick.start();
 });
 onBeforeUnmount(() => {
+  window.removeEventListener("focus", run.warmUp);
+  document.removeEventListener("visibilitychange", warmWhenVisible);
   clearTimeout(saveTimer);
   pack.stop();
   quick.stop();

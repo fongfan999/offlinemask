@@ -279,6 +279,30 @@ test("run: cancellation discards the result, failures keep the draft, spreadshee
   assert.deepEqual(detector.calls.at(-1), ["destroy"]);
 });
 
+test("run: warming up again needs a ready pack and waits a minute between runs", async (t) => {
+  t.mock.timers.enable({ apis: ["Date"], now: 1_000_000 });
+  const detector = fakeDetector();
+  const readyRoot = ref(null);
+  const run = useMaskingRun({
+    detector,
+    pack: { ready: ref(false), readyRoot },
+    sessions: ref([]),
+    onSession: () => {},
+  });
+  run.warmUp();
+  assert.deepEqual(detector.calls, []);
+  readyRoot.value = "asset://pack";
+  await nextTick();
+  const warmed = () => detector.calls.filter(([kind]) => kind === "detect").length;
+  assert.equal(warmed(), 1);
+  // The window coming back right away does not queue another run.
+  run.warmUp();
+  assert.equal(warmed(), 1);
+  t.mock.timers.tick(60_000);
+  run.warmUp();
+  assert.equal(warmed(), 2);
+});
+
 test("run: a ready pack is prepared once and selects every category unless the user chose", async () => {
   const detector = fakeDetector();
   const ready = ref(false);
