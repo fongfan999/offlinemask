@@ -26,22 +26,8 @@ pub fn run() {
                 tauri_plugin_autostart::MacosLauncher::LaunchAgent,
                 Some(vec![background::BACKGROUND_FLAG]),
             ))?;
-            background::setup_tray(app.handle())?;
-            #[cfg(target_os = "macos")]
-            background::install_app_menu(app.handle())?;
             app.manage(background::ServiceFiles::default());
             app.manage(selection::SelectionWatch::default());
-            #[cfg(target_os = "macos")]
-            services::install(app.handle());
-            // The floating panel must take clicks without activating the app, or the
-            // paste after a popover button lands in OfflineMask (decision 0096).
-            #[cfg(target_os = "macos")]
-            if let Some(panel) = app.get_webview_window("pill") {
-                panel_macos::make_non_activating(&panel);
-            }
-            if background::started_in_background() {
-                background::hide_main(app.handle());
-            }
         }
         let root = app
             .path()
@@ -75,6 +61,31 @@ pub fn run() {
                 .join("native")
                 .join(native_runtime::LIBRARY),
         ));
+        // The webview windows come last (decision 0121). Tauri builds config windows
+        // before this hook, and on a slow machine their first commands arrived before
+        // the state above was managed: `vault_status` failed for the whole launch.
+        for window in app.config().app.windows.clone() {
+            if !window.create {
+                tauri::WebviewWindowBuilder::from_config(app.handle(), &window)?.build()?;
+            }
+        }
+        #[cfg(desktop)]
+        {
+            background::setup_tray(app.handle())?;
+            #[cfg(target_os = "macos")]
+            background::install_app_menu(app.handle())?;
+            #[cfg(target_os = "macos")]
+            services::install(app.handle());
+            // The floating panel must take clicks without activating the app, or the
+            // paste after a popover button lands in OfflineMask (decision 0096).
+            #[cfg(target_os = "macos")]
+            if let Some(panel) = app.get_webview_window("pill") {
+                panel_macos::make_non_activating(&panel);
+            }
+            if background::started_in_background() {
+                background::hide_main(app.handle());
+            }
+        }
         Ok(())
     });
     #[cfg(all(

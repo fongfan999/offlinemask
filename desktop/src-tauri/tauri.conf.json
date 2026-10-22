@@ -14,6 +14,7 @@
     "windows": [
       {
         "label": "main",
+        "create": false,
         "title": "OfflineMask",
         "width": 1440,
         "height": 940,
@@ -23,6 +24,7 @@
       },
       {
         "label": "pill",
+        "create": false,
         "title": "OfflineMask",
         "url": "pill.html",
         "width": 336,
