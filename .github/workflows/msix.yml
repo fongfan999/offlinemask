@@ -33,8 +33,8 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v5
         with:
           install_args: node
       - name: Find the built app
@@ -53,7 +53,7 @@ jobs:
           fi
           echo "Using the app built by https://github.com/$GITHUB_REPOSITORY/actions/runs/$RUN_ID"
           echo "run_id=$RUN_ID" >> "$GITHUB_OUTPUT"
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         if: steps.source.outputs.run_id
         with:
           name: windows-app-x64
@@ -66,7 +66,7 @@ jobs:
         if: steps.source.outputs.run_id
         shell: pwsh
         run: ./desktop/scripts/check-msix.ps1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always() && steps.source.outputs.run_id
         with:
           name: msix-windows-x64

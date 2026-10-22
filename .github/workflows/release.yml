@@ -48,7 +48,7 @@ jobs:
       version: ${{ steps.version.outputs.version }}
       publish: ${{ steps.version.outputs.publish }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.TAG }}
       - id: version
@@ -115,10 +115,10 @@ jobs:
               desktop/src-tauri/target/release/bundle/deb/*.deb
               desktop/src-tauri/target/release/bundle/rpm/*.rpm
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.TAG }}
-      - uses: jdx/mise-action@v2
+      - uses: jdx/mise-action@v5
         env:
           # mise installs pnpm from the aqua registry, which ships no macOS x64 binary
           # for pnpm 11; that runner gets the same pinned version through npm below.
@@ -195,7 +195,7 @@ jobs:
           MISE_DISABLE_TOOLS: ${{ matrix.name == 'macos-x64' && 'pnpm' || '' }}
       # The built app before packaging, so the "Windows: MSIX check" workflow can repackage
       # it in minutes instead of rebuilding (decision 0117).
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.name == 'windows-x64'
         with:
           name: windows-app-x64
@@ -216,7 +216,7 @@ jobs:
         if: matrix.name == 'windows-x64'
         shell: pwsh
         run: ./desktop/scripts/check-msix.ps1
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: matrix.name == 'windows-x64'
         with:
           name: msix-windows-x64
@@ -236,7 +236,7 @@ jobs:
           done <<< "${{ matrix.bundles }}"
           ls -la release-out
           [[ -n "$(ls -A release-out)" ]] || { echo "::error::No bundles were produced." >&2; exit 1; }
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: offlinemask-${{ matrix.name }}
           path: release-out/*
@@ -250,10 +250,10 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ env.TAG }}
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: bundles
           # Release bundles only; the MSIX artifact goes to Partner Center, not here.

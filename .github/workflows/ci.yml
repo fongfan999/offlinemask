@@ -36,8 +36,8 @@ jobs:
     name: Lint, test and build (macos-latest)
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v5
       - run: mise exec -- pnpm install --frozen-lockfile
       - run: mise exec -- pnpm lint
       - run: mise exec -- pnpm -C desktop build
@@ -54,8 +54,8 @@ jobs:
       matrix:
         os: [ubuntu-latest]
     steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v5
       - name: Install Tauri Linux prerequisites
         if: runner.os == 'Linux'
         run: |

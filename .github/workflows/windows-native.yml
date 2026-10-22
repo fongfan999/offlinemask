@@ -33,15 +33,15 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 90
     steps:
-      - uses: actions/checkout@v4
-      - uses: jdx/mise-action@v2
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v5
       - run: mise exec -- pnpm install --frozen-lockfile
       - run: mise exec -- cargo test --manifest-path src-tauri/Cargo.toml --locked --features recognition-native-sidecar
         working-directory: desktop
       # Prepares resources, builds with the release feature, verifies the output and
       # starts the packaged helper (scripts/build-native-desktop.mjs).
       - run: mise exec -- pnpm -C desktop desktop:build:native
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: offlinemask-windows-x64-native
           path: |
