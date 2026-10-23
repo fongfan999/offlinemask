@@ -957,6 +957,23 @@ test("read-only plain text: a circle only when the rules find something; its cli
   adapter.command("open");
   await tick();
   assert.deepEqual(opened, [sessions.value[0].id]);
+  // Still on that selection: the preview opened beside the circle.
+  assert.equal(quick.lastStatus.value.corner, undefined);
+
+  // The user selected something else while masking ran: the preview takes the corner.
+  adapter.current = { text: phoneText, bounds: null, pointer: { x: 1, y: 1 }, editable: false };
+  const maskText = run.maskText;
+  run.maskText = async (text) => {
+    adapter.current = { ...adapter.current, text: "Đoạn khác" };
+    return maskText(text);
+  };
+  select();
+  await tick();
+  adapter.command("mask");
+  await tick();
+  await tick();
+  assert.equal(quick.lastStatus.value.tone, "preview");
+  assert.equal(quick.lastStatus.value.corner, true);
 });
 
 test("the circle replaces with the exact selection, never with repeated Accessibility text", async () => {

@@ -508,7 +508,9 @@ export function useQuickActions({
     if (busy.value) return show({ message: quickMessages.busy, tone: "error" });
     busy.value = true;
     try {
-      // The circle spins where it stands; the preview then opens beside it.
+      // The circle spins where it stands; the preview then opens beside it, or in the
+      // corner when the user moved on to another selection meanwhile (decision 0127).
+      const anchor = await readAnchor();
       await show({ message: workingMessage, tone: "busy", inPlace: true });
       const outcome = await run.maskText(text);
       if ("error" in outcome)
@@ -521,9 +523,11 @@ export function useQuickActions({
         return await show({ message: quickMessages.nothing, tone: "error" });
       const masked = sessionOutput(session);
       preview = { text: masked, sessionId: session.id };
+      const moved = anchor !== null && (await readAnchor()) !== anchor;
       await show({
         message: quickMessages.maskedTitle,
         tone: "preview",
+        ...(moved ? { corner: true } : {}),
         preview: {
           text: masked,
           marks: aliasMarks(masked, session.analysis.findings),
