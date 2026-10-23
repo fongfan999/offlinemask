@@ -6,6 +6,7 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
+- On WASM recognition (Intel Macs, Linux, `pnpm desktop:dev`) the app's page no longer passes WebKit's 4 GB limit and gets reloaded. The recognition models used to take three copies of their weights in memory; they now load with one, so the page settles near 2.5 GB instead of 4.3 GB and stays up through repeated ⌘⇧M use. Recognition results are unchanged ([0129](docs/decisions/0129-wasm-weights-as-external-data.md)).
 - The OfflineMask circle no longer spins forever when the app's page is reloaded mid-action. On WASM recognition (Intel Macs) WebKit kills the page once it passes 4 GB; the page now clears the circle when it comes back ([0128](docs/decisions/0128-webkit-kills-the-wasm-page.md)).
 - A masked result no longer replaces text you selected elsewhere while masking was still running. Right before pasting, OfflineMask checks that the selection is still the text it masked; if not, the result opens in a card to copy from, and your clipboard is left as it was ([0127](docs/decisions/0127-paste-only-over-the-masked-selection.md)).
 - On macOS, selecting text in Chromium and Electron apps (Chrome, Dia, Arc, Slack, Zalo) shows the OfflineMask circle again. Those apps expose the selection only after an assistive tool asks them to, and OfflineMask never asked ([0126](docs/decisions/0126-chromium-accessibility-tree.md)).
