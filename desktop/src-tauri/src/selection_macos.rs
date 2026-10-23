@@ -5,7 +5,7 @@
 //! selection's screen rectangle. Both calls fail without the Accessibility permission,
 //! and nothing is read for secure (password) fields or this app. Chromium and
 //! Electron applications build their accessibility tree only once a client asks for
-//! it, so the application is asked first (decision 0125).
+//! it, so the application is asked first (decision 0126).
 use std::collections::HashSet;
 use std::ffi::c_void;
 use std::ptr::NonNull;

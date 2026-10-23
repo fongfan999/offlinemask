@@ -1,4 +1,4 @@
-# 0125 — macOS: ask Chromium and Electron apps for their accessibility tree
+# 0126 — macOS: ask Chromium and Electron apps for their accessibility tree
 
 Date: 23 October 2026. Status: found by the owner on macOS (dev build, Ẩn nhanh on, Accessibility granted): selecting a support message with a name, account number and phone in ChatGPT's message box in Dia showed no circle, and Settings showed no skip reason. The same text in TextEdit showed the circle.
 

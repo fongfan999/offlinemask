@@ -6,7 +6,7 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
-- On macOS, selecting text in Chromium and Electron apps (Chrome, Dia, Arc, Slack, Zalo) shows the OfflineMask circle again. Those apps expose the selection only after an assistive tool asks them to, and OfflineMask never asked ([0125](docs/decisions/0125-chromium-accessibility-tree.md)).
+- On macOS, selecting text in Chromium and Electron apps (Chrome, Dia, Arc, Slack, Zalo) shows the OfflineMask circle again. Those apps expose the selection only after an assistive tool asks them to, and OfflineMask never asked ([0126](docs/decisions/0126-chromium-accessibility-tree.md)).
 
 ## [2.0.3] — 2026-10-22
 

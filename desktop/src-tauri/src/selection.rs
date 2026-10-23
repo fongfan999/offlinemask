@@ -86,23 +86,13 @@ pub struct SelectionWatch {
 /// poller never announce the same selection twice.
 static LAST_SHOWN: Mutex<String> = Mutex::new(String::new());
 
-// TEMP TRACE
-pub fn trace(label: &str, n: usize) {
-    use std::io::Write;
-    let at = std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_millis()).unwrap_or(0);
-    if let Ok(mut f) = std::fs::OpenOptions::new().create(true).append(true).open("/private/tmp/claude-502/-Users-fongfan999-Workspaces-offlinemask/f80784d5-d79c-409a-8247-7f33774dd686/scratchpad/trace.log") {
-        let _ = writeln!(f, "{at} {label} {n}");
-    }
-}
 pub fn emit_made<R: Runtime>(app: &AppHandle<R>, selection: Selection) {
-    trace("selection-made", selection.text.chars().count()); // TEMP TRACE
     if let Ok(mut last) = LAST_SHOWN.lock() {
         last.clone_from(&selection.text);
     }
     let _ = app.emit_to(MAIN_WINDOW, MADE_EVENT, selection);
 }
 pub fn emit_cleared<R: Runtime>(app: &AppHandle<R>) {
-    trace("selection-cleared", 0); // TEMP TRACE
     if let Ok(mut last) = LAST_SHOWN.lock() {
         last.clear();
     }

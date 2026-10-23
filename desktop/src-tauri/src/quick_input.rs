@@ -136,7 +136,6 @@ pub fn quick_input_permission(app: AppHandle, prompt: bool) -> String {
 /// Copy the front application's selection to the clipboard, then wait for it to land.
 #[tauri::command]
 pub async fn quick_copy_selection(app: AppHandle) -> Result<(), String> {
-    crate::selection::trace("copy-start", 0); // TEMP TRACE
     tauri::async_runtime::spawn_blocking(move || {
         chord(&app, 'c')?;
         sleep(SETTLE);
@@ -148,7 +147,6 @@ pub async fn quick_copy_selection(app: AppHandle) -> Result<(), String> {
 /// Paste the clipboard over the front application's selection.
 #[tauri::command]
 pub async fn quick_paste_result(app: AppHandle) -> Result<(), String> {
-    crate::selection::trace("paste", 0); // TEMP TRACE
     tauri::async_runtime::spawn_blocking(move || chord(&app, 'v'))
         .await
         .map_err(|error| format!("io: {error}"))?
