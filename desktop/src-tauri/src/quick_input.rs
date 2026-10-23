@@ -285,7 +285,7 @@ pub async fn quick_replace_selection(app: AppHandle, text: String) -> Result<(),
             None => Some(clipboard_guard::save(&app)),
         };
         #[cfg(target_os = "macos")]
-        let before = crate::selection_macos::focused_value(&app);
+        let before = crate::selection_macos::focused_state(&app);
         let left = clipboard_guard::write_private(&app, &text)?;
         let sent = chord(&app, 'v');
         #[cfg(target_os = "macos")]
@@ -294,7 +294,7 @@ pub async fn quick_replace_selection(app: AppHandle, text: String) -> Result<(),
             let mut changed = before.is_none();
             while !changed && started.elapsed() < PASTE_CONFIRM {
                 sleep(Duration::from_millis(25));
-                changed = crate::selection_macos::focused_value(&app) != before;
+                changed = crate::selection_macos::focused_state(&app) != before;
             }
             changed
         };

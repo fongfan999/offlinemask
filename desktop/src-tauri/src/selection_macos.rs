@@ -213,7 +213,8 @@ fn read_selection(frontmost_pid: i32) -> Option<Read> {
         return None;
     }
     let bounds = selection_bounds(element);
-    let editable = settable(element, "AXValue") || settable(element, "AXSelectedText");
+    let editable =
+        settable(element, "AXValue") || settable(element, "AXSelectedText") || web_editor(element);
     Some((text, bounds, editable))
 }
 
@@ -391,9 +392,25 @@ fn native_focus<R: Runtime>(app: &AppHandle<R>) -> Option<CFType> {
     }
     Some(focused)
 }
-/// The text of the frontmost application's focused field, web fields included: how a
-/// paste is confirmed to have landed (decision 0131).
-pub fn focused_value<R: Runtime>(app: &AppHandle<R>) -> Option<String> {
+/// A web editor that Accessibility does not call editable (decision 0132). Zalo's message
+/// box is a focused `AXGroup` with nothing settable; read-only web text leaves focus on
+/// the page (`AXWebArea`) instead. A wrong guess only costs a paste that does not land,
+/// which the click detects before it reports anything.
+fn web_editor(element: AXUIElementRef) -> bool {
+    let role = attribute(element, "AXRole").as_ref().and_then(string);
+    matches!(
+        role.as_deref(),
+        Some("AXGroup" | "AXTextArea" | "AXTextField")
+    ) && attribute(element, "AXSelectedTextMarkerRange").is_some()
+        && settable(element, "AXFocused")
+        && attribute(element, "AXFocused")
+            .and_then(|focused| focused.downcast::<core_foundation::boolean::CFBoolean>())
+            .is_some_and(bool::from)
+}
+/// The frontmost application's focused field as its text and selection, web fields
+/// included: a paste has landed when either changes. Zalo reports an empty value but a
+/// selection, which a paste collapses (decisions 0131, 0132).
+pub fn focused_state<R: Runtime>(app: &AppHandle<R>) -> Option<(Option<String>, Option<String>)> {
     let pid = front_pid(app)?;
     // SAFETY: plain query.
     if !unsafe { AXIsProcessTrusted() } || pid as u32 == std::process::id() {
@@ -406,9 +423,9 @@ pub fn focused_value<R: Runtime>(app: &AppHandle<R>) -> Option<String> {
         application.as_CFTypeRef() as AXUIElementRef,
         "AXFocusedUIElement",
     )?;
-    attribute(focused.as_CFTypeRef() as AXUIElementRef, "AXValue")
-        .as_ref()
-        .and_then(string)
+    let element = focused.as_CFTypeRef() as AXUIElementRef;
+    let read = |name| attribute(element, name).as_ref().and_then(string);
+    Some((read("AXValue"), read("AXSelectedText")))
 }
 /// The selection of a native text view, read without the clipboard.
 pub fn native_selection<R: Runtime>(app: &AppHandle<R>) -> Option<String> {
