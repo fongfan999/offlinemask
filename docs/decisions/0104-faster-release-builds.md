@@ -1,6 +1,6 @@
 # 0104 — Faster release builds: thin LTO, a stable cache key, no AppImage
 
-Date: 20 October 2026. Status: requested by the owner after the first runs of the release workflow ("well, quite long and heavy"; then "apply thin LTO, the lockfile-only cache key and drop the AppImage, record the decision, and rebuild to measure").
+Date: 20 October 2026. Status: cache key revised in [0124](0124-release-cache-across-tags.md); requested by the owner after the first runs of the release workflow ("well, quite long and heavy"; then "apply thin LTO, the lockfile-only cache key and drop the AppImage, record the decision, and rebuild to measure").
 
 ## Problem
 

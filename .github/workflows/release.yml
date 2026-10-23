@@ -3,7 +3,8 @@
 # bundles and a SHA256SUMS.txt to the GitHub release for that tag (created as a draft
 # when it does not exist yet). "Run workflow" with a tag name rebuilds that tag using
 # the workflow as it is on the chosen branch; without a tag it is a dry run that builds
-# the chosen branch and keeps the bundles as run artifacts, attaching nothing.
+# the chosen branch and keeps the bundles as run artifacts, attaching nothing. A twice-weekly
+# scheduled dry run of main warms the Rust cache for the next tag (decision 0124).
 #
 # Per platform:
 #   macOS arm64   native recognition helper (decision 0049), the verified path.
@@ -23,6 +24,10 @@ name: "Desktop: Release"
 on:
   push:
     tags: ["v*"]
+  # Twice-weekly dry run of main, which keeps the Rust cache that tag runs restore warm and
+  # inside GitHub's seven-day eviction window (decision 0124).
+  schedule:
+    - cron: "0 3 * * 1,4"
   workflow_dispatch:
     inputs:
       tag:
@@ -133,13 +138,17 @@ jobs:
       - uses: swatinem/rust-cache@v2
         with:
           workspaces: desktop/src-tauri -> target
-          # One key per platform that changes only with the pinned toolchain and the
-          # dependency graph. The action's own environment hash also covers every
-          # rustc preinstalled on the runner image, which drifts between runs and
-          # left the Linux cache unused (decision 0104).
-          key: release-${{ matrix.name }}-${{ hashFiles('mise.toml', 'desktop/src-tauri/Cargo.lock', 'desktop/src-tauri/Cargo.toml', 'desktop/.cargo/config.toml') }}
+          # One key per platform from the pinned toolchain only. The action appends its
+          # own Cargo.lock/Cargo.toml hash and, on a miss, restores the newest cache with
+          # this prefix, so a version bump still starts warm. Its environment hash also
+          # covers every rustc preinstalled on the runner image, which drifts between
+          # runs and left the Linux cache unused (decisions 0104, 0124).
+          key: release-${{ matrix.name }}-${{ hashFiles('mise.toml', 'desktop/.cargo/config.toml') }}
           add-job-id-key: false
           add-rust-environment-hash-key: false
+          # A tag run can restore main's cache but no other tag's, so only main saves
+          # (the scheduled dry run above); tag caches were 2.4 GB per release nobody read.
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - name: Install Tauri Linux prerequisites
         if: runner.os == 'Linux'
         run: |
