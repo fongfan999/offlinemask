@@ -124,10 +124,12 @@ export interface QuickActionsAdapter {
   desktop: boolean;
   /** With `prompt`, macOS shows its permission dialog. */
   inputPermission(prompt: boolean): Promise<InputPermission>;
-  /** Send the copy chord to the front application and wait for the clipboard. */
-  copySelection(): Promise<void>;
-  /** Send the paste chord to the front application. */
-  pasteResult(): Promise<void>;
+  /** The front application's selection, read natively without leaving anything on the
+   * user's clipboard (decision 0130); null when nothing answered. */
+  copySelection(): Promise<string | null>;
+  /** Put `text` over the front application's selection, natively, the user's clipboard
+   * left as it was (decision 0130). */
+  replaceSelection(text: string): Promise<void>;
   /** Empty string when the clipboard holds no text. */
   readClipboard(): Promise<string>;
   writeClipboard(text: string): Promise<void>;
@@ -168,8 +170,8 @@ export const nativeQuickActions: QuickActionsAdapter = {
     const state = await invoke<string>("quick_input_permission", { prompt });
     return state === "granted" || state === "denied" ? state : "unsupported";
   },
-  copySelection: () => invoke("quick_copy_selection"),
-  pasteResult: () => invoke("quick_paste_result"),
+  copySelection: () => invoke<string | null>("quick_copy_selection"),
+  replaceSelection: (text) => invoke("quick_replace_selection", { text }),
   async readClipboard() {
     if (!isTauri()) return navigator.clipboard.readText();
     try {

@@ -1,19 +1,21 @@
 //! Keystrokes for the in-place quick action (decision 0091): one copy chord to
 //! take the selection of the front application and one paste chord to put the
-//! result back. Both are sent only while handling the user's own shortcut
-//! press; nothing is ever read from the keyboard and no event tap is installed.
+//! result back, each around a saved and restored clipboard (decision 0130); native
+//! macOS text views need neither. Both are sent only while handling the user's own
+//! click or shortcut; nothing is ever read from the keyboard and no event tap is
+//! installed.
 use enigo::{Direction, Enigo, InputError, Key, Keyboard, NewConError, Settings};
 use std::sync::mpsc;
 use std::thread::sleep;
-use std::time::Duration;
+use std::time::{Duration, Instant};
 use tauri::{AppHandle, Runtime};
+
+use crate::clipboard_guard;
 
 #[cfg(target_os = "macos")]
 const MODIFIER: Key = Key::Meta;
 #[cfg(not(target_os = "macos"))]
 const MODIFIER: Key = Key::Control;
-/// How long the front application gets to serve the copy before the clipboard is read.
-const SETTLE: Duration = Duration::from_millis(160);
 
 fn settings(prompt: bool) -> Settings {
     Settings {
@@ -133,21 +135,68 @@ pub fn quick_input_permission(app: AppHandle, prompt: bool) -> String {
     let _ = (app, prompt);
     state
 }
-/// Copy the front application's selection to the clipboard, then wait for it to land.
+/// How long the front application gets to answer the copy chord.
+const COPY_WAIT: Duration = Duration::from_millis(600);
+/// How long a pasted result stays on the clipboard before the user's own contents come
+/// back. Applications read it while handling the chord (decision 0130).
+const PASTE_HOLD: Duration = Duration::from_millis(500);
+
+/// The front application's selection. A native macOS text view is read through
+/// Accessibility; anything else with the copy chord, the user's clipboard saved before
+/// and put back right after (decision 0130). None when nothing answered.
 #[tauri::command]
-pub async fn quick_copy_selection(app: AppHandle) -> Result<(), String> {
+pub async fn quick_copy_selection(app: AppHandle) -> Result<Option<String>, String> {
     tauri::async_runtime::spawn_blocking(move || {
-        chord(&app, 'c')?;
-        sleep(SETTLE);
-        Ok(())
+        #[cfg(target_os = "macos")]
+        if let Some(text) = crate::selection_macos::native_selection(&app) {
+            return Ok(Some(text));
+        }
+        let saved = clipboard_guard::save(&app);
+        // An empty private item first, so any change after the chord is the copy.
+        let marked = clipboard_guard::write_private(&app, "")?;
+        let sent = chord(&app, 'c');
+        let mut left = marked;
+        if sent.is_ok() {
+            let started = Instant::now();
+            while left == marked && started.elapsed() < COPY_WAIT {
+                sleep(Duration::from_millis(15));
+                left = clipboard_guard::stamp(&app);
+            }
+            if left != marked {
+                // Some applications write the copy in steps.
+                sleep(Duration::from_millis(30));
+                left = clipboard_guard::stamp(&app);
+            }
+        }
+        let text = (left != marked)
+            .then(|| clipboard_guard::read_text(&app))
+            .flatten();
+        clipboard_guard::restore(&app, saved, left);
+        sent?;
+        Ok(text.filter(|text| !text.trim().is_empty()))
     })
     .await
     .map_err(|error| format!("io: {error}"))?
 }
-/// Paste the clipboard over the front application's selection.
+/// Put `text` over the front application's selection: through Accessibility in a native
+/// macOS text view, otherwise with the paste chord and the user's clipboard put back
+/// once the application has taken the text (decision 0130).
 #[tauri::command]
-pub async fn quick_paste_result(app: AppHandle) -> Result<(), String> {
-    tauri::async_runtime::spawn_blocking(move || chord(&app, 'v'))
-        .await
-        .map_err(|error| format!("io: {error}"))?
+pub async fn quick_replace_selection(app: AppHandle, text: String) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        #[cfg(target_os = "macos")]
+        if crate::selection_macos::replace_native(&app, &text) {
+            return Ok(());
+        }
+        let saved = clipboard_guard::save(&app);
+        let left = clipboard_guard::write_private(&app, &text)?;
+        let sent = chord(&app, 'v');
+        if sent.is_ok() {
+            sleep(PASTE_HOLD);
+        }
+        clipboard_guard::restore(&app, saved, left);
+        sent
+    })
+    .await
+    .map_err(|error| format!("io: {error}"))?
 }

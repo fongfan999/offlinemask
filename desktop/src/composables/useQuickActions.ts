@@ -253,26 +253,13 @@ export function useQuickActions({
     lastStatus.value = status;
     if (adapter.desktop) await adapter.sendStatus(status).catch(() => {});
   }
-  /** The shortcut first tries to take the front application's selection. A marker
-   * goes on the clipboard before the copy chord, so a selection that equals the old
-   * clipboard still counts and no answer to the chord is told apart from one; with
-   * nothing selected the user's clipboard is put back. Without permission the
-   * clipboard's own text is used as before. */
-  async function takeSelection(before: string): Promise<{ text: string; replaced: boolean }> {
+  /** The front application's selection, read natively (decision 0130): through
+   * Accessibility in a native text view, otherwise with the copy chord around a saved
+   * and restored clipboard. Null without permission or when nothing answered. */
+  async function takeSelection(): Promise<string | null> {
     if (inputPermission.value === "unknown") await checkInputPermission();
-    if (inputPermission.value !== "granted") return { text: before, replaced: false };
-    // An empty clipboard (or an image) needs no marker: any text after the chord is new.
-    const marker = before ? `\u2063OfflineMask ${Date.now().toString(36)}\u2063` : "";
-    try {
-      if (marker) await writeClipboard(marker);
-      await adapter.copySelection();
-      const text = await adapter.readClipboard();
-      if (text !== marker && text.trim()) return { text, replaced: true };
-    } catch {
-      // Keys could not be sent this time: the clipboard flow still works.
-    }
-    if (marker) await writeClipboard(before).catch(() => {});
-    return { text: before, replaced: false };
+    if (inputPermission.value !== "granted") return null;
+    return adapter.copySelection().catch(() => null);
   }
   /** The front application's selection as Accessibility reports it, or null. */
   async function readAnchor(): Promise<string | null> {
@@ -282,32 +269,23 @@ export function useQuickActions({
   /** Masking takes a while, and meanwhile the user may switch applications or select
    * other text: only the very selection that was masked is replaced (decision 0127).
    * Accessibility answers without the clipboard, comparing its own report before and
-   * after; only applications it cannot read get a second copy chord. */
+   * after; only applications it cannot read are asked with the copy chord again. */
   async function stillSelected(text: string, anchor: string | null): Promise<boolean> {
     if (anchor !== null) return (await readAnchor()) === anchor;
-    const marker = `\u2063OfflineMask ${Date.now().toString(36)}\u2063`;
-    try {
-      await writeClipboard(marker);
-      await adapter.copySelection();
-      return (await adapter.readClipboard()) === text;
-    } catch {
-      return false;
-    }
+    return (await takeSelection()) === text;
   }
   /** Run one action. `auto` (the shortcut) decides from the text: known aliases
    * restore, anything else is masked; the panel's buttons act on the clipboard only.
    * `given` is text handed over by a Service: it is used as is and the result goes
-   * to the clipboard. */
+   * to the clipboard. With `replace`, `given` is the selection itself: the result
+   * replaces it and the clipboard is not involved (decision 0130). */
   async function act(
     command: "auto" | "mask" | "restore",
     given?: string,
     options: { replace?: boolean; inPlace?: boolean } = {},
   ): Promise<QuickStatus> {
     const tag = options.inPlace ? { inPlace: true } : {};
-    // A popover action works on text still selected in the front application: the
-    // result is pasted over it, like the shortcut's in-place path.
     let replaced = options.replace === true;
-    let before = "";
     const done = async (
       message: string,
       tone: QuickStatus["tone"] = "ok",
@@ -318,76 +296,97 @@ export function useQuickActions({
         hinted = true;
         message += ` ${quickMessages.permissionHint}`;
       }
-      // A preview opens beside the circle, like the read-only one, not in its place.
+      // A preview opens in the corner: the user has moved on, or the replace failed.
       const status: QuickStatus = shown
         ? { message, tone, preview: shown, corner: true }
         : { message, tone, ...tag };
       await show(status);
       return status;
     };
-    /** Nothing changed: a taken selection hands the user their clipboard back. */
-    const undone = async (message: string) => {
-      if (replaced) await writeClipboard(before).catch(() => {});
-      return done(message, "error");
+    /** A result that could not replace the selection waits in a preview, where the user
+     * copies it or opens its session; the clipboard stays theirs. */
+    const offer = async (
+      title: string,
+      text: string,
+      marks: { start: number; end: number }[],
+      sessionId: string | null,
+    ) => {
+      preview = { text, sessionId };
+      return done(title, "preview", { text, marks, canOpen: !!sessionId && !!openSession });
     };
     if (locked()) return done(lockedMessage, "error");
     if (busy.value) return done(quickMessages.busy, "error");
     busy.value = true;
     try {
-      try {
-        before = await adapter.readClipboard();
-      } catch {
-        return await done(quickMessages.clipboard, "error");
+      let text = given ?? "";
+      if (command === "auto" && given === undefined) {
+        const taken = await takeSelection();
+        if (taken !== null) {
+          text = taken;
+          replaced = true;
+        }
       }
-      let text = given ?? before;
-      if (command === "auto" && given === undefined)
-        ({ text, replaced } = await takeSelection(before));
-      const direction = quickDirection(text, knownTables());
-      if (direction === "empty") return await undone(quickMessages.empty);
-      if (command === "restore" || (command === "auto" && direction !== "mask")) {
-        if (direction !== "restore")
-          return await undone(
-            direction === "unknown" ? quickMessages.unknown : quickMessages.noAliases,
-          );
-        const result = restoreFromTables(text, knownTables());
+      if (!replaced && given === undefined) {
         try {
-          await writeClipboard(result.text);
+          text = await adapter.readClipboard();
         } catch {
           return await done(quickMessages.clipboard, "error");
         }
-        if (replaced) await adapter.pasteResult().catch(() => {});
+      }
+      const direction = quickDirection(text, knownTables());
+      if (direction === "empty") return await done(quickMessages.empty, "error");
+      if (command === "restore" || (command === "auto" && direction !== "mask")) {
+        if (direction !== "restore")
+          return await done(
+            direction === "unknown" ? quickMessages.unknown : quickMessages.noAliases,
+            "error",
+          );
+        const result = restoreFromTables(text, knownTables());
+        if (replaced) {
+          try {
+            await adapter.replaceSelection(result.text);
+          } catch {
+            return await offer(quickMessages.previewTitle, result.text, result.marks, null);
+          }
+        } else {
+          try {
+            await writeClipboard(result.text);
+          } catch {
+            return await done(quickMessages.clipboard, "error");
+          }
+        }
         return await done(quickMessages.restored(result.restored, result.unknown.length, replaced));
       }
       const anchor = replaced ? await readAnchor() : null;
       await show({ message: workingMessage, tone: "busy", ...tag });
       const outcome = await run.maskText(text);
       if ("error" in outcome)
-        return await undone(outcome.error === "busy" ? quickMessages.busy : outcome.message);
+        return await done(outcome.error === "busy" ? quickMessages.busy : outcome.message, "error");
       const session = outcome.session;
-      if (!session.analysis.findings.length) return await undone(quickMessages.nothing);
-      if (replaced && !(await stillSelected(text, anchor))) {
-        // The selection moved: the user's clipboard comes back untouched and the result
-        // waits in a preview, where they copy it or open its session.
-        await writeClipboard(before).catch(() => {});
-        const masked = sessionOutput(session);
-        preview = { text: masked, sessionId: session.id };
-        return await done(quickMessages.maskedMoved, "preview", {
-          text: masked,
-          marks: aliasMarks(masked, session.analysis.findings),
-          canOpen: !!openSession,
-        });
+      const found = session.analysis.findings.length;
+      if (!found) return await done(quickMessages.nothing, "error");
+      const masked = sessionOutput(session);
+      const marks = aliasMarks(masked, session.analysis.findings);
+      if (replaced) {
+        if (!(await stillSelected(text, anchor)))
+          return await offer(quickMessages.maskedMoved, masked, marks, session.id);
+        try {
+          // The result is in place before the panel flashes, so it cannot land there.
+          await adapter.replaceSelection(masked);
+        } catch {
+          return await offer(quickMessages.maskedTitle, masked, marks, session.id);
+        }
+        return await done(quickMessages.masked(found, true));
       }
       try {
-        await writeClipboard(sessionOutput(session));
+        await writeClipboard(masked);
       } catch {
         return await done(quickMessages.clipboard, "error");
       }
-      // The result is pasted before the panel flashes, so the paste cannot land there.
-      if (replaced) await adapter.pasteResult().catch(() => {});
-      return await done(quickMessages.masked(session.analysis.findings.length, replaced));
+      return await done(quickMessages.masked(found, false));
     } catch {
       // Whatever broke, the panel must not stay on "Đang ẩn thông tin…".
-      return await undone(quickMessages.failed);
+      return await done(quickMessages.failed, "error");
     } finally {
       busy.value = false;
     }
@@ -620,46 +619,32 @@ export function useQuickActions({
       await adapter.quit().catch(() => {});
     }
   }
-  /** The exact selection of the front application, read with the copy chord at the
-   * moment the circle is clicked; the user's clipboard is put back afterwards. The
-   * Accessibility text only decides whether the circle shows: some applications
-   * (Chromium editors) report it repeated or partial, and pasting a result built from
-   * it over the selection duplicated the user's text. */
-  async function exactSelection(): Promise<string | null> {
-    if (inputPermission.value !== "granted") return null;
-    let before = "";
-    try {
-      before = await adapter.readClipboard();
-    } catch {
-      // An unreadable clipboard is restored as empty.
-    }
-    const marker = `\u2063OfflineMask ${Date.now().toString(36)}\u2063`;
-    try {
-      await writeClipboard(marker);
-      await adapter.copySelection();
-      const text = await adapter.readClipboard();
-      return text !== marker && text.trim() ? text : null;
-    } catch {
-      return null;
-    } finally {
-      await writeClipboard(before).catch(() => {});
-    }
+  /** The exact selection of the front application at the moment the circle is clicked
+   * (decision 0130). Accessibility text only decides whether the circle shows: Chromium
+   * editors report it repeated, or without line breaks, and a result built from it
+   * duplicated or reflowed the user's text. The copy must be part of what Accessibility
+   * reported, whitespace aside: an application that copies something else when the
+   * selection is gone (a whole line, in some editors) is not taken at its word. */
+  async function exactSelection(reported: string): Promise<string | null> {
+    const copied = await takeSelection();
+    if (copied === null) return null;
+    const bare = (text: string) => text.replace(/\s+/gu, "");
+    return bare(copied) && bare(reported).includes(bare(copied)) ? copied : null;
   }
   async function actOnSelection(
     command: "mask" | "restore",
     selection: { text: string; editable: boolean },
   ) {
-    const exact = await exactSelection();
-    if (!selection.editable) {
+    const exact = await exactSelection(selection.text);
+    // Read-only text, or a selection that could not be read exactly, is never replaced:
+    // its result opens in the preview, and the user decides what to do with it.
+    if (!selection.editable || exact === null) {
       const text = exact ?? selection.text;
       if (command === "restore") await showPreview(text);
       else await showMaskedPreview(text);
       return;
     }
-    // Replace in place only with the exact selection; without it the result goes to
-    // the clipboard and the user pastes it.
-    if (exact) await act(command, exact, { replace: true, inPlace: true });
-    else await act(command, selection.text);
+    await act(command, exact, { replace: true, inPlace: true });
   }
   /** ⌘⇧M does exactly what a click on the circle does, no more and no less: the
    * selection is read with its place and whether it can be typed in, the circle appears

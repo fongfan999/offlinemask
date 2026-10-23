@@ -106,7 +106,7 @@ pub fn run() {
         vault::vault_reset,
         quick_input::quick_input_permission,
         quick_input::quick_copy_selection,
-        quick_input::quick_paste_result,
+        quick_input::quick_replace_selection,
         background::quick_quit,
         background::quick_show_main,
         background::quick_hide_main,
@@ -134,7 +134,7 @@ pub fn run() {
         vault::vault_reset,
         quick_input::quick_input_permission,
         quick_input::quick_copy_selection,
-        quick_input::quick_paste_result,
+        quick_input::quick_replace_selection,
         background::quick_quit,
         background::quick_show_main,
         background::quick_hide_main,
@@ -165,7 +165,7 @@ pub fn run() {
         vault::vault_reset,
         quick_input::quick_input_permission,
         quick_input::quick_copy_selection,
-        quick_input::quick_paste_result,
+        quick_input::quick_replace_selection,
         background::quick_quit,
         background::quick_show_main,
         background::quick_hide_main,
@@ -200,7 +200,7 @@ pub fn run() {
         vault::vault_reset,
         quick_input::quick_input_permission,
         quick_input::quick_copy_selection,
-        quick_input::quick_paste_result,
+        quick_input::quick_replace_selection,
         background::quick_quit,
         background::quick_show_main,
         background::quick_hide_main,
@@ -243,6 +243,7 @@ pub fn run() {
         });
 }
 mod background;
+mod clipboard_guard;
 #[cfg(feature = "minilm-native-desktop-prototype")]
 mod minilm_native_graph;
 #[cfg(feature = "minilm-desktop-prototype")]

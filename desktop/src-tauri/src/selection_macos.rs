@@ -353,6 +353,81 @@ pub fn start<R: Runtime>(app: AppHandle<R>, enabled: Arc<AtomicBool>) {
     let _ = app.app_handle();
 }
 
+/// The frontmost application's process id, read on the main thread.
+fn front_pid<R: Runtime>(app: &AppHandle<R>) -> Option<i32> {
+    let (sender, receiver) = std::sync::mpsc::channel();
+    app.run_on_main_thread(move || {
+        let pid = NSWorkspace::sharedWorkspace()
+            .frontmostApplication()
+            .map(|front| front.processIdentifier());
+        let _ = sender.send(pid);
+    })
+    .ok()?;
+    receiver.recv_timeout(Duration::from_secs(1)).ok()?
+}
+/// The focused element of the frontmost application when it is a native text view: it
+/// answers `AXSelectedText` but not the text markers of web content. WebKit and Chromium
+/// fields can drop line breaks from their Accessibility text and ignore a write to it,
+/// so those keep the copy and paste chords (decision 0130).
+fn native_focus<R: Runtime>(app: &AppHandle<R>) -> Option<CFType> {
+    let pid = front_pid(app)?;
+    // SAFETY: plain query.
+    if !unsafe { AXIsProcessTrusted() } || pid as u32 == std::process::id() {
+        return None;
+    }
+    // SAFETY: returns an owned element for that process.
+    let application =
+        unsafe { CFType::wrap_under_create_rule(AXUIElementCreateApplication(pid) as CFTypeRef) };
+    let focused = attribute(
+        application.as_CFTypeRef() as AXUIElementRef,
+        "AXFocusedUIElement",
+    )?;
+    let element = focused.as_CFTypeRef() as AXUIElementRef;
+    let role = attribute(element, "AXRole").as_ref().and_then(string);
+    if role.as_deref() == Some("AXSecureTextField")
+        || attribute(element, "AXSelectedTextMarkerRange").is_some()
+    {
+        return None;
+    }
+    Some(focused)
+}
+/// The selection of a native text view, read without the clipboard.
+pub fn native_selection<R: Runtime>(app: &AppHandle<R>) -> Option<String> {
+    let focused = native_focus(app)?;
+    attribute(focused.as_CFTypeRef() as AXUIElementRef, "AXSelectedText")
+        .as_ref()
+        .and_then(string)
+        .filter(|text| usable(text))
+}
+/// Replace the selection of a native text view without the clipboard. True only when the
+/// field's text afterwards differs and holds the replacement: some fields report success
+/// for a write they ignore.
+pub fn replace_native<R: Runtime>(app: &AppHandle<R>, text: &str) -> bool {
+    let Some(focused) = native_focus(app) else {
+        return false;
+    };
+    let element = focused.as_CFTypeRef() as AXUIElementRef;
+    if !settable(element, "AXSelectedText") {
+        return false;
+    }
+    let value = |element| attribute(element, "AXValue").as_ref().and_then(string);
+    let Some(before) = value(element) else {
+        return false;
+    };
+    let key = CFString::new("AXSelectedText");
+    let replacement = CFString::new(text);
+    // SAFETY: valid element; key and value are borrowed for the call.
+    let status = unsafe {
+        AXUIElementSetAttributeValue(
+            element,
+            key.as_concrete_TypeRef(),
+            replacement.as_CFTypeRef(),
+        )
+    };
+    status == AX_SUCCESS
+        && value(element).is_some_and(|after| after != before && after.contains(text))
+}
+
 /// One look for the keyboard poller: the frontmost application, the pointer and the
 /// mouse buttons are read on the main thread; the selection itself off it.
 pub fn probe<R: Runtime>(app: &AppHandle<R>) -> Probe {

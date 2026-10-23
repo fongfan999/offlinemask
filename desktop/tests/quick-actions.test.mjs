@@ -116,11 +116,16 @@ function fakeAdapter(clipboard = "") {
       calls.push(["permission", prompt]);
       return adapter.permission;
     },
+    // The native read and replace leave the clipboard alone (decision 0130).
     copySelection: async () => {
       calls.push(["copy"]);
-      if (adapter.selection !== null) adapter.clipboard = adapter.selection;
+      return adapter.selection;
     },
-    pasteResult: async () => calls.push(["paste", adapter.clipboard]),
+    replaceSelection: async (text) => {
+      calls.push(["paste", text]);
+      if (adapter.replaceFails) throw new Error("io");
+    },
+    replaceFails: false,
     closeHandler: null,
     autostart: false,
     onCloseRequested: async (handler) => {
@@ -350,11 +355,13 @@ test("with permission, the shortcut takes the selection and pastes the result ov
     adapter.calls.filter((call) => call[0] === "paste"),
     [["paste", `Gọi ${alias} giúp tôi.`]],
   );
-  // A marker went on the clipboard before the copy chord, so a selection equal to
-  // the old clipboard would still have counted.
-  const writes = adapter.calls.filter((call) => call[0] === "write").map((call) => call[1]);
-  assert.match(writes[0], /OfflineMask/);
-  assert.equal(writes.at(-1), `Gọi ${alias} giúp tôi.`);
+  // The selection was read and replaced natively: the user's clipboard never changed
+  // and the result is not left on it (decision 0130).
+  assert.deepEqual(
+    adapter.calls.filter((call) => call[0] === "write"),
+    [],
+  );
+  assert.equal(adapter.clipboard, "bản cũ trong clipboard");
   // The panel's own buttons never touch the selection: the two chords are the shortcut's
   // read and its check before the paste.
   adapter.clipboard = phoneText;
@@ -460,10 +467,10 @@ test("nothing selected, or no permission, falls back to the clipboard; the hint 
     adapter.calls.filter((call) => call[0] === "paste"),
     [],
   );
-  // No selection: the marker was replaced by the user's clipboard before masking it.
+  // No selection: the clipboard's own text was masked, and the result written once.
   const writes = adapter.calls.filter((call) => call[0] === "write").map((call) => call[1]);
-  assert.match(writes[0], /OfflineMask/);
-  assert.equal(writes[1], phoneText);
+  assert.equal(writes.length, 1);
+  assert.match(writes[0], /\[SDT_1_[a-f0-9]{4}\]/);
 
   const denied = fakeAdapter(phoneText);
   denied.permission = "denied";
@@ -1010,8 +1017,8 @@ test("the circle replaces with the exact selection, never with repeated Accessib
     [["paste", `Gọi ${alias} giúp tôi.`]],
   );
 
-  // No exact read (the app ignores the copy chord): the result goes to the clipboard
-  // only, and nothing is pasted over the selection.
+  // No exact read (the app ignores the copy chord): nothing is pasted over the
+  // selection and the clipboard stays the user's; the result opens in the preview.
   adapter.selection = null;
   adapter.clipboard = "clipboard cũ";
   adapter.selectionHandler({
@@ -1026,9 +1033,46 @@ test("the circle replaces with the exact selection, never with repeated Accessib
   await tick();
   assert.equal(adapter.calls.filter((call) => call[0] === "paste").length, 1);
   assert.equal(run.texts.at(-1), "Số 0912345678");
-  // (The fake run masks its own sample text; what matters is that the result went to
-  // the clipboard instead of over the selection.)
-  assert.match(adapter.clipboard, /\[SDT_1_[a-f0-9]{4}\]/);
+  assert.equal(adapter.clipboard, "clipboard cũ");
+  assert.equal(quick.lastStatus.value.tone, "preview");
+  assert.match(quick.lastStatus.value.preview.text, /\[SDT_1_[a-f0-9]{4}\]/);
+
+  // A copy that is not part of the reported selection (an editor copying the whole
+  // line) is not trusted either.
+  adapter.selection = "const so = 0912345678; // cả dòng";
+  adapter.selectionHandler({
+    text: "0912345678",
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: true,
+  });
+  await tick();
+  adapter.command("mask");
+  await tick();
+  await tick();
+  assert.equal(adapter.calls.filter((call) => call[0] === "paste").length, 1);
+  assert.equal(run.texts.at(-1), "0912345678");
+  assert.equal(quick.lastStatus.value.tone, "preview");
+});
+
+test("a replace that fails leaves the result in a preview and the clipboard alone", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("bản cũ trong clipboard");
+  adapter.permission = "granted";
+  adapter.selection = phoneText;
+  adapter.replaceFails = true;
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  const status = await quick.act("auto");
+  const alias = sessions.value[0].analysis.findings[0].alias;
+  assert.equal(status.tone, "preview");
+  assert.equal(status.preview.text, `Gọi ${alias} giúp tôi.`);
+  assert.equal(adapter.clipboard, "bản cũ trong clipboard");
 });
 
 test("a click on the circle reports its progress in place; the shortcut's results go to the corner", async () => {
