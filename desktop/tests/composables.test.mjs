@@ -474,3 +474,100 @@ test("run: maskText leaves the draft alone and adopts only sessions with finding
     message: "Nhập hoặc dán văn bản để bắt đầu.",
   });
 });
+
+/** A detector whose calls each wait until the test settles them, in order. */
+function queuedDetector() {
+  const calls = [];
+  return {
+    calls,
+    settle: (index, detections) => calls[index].resolve(detections),
+    prepare: () => {},
+    cancel: () => {},
+    destroy: () => {},
+    detect: (text) =>
+      new Promise((resolve) => {
+        calls.push({ text, resolve });
+      }),
+  };
+}
+const flush = () => new Promise((resolve) => setTimeout(resolve, 0));
+const phoneAt = (text, value) => {
+  const start = text.indexOf(value);
+  return {
+    start,
+    end: start + value.length,
+    type: "SDT",
+    label: "SĐT",
+    source: "t",
+    reason: "t",
+    priority: 1,
+  };
+};
+
+test("run: the circle's check is the click's detection, even with other line breaks", async () => {
+  const detector = queuedDetector();
+  const run = useMaskingRun({
+    detector,
+    pack: { ready: ref(false), readyRoot: ref(null) },
+    sessions: ref([]),
+    onSession: () => {},
+  });
+  // Accessibility reports the selection without the line break its copy has.
+  const reported = "Kính gửi,Số 0901234567 nhé";
+  const copied = "Kính gửi,\n\nSố 0901234567 nhé";
+  const checked = run.probe(reported);
+  await flush();
+  // The click comes while the check still runs: it waits for it, no second detection.
+  const clicked = run.maskText(copied);
+  await flush();
+  detector.settle(0, [phoneAt(reported, "0901234567")]);
+  assert.equal((await checked).count, 1);
+  const { session } = await clicked;
+  assert.equal(detector.calls.length, 1);
+  assert.equal(session.analysis.findings.length, 1);
+  assert.equal(session.analysis.findings[0].value, "0901234567");
+
+  // Other text than the check's: the click runs its own detection.
+  const other = run.probe("Số 0901234567");
+  await flush();
+  detector.settle(1, [phoneAt("Số 0901234567", "0901234567")]);
+  await other;
+  const own = run.maskText("Gọi 0912345678");
+  await flush();
+  assert.equal(detector.calls.length, 3);
+  detector.settle(2, [phoneAt("Gọi 0912345678", "0912345678")]);
+  assert.equal((await own).session.analysis.findings.length, 1);
+});
+
+test("run: one check at a time; selections replaced before their turn are never checked", async () => {
+  const detector = queuedDetector();
+  const run = useMaskingRun({
+    detector,
+    pack: { ready: ref(false), readyRoot: ref(null) },
+    sessions: ref([]),
+    onSession: () => {},
+  });
+  const first = run.probe("Một 0901234567");
+  const second = run.probe("Hai 0901234567");
+  const third = run.probe("Ba 0901234567");
+  await flush();
+  assert.deepEqual(
+    detector.calls.map((call) => call.text),
+    ["Một 0901234567"],
+  );
+  detector.settle(0, [phoneAt("Một 0901234567", "0901234567")]);
+  assert.equal((await first).count, 1);
+  await flush();
+  // The second was replaced by the third while it waited.
+  assert.equal((await second).count, 0);
+  assert.deepEqual(
+    detector.calls.map((call) => call.text),
+    ["Một 0901234567", "Ba 0901234567"],
+  );
+  detector.settle(1, [phoneAt("Ba 0901234567", "0901234567")]);
+  assert.equal((await third).count, 1);
+  // The rules alone find the phone at once, without any detection.
+  assert.equal(run.rulesFind("Gọi 0901234567"), true);
+  assert.equal(run.rulesFind("Không có gì"), false);
+  assert.equal(detector.calls.length, 2);
+});

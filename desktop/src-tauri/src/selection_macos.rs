@@ -391,6 +391,25 @@ fn native_focus<R: Runtime>(app: &AppHandle<R>) -> Option<CFType> {
     }
     Some(focused)
 }
+/// The text of the frontmost application's focused field, web fields included: how a
+/// paste is confirmed to have landed (decision 0131).
+pub fn focused_value<R: Runtime>(app: &AppHandle<R>) -> Option<String> {
+    let pid = front_pid(app)?;
+    // SAFETY: plain query.
+    if !unsafe { AXIsProcessTrusted() } || pid as u32 == std::process::id() {
+        return None;
+    }
+    // SAFETY: returns an owned element for that process.
+    let application =
+        unsafe { CFType::wrap_under_create_rule(AXUIElementCreateApplication(pid) as CFTypeRef) };
+    let focused = attribute(
+        application.as_CFTypeRef() as AXUIElementRef,
+        "AXFocusedUIElement",
+    )?;
+    attribute(focused.as_CFTypeRef() as AXUIElementRef, "AXValue")
+        .as_ref()
+        .and_then(string)
+}
 /// The selection of a native text view, read without the clipboard.
 pub fn native_selection<R: Runtime>(app: &AppHandle<R>) -> Option<String> {
     let focused = native_focus(app)?;

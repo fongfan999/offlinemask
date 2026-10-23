@@ -49,8 +49,11 @@ export interface QuickActionsDependencies {
     ): Promise<
       { session: TextSession } | { error: "busy" | "invalid" | "failed"; message: string }
     >;
-    /** Built-in rules only; how many values they find (the clipboard watch). */
+    /** How many values a click would hide: the click's own detection, models included,
+     * which the click then reuses (decisions 0100, 0131). */
     probe(text: string): Promise<{ count: number; kinds: string[] }>;
+    /** Whether the built-in rules alone find something, at once and without the models. */
+    rulesFind(text: string): boolean;
   };
   /** Opens a file a Service handed over on its page; returns an error message or "". */
   openFile?: (file: File) => Promise<string>;
@@ -256,10 +259,14 @@ export function useQuickActions({
   /** The front application's selection, read natively (decision 0130): through
    * Accessibility in a native text view, otherwise with the copy chord around a saved
    * and restored clipboard. Null without permission or when nothing answered. */
-  async function takeSelection(): Promise<string | null> {
+  async function takeSelection(keep = false): Promise<string | null> {
     if (inputPermission.value === "unknown") await checkInputPermission();
     if (inputPermission.value !== "granted") return null;
-    return adapter.copySelection().catch(() => null);
+    return adapter.copySelection(keep).catch(() => null);
+  }
+  /** A clipboard kept for a paste goes back once the action is over, pasted or not. */
+  async function release() {
+    if (adapter.desktop) await adapter.releaseClipboard().catch(() => {});
   }
   /** The front application's selection as Accessibility reports it, or null. */
   async function readAnchor(): Promise<string | null> {
@@ -272,7 +279,7 @@ export function useQuickActions({
    * after; only applications it cannot read are asked with the copy chord again. */
   async function stillSelected(text: string, anchor: string | null): Promise<boolean> {
     if (anchor !== null) return (await readAnchor()) === anchor;
-    return (await takeSelection()) === text;
+    return (await takeSelection(true)) === text;
   }
   /** Run one action. `auto` (the shortcut) decides from the text: known aliases
    * restore, anything else is masked; the panel's buttons act on the clipboard only.
@@ -320,7 +327,7 @@ export function useQuickActions({
     try {
       let text = given ?? "";
       if (command === "auto" && given === undefined) {
-        const taken = await takeSelection();
+        const taken = await takeSelection(true);
         if (taken !== null) {
           text = taken;
           replaced = true;
@@ -388,6 +395,7 @@ export function useQuickActions({
       // Whatever broke, the panel must not stay on "Đang ẩn thông tin…".
       return await done(quickMessages.failed, "error");
     } finally {
+      await release();
       busy.value = false;
     }
   }
@@ -448,7 +456,11 @@ export function useQuickActions({
     const direction = quickDirection(selection.text, knownTables());
     if (direction === "empty") return void (lastSkip.value = quickMessages.skipped.empty);
     const seq = ++selectionSeq;
-    if (direction === "mask") {
+    if (direction === "mask" && run.rulesFind(selection.text)) {
+      // The rules already find a phone, an email, an account or ID number: the circle
+      // shows at once, and the models check on for the click to reuse (decision 0131).
+      void run.probe(selection.text);
+    } else if (direction === "mask") {
       // Any app, editable or not: a circle only when a click would hide something.
       let wait: ReturnType<typeof setTimeout> | undefined;
       const probed = await Promise.race([
@@ -625,8 +637,8 @@ export function useQuickActions({
    * duplicated or reflowed the user's text. The copy must be part of what Accessibility
    * reported, whitespace aside: an application that copies something else when the
    * selection is gone (a whole line, in some editors) is not taken at its word. */
-  async function exactSelection(reported: string): Promise<string | null> {
-    const copied = await takeSelection();
+  async function exactSelection(reported: string, keep: boolean): Promise<string | null> {
+    const copied = await takeSelection(keep);
     if (copied === null) return null;
     const bare = (text: string) => text.replace(/\s+/gu, "");
     return bare(copied) && bare(reported).includes(bare(copied)) ? copied : null;
@@ -635,10 +647,12 @@ export function useQuickActions({
     command: "mask" | "restore",
     selection: { text: string; editable: boolean },
   ) {
-    const exact = await exactSelection(selection.text);
+    // An editable selection keeps the clipboard borrowed until its paste (decision 0131).
+    const exact = await exactSelection(selection.text, selection.editable);
     // Read-only text, or a selection that could not be read exactly, is never replaced:
     // its result opens in the preview, and the user decides what to do with it.
     if (!selection.editable || exact === null) {
+      await release();
       const text = exact ?? selection.text;
       if (command === "restore") await showPreview(text);
       else await showMaskedPreview(text);

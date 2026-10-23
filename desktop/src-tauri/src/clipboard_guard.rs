@@ -11,6 +11,7 @@ use tauri::{AppHandle, Runtime};
 /// Identifies one state of the clipboard: it changes with every write by anyone.
 pub type Stamp = u64;
 
+#[derive(Default)]
 pub struct Saved(imp::Saved);
 
 /// Everything on the clipboard now, to be put back with [`restore`].

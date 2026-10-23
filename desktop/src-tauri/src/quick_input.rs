@@ -5,8 +5,9 @@
 //! click or shortcut; nothing is ever read from the keyboard and no event tap is
 //! installed.
 use enigo::{Direction, Enigo, InputError, Key, Keyboard, NewConError, Settings};
-use std::sync::mpsc;
+use std::sync::{mpsc, Mutex, PoisonError};
 use std::thread::sleep;
+use std::thread::JoinHandle;
 use std::time::{Duration, Instant};
 use tauri::{AppHandle, Runtime};
 
@@ -140,18 +141,86 @@ const COPY_WAIT: Duration = Duration::from_millis(600);
 /// How long a pasted result stays on the clipboard before the user's own contents come
 /// back. Applications read it while handling the chord (decision 0130).
 const PASTE_HOLD: Duration = Duration::from_millis(500);
+/// How long a pasted field gets to show the new text before the paste counts as
+/// dropped (decision 0131).
+const PASTE_CONFIRM: Duration = Duration::from_millis(400);
+/// A clipboard borrowed by a copy that a paste will follow (decision 0131): Chrome drops
+/// a paste when the clipboard was put back between its own copy and that paste, so it
+/// is put back once, after the paste, or by `quick_release_clipboard` when no paste
+/// comes. Nothing keeps it longer than `BORROW_LIMIT`.
+struct Borrowed {
+    saved: clipboard_guard::Saved,
+    left: clipboard_guard::Stamp,
+    serial: u64,
+}
+static BORROWED: Mutex<Option<Borrowed>> = Mutex::new(None);
+static SERIAL: Mutex<u64> = Mutex::new(0);
+const BORROW_LIMIT: Duration = Duration::from_secs(20);
+/// The restore after a paste runs while the user already sees the result. The next copy
+/// or paste waits for it, so it never saves the pasted text as the user's clipboard.
+static RESTORING: Mutex<Option<JoinHandle<()>>> = Mutex::new(None);
+fn finish_restore() {
+    let pending = RESTORING
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner)
+        .take();
+    if let Some(pending) = pending {
+        let _ = pending.join();
+    }
+}
+fn take_borrowed() -> Option<Borrowed> {
+    BORROWED
+        .lock()
+        .unwrap_or_else(PoisonError::into_inner)
+        .take()
+}
+/// Keep the clipboard borrowed for the paste to come; put it back after `BORROW_LIMIT`
+/// if none comes.
+fn lend<R: Runtime>(
+    app: &AppHandle<R>,
+    saved: clipboard_guard::Saved,
+    left: clipboard_guard::Stamp,
+) {
+    let serial = {
+        let mut serial = SERIAL.lock().unwrap_or_else(PoisonError::into_inner);
+        *serial += 1;
+        *serial
+    };
+    *BORROWED.lock().unwrap_or_else(PoisonError::into_inner) = Some(Borrowed {
+        saved,
+        left,
+        serial,
+    });
+    let app = app.clone();
+    std::thread::spawn(move || {
+        sleep(BORROW_LIMIT);
+        let mut borrowed = BORROWED.lock().unwrap_or_else(PoisonError::into_inner);
+        if borrowed.as_ref().is_some_and(|b| b.serial == serial) {
+            if let Some(b) = borrowed.take() {
+                clipboard_guard::restore(&app, b.saved, b.left);
+            }
+        }
+    });
+}
 
 /// The front application's selection. A native macOS text view is read through
 /// Accessibility; anything else with the copy chord, the user's clipboard saved before
-/// and put back right after (decision 0130). None when nothing answered.
+/// and put back right after (decision 0130), or, with `keep`, after the paste that will
+/// follow (decision 0131). None when nothing answered.
 #[tauri::command]
-pub async fn quick_copy_selection(app: AppHandle) -> Result<Option<String>, String> {
+pub async fn quick_copy_selection(app: AppHandle, keep: bool) -> Result<Option<String>, String> {
     tauri::async_runtime::spawn_blocking(move || {
         #[cfg(target_os = "macos")]
         if let Some(text) = crate::selection_macos::native_selection(&app) {
             return Ok(Some(text));
         }
-        let saved = clipboard_guard::save(&app);
+        finish_restore();
+        // A second look while borrowed (the check before a paste) keeps the first save.
+        let earlier = take_borrowed();
+        let saved = match &earlier {
+            Some(_) => None,
+            None => Some(clipboard_guard::save(&app)),
+        };
         // An empty private item first, so any change after the chord is the copy.
         let marked = clipboard_guard::write_private(&app, "")?;
         let sent = chord(&app, 'c');
@@ -171,31 +240,82 @@ pub async fn quick_copy_selection(app: AppHandle) -> Result<Option<String>, Stri
         let text = (left != marked)
             .then(|| clipboard_guard::read_text(&app))
             .flatten();
-        clipboard_guard::restore(&app, saved, left);
+        let saved = saved.or(earlier.map(|b| b.saved)).unwrap_or_default();
+        if keep && sent.is_ok() {
+            lend(&app, saved, left);
+        } else {
+            clipboard_guard::restore(&app, saved, left);
+        }
         sent?;
         Ok(text.filter(|text| !text.trim().is_empty()))
     })
     .await
     .map_err(|error| format!("io: {error}"))?
 }
+/// Put back a clipboard a copy kept for a paste that is not coming (decision 0131).
+#[tauri::command]
+pub async fn quick_release_clipboard(app: AppHandle) {
+    let _ = tauri::async_runtime::spawn_blocking(move || {
+        if let Some(borrowed) = take_borrowed() {
+            clipboard_guard::restore(&app, borrowed.saved, borrowed.left);
+        }
+    })
+    .await;
+}
 /// Put `text` over the front application's selection: through Accessibility in a native
 /// macOS text view, otherwise with the paste chord and the user's clipboard put back
-/// once the application has taken the text (decision 0130).
+/// once the application has taken the text (decisions 0130, 0131). On macOS the field
+/// must show the change, or the paste counts as dropped and the call fails.
 #[tauri::command]
 pub async fn quick_replace_selection(app: AppHandle, text: String) -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(move || {
         #[cfg(target_os = "macos")]
         if crate::selection_macos::replace_native(&app, &text) {
+            if let Some(borrowed) = take_borrowed() {
+                clipboard_guard::restore(&app, borrowed.saved, borrowed.left);
+            }
             return Ok(());
         }
-        let saved = clipboard_guard::save(&app);
+        finish_restore();
+        let borrowed = take_borrowed();
+        // A copy made by the user since the borrow is theirs now: nothing to put back.
+        let saved = match borrowed {
+            Some(b) if clipboard_guard::stamp(&app) == b.left => Some(b.saved),
+            Some(_) => None,
+            None => Some(clipboard_guard::save(&app)),
+        };
+        #[cfg(target_os = "macos")]
+        let before = crate::selection_macos::focused_value(&app);
         let left = clipboard_guard::write_private(&app, &text)?;
         let sent = chord(&app, 'v');
-        if sent.is_ok() {
-            sleep(PASTE_HOLD);
+        #[cfg(target_os = "macos")]
+        let landed = sent.is_ok() && {
+            let started = Instant::now();
+            let mut changed = before.is_none();
+            while !changed && started.elapsed() < PASTE_CONFIRM {
+                sleep(Duration::from_millis(25));
+                changed = crate::selection_macos::focused_value(&app) != before;
+            }
+            changed
+        };
+        #[cfg(not(target_os = "macos"))]
+        let landed = sent.is_ok();
+        let restorer = app.clone();
+        let pending = std::thread::spawn(move || {
+            if landed {
+                sleep(PASTE_HOLD);
+            }
+            if let Some(saved) = saved {
+                clipboard_guard::restore(&restorer, saved, left);
+            }
+        });
+        *RESTORING.lock().unwrap_or_else(PoisonError::into_inner) = Some(pending);
+        sent?;
+        if landed {
+            Ok(())
+        } else {
+            Err("io: paste not taken".into())
         }
-        clipboard_guard::restore(&app, saved, left);
-        sent
     })
     .await
     .map_err(|error| format!("io: {error}"))?

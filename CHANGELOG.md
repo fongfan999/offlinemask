@@ -6,6 +6,7 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
+- The OfflineMask circle shows within about half a second when the selection holds a phone number, an email or an ID, and its click no longer runs the detection a second time. A paste Chrome silently dropped is now caught and shown in the preview card ([0131](docs/decisions/0131-circle-speed.md)).
 - Ẩn nhanh leaves your clipboard as it was. In native macOS apps it reads and replaces the selection through Accessibility; elsewhere it saves the whole clipboard (images, files and formatting included), copies or pastes, and puts it back unless you copied something meanwhile. Its own clipboard items are kept out of clipboard managers and Universal Clipboard, and the result no longer stays on the clipboard ([0130](docs/decisions/0130-quick-actions-borrow-the-clipboard.md)).
 - On WASM recognition (Intel Macs, Linux, `pnpm desktop:dev`) the app's page no longer passes WebKit's 4 GB limit and gets reloaded. The recognition models used to take three copies of their weights in memory; they now load with one, so the page settles near 2.5 GB instead of 4.3 GB and stays up through repeated ⌘⇧M use. Recognition results are unchanged ([0129](docs/decisions/0129-wasm-weights-as-external-data.md)).
 - The OfflineMask circle no longer spins forever when the app's page is reloaded mid-action. On WASM recognition (Intel Macs) WebKit kills the page once it passes 4 GB; the page now clears the circle when it comes back ([0128](docs/decisions/0128-webkit-kills-the-wasm-page.md)).

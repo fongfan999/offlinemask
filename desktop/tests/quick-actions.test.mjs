@@ -117,12 +117,19 @@ function fakeAdapter(clipboard = "") {
       return adapter.permission;
     },
     // The native read and replace leave the clipboard alone (decision 0130).
-    copySelection: async () => {
+    copySelection: async (keep = false) => {
       calls.push(["copy"]);
+      if (keep) adapter.borrowed = true;
       return adapter.selection;
+    },
+    // Whether a copy kept the clipboard for a paste that has not been released yet.
+    borrowed: false,
+    releaseClipboard: async () => {
+      adapter.borrowed = false;
     },
     replaceSelection: async (text) => {
       calls.push(["paste", text]);
+      adapter.borrowed = false;
       if (adapter.replaceFails) throw new Error("io");
     },
     replaceFails: false,
@@ -184,6 +191,9 @@ function fakeRun(sessions) {
     // Like the real check: phone numbers and emails count, unless a test says otherwise.
     found: null,
     kinds: [],
+    // Off unless a test says so: most tests exercise the models' answer.
+    rules: false,
+    rulesFind: () => run.rules,
     async probe(text) {
       run.probed.push(text);
       const count = run.found ?? (/\d{9,}|@/.test(text) ? 1 : 0);
@@ -1731,4 +1741,74 @@ test("the circle goes by the text, even when a field only reports its frame", as
     mouse: true,
   });
   assert.equal(outside.bounds.x, field.x + 8);
+});
+
+test("when the rules already find something, the circle shows without waiting for the models", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  adapter.permission = "granted";
+  const run = fakeRun(sessions);
+  run.rules = true;
+  // The models never answer during this test.
+  run.probe = (text) => {
+    run.probed.push(text);
+    return new Promise(() => {});
+  };
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  await quick.setPopover(true);
+  adapter.selectionHandler({
+    text: phoneText,
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: true,
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(quick.lastStatus.value.tone, "select");
+  // The models' check still started, for the click to reuse.
+  assert.equal(run.probed.at(-1), phoneText);
+});
+
+test("a clipboard kept for a paste always goes back, pasted or not", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("");
+  adapter.permission = "granted";
+  const run = fakeRun(sessions);
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  await quick.start();
+  await quick.setPopover(true);
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+  const click = async (text, copied) => {
+    adapter.selection = copied;
+    adapter.selectionHandler({ text, bounds: null, pointer: { x: 1, y: 1 }, editable: true });
+    await tick();
+    adapter.command("mask");
+    await tick();
+    await tick();
+  };
+  // Pasted: the paste itself put it back.
+  await click(phoneText, phoneText);
+  assert.equal(adapter.calls.filter((call) => call[0] === "paste").length, 1);
+  assert.equal(adapter.borrowed, false);
+  // Nothing to hide after all.
+  run.outcome = { session: { analysis: { findings: [] } } };
+  await click(phoneText, phoneText);
+  assert.equal(adapter.borrowed, false);
+  run.outcome = null;
+  // The copy does not match the reported selection: the preview, and the clipboard back.
+  await click("0912345678", "cả dòng 0912345678 khác");
+  assert.equal(quick.lastStatus.value.tone, "preview");
+  assert.equal(adapter.borrowed, false);
 });

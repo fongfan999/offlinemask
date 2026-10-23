@@ -13,6 +13,9 @@ import {
   type Session,
   type TextSession,
 } from "../core/sessions.ts";
+import { carryDetections } from "../core/detection/carry.ts";
+import { filterDetections } from "../core/detection/options.ts";
+import { localDetections } from "../core/detection/policy.ts";
 import { decodeText } from "../core/decode-text.ts";
 import { maxTextLength, validateText } from "../core/text.ts";
 import type { SheetProgress } from "./useSheetRun.ts";
@@ -187,9 +190,13 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     const invalid = validateText(text);
     if (invalid) return { error: "invalid", message: invalid };
     if (processing.value) return { error: "busy", message: "" };
-    const { options, key } = quickRun(text);
-    // The circle's check already ran this exact detection: use it (decision 0100).
-    const known = lastQuick?.key === key ? lastQuick.detections : undefined;
+    const { options, run } = quickRun();
+    // The detector runs one request at a time, and the circle's check in flight may be
+    // this very text: wait for it rather than queue a second detection behind it.
+    waiting = null;
+    if (checking) await checking.detections.catch(() => {});
+    // The circle's check already ran this detection: use it (decisions 0100, 0131).
+    const known = lastQuick ? await reuse(text, run, options) : undefined;
     lastQuick = null;
     try {
       const session = await detectSession(
@@ -206,29 +213,81 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
   }
   /** Quick actions hide as much as possible (decision 0096): every category the
    * machine can run, whatever is ticked on the text page; the built-in ones without
-   * the pack. The key ties a check to the exact run a click would make. */
-  function quickRun(text: string) {
+   * the pack. `run` ties a check to the run a click would make. */
+  function quickRun() {
     const options: DetectionOption[] = pack.ready.value
       ? detectionOptions.map((option) => option.id)
       : [...localOptions];
     const root = pack.readyRoot.value ?? undefined;
-    return { options, root, key: `${root ?? ""}\n${options.join(",")}\n${text}` };
+    return { options, root, run: `${root ?? ""}\n${options.join(",")}` };
   }
-  /** The last check's detections, in memory only, for the click that usually follows. */
-  let lastQuick: { key: string; detections: Detections } | null = null;
+  type Check = { run: string; text: string; detections: Promise<Detections> };
+  /** The circle's last check, in memory only, for the click that usually follows. It
+   * is kept while it runs, so the click can wait for it (decision 0131). */
+  let lastQuick: Check | null = null;
+  /** The check the detector is running now, and the newest selection waiting for it.
+   * Only one check runs at a time: a selection replaced before its turn is never
+   * checked, so a burst of selections cannot queue detections behind a click. */
+  let checking: Check | null = null;
+  let waiting: string | null = null;
+  function startCheck(text: string): Check {
+    const { options, root, run } = quickRun();
+    const check = { run, text, detections: detector.detect(text, () => {}, root, [...options]) };
+    lastQuick = checking = check;
+    void check.detections
+      .catch(() => {})
+      .finally(() => {
+        if (checking === check) checking = null;
+      });
+    return check;
+  }
+  /** The detections for `text`, from the check of that text if one exists; null when a
+   * newer selection or a click took its turn. */
+  async function check(text: string): Promise<Detections | null> {
+    const { run } = quickRun();
+    if (lastQuick?.run === run && lastQuick.text === text) return lastQuick.detections;
+    if (checking) {
+      waiting = text;
+      while (checking) await checking.detections.catch(() => {});
+      if (waiting !== text) return null;
+      waiting = null;
+    }
+    return startCheck(text).detections;
+  }
+  /** The last check's detections as the click's, when it checked this text or the same
+   * text with other whitespace. Line breaks the check did not see can change what the
+   * built-in rules match, so they run again on the click's text; overlaps are resolved
+   * as usual when the session is built. */
+  async function reuse(
+    text: string,
+    run: string,
+    options: readonly DetectionOption[],
+  ): Promise<Detections | undefined> {
+    const last = lastQuick;
+    if (!last || last.run !== run) return;
+    const detections = await last.detections.catch(() => undefined);
+    if (!detections) return;
+    if (last.text === text) return detections;
+    const carried = carryDetections(detections, last.text, text);
+    if (!carried) return;
+    return [...carried, ...filterDetections(localDetections(text), options)];
+  }
+  /** Whether the built-in rules alone find something to hide: instant, no models. A
+   * full check keeps every rule finding, so a yes here is a yes for the click. */
+  function rulesFind(text: string): boolean {
+    if (validateText(text)) return false;
+    return filterDetections(localDetections(text), quickRun().options).length > 0;
+  }
   /** How many values a click on the circle would hide (decision 0100): the very same
    * detection as `maskText`, models included, so the two cannot disagree. No session,
-   * no progress, no draft; a failure counts as nothing. */
+   * no progress, no draft; a failure, or a selection replaced before its turn, counts
+   * as nothing. */
   async function probe(text: string): Promise<{ count: number; kinds: string[] }> {
     const nothing = { count: 0, kinds: [] };
     if (validateText(text)) return nothing;
-    const { options, root, key } = quickRun(text);
     try {
-      const detections =
-        lastQuick?.key === key
-          ? lastQuick.detections
-          : await detector.detect(text, () => {}, root, [...options]);
-      lastQuick = { key, detections };
+      const detections = await check(text);
+      if (!detections) return nothing;
       // Distinct values, like the "Đã ẩn n thông tin" count after masking.
       const values = new Set(detections.map((d) => d.type + ":" + text.slice(d.start, d.end)));
       return { count: values.size, kinds: [...new Set(detections.map((d) => d.label))] };
@@ -262,6 +321,7 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     mask,
     maskText,
     probe,
+    rulesFind,
     warmUp,
     cancel,
     destroy,

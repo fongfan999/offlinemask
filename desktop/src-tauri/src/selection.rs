@@ -110,7 +110,9 @@ pub enum Probe {
 /// Keyboard selections (⌘A, ⇧ with arrows) produce no mouse event. While the popover is
 /// on, the front application's selection is read every `POLL`; a selection that holds
 /// still for one look is announced, and one that disappears is cleared. No key is read.
-pub const POLL: std::time::Duration = std::time::Duration::from_millis(450);
+/// Short enough that a keyboard selection gets its circle within half a second
+/// (decision 0131); each look is one Accessibility query.
+pub const POLL: std::time::Duration = std::time::Duration::from_millis(250);
 /// Decide what to announce after a look: `candidate` is the text seen on the previous
 /// look. Returns the new candidate and whether to announce or clear.
 pub fn after_look(
