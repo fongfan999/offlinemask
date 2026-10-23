@@ -4,6 +4,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+### Fixed
+
+- In the Microsoft Store build, masking works right after the recognition pack downloads; it used to fail until the app was restarted. Start at login works there too: it now uses the package's startup task, and the switch says where to turn it back on if you turned OfflineMask off in Windows' Startup apps ([0117](docs/decisions/0117-microsoft-store-msix.md)).
+
 ## [2.0.4] — 2026-10-23
 
 Makes Ẩn nhanh fast, keeps it off your clipboard and fixes it in Chrome, Dia and Zalo.

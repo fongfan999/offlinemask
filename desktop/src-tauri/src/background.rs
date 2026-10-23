@@ -254,6 +254,117 @@ pub fn quick_show_main(app: AppHandle) {
 
 /// The login item starts the app with this flag, so it begins hidden in the tray.
 pub const BACKGROUND_FLAG: &str = "--background";
+/// A login start: the flag from the Run key or LaunchAgent, or the MSIX startup task,
+/// which starts the app without arguments.
 pub fn started_in_background() -> bool {
-    std::env::args().any(|arg| arg == BACKGROUND_FLAG)
+    std::env::args().any(|arg| arg == BACKGROUND_FLAG) || startup_task::activated()
+}
+
+/// The error when Windows keeps the startup task off because the user turned it off
+/// in Task Manager; the frontend shows where to turn it back on.
+#[cfg_attr(not(windows), allow(dead_code))]
+const DISABLED_BY_USER: &str = "disabled-by-user";
+
+/// Whether OfflineMask starts at login, read from the system (decision 0092).
+#[tauri::command]
+pub async fn quick_launch_at_login(app: AppHandle) -> Result<bool, String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        #[cfg(windows)]
+        if startup_task::packaged() {
+            return startup_task::enabled();
+        }
+        use tauri_plugin_autostart::ManagerExt;
+        app.autolaunch()
+            .is_enabled()
+            .map_err(|error| error.to_string())
+    })
+    .await
+    .map_err(|error| error.to_string())?
+}
+
+#[tauri::command]
+pub async fn quick_set_launch_at_login(app: AppHandle, on: bool) -> Result<(), String> {
+    tauri::async_runtime::spawn_blocking(move || {
+        #[cfg(windows)]
+        if startup_task::packaged() {
+            return startup_task::set(on);
+        }
+        use tauri_plugin_autostart::ManagerExt;
+        let launcher = app.autolaunch();
+        if on {
+            launcher.enable()
+        } else {
+            launcher.disable()
+        }
+        .map_err(|error| error.to_string())
+    })
+    .await
+    .map_err(|error| error.to_string())?
+}
+
+/// The Microsoft Store build (decision 0117). A packaged app's writes to the `Run`
+/// registry key stay inside the package, so Windows never starts it from there; the
+/// manifest declares a startup task that the app turns on and off instead.
+#[cfg(windows)]
+mod startup_task {
+    use windows::core::HSTRING;
+    use windows::ApplicationModel::{
+        Activation::ActivationKind, AppInstance, Package, StartupTask, StartupTaskState,
+    };
+
+    /// The `TaskId` of the `windows.startupTask` extension in `store/AppxManifest.xml`.
+    const TASK_ID: &str = "OfflineMaskStartup";
+
+    /// Only a packaged process has a package identity.
+    pub fn packaged() -> bool {
+        Package::Current().is_ok()
+    }
+
+    pub fn activated() -> bool {
+        packaged()
+            && AppInstance::GetActivatedEventArgs()
+                .and_then(|args| args.Kind())
+                .is_ok_and(|kind| kind == ActivationKind::StartupTask)
+    }
+
+    fn task() -> Result<StartupTask, String> {
+        StartupTask::GetAsync(&HSTRING::from(TASK_ID))
+            .and_then(|operation| operation.join())
+            .map_err(|error| error.message())
+    }
+
+    fn on(state: StartupTaskState) -> bool {
+        state == StartupTaskState::Enabled || state == StartupTaskState::EnabledByPolicy
+    }
+
+    pub fn enabled() -> Result<bool, String> {
+        task()?.State().map(on).map_err(|error| error.message())
+    }
+
+    pub fn set(enable: bool) -> Result<(), String> {
+        let task = task()?;
+        if !enable {
+            return task.Disable().map_err(|error| error.message());
+        }
+        let state = task
+            .RequestEnableAsync()
+            .and_then(|operation| operation.join())
+            .map_err(|error| error.message())?;
+        // Turned off in Task Manager or by policy: only the user or an administrator
+        // can turn it back on there, so the switch reports the failure.
+        if on(state) {
+            Ok(())
+        } else if state == StartupTaskState::DisabledByUser {
+            Err(super::DISABLED_BY_USER.to_string())
+        } else {
+            Err(format!("startup task state {}", state.0))
+        }
+    }
+}
+
+#[cfg(not(windows))]
+mod startup_task {
+    pub fn activated() -> bool {
+        false
+    }
 }

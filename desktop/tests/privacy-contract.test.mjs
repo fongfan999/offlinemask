@@ -83,9 +83,6 @@ test("the app's system permissions are the ones the page explains (privacy §5)"
   assert.deepEqual(
     ids("default"),
     [
-      "autostart:allow-disable",
-      "autostart:allow-enable",
-      "autostart:allow-is-enabled",
       "clipboard-manager:allow-read-text",
       "clipboard-manager:allow-write-text",
       "dialog:allow-save",

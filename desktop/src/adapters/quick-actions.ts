@@ -1,7 +1,6 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
 import { emitTo, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { disable, enable, isEnabled } from "@tauri-apps/plugin-autostart";
 import { readText, writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { isRegistered, register, unregister } from "@tauri-apps/plugin-global-shortcut";
 
@@ -204,8 +203,9 @@ export const nativeQuickActions: QuickActionsAdapter = {
       handler();
     }),
   hideMainWindow: () => invoke("quick_hide_main"),
-  launchAtLogin: () => isEnabled(),
-  setLaunchAtLogin: (on) => (on ? enable() : disable()),
+  // Natively, so the Store build can use its startup task instead of the Run key.
+  launchAtLogin: () => invoke<boolean>("quick_launch_at_login"),
+  setLaunchAtLogin: (on) => invoke("quick_set_launch_at_login", { on }),
   quit: () => invoke("quick_quit"),
   showMainWindow: () => invoke("quick_show_main"),
   setTrayOffer: (on) => invoke("quick_tray_offer", { on }),

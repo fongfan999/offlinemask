@@ -18,9 +18,6 @@
     "clipboard-manager:allow-read-text",
     "clipboard-manager:allow-write-text",
     "core:window:allow-hide",
-    "autostart:allow-enable",
-    "autostart:allow-disable",
-    "autostart:allow-is-enabled",
     {
       "identifier": "opener:allow-open-url",
       "allow": [

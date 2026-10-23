@@ -18,7 +18,7 @@ Unsigned Windows installers trigger SmartScreen, a paid certificate costs more t
 
 - **App data** written under `%LOCALAPPDATA%` is redirected to the package's private `LocalCache` and removed on uninstall. The vault, settings and the recognition pack move there; nothing migrates from an earlier EXE/MSI install.
 - **Asset scope.** Tauri resolves the `$APPLOCALDATA/models/**` asset scope before setup and matches each request by its real path. On the first launch after install the redirected folder did not exist yet, so the scope held only the unredirected path and every pack file was refused until a restart; text masking failed right after the pack download (found testing 2.0.4 on 23 October 2026). Setup now creates `models/` and allows it again, which adds the `LocalCache` path.
-- **Start at login** (decision 0092) uses `tauri-plugin-autostart`, which writes the `Run` registry key. Registry writes from a packaged app are virtualized, so this is expected not to work from the Store build until a `windows.startupTask` extension replaces it.
+- **Start at login** (decision 0092). `tauri-plugin-autostart` writes the `Run` registry key, and a packaged app's registry writes stay inside the package: testing 2.0.4 on 23 October 2026, the switch turned on and the plugin reported it on, but nothing reached the real key, so the app would never have started at login. The manifest now declares a `windows.startupTask` extension (`OfflineMaskStartup`, off by default). The switch calls two app commands, `quick_launch_at_login` and `quick_set_launch_at_login`, instead of the plugin's JavaScript API: inside a package they read, request and disable the startup task through `Windows.ApplicationModel.StartupTask` (the `windows` crate's `ApplicationModel` features, no new crate); everywhere else they call the plugin from Rust as before. The JavaScript package and its three `autostart:` permissions are gone. A startup task starts the app without arguments, so `started_in_background` also treats a `StartupTask` activation (`AppInstance::GetActivatedEventArgs`) as a login start and keeps the window hidden. If the user turns OfflineMask off under Task Manager → Startup apps, Windows does not let the app turn it back on; the switch then shows its usual error and reads the state again.
 - **WebView2** is not bootstrapped by an MSIX; the app relies on the Evergreen runtime that Windows 11 and nearly all Windows 10 machines have.
 - The package folder is read-only; the app writes nothing beside its executable.
 
@@ -31,4 +31,4 @@ Unsigned Windows installers trigger SmartScreen, a paid certificate costs more t
 
 ## Not done
 
-A `windows.startupTask` for start at login; scale variants of the tile icons; Store listing text; ARM64.
+Scale variants of the tile icons; Store listing text; ARM64.

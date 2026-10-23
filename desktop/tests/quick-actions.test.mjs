@@ -10,6 +10,7 @@ import {
   sessionFindings,
 } from "../src/core/quick-actions.ts";
 import {
+  launchBlocked,
   launchError,
   lockedMessage,
   popoverKey,
@@ -533,6 +534,11 @@ test("closing the window hides it and tells the panel; the login item mirrors th
   };
   await quick.setLaunchAtLogin(true);
   assert.equal(quick.launchFailure.value, launchError);
+  assert.equal(quick.launchAtLogin.value, false);
+  // The Store build's startup task, turned off in Windows Settings (decision 0117).
+  adapter.setLaunchAtLogin = () => Promise.reject("disabled-by-user");
+  await quick.setLaunchAtLogin(true);
+  assert.equal(quick.launchFailure.value, launchBlocked);
   assert.equal(quick.launchAtLogin.value, false);
   quick.stop();
   assert.ok(adapter.calls.some((call) => call[0] === "unclose"));
