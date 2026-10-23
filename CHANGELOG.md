@@ -6,6 +6,7 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
+- The OfflineMask circle no longer spins forever when the app's page is reloaded mid-action. On WASM recognition (Intel Macs) WebKit kills the page once it passes 4 GB; the page now clears the circle when it comes back ([0128](docs/decisions/0128-webkit-kills-the-wasm-page.md)).
 - A masked result no longer replaces text you selected elsewhere while masking was still running. Right before pasting, OfflineMask checks that the selection is still the text it masked; if not, the result opens in a card to copy from, and your clipboard is left as it was ([0127](docs/decisions/0127-paste-only-over-the-masked-selection.md)).
 - On macOS, selecting text in Chromium and Electron apps (Chrome, Dia, Arc, Slack, Zalo) shows the OfflineMask circle again. Those apps expose the selection only after an assistive tool asks them to, and OfflineMask never asked ([0126](docs/decisions/0126-chromium-accessibility-tree.md)).
 

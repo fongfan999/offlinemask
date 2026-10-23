@@ -738,6 +738,9 @@ export function useQuickActions({
       return;
     }
     started = true;
+    // The panel outlives this page. If WebKit killed and reloaded it mid-action (WASM
+    // models past its 4 GB limit), the circle would spin for an answer that never comes.
+    await adapter.dismissPanel().catch(() => {});
     if (typeof window !== "undefined") window.addEventListener("focus", recheck);
     await Promise.all([checkInputPermission(), readLaunchAtLogin()]);
     popoverSupported.value = await adapter.selectionSupported().catch(() => false);

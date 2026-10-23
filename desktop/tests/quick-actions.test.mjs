@@ -208,8 +208,14 @@ test("the shortcut masks ordinary text and leaves the masked copy on the clipboa
     storage: memoryStorage({ [popoverKey]: "on" }),
   });
   await quick.start();
-  // Start reads the permission once, then takes the shortcut because it is granted.
-  assert.deepEqual(adapter.calls, [["permission", false], ["register"], ["popover", true]]);
+  // Start clears a panel left from a page WebKit reloaded mid-action, reads the
+  // permission once, then takes the shortcut because it is granted.
+  assert.deepEqual(adapter.calls, [
+    ["dismiss"],
+    ["permission", false],
+    ["register"],
+    ["popover", true],
+  ]);
   const status = await quick.act("auto");
   assert.equal(status.tone, "ok");
   assert.equal(status.message, quickMessages.masked(1));
