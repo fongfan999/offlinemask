@@ -4,6 +4,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.0.4] — 2026-10-23
+
+Makes Ẩn nhanh fast, keeps it off your clipboard and fixes it in Chrome, Dia and Zalo.
+
 ### Fixed
 
 - On Windows, a paste the application drops opens the result in the preview card instead of showing a check mark, web editors count as editable, and a clipboard OfflineMask cannot read is no longer emptied when it puts it back ([0133](docs/decisions/0133-windows-paste-confirmation.md)).
@@ -86,7 +90,8 @@ The first public release. The number starts at 2.0.0 by the owner's choice; ther
 - Builds are not yet signed or notarized ([release notes](docs/release/macos-arm64.md)).
 - Detection has documented misses and over-masking; review the result before sharing it ([evidence](docs/evaluations/recognition-production-v1/README.md)).
 
-[Unreleased]: https://github.com/fongfan999/offlinemask/compare/v2.0.3...HEAD
+[Unreleased]: https://github.com/fongfan999/offlinemask/compare/v2.0.4...HEAD
+[2.0.4]: https://github.com/fongfan999/offlinemask/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/fongfan999/offlinemask/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/fongfan999/offlinemask/compare/v2.0.1...v2.0.2
 [2.0.1]: https://github.com/fongfan999/offlinemask/compare/v2.0.0...v2.0.1
