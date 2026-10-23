@@ -5,15 +5,16 @@
 ## How to release
 
 1. Bump the version in `desktop/package.json`, `desktop/src-tauri/tauri.conf.json` and `desktop/src-tauri/Cargo.toml` (run `cargo metadata --locked` in `desktop/` so `Cargo.lock` follows), add the section to `CHANGELOG.md`, commit.
+   If the commit changes the packaging scripts or the Rust dependencies, push it and run a dry run first (below): it tries the installers, and it refreshes the build cache the tag will use.
 2. Tag and push:
 
 ```sh
 git tag -a v2.1.0 -m "OfflineMask 2.1.0" && git push origin main v2.1.0
 ```
 
-3. The workflow checks that the tag equals the version, builds on four runners, and attaches the files to the release for that tag. If no release exists it creates a **draft** with the changelog section as notes; publish it after looking at the files. If the release already exists (as for 2.0.0), the files are added to it.
+3. Pushing the tag starts the workflow automatically; there is nothing to click. Only tags that start with `v` trigger it, and a tag that exists only on your machine does nothing until it is pushed. The workflow checks that the tag equals the version, builds on four runners, and attaches the files to the release for that tag. If no release exists it creates a **draft** with the changelog section as notes; publish it after looking at the files. If the release already exists (as for 2.0.0), the files are added to it.
 
-To build or rebuild an existing tag, open Actions › Release › Run workflow on `main` and enter the tag name; the workflow as it is on `main` checks out that tag. Leave the tag empty for a **dry run**: the chosen branch is built, the bundles stay as run artifacts for 90 days, and nothing is attached to any release. From the command line:
+To build or rebuild an existing tag, open Actions › Desktop: Release › Run workflow on `main` and enter the tag name; the workflow as it is on `main` checks out that tag. Leave the tag empty for a **dry run**: the chosen branch is built, the bundles stay as run artifacts for 90 days, and nothing is attached to any release. From the command line:
 
 ```sh
 gh workflow run release.yml --ref main -f tag=v2.0.0
@@ -32,7 +33,7 @@ gh workflow run release.yml --ref main
 | `windows-latest` | `pnpm -C desktop desktop:build:native` | Native helper, verified and smoke-tested ([0077](../decisions/0077-native-recognition-windows.md)) | `OfflineMask_<v>_x64-setup.exe`, `OfflineMask_<v>_x64_en-US.msi`, `provenance-windows-x64.json` |
 | `ubuntu-22.04` | `pnpm -C desktop desktop:build --bundles deb,rpm` | WASM | `.deb`, `.rpm` (no AppImage until Linux has been tried, [0104](../decisions/0104-faster-release-builds.md)) |
 
-The publish job adds `SHA256SUMS.txt` over every attached file. Each platform keeps a Rust build cache keyed on `mise.toml`, the Cargo manifests and `.cargo/config.toml`; the release profile uses thin LTO so the link runs in parallel ([0104](../decisions/0104-faster-release-builds.md)). With a warm cache a release takes about 2 (Linux) to 9 (macOS arm64) minutes per platform, all in parallel. The native helper is its own crate in the `src-tauri` Cargo workspace, so a native job compiles the app library once ([0107](../decisions/0107-helper-crate.md)). Ubuntu 22.04 is used on purpose: the bundles link against its glibc and WebKitGTK, so they run on distributions at least that old.
+The publish job adds `SHA256SUMS.txt` over every attached file. Each platform restores a Rust build cache that only `main` saves, because a tag can read `main`'s cache but not another tag's. A dry run of `main` every Monday and Thursday keeps it fresh; the key changes only with `mise.toml` and `.cargo/config.toml`, so a version bump still starts warm ([0124](../decisions/0124-release-cache-across-tags.md)). The release profile uses thin LTO so the link runs in parallel ([0104](../decisions/0104-faster-release-builds.md)). With a warm cache a release takes about 2 (Linux) to 9 (macOS arm64) minutes per platform, all in parallel; from a cold cache, 6 (Linux) to 18 (macOS Intel). The native helper is its own crate in the `src-tauri` Cargo workspace, so a native job compiles the app library once ([0107](../decisions/0107-helper-crate.md)). Ubuntu 22.04 is used on purpose: the bundles link against its glibc and WebKitGTK, so they run on distributions at least that old.
 
 ## Signing
 
