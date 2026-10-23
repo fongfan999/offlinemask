@@ -12,6 +12,10 @@ use std::time::{Duration, Instant};
 use tauri::{AppHandle, Runtime};
 
 use crate::clipboard_guard;
+#[cfg(target_os = "macos")]
+use crate::selection_macos::focused_state;
+#[cfg(windows)]
+use crate::selection_windows::focused_state;
 
 #[cfg(target_os = "macos")]
 const MODIFIER: Key = Key::Meta;
@@ -142,7 +146,7 @@ const COPY_WAIT: Duration = Duration::from_millis(600);
 /// back. Applications read it while handling the chord (decision 0130).
 const PASTE_HOLD: Duration = Duration::from_millis(500);
 /// How long a pasted field gets to show the new text before the paste counts as
-/// dropped (decision 0131).
+/// dropped (decisions 0131, 0133).
 const PASTE_CONFIRM: Duration = Duration::from_millis(400);
 /// A clipboard borrowed by a copy that a paste will follow (decision 0131): Chrome drops
 /// a paste when the clipboard was put back between its own copy and that paste, so it
@@ -264,8 +268,9 @@ pub async fn quick_release_clipboard(app: AppHandle) {
 }
 /// Put `text` over the front application's selection: through Accessibility in a native
 /// macOS text view, otherwise with the paste chord and the user's clipboard put back
-/// once the application has taken the text (decisions 0130, 0131). On macOS the field
-/// must show the change, or the paste counts as dropped and the call fails.
+/// once the application has taken the text (decisions 0130, 0131). On macOS and Windows
+/// the field must show the change, or the paste counts as dropped and the call fails
+/// (decisions 0131, 0133).
 #[tauri::command]
 pub async fn quick_replace_selection(app: AppHandle, text: String) -> Result<(), String> {
     tauri::async_runtime::spawn_blocking(move || {
@@ -284,21 +289,21 @@ pub async fn quick_replace_selection(app: AppHandle, text: String) -> Result<(),
             Some(_) => None,
             None => Some(clipboard_guard::save(&app)),
         };
-        #[cfg(target_os = "macos")]
-        let before = crate::selection_macos::focused_state(&app);
+        #[cfg(any(target_os = "macos", windows))]
+        let before = focused_state(&app);
         let left = clipboard_guard::write_private(&app, &text)?;
         let sent = chord(&app, 'v');
-        #[cfg(target_os = "macos")]
+        #[cfg(any(target_os = "macos", windows))]
         let landed = sent.is_ok() && {
             let started = Instant::now();
             let mut changed = before.is_none();
             while !changed && started.elapsed() < PASTE_CONFIRM {
                 sleep(Duration::from_millis(25));
-                changed = crate::selection_macos::focused_state(&app) != before;
+                changed = focused_state(&app) != before;
             }
             changed
         };
-        #[cfg(not(target_os = "macos"))]
+        #[cfg(not(any(target_os = "macos", windows)))]
         let landed = sent.is_ok();
         let restorer = app.clone();
         let pending = std::thread::spawn(move || {

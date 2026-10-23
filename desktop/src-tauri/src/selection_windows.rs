@@ -2,7 +2,8 @@
 //! (WH_MOUSE_LL) sees left-button presses and releases; after a drag or double click
 //! the focused element is asked, through UI Automation's text pattern, for its
 //! selection and that selection's screen rectangles. Password fields and this app's
-//! own windows are skipped. No permission is involved; applications running elevated
+//! own windows are skipped. The same look tells a quick action's paste whether it
+//! landed (decision 0133). No permission is involved; applications running elevated
 //! are shielded by Windows and simply give no popover.
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
@@ -10,6 +11,7 @@ use std::thread;
 use std::time::Duration;
 
 use tauri::{AppHandle, Runtime};
+use windows::core::Interface;
 use windows::Win32::Foundation::{HWND, LPARAM, LRESULT, POINT, WPARAM};
 use windows::Win32::Graphics::Gdi::{MonitorFromPoint, MONITOR_DEFAULTTONEAREST};
 use windows::Win32::System::Com::{
@@ -20,8 +22,10 @@ use windows::Win32::System::Ole::{
     SafeArrayAccessData, SafeArrayDestroy, SafeArrayGetUBound, SafeArrayUnaccessData,
 };
 use windows::Win32::System::Threading::GetCurrentProcessId;
+use windows::Win32::System::Variant::{VariantClear, VT_BOOL};
 use windows::Win32::UI::Accessibility::{
-    CUIAutomation, IUIAutomation, IUIAutomationTextPattern, IUIAutomationValuePattern,
+    CUIAutomation, IUIAutomation, IUIAutomation2, IUIAutomationElement, IUIAutomationTextPattern,
+    IUIAutomationTextRange, IUIAutomationValuePattern, UIA_IsReadOnlyAttributeId,
     UIA_TextPatternId, UIA_ValuePatternId,
 };
 use windows::Win32::UI::HiDpi::{GetDpiForMonitor, MDT_EFFECTIVE_DPI};
@@ -113,27 +117,55 @@ unsafe fn first_rect(array: *mut SAFEARRAY) -> Option<Rect> {
     rect
 }
 
-fn read_selection(at: POINT) -> Option<Read> {
+/// Run `work` with UI Automation on this thread, COM initialised and uninitialised around it.
+fn with_automation<T>(work: impl FnOnce(&IUIAutomation) -> Option<T>) -> Option<T> {
     // SAFETY: COM calls on a thread we initialise and uninitialise ourselves.
     unsafe {
         let init = CoInitializeEx(None, COINIT_APARTMENTTHREADED);
-        let result = (|| {
-            let automation: IUIAutomation =
-                CoCreateInstance(&CUIAutomation, None, CLSCTX_INPROC_SERVER).ok()?;
-            let element = automation.GetFocusedElement().ok()?;
-            if element.CurrentProcessId().ok()? as u32 == GetCurrentProcessId() {
-                return None;
-            }
+        let result = CoCreateInstance(&CUIAutomation, None, CLSCTX_INPROC_SERVER)
+            .ok()
+            .and_then(|automation: IUIAutomation| work(&automation));
+        if init.is_ok() {
+            CoUninitialize();
+        }
+        result
+    }
+}
+/// The focused element of another application, or None for one of ours.
+unsafe fn foreign_focus(automation: &IUIAutomation) -> Option<IUIAutomationElement> {
+    let element = automation.GetFocusedElement().ok()?;
+    (element.CurrentProcessId().ok()? as u32 != GetCurrentProcessId()).then_some(element)
+}
+/// The first selected range of the element's text pattern.
+unsafe fn selected_range(element: &IUIAutomationElement) -> Option<IUIAutomationTextRange> {
+    let pattern: IUIAutomationTextPattern = element.GetCurrentPatternAs(UIA_TextPatternId).ok()?;
+    let ranges = pattern.GetSelection().ok()?;
+    if ranges.Length().ok()? < 1 {
+        return None;
+    }
+    ranges.GetElement(0).ok()
+}
+/// The text's own read-only attribute: Some(false) inside editable content (a web
+/// editor, a Word document), Some(true) in read-only text, None when the application
+/// does not say or the range is mixed.
+unsafe fn range_read_only(range: &IUIAutomationTextRange) -> Option<bool> {
+    let mut value = range.GetAttributeValue(UIA_IsReadOnlyAttributeId).ok()?;
+    let inner = &value.Anonymous.Anonymous;
+    let read_only = (inner.vt == VT_BOOL).then(|| inner.Anonymous.boolVal.as_bool());
+    // Mixed and unsupported come back as an object, released here.
+    let _ = VariantClear(&mut value);
+    read_only
+}
+
+fn read_selection(at: POINT) -> Option<Read> {
+    with_automation(|automation| {
+        // SAFETY: COM calls on the thread `with_automation` initialised.
+        unsafe {
+            let element = foreign_focus(automation)?;
             if element.CurrentIsPassword().ok()?.as_bool() {
                 return None;
             }
-            let pattern: IUIAutomationTextPattern =
-                element.GetCurrentPatternAs(UIA_TextPatternId).ok()?;
-            let ranges = pattern.GetSelection().ok()?;
-            if ranges.Length().ok()? < 1 {
-                return None;
-            }
-            let range = ranges.GetElement(0).ok()?;
+            let range = selected_range(&element)?;
             let text = range.GetText(-1).ok()?.to_string();
             if !usable(&text) {
                 return None;
@@ -165,20 +197,52 @@ fn read_selection(at: POINT) -> Option<Read> {
                     };
                     (rect, field)
                 });
-            // An editable field exposes a value pattern that is not read-only; anything
-            // else (documents, web pages, an AI's answer) counts as read-only.
+            // An editable field exposes a value pattern that is not read-only. A web
+            // editor or a Word document may not (decision 0132's Zalo box has none on
+            // macOS), but its text says it is not read-only (decision 0133). Anything
+            // else (web pages, an AI's answer) counts as read-only.
             let editable = element
                 .GetCurrentPatternAs::<IUIAutomationValuePattern>(UIA_ValuePatternId)
                 .ok()
                 .and_then(|value| value.CurrentIsReadOnly().ok())
-                .is_some_and(|read_only| !read_only.as_bool());
+                .is_some_and(|read_only| !read_only.as_bool())
+                || range_read_only(&range) == Some(false);
             Some((text, bounds, editable))
-        })();
-        if init.is_ok() {
-            CoUninitialize();
         }
-        result
-    }
+    })
+}
+
+/// The focused element's value (where it has a value pattern) and selected text, to
+/// see whether a paste changed anything (decisions 0131, 0133). None when the element
+/// is ours or offers neither, so nothing can be seen.
+pub fn focused_state<R: Runtime>(_app: &AppHandle<R>) -> Option<(Option<String>, Option<String>)> {
+    with_automation(|automation| {
+        // SAFETY: COM calls on the thread `with_automation` initialised.
+        unsafe {
+            // A hung application must not hold up the paste for UIA's default 20 s.
+            if let Ok(automation) = automation.cast::<IUIAutomation2>() {
+                let _ = automation.SetTransactionTimeout(200);
+            }
+            let element = foreign_focus(automation)?;
+            let value = element
+                .GetCurrentPatternAs::<IUIAutomationValuePattern>(UIA_ValuePatternId)
+                .ok()
+                .and_then(|pattern| pattern.CurrentValue().ok())
+                .map(|value| value.to_string());
+            let selection =
+                match element.GetCurrentPatternAs::<IUIAutomationTextPattern>(UIA_TextPatternId) {
+                    // A collapsed selection is an empty range, or no range at all.
+                    Ok(_) => Some(
+                        selected_range(&element)
+                            .and_then(|range| range.GetText(-1).ok())
+                            .map(|text| text.to_string())
+                            .unwrap_or_default(),
+                    ),
+                    Err(_) => None,
+                };
+            (value.is_some() || selection.is_some()).then_some((value, selection))
+        }
+    })
 }
 
 unsafe extern "system" fn hook(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {

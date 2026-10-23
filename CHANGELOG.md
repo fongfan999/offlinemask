@@ -6,6 +6,7 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
+- On Windows, a paste the application drops opens the result in the preview card instead of showing a check mark, web editors count as editable, and a clipboard OfflineMask cannot read is no longer emptied when it puts it back ([0133](docs/decisions/0133-windows-paste-confirmation.md)).
 - In Zalo's message box, and other web editors that macOS does not report as editable, the circle sits by the text and its click replaces the selection instead of opening the preview card ([0132](docs/decisions/0132-web-editors-accessibility-misses.md)).
 - The OfflineMask circle shows within about half a second when the selection holds a phone number, an email or an ID, and its click no longer runs the detection a second time. A paste Chrome silently dropped is now caught and shown in the preview card ([0131](docs/decisions/0131-circle-speed.md)).
 - Ẩn nhanh leaves your clipboard as it was. In native macOS apps it reads and replaces the selection through Accessibility; elsewhere it saves the whole clipboard (images, files and formatting included), copies or pastes, and puts it back unless you copied something meanwhile. Its own clipboard items are kept out of clipboard managers and Universal Clipboard, and the result no longer stays on the clipboard ([0130](docs/decisions/0130-quick-actions-borrow-the-clipboard.md)).

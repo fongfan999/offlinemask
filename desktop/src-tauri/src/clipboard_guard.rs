@@ -153,12 +153,33 @@ mod imp {
 
     use super::Stamp;
 
-    /// Each format and its bytes.
-    pub type Saved = Vec<(u32, Vec<u8>)>;
+    /// Each format and its bytes; None when the clipboard could not be opened to save
+    /// it, so a restore leaves it alone rather than emptying it (decision 0133).
+    pub type Saved = Option<Vec<(u32, Vec<u8>)>>;
 
     /// GDI handle formats are not memory blocks; Windows synthesizes them again from
     /// CF_DIB and the other memory formats that are saved.
     const GDI_FORMATS: [u32; 8] = [2, 3, 9, 14, 0x80, 0x82, 0x83, 0x8E];
+    /// CF_PRIVATEFIRST..CF_GDIOBJLAST: handles of any kind, meaningful only to the
+    /// application that put them there.
+    const HANDLE_FORMATS: std::ops::RangeInclusive<u32> = 0x200..=0x3FF;
+    /// The registered formats that keep an entry out of clipboard monitors, the Win+V
+    /// history and the cloud clipboard.
+    unsafe fn mark_private() {
+        let zero = 0u32.to_le_bytes();
+        set(
+            RegisterClipboardFormatW(w!("ExcludeClipboardContentFromMonitorProcessing")),
+            &zero,
+        );
+        set(
+            RegisterClipboardFormatW(w!("CanIncludeInClipboardHistory")),
+            &zero,
+        );
+        set(
+            RegisterClipboardFormatW(w!("CanUploadToCloudClipboard")),
+            &zero,
+        );
+    }
 
     /// Ownership needs a window: with none, `SetClipboardData` fails after
     /// `EmptyClipboard`.
@@ -218,9 +239,7 @@ mod imp {
         unsafe { GetClipboardSequenceNumber() as Stamp }
     }
     pub fn save<R: Runtime>(app: &AppHandle<R>) -> Saved {
-        let Some(_open) = Open::new(owner(app)) else {
-            return Vec::new();
-        };
+        let _open = Open::new(owner(app))?;
         let mut saved = Vec::new();
         let mut format = 0;
         loop {
@@ -229,7 +248,7 @@ mod imp {
             if format == 0 {
                 break;
             }
-            if GDI_FORMATS.contains(&format) {
+            if GDI_FORMATS.contains(&format) || HANDLE_FORMATS.contains(&format) {
                 continue;
             }
             // SAFETY: the clipboard is open; the handle is read, not kept.
@@ -238,9 +257,12 @@ mod imp {
                 saved.push((format, bytes));
             }
         }
-        saved
+        Some(saved)
     }
     pub fn restore<R: Runtime>(app: &AppHandle<R>, saved: Saved) {
+        let Some(saved) = saved else {
+            return;
+        };
         let Some(_open) = Open::new(owner(app)) else {
             return;
         };
@@ -250,6 +272,9 @@ mod imp {
             for (format, bytes) in &saved {
                 set(*format, bytes);
             }
+            // The user's own copy is in the history already; putting it back is not a
+            // new one.
+            mark_private();
         }
     }
     pub fn write_private<R: Runtime>(app: &AppHandle<R>, text: &str) -> Result<Stamp, String> {
@@ -264,20 +289,7 @@ mod imp {
             unsafe {
                 EmptyClipboard().map_err(|_| "io: clipboard")?;
                 set(CF_UNICODETEXT.0 as u32, &wide);
-                // Kept out of clipboard monitors, the Win+V history and the cloud clipboard.
-                let zero = 0u32.to_le_bytes();
-                set(
-                    RegisterClipboardFormatW(w!("ExcludeClipboardContentFromMonitorProcessing")),
-                    &zero,
-                );
-                set(
-                    RegisterClipboardFormatW(w!("CanIncludeInClipboardHistory")),
-                    &zero,
-                );
-                set(
-                    RegisterClipboardFormatW(w!("CanUploadToCloudClipboard")),
-                    &zero,
-                );
+                mark_private();
             }
         }
         Ok(stamp(app))
