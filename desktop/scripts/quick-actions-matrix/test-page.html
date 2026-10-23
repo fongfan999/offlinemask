@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <title>Ẩn nhanh matrix</title>
+    <style>
+      body {
+        font:
+          16px/1.5 -apple-system,
+          sans-serif;
+        margin: 32px;
+        max-width: 720px;
+      }
+      textarea,
+      input,
+      [contenteditable] {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        margin: 0 0 24px;
+        padding: 8px;
+        font: inherit;
+        border: 1px solid #999;
+      }
+      textarea {
+        height: 72px;
+      }
+      #log {
+        font:
+          12px ui-monospace,
+          monospace;
+        white-space: pre-wrap;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Filled by run.mjs through the URL hash; every field gets the same sample. -->
+    <textarea id="field-textarea"></textarea>
+    <input id="field-input" />
+    <div id="field-contenteditable" contenteditable="true"></div>
+    <p id="field-readonly"></p>
+    <!-- What landed where: run.mjs reads this through Accessibility after each case. -->
+    <pre id="log"></pre>
+    <script>
+      const sample = decodeURIComponent(location.hash.slice(1));
+      document.getElementById("field-textarea").value = sample;
+      document.getElementById("field-input").value = sample;
+      document.getElementById("field-contenteditable").textContent = sample;
+      document.getElementById("field-readonly").textContent = sample;
+      const log = document.getElementById("log");
+      const note = (event) => {
+        const target = event.target.closest("[id]")?.id ?? event.target.nodeName;
+        log.textContent += `${event.type}${event.inputType ? `:${event.inputType}` : ""}@${target}\n`;
+      };
+      for (const type of ["paste", "beforeinput", "copy"])
+        document.addEventListener(type, note, true);
+    </script>
+  </body>
+</html>

@@ -16,11 +16,12 @@ export default [
       "desktop/public/**",
       "desktop/src-tauri/**",
       // Frozen evaluation tooling is reproduced from recorded sources, not linted.
-      "desktop/scripts/**",
+      "desktop/scripts/**/*",
       "!desktop/scripts/prepare-*.mjs",
       "!desktop/scripts/build-*.mjs",
       "!desktop/scripts/verify-*.mjs",
       "!desktop/scripts/check-*.mjs",
+      "!desktop/scripts/quick-actions-matrix/**",
       "landing/dist/**",
       "landing/.wrangler/**",
     ],

@@ -28,7 +28,8 @@
     "test:models:legacy": "pnpm models:check && node scripts/evaluate-model.mjs",
     "compare:models": "pnpm models:check && node scripts/compare-models.mjs",
     "desktop:build:native": "node scripts/build-native-desktop.mjs",
-    "desktop:dev:native": "node scripts/dev-native-desktop.mjs"
+    "desktop:dev:native": "node scripts/dev-native-desktop.mjs",
+    "quick-actions:matrix": "node scripts/quick-actions-matrix/run.mjs"
   },
   "dependencies": {
     "@fontsource-variable/noto-sans": "5.3.0",

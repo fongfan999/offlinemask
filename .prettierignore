@@ -13,11 +13,10 @@ landing/.wrangler/
 # Frozen evaluation experiments. The protocols under docs/evaluations/ pin
 # SHA-256 fingerprints of these scripts; reformatting would invalidate recorded
 # evidence without changing behavior. Start a new versioned experiment instead.
-desktop/scripts/
-!desktop/scripts/prepare-*.mjs
-!desktop/scripts/build-*.mjs
-!desktop/scripts/verify-*.mjs
-!desktop/scripts/check-*.mjs
+# The build and check scripts beside them keep their own layout too (ESLint checks
+# them); only the maintained quick-actions matrix is formatted.
+desktop/scripts/*
+!desktop/scripts/quick-actions-matrix/
 desktop/tests/fixtures/
 docs/evaluations/
 

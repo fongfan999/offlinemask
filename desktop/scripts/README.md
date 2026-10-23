@@ -15,6 +15,7 @@ Two kinds of files live here. Only the first kind is needed to build, run or che
 | `measure-wasm-heap.mjs` | Prints the ONNX Runtime WASM heap the pack needs, loading each graph whole or with its weights as external data ([0129](../../docs/decisions/0129-wasm-weights-as-external-data.md)). |
 | `prepare-pack.mjs` | `pnpm pack:prepare`: pins local model files into a pack definition's `assets`. |
 | `build-r2-pack.mjs`, `verify-r2-pack.mjs` | Compressed pack publication for the shipping pack ([Decision 0041](../../docs/decisions/0041-compressed-pack-installer-and-r2.md)). |
+| `quick-actions-matrix/` | `pnpm quick-actions:matrix`: the Ẩn nhanh circle across macOS applications, run by hand before a release ([README](quick-actions-matrix/README.md)). Maintained, so linted and formatted. |
 | `prepare-models.mjs`, `model-manifest.json` | Developer download and hash check of the historical OpenMed evaluation models (`pnpm models:download`, `pnpm test:models:legacy`). These are not the shipping pack. |
 
 The shipping pack definition itself lives in [`packs/vietnamese-pii-v1.json`](../packs/vietnamese-pii-v1.json); it was `scripts/release-pack-v1.json` until [Decision 0054](../../docs/decisions/0054-replaceable-recognition-packs.md).
