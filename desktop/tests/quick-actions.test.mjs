@@ -349,10 +349,47 @@ test("with permission, the shortcut takes the selection and pastes the result ov
   const writes = adapter.calls.filter((call) => call[0] === "write").map((call) => call[1]);
   assert.match(writes[0], /OfflineMask/);
   assert.equal(writes.at(-1), `Gọi ${alias} giúp tôi.`);
-  // The panel's own buttons never touch the selection.
+  // The panel's own buttons never touch the selection: the two chords are the shortcut's
+  // read and its check before the paste.
   adapter.clipboard = phoneText;
   await quick.act("mask");
-  assert.equal(adapter.calls.filter((call) => call[0] === "copy").length, 1);
+  assert.equal(adapter.calls.filter((call) => call[0] === "copy").length, 2);
+});
+
+test("a selection changed while masking ran is left alone; the result waits on the clipboard", async () => {
+  // The user switched to another app and selected something else before the result came.
+  const sessions = ref([]);
+  const adapter = fakeAdapter("bản cũ trong clipboard");
+  adapter.permission = "granted";
+  adapter.selection = phoneText;
+  const run = fakeRun(sessions);
+  const maskText = run.maskText;
+  run.maskText = async (text) => {
+    adapter.selection = "Một đoạn khác ở ứng dụng khác";
+    return maskText(text);
+  };
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  const status = await quick.act("auto");
+  const alias = sessions.value[0].analysis.findings[0].alias;
+  assert.equal(adapter.calls.filter((call) => call[0] === "paste").length, 0);
+  assert.equal(adapter.clipboard, `Gọi ${alias} giúp tôi.`);
+  assert.equal(status.message, quickMessages.maskedMoved(1));
+
+  // Nothing selected any more (the click landed elsewhere): no paste either.
+  adapter.selection = phoneText;
+  run.maskText = async (text) => {
+    adapter.selection = null;
+    return maskText(text);
+  };
+  await quick.act("auto");
+  assert.equal(adapter.calls.filter((call) => call[0] === "paste").length, 0);
+  assert.match(adapter.clipboard, /\[SDT_1_[a-f0-9]{4}\]/);
 });
 
 test("nothing selected, or no permission, falls back to the clipboard; the hint shows once", async () => {
@@ -563,8 +600,8 @@ test("the popover asks above a fresh selection and its button replaces that sele
   assert.equal(quick.lastStatus.value.hint, "Ẩn thông tin");
   assert.deepEqual(quick.lastStatus.value.anchor, { bounds, pointer: { x: 150, y: 210 } });
 
-  // The panel's button reads the exact selection with one copy chord, masks it, puts the
-  // user's clipboard back and pastes the result over the selection.
+  // The panel's button reads the exact selection with one copy chord, masks it, checks
+  // with a second one that the selection is still that text, and pastes over it.
   adapter.selection = phoneText;
   adapter.command("mask");
   await new Promise((resolve) => setTimeout(resolve, 0));
@@ -576,7 +613,7 @@ test("the popover asks above a fresh selection and its button replaces that sele
     [["paste", `Gọi ${alias} giúp tôi.`]],
   );
   assert.equal(quick.lastStatus.value.message, quickMessages.masked(1, true));
-  assert.equal(adapter.calls.filter((call) => call[0] === "copy").length, 1);
+  assert.equal(adapter.calls.filter((call) => call[0] === "copy").length, 2);
   adapter.selection = null;
 
   // A reply with that alias asks to restore; a press elsewhere dismisses the question.

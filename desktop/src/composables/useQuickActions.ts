@@ -274,6 +274,19 @@ export function useQuickActions({
     if (marker) await writeClipboard(before).catch(() => {});
     return { text: before, replaced: false };
   }
+  /** Masking takes a while, and meanwhile the user may switch applications or select
+   * other text. Right before the paste the selection is copied again: only the very
+   * text that was masked is replaced (decision 0127). */
+  async function stillSelected(text: string): Promise<boolean> {
+    const marker = `\u2063OfflineMask ${Date.now().toString(36)}\u2063`;
+    try {
+      await writeClipboard(marker);
+      await adapter.copySelection();
+      return (await adapter.readClipboard()) === text;
+    } catch {
+      return false;
+    }
+  }
   /** Run one action. `auto` (the shortcut) decides from the text: known aliases
    * restore, anything else is masked; the panel's buttons act on the clipboard only.
    * `given` is text handed over by a Service: it is used as is and the result goes
@@ -337,6 +350,8 @@ export function useQuickActions({
         return await undone(outcome.error === "busy" ? quickMessages.busy : outcome.message);
       const session = outcome.session;
       if (!session.analysis.findings.length) return await undone(quickMessages.nothing);
+      const moved = replaced && !(await stillSelected(text));
+      if (moved) replaced = false;
       try {
         await writeClipboard(sessionOutput(session));
       } catch {
@@ -344,7 +359,10 @@ export function useQuickActions({
       }
       // The result is pasted before the panel flashes, so the paste cannot land there.
       if (replaced) await adapter.pasteResult().catch(() => {});
-      return await done(quickMessages.masked(session.analysis.findings.length, replaced));
+      const found = session.analysis.findings.length;
+      return await done(
+        moved ? quickMessages.maskedMoved(found) : quickMessages.masked(found, replaced),
+      );
     } catch {
       // Whatever broke, the panel must not stay on "Đang ẩn thông tin…".
       return await undone(quickMessages.failed);

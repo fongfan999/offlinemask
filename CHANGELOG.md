@@ -6,6 +6,7 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ### Fixed
 
+- A masked result no longer replaces text you selected elsewhere while masking was still running. Right before pasting, OfflineMask checks that the selection is still the text it masked; if not, the result waits on the clipboard ([0127](docs/decisions/0127-paste-only-over-the-masked-selection.md)).
 - On macOS, selecting text in Chromium and Electron apps (Chrome, Dia, Arc, Slack, Zalo) shows the OfflineMask circle again. Those apps expose the selection only after an assistive tool asks them to, and OfflineMask never asked ([0126](docs/decisions/0126-chromium-accessibility-tree.md)).
 
 ## [2.0.3] — 2026-10-22
