@@ -49,6 +49,9 @@ export interface QuickStatus {
   /** Progress and result of a click on the circle that works in place: the circle itself
    * spins, then shows a check mark, instead of a card in the corner. */
   inPlace?: boolean;
+  /** A preview for a result the user did not wait for beside the circle (the selection
+   * moved, decision 0127): it opens in the top-right corner instead. */
+  corner?: boolean;
   /** The preview's copy worked: its copy icon turns into a check mark and the card fades. */
   copied?: boolean;
   /** The restore preview of read-only text: the restored text, where each restored

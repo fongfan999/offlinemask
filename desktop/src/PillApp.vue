@@ -258,8 +258,10 @@ async function showPreview() {
   dot = null;
   mode.value = "preview";
   const size = await fit();
-  // Beside the circle that opened it; the top-right corner when there was none.
-  if (lastCircle) await panel.placePreview(lastCircle, size).catch(() => {});
+  // Beside the circle that opened it; the top-right corner when there was none, or when
+  // the user has moved on from that selection.
+  if (lastCircle && !status.value?.corner)
+    await panel.placePreview(lastCircle, size).catch(() => {});
   else await panel.placeTopRight().catch(() => {});
   await panel.show();
 }

@@ -10,7 +10,7 @@ The in-place path ([0091](0091-in-place-replace.md), [0096](0096-selection-popov
 
 Before masking starts, the selection is read through Accessibility (macOS) or UI Automation (Windows), the same read ⌘⇧M uses. Right before the paste it is read again, and the paste is sent only when both reads agree. This check does not touch the clipboard. In applications that report no selection this way, the selection is copied once more instead, with the same marker round trip as the first read, and must equal the masked text.
 
-When the selection changed, nothing is pasted and the result does not go to the clipboard: the user's own clipboard is put back, and the masked text opens in the preview card titled "Vùng chọn đã đổi". Its buttons copy the result or open its session, so the user decides where it goes (owner, 23 October: "don't overuse the clipboard, just show a popup and let users decide").
+When the selection changed, nothing is pasted and the result does not go to the clipboard: the user's own clipboard is put back, and the masked text opens in the preview card titled "Vùng chọn đã đổi", in the top-right corner of the screen rather than beside the circle: the user has moved on from that spot (owner, 23 October). Its buttons copy the result or open its session, so the user decides where it goes (owner, 23 October: "don't overuse the clipboard, just show a popup and let users decide").
 
 Restoring stays as it was: it runs from tables in memory, with no wait in which the selection could change.
 

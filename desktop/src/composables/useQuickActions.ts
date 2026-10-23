@@ -320,7 +320,7 @@ export function useQuickActions({
       }
       // A preview opens beside the circle, like the read-only one, not in its place.
       const status: QuickStatus = shown
-        ? { message, tone, preview: shown }
+        ? { message, tone, preview: shown, corner: true }
         : { message, tone, ...tag };
       await show(status);
       return status;

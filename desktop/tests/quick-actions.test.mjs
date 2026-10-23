@@ -391,6 +391,8 @@ test("a selection changed while masking ran is left alone; the result waits in a
   assert.equal(status.message, quickMessages.maskedMoved);
   assert.equal(status.preview.text, `Gọi ${alias} giúp tôi.`);
   assert.equal(status.inPlace, undefined);
+  // The user has moved on, so the card opens in the corner, not beside the old circle.
+  assert.equal(status.corner, true);
   // Its copy button is how the result reaches the clipboard.
   adapter.command("copy");
   await new Promise((resolve) => setTimeout(resolve, 0));
