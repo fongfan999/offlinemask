@@ -33,6 +33,14 @@ pub fn run() {
             .path()
             .app_local_data_dir()?
             .join(models::pack_directory());
+        // The asset scope (`$APPLOCALDATA/models/**`) is resolved before this hook and
+        // requests are matched by their real path. The MSIX redirects app data to the
+        // package's LocalCache, and on the first launch that folder does not exist yet,
+        // so the pack was refused until a restart (decision 0117). Allowing the folder
+        // again once it exists adds its redirected path.
+        let models_dir = app.path().app_local_data_dir()?.join("models");
+        std::fs::create_dir_all(&models_dir)?;
+        app.asset_protocol_scope().allow_directory(&models_dir, true)?;
         app.manage(vault::Vault::new(app.path().app_local_data_dir()?));
         let handle = app.handle().clone();
         app.manage(models::Models::with_notifier(

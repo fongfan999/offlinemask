@@ -17,6 +17,7 @@ Unsigned Windows installers trigger SmartScreen, a paid certificate costs more t
 ## Behaviour that differs in the package (to test by hand)
 
 - **App data** written under `%LOCALAPPDATA%` is redirected to the package's private `LocalCache` and removed on uninstall. The vault, settings and the recognition pack move there; nothing migrates from an earlier EXE/MSI install.
+- **Asset scope.** Tauri resolves the `$APPLOCALDATA/models/**` asset scope before setup and matches each request by its real path. On the first launch after install the redirected folder did not exist yet, so the scope held only the unredirected path and every pack file was refused until a restart; text masking failed right after the pack download (found testing 2.0.4 on 23 October 2026). Setup now creates `models/` and allows it again, which adds the `LocalCache` path.
 - **Start at login** (decision 0092) uses `tauri-plugin-autostart`, which writes the `Run` registry key. Registry writes from a packaged app are virtualized, so this is expected not to work from the Store build until a `windows.startupTask` extension replaces it.
 - **WebView2** is not bootstrapped by an MSIX; the app relies on the Evergreen runtime that Windows 11 and nearly all Windows 10 machines have.
 - The package folder is read-only; the app writes nothing beside its executable.
