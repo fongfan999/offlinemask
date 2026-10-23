@@ -261,7 +261,7 @@ async function closeSidebar() {
           ><span v-if="topbarLabel">{{ topbarLabel }}</span>
         </div>
       </header>
-      <main :class="{ 'home-page': page === 'home' }">
+      <main :class="{ 'home-page': page === 'home', 'wide-page': page === 'excel' }">
         <!-- The text and spreadsheet pages stay alive across navigation, so the step,
              view and pasted reply are still there on return. All of it is RAM only. -->
         <KeepAlive include="WorkspacePage,SheetPage,DocPage">

@@ -4,6 +4,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+### Changed
+
+- The main button of each step stays in view while a long review or file list scrolls under it, and short results no longer sit in a tall empty box. After pasting the AI's reply, the restored copy gets the room under its own label, and its buttons share one row. Small labels are larger, spreadsheets show six columns side by side, and notes that were already done disappear ([0134](docs/decisions/0134-actions-in-view-and-readable-type.md)).
+
 ### Fixed
 
 - In the Microsoft Store build, masking works right after the recognition pack downloads; it used to fail until the app was restarted. Start at login works there too: it now uses the package's startup task, and the switch says where to turn it back on if you turned OfflineMask off in Windows' Startup apps ([0117](docs/decisions/0117-microsoft-store-msix.md)).

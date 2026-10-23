@@ -39,6 +39,8 @@ const restore = shallowRef<SheetRestore | null>(null);
 const restoreError = ref("");
 const restoreBusy = ref(false);
 const restoreSaved = ref(false);
+/** A text reply is in the restore box (RestorePanel). */
+const replyPasted = ref(false);
 const settingPasscode = ref(false);
 const keptNotice = ref("");
 
@@ -79,7 +81,8 @@ const subtitle = computed(() => {
       : `Bảng tính #${props.session.number} · ${rows.toLocaleString("vi-VN")} dòng · Đọc lại rồi tải tệp đã ẩn về để gửi AI.`;
   }
   return draft.value
-    ? `${totalRows.value.toLocaleString("vi-VN")} dòng${draft.value.tables.length > 1 ? ` · ${draft.value.tables.length} trang tính` : ""} · Chọn cách xử lý từng cột, rồi ẩn toàn bộ.`
+    ? // The card says what to do with the columns; the subtitle only sizes the file.
+      `${totalRows.value.toLocaleString("vi-VN")} dòng${draft.value.tables.length > 1 ? ` · ${draft.value.tables.length} trang tính` : ""}`
     : "Mở tệp Excel, LibreOffice hoặc CSV. Thông tin bạn chọn được thay bằng mã như [SDT_1_…], ngay trên máy bạn.";
 });
 const totalRows = computed(
@@ -226,7 +229,7 @@ defineExpose({
         class="quiet-button"
         @click="sheet.discardDraft()"
       >
-        <AppIcon name="close" :size="15" />Chọn tệp khác
+        <AppIcon name="upload" :size="15" />Chọn tệp khác
       </button>
     </div>
   </div>
@@ -508,14 +511,17 @@ defineExpose({
           :analysis="{ findings: session.findings, spans: [] }"
           new-label="Ẩn bảng tính mới"
           @new-text="newSheet"
-        />
-        <footer class="card-footer">
+          @pasted="(pasted) => (replyPasted = pasted)"
+        >
           <button class="quiet-button" @click="openStep(2)">
             <AppIcon name="eye" :size="15" />Xem lại bản đã ẩn
           </button>
-        </footer>
+        </RestorePanel>
       </template>
     </div>
   </section>
-  <p v-if="status" class="feedback" role="status">{{ status }}</p>
+  <!-- "Open the returned file at step 3" is done once one is open (decision 0134). -->
+  <p v-if="status && !(step === 3 && (restore || replyPasted))" class="feedback" role="status">
+    {{ status }}
+  </p>
 </template>

@@ -47,6 +47,8 @@ const restore = shallowRef<DocRestore | null>(null);
 const restoreError = ref("");
 const restoreBusy = ref(false);
 const restoreSaved = ref(false);
+/** A text reply is in the restore box (RestorePanel). */
+const replyPasted = ref(false);
 const settingPasscode = ref(false);
 const keptNotice = ref("");
 
@@ -206,7 +208,7 @@ defineExpose({
         <AppIcon name="plus" :size="15" />Tạo mới
       </button>
       <button v-else-if="!doc.processing.value" class="quiet-button" @click="doc.discardDraft()">
-        <AppIcon name="close" :size="15" />Chọn tệp khác
+        <AppIcon name="upload" :size="15" />Chọn tệp khác
       </button>
     </div>
   </div>
@@ -443,14 +445,17 @@ defineExpose({
           :analysis="{ findings: session.findings, spans: [] }"
           new-label="Ẩn tài liệu mới"
           @new-text="newDoc"
-        />
-        <footer class="card-footer">
+          @pasted="(pasted) => (replyPasted = pasted)"
+        >
           <button class="quiet-button" @click="openStep(2)">
             <AppIcon name="eye" :size="15" />Xem lại bản đã ẩn
           </button>
-        </footer>
+        </RestorePanel>
       </template>
     </div>
   </section>
-  <p v-if="status" class="feedback" role="status">{{ status }}</p>
+  <!-- "Open the returned file at step 3" is done once one is open (decision 0134). -->
+  <p v-if="status && !(step === 3 && (restore || replyPasted))" class="feedback" role="status">
+    {{ status }}
+  </p>
 </template>

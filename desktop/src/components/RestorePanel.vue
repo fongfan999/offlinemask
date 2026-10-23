@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef, watch } from "vue";
+import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
 import HighlightedText from "./HighlightedText.vue";
@@ -7,8 +7,9 @@ import { restoreAliases, type Restoration } from "../core/restore.ts";
 import type { TextAnalysis } from "../core/text.ts";
 
 const props = defineProps<{ sessionId: string; analysis: TextAnalysis; newLabel?: string }>();
-/** After copying, the next step is another reply or a new text; nothing needs "finishing". */
-const emit = defineEmits<{ newText: [] }>();
+/** After copying, the next step is another reply or a new text; nothing needs "finishing".
+ * `pasted` tells the page a reply is in, so its "paste the reply here" note can go. */
+const emit = defineEmits<{ newText: []; pasted: [boolean] }>();
 
 const reply = ref("");
 const result = ref<Restoration | null>(null);
@@ -38,7 +39,10 @@ watch(reply, (text) => {
   result.value = text.trim() ? restoreAliases(text, props.analysis) : null;
   copied.value = false;
   copyStatus.value = "";
+  emit("pasted", Boolean(result.value));
 });
+// Leaving the step drops the pasted reply with this panel.
+onBeforeUnmount(() => emit("pasted", false));
 
 const status = computed(() => {
   const current = result.value;
@@ -77,46 +81,57 @@ async function copy() {
 </script>
 
 <template>
-  <div class="restore-body">
+  <!-- Once a reply is in, the result is what matters: the pasted reply shrinks and the
+       restored copy gets the room, under its own label (decision 0134). -->
+  <div class="restore-body" :class="{ 'has-result': result?.restored }">
     <p class="restore-intro">
       <BrandMark variant="restore" :size="16" class="inline-mark" />Dán câu trả lời của AI vào đây.
       Mã thay thế của văn bản này được đổi lại thành thông tin thật, ngay trên máy bạn.
     </p>
-    <label class="sr-only" for="restore-input">Phản hồi của AI chứa mã thay thế</label>
+    <label class="sr-only" for="restore-input">Câu trả lời của AI chứa mã thay thế</label>
     <textarea
       id="restore-input"
       ref="input"
       v-model="reply"
       class="text-content restore-input"
-      placeholder="Dán phản hồi của AI vào đây…"
+      placeholder="Dán câu trả lời của AI vào đây…"
       spellcheck="false"
       autocomplete="off"
       autocorrect="off"
       autocapitalize="off"
     ></textarea>
     <p v-if="status" class="restore-status" role="status">
-      {{ status }}<span v-if="unknownNote" class="restore-unknown">{{ unknownNote }}</span>
+      <strong v-if="result?.restored">Bản đã khôi phục</strong>{{ status
+      }}<span v-if="unknownNote" class="restore-unknown">{{ unknownNote }}</span>
     </p>
     <template v-if="result && result.restored">
       <label class="sr-only" for="restore-output">Bản đã khôi phục</label>
       <HighlightedText
         id="restore-output"
         ref="output"
+        class="restore-output"
         :value="result.text"
         :marks="result.marks"
       />
-      <div class="restore-actions">
-        <p v-if="copyStatus" class="restore-status" role="status">{{ copyStatus }}</p>
-        <template v-if="copied">
-          <button class="quiet-button" @click="anotherReply">Dán câu trả lời khác</button>
-          <button class="quiet-button" @click="emit('newText')">
-            <AppIcon name="plus" :size="15" />{{ newLabel ?? "Ẩn văn bản mới" }}
-          </button>
-        </template>
-        <button v-else class="primary-action" @click="copy">
-          <AppIcon name="copy" :size="17" />Sao chép bản khôi phục
-        </button>
-      </div>
     </template>
   </div>
+  <!-- One action row for the step, kept in view; the page adds its own buttons. -->
+  <footer class="card-footer">
+    <span class="action-hint" role="status"
+      ><template v-if="copyStatus">{{ copyStatus }}</template
+      ><slot v-else name="hint"
+    /></span>
+    <slot />
+    <template v-if="result && result.restored">
+      <template v-if="copied">
+        <button class="quiet-button" @click="anotherReply">Dán câu trả lời khác</button>
+        <button class="quiet-button" @click="emit('newText')">
+          <AppIcon name="plus" :size="15" />{{ newLabel ?? "Ẩn văn bản mới" }}
+        </button>
+      </template>
+      <button v-else class="primary-action" @click="copy">
+        <AppIcon name="copy" :size="17" />Sao chép bản khôi phục
+      </button>
+    </template>
+  </footer>
 </template>

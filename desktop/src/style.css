@@ -197,21 +197,23 @@ nav button.nav-upcoming:hover {
   display: grid;
   line-height: 1.35;
 }
+/* As large as the narrow (210px) sidebar allows without wrapping "XLSX, XLS, ODS, CSV"
+   or the upcoming formats' names (decision 0134). */
 .nav-text small {
   color: var(--muted);
-  font: 9.5px var(--mono);
-  letter-spacing: 0.02em;
+  font: 10.5px var(--mono);
+  letter-spacing: 0;
   font-weight: 400;
 }
 .nav-upcoming .coming-soon-badge {
   margin-left: auto;
-  padding: 2px 7px;
-  font-size: 9px;
+  padding: 2px 6px;
+  font-size: 10px;
 }
 .history-heading {
   display: flex;
   justify-content: space-between;
-  font: 10px var(--mono);
+  font: 11px var(--mono);
   letter-spacing: 0.12em;
   color: var(--muted);
   padding: 30px 14px 12px;
@@ -264,7 +266,7 @@ nav button.nav-upcoming:hover {
 }
 .history-item small {
   display: block;
-  font: 10px var(--mono);
+  font: 11px var(--mono);
   letter-spacing: 0.02em;
   color: var(--muted);
   margin-top: 5px;
@@ -323,6 +325,10 @@ main {
   margin: 42px auto 28px;
   flex: 1;
   min-width: 0;
+}
+/* Spreadsheets need the width for their columns (decision 0134). */
+main.wide-page {
+  width: min(1180px, 100%);
 }
 main.home-page {
   width: min(730px, 100%);
@@ -438,7 +444,7 @@ h1 {
   border-radius: 999px;
   background: var(--paper-sunk);
   color: var(--muted);
-  font: 10px var(--mono);
+  font: 11px var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   line-height: 1.5;
@@ -447,7 +453,7 @@ h1 {
 }
 .prototype-note {
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
   line-height: 1.8;
   text-align: center;
   margin: 20px auto 0;
@@ -463,6 +469,15 @@ h1 {
 .editor-heading h1 {
   font-size: 30px;
 }
+/* A code in a masked title, set like the review's highlights (decision 0134). */
+.title-alias {
+  padding: 0.05em 0.3em;
+  border-radius: 6px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font: 0.72em var(--mono);
+  vertical-align: 0.12em;
+}
 .editor-actions {
   display: flex;
   align-items: center;
@@ -471,7 +486,7 @@ h1 {
 }
 .eyebrow {
   color: var(--muted);
-  font: 10px var(--mono);
+  font: 11px var(--mono);
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
@@ -491,9 +506,18 @@ h1 {
   border-color: var(--line-strong);
   background: var(--paper-sunk);
 }
+/* A disabled button must not pass for one that works (decision 0134). */
+.quiet-button:disabled {
+  color: var(--muted);
+  opacity: 0.55;
+  cursor: not-allowed;
+}
 .glass-card {
   border-radius: 12px;
   overflow: hidden;
+  /* Clips the corners like `hidden` without becoming the scroller, so the step's
+     action row can stick to the window (decision 0134). */
+  overflow: clip;
 }
 /* The text card's three steps, one on screen at a time. Done steps can be revisited. */
 .stepper {
@@ -636,7 +660,7 @@ h1 {
   border-color: var(--accent);
 }
 .sample-tag {
-  font: 10px var(--mono);
+  font: 11px var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   padding: 6px 10px;
@@ -701,6 +725,16 @@ h1 {
 .highlight-input {
   position: relative;
   background: transparent;
+}
+/* A short result takes the room it needs rather than a fixed 340px box, so the review
+   and its actions fit the window; WebKit without `field-sizing` keeps the fixed box. */
+@supports (field-sizing: content) {
+  .highlight-input {
+    field-sizing: content;
+    height: auto;
+    min-height: 160px;
+    max-height: 340px;
+  }
 }
 .highlight-mirror mark {
   color: transparent;
@@ -853,12 +887,22 @@ h1 {
   gap: 16px;
   padding: 22px 24px;
 }
+/* A long review, file list or restored reply scrolls under the step's action row
+   instead of pushing it below the window (decision 0134). */
+.step-panel > .card-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
+  padding: 16px 24px;
+  border-top: 1px solid var(--line);
+  background: var(--paper-raised);
+}
 .action-hint {
   margin-right: auto;
   display: flex;
   align-items: center;
   gap: 6px;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
 }
 .primary-action {
@@ -987,7 +1031,7 @@ h1 {
 }
 .change-row small {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   margin-top: 4px;
   color: var(--muted);
   overflow-wrap: anywhere;
@@ -1038,7 +1082,7 @@ td {
 th {
   color: var(--muted);
   background: var(--paper-sunk);
-  font: 10px var(--mono);
+  font: 11px var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
@@ -1295,7 +1339,8 @@ th {
   letter-spacing: 0;
 }
 .plan-select {
-  max-width: 180px;
+  /* Six columns fit the default window side by side (decision 0134). */
+  max-width: 148px;
   padding: 5px 8px;
   border: 1px solid var(--line);
   border-radius: 7px;
@@ -1376,17 +1421,33 @@ td.alias {
   height: 160px;
   min-height: 120px;
 }
-.restore-actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 16px;
+/* With a result, the pasted reply shrinks to a few lines and the restored copy, which
+   is what the user came for, gets the room (decision 0134). */
+.restore-body.has-result .restore-input {
+  height: 96px;
+  min-height: 72px;
+}
+.restore-body .restore-output .highlight-input {
+  height: 320px;
+  max-height: none;
+}
+@supports (field-sizing: content) {
+  .restore-body .restore-output .highlight-input {
+    height: auto;
+    min-height: 160px;
+    max-height: min(420px, 55vh);
+  }
 }
 .restore-status {
-  margin-right: auto;
+  margin: 4px 0 -4px;
   font-size: 12px;
   line-height: 1.6;
   color: var(--muted);
+}
+.restore-status strong {
+  margin-right: 8px;
+  font-size: 13px;
+  color: var(--ink);
 }
 .restore-unknown {
   display: block;
@@ -1507,9 +1568,9 @@ td.alias {
     margin-right: 17px;
   }
   .change-row code {
-    font-size: 10px;
+    font-size: 11px;
   }
-  .restore-actions {
+  .step-panel > .card-footer {
     flex-wrap: wrap;
   }
 }
@@ -1584,7 +1645,7 @@ td.alias {
   margin-top: 12px;
   border-top: 1px solid var(--line);
   color: var(--muted);
-  font: 10px var(--mono);
+  font: 11px var(--mono);
   letter-spacing: 0.02em;
   line-height: 1.5;
 }
@@ -1709,7 +1770,7 @@ td.alias {
 .detection-option small {
   display: block;
   color: var(--muted);
-  font: 10px var(--mono);
+  font: 11px var(--mono);
   margin-top: 4px;
 }
 .detection-options:disabled .detection-option {
@@ -1742,7 +1803,7 @@ td.alias {
 .model-requirement p span {
   display: block;
   color: var(--muted);
-  font-size: 11px;
+  font-size: 12px;
 }
 .model-requirement .quiet-button {
   padding: 6px 10px;
@@ -1770,7 +1831,7 @@ td.alias {
 .model-badge {
   margin-left: auto;
   align-self: flex-start;
-  font: 10px var(--mono);
+  font: 11px var(--mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
@@ -1813,7 +1874,7 @@ td.alias {
 }
 .download-size span {
   display: block;
-  font-size: 11px;
+  font-size: 12px;
   color: var(--muted);
   margin-top: 6px;
   line-height: 1.5;
@@ -3162,7 +3223,7 @@ td.alias {
   border-radius: 6px;
   color: var(--paper-raised);
   background: var(--ink);
-  font-size: 11.5px;
+  font-size: 12px;
   white-space: nowrap;
   pointer-events: none;
 }

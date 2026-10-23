@@ -89,6 +89,8 @@ function afterStepEnter() {
 const changesOpen = ref(false);
 const copied = ref(false);
 const copyStatus = ref("");
+/** A reply is in the restore box, so the copy note's "paste it here" is done. */
+const replyPasted = ref(false);
 const manualCopy = ref(false);
 const highlighted = useTemplateRef<InstanceType<typeof HighlightedText>>("highlighted");
 const content = computed(() => highlighted.value?.field ?? null);
@@ -191,6 +193,9 @@ const title = computed(() =>
       : sessionTitle(session.value)
     : "Ẩn thông tin trong văn bản.",
 );
+/** The title is the first masked line: its codes are set like the review's highlights,
+ * so a code in the heading does not read as a typo (decision 0134). Odd parts are codes. */
+const titleParts = computed(() => title.value.split(/(\[[A-Z][A-Z_]*_\d+_[a-f0-9]{4,8}\])/));
 const subtitle = computed(() =>
   session.value
     ? privateSession.value
@@ -461,7 +466,12 @@ defineExpose({
 <template>
   <div class="editor-heading">
     <div>
-      <h1 ref="heading" tabindex="-1">{{ title }}</h1>
+      <h1 ref="heading" tabindex="-1">
+        <template v-for="(part, index) in titleParts" :key="index"
+          ><span v-if="index % 2" class="title-alias">{{ part }}</span
+          ><template v-else>{{ part }}</template></template
+        >
+      </h1>
       <p>{{ subtitle }}</p>
     </div>
     <div v-if="session" class="editor-actions">
@@ -524,17 +534,15 @@ defineExpose({
           :session-id="session.id"
           :analysis="session.analysis"
           @new-text="emit('navigate', 'text')"
-        />
-        <footer class="card-footer">
-          <span class="action-hint"
-            ><template v-if="savedNote"
-              ><AppIcon name="lock" :size="13" />{{ savedNote }}</template
-            ></span
+          @pasted="(pasted) => (replyPasted = pasted)"
+        >
+          <template v-if="savedNote" #hint
+            ><AppIcon name="lock" :size="13" />{{ savedNote }}</template
           >
           <button class="quiet-button" @click="openStep(2)">
             <AppIcon name="eye" :size="15" />Xem lại bản đã ẩn
           </button>
-        </footer>
+        </RestorePanel>
       </div>
       <div v-else :key="session ? 'review' : 'draft'" class="step-panel">
         <header v-if="session" class="card-header">
@@ -877,7 +885,10 @@ defineExpose({
     </Transition>
   </section>
   <p v-if="processingError" class="storage-error" role="alert">{{ processingError }}</p>
-  <p v-if="copyStatus" class="feedback" role="status">{{ copyStatus }}</p>
+  <!-- "Paste the reply here" is done once a reply is in (decision 0134). -->
+  <p v-if="copyStatus && !(step === 3 && replyPasted)" class="feedback" role="status">
+    {{ copyStatus }}
+  </p>
   <!-- Belongs to the copied result: gone with it (decision 0098). -->
   <QuickIntro v-if="copyStatus" />
 </template>
