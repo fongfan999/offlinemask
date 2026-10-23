@@ -3,7 +3,10 @@
 //! delivers no events of this app itself). After a drag or multi-click the focused
 //! element is asked, through the Accessibility API, for its selected text and the
 //! selection's screen rectangle. Both calls fail without the Accessibility permission,
-//! and nothing is read for secure (password) fields or this app.
+//! and nothing is read for secure (password) fields or this app. Chromium and
+//! Electron applications build their accessibility tree only once a client asks for
+//! it, so the application is asked first (decision 0125).
+use std::collections::HashSet;
 use std::ffi::c_void;
 use std::ptr::NonNull;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -13,6 +16,7 @@ use std::time::Duration;
 
 use block2::RcBlock;
 use core_foundation::base::{CFType, CFTypeRef, TCFType};
+use core_foundation::boolean::CFBoolean;
 use core_foundation::string::{CFString, CFStringRef};
 use objc2::MainThreadMarker;
 use objc2_app_kit::{NSEvent, NSEventMask, NSEventType, NSScreen, NSWorkspace};
@@ -55,6 +59,11 @@ extern "C" {
         attribute: CFStringRef,
         parameter: CFTypeRef,
         value: *mut CFTypeRef,
+    ) -> AXError;
+    fn AXUIElementSetAttributeValue(
+        element: AXUIElementRef,
+        attribute: CFStringRef,
+        value: CFTypeRef,
     ) -> AXError;
     fn AXUIElementGetPid(element: AXUIElementRef, pid: *mut i32) -> AXError;
     fn AXUIElementIsAttributeSettable(
@@ -120,6 +129,35 @@ fn settable(element: AXUIElementRef, name: &str) -> bool {
     status == AX_SUCCESS && value != 0
 }
 
+/// Applications already asked for their accessibility tree in this launch.
+static TREE_ASKED: Mutex<Option<HashSet<i32>>> = Mutex::new(None);
+/// Chromium needs a moment to build the tree after the first request.
+const TREE_WAIT_MS: u64 = 120;
+const TREE_TRIES: u32 = 5;
+
+/// Ask the application once to expose its accessibility tree. Chromium (Chrome, Dia,
+/// Arc, Edge) and Electron (Slack, Zalo, VS Code) keep it off until an assistive client
+/// sets `AXManualAccessibility`; until then they report no focused element. Native
+/// applications reject the attribute, which is harmless. True on the first request.
+fn ask_for_tree(application: AXUIElementRef, pid: i32) -> bool {
+    let Ok(mut asked) = TREE_ASKED.lock() else {
+        return false;
+    };
+    if !asked.get_or_insert_with(HashSet::new).insert(pid) {
+        return false;
+    }
+    let name = CFString::new("AXManualAccessibility");
+    // SAFETY: valid element; the attribute and value are borrowed for the call.
+    let status = unsafe {
+        AXUIElementSetAttributeValue(
+            application,
+            name.as_concrete_TypeRef(),
+            CFBoolean::true_value().as_CFTypeRef(),
+        )
+    };
+    status == AX_SUCCESS
+}
+
 fn read_selection(frontmost_pid: i32) -> Option<Read> {
     // SAFETY: plain query.
     if !unsafe { AXIsProcessTrusted() } || frontmost_pid as u32 == std::process::id() {
@@ -129,10 +167,18 @@ fn read_selection(frontmost_pid: i32) -> Option<Read> {
     let application = unsafe {
         CFType::wrap_under_create_rule(AXUIElementCreateApplication(frontmost_pid) as CFTypeRef)
     };
-    let focused = attribute(
-        application.as_CFTypeRef() as AXUIElementRef,
-        "AXFocusedUIElement",
-    )?;
+    let application = application.as_CFTypeRef() as AXUIElementRef;
+    let tries = if ask_for_tree(application, frontmost_pid) {
+        TREE_TRIES
+    } else {
+        1
+    };
+    let focused = (0..tries).find_map(|try_| {
+        if try_ > 0 {
+            thread::sleep(Duration::from_millis(TREE_WAIT_MS));
+        }
+        attribute(application, "AXFocusedUIElement")
+    })?;
     let element = focused.as_CFTypeRef() as AXUIElementRef;
     let mut pid = 0;
     // SAFETY: valid element; pid is written on success.

@@ -358,6 +358,7 @@ pub async fn recognition_encode(
     text: String,
     model: String,
 ) -> Result<Encoded, String> {
+    crate::selection::trace(&format!("encode:{model}"), text.chars().count()); // TEMP TRACE
     if text.len() > 200_000 {
         return Err("length".into());
     }

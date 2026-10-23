@@ -1,11 +1,10 @@
-# Windows x64 native recognition build (decision 0077).
+# Windows x64 Rust tests with the native recognition feature (decisions 0077, 0125).
 #
-# Builds the release package with the native ONNX Runtime helper on a real Windows
-# runner, verifies the bundled files and their imports, and starts the helper so it
-# loads onnxruntime.dll and the app-local Visual C++ runtime. The installers are
-# uploaded for a manual check on a Windows PC with the recognition pack installed;
-# that check, not this job, is what qualifies Windows for the default build.
-name: "Desktop: Windows native build"
+# Runs the crate's tests on a real Windows runner whenever the native layer changes, so
+# Windows-only breakage shows up on the push rather than at the next release. The
+# installers, the bundled-file verifier and the helper smoke test run in release.yml,
+# on a tag or as a dry run ("Run workflow" on main without a tag).
+name: "Desktop: Windows tests"
 
 on:
   workflow_dispatch:
@@ -13,14 +12,10 @@ on:
     branches: [main]
     paths:
       - "desktop/src-tauri/**"
-      - "desktop/scripts/*native*"
-      - "desktop/scripts/build-desktop.mjs"
       - "desktop/.cargo/**"
       - ".github/workflows/windows-native.yml"
       - ".gitattributes"
       - "docs/licenses/**"
-      - "desktop/package.json"
-      - "pnpm-lock.yaml"
       - "mise.toml"
 
 concurrency:
@@ -28,25 +23,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build and smoke-test (windows-latest)
+  test:
+    name: Rust tests (windows-latest)
     runs-on: windows-latest
-    timeout-minutes: 90
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v5
       - run: mise exec -- pnpm install --frozen-lockfile
+      # Same keying as release.yml (decision 0124): the toolchain pin, plus the action's
+      # own lockfile hash with a prefix fallback, so a version bump still starts warm.
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri -> target
+          key: windows-test-${{ hashFiles('mise.toml', 'desktop/.cargo/config.toml') }}
+          add-job-id-key: false
+          add-rust-environment-hash-key: false
       - run: mise exec -- cargo test --manifest-path src-tauri/Cargo.toml --locked --features recognition-native-sidecar
         working-directory: desktop
-      # Prepares resources, builds with the release feature, verifies the output and
-      # starts the packaged helper (scripts/build-native-desktop.mjs).
-      - run: mise exec -- pnpm -C desktop desktop:build:native
-      - uses: actions/upload-artifact@v7
-        with:
-          name: offlinemask-windows-x64-native
-          path: |
-            desktop/src-tauri/target/release/bundle/nsis/*.exe
-            desktop/src-tauri/target/release/bundle/msi/*.msi
-            desktop/artifacts/native-desktop/provenance.json
-            desktop/artifacts/native-desktop/native-sha256.txt
-          if-no-files-found: error
