@@ -274,10 +274,17 @@ export function useQuickActions({
     if (marker) await writeClipboard(before).catch(() => {});
     return { text: before, replaced: false };
   }
+  /** The front application's selection as Accessibility reports it, or null. */
+  async function readAnchor(): Promise<string | null> {
+    if (!adapter.desktop) return null;
+    return (await adapter.readSelection().catch(() => null))?.text ?? null;
+  }
   /** Masking takes a while, and meanwhile the user may switch applications or select
-   * other text. Right before the paste the selection is copied again: only the very
-   * text that was masked is replaced (decision 0127). */
-  async function stillSelected(text: string): Promise<boolean> {
+   * other text: only the very selection that was masked is replaced (decision 0127).
+   * Accessibility answers without the clipboard, comparing its own report before and
+   * after; only applications it cannot read get a second copy chord. */
+  async function stillSelected(text: string, anchor: string | null): Promise<boolean> {
+    if (anchor !== null) return (await readAnchor()) === anchor;
     const marker = `\u2063OfflineMask ${Date.now().toString(36)}\u2063`;
     try {
       await writeClipboard(marker);
@@ -301,13 +308,20 @@ export function useQuickActions({
     // result is pasted over it, like the shortcut's in-place path.
     let replaced = options.replace === true;
     let before = "";
-    const done = async (message: string, tone: QuickStatus["tone"] = "ok") => {
+    const done = async (
+      message: string,
+      tone: QuickStatus["tone"] = "ok",
+      shown?: QuickStatus["preview"],
+    ) => {
       // Only the first clipboard-only result after a refusal carries the hint.
       if (command === "auto" && !replaced && inputPermission.value === "denied" && !hinted) {
         hinted = true;
         message += ` ${quickMessages.permissionHint}`;
       }
-      const status = { message, tone, ...tag };
+      // A preview opens beside the circle, like the read-only one, not in its place.
+      const status: QuickStatus = shown
+        ? { message, tone, preview: shown }
+        : { message, tone, ...tag };
       await show(status);
       return status;
     };
@@ -344,14 +358,25 @@ export function useQuickActions({
         if (replaced) await adapter.pasteResult().catch(() => {});
         return await done(quickMessages.restored(result.restored, result.unknown.length, replaced));
       }
+      const anchor = replaced ? await readAnchor() : null;
       await show({ message: workingMessage, tone: "busy", ...tag });
       const outcome = await run.maskText(text);
       if ("error" in outcome)
         return await undone(outcome.error === "busy" ? quickMessages.busy : outcome.message);
       const session = outcome.session;
       if (!session.analysis.findings.length) return await undone(quickMessages.nothing);
-      const moved = replaced && !(await stillSelected(text));
-      if (moved) replaced = false;
+      if (replaced && !(await stillSelected(text, anchor))) {
+        // The selection moved: the user's clipboard comes back untouched and the result
+        // waits in a preview, where they copy it or open its session.
+        await writeClipboard(before).catch(() => {});
+        const masked = sessionOutput(session);
+        preview = { text: masked, sessionId: session.id };
+        return await done(quickMessages.maskedMoved, "preview", {
+          text: masked,
+          marks: aliasMarks(masked, session.analysis.findings),
+          canOpen: !!openSession,
+        });
+      }
       try {
         await writeClipboard(sessionOutput(session));
       } catch {
@@ -359,10 +384,7 @@ export function useQuickActions({
       }
       // The result is pasted before the panel flashes, so the paste cannot land there.
       if (replaced) await adapter.pasteResult().catch(() => {});
-      const found = session.analysis.findings.length;
-      return await done(
-        moved ? quickMessages.maskedMoved(found) : quickMessages.masked(found, replaced),
-      );
+      return await done(quickMessages.masked(session.analysis.findings.length, replaced));
     } catch {
       // Whatever broke, the panel must not stay on "Đang ẩn thông tin…".
       return await undone(quickMessages.failed);

@@ -8,12 +8,14 @@ The in-place path ([0091](0091-in-place-replace.md), [0096](0096-selection-popov
 
 ## Decision
 
-Right before the paste, the selection is copied once more, with the same marker round trip as the first read. The paste is sent only when that copy is exactly the text that was masked. Otherwise nothing is pasted: the masked text stays on the clipboard and the panel says "Đã ẩn n thông tin · vùng chọn đã đổi nên chưa thay, dán để dùng".
+Before masking starts, the selection is read through Accessibility (macOS) or UI Automation (Windows), the same read ⌘⇧M uses. Right before the paste it is read again, and the paste is sent only when both reads agree. This check does not touch the clipboard. In applications that report no selection this way, the selection is copied once more instead, with the same marker round trip as the first read, and must equal the masked text.
 
-The check costs one copy chord (about 0.2 s) per in-place mask. Restoring stays as it was: it runs from tables in memory, with no wait in which the selection could change.
+When the selection changed, nothing is pasted and the result does not go to the clipboard: the user's own clipboard is put back, and the masked text opens in the preview card titled "Vùng chọn đã đổi". Its buttons copy the result or open its session, so the user decides where it goes (owner, 23 October: "don't overuse the clipboard, just show a popup and let users decide").
+
+Restoring stays as it was: it runs from tables in memory, with no wait in which the selection could change.
 
 ## Limits
 
 The check compares text, not the application. If the user selects the very same text somewhere else while masking runs, the result replaces that copy, which holds the same values.
 
-`landing/privacy.html` now describes the second copy and the refusal to paste over a different selection.
+`landing/privacy.html` describes the check, the fallback copy and the preview.

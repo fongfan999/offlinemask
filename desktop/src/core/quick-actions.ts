@@ -52,9 +52,8 @@ export const quickMessages = {
   // Short on purpose: in place the change is visible, otherwise one line says where it is.
   masked: (n: number, replaced = false) =>
     replaced ? `Đã ẩn ${count(n)} thông tin` : `Đã ẩn ${count(n)} thông tin · dán để dùng`,
-  /** The selection changed while masking ran (decision 0127): nothing was replaced. */
-  maskedMoved: (n: number) =>
-    `Đã ẩn ${count(n)} thông tin · vùng chọn đã đổi nên chưa thay, dán để dùng`,
+  /** The preview's title when the selection changed while masking ran (decision 0127). */
+  maskedMoved: "Vùng chọn đã đổi",
   restored: (n: number, unknown: number, replaced = false) =>
     (replaced
       ? `Đã khôi phục ${count(n)} thông tin`
