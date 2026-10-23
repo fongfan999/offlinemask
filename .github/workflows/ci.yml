@@ -38,6 +38,14 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - uses: jdx/mise-action@v5
+      # Keyed like release.yml (decision 0124); only main saves, pull requests restore it.
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri -> target
+          key: verify-${{ hashFiles('mise.toml', 'desktop/.cargo/config.toml') }}
+          add-job-id-key: false
+          add-rust-environment-hash-key: false
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - run: mise exec -- pnpm install --frozen-lockfile
       - run: mise exec -- pnpm lint
       - run: mise exec -- pnpm -C desktop build
@@ -62,6 +70,13 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file \
             libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri -> target
+          key: portability-${{ matrix.os }}-${{ hashFiles('mise.toml', 'desktop/.cargo/config.toml') }}
+          add-job-id-key: false
+          add-rust-environment-hash-key: false
+          save-if: ${{ github.ref == 'refs/heads/main' }}
       - run: mise exec -- pnpm install --frozen-lockfile
       - run: mise exec -- pnpm -C desktop build
       - run: mise exec -- cargo check --manifest-path src-tauri/Cargo.toml --locked
