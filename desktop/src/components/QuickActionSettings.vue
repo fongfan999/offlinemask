@@ -164,9 +164,10 @@ const placeGroups = computed(() =>
               </li>
             </ul>
           </template>
-          <p v-if="!quick.places.value.length" class="quick-note">
-            Chưa có nơi nào. Nhấn {{ quickShortcutLabel }} ở một ứng dụng rồi chọn “Luôn hiện nút ở
-            …” để thêm.
+          <!-- Adding comes from use, so the way to add is said under the list (decision 0136). -->
+          <p class="quick-note quick-places-hint">
+            {{ quick.places.value.length ? "Thêm nơi khác:" : "Chưa có nơi nào. Để thêm:" }}
+            bôi đen chữ ở đó, nhấn {{ quickShortcutLabel }} rồi chọn “Luôn hiện nút ở …”.
           </p>
           <button
             v-if="quick.placesChanged.value"

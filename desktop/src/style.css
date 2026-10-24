@@ -2573,8 +2573,11 @@ td.alias {
   background: var(--error-soft);
   color: var(--error);
 }
-.quick-places-reset {
+.quick-places-hint {
   margin-top: 10px;
+}
+.quick-places-reset {
+  margin-top: 6px;
 }
 .app-settings .settings-tool-row.quick-sub.is-off .quick-places,
 .app-settings .settings-tool-row.quick-sub.is-off .quick-places-reset {

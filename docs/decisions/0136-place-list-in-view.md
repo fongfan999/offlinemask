@@ -14,7 +14,8 @@ Date: 24 October 2026. Status: implemented; checked in a Vite harness that mount
   - It is dimmed while Ẩn nhanh is off, but stays readable.
   - It says "Các ứng dụng và trang AI dưới đây. Ở nơi khác, nhấn ⌘⇧M để dùng."
   - Two labelled groups, "Ứng dụng" and "Trang web", list the places as chips. Each chip has its own × button ("Bỏ …" to assistive technology). Sites show their host, with the name as the tooltip.
-  - "Khôi phục mặc định" follows once something has changed. An empty list says how to add a place.
+  - Under the chips, one line says how to add a place, since adding comes from use: "Thêm nơi khác: bôi đen chữ ở đó, nhấn ⌘⇧M rồi chọn “Luôn hiện nút ở …”." A typed form stays out, as 0135 decided; the owner agreed after seeing the offer after the shortcut.
+  - "Khôi phục mặc định" follows once something has changed.
 
   The one-line summary and its "Xem danh sách" link are gone, and the Ẩn nhanh row is back to one switch and its text.
 
