@@ -142,8 +142,8 @@ function fakeAdapter(clipboard = "") {
       return () => calls.push(["unclose"]);
     },
     hideMainWindow: async () => calls.push(["hide-main"]),
-    trayOffers: [],
-    setTrayOffer: async (on) => adapter.trayOffers.push(on),
+    trayMarks: [],
+    setTrayQuick: async (on, available) => adapter.trayMarks.push({ on, available }),
     launchAtLogin: async () => adapter.autostart,
     setLaunchAtLogin: async (on) => {
       calls.push(["autostart", on]);
@@ -1543,7 +1543,7 @@ test("the shortcut is a sub-option of the circle: off with it, back with it", as
   quick.stop();
 });
 
-test("the tray offers Ẩn nhanh only while it is off", async () => {
+test("the tray's check item mirrors Ẩn nhanh and switches it (decision 0137)", async () => {
   const sessions = ref([]);
   const adapter = fakeAdapter("");
   adapter.permission = "granted";
@@ -1556,13 +1556,20 @@ test("the tray offers Ẩn nhanh only while it is off", async () => {
   });
   await quick.start();
   await nextTick();
-  assert.equal(adapter.trayOffers.at(-1), true);
+  assert.deepEqual(adapter.trayMarks.at(-1), { on: false, available: true });
+  // Switched in Cài đặt: the mark follows.
   await quick.setPopover(true);
   await nextTick();
-  assert.equal(adapter.trayOffers.at(-1), false);
-  await quick.setPopover(false);
-  await nextTick();
-  assert.equal(adapter.trayOffers.at(-1), true);
+  assert.deepEqual(adapter.trayMarks.at(-1), { on: true, available: true });
+  // Switched from the tray: off, then on again, the mark set from the real state.
+  adapter.command("toggle-quick");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(quick.popoverOn.value, false);
+  assert.deepEqual(adapter.trayMarks.at(-1), { on: false, available: true });
+  adapter.command("toggle-quick");
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(quick.popoverOn.value, true);
+  assert.deepEqual(adapter.trayMarks.at(-1), { on: true, available: true });
   quick.stop();
 });
 
@@ -1674,7 +1681,7 @@ test("switched on without the permission still counts as off for the offers", as
   await nextTick();
   assert.equal(quick.popoverOn.value, true);
   assert.equal(quick.quickReady.value, false);
-  assert.equal(adapter.trayOffers.at(-1), true);
+  assert.equal(adapter.trayMarks.at(-1).on, false);
   quick.offerIntro();
   assert.equal(quick.introStage.value, "offer");
   await quick.startIntro();
@@ -1684,7 +1691,7 @@ test("switched on without the permission still counts as off for the offers", as
   await nextTick();
   assert.equal(quick.quickReady.value, true);
   assert.equal(quick.introStage.value, "done");
-  assert.equal(adapter.trayOffers.at(-1), false);
+  assert.equal(adapter.trayMarks.at(-1).on, true);
   quick.stop();
 });
 

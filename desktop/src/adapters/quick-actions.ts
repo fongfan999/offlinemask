@@ -29,6 +29,8 @@ export type QuickCommand =
   | "open"
   | "close"
   | "settings"
+  /** The tray's "Ẩn nhanh khi bôi đen" check item (decision 0137). */
+  | "toggle-quick"
   /** The circle's "Tắt ở …": no circle by itself in this place any more (decision 0135). */
   | "forget-place"
   /** After ⌘⇧M somewhere else: "Luôn hiện nút ở …" adds that place. */
@@ -169,8 +171,9 @@ export interface QuickActionsAdapter {
   quit(): Promise<void>;
   /** Bring the main window back, from wherever it is (decision 0096). */
   showMainWindow(): Promise<void>;
-  /** The tray menu's "Bật Ẩn nhanh…" item, shown while Ẩn nhanh is off (decision 0098). */
-  setTrayOffer(on: boolean): Promise<void>;
+  /** The tray menu's "Ẩn nhanh khi bôi đen" check item: its mark, and whether it can be
+   * used here (decision 0137). */
+  setTrayQuick(on: boolean, available: boolean): Promise<void>;
   /** Text or files from a macOS Service (decision 0094). */
   onService(handler: (request: ServiceRequest) => void): Promise<() => void>;
   /** Bytes of a file a Service handed over; any other path is refused natively. */
@@ -232,7 +235,7 @@ export const nativeQuickActions: QuickActionsAdapter = {
   setLaunchAtLogin: (on) => invoke("quick_set_launch_at_login", { on }),
   quit: () => invoke("quick_quit"),
   showMainWindow: () => invoke("quick_show_main"),
-  setTrayOffer: (on) => invoke("quick_tray_offer", { on }),
+  setTrayQuick: (on, available) => invoke("quick_tray_state", { on, available }),
   onService: (handler) => listen<ServiceRequest>(events.service, (event) => handler(event.payload)),
   async readServiceFile(path) {
     const bytes = await invoke<ArrayBuffer | number[]>("quick_read_service_file", { path });

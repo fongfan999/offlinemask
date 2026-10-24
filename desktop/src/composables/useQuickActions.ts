@@ -762,6 +762,19 @@ export function useQuickActions({
     await adapter.showMainWindow().catch(() => {});
     if (adapter.desktop) await adapter.dismissPanel().catch(() => {});
   }
+  /** The tray's check item mirrors whether Ẩn nhanh works (decision 0137). */
+  function syncTray() {
+    void adapter.setTrayQuick(quickReady.value, popoverSupported.value).catch(() => {});
+  }
+  /** The tray's "Ẩn nhanh khi bôi đen": on and off from the menu. Without the macOS
+   * permission it opens Cài đặt, where the permission is granted. The menu toggles its
+   * mark by itself on the click, so the mark is set again from the real state. */
+  async function toggleQuick() {
+    if (quickReady.value) await setPopover(false);
+    else if (popoverSupported.value && inputPermission.value === "granted") await setPopover(true);
+    else await goToSettings();
+    syncTray();
+  }
   function onCommand(command: QuickCommand) {
     if (command === "forget-place") {
       if (circlePlace) forgetPlace(circlePlace);
@@ -778,6 +791,7 @@ export function useQuickActions({
     }
     if (command === "quit") void quit();
     else if (command === "settings") void goToSettings();
+    else if (command === "toggle-quick") void toggleQuick();
     else if (command === "copy" || command === "open" || command === "close")
       void previewAction(command);
     else if (pendingSelection !== null) {
@@ -825,14 +839,12 @@ export function useQuickActions({
     await Promise.all([checkInputPermission(), readLaunchAtLogin(), syncPlaces()]);
     popoverSupported.value = await adapter.selectionSupported().catch(() => false);
     if (popoverOn.value) await setPopover(popoverSupported.value);
-    // While Ẩn nhanh is off, the tray menu offers it (decision 0098).
-    stopTrayOffer = watch(
-      () => popoverSupported.value && !quickReady.value,
-      (offer) => void adapter.setTrayOffer(offer).catch(() => {}),
-      { immediate: true },
-    );
+    // The tray's check item follows Ẩn nhanh wherever it is switched (decision 0137).
+    stopTray = watch(() => [quickReady.value, popoverSupported.value], syncTray, {
+      immediate: true,
+    });
   }
-  let stopTrayOffer: (() => void) | undefined;
+  let stopTray: (() => void) | undefined;
   let stopped = false;
   function stopAll() {
     stopCommands?.();
@@ -858,8 +870,8 @@ export function useQuickActions({
     stopSelection = undefined;
     stopCleared?.();
     stopCleared = undefined;
-    stopTrayOffer?.();
-    stopTrayOffer = undefined;
+    stopTray?.();
+    stopTray = undefined;
     if (typeof window !== "undefined") window.removeEventListener("focus", recheck);
     if (permissionPoll) clearInterval(permissionPoll);
     permissionPoll = undefined;

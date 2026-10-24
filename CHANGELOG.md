@@ -6,6 +6,7 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ### Changed
 
+- The tray menu no longer acts on the clipboard: it opens OfflineMask or its settings, switches Ẩn nhanh on and off with a check mark, and quits. Cài đặt drops the unfinished "Cài từ tệp", and "Cập nhật" now opens OfflineMask.com to compare versions. "Sắp có" badges are centred ([0137](docs/decisions/0137-tray-and-settings-cleanup.md)).
 - Cài đặt › Thao tác nhanh shows where the OfflineMask circle appears by itself, always in view, as apps and sites you can remove one by one. Beside the circle, "Tắt ở …" and "Luôn hiện nút ở …" now look like the buttons they are ([0136](docs/decisions/0136-place-list-in-view.md)).
 
 ## [2.1.0] — 2026-10-24

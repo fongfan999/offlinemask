@@ -2,7 +2,7 @@
 //! (menu bar) icon with the quick actions, and reopening from it or the dock. The
 //! window hides instead of closing from the frontend (`onCloseRequested`).
 use serde::Serialize;
-use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
+use tauri::menu::{CheckMenuItem, Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::TrayIconBuilder;
 use tauri::{AppHandle, Emitter, Manager, Runtime};
 
@@ -72,47 +72,33 @@ pub fn show_main<R: Runtime>(app: &AppHandle<R>) {
     }
 }
 
-/// "Bật Ẩn nhanh…" in the tray menu, present only while Ẩn nhanh is off; the
-/// frontend says when (decision 0098). It opens Cài đặt, where the feature lives.
-pub struct TrayOffer<R: Runtime> {
-    menu: Menu<R>,
-    item: MenuItem<R>,
-    shown: std::sync::Mutex<bool>,
-}
+/// "Ẩn nhanh khi bôi đen" in the tray menu, a check item that mirrors the feature and
+/// switches it (decision 0137). The frontend owns the state and sets the mark, also
+/// after a click, which toggles the mark by itself before the frontend has decided.
+pub struct TrayQuick<R: Runtime>(CheckMenuItem<R>);
 #[tauri::command]
-pub fn quick_tray_offer(
-    offer: tauri::State<'_, TrayOffer<tauri::Wry>>,
+pub fn quick_tray_state(
+    tray: tauri::State<'_, TrayQuick<tauri::Wry>>,
     on: bool,
+    available: bool,
 ) -> Result<(), String> {
-    let mut shown = offer.shown.lock().map_err(|_| "io: poisoned".to_string())?;
-    if *shown == on {
-        return Ok(());
-    }
-    if on {
-        offer.menu.insert(&offer.item, 1)
-    } else {
-        offer.menu.remove(&offer.item)
-    }
-    .map_err(|error| error.to_string())?;
-    *shown = on;
-    Ok(())
+    tray.0.set_checked(on).map_err(|error| error.to_string())?;
+    tray.0
+        .set_enabled(available)
+        .map_err(|error| error.to_string())
 }
 
+/// The tray menu (decisions 0092, 0137): open the app or its settings, switch Ẩn nhanh,
+/// quit. Nothing here acts on the clipboard.
 pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let open = MenuItem::with_id(app, "open", "Mở OfflineMask", true, None::<&str>)?;
-    let enable = MenuItem::with_id(app, "enable", "Bật Ẩn nhanh…", true, None::<&str>)?;
-    let mask = MenuItem::with_id(
+    let settings = MenuItem::with_id(app, "settings", "Cài đặt…", true, None::<&str>)?;
+    let quick = CheckMenuItem::with_id(
         app,
-        "mask",
-        "Ẩn thông tin trong clipboard",
+        "quick",
+        "Ẩn nhanh khi bôi đen",
         true,
-        None::<&str>,
-    )?;
-    let restore = MenuItem::with_id(
-        app,
-        "restore",
-        "Khôi phục trong clipboard",
-        true,
+        false,
         None::<&str>,
     )?;
     let quit = MenuItem::with_id(app, "quit", "Thoát OfflineMask", true, None::<&str>)?;
@@ -120,9 +106,9 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
         app,
         &[
             &open,
+            &settings,
             &PredefinedMenuItem::separator(app)?,
-            &mask,
-            &restore,
+            &quick,
             &PredefinedMenuItem::separator(app)?,
             &quit,
         ],
@@ -130,25 +116,15 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let mut tray = TrayIconBuilder::with_id("offlinemask")
         .tooltip("OfflineMask")
         .menu(&menu)
-        .on_menu_event(|app, event| match event.id.as_ref() {
-            "open" => show_main(app),
-            "mask" => {
-                let _ = app.emit_to(MAIN_WINDOW, COMMAND_EVENT, Command { command: "mask" });
-            }
-            "restore" => {
-                let _ = app.emit_to(MAIN_WINDOW, COMMAND_EVENT, Command { command: "restore" });
-            }
-            "quit" => request_quit(app),
-            "enable" => {
-                let _ = app.emit_to(
-                    MAIN_WINDOW,
-                    COMMAND_EVENT,
-                    Command {
-                        command: "settings",
-                    },
-                );
-            }
-            _ => {}
+        .on_menu_event(|app, event| {
+            let command = match event.id.as_ref() {
+                "open" => return show_main(app),
+                "quit" => return request_quit(app),
+                "settings" => "settings",
+                "quick" => "toggle-quick",
+                _ => return,
+            };
+            let _ = app.emit_to(MAIN_WINDOW, COMMAND_EVENT, Command { command });
         });
     // The macOS menu bar takes a template: the mark in black with the eye holes
     // transparent, which the system recolours for light and dark bars. Windows
@@ -180,11 +156,7 @@ pub fn setup_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
             });
     }
     tray.build(app)?;
-    app.manage(TrayOffer {
-        menu,
-        item: enable,
-        shown: std::sync::Mutex::new(false),
-    });
+    app.manage(TrayQuick(quick));
     Ok(())
 }
 

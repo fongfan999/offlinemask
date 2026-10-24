@@ -1,11 +1,23 @@
 <script setup lang="ts">
+import { ref } from "vue";
 import { version } from "../../package.json";
+import { openProductWebsite, productWebsite } from "../adapters/desktop.ts";
+import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
-import ComingSoonBadge from "./ComingSoonBadge.vue";
 import { themeChoices, useTheme } from "../composables/useTheme.ts";
 
-/** App-wide preferences: appearance, updates and the version they refer to. */
+/** App-wide preferences: appearance, and the version with where to look for a newer
+ * one. The app never checks by itself; the user opens the homepage (decision 0137). */
 const { theme, setTheme } = useTheme();
+const websiteError = ref("");
+async function visitWebsite(event: MouseEvent) {
+  websiteError.value = "";
+  try {
+    await openProductWebsite(event);
+  } catch {
+    websiteError.value = "Chưa mở được trình duyệt. Bạn có thể truy cập OfflineMask.com.";
+  }
+}
 </script>
 
 <template>
@@ -27,22 +39,28 @@ const { theme, setTheme } = useTheme();
     </div>
     <div class="settings-tool-row">
       <div>
-        <h3>Cập nhật <ComingSoonBadge /></h3>
+        <h3>Cập nhật</h3>
         <p class="about-lockup">
           <span class="brand-mark"><BrandMark :size="14" /></span
           ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
           <span class="about-version">Phiên bản {{ version }}</span>
         </p>
         <p id="updates-policy">
-          OfflineMask không tự kết nối Internet; bạn chủ động kiểm tra bản mới cho ứng dụng và gói
-          nhận diện.
+          OfflineMask không tự kết nối Internet nên không tự báo bản mới. Thỉnh thoảng hãy mở
+          OfflineMask.com để xem phiên bản mới nhất và so với bản {{ version }} ở trên.
         </p>
+        <p v-if="websiteError" class="quick-error" role="alert">{{ websiteError }}</p>
       </div>
-      <!-- One future, explicitly initiated check for all supported update types.
-           Do not attach update requests to mounting, polling, or navigation. -->
-      <button class="quiet-button" disabled aria-describedby="updates-policy">
-        Kiểm tra cập nhật
-      </button>
+      <a
+        class="quiet-button"
+        :href="productWebsite"
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-describedby="updates-policy"
+        @click="visitWebsite"
+      >
+        Mở OfflineMask.com<AppIcon name="external" :size="13" />
+      </a>
     </div>
   </section>
 </template>

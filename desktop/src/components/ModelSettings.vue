@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
-import ComingSoonBadge from "./ComingSoonBadge.vue";
 import { formatModelBytes as sizes, type ModelStatus } from "../adapters/models";
 import { recognitionPack } from "../core/detection/pack.ts";
 const props = defineProps<{
@@ -148,25 +147,6 @@ const errorMessage = computed(() => {
       </button>
     </div>
     <div class="model-details">
-      <!-- The offline route to the same pack: a download page and file installer, both placeholders until available. -->
-      <details class="offline-install">
-        <summary>Cài từ tệp <ComingSoonBadge /></summary>
-        <div class="settings-tool-row">
-          <p id="offline-install-hint">
-            Tải gói trên
-            <span
-              class="placeholder-link"
-              role="link"
-              aria-disabled="true"
-              aria-label="OfflineMask.com — trang tải gói sắp có"
-              >OfflineMask.com</span
-            >, rồi chọn tệp để cài.
-          </p>
-          <button class="quiet-button" disabled aria-describedby="offline-install-hint">
-            Chọn tệp
-          </button>
-        </div>
-      </details>
       <details>
         <summary>Chi tiết</summary>
         <p>{{ recognitionPack.attribution }}</p>
