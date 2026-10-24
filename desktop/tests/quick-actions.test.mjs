@@ -15,6 +15,7 @@ import {
   lockedMessage,
   popoverKey,
   introKey,
+  placesKey,
   popoverPermission,
   serviceFileError,
   shortcutError,
@@ -181,6 +182,13 @@ function fakeAdapter(clipboard = "") {
     dismissPanel: async () => calls.push(["dismiss"]),
     current: null,
     readSelection: async () => adapter.current,
+    // The AI places sent to the native side (decision 0135), and whether it honours them.
+    places: [],
+    placesSupported: true,
+    setPlaces: async (places) => {
+      adapter.places.push(places);
+      return adapter.placesSupported;
+    },
   };
   return adapter;
 }
@@ -1817,4 +1825,139 @@ test("a clipboard kept for a paste always goes back, pasted or not", async () =>
   await click("0912345678", "cả dòng 0912345678 khác");
   assert.equal(quick.lastStatus.value.tone, "preview");
   assert.equal(adapter.borrowed, false);
+});
+
+test("the AI places go to the native side; the circle's Tắt ở … removes one for good", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter();
+  adapter.permission = "granted";
+  const run = fakeRun(sessions);
+  run.rules = true;
+  const storage = memoryStorage({ [popoverKey]: "on" });
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage,
+    platform: "macos",
+  });
+  await quick.start();
+  const tick = () => new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(quick.placesSupported.value, true);
+  const sentFirst = adapter.places.at(-1);
+  assert.ok(sentFirst.apps.includes("com.anthropic.claudefordesktop"));
+  assert.ok(sentFirst.hosts.includes("chatgpt.com"));
+  assert.ok(sentFirst.browsers.includes("com.google.Chrome"));
+  assert.ok(!sentFirst.browsers.includes("org.mozilla.firefox"));
+
+  // A circle on chatgpt.com names its place, for "Tắt ở …".
+  const place = { kind: "host", id: "chatgpt.com", name: "ChatGPT" };
+  adapter.selectionHandler({
+    text: phoneText,
+    bounds: null,
+    pointer: { x: 1, y: 1 },
+    editable: true,
+    place,
+    listed: true,
+  });
+  await tick();
+  assert.equal(quick.lastStatus.value.place, "ChatGPT");
+  adapter.command("forget-place");
+  await tick();
+  assert.ok(adapter.calls.some((call) => call[0] === "dismiss"));
+  assert.ok(!adapter.places.at(-1).hosts.includes("chatgpt.com"));
+  assert.deepEqual(JSON.parse(storage.data.get(placesKey)).removed, ["host:chatgpt.com"]);
+  assert.ok(!quick.places.value.some((known) => known.id === "chatgpt.com"));
+
+  // The removal survives a new launch; Khôi phục mặc định brings it back.
+  const again = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage,
+    platform: "macos",
+  });
+  assert.ok(!again.places.value.some((known) => known.id === "chatgpt.com"));
+  again.resetPlaces();
+  assert.equal(storage.data.has(placesKey), false);
+  assert.ok(again.places.value.some((known) => known.id === "chatgpt.com"));
+  quick.stop();
+  again.stop();
+});
+
+test("⌘⇧M outside the AI places offers to show the circle there; Luôn hiện nút adds it", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("clipboard cũ");
+  adapter.permission = "granted";
+  const run = fakeRun(sessions);
+  const storage = memoryStorage({ [popoverKey]: "on" });
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage,
+    platform: "macos",
+  });
+  await quick.start();
+  const tick = async () => {
+    for (let i = 0; i < 4; i++) await new Promise((resolve) => setTimeout(resolve, 0));
+  };
+  const sent = [];
+  adapter.sendStatus = async (status) => sent.push(status);
+  const zalo = { kind: "app", id: "com.vng.zalo", name: "Zalo" };
+  adapter.current = {
+    text: phoneText,
+    pointer: { x: 5, y: 5 },
+    editable: true,
+    place: zalo,
+    listed: false,
+  };
+  adapter.selection = phoneText;
+  adapter.fire();
+  await tick();
+  assert.equal(sent[0].offerPlace, "Zalo");
+  adapter.command("keep-place");
+  await tick();
+  assert.ok(adapter.places.at(-1).apps.includes("com.vng.zalo"));
+  assert.deepEqual(JSON.parse(storage.data.get(placesKey)).added, [zalo]);
+
+  // In a listed place, or where the platform has no list, nothing is offered.
+  sent.length = 0;
+  adapter.current = { ...adapter.current, listed: true };
+  adapter.fire();
+  await tick();
+  assert.equal(sent[0].offerPlace, undefined);
+  quick.stop();
+});
+
+test("where the platform has no AI places, the circle names none and offers none", async () => {
+  const sessions = ref([]);
+  const adapter = fakeAdapter("clipboard cũ");
+  adapter.permission = "granted";
+  adapter.placesSupported = false;
+  const run = fakeRun(sessions);
+  run.rules = true;
+  const quick = useQuickActions({
+    adapter,
+    run,
+    sessions,
+    locked: () => false,
+    storage: memoryStorage({ [popoverKey]: "on" }),
+    platform: "windows",
+  });
+  await quick.start();
+  assert.equal(quick.placesSupported.value, false);
+  adapter.selectionHandler({
+    text: phoneText,
+    pointer: { x: 1, y: 1 },
+    editable: true,
+    place: { kind: "app", id: "x", name: "X" },
+    listed: true,
+  });
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(quick.lastStatus.value.place, undefined);
+  quick.stop();
 });

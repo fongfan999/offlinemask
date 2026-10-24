@@ -4,6 +4,7 @@
 //! Accessibility API), Windows (low-level mouse hook and UI Automation). Nothing on
 //! Linux yet. Only mouse button events are observed, never keys.
 use serde::Serialize;
+use std::collections::HashSet;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use tauri::{AppHandle, Emitter, Runtime};
@@ -34,8 +35,23 @@ pub struct Rect {
     pub height: f64,
 }
 /// What a backend reads: the text, where it is (with whether that is only the frame of
-/// the field holding it), and whether it can be typed over.
-pub type Read = (String, Option<(Rect, bool)>, bool);
+/// the field holding it), whether it can be typed over, and where it was made.
+pub type Read = (String, Option<(Rect, bool)>, bool, Spot);
+/// Where a selection was made (decision 0135): an application by its identifier, or in a
+/// browser the host of the page. A browser selection outside any page (the address bar)
+/// has none.
+#[derive(Serialize, Clone, Debug, PartialEq)]
+pub struct Place {
+    pub kind: &'static str,
+    pub id: String,
+    pub name: String,
+}
+/// The place of a selection and whether the circle shows there by itself.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct Spot {
+    pub place: Option<Place>,
+    pub listed: bool,
+}
 #[derive(Serialize, Clone, Debug, PartialEq)]
 pub struct Selection {
     pub text: String,
@@ -52,6 +68,84 @@ pub struct Selection {
     /// The selection sits in a field the user can type in (an input, a text area, an
     /// editor). Read-only text, such as an AI's answer, is false; so is any doubt.
     pub editable: bool,
+    /// Where it was made; None where the platform cannot tell (decision 0135).
+    pub place: Option<Place>,
+    /// The circle shows there by itself. Only ⌘⇧M reports a selection that is not.
+    pub listed: bool,
+}
+
+/// The AI places the circle shows in by itself (decision 0135), set by the front end
+/// from its list: application identifiers, browsers whose page host is read, and hosts.
+#[derive(Default, Debug)]
+pub struct Places {
+    pub apps: HashSet<String>,
+    pub browsers: HashSet<String>,
+    pub hosts: Vec<String>,
+}
+pub static PLACES: Mutex<Option<Places>> = Mutex::new(None);
+impl Places {
+    /// A host counts when it is a listed host or one of its subdomains.
+    pub fn host_listed(&self, host: &str) -> bool {
+        let host = host.trim_end_matches('.').to_ascii_lowercase();
+        self.hosts.iter().any(|listed| {
+            host == *listed
+                || host
+                    .strip_suffix(listed.as_str())
+                    .is_some_and(|rest| rest.ends_with('.'))
+        })
+    }
+}
+/// Whether the circle may look at this application at all (decision 0135): a listed AI
+/// application or a known browser. Anything else is not asked a thing.
+pub fn may_look(app: &str) -> bool {
+    PLACES.lock().is_ok_and(|places| {
+        places
+            .as_ref()
+            .is_some_and(|places| places.apps.contains(app) || places.browsers.contains(app))
+    })
+}
+/// Where a selection is and whether the circle shows there by itself: in a known browser
+/// the page's host, listed when it is an AI host; elsewhere the application, listed when
+/// it is an AI application. Never in a dialog (where files are named and saved), and
+/// never in a browser outside any page (the address bar).
+pub fn spot_for(app: Option<&str>, name: Option<&str>, page: Option<&str>, dialog: bool) -> Spot {
+    let Ok(places) = PLACES.lock() else {
+        return Spot::default();
+    };
+    let places = places.as_ref();
+    let id = app.unwrap_or_default();
+    if places.is_some_and(|places| places.browsers.contains(id)) {
+        let host = page.and_then(url_host);
+        return Spot {
+            listed: !dialog
+                && host
+                    .as_deref()
+                    .is_some_and(|host| places.is_some_and(|places| places.host_listed(host))),
+            place: host.map(|host| Place {
+                kind: "host",
+                name: host.clone(),
+                id: host,
+            }),
+        };
+    }
+    Spot {
+        listed: !dialog && places.is_some_and(|places| places.apps.contains(id)),
+        place: app.map(|id| Place {
+            kind: "app",
+            name: name.unwrap_or(id).to_string(),
+            id: id.to_string(),
+        }),
+    }
+}
+/// The host of a page address, lowercased; None for anything but http(s).
+pub fn url_host(url: &str) -> Option<String> {
+    let rest = url
+        .strip_prefix("https://")
+        .or_else(|| url.strip_prefix("http://"))?;
+    let authority = rest.split(['/', '?', '#']).next()?;
+    let host = authority.rsplit('@').next()?;
+    let host = host.split(':').next()?;
+    (!host.is_empty()).then(|| host.to_ascii_lowercase())
 }
 
 /// Shared gesture logic: a press records where it began; a release after a drag of
@@ -156,7 +250,7 @@ fn start_poller<R: Runtime>(app: AppHandle<R>, enabled: Arc<AtomicBool>) {
                 candidate = None;
                 continue;
             }
-            let probe = backend::probe(&app);
+            let probe = backend::probe(&app, true);
             let last = LAST_SHOWN
                 .lock()
                 .map(|text| text.clone())
@@ -183,7 +277,7 @@ mod backend {
         false
     }
     pub fn start(_app: AppHandle, _enabled: Arc<AtomicBool>) {}
-    pub fn probe<R: Runtime>(_app: &AppHandle<R>) -> Probe {
+    pub fn probe<R: Runtime>(_app: &AppHandle<R>, _gate: bool) -> Probe {
         Probe::Nothing
     }
 }
@@ -195,15 +289,32 @@ pub fn quick_selection_supported() -> bool {
 /// The front application's current selection, read once for ⌘⇧M so the shortcut can
 /// take the same path as a click on the circle (decision 0096). None when nothing
 /// usable is selected, a drag is still in progress, or the platform cannot read it.
+/// ⌘⇧M is deliberate, so it reads in any application, AI place or not (decision 0135).
 #[tauri::command]
 pub async fn quick_read_selection(app: AppHandle) -> Option<Selection> {
-    tauri::async_runtime::spawn_blocking(move || match backend::probe(&app) {
+    tauri::async_runtime::spawn_blocking(move || match backend::probe(&app, false) {
         Probe::Found(selection) => Some(selection),
         Probe::MouseDown | Probe::Nothing => None,
     })
     .await
     .ok()
     .flatten()
+}
+/// The AI places from the front end's list (decision 0135). True where the backend
+/// honours them (macOS, Windows); elsewhere the circle still shows in every application.
+#[tauri::command]
+pub fn quick_set_places(apps: Vec<String>, browsers: Vec<String>, hosts: Vec<String>) -> bool {
+    if let Ok(mut places) = PLACES.lock() {
+        *places = Some(Places {
+            apps: apps.into_iter().collect(),
+            browsers: browsers.into_iter().collect(),
+            hosts: hosts
+                .into_iter()
+                .map(|host| host.trim_end_matches('.').to_ascii_lowercase())
+                .collect(),
+        });
+    }
+    cfg!(any(target_os = "macos", windows))
 }
 /// Turn the popover on or off. The backend starts on the first "on" and then only
 /// watches silently (gesture bookkeeping, no reads, no events) while it is off.
@@ -255,7 +366,64 @@ mod tests {
             mouse: false,
             pointer: Point { x: 0.0, y: 0.0 },
             editable: true,
+            place: None,
+            listed: true,
         })
+    }
+
+    #[test]
+    fn a_listed_host_counts_with_its_subdomains_only() {
+        let places = Places {
+            hosts: vec!["chatgpt.com".into(), "claude.ai".into()],
+            ..Places::default()
+        };
+        assert!(places.host_listed("chatgpt.com"));
+        assert!(places.host_listed("www.ChatGPT.com."));
+        assert!(!places.host_listed("notchatgpt.com"));
+        assert!(!places.host_listed("chatgpt.com.evil.net"));
+        assert!(!places.host_listed("example.com"));
+    }
+
+    #[test]
+    fn a_browser_counts_by_its_page_an_app_by_itself_and_a_dialog_never() {
+        *PLACES.lock().unwrap() = Some(Places {
+            apps: ["claude.exe".to_string()].into(),
+            browsers: ["msedge.exe".to_string()].into(),
+            hosts: vec!["chatgpt.com".into()],
+        });
+        let page = Some("https://chatgpt.com/c/1");
+        assert!(spot_for(Some("msedge.exe"), None, page, false).listed);
+        assert_eq!(
+            spot_for(Some("msedge.exe"), None, page, false)
+                .place
+                .map(|place| place.id),
+            Some("chatgpt.com".to_string())
+        );
+        // The address bar: no page above it, so no place and no circle.
+        let bar = spot_for(Some("msedge.exe"), None, None, false);
+        assert!(!bar.listed && bar.place.is_none());
+        assert!(!spot_for(Some("msedge.exe"), None, Some("https://example.com"), false).listed);
+        assert!(spot_for(Some("claude.exe"), Some("Claude"), None, false).listed);
+        assert!(!spot_for(Some("claude.exe"), Some("Claude"), None, true).listed);
+        let zalo = spot_for(Some("zalo.exe"), Some("Zalo"), None, false);
+        assert!(!zalo.listed);
+        assert_eq!(zalo.place.map(|place| place.name), Some("Zalo".to_string()));
+        assert!(may_look("claude.exe") && may_look("msedge.exe") && !may_look("zalo.exe"));
+        *PLACES.lock().unwrap() = None;
+    }
+
+    #[test]
+    fn a_page_host_is_read_from_http_addresses_only() {
+        assert_eq!(
+            url_host("https://chatgpt.com/c/1?x=2").as_deref(),
+            Some("chatgpt.com")
+        );
+        assert_eq!(
+            url_host("http://user@Claude.ai:8080").as_deref(),
+            Some("claude.ai")
+        );
+        assert_eq!(url_host("file:///tmp/a.html"), None);
+        assert_eq!(url_host("about:blank"), None);
     }
 
     #[test]

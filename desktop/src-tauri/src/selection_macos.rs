@@ -5,7 +5,9 @@
 //! selection's screen rectangle. Both calls fail without the Accessibility permission,
 //! and nothing is read for secure (password) fields or this app. Chromium and
 //! Electron applications build their accessibility tree only once a client asks for
-//! it, so the application is asked first (decision 0126).
+//! it, so the application is asked first (decision 0126). The circle only reads in an
+//! AI place (decision 0135): a listed AI application, or a page on a listed AI host in
+//! a browser; any other application is not asked anything.
 use std::collections::HashSet;
 use std::ffi::c_void;
 use std::ptr::NonNull;
@@ -19,11 +21,14 @@ use core_foundation::base::{CFType, CFTypeRef, TCFType};
 use core_foundation::boolean::CFBoolean;
 use core_foundation::string::{CFString, CFStringRef};
 use objc2::MainThreadMarker;
-use objc2_app_kit::{NSEvent, NSEventMask, NSEventType, NSScreen, NSWorkspace};
+use objc2_app_kit::{
+    NSEvent, NSEventMask, NSEventType, NSRunningApplication, NSScreen, NSWorkspace,
+};
 use tauri::{AppHandle, Manager, Runtime};
 
 use crate::selection::{
-    emit_cleared, emit_made, usable, Gesture, Point, Probe, Read, Rect, Selection, SETTLE_MS,
+    emit_cleared, emit_made, may_look, spot_for, usable, Gesture, Point, Probe, Read, Rect,
+    Selection, Spot, SETTLE_MS,
 };
 
 #[repr(C)]
@@ -158,9 +163,78 @@ fn ask_for_tree(application: AXUIElementRef, pid: i32) -> bool {
     status == AX_SUCCESS
 }
 
-fn read_selection(frontmost_pid: i32) -> Option<Read> {
+/// The frontmost application, read on the main thread.
+pub struct Front {
+    pid: i32,
+    bundle: Option<String>,
+    name: Option<String>,
+}
+fn front_of(application: &NSRunningApplication) -> Front {
+    Front {
+        pid: application.processIdentifier(),
+        bundle: application.bundleIdentifier().map(|id| id.to_string()),
+        name: application.localizedName().map(|name| name.to_string()),
+    }
+}
+
+/// Far enough for the deepest composer seen (Dia's ChatGPT box sits 25 levels down).
+const MAX_ANCESTORS: usize = 80;
+/// What lies above the focused element: the address of the outermost page holding it
+/// (the tab's own page, not a frame inside it) and whether it sits in a sheet or a
+/// dialog, where files are named and saved (decision 0135).
+fn surroundings(element: AXUIElementRef) -> (Option<String>, bool) {
+    let mut page = None;
+    let mut dialog = false;
+    // The ancestor being looked at, owned; None while it is the focused element itself.
+    let mut held: Option<CFType> = None;
+    for _ in 0..MAX_ANCESTORS {
+        let node = held
+            .as_ref()
+            .map_or(element, |held| held.as_CFTypeRef() as AXUIElementRef);
+        let role = attribute(node, "AXRole").as_ref().and_then(string);
+        match role.as_deref() {
+            Some("AXWebArea") => {
+                if let Some(url) = attribute(node, "AXURL") {
+                    page = url
+                        .downcast::<core_foundation::url::CFURL>()
+                        .map(|url| url.get_string().to_string())
+                        .or_else(|| string(&url));
+                }
+            }
+            Some("AXSheet") => dialog = true,
+            Some("AXWindow") => {
+                let subrole = attribute(node, "AXSubrole").as_ref().and_then(string);
+                dialog |= matches!(subrole.as_deref(), Some("AXDialog" | "AXSystemDialog"));
+            }
+            _ => {}
+        }
+        let Some(parent) = attribute(node, "AXParent") else {
+            break;
+        };
+        held = Some(parent);
+    }
+    (page, dialog)
+}
+/// Where the focused element is, and whether the circle shows there by itself.
+fn spot_of(front: &Front, element: AXUIElementRef) -> Spot {
+    let (page, dialog) = surroundings(element);
+    spot_for(
+        front.bundle.as_deref(),
+        front.name.as_deref(),
+        page.as_deref(),
+        dialog,
+    )
+}
+
+/// The selection of the frontmost application. With `gate` (the circle), only in an AI
+/// place; without it (⌘⇧M, which the user asked for), anywhere.
+fn read_selection(front: &Front, gate: bool) -> Option<Read> {
+    let frontmost_pid = front.pid;
     // SAFETY: plain query.
     if !unsafe { AXIsProcessTrusted() } || frontmost_pid as u32 == std::process::id() {
+        return None;
+    }
+    if gate && !may_look(front.bundle.as_deref().unwrap_or_default()) {
         return None;
     }
     // SAFETY: returns an owned element for that process.
@@ -195,6 +269,10 @@ fn read_selection(frontmost_pid: i32) -> Option<Read> {
     {
         return None;
     }
+    let spot = spot_of(front, element);
+    if gate && !spot.listed {
+        return None;
+    }
     // Native text views answer AXSelectedText; web content (WebKit and Chromium web
     // areas: pages, an AI's answer) only answers through the text marker range.
     let text = attribute(element, "AXSelectedText")
@@ -215,7 +293,7 @@ fn read_selection(frontmost_pid: i32) -> Option<Read> {
     let bounds = selection_bounds(element);
     let editable =
         settable(element, "AXValue") || settable(element, "AXSelectedText") || web_editor(element);
-    Some((text, bounds, editable))
+    Some((text, bounds, editable, spot))
 }
 
 /// An AXValue of one of the geometry types, read into `out`.
@@ -318,7 +396,7 @@ pub fn start<R: Runtime>(app: AppHandle<R>, enabled: Arc<AtomicBool>) {
                         else {
                             return;
                         };
-                        let pid = front.processIdentifier();
+                        let front = front_of(&front);
                         let handle = handle.clone();
                         let enabled = enabled.clone();
                         thread::spawn(move || {
@@ -326,7 +404,9 @@ pub fn start<R: Runtime>(app: AppHandle<R>, enabled: Arc<AtomicBool>) {
                             if !enabled.load(Ordering::Relaxed) {
                                 return;
                             }
-                            if let Some((text, bounds, editable)) = read_selection(pid) {
+                            if let Some((text, bounds, editable, spot)) =
+                                read_selection(&front, true)
+                            {
                                 emit_made(
                                     &handle,
                                     Selection {
@@ -336,6 +416,8 @@ pub fn start<R: Runtime>(app: AppHandle<R>, enabled: Arc<AtomicBool>) {
                                         mouse: true,
                                         pointer: at,
                                         editable,
+                                        place: spot.place,
+                                        listed: spot.listed,
                                     },
                                 );
                             }
@@ -464,37 +546,40 @@ pub fn replace_native<R: Runtime>(app: &AppHandle<R>, text: &str) -> bool {
         && value(element).is_some_and(|after| after != before && after.contains(text))
 }
 
-/// One look for the keyboard poller: the frontmost application, the pointer and the
-/// mouse buttons are read on the main thread; the selection itself off it.
-pub fn probe<R: Runtime>(app: &AppHandle<R>) -> Probe {
+/// One look for the keyboard poller (`gate`: AI places only) or ⌘⇧M: the frontmost
+/// application, the pointer and the mouse buttons are read on the main thread; the
+/// selection itself off it.
+pub fn probe<R: Runtime>(app: &AppHandle<R>, gate: bool) -> Probe {
     let (sender, receiver) = std::sync::mpsc::channel();
     let posted = app.run_on_main_thread(move || {
         let Some(mtm) = MainThreadMarker::new() else {
             return;
         };
         let down = NSEvent::pressedMouseButtons() & 1 != 0;
-        let pid = NSWorkspace::sharedWorkspace()
+        let front = NSWorkspace::sharedWorkspace()
             .frontmostApplication()
-            .map(|front| front.processIdentifier());
-        let _ = sender.send((down, pid, pointer_top_left(mtm)));
+            .map(|front| front_of(&front));
+        let _ = sender.send((down, front, pointer_top_left(mtm)));
     });
     if posted.is_err() {
         return Probe::Nothing;
     }
-    let Ok((down, pid, pointer)) = receiver.recv_timeout(Duration::from_secs(1)) else {
+    let Ok((down, front, pointer)) = receiver.recv_timeout(Duration::from_secs(1)) else {
         return Probe::Nothing;
     };
     if down {
         return Probe::MouseDown;
     }
-    match pid.and_then(read_selection) {
-        Some((text, bounds, editable)) => Probe::Found(Selection {
+    match front.and_then(|front| read_selection(&front, gate)) {
+        Some((text, bounds, editable, spot)) => Probe::Found(Selection {
             text,
             field: bounds.as_ref().is_some_and(|(_, field)| *field),
             bounds: bounds.map(|(rect, _)| rect),
             mouse: false,
             pointer,
             editable,
+            place: spot.place,
+            listed: spot.listed,
         }),
         None => Probe::Nothing,
     }

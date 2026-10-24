@@ -109,6 +109,22 @@ test("selection watching observes mouse buttons only, never keys (privacy §5)",
   assert.match(win, /WH_MOUSE_LL/, UPDATE);
 });
 
+test("the circle reads only in AI places, by app and page host (privacy §5)", () => {
+  const mac = read("../src-tauri/src/selection_macos.rs");
+  const win = read("../src-tauri/src/selection_windows.rs");
+  const page = read("../../landing/privacy.html");
+  // The circle's path asks nothing of an application off the list (decision 0135).
+  for (const backend of [mac, win]) {
+    assert.match(backend, /if gate && !.*may_look\(/, UPDATE);
+    assert.match(backend, /if gate && !spot\.listed/, UPDATE);
+  }
+  // A browser's page address is read, and only its host is compared.
+  assert.match(mac, /"AXURL"/, UPDATE);
+  assert.match(win, /UIA_DocumentControlTypeId/, UPDATE);
+  assert.match(page, /chỉ dùng tên miền để so với danh sách, và không lưu lại/, UPDATE);
+  assert.match(page, /Nút chỉ hiện ở nơi có AI/, UPDATE);
+});
+
 test("the privacy page carries an update date", () => {
   assert.match(read("../../landing/privacy.html"), /Cập nhật ngày \d{1,2} tháng \d{1,2} năm \d{4}/);
 });

@@ -11,10 +11,10 @@ import BrandMark from "./BrandMark.vue";
   <figure
     class="quick-demo"
     role="img"
-    aria-label="Minh họa: bôi đen chữ trong ứng dụng khác, bấm nút OfflineMask, thông tin được ẩn ngay tại chỗ"
+    aria-label="Minh họa: bôi đen chữ trong ChatGPT, bấm nút OfflineMask, thông tin được ẩn ngay tại chỗ"
   >
     <div class="qd-window" aria-hidden="true">
-      <div class="qd-bar"><i></i><i></i><i></i><span>Ứng dụng bất kỳ</span></div>
+      <div class="qd-bar"><i></i><i></i><i></i><span>ChatGPT</span></div>
       <p class="qd-line">
         Tóm tắt giúp tôi:<br />
         khách

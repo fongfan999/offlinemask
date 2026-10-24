@@ -168,7 +168,7 @@ const packNotice = computed<PackNotice | null>(() => {
     </div>
     <!-- The other way in, until it works (decision 0099). -->
     <p v-if="quickOffer" class="start-quick">
-      <BrandMark :size="14" />Hoặc bôi đen chữ ngay trong ChatGPT, Zalo hay Word để ẩn tại chỗ.
+      <BrandMark :size="14" />Hoặc bôi đen chữ ngay trong ChatGPT, Claude hay Gemini để ẩn tại chỗ.
       <button type="button" class="link-button" @click="emit('navigate', 'settings')">
         Bật Ẩn nhanh
       </button>

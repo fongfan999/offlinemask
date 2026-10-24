@@ -2530,6 +2530,39 @@ td.alias {
   font-size: 12px;
   line-height: 1.7;
 }
+/* Where the circle shows by itself, and the list behind it (decision 0135). */
+.quick-places-summary {
+  margin-top: 6px;
+}
+.quick-places-summary .link-button {
+  margin-left: 4px;
+}
+.quick-places {
+  display: grid;
+  gap: 2px;
+  max-width: 420px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 13px;
+}
+.quick-places li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line);
+}
+.quick-places li.quick-places-reset {
+  justify-content: flex-start;
+  border-bottom: 0;
+}
+.quick-place-host {
+  margin-left: 6px;
+  color: var(--muted);
+  font: 12px var(--mono);
+}
 /* Cài đặt › Thao tác nhanh: what it is, beside the illustration (decision 0098). */
 .quick-head {
   display: flex;
@@ -3135,6 +3168,17 @@ td.alias {
     0 6px 14px -8px var(--shadow);
   font-size: 12.5px;
   white-space: nowrap;
+}
+/* A quiet second step beside the circle: "Tắt ở …", "Luôn hiện nút ở …" (decision 0135). */
+.quick-hint-action {
+  color: var(--muted);
+  font: inherit;
+  font-size: 12.5px;
+  cursor: pointer;
+}
+.quick-hint-action:hover {
+  color: var(--ink);
+  border-color: var(--accent);
 }
 /* The restore preview, top right: the AI's text with the real values back. */
 .quick-preview {

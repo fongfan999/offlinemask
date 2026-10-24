@@ -15,6 +15,18 @@ import {
   restoreFromTables,
   sessionFindings,
 } from "../core/quick-actions.ts";
+import {
+  addPlace,
+  detectPlatform,
+  effectivePlaces,
+  nativePlaces,
+  noChanges,
+  parseChanges,
+  removePlace,
+  type Place,
+  type PlaceChanges,
+  type PlacePlatform,
+} from "../core/places.ts";
 import { aliasTokens } from "../core/restore.ts";
 import type { Finding } from "../core/review.ts";
 import { isPrivate, sessionOutput, type Session, type TextSession } from "../core/sessions.ts";
@@ -23,6 +35,8 @@ export const shortcutKey = "offlinemask.quick-shortcut.v1";
 export const popoverKey = "offlinemask.quick-popover.v1";
 /** Set once the one-time Ẩn nhanh card was answered (decision 0098). */
 export const introKey = "offlinemask.quick-intro.v1";
+/** The user's changes to the AI places (decision 0135): identifiers and names only. */
+export const placesKey = "offlinemask.quick-places.v1";
 /** A selection gets a masking circle only if the click's own detection finds something
  * to hide (decision 0100). A check slower than this shows the circle anyway: a circle
  * that finds nothing is better than one that quietly never appeared. */
@@ -72,6 +86,8 @@ export interface QuickActionsDependencies {
   /** Pending work to finish before the process ends (the shell's debounced vault save). */
   flush?: () => Promise<void>;
   storage?: PreferenceStorage | null;
+  /** Which application identifiers the default AI places use (decision 0135). */
+  platform?: PlacePlatform;
 }
 
 /** Clipboard quick actions (decision 0090): one global shortcut that masks ordinary
@@ -89,6 +105,7 @@ export function useQuickActions({
   openSettings,
   historyKept,
   storage = defaultStorage(),
+  platform = detectPlatform(),
 }: QuickActionsDependencies) {
   // Preferences only, no content: on/off switches.
   const read = (key: string, fallback: boolean) => {
@@ -106,6 +123,42 @@ export function useQuickActions({
       // Unwritable storage: the choice holds until the app closes.
     }
   };
+  /** The AI places where the circle shows by itself (decision 0135): the defaults, less
+   * what the user removed, plus what they added. */
+  const placeChanges = ref<PlaceChanges>(noChanges);
+  try {
+    placeChanges.value = parseChanges(storage?.getItem(placesKey));
+  } catch {
+    // Unreadable storage: the defaults.
+  }
+  const places = computed(() => effectivePlaces(placeChanges.value, platform));
+  /** Whether this platform honours the list; elsewhere the circle shows everywhere. */
+  const placesSupported = ref(false);
+  async function syncPlaces() {
+    if (!adapter.desktop) return;
+    placesSupported.value = await adapter
+      .setPlaces(nativePlaces(places.value, platform))
+      .catch(() => false);
+  }
+  function changePlaces(next: PlaceChanges) {
+    placeChanges.value = next;
+    try {
+      if (next.added.length || next.removed.length)
+        storage?.setItem(placesKey, JSON.stringify(next));
+      else storage?.removeItem(placesKey);
+    } catch {
+      // Unwritable storage: the change holds until the app closes.
+    }
+    void syncPlaces();
+  }
+  const keepPlace = (place: Place) => changePlaces(addPlace(placeChanges.value, place, platform));
+  const forgetPlace = (place: Pick<Place, "kind" | "id">) =>
+    changePlaces(removePlace(placeChanges.value, place, platform));
+  const resetPlaces = () => changePlaces(noChanges);
+  /** The place of the circle on screen, for its "Tắt ở …", and of the last ⌘⇧M outside
+   * the list, for "Luôn hiện nút ở …". */
+  let circlePlace: Place | null = null;
+  let offeredPlace: Place | null = null;
   const shortcutOn = ref(adapter.desktop && read(shortcutKey, true));
   // The selection popover (decision 0096): opt-in; the last selection waits for a button.
   const popoverOn = ref(adapter.desktop && read(popoverKey, false));
@@ -480,10 +533,12 @@ export function useQuickActions({
     // is clearly OfflineMask's, and silence looked like a bug.
     const action = direction;
     pendingSelection = { text: selection.text, editable: selection.editable, action };
+    circlePlace = placesSupported.value ? (selection.place ?? null) : null;
     await show({
       message: action === "mask" ? quickMessages.selectMask : quickMessages.selectRestore,
       tone: "select",
       action,
+      ...(circlePlace ? { place: circlePlace.name } : {}),
       hint:
         action === "mask"
           ? quickMessages.hintMask
@@ -675,10 +730,16 @@ export function useQuickActions({
     if (!selection || direction === "empty") return;
     pendingSelection = null;
     const action = direction;
+    // Used outside the AI places: once done, the circle offers to show there by itself.
+    offeredPlace =
+      placesSupported.value && selection.place && selection.listed === false
+        ? selection.place
+        : null;
     await show({
       message: action === "mask" ? quickMessages.selectMask : quickMessages.selectRestore,
       tone: "select",
       action,
+      ...(offeredPlace ? { offerPlace: offeredPlace.name } : {}),
       anchor: selectionAnchor(selection),
     });
     if (action === "unknown") await explainUnknown();
@@ -702,6 +763,19 @@ export function useQuickActions({
     if (adapter.desktop) await adapter.dismissPanel().catch(() => {});
   }
   function onCommand(command: QuickCommand) {
+    if (command === "forget-place") {
+      if (circlePlace) forgetPlace(circlePlace);
+      circlePlace = null;
+      pendingSelection = null;
+      if (adapter.desktop) void adapter.dismissPanel().catch(() => {});
+      return;
+    }
+    if (command === "keep-place") {
+      if (offeredPlace) keepPlace(offeredPlace);
+      offeredPlace = null;
+      if (adapter.desktop) void adapter.dismissPanel().catch(() => {});
+      return;
+    }
     if (command === "quit") void quit();
     else if (command === "settings") void goToSettings();
     else if (command === "copy" || command === "open" || command === "close")
@@ -748,7 +822,7 @@ export function useQuickActions({
     // models past its 4 GB limit), the circle would spin for an answer that never comes.
     await adapter.dismissPanel().catch(() => {});
     if (typeof window !== "undefined") window.addEventListener("focus", recheck);
-    await Promise.all([checkInputPermission(), readLaunchAtLogin()]);
+    await Promise.all([checkInputPermission(), readLaunchAtLogin(), syncPlaces()]);
     popoverSupported.value = await adapter.selectionSupported().catch(() => false);
     if (popoverOn.value) await setPopover(popoverSupported.value);
     // While Ẩn nhanh is off, the tray menu offers it (decision 0098).
@@ -817,6 +891,13 @@ export function useQuickActions({
     grantAndEnable,
     lastSkip,
     popoverSupported: computed(() => popoverSupported.value),
+    places,
+    placesChanged: computed(
+      () => placeChanges.value.added.length > 0 || placeChanges.value.removed.length > 0,
+    ),
+    placesSupported: computed(() => placesSupported.value),
+    forgetPlace,
+    resetPlaces,
     popoverFailure,
     setPopover,
     act,

@@ -3,6 +3,7 @@ import { emitTo, listen } from "@tauri-apps/api/event";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import { readText, writeText } from "@tauri-apps/plugin-clipboard-manager";
 import { isRegistered, register, unregister } from "@tauri-apps/plugin-global-shortcut";
+import type { Place } from "../core/places.ts";
 
 /** The one quick-action shortcut (decision 0090). Copy, press it, paste. */
 export const quickShortcut = "CommandOrControl+Shift+M";
@@ -20,7 +21,18 @@ export const trayLabel = /Mac|iPhone|iPad/.test(navigator.userAgent)
 /** Panel or tray → shell: a button in the panel, its close control, the tray's quit, or
  * the restore preview's two actions (decision 0096). */
 export type QuickCommand =
-  "mask" | "restore" | "unknown" | "quit" | "copy" | "open" | "close" | "settings";
+  | "mask"
+  | "restore"
+  | "unknown"
+  | "quit"
+  | "copy"
+  | "open"
+  | "close"
+  | "settings"
+  /** The circle's "Tắt ở …": no circle by itself in this place any more (decision 0135). */
+  | "forget-place"
+  /** After ⌘⇧M somewhere else: "Luôn hiện nút ở …" adds that place. */
+  | "keep-place";
 /** Logical screen points, top-left origin (decision 0096). */
 export interface ScreenPoint {
   x: number;
@@ -59,6 +71,10 @@ export interface QuickStatus {
   /** An explanation card (codes from an earlier launch): its body, and whether it offers
    * the way to the passcode setting. */
   notice?: { body: string; settings: boolean };
+  /** For a circle in an AI place: its name, for "Tắt ở …" beside the hint (decision 0135). */
+  place?: string;
+  /** For ⌘⇧M outside the AI places: its name, for "Luôn hiện nút ở …" once it is done. */
+  offerPlace?: string;
 }
 /** Text the user just selected in another application (decision 0096). */
 export interface SelectionMade {
@@ -72,6 +88,11 @@ export interface SelectionMade {
   field?: boolean;
   /** Made with the mouse, so `pointer` is where the drag or clicks ended. */
   mouse?: boolean;
+  /** The application, or the page's host in a browser (decision 0135); none where the
+   * platform cannot tell, or in a browser outside any page. */
+  place?: Place | null;
+  /** The circle shows there by itself; only ⌘⇧M reports a selection elsewhere. */
+  listed?: boolean;
 }
 /** Where the circle goes for a selection (decision 0101): by the text whenever its
  * place is known. Read-only text (a chat bubble, a page) often reports a whole block,
@@ -163,6 +184,9 @@ export interface QuickActionsAdapter {
   dismissPanel(): Promise<void>;
   /** The front application's current selection, read once (for ⌘⇧M), or null. */
   readSelection(): Promise<SelectionMade | null>;
+  /** The AI places the circle shows in by itself (decision 0135). True where the platform
+   * honours them; elsewhere the circle still shows in every application. */
+  setPlaces(places: { apps: string[]; browsers: string[]; hosts: string[] }): Promise<boolean>;
 }
 
 export const nativeQuickActions: QuickActionsAdapter = {
@@ -223,4 +247,6 @@ export const nativeQuickActions: QuickActionsAdapter = {
   dismissPanel: () => emitTo(panelWindow, events.dismiss, {}),
   readSelection: () =>
     isTauri() ? invoke<SelectionMade | null>("quick_read_selection") : Promise.resolve(null),
+  setPlaces: (places) =>
+    isTauri() ? invoke<boolean>("quick_set_places", places) : Promise.resolve(false),
 };

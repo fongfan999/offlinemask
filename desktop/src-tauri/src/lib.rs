@@ -126,7 +126,8 @@ pub fn run() {
         background::quick_read_service_file,
         selection::quick_selection_supported,
         selection::quick_selection_watch,
-        selection::quick_read_selection
+        selection::quick_read_selection,
+        selection::quick_set_places
     ]);
     #[cfg(all(
         feature = "minilm-desktop-prototype",
@@ -158,6 +159,7 @@ pub fn run() {
         selection::quick_selection_supported,
         selection::quick_selection_watch,
         selection::quick_read_selection,
+        selection::quick_set_places,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -192,6 +194,7 @@ pub fn run() {
         selection::quick_selection_supported,
         selection::quick_selection_watch,
         selection::quick_read_selection,
+        selection::quick_set_places,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -230,6 +233,7 @@ pub fn run() {
         selection::quick_selection_supported,
         selection::quick_selection_watch,
         selection::quick_read_selection,
+        selection::quick_set_places,
         recognition_native::recognition_native_load,
         recognition_native::recognition_native_run,
         recognition_native::recognition_native_release

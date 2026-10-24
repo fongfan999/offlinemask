@@ -1,0 +1,57 @@
+{
+  "about": "Where the circle shows by itself (decision 0135). apps: AI desktop applications, by bundle identifier on macOS and executable name on Windows. browsers: browsers whose page address is read to compare with hosts (Chromium and WebKit; Firefox is left out until probed). hosts: AI sites, matched with their subdomains.",
+  "apps": [
+    {
+      "name": "ChatGPT",
+      "macos": ["com.openai.chat", "com.openai.codex"],
+      "windows": ["chatgpt.exe"]
+    },
+    { "name": "Claude", "macos": ["com.anthropic.claudefordesktop"], "windows": ["claude.exe"] },
+    { "name": "Perplexity", "macos": ["ai.perplexity.mac"], "windows": ["perplexity.exe"] },
+    { "name": "Cursor", "macos": ["com.todesktop.230313mzl4w4u92"], "windows": ["cursor.exe"] },
+    { "name": "Windsurf", "macos": ["com.exafunction.windsurf"], "windows": ["windsurf.exe"] }
+  ],
+  "browsers": {
+    "macos": [
+      "com.apple.Safari",
+      "com.apple.SafariTechnologyPreview",
+      "com.google.Chrome",
+      "com.google.Chrome.beta",
+      "com.google.Chrome.canary",
+      "com.microsoft.edgemac",
+      "company.thebrowser.dia",
+      "company.thebrowser.Browser",
+      "com.brave.Browser",
+      "com.vivaldi.Vivaldi",
+      "com.operasoftware.Opera",
+      "com.coccoc.Coccoc",
+      "com.openai.atlas"
+    ],
+    "windows": [
+      "chrome.exe",
+      "msedge.exe",
+      "brave.exe",
+      "vivaldi.exe",
+      "opera.exe",
+      "arc.exe",
+      "browser.exe"
+    ]
+  },
+  "hosts": [
+    { "id": "chatgpt.com", "name": "ChatGPT" },
+    { "id": "chat.openai.com", "name": "ChatGPT" },
+    { "id": "claude.ai", "name": "Claude" },
+    { "id": "gemini.google.com", "name": "Gemini" },
+    { "id": "aistudio.google.com", "name": "Google AI Studio" },
+    { "id": "notebooklm.google.com", "name": "NotebookLM" },
+    { "id": "copilot.microsoft.com", "name": "Copilot" },
+    { "id": "m365.cloud.microsoft", "name": "Microsoft 365 Copilot" },
+    { "id": "perplexity.ai", "name": "Perplexity" },
+    { "id": "chat.deepseek.com", "name": "DeepSeek" },
+    { "id": "grok.com", "name": "Grok" },
+    { "id": "chat.mistral.ai", "name": "Le Chat" },
+    { "id": "chat.qwen.ai", "name": "Qwen" },
+    { "id": "kimi.com", "name": "Kimi" },
+    { "id": "poe.com", "name": "Poe" }
+  ]
+}

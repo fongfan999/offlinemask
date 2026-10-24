@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import { quickShortcutLabel, trayLabel } from "../adapters/quick-actions.ts";
 import { quickKey, useProvided } from "../composables/context.ts";
 import QuickDemo from "./QuickDemo.vue";
@@ -12,6 +12,16 @@ function grant() {
   asked.value = true;
   void quick.grantAndEnable();
 }
+/** Where the circle shows by itself (decision 0135), named in one line; the full list
+ * opens on request. */
+const placeNames = computed(() => [...new Set(quick.places.value.map((place) => place.name))]);
+const placeSummary = computed(() => {
+  const names = placeNames.value;
+  if (!names.length) return `Chưa có ứng dụng nào. ${quickShortcutLabel} vẫn dùng được ở mọi nơi.`;
+  const shown = names.slice(0, 3).join(", ");
+  return `Nút hiện trong ${shown}${names.length > 3 ? "…" : ""} · ${quickShortcutLabel} dùng được ở mọi nơi.`;
+});
+const listOpen = ref(false);
 </script>
 
 <template>
@@ -22,7 +32,9 @@ function grant() {
       <div>
         <h2 id="quick-title" class="app-settings-title">Thao tác nhanh</h2>
         <p class="quick-lead">
-          Bôi đen chữ trong ứng dụng bất kỳ, bấm nút OfflineMask để ẩn hoặc khôi phục ngay tại chỗ.
+          Bôi đen chữ trong
+          {{ quick.placesSupported.value ? "ChatGPT, Claude hay Gemini" : "ứng dụng bất kỳ" }}, bấm
+          nút OfflineMask để ẩn hoặc khôi phục ngay tại chỗ.
         </p>
         <p class="quick-intro">Chỉ đọc chữ bạn bôi đen, xử lý trên máy này.</p>
       </div>
@@ -66,8 +78,41 @@ function grant() {
             Ô nhập được thay ngay; chữ không sửa được thì hiện bản xem trước để sao chép.
           </p>
           <p v-if="quick.quickReady.value && !quick.lastSkip.value" class="quick-ready">
-            Đang bật · thử bôi đen một đoạn trong ứng dụng khác.
+            Đang bật · thử bôi đen một đoạn trong
+            {{ quick.placesSupported.value ? "ChatGPT hay Claude" : "ứng dụng khác" }}.
           </p>
+          <!-- Where it shows by itself: one line, the list only on request (decision 0135). -->
+          <template v-if="quick.placesSupported.value && quick.popoverOn.value">
+            <p class="quick-intro quick-places-summary">
+              {{ placeSummary }}
+              <button
+                class="link-button"
+                :aria-expanded="listOpen"
+                aria-controls="quick-places"
+                @click="listOpen = !listOpen"
+              >
+                {{ listOpen ? "Ẩn danh sách" : "Xem danh sách" }}
+              </button>
+            </p>
+            <ul v-if="listOpen" id="quick-places" class="quick-places">
+              <li v-for="place in quick.places.value" :key="`${place.kind}:${place.id}`">
+                <span>
+                  {{ place.name }}
+                  <span v-if="place.kind === 'host'" class="quick-place-host">{{ place.id }}</span>
+                </span>
+                <button
+                  class="link-button"
+                  :aria-label="`Bỏ ${place.name}${place.kind === 'host' ? ` (${place.id})` : ''}`"
+                  @click="quick.forgetPlace(place)"
+                >
+                  Bỏ
+                </button>
+              </li>
+              <li v-if="quick.placesChanged.value" class="quick-places-reset">
+                <button class="link-button" @click="quick.resetPlaces()">Khôi phục mặc định</button>
+              </li>
+            </ul>
+          </template>
           <p v-if="!quick.popoverSupported.value" class="quick-note">
             Hệ điều hành này chưa hỗ trợ.
           </p>

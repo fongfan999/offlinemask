@@ -42,7 +42,7 @@ onBeforeUnmount(() => {
       <div class="quick-intro-body">
         <template v-if="quick.introStage.value === 'offer'">
           <strong id="quick-intro-title">Lần sau, không cần dán vào đây</strong>
-          <span>Bôi đen chữ trong ChatGPT, Zalo hay Word, bấm nút OfflineMask là xong.</span>
+          <span>Bôi đen chữ trong ChatGPT, Claude hay Gemini, bấm nút OfflineMask là xong.</span>
           <div class="quick-intro-actions">
             <button class="quiet-button" @click="quick.dismissIntro()">Để sau</button>
             <button class="quiet-button accent" @click="quick.startIntro()">Bật Ẩn nhanh</button>
@@ -70,7 +70,7 @@ onBeforeUnmount(() => {
         </template>
         <template v-else>
           <strong id="quick-intro-title">Đã bật Ẩn nhanh</strong>
-          <span role="status">Thử bôi đen một đoạn trong ứng dụng khác.</span>
+          <span role="status">Thử bôi đen một đoạn trong ChatGPT hay Claude.</span>
           <div class="quick-intro-actions">
             <button class="quiet-button" @click="quick.dismissIntro()">Đóng</button>
           </div>

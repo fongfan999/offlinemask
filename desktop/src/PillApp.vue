@@ -9,7 +9,9 @@ import { nativeQuickPanel as panel, type Spot } from "./adapters/quick-panel.ts"
  * window: its shape, where it sits, whether it is shown. The shell does the masking
  * and restoring; this page never touches the clipboard. Its shapes:
  * - `dot`: a 32 px circle just above a fresh selection; one click runs its action.
- *   Hovering it shows a one-line hint beside it saying what that click will do;
+ *   Hovering it shows a one-line hint beside it saying what that click will do, and
+ *   "Tắt ở …" to stop it showing in that AI place (decision 0135). After ⌘⇧M outside
+ *   the AI places, the check mark offers "Luôn hiện nút ở …";
  * - `preview`: read-only AI text with the real values back, top right, with copy and
  *   open-in-app buttons; it stays until one is used or it is closed;
  * - `notice`: why codes of an earlier launch cannot be restored;
@@ -277,7 +279,11 @@ async function present(next: PanelStatus) {
     hideLater(1600);
     return;
   }
-  status.value = next;
+  // An in-place result keeps what the circle's own question said about its place.
+  status.value =
+    next.inPlace && mode.value === "dot" && status.value?.offerPlace
+      ? { ...next, offerPlace: status.value.offerPlace }
+      : next;
   clearTimeout(hideTimer);
   if (next.tone === "preview") return showPreview();
   if (next.tone === "notice") return showNotice();
@@ -286,7 +292,9 @@ async function present(next: PanelStatus) {
     hovered.value = false;
     circle.value = next.tone === "busy" ? "busy" : next.tone === "error" ? "error" : "done";
     await reshape();
-    if (next.tone !== "busy") hideLater(next.tone === "error" ? 4500 : 1500);
+    // The offer to show there by itself needs time to be read and clicked.
+    const offering = circle.value === "done" && !!status.value?.offerPlace;
+    if (next.tone !== "busy") hideLater(next.tone === "error" ? 4500 : offering ? 6000 : 1500);
     return;
   }
   if (next.tone === "select" && next.anchor) {
@@ -437,10 +445,24 @@ onBeforeUnmount(() => {
       >
         {{ status.hint }}
       </span>
-      <span v-else-if="circle === 'error'" class="quick-hint is-error" role="status">
+      <button
+        v-if="circle === 'idle' && hovered && status?.place"
+        class="quick-hint quick-hint-action"
+        @click="send('forget-place')"
+      >
+        Tắt ở {{ status.place }}
+      </button>
+      <span v-if="circle === 'error'" class="quick-hint is-error" role="status">
         {{ shortMessage }}
       </span>
       <span v-else-if="circle !== 'idle'" class="sr-only" role="status">{{ status?.message }}</span>
+      <button
+        v-if="circle === 'done' && status?.offerPlace"
+        class="quick-hint quick-hint-action"
+        @click="send('keep-place')"
+      >
+        Luôn hiện nút ở {{ status.offerPlace }}
+      </button>
     </div>
 
     <!-- Codes from an earlier launch: why nothing can be restored, and the way out. -->
