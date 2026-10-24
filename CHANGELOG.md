@@ -4,6 +4,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.1.1] — 2026-10-24
+
+Tidies the tray menu and Settings, and makes the circle's place list easy to see.
+
 ### Changed
 
 - The tray menu no longer acts on the clipboard: it opens OfflineMask or its settings, switches Ẩn nhanh on and off with a check mark, and quits. Cài đặt drops the unfinished "Cài từ tệp", and "Cập nhật" now opens OfflineMask.com to compare versions. "Sắp có" badges are centred ([0137](docs/decisions/0137-tray-and-settings-cleanup.md)).
@@ -115,7 +119,9 @@ The first public release. The number starts at 2.0.0 by the owner's choice; ther
 - Builds are not yet signed or notarized ([release notes](docs/release/macos-arm64.md)).
 - Detection has documented misses and over-masking; review the result before sharing it ([evidence](docs/evaluations/recognition-production-v1/README.md)).
 
-[Unreleased]: https://github.com/fongfan999/offlinemask/compare/v2.0.5...HEAD
+[Unreleased]: https://github.com/fongfan999/offlinemask/compare/v2.1.1...HEAD
+[2.1.1]: https://github.com/fongfan999/offlinemask/compare/v2.1.0...v2.1.1
+[2.1.0]: https://github.com/fongfan999/offlinemask/compare/v2.0.5...v2.1.0
 [2.0.5]: https://github.com/fongfan999/offlinemask/compare/v2.0.4...v2.0.5
 [2.0.4]: https://github.com/fongfan999/offlinemask/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/fongfan999/offlinemask/compare/v2.0.2...v2.0.3
