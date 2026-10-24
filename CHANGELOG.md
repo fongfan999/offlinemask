@@ -4,6 +4,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.0.5] — 2026-10-24
+
+The first Microsoft Store build: masking works on first launch, start at login works in the package, and each step's main button stays in view.
+
 ### Changed
 
 - The main button of each step stays in view while a long review or file list scrolls under it, and short results no longer sit in a tall empty box. After pasting the AI's reply, the restored copy gets the room under its own label, and its buttons share one row. Small labels are larger, spreadsheets show six columns side by side, and notes that were already done disappear ([0134](docs/decisions/0134-actions-in-view-and-readable-type.md)).
@@ -98,7 +102,8 @@ The first public release. The number starts at 2.0.0 by the owner's choice; ther
 - Builds are not yet signed or notarized ([release notes](docs/release/macos-arm64.md)).
 - Detection has documented misses and over-masking; review the result before sharing it ([evidence](docs/evaluations/recognition-production-v1/README.md)).
 
-[Unreleased]: https://github.com/fongfan999/offlinemask/compare/v2.0.4...HEAD
+[Unreleased]: https://github.com/fongfan999/offlinemask/compare/v2.0.5...HEAD
+[2.0.5]: https://github.com/fongfan999/offlinemask/compare/v2.0.4...v2.0.5
 [2.0.4]: https://github.com/fongfan999/offlinemask/compare/v2.0.3...v2.0.4
 [2.0.3]: https://github.com/fongfan999/offlinemask/compare/v2.0.2...v2.0.3
 [2.0.2]: https://github.com/fongfan999/offlinemask/compare/v2.0.1...v2.0.2
