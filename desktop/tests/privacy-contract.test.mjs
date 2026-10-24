@@ -53,6 +53,18 @@ test("only the pack downloader opens network connections (privacy §4)", () => {
   assert.deepEqual(networked.toSorted(), ["model_pack.rs", "models.rs"], UPDATE);
 });
 
+test("the page names what the system web view connects to by itself (privacy §4)", () => {
+  // Measured with a WebView2 net log of the idle app (decision 0138): its component
+  // updater and the system's DNS, nothing of OfflineMask's.
+  const page = read("../../landing/privacy.html");
+  assert.match(page, /Microsoft Edge WebView2/, UPDATE);
+  assert.match(page, /edge\.microsoft\.com/, UPDATE);
+  // Switching WebView2's own traffic off would change that fact: update the page then.
+  const conf = JSON.parse(read("../src-tauri/tauri.conf.json"));
+  const args = conf.app.windows.map((window) => window.additionalBrowserArgs ?? "").join(" ");
+  assert.doesNotMatch(args, /component-update|ComponentUpdater|DnsOverHttps/i, UPDATE);
+});
+
 test("pack files come only from the project's Cloudflare R2 store (privacy §4)", () => {
   const dir = new URL("../packs/", import.meta.url);
   const hosts = new Set();

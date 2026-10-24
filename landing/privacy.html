@@ -144,7 +144,7 @@
         </p>
 
         <h2 id="mang"><span>4</span>Khi nào ứng dụng dùng mạng</h2>
-        <p>Chỉ trong ba trường hợp, và đều do bạn bấm:</p>
+        <p>OfflineMask chỉ dùng mạng trong ba trường hợp, và đều do bạn bấm:</p>
         <div class="om-doc-table">
           <table>
             <thead>
@@ -157,7 +157,7 @@
             <tbody>
               <tr>
                 <td>Bạn tải ứng dụng</td>
-                <td>GitHub (trang phát hành)</td>
+                <td>GitHub (trang phát hành) hoặc Microsoft Store</td>
                 <td>Yêu cầu tải tệp thông thường</td>
               </tr>
               <tr>
@@ -178,13 +178,25 @@
           <a
             href="https://github.com/fongfan999/offlinemask/blob/main/desktop/packs/vietnamese-pii-v1.json"
             >tệp mô tả gói</a
-          >, nên ứng dụng chỉ nhận đúng tệp đã công bố. Ngoài ra không có kết nối nào khác: không tự
-          cập nhật, không báo lỗi tự động, không thống kê. Giao diện ứng dụng còn bị chặn kết nối ra
-          ngoài bởi
+          >, nên ứng dụng chỉ nhận đúng tệp đã công bố. Ngoài ba trường hợp trên, OfflineMask không
+          có kết nối nào khác: không tự cập nhật, không báo lỗi tự động, không thống kê. Giao diện
+          ứng dụng còn bị chặn kết nối ra ngoài bởi
           <a
             href="https://github.com/fongfan999/offlinemask/blob/main/desktop/src-tauri/tauri.conf.json"
             >chính sách bảo mật nội dung</a
           >.
+        </p>
+        <p>
+          <strong>Thành phần của hệ điều hành.</strong> Giao diện của OfflineMask chạy trong trình
+          hiển thị web có sẵn của hệ điều hành: Microsoft Edge WebView2 trên Windows, WebKit trên
+          macOS và Linux. Thành phần này do Microsoft hoặc Apple quản lý và có thể tự kết nối mạng
+          dù OfflineMask không yêu cầu. Trên Windows, WebView2 tự kiểm tra bản cập nhật cho thành
+          phần của nó tại <code>edge.microsoft.com</code>, và tra tên miền qua máy chủ DNS mà máy
+          bạn đang dùng, có khi theo giao thức DNS qua HTTPS (ví dụ <code>dns.google</code> nếu máy
+          dùng DNS của Google). Các kết nối này không mang nội dung, tệp hay thông tin bạn đưa vào
+          OfflineMask, và thuộc
+          <a href="https://www.microsoft.com/privacy/privacystatement">chính sách của Microsoft</a>.
+          Bản cài từ Microsoft Store được Store cập nhật, theo cài đặt Store trên máy bạn.
         </p>
 
         <h2 id="an-nhanh"><span>5</span>Ẩn nhanh và quyền hệ thống</h2>
@@ -251,7 +263,11 @@
         <h2 id="kiem-chung"><span>8</span>Tự kiểm chứng</h2>
         <ul>
           <li><strong>Tắt Wi‑Fi rồi dùng thử:</strong> ẩn và khôi phục vẫn chạy bình thường.</li>
-          <li><strong>Theo dõi kết nối</strong> bằng công cụ như Little Snitch hay LuLu.</li>
+          <li>
+            <strong>Theo dõi kết nối</strong> bằng công cụ như Little Snitch hay LuLu. Trên Windows,
+            kết nối của WebView2 tới <code>edge.microsoft.com</code> nêu ở mục 4 là của thành phần
+            hệ điều hành, không phải của OfflineMask.
+          </li>
           <li>
             <strong>Đọc mã nguồn</strong> công khai trên
             <a href="https://github.com/fongfan999/offlinemask">GitHub</a>.
