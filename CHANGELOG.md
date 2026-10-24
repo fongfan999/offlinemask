@@ -4,6 +4,14 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.1.0] — 2026-10-24
+
+The OfflineMask circle now shows only where an AI is.
+
+### Changed
+
+- The circle shows by itself only in AI apps (ChatGPT, Claude, Perplexity, Cursor, Windsurf) and on AI sites in a browser (chatgpt.com, claude.ai, gemini.google.com and others), on macOS and Windows. In other apps, such as Zalo, Mail or Word, the selected text is not read, and ⌘⇧M (Ctrl+Shift+M) still works everywhere. It never shows in a browser's address bar or in open and save dialogs. Hover the circle for "Tắt ở …" to turn it off in a place; after the shortcut in a place not on the list, "Luôn hiện nút ở …" adds it; Cài đặt › Thao tác nhanh shows the list. Firefox is not on it yet ([0135](docs/decisions/0135-circle-only-where-ai-is.md)).
+
 ## [2.0.5] — 2026-10-24
 
 The first Microsoft Store build: masking works on first launch, start at login works in the package, and each step's main button stays in view.
