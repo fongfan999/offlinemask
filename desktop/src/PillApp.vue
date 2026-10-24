@@ -450,7 +450,7 @@ onBeforeUnmount(() => {
         class="quick-hint quick-hint-action"
         @click="send('forget-place')"
       >
-        Tắt ở {{ status.place }}
+        <AppIcon name="close" :size="12" />Tắt ở {{ status.place }}
       </button>
       <span v-if="circle === 'error'" class="quick-hint is-error" role="status">
         {{ shortMessage }}
@@ -461,7 +461,7 @@ onBeforeUnmount(() => {
         class="quick-hint quick-hint-action"
         @click="send('keep-place')"
       >
-        Luôn hiện nút ở {{ status.offerPlace }}
+        <AppIcon name="plus" :size="12" />Luôn hiện nút ở {{ status.offerPlace }}
       </button>
     </div>
 

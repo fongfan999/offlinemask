@@ -2,6 +2,7 @@
 import { computed, ref } from "vue";
 import { quickShortcutLabel, trayLabel } from "../adapters/quick-actions.ts";
 import { quickKey, useProvided } from "../composables/context.ts";
+import AppIcon from "./AppIcon.vue";
 import QuickDemo from "./QuickDemo.vue";
 
 /** Quick actions (decisions 0090 to 0097): the circle, its shortcut and the start at login. */
@@ -12,16 +13,14 @@ function grant() {
   asked.value = true;
   void quick.grantAndEnable();
 }
-/** Where the circle shows by itself (decision 0135), named in one line; the full list
- * opens on request. */
-const placeNames = computed(() => [...new Set(quick.places.value.map((place) => place.name))]);
-const placeSummary = computed(() => {
-  const names = placeNames.value;
-  if (!names.length) return `Chưa có ứng dụng nào. ${quickShortcutLabel} vẫn dùng được ở mọi nơi.`;
-  const shown = names.slice(0, 3).join(", ");
-  return `Nút hiện trong ${shown}${names.length > 3 ? "…" : ""} · ${quickShortcutLabel} dùng được ở mọi nơi.`;
-});
-const listOpen = ref(false);
+/** Where the circle shows by itself (decision 0135), always in view as two groups of
+ * chips, apps and sites, each removable (decision 0136). Sites show their host. */
+const placeGroups = computed(() =>
+  [
+    { label: "Ứng dụng", places: quick.places.value.filter((place) => place.kind === "app") },
+    { label: "Trang web", places: quick.places.value.filter((place) => place.kind === "host") },
+  ].filter((group) => group.places.length),
+);
 </script>
 
 <template>
@@ -81,38 +80,6 @@ const listOpen = ref(false);
             Đang bật · thử bôi đen một đoạn trong
             {{ quick.placesSupported.value ? "ChatGPT hay Claude" : "ứng dụng khác" }}.
           </p>
-          <!-- Where it shows by itself: one line, the list only on request (decision 0135). -->
-          <template v-if="quick.placesSupported.value && quick.popoverOn.value">
-            <p class="quick-intro quick-places-summary">
-              {{ placeSummary }}
-              <button
-                class="link-button"
-                :aria-expanded="listOpen"
-                aria-controls="quick-places"
-                @click="listOpen = !listOpen"
-              >
-                {{ listOpen ? "Ẩn danh sách" : "Xem danh sách" }}
-              </button>
-            </p>
-            <ul v-if="listOpen" id="quick-places" class="quick-places">
-              <li v-for="place in quick.places.value" :key="`${place.kind}:${place.id}`">
-                <span>
-                  {{ place.name }}
-                  <span v-if="place.kind === 'host'" class="quick-place-host">{{ place.id }}</span>
-                </span>
-                <button
-                  class="link-button"
-                  :aria-label="`Bỏ ${place.name}${place.kind === 'host' ? ` (${place.id})` : ''}`"
-                  @click="quick.forgetPlace(place)"
-                >
-                  Bỏ
-                </button>
-              </li>
-              <li v-if="quick.placesChanged.value" class="quick-places-reset">
-                <button class="link-button" @click="quick.resetPlaces()">Khôi phục mặc định</button>
-              </li>
-            </ul>
-          </template>
           <p v-if="!quick.popoverSupported.value" class="quick-note">
             Hệ điều hành này chưa hỗ trợ.
           </p>
@@ -165,6 +132,50 @@ const listOpen = ref(false);
             @change="quick.setShortcut(($event.target as HTMLInputElement).checked)"
           />
         </label>
+      </div>
+      <!-- Where the circle shows by itself, always in view: the list is what the setting
+           means, so it is not behind a link (decision 0136). -->
+      <div
+        v-if="quick.placesSupported.value"
+        class="settings-tool-row quick-sub quick-places-row"
+        :class="{ 'is-off': !quick.popoverOn.value }"
+      >
+        <div>
+          <h3 id="quick-places-title">Nơi nút tự hiện</h3>
+          <p id="quick-places-help">
+            Các ứng dụng và trang AI dưới đây. Ở nơi khác, nhấn {{ quickShortcutLabel }} để dùng.
+          </p>
+          <template v-for="group in placeGroups" :key="group.label">
+            <p class="quick-places-label">{{ group.label }}</p>
+            <ul class="quick-places" :aria-label="`${group.label} có nút OfflineMask`">
+              <li
+                v-for="place in group.places"
+                :key="`${place.kind}:${place.id}`"
+                :title="place.kind === 'host' ? place.name : undefined"
+              >
+                {{ place.kind === "host" ? place.id : place.name }}
+                <button
+                  class="quick-place-remove"
+                  :aria-label="`Bỏ ${place.kind === 'host' ? place.id : place.name}`"
+                  @click="quick.forgetPlace(place)"
+                >
+                  <AppIcon name="close" :size="11" />
+                </button>
+              </li>
+            </ul>
+          </template>
+          <p v-if="!quick.places.value.length" class="quick-note">
+            Chưa có nơi nào. Nhấn {{ quickShortcutLabel }} ở một ứng dụng rồi chọn “Luôn hiện nút ở
+            …” để thêm.
+          </p>
+          <button
+            v-if="quick.placesChanged.value"
+            class="link-button quick-places-reset"
+            @click="quick.resetPlaces()"
+          >
+            Khôi phục mặc định
+          </button>
+        </div>
       </div>
     </template>
 

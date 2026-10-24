@@ -4,6 +4,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+### Changed
+
+- Cài đặt › Thao tác nhanh shows where the OfflineMask circle appears by itself, always in view, as apps and sites you can remove one by one. Beside the circle, "Tắt ở …" and "Luôn hiện nút ở …" now look like the buttons they are ([0136](docs/decisions/0136-place-list-in-view.md)).
+
 ## [2.1.0] — 2026-10-24
 
 The OfflineMask circle now shows only where an AI is.

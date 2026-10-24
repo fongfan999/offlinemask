@@ -2531,37 +2531,54 @@ td.alias {
   line-height: 1.7;
 }
 /* Where the circle shows by itself, and the list behind it (decision 0135). */
-.quick-places-summary {
-  margin-top: 6px;
-}
-.quick-places-summary .link-button {
-  margin-left: 4px;
+/* Where the circle shows by itself (decision 0136): apps and sites as chips, each with
+   its own remove button, always in view. */
+.quick-places-label {
+  margin: 12px 0 6px;
+  color: var(--muted);
+  font: 11px var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 .quick-places {
-  display: grid;
-  gap: 2px;
-  max-width: 420px;
-  margin: 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 13px;
 }
 .quick-places li {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 5px 0;
-  border-bottom: 1px solid var(--line);
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px 3px 3px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 12.5px;
 }
-.quick-places li.quick-places-reset {
-  justify-content: flex-start;
-  border-bottom: 0;
-}
-.quick-place-host {
-  margin-left: 6px;
+.quick-place-remove {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
   color: var(--muted);
-  font: 12px var(--mono);
+}
+.quick-place-remove:hover {
+  background: var(--error-soft);
+  color: var(--error);
+}
+.quick-places-reset {
+  margin-top: 10px;
+}
+.app-settings .settings-tool-row.quick-sub.is-off .quick-places,
+.app-settings .settings-tool-row.quick-sub.is-off .quick-places-reset {
+  opacity: 0.55;
 }
 /* Cài đặt › Thao tác nhanh: what it is, beside the illustration (decision 0098). */
 .quick-head {
@@ -3169,16 +3186,26 @@ td.alias {
   font-size: 12.5px;
   white-space: nowrap;
 }
-/* A quiet second step beside the circle: "Tắt ở …", "Luôn hiện nút ở …" (decision 0135). */
+/* "Tắt ở …" and "Luôn hiện nút ở …" beside the circle (decision 0135) are buttons, and
+   must look like ones next to the plain hint: rounded, cobalt, with an icon (0136). */
 .quick-hint-action {
-  color: var(--muted);
+  gap: 5px;
+  border-color: var(--accent);
+  border-radius: 999px;
+  color: var(--accent);
+  background: var(--paper-raised);
   font: inherit;
   font-size: 12.5px;
+  font-weight: 600;
   cursor: pointer;
 }
 .quick-hint-action:hover {
-  color: var(--ink);
-  border-color: var(--accent);
+  color: var(--on-accent);
+  background: var(--accent);
+}
+.quick-hint-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 /* The restore preview, top right: the AI's text with the real values back. */
 .quick-preview {
