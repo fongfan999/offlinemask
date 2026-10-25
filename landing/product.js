@@ -284,8 +284,11 @@ function setupSceneLoops(root, motion) {
  * real values. It loops while on screen. Without motion the static markup shows the moment
  * before the click.
  */
-function setupQuick(root, motion) {
+function setupQuick(root, motion, phone) {
   if (!motion) return () => {};
+  // On a phone the window is narrow and the reply's empty seat would look like a hole for most
+  // of the loop, so the reply waits as a ghost (faint, in place) rather than unseen.
+  const waiting = phone ? { autoAlpha: 0.3, y: 0 } : { autoAlpha: 0, y: 10 };
   const quick = root.querySelector("[data-om-quick]");
   const [askSel, replySel] = quick.querySelectorAll("[data-om-sel]");
   const [askCircle, replyCircle] = quick.querySelectorAll("[data-om-circle]");
@@ -312,7 +315,7 @@ function setupQuick(root, motion) {
     });
     gsap.set([askSel, replySel], { backgroundSize: "0% 100%" });
     gsap.set([askCircle, replyCircle], { scale: 0 });
-    gsap.set(reply, { autoAlpha: 0, y: 10 });
+    gsap.set(reply, waiting);
     say("Bôi đen cả tin nhắn…", false);
   };
   const scramble = (values, key, className) => (tween, at) =>
@@ -585,6 +588,7 @@ export function initOfflineMask(root) {
       motion: "(prefers-reduced-motion: no-preference)",
       reduce: "(prefers-reduced-motion: reduce)",
       wide: "(min-width: 861px)",
+      phone: "(max-width: 640px)",
     },
     (context) => {
       const undoScan = setupScan(root, context.conditions.motion);
@@ -593,7 +597,7 @@ export function initOfflineMask(root) {
         : () => {};
       const undoRoles = setupRoles(root);
       const undoFaq = setupFaq(root);
-      const undoQuick = setupQuick(root, context.conditions.motion);
+      const undoQuick = setupQuick(root, context.conditions.motion, context.conditions.phone);
       const undoSheet = setupSheet(root, context.conditions.motion);
       const undoLoops = setupSceneLoops(root, context.conditions.motion);
       return () => {

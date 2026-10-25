@@ -2162,9 +2162,11 @@
   .om-card {
     padding: 22px;
   }
-  .om-privacy {
-    margin-top: 110px;
-    padding-block: 90px;
+  /* Half the pause before the privacy frame: 230 px of empty paper was nearly half a phone
+     screen. (.om-safe carries the band's padding, so it is matched here too.) */
+  .om-privacy.om-safe {
+    margin-top: 56px;
+    padding-block: 64px 40px;
   }
   .om-questions summary {
     font-size: 17px;
