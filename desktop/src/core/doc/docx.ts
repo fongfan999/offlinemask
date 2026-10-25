@@ -7,7 +7,16 @@ import type { Finding } from "../review.ts";
  * formatting of every run is kept. A small tag scanner is enough for Word's
  * well-formed XML and works inside a worker, where DOMParser does not exist. */
 export const maxDocBytes = 20 * 1024 * 1024;
-export type DocError = "unsupported" | "too-large" | "unreadable" | "empty";
+export type DocError =
+  | "unsupported"
+  | "too-large"
+  | "unreadable"
+  | "empty"
+  // PDF only (decision 0149).
+  | "password"
+  | "too-many-pages"
+  | "scanned"
+  | "old-font";
 export class DocFileError extends Error {
   readonly code: DocError;
   constructor(code: DocError) {

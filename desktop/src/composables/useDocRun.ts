@@ -32,6 +32,12 @@ export const docErrorMessages: Record<DocError, string> = {
   unreadable:
     "Chưa đọc được tệp này. Hãy kiểm tra tệp mở được trong Word hoặc LibreOffice và không có mật khẩu.",
   empty: "Tài liệu không có chữ để ẩn.",
+  password:
+    "PDF này cần mật khẩu để mở. Hãy mở bằng trình đọc PDF, lưu lại bản không mật khẩu rồi thử lại.",
+  "too-many-pages": "PDF dài hơn 300 trang. Hãy tách thành các tệp nhỏ hơn rồi thử lại.",
+  scanned: "PDF này là ảnh scan nên OfflineMask chưa đọc được chữ. Hỗ trợ ảnh scan sắp có.",
+  "old-font":
+    "Chữ trong PDF này dùng phông chữ cũ (như TCVN3, VNI) nên chưa đọc được. Hãy mở tệp gốc, chuyển sang Unicode rồi xuất lại PDF.",
 };
 export const docFailure =
   "Chưa xử lý được tài liệu trên thiết bị. Tệp gốc không bị thay đổi. Hãy thử lại.";

@@ -9,3 +9,7 @@ allowBuilds:
   protobufjs: false
   sharp: false
   workerd: true
+
+# pdf.js only reads text here (decision 0149); its optional canvas binding draws pages.
+ignoredOptionalDependencies:
+  - "@napi-rs/canvas"
