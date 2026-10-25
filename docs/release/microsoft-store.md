@@ -68,7 +68,7 @@ Lịch sử được mã hóa khi bạn đặt mật mã
 
 **Screenshots:** at least one, 1366×768 or larger, from the Windows app with the synthetic sample (no real data). The landing page shots in `landing/shots/` are a starting point but come from macOS.
 
-**Copyright:** `© 2026 Wot Da Fong`
+**Copyright:** `© 2026 Phong Phan`
 
 ## Submission options
 
