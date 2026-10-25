@@ -218,8 +218,9 @@ const syllable =
 const fold = (word: string) =>
   word.normalize("NFD").replace(/\p{M}/gu, "").replace(/đ/giu, "d").toLowerCase();
 /** A single word in capitals that no Vietnamese syllable spells is a brand or an acronym
- * ("VISSAN Xúc xích", "WINECO Cải ngọt"), not a person. A Vietnamese name in capitals
- * ("NGUYỄN", "HÀ") is made of syllables and is kept, as is a foreign name in Title Case. */
+ * ("VISSAN Xúc xích", "WINECO Cải ngọt"), not a person; nor an organization in a cell
+ * that describes goods (`productCell`). A Vietnamese name in capitals ("NGUYỄN", "HÀ")
+ * is made of syllables and is kept, as is a foreign name in Title Case. */
 export function brandInCapitals(value: string): boolean {
   const word = value.normalize("NFC").trim();
   return (
@@ -313,16 +314,50 @@ export function modelDetections(text: string, spans: readonly DecodedEntitySpan[
  * text skips the phrase check: ranges are NFC positions, and the window text is NFC. */
 export function plausibleModelDetections(text: string, detections: readonly Detection[]) {
   const phrases = text === text.normalize("NFC") ? boilerplateRanges(text) : [];
-  return detections.filter((d) => {
+  return detections.flatMap((detection) => {
+    const d = detection.type === "TEN" ? withoutBrands(text, detection) : detection;
+    if (!d) return [];
     const value = text.slice(d.start, d.end);
-    if (!plausibleContextualSpan(d.type, value)) return false;
-    if (!contextual.has(d.type)) return true;
-    if (phrases.some(([start, end]) => start <= d.start && d.end <= end)) return false;
-    if (d.type === "TEN" && brandInCapitals(value)) return false;
+    if (!plausibleContextualSpan(d.type, value)) return [];
+    if (!contextual.has(d.type)) return [d];
+    if (phrases.some(([start, end]) => start <= d.start && d.end <= end)) return [];
+    if (d.type === "TO_CHUC" && brandInCapitals(value) && productCell(text, d.start)) return [];
     // One word on its own (a cell, a short message) is the whole evidence there is.
     const alone = value.trim() === text.trim();
-    return alone || /\s/u.test(value.trim()) || (d.score ?? 1) >= singleWordMinScore;
+    return alone || /\s/u.test(value.trim()) || (d.score ?? 1) >= singleWordMinScore ? [d] : [];
   });
+}
+
+/** A name span without the brands in capitals at its edges ("VISSAN Xúc" → "Xúc"),
+ * or nothing when only brands are left. */
+function withoutBrands(text: string, detection: Detection): Detection | undefined {
+  let { start, end } = detection;
+  for (;;) {
+    const first = /^[\p{L}\p{M}]+/u.exec(text.slice(start, end))?.[0];
+    if (!first || !brandInCapitals(first)) break;
+    start += first.length;
+    while (start < end && /\s/u.test(text[start]!)) start++;
+  }
+  for (;;) {
+    const last = /[\p{L}\p{M}]+$/u.exec(text.slice(start, end))?.[0];
+    if (!last || !brandInCapitals(last)) break;
+    end -= last.length;
+    while (end > start && /\s/u.test(text[end - 1]!)) end--;
+  }
+  if (end <= start) return undefined;
+  return start === detection.start && end === detection.end
+    ? detection
+    : { ...detection, start, end };
+}
+
+/** A product's measure or pack ("300g", "1,5 l", "gói", "khay"): the cell around it
+ * (between tabs or lines) describes goods, where a brand is not an organization. */
+const productMeasure =
+  /\d+(?:[.,]\d+)?[^\S\r\n]?(?:g|gr|kg|mg|ml|l|lít|cm|mm)(?![\p{L}\p{N}])|(?<![\p{L}\p{M}])(?:gói|hộp|khay|chai|lon|túi|thùng|bịch|hũ|vỉ|lốc)(?![\p{L}\p{M}])/iu;
+function productCell(text: string, at: number): boolean {
+  const before = Math.max(text.lastIndexOf("\t", at), text.lastIndexOf("\n", at)) + 1;
+  const after = [text.indexOf("\t", at), text.indexOf("\n", at)].filter((index) => index >= 0);
+  return productMeasure.test(text.slice(before, after.length ? Math.min(...after) : text.length));
 }
 
 /** Combine overlapping evidence across models/windows without dropping exposed tails. */

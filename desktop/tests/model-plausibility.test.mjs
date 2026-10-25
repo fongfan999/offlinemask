@@ -4,6 +4,7 @@ import {
   brandInCapitals,
   modelDetections,
   plausibleContextualSpan,
+  plausibleModelDetections,
 } from "../src/core/detection/model-policy.ts";
 import { applyDetectionPolicy } from "../src/core/detection/policy.ts";
 import { scanBatches, splitDetections } from "../src/core/sheet/mask.ts";
@@ -327,4 +328,19 @@ test("an organization a rule completes and a model continues is one organization
     },
   ]).complete;
   assert.equal(separate.length, 2);
+});
+
+test("brands are trimmed from names, and a brand in a product cell is not an organization", () => {
+  const text =
+    "4\tVISSAN Xúc xích bò gói 280g\tG1\n5\tWINECO Cải ngọt L1 300g\tG1\nKhách hàng JOHN NGUYỄN làm việc tại JEMMIA";
+  const detections = plausibleModelDetections(text, [
+    { ...span(text, "VISSAN Xúc", "PERSON"), type: "TEN", score: 0.38 },
+    { ...span(text, "WINECO", "ORGANIZATION"), type: "TO_CHUC", score: 0.98 },
+    { ...span(text, "JOHN NGUYỄN", "PERSON"), type: "TEN", score: 0.9 },
+    { ...span(text, "JEMMIA", "ORGANIZATION"), type: "TO_CHUC", score: 0.95 },
+  ]);
+  assert.deepEqual(values(text, detections), [
+    ["TEN", "NGUYỄN"],
+    ["TO_CHUC", "JEMMIA"],
+  ]);
 });
