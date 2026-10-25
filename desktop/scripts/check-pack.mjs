@@ -13,15 +13,13 @@
 //   cargo build --manifest-path src-tauri/Cargo.toml --release \
 //     --features recognition-evaluation --bin recognition-tokenizer-check
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
 import { createHash } from "node:crypto";
 import { createReadStream, existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 import { recognitionPack } from "../src/core/detection/pack.ts";
-import { loadRecognition } from "../src/core/detection/recognition.ts";
+import { loadPack } from "./pack-runtime.mjs";
 import { analyzeText, maskedText } from "../src/core/text.ts";
 
 const repo = fileURLToPath(new URL("../", import.meta.url));
@@ -57,45 +55,6 @@ for (const asset of recognitionPack.assets) {
 }
 console.log("All pinned files present and verified.");
 
-// Exact offsets for native-offset models come from the same Rust tokenizer the app uses.
-const nativeModels = recognitionPack.models.filter((model) => model.offsets === "native");
-const children = new Map();
-function nativeEncoder(directory) {
-  const binary = join(repo, "src-tauri/target/release/recognition-tokenizer-check");
-  if (!existsSync(binary))
-    throw new Error("Build the tokenizer harness first (see the header of this script).");
-  const child = spawn(binary, [root, directory], { stdio: ["pipe", "pipe", "inherit"] });
-  const lines = createInterface({ input: child.stdout });
-  let pending;
-  lines.on("line", (line) => {
-    const next = pending;
-    pending = undefined;
-    if (!next) return;
-    try {
-      next.resolve(JSON.parse(line));
-    } catch (error) {
-      next.reject(error);
-    }
-  });
-  child.on("exit", () => {
-    pending?.reject(new Error("Native tokenizer exited"));
-    pending = undefined;
-  });
-  children.set(directory, child);
-  return (text) =>
-    new Promise((resolve, reject) => {
-      assert.ok(!pending, "One tokenizer request at a time");
-      pending = { resolve, reject };
-      child.stdin.write(JSON.stringify(text) + "\n");
-    });
-}
-const encoders = new Map(nativeModels.map((model) => [model.directory, nativeEncoder(model.directory)]));
-const encode = (text, directory) => {
-  const encoder = encoders.get(directory);
-  if (!encoder) throw new Error(`No native tokenizer for ${directory}`);
-  return encoder(text);
-};
-
 const originalFetch = globalThis.fetch;
 let networkAttempts = 0;
 globalThis.fetch = async () => {
@@ -103,7 +62,8 @@ globalThis.fetch = async () => {
   throw new Error("Network access forbidden during pack evaluation");
 };
 const started = performance.now();
-const detector = await loadRecognition(root, encode, "cpu");
+// Exact offsets for native-offset models come from the same Rust tokenizer the app uses.
+const detector = await loadPack(root);
 console.log(`Loaded in ${Math.round(performance.now() - started)} ms with network fetch disabled.`);
 let failures = 0,
   knownMisses = 0;
@@ -111,7 +71,7 @@ try {
   const fixtures = JSON.parse(await readFile(fixturePath, "utf8"));
   for (const fixture of fixtures) {
     const begin = performance.now();
-    const detections = await detector.detect(fixture.text, () => {});
+    const detections = await detector.detect(fixture.text);
     const analysis = analyzeText(fixture.text, "12345678", detections);
     const decisions = (choice) => Object.fromEntries(analysis.findings.map((x) => [x.id, choice]));
     const output = maskedText(fixture.text, analysis, decisions("mask"));
@@ -151,6 +111,5 @@ try {
   );
 } finally {
   await detector.dispose();
-  for (const child of children.values()) child.stdin.end();
   globalThis.fetch = originalFetch;
 }
