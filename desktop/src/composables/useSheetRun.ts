@@ -2,6 +2,7 @@ import { computed, ref, shallowRef, watch, type Ref } from "vue";
 import {
   exportName,
   maskedSuffix,
+  unmaskedSuffix,
   saveFile,
   SheetAdapterError,
   fileErrorMessages,
@@ -362,7 +363,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     const bytes = await files.write(restore.handle, restore.edits);
     return saveFile(
       bytes,
-      exportName(withoutMaskedSuffix(savedName(restore.fileName)), "đã khôi phục"),
+      exportName(withoutMaskedSuffix(savedName(restore.fileName)), unmaskedSuffix),
     );
   }
   function closeReturned(restore: SheetRestore | null) {
