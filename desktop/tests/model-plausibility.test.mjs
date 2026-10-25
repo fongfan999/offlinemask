@@ -1,6 +1,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { modelDetections, plausibleContextualSpan } from "../src/core/detection/model-policy.ts";
+import {
+  brandInCapitals,
+  modelDetections,
+  plausibleContextualSpan,
+} from "../src/core/detection/model-policy.ts";
 import { applyDetectionPolicy } from "../src/core/detection/policy.ts";
 import { scanBatches, splitDetections } from "../src/core/sheet/mask.ts";
 
@@ -260,4 +264,67 @@ test("a one-word name, place or organization needs a confident score unless it i
   );
   // A span without a score (older callers) is kept.
   assert.equal(modelDetections(text, [span(text, "Đại", "PERSON")]).length, 1);
+});
+
+test("invoice wording, a country alone and a brand in capitals are not names or places", () => {
+  const text =
+    "HÓA ĐƠN GIÁ TRỊ GIA TĂNG\nMã tra cứu: AB12 Trang tra cứu: https://example.vn\nTrang 1/1\n3\tKIMSAN Thịt bò Úc xay\tKG\nKhách hàng: Thu Trang, NGUYỄN VĂN AN, sống tại Úc Châu, Hà Nội, Việt Nam";
+  const detections = modelDetections(text, [
+    span(text, "HÓA ĐƠN", "PERSON"),
+    span(text, "GIÁ TRỊ GIA TĂNG", "PERSON"),
+    span(text, "Trang tra cứu", "PERSON"),
+    span(text, "Trang 1/1", "PERSON"),
+    span(text, "KIMSAN", "PERSON"),
+    span(text, "Úc", "LOCATION"),
+    span(text, "Thu Trang", "PERSON"),
+    span(text, "NGUYỄN VĂN AN", "PERSON"),
+    span(text, "Hà Nội, Việt Nam", "LOCATION"),
+  ]);
+  assert.deepEqual(values(text, detections), [
+    ["TEN", "Thu Trang"],
+    ["TEN", "NGUYỄN VĂN AN"],
+    ["DIA_CHI", "Hà Nội, Việt Nam"],
+  ]);
+  for (const country of ["Úc", "Việt Nam", "Nhật Bản", "châu Âu"])
+    assert.equal(plausibleContextualSpan("DIA_CHI", country), false, country);
+  for (const place of ["Huế", "Hà Nội, Việt Nam", "Phường Sài Gòn"])
+    assert.equal(plausibleContextualSpan("DIA_CHI", place), true, place);
+});
+
+test("a brand in capitals is no Vietnamese syllable; Vietnamese names in capitals are", () => {
+  for (const brand of ["VISSAN", "PACOW", "WINECO", "JEMMIA", "FPT", "KIMSAN"])
+    assert.equal(brandInCapitals(brand), true, brand);
+  for (const name of ["NGUYỄN", "HÀ", "TRANG", "QUỲNH", "NGHIÊM", "Vissan", "An"])
+    assert.equal(brandInCapitals(name), false, name);
+});
+
+test("an organization a rule completes and a model continues is one organization", () => {
+  const text = "Tên đơn vị: Công ty Cổ phần Thương mại Tổng hợp Bình Minh";
+  const { complete } = applyDetectionPolicy(text, [
+    {
+      ...span(text, "hợp Bình Minh", "ORGANIZATION"),
+      type: "TO_CHUC",
+      label: "Tổ chức",
+      source: "m",
+      reason: "r",
+      priority: 50,
+    },
+  ]);
+  const organizations = complete
+    .filter((d) => d.type === "TO_CHUC")
+    .map((d) => text.slice(d.start, d.end));
+  assert.deepEqual(organizations, ["Công ty Cổ phần Thương mại Tổng hợp Bình Minh"]);
+  const separate = applyDetectionPolicy("Bình Minh\tAn Phát", [
+    { start: 0, end: 9, type: "TO_CHUC", label: "Tổ chức", source: "m", reason: "r", priority: 50 },
+    {
+      start: 10,
+      end: 17,
+      type: "TO_CHUC",
+      label: "Tổ chức",
+      source: "m",
+      reason: "r",
+      priority: 50,
+    },
+  ]).complete;
+  assert.equal(separate.length, 2);
 });

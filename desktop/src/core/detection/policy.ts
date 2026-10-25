@@ -31,5 +31,27 @@ export function applyDetectionPolicy(text: string, predictions: readonly Detecti
       ...reconcileLabelledFields(text, completed, fields),
     ]),
   );
-  return { modelOnly, complete };
+  return { modelOnly, complete: joinAdjacentOrganizations(text, complete) };
+}
+
+/** Two organization spans with only spaces between them are one organization: a rule
+ * completes "Công ty Cổ phần Dịch vụ Thương mại Tổng" up to a lowercase word and a model
+ * finds "hợp Wincommerce" after it (decision 0151). One name, one alias. */
+export function joinAdjacentOrganizations(text: string, detections: readonly Detection[]) {
+  const result: Detection[] = [];
+  for (const detection of [...detections].sort((a, b) => a.start - b.start)) {
+    const previous = [...result].reverse().find((d) => d.type === "TO_CHUC");
+    if (
+      detection.type === "TO_CHUC" &&
+      previous &&
+      detection.start >= previous.end &&
+      /^[^\S\r\n\t]*$/u.test(text.slice(previous.end, detection.start)) &&
+      !result.some((d) => d !== previous && d.start >= previous.end && d.start < detection.start)
+    ) {
+      previous.end = Math.max(previous.end, detection.end);
+      continue;
+    }
+    result.push({ ...detection });
+  }
+  return result;
 }

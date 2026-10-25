@@ -114,7 +114,70 @@ const boilerplatePhrases = [
   "trưởng phòng",
   "chủ tịch(?: hội đồng (?:quản trị|thành viên))?",
   `(?:(?:${numberWords}) )+(?:trăm|nghìn|ngàn|triệu|tỷ|tỉ|đồng|vnd|usd)`,
+  // Invoices and receipts (decision 0151): their title in capitals ("HÓA ĐƠN GIÁ TRỊ GIA
+  // TĂNG"), column headings and footer, which a model reads as names.
+  "hóa đơn",
+  "điện tử",
+  "giá trị gia tăng",
+  "gtgt",
+  "thuế suất",
+  "tiền thuế",
+  "thuế",
+  "thành tiền",
+  "đơn giá",
+  "đơn vị tính",
+  "số lượng",
+  "tổng cộng",
+  "tổng hợp",
+  "tổng tiền",
+  "ký hiệu",
+  "mã số thuế",
+  "người mua hàng",
+  "người bán hàng",
+  "mã tra cứu",
+  "trang tra cứu",
+  "tra cứu",
+  "trang \\d+(?:/\\d+)?",
 ];
+/** Countries and regions: a span that is only one of these is where something comes
+ * from ("Thịt bò Úc"), not anyone's address; an address that ends in one is kept whole. */
+const countries = new Set(
+  [
+    "việt nam",
+    "úc",
+    "mỹ",
+    "hoa kỳ",
+    "anh",
+    "pháp",
+    "đức",
+    "ý",
+    "nga",
+    "nhật",
+    "nhật bản",
+    "hàn quốc",
+    "trung quốc",
+    "đài loan",
+    "hồng kông",
+    "thái lan",
+    "lào",
+    "campuchia",
+    "singapore",
+    "malaysia",
+    "indonesia",
+    "philippines",
+    "ấn độ",
+    "canada",
+    "new zealand",
+    "tây ban nha",
+    "hà lan",
+    "thụy sĩ",
+    "châu âu",
+    "châu á",
+    "châu mỹ",
+    "châu phi",
+    "châu úc",
+  ].map((name) => name.normalize("NFC")),
+);
 // Longest phrase first, and consecutive phrases form one run ("HỢP ĐỒNG DỊCH VỤ").
 const phrase = `(?:${[...boilerplatePhrases]
   .sort((a, b) => b.length - a.length)
@@ -133,7 +196,8 @@ export function boilerplateRanges(text: string): [number, number][] {
 }
 
 /** Whether a predicted name, place or organization can be one at all: it needs a letter
- * and two symbols (a place may count digits: "Quận 5"), and it is not a contract party. */
+ * and two symbols (a place may count digits: "Quận 5"), it is not a contract party, and
+ * a place is not only a country. */
 export function plausibleContextualSpan(type: string, value: string): boolean {
   if (!contextual.has(type)) return true;
   const content = value.normalize("NFC");
@@ -143,7 +207,26 @@ export function plausibleContextualSpan(type: string, value: string): boolean {
     .replace(/[^\p{L}\p{M}\p{N}\s]/gu, " ")
     .replace(/\s+/gu, " ")
     .trim();
+  if (type === "DIA_CHI" && countries.has(words.toLowerCase())) return false;
   return !party.test(words);
+}
+
+/** One Vietnamese syllable, without its tone marks: an onset, one to three vowels and a
+ * final. "VISSAN", "PACOW", "FPT", "JEMMIA" are not one. */
+const syllable =
+  /^(?:ngh|ng|nh|ch|gh|gi|kh|ph|qu|th|tr|[bcdghklmnprstvx])?[aeiouy]{1,3}(?:ng|nh|ch|[cmnpt])?$/;
+const fold = (word: string) =>
+  word.normalize("NFD").replace(/\p{M}/gu, "").replace(/đ/giu, "d").toLowerCase();
+/** A single word in capitals that no Vietnamese syllable spells is a brand or an acronym
+ * ("VISSAN Xúc xích", "WINECO Cải ngọt"), not a person. A Vietnamese name in capitals
+ * ("NGUYỄN", "HÀ") is made of syllables and is kept, as is a foreign name in Title Case. */
+export function brandInCapitals(value: string): boolean {
+  const word = value.normalize("NFC").trim();
+  return (
+    /^\p{Lu}[\p{Lu}\p{M}]{2,}$/u.test(word) &&
+    word === word.toUpperCase() &&
+    !syllable.test(fold(word))
+  );
 }
 
 /** A predicted span cut at the separators its type never contains, trimmed. */
@@ -235,6 +318,7 @@ export function plausibleModelDetections(text: string, detections: readonly Dete
     if (!plausibleContextualSpan(d.type, value)) return false;
     if (!contextual.has(d.type)) return true;
     if (phrases.some(([start, end]) => start <= d.start && d.end <= end)) return false;
+    if (d.type === "TEN" && brandInCapitals(value)) return false;
     // One word on its own (a cell, a short message) is the whole evidence there is.
     const alone = value.trim() === text.trim();
     return alone || /\s/u.test(value.trim()) || (d.score ?? 1) >= singleWordMinScore;

@@ -222,5 +222,25 @@
       "Đại diện Bên A",
       "Giám Đốc"
     ]
+  },
+  {
+    "id": "vat-invoice",
+    "text": "HÓA ĐƠN\nGIÁ TRỊ GIA TĂNG\nKý hiệu: 1C26ABC · Số: 1234567\nĐơn vị bán hàng: Công ty Cổ phần Thương mại Tổng hợp Sao Mai\nMã số thuế: 0109876543\nĐịa chỉ: 15 Trần Hưng Đạo, Phường Cửa Nam, Hà Nội, Việt Nam\nTên đơn vị: CÔNG TY TNHH BÌNH AN PHÁT\nĐịa chỉ: 88/12 Nguyễn Trãi, Phường Bến Thành, Thành phố Hồ Chí Minh\nSTT\tTên hàng hóa, dịch vụ\tĐơn vị tính\tSố lượng\tĐơn giá\tThành tiền\n1\tKIMSAN Xúc xích bò gói 280g\tG1\t1\t27.870\t27.870\n2\tThịt bò Úc xay khay 250g\tKH\t1\t87.524\t87.524\nTổng cộng tiền thanh toán\t115.394\nMã tra cứu hóa đơn: X7Q2 Trang tra cứu: https://hoadon.example.vn\nTrang 1/1",
+    "sensitive": [
+      "Công ty Cổ phần Thương mại Tổng hợp Sao Mai",
+      "0109876543",
+      "15 Trần Hưng Đạo, Phường Cửa Nam, Hà Nội, Việt Nam",
+      "CÔNG TY TNHH BÌNH AN PHÁT",
+      "88/12 Nguyễn Trãi, Phường Bến Thành, Thành phố Hồ Chí Minh"
+    ],
+    "retain": [
+      "HÓA ĐƠN",
+      "GIÁ TRỊ GIA TĂNG",
+      "KIMSAN Xúc xích",
+      "Thịt bò Úc xay",
+      "Trang tra cứu",
+      "Trang 1/1",
+      "Tổng cộng tiền thanh toán"
+    ]
   }
 ]
