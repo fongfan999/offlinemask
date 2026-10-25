@@ -3,7 +3,7 @@
 Real questions people search, in the order they will be written. `[ ]` to write, `[x]` written (with its slug), `[-]` skipped (with why). See [README.md](README.md).
 
 - [x] Có nên dán thông tin khách hàng vào ChatGPT không? — `co-nen-dan-thong-tin-khach-hang-vao-chatgpt`
-- [ ] Cách ẩn thông tin cá nhân trong file Excel trước khi gửi cho AI phân tích
+- [x] Cách ẩn thông tin cá nhân trong file Excel trước khi gửi cho AI phân tích — `an-thong-tin-ca-nhan-trong-file-excel-gui-ai`
 - [ ] ChatGPT có dùng dữ liệu của tôi để huấn luyện không, và tắt ở đâu?
 - [ ] Nhờ AI soạn hợp đồng mà không lộ tên, CCCD của các bên
 - [ ] Kế toán dùng ChatGPT thế nào cho an toàn với số tài khoản, mã số thuế?
