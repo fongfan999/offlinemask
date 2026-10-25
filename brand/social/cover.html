@@ -1,0 +1,163 @@
+<!doctype html>
+<!-- Facebook cover photo, 1640×856. Desktop shows the middle 1640×624 band, phones the middle
+     ~1520 px; everything that matters stays inside both. Render: see README.md in this folder. -->
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="stylesheet" href="fonts.css" />
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 1640px;
+        height: 856px;
+        overflow: hidden;
+      }
+      body {
+        position: relative;
+        color: #f7f5ee;
+        font-family: "Noto Sans", sans-serif;
+        background:
+          radial-gradient(55% 70% at 12% 18%, #6f8de8 0%, transparent 60%),
+          radial-gradient(50% 70% at 92% 8%, #1d3184 0%, transparent 65%),
+          radial-gradient(70% 70% at 70% 100%, #2a44a6 0%, transparent 70%), #3453b6;
+      }
+      .copy {
+        position: absolute;
+        left: 150px;
+        top: 50%;
+        translate: 0 -50%;
+        width: 700px;
+      }
+      .tagline {
+        margin: 0;
+        font: 500 50px/1.22 "Noto Sans", sans-serif;
+        letter-spacing: -0.04em;
+      }
+      .tagline em {
+        padding-bottom: 0.08em;
+        color: #b3c3ff;
+        font: italic 400 1em "Noto Serif", serif;
+        letter-spacing: -0.03em;
+        background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'%3E%3Cpath d='M3 9c28-6 58-7 92-5s68 4 102-3' fill='none' stroke='%23f7f5ee' stroke-width='4' stroke-linecap='round' opacity='.5'/%3E%3C/svg%3E")
+          left bottom / 100% 0.16em no-repeat;
+      }
+      .wordmark {
+        margin: 18px 0 0 -6px;
+        font: 750 132px/1 "Noto Sans", sans-serif;
+        letter-spacing: -0.055em;
+      }
+      .wordmark span {
+        color: #b3c3ff;
+      }
+      .facts {
+        display: flex;
+        gap: 12px;
+        margin: 34px 0 0;
+        padding: 0;
+        list-style: none;
+        font: 600 25px/1 "Noto Sans", sans-serif;
+      }
+      .facts li {
+        padding: 12px 20px;
+        border: 2px solid #f7f5ee55;
+        border-radius: 999px;
+      }
+      .site {
+        margin: 26px 0 0;
+        color: #d5ddff;
+        font: 500 26px/1 "Noto Sans", sans-serif;
+        letter-spacing: -0.01em;
+      }
+      .window {
+        position: absolute;
+        left: 905px;
+        top: 190px;
+        width: 860px;
+        height: 520px;
+        overflow: hidden;
+        border-radius: 16px;
+        background: #f7f5ee;
+        box-shadow: 0 40px 90px -20px #0b154a;
+        rotate: -2deg;
+      }
+      .bar {
+        display: flex;
+        gap: 9px;
+        align-items: center;
+        height: 40px;
+        padding: 0 18px;
+        background: #efede4;
+        border-bottom: 1px solid #d9d9cd;
+      }
+      .bar i {
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        background: #ef6b5e;
+      }
+      .bar i:nth-child(2) {
+        background: #f5bd4f;
+      }
+      .bar i:nth-child(3) {
+        background: #61c454;
+      }
+      /* The letter with its codes, not the app's sidebar. */
+      .window img {
+        display: block;
+        width: 100%;
+        height: calc(100% - 41px);
+        object-fit: cover;
+        object-position: 72% 40%;
+      }
+      .chip {
+        position: absolute;
+        display: inline-flex;
+        align-items: center;
+        gap: 14px;
+        padding: 14px 22px;
+        border: 1px solid #bfc2b4;
+        border-radius: 14px;
+        background: #fcfaf4;
+        color: #3453b6;
+        font: 600 24px ui-monospace, "SF Mono", Menlo, monospace;
+        box-shadow: 0 22px 44px -16px #0b154a99;
+        white-space: nowrap;
+      }
+      .chip s {
+        color: #595d54;
+        font: 400 22px "Noto Sans", sans-serif;
+        text-decoration-color: #c0612f;
+        text-decoration-thickness: 3px;
+      }
+      .chip-a {
+        left: 860px;
+        top: 580px;
+        rotate: -3deg;
+      }
+      .chip-b {
+        left: 1150px;
+        top: 168px;
+        rotate: 2deg;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="copy">
+      <p class="tagline"><em>AI</em> không nên biết<br />bạn đang nói về <em>ai</em>.</p>
+      <p class="wordmark">Offline<span>Mask</span></p>
+      <ul class="facts">
+        <li>Miễn phí</li>
+        <li>Chạy trên máy</li>
+        <li>Mã nguồn mở</li>
+      </ul>
+      <p class="site">OfflineMask.com</p>
+    </div>
+    <div class="window">
+      <div class="bar"><i></i><i></i><i></i></div>
+      <img src="../../landing/shots/text-masked.webp" alt="" />
+    </div>
+    <span class="chip chip-a"><s>Nguyễn Văn An</s><b>[TEN_1_4e8c]</b></span>
+    <span class="chip chip-b"><s>0901234567</s><b>[SDT_1_4e8c]</b></span>
+  </body>
+</html>
