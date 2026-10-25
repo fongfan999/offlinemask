@@ -57,6 +57,13 @@
 .om-page [id] {
   scroll-margin-top: 96px;
 }
+/* Anchor links glide to their section instead of jumping. The page scrolls on the root, so the
+   rule sits there, and only for visitors who have not asked for reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  :root:has(.om-page) {
+    scroll-behavior: smooth;
+  }
+}
 .om-wrap {
   width: min(1200px, calc(100% - 2 * var(--gutter)));
   margin-inline: auto;
