@@ -218,8 +218,7 @@ const syllable =
 const fold = (word: string) =>
   word.normalize("NFD").replace(/\p{M}/gu, "").replace(/đ/giu, "d").toLowerCase();
 /** A single word in capitals that no Vietnamese syllable spells is a brand or an acronym
- * ("VISSAN Xúc xích", "WINECO Cải ngọt"), not a person; nor an organization in a cell
- * that describes goods (`productCell`). A Vietnamese name in capitals ("NGUYỄN", "HÀ")
+ * ("VISSAN Xúc xích", "WINECO Cải ngọt"), not a person. A Vietnamese name in capitals ("NGUYỄN", "HÀ")
  * is made of syllables and is kept, as is a foreign name in Title Case. */
 export function brandInCapitals(value: string): boolean {
   const word = value.normalize("NFC").trim();
@@ -321,7 +320,7 @@ export function plausibleModelDetections(text: string, detections: readonly Dete
     if (!plausibleContextualSpan(d.type, value)) return [];
     if (!contextual.has(d.type)) return [d];
     if (phrases.some(([start, end]) => start <= d.start && d.end <= end)) return [];
-    if (d.type === "TO_CHUC" && brandInCapitals(value) && productCell(text, d.start)) return [];
+    if (productCell(text, d.start, d.end)) return [];
     // One word on its own (a cell, a short message) is the whole evidence there is.
     const alone = value.trim() === text.trim();
     return alone || /\s/u.test(value.trim()) || (d.score ?? 1) >= singleWordMinScore ? [d] : [];
@@ -350,14 +349,27 @@ function withoutBrands(text: string, detection: Detection): Detection | undefine
     : { ...detection, start, end };
 }
 
-/** A product's measure or pack ("300g", "1,5 l", "gói", "khay"): the cell around it
- * (between tabs or lines) describes goods, where a brand is not an organization. */
+/** A product's measure, pack or unit ("300g", "3kg", "1,5 l", "gói", "hộp", "khay", and
+ * an invoice's unit column: "KG", "HOP", "KH", "G1", "cái"). A table
+ * cell (text with a tab on at least one side, as the PDF reader writes rows) that has
+ * one describes goods: a model's name, place or organization there is product wording
+ * ("AN ĐÌNH Gạo Japonica BB-3kg", "OLALA Trứng Gà Sạch hộp", "WINECO Cải ngọt 300g"),
+ * whatever its score (decision 0151). A sentence is not a cell: "Gửi 2 hộp bánh cho anh
+ * Nguyễn Văn An" keeps its name. */
 const productMeasure =
-  /\d+(?:[.,]\d+)?[^\S\r\n]?(?:g|gr|kg|mg|ml|l|lít|cm|mm)(?![\p{L}\p{N}])|(?<![\p{L}\p{M}])(?:gói|hộp|khay|chai|lon|túi|thùng|bịch|hũ|vỉ|lốc)(?![\p{L}\p{M}])/iu;
-function productCell(text: string, at: number): boolean {
-  const before = Math.max(text.lastIndexOf("\t", at), text.lastIndexOf("\n", at)) + 1;
-  const after = [text.indexOf("\t", at), text.indexOf("\n", at)].filter((index) => index >= 0);
-  return productMeasure.test(text.slice(before, after.length ? Math.min(...after) : text.length));
+  /\d+(?:[.,]\d+)?[^\S\r\n]?(?:g|gr|kg|mg|ml|l|lít|cm|mm)(?![\p{L}\p{N}])|(?<![\p{L}\p{M}])(?:gói|goi|hộp|hop|khay|kh|chai|lon|túi|thùng|bịch|hũ|vỉ|lốc|kg|ml|g1|cái|cai|chiếc|bộ|cuộn)(?![\p{L}\p{M}\p{N}])/iu;
+function productCell(text: string, start: number, end: number): boolean {
+  const tab = text.lastIndexOf("\t", start - 1);
+  const line = text.lastIndexOf("\n", start - 1);
+  const nextTab = text.indexOf("\t", end);
+  const nextLine = text.indexOf("\n", end);
+  const cellStart = Math.max(tab, line) + 1;
+  const cellEnd = Math.min(
+    nextTab < 0 ? text.length : nextTab,
+    nextLine < 0 ? text.length : nextLine,
+  );
+  const tabbed = (tab > line && tab >= 0) || (nextTab >= 0 && (nextLine < 0 || nextTab < nextLine));
+  return tabbed && productMeasure.test(text.slice(cellStart, cellEnd));
 }
 
 /** Combine overlapping evidence across models/windows without dropping exposed tails. */

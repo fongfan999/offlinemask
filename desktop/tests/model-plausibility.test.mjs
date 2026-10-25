@@ -344,3 +344,21 @@ test("brands are trimmed from names, and a brand in a product cell is not an org
     ["TO_CHUC", "JEMMIA"],
   ]);
 });
+
+test("in a table cell describing goods, a model's name, place or organization is product wording", () => {
+  const text =
+    "2\tAN ĐÌNH Gạo Japonica BB-3kg\tG1\n6\tOLALA Trứng Gà Sạch hộp 10\tHOP\n3\tChuối vàng\tKG\t0,612\nGửi 2 hộp bánh cho anh Nguyễn Văn An tại Hà Nội\nNgười nhận\tTrần Thị Mai";
+  const detections = plausibleModelDetections(text, [
+    { ...span(text, "ĐÌNH Gạo", "PERSON"), type: "TEN", score: 0.54 },
+    { ...span(text, "Trứng Gà", "LOCATION"), type: "DIA_CHI", score: 0.83 },
+    { ...span(text, "KG", "LOCATION"), type: "DIA_CHI", score: 0.63 },
+    { ...span(text, "Nguyễn Văn An", "PERSON"), type: "TEN", score: 0.9 },
+    { ...span(text, "Hà Nội", "LOCATION"), type: "DIA_CHI", score: 0.9 },
+    { ...span(text, "Trần Thị Mai", "PERSON"), type: "TEN", score: 0.9 },
+  ]);
+  assert.deepEqual(values(text, detections), [
+    ["TEN", "Nguyễn Văn An"],
+    ["DIA_CHI", "Hà Nội"],
+    ["TEN", "Trần Thị Mai"],
+  ]);
+});
