@@ -641,6 +641,9 @@
 .om-video-open:hover {
   background: rgba(247, 245, 238, 0.2);
 }
+.om-video-len {
+  display: none;
+}
 .om-video-open span {
   display: grid;
   place-items: center;
@@ -1812,6 +1815,9 @@
 .om-button:hover {
   transform: translateY(-2px);
 }
+.om-download-phone {
+  display: none;
+}
 .om-download-version {
   margin-top: 22px !important;
   font-size: 17px;
@@ -2086,6 +2092,16 @@
   .om-hero {
     padding-top: 88px;
   }
+  /* One sentence under the wordmark; the nudge toward the video becomes the video's length on
+     its button, so the first screen (with the browser's own bars) still reaches the window. */
+  .om-hero-sub {
+    max-width: 30ch;
+    margin-top: 16px !important;
+    line-height: 1.55;
+  }
+  .om-hero-nudge {
+    display: none;
+  }
   .om-video-open {
     margin-top: 20px;
     padding: 7px 16px 7px 8px;
@@ -2094,6 +2110,25 @@
   .om-video-open span {
     width: 28px;
     height: 28px;
+  }
+  .om-video-len {
+    display: inline;
+    font-size: inherit;
+    font-weight: 500;
+    opacity: 0.85;
+  }
+  /* The whole app window is unreadable at phone width, so the window shows the letter itself:
+     the screenshots are cropped to the document, where the codes can be read. */
+  .om-scan-stage {
+    aspect-ratio: 4 / 3;
+    grid-template-rows: minmax(0, 1fr);
+  }
+  .om-scan-stage img {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: cover;
+    object-position: 70% 38%;
   }
   .om-hero > .om-wash {
     bottom: 22%;
@@ -2144,15 +2179,32 @@
   .om-questions summary {
     font-size: 17px;
   }
+  /* Nothing installs on a phone: no dock, no download buttons, no list of builds. The band
+     explains that and offers to send the link to the computer. */
   .om-download {
-    padding-block: 110px 150px;
+    padding-block: 100px 110px;
   }
-  .om-dock {
-    width: calc(100% - 28px);
+  .om-dock,
+  .om-download > .om-download-inner > .om-button,
+  .om-download-platforms,
+  .om-platforms {
+    display: none;
   }
-  .om-dock-button {
-    width: 100%;
-    justify-content: center;
+  .om-download-phone {
+    display: block;
+    max-width: 34ch;
+    margin: 22px auto 0;
+    font-size: 16px;
+    line-height: 1.55;
+  }
+  .om-download-phone p {
+    opacity: 0.92;
+  }
+  .om-download-phone .om-button {
+    display: inline-flex;
+    margin-top: 22px;
+    padding: 14px 24px;
+    font-size: 16px;
   }
   .om-scene-pill {
     display: none;

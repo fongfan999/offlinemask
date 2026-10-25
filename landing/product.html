@@ -56,7 +56,7 @@
           >
         </p>
         <button type="button" class="om-video-open" hidden data-om-enter data-om-video-open>
-          <span aria-hidden="true">▶</span> Xem video
+          <span aria-hidden="true">▶</span> Xem video<small class="om-video-len"> · 36 giây</small>
         </button>
       </div>
       <figure class="om-window om-hero-window">
@@ -76,7 +76,7 @@
               ./shots/text-original-1280.webp 1280w,
               ./shots/text-original.webp      2048w
             "
-            sizes="(min-width: 1200px) 1120px, 92vw"
+            sizes="(max-width: 640px) 170vw, (min-width: 1200px) 1120px, 92vw"
             width="2048"
             height="1216"
             alt=""
@@ -90,7 +90,7 @@
               ./shots/text-masked-1280.webp 1280w,
               ./shots/text-masked.webp      2048w
             "
-            sizes="(min-width: 1200px) 1120px, 92vw"
+            sizes="(max-width: 640px) 170vw, (min-width: 1200px) 1120px, 92vw"
             width="2048"
             height="1216"
             fetchpriority="high"
@@ -839,6 +839,17 @@
             · phát hành ngày <span data-om-release-date>__OM_RELEASE_DATE__</span></span
           >
         </p>
+        <!-- On a phone there is nothing to install, so the band hands the link to the computer
+             instead (the share sheet, or the clipboard). Only the wide layout shows the buttons. -->
+        <div class="om-download-phone">
+          <p>
+            OfflineMask là ứng dụng cho máy tính Mac, Windows và Linux. Lúc ngồi trước máy, mở
+            <b>offlinemask.com</b> để tải.
+          </p>
+          <button type="button" class="om-button" hidden data-om-share>
+            Gửi link cho mình <span aria-hidden="true">↗</span>
+          </button>
+        </div>
         <a class="om-button" href="#om-platforms" data-om-download
           ><span data-om-download-label>Chọn bản tải về</span> <span aria-hidden="true">↓</span></a
         >
