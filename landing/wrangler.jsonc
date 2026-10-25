@@ -7,13 +7,9 @@
   // asset and never runs it.
   "main": "./worker.js",
   // offlinemask.com is registered at Cloudflare (20 October 2026). A deploy binds the
-  // Worker to the apex and www as custom domains and creates their DNS records. www is kept
-  // only so it resolves with a certificate: a Redirect Rule in the zone sends it to the apex
-  // before the Worker runs (decision 0151).
-  "routes": [
-    { "pattern": "offlinemask.com", "custom_domain": true },
-    { "pattern": "www.offlinemask.com", "custom_domain": true },
-  ],
+  // Worker to the apex as a custom domain and creates its DNS record. www is not served:
+  // it is set up in the Cloudflare zone to redirect to the apex (decision 0151).
+  "routes": [{ "pattern": "offlinemask.com", "custom_domain": true }],
   "assets": {
     "directory": "./dist",
     "not_found_handling": "404-page",
