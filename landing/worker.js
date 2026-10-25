@@ -4,7 +4,7 @@
 //   /download/<platform> a redirect straight to that release's file
 // It asks GitHub, never the visitor's browser, so the page still loads nothing from third
 // parties. It reads no cookies and keeps no logs (observability is off in wrangler.jsonc); each
-// download adds one row of platform and country to a count (decision 0144), nothing else.
+// download adds one to that month's count for its platform (decision 0144), nothing else.
 
 const repository = "https://github.com/fongfan999/offlinemask";
 const raw = "https://raw.githubusercontent.com/fongfan999/offlinemask";
@@ -59,6 +59,16 @@ async function cachedRelease(request, context) {
   return release;
 }
 
+/** Adds one to "2026-10 deb" in KV. Two downloads in the same moment may count once. */
+async function count(store, platform) {
+  const key = `${new Date().toISOString().slice(0, 7)} ${platform}`;
+  try {
+    await store?.put(key, String((Number(await store.get(key)) || 0) + 1));
+  } catch {
+    // A missed count never stops a download.
+  }
+}
+
 const unavailable = () =>
   new Response("Chưa lấy được bản tải về. Bạn thử lại sau ít phút nhé.", {
     status: 503,
@@ -87,10 +97,7 @@ export default {
       try {
         const target = (await cachedRelease(request, context)).downloads[platform];
         if (target) {
-          env.DOWNLOADS?.writeDataPoint({
-            blobs: [platform, request.cf?.country ?? ""],
-            indexes: [platform],
-          });
+          context?.waitUntil(count(env.DOWNLOADS, platform));
           return Response.redirect(target, 302);
         }
       } catch {

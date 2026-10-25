@@ -62,17 +62,36 @@ test("the Worker redirects downloads, answers the version and serves the rest as
   assert.equal(await (await get("/")).text(), "asset");
 });
 
-test("a download is counted by platform and country only", async (t) => {
+test("a download adds one to its month and platform, and nothing else", async (t) => {
   t.mock.method(globalThis, "fetch", async (input) => github(String(input)));
-  const points = [];
-  const env = { DOWNLOADS: { writeDataPoint: (point) => points.push(point) } };
-  const request = new Request("https://offlinemask.com/download/deb", {
-    headers: { "cf-connecting-ip": "203.0.113.7", "user-agent": "Test" },
-  });
-  Object.defineProperty(request, "cf", { value: { country: "VN" } });
-  assert.equal((await worker.fetch(request, env)).status, 302);
-  await worker.fetch(new Request("https://offlinemask.com/latest.json"), env);
-  assert.deepEqual(points, [{ blobs: ["deb", "VN"], indexes: ["deb"] }]);
+  const store = new Map();
+  const env = {
+    DOWNLOADS: { get: async (key) => store.get(key) ?? null, put: async (k, v) => store.set(k, v) },
+  };
+  const pending = [];
+  const context = { waitUntil: (promise) => pending.push(promise) };
+  const get = (path) => worker.fetch(new Request(`https://offlinemask.com${path}`), env, context);
+  assert.equal((await get("/download/deb")).status, 302);
+  await Promise.all(pending);
+  assert.equal((await get("/download/deb")).status, 302);
+  await get("/latest.json");
+  await Promise.all(pending);
+  const month = new Date().toISOString().slice(0, 7);
+  assert.deepEqual(Object.fromEntries(store), { [`${month} deb`]: "2" });
+});
+
+test("a broken counter never stops a download", async (t) => {
+  t.mock.method(globalThis, "fetch", async (input) => github(String(input)));
+  const env = { DOWNLOADS: { get: async () => Promise.reject(new Error("KV down")) } };
+  const pending = [];
+  const context = { waitUntil: (promise) => pending.push(promise) };
+  const reply = await worker.fetch(
+    new Request("https://offlinemask.com/download/deb"),
+    env,
+    context,
+  );
+  assert.equal(reply.status, 302);
+  await Promise.all(pending);
 });
 
 test("GitHub being down gives a short retry message, not a GitHub page", async (t) => {

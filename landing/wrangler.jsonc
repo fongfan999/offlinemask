@@ -18,6 +18,6 @@
     "run_worker_first": ["/latest.json", "/download/*"],
   },
   "observability": { "enabled": false },
-  // One row per download: platform and country, no address or identifier (decision 0144).
-  "analytics_engine_datasets": [{ "binding": "DOWNLOADS", "dataset": "offlinemask_downloads" }],
+  // Downloads per month and platform ("2026-10 deb": "12"), nothing about who (decision 0144).
+  "kv_namespaces": [{ "binding": "DOWNLOADS", "id": "9ad97a5609c342e4b49f10c2e3dae2c5" }],
 }
