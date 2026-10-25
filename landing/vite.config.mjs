@@ -71,12 +71,20 @@ export default defineConfig({
         this.emitFile({ type: "asset", fileName: "robots.txt", source: robots() });
       },
       configureServer(server) {
-        // The dev server answers the Worker's paths with the Worker itself.
+        // The dev server answers the Worker's paths with the Worker itself; reports it is sent
+        // are only printed.
         server.middlewares.use(async (request, response, next) => {
-          if (!/^\/(latest\.json|download\/)/.test(request.url)) return next();
-          const reply = await worker.fetch(new Request(`http://localhost${request.url}`), {
-            ASSETS: { fetch: () => new Response("Not found", { status: 404 }) },
-          });
+          if (!/^\/(latest\.json|download\/|report$)/.test(request.url)) return next();
+          const chunks = [];
+          for await (const chunk of request) chunks.push(chunk);
+          const body = ["GET", "HEAD"].includes(request.method) ? undefined : Buffer.concat(chunks);
+          const reply = await worker.fetch(
+            new Request(`http://localhost${request.url}`, { method: request.method, body }),
+            {
+              ASSETS: { fetch: () => new Response("Not found", { status: 404 }) },
+              REPORTS: { put: async (key, value) => console.log(`Report ${key}: ${value}`) },
+            },
+          );
           response.statusCode = reply.status;
           reply.headers.forEach((value, name) => response.setHeader(name, value));
           response.end(Buffer.from(await reply.arrayBuffer()));
@@ -193,6 +201,7 @@ export default defineConfig({
         index: fileURLToPath(new URL("./index.html", import.meta.url)),
         privacy: fileURLToPath(new URL("./privacy.html", import.meta.url)),
         install: fileURLToPath(new URL("./install.html", import.meta.url)),
+        report: fileURLToPath(new URL("./bao-loi.html", import.meta.url)),
         blog: fileURLToPath(blogTemplate),
       },
     },

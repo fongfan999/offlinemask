@@ -1,7 +1,8 @@
 // The site's only code on Cloudflare (decision 0140). Everything else is static assets; this
-// answers two paths so downloads always reach the newest published release without a redeploy:
+// answers three paths:
 //   /latest.json         the newest version, its release day and its download paths
 //   /download/<platform> a redirect straight to that release's file
+//   /report              a bug report the visitor sends from /bao-loi (decision 0147)
 // It asks GitHub, never the visitor's browser, so the page still loads nothing from third
 // parties. It reads no cookies and keeps no logs (observability is off in wrangler.jsonc); each
 // download adds one to that day's count for its platform (decision 0144), nothing else.
@@ -73,6 +74,44 @@ async function count(store, platform) {
   }
 }
 
+/** What a report may say; the app fills these in, the visitor reads them and presses Gửi. */
+export const reportKinds = ["missed", "wrong", "crash", "other"];
+const reportLimits = { message: 2000, version: 20, os: 20, screen: 20 };
+
+/** The report as stored, or undefined when it is not one the page could have sent. */
+export function readReport(body) {
+  if (!body || typeof body !== "object" || !reportKinds.includes(body.kind)) return undefined;
+  const report = { kind: body.kind };
+  for (const [field, limit] of Object.entries(reportLimits)) {
+    const value = typeof body[field] === "string" ? body[field].trim() : "";
+    if (value.length > limit) return undefined;
+    report[field] = value;
+  }
+  return report.message ? report : undefined;
+}
+
+/**
+ * Keeps one report in KV under "<time> <random>", with its kind and version as metadata so a
+ * key listing shows what came in. Nothing about the sender: no IP address, country or browser.
+ */
+async function receiveReport(request, store) {
+  const text = request.method === "POST" ? await request.text() : "";
+  let body;
+  try {
+    body = text.length <= 8192 ? JSON.parse(text) : undefined;
+  } catch {
+    body = undefined;
+  }
+  const report = readReport(body);
+  if (!report) return new Response("Báo lỗi chưa hợp lệ.", { status: 400 });
+  const at = new Date().toISOString();
+  const key = `${at} ${crypto.randomUUID().slice(0, 8)}`;
+  await store.put(key, JSON.stringify({ at, ...report }), {
+    metadata: { kind: report.kind, version: report.version },
+  });
+  return new Response(null, { status: 204 });
+}
+
 const unavailable = () =>
   new Response("Chưa lấy được bản tải về. Bạn thử lại sau ít phút nhé.", {
     status: 503,
@@ -94,6 +133,13 @@ export default {
         );
       } catch {
         return unavailable();
+      }
+    }
+    if (pathname === "/report") {
+      try {
+        return await receiveReport(request, env.REPORTS);
+      } catch {
+        return new Response("Chưa gửi được. Bạn thử lại sau ít phút nhé.", { status: 503 });
       }
     }
     const platform = /^\/download\/([\w-]+)$/.exec(pathname)?.[1];

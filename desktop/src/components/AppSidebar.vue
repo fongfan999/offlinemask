@@ -3,6 +3,7 @@ import { ref, useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
 import ComingSoonBadge from "./ComingSoonBadge.vue";
+import ReportDialog from "./ReportDialog.vue";
 import { openProductWebsite, productWebsite } from "../adapters/desktop.ts";
 import type { Page } from "../composables/context.ts";
 import { sessionPreview } from "../core/session-preview.ts";
@@ -30,7 +31,16 @@ const upcomingFormats = [
   { label: "PDF", icon: "pdf", types: "" },
   { label: "Hình ảnh", icon: "image", types: "JPG, PNG" },
 ];
+/** What the report says the user was looking at. */
+const screens: Record<Page, string> = {
+  home: "Trang chủ",
+  settings: "Cài đặt",
+  text: "Văn bản",
+  excel: "Bảng tính",
+  word: "Tài liệu",
+};
 const start = useTemplateRef<HTMLButtonElement>("start");
+const report = useTemplateRef<InstanceType<typeof ReportDialog>>("report");
 const websiteError = ref("");
 async function visitWebsite(event: MouseEvent) {
   websiteError.value = "";
@@ -142,7 +152,9 @@ defineExpose({
           aria-label="Đang chuẩn bị gói nhận diện"
         ></span>
       </button>
+      <button @click="report?.open()"><AppIcon name="help" />Báo lỗi</button>
     </nav>
+    <ReportDialog ref="report" :version="version" :screen="screens[page]" />
     <footer class="sidebar-footer">
       <a :href="productWebsite" target="_blank" rel="noopener noreferrer" @click="visitWebsite">
         OfflineMask.com<AppIcon name="external" :size="12" />

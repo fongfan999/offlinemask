@@ -150,7 +150,7 @@
         </p>
 
         <h2 id="mang"><span>4</span>Khi nào ứng dụng dùng mạng</h2>
-        <p>OfflineMask chỉ dùng mạng trong ba trường hợp, và đều do bạn bấm:</p>
+        <p>OfflineMask chỉ dùng mạng trong bốn trường hợp, và đều do bạn bấm:</p>
         <div class="om-doc-table">
           <table>
             <thead>
@@ -176,6 +176,15 @@
                 <td>Trang đó, mở trong trình duyệt của bạn</td>
                 <td>Như khi bạn tự mở trang</td>
               </tr>
+              <tr>
+                <td>Bạn bấm Mở trang báo lỗi, rồi bấm Gửi trên trang đó</td>
+                <td>Trang báo lỗi trên OfflineMask.com, mở trong trình duyệt của bạn</td>
+                <td>
+                  Đúng những gì bạn viết và thấy trên trang, cùng phiên bản ứng dụng, hệ điều hành
+                  và màn hình đang mở. Ứng dụng không gửi gì; chỉ khi bạn bấm Gửi trên trang thì
+                  trình duyệt mới gửi
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -184,7 +193,7 @@
           <a
             href="https://github.com/fongfan999/offlinemask/blob/main/desktop/packs/vietnamese-pii-v1.json"
             >tệp mô tả gói</a
-          >, nên ứng dụng chỉ nhận đúng tệp đã công bố. Ngoài ba trường hợp trên, OfflineMask không
+          >, nên ứng dụng chỉ nhận đúng tệp đã công bố. Ngoài bốn trường hợp trên, OfflineMask không
           có kết nối nào khác: không tự cập nhật, không báo lỗi tự động, không thống kê. Giao diện
           ứng dụng còn bị chặn kết nối ra ngoài bởi
           <a
@@ -264,10 +273,12 @@
           phông chữ và không tải tài nguyên từ bên thứ ba. Số phiên bản mới nhất và các nút tải về
           do một đoạn mã nhỏ của trang trên Cloudflare tra từ GitHub, để trang luôn trỏ tới bản mới
           nhất. Mỗi lần bạn bấm tải, đoạn mã này đếm thêm một lượt cho loại bản tải (Mac, Windows,
-          Linux) trong ngày đó; không kèm địa chỉ IP, cookie hay bất cứ gì nhận ra bạn. Bấm tải bản
-          cho Mac hay Linux thì tệp đến từ máy chủ tệp của GitHub. Cloudflare xử lý địa chỉ IP và
-          thông tin kỹ thuật của yêu cầu để phục vụ trang, và cho chúng tôi xem số liệu tổng hợp như
-          số lượt truy cập, theo
+          Linux) trong ngày đó; không kèm địa chỉ IP, cookie hay bất cứ gì nhận ra bạn. Khi bạn bấm
+          Gửi trên <a href="./bao-loi">trang báo lỗi</a>, đoạn mã này lưu đúng nội dung trên trang
+          (loại lỗi, lời bạn viết, phiên bản, hệ điều hành và màn hình) cùng thời điểm gửi; cũng
+          không kèm địa chỉ IP hay cookie. Bấm tải bản cho Mac hay Linux thì tệp đến từ máy chủ tệp
+          của GitHub. Cloudflare xử lý địa chỉ IP và thông tin kỹ thuật của yêu cầu để phục vụ
+          trang, và cho chúng tôi xem số liệu tổng hợp như số lượt truy cập, theo
           <a href="https://www.cloudflare.com/privacypolicy/">chính sách của Cloudflare</a>.
         </p>
 
@@ -288,7 +299,9 @@
         <h2 id="thay-doi"><span>9</span>Thay đổi và liên hệ</h2>
         <p>
           Khi cách ứng dụng xử lý dữ liệu thay đổi, trang này được cập nhật cùng ngày, và mọi thay
-          đổi đều xem được trong lịch sử mã nguồn. Câu hỏi hoặc phát hiện vấn đề, hãy mở một
+          đổi đều xem được trong lịch sử mã nguồn. Gặp lỗi, hãy dùng
+          <a href="./bao-loi">trang báo lỗi</a> (trong ứng dụng: thanh bên › Báo lỗi). Câu hỏi khác,
+          hãy mở một
           <a href="https://github.com/fongfan999/offlinemask/issues">issue trên GitHub</a>.
         </p>
       </main>

@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="vi" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Báo cho OfflineMask biết khi ứng dụng làm sai." />
+    <meta name="robots" content="noindex" />
+    <meta name="theme-color" content="#f7f5ee" />
+    <link rel="canonical" href="https://offlinemask.com/bao-loi" />
+    <link rel="icon" href="../brand/mark-ink.svg" type="image/svg+xml" />
+    <title>Báo lỗi — OfflineMask</title>
+    <link rel="stylesheet" href="./standalone.css" />
+  </head>
+  <body>
+    <div class="om-page om-doc-page" lang="vi">
+      <header class="om-doc-header om-wrap">
+        <a class="om-brand" href="./"
+          ><span class="om-mark" aria-hidden="true"></span><span>Offline<span>Mask</span></span></a
+        >
+        <a class="om-text-link" href="./">← Về trang chủ</a>
+      </header>
+      <main class="om-doc om-wrap">
+        <p class="om-maker-label">Báo lỗi</p>
+        <h1>Có gì chưa đúng?</h1>
+        <p class="om-doc-lead">
+          Cảm ơn bạn đã báo. Xem lại nội dung bên dưới rồi bấm <strong>Gửi</strong>, vậy là xong.
+        </p>
+
+        <form class="om-report" data-om-report novalidate>
+          <fieldset>
+            <legend>Chuyện gì đã xảy ra?</legend>
+            <label
+              ><input type="radio" name="kind" value="missed" checked /> Còn sót thông tin chưa
+              ẩn</label
+            >
+            <label><input type="radio" name="kind" value="wrong" /> Ẩn nhầm chữ bình thường</label>
+            <label
+              ><input type="radio" name="kind" value="crash" /> Ứng dụng báo lỗi, treo hoặc tự
+              tắt</label
+            >
+            <label><input type="radio" name="kind" value="other" /> Chuyện khác</label>
+          </fieldset>
+          <label class="om-report-field" for="om-report-message">Kể thêm một chút</label>
+          <textarea
+            id="om-report-message"
+            name="message"
+            rows="6"
+            maxlength="2000"
+            required
+            aria-describedby="om-report-hint"
+            placeholder="Ví dụ: số điện thoại có dấu chấm ở giữa không được ẩn."
+          ></textarea>
+          <p id="om-report-hint" class="om-report-hint">
+            Chỉ cần mô tả. Đừng dán tên, số điện thoại hay nội dung giấy tờ thật.
+          </p>
+          <p class="om-report-about" data-om-report-about hidden></p>
+          <button class="om-report-send" type="submit">Gửi</button>
+          <p class="om-report-status" data-om-report-status role="status"></p>
+        </form>
+        <div class="om-report-done" data-om-report-done hidden tabindex="-1">
+          <h2>Đã gửi. Cảm ơn bạn!</h2>
+          <p>Báo lỗi của bạn đã tới tay người làm OfflineMask. Bạn có thể đóng trang này.</p>
+        </div>
+        <noscript><p>Trang này cần bật JavaScript để gửi báo lỗi.</p></noscript>
+
+        <p class="om-doc-note">
+          Trang chỉ gửi những gì bạn thấy ở trên, cùng phiên bản ứng dụng, hệ điều hành và màn hình
+          bạn đang mở nếu bạn đến từ ứng dụng. Không kèm địa chỉ IP hay cookie. Xem thêm về
+          <a href="./privacy.html#trang-web">quyền riêng tư</a>.
+        </p>
+      </main>
+      <footer class="om-doc-footer om-wrap">
+        <span>© 2026 Phong Phan</span><a href="./">OfflineMask.com</a
+        ><a href="https://github.com/fongfan999/offlinemask/blob/main/LICENSE.md"
+          >Giấy phép O’Saasy ↗</a
+        >
+      </footer>
+    </div>
+    <script type="module" src="./bao-loi.js"></script>
+  </body>
+</html>

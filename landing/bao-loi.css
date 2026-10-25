@@ -1,0 +1,100 @@
+/* The report page's form, on the doc page's layout and the product's tokens. */
+.om-report {
+  display: grid;
+  gap: 10px;
+  margin-top: 40px;
+}
+.om-report[hidden] {
+  display: none;
+}
+.om-report fieldset {
+  display: grid;
+  gap: 10px;
+  margin: 0 0 18px;
+  padding: 0;
+  border: 0;
+}
+.om-report legend,
+.om-report-field {
+  margin-bottom: 8px;
+  color: var(--ink);
+  font: 600 18px / 1.4 var(--sans);
+}
+.om-report fieldset label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-size: 17px;
+  cursor: pointer;
+}
+.om-report fieldset label:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+.om-report input[type="radio"] {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+.om-report textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font: 17px / 1.55 var(--sans);
+  resize: vertical;
+}
+.om-report textarea:focus-visible,
+.om-report fieldset label:has(input:focus-visible),
+.om-report-send:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.om-doc .om-report-hint,
+.om-doc .om-report-about {
+  margin-top: 0;
+  font-size: 15px;
+}
+.om-report-send {
+  justify-self: start;
+  margin-top: 12px;
+  padding: 15px 40px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font: 650 17px var(--sans);
+  cursor: pointer;
+}
+.om-report-send:hover:not(:disabled) {
+  background: var(--accent-strong);
+}
+.om-report-send:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+.om-doc .om-report-status:empty {
+  display: none;
+}
+.om-report-done {
+  margin-top: 40px;
+  padding: 24px 28px;
+  border-radius: 16px;
+  background: var(--note);
+  color: var(--note-ink);
+}
+.om-report-done h2 {
+  margin-top: 0;
+}
+.om-doc .om-report-done p {
+  color: inherit;
+}

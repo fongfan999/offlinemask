@@ -3,7 +3,8 @@
   "name": "offlinemask-landing",
   "compatibility_date": "2026-10-01",
   // Answers /latest.json and /download/<platform> from the newest GitHub release (decision
-  // 0140); every other path is a static asset and never runs it.
+  // 0140) and takes bug reports at /report (decision 0147); every other path is a static
+  // asset and never runs it.
   "main": "./worker.js",
   // offlinemask.com is registered at Cloudflare (20 October 2026). A deploy binds the
   // Worker to the apex and www as custom domains and creates their DNS records.
@@ -15,9 +16,14 @@
     "directory": "./dist",
     "not_found_handling": "404-page",
     "binding": "ASSETS",
-    "run_worker_first": ["/latest.json", "/download/*"],
+    "run_worker_first": ["/latest.json", "/download/*", "/report"],
   },
   "observability": { "enabled": false },
-  // Downloads per day and platform ("2026-10-25 deb": "12"), nothing about who (decision 0144).
-  "kv_namespaces": [{ "binding": "DOWNLOADS", "id": "9ad97a5609c342e4b49f10c2e3dae2c5" }],
+  // DOWNLOADS: downloads per day and platform ("2026-10-25 deb": "12"), nothing about who
+  // (decision 0144). REPORTS: bug reports sent from /bao-loi, what the visitor wrote and the
+  // app's version, nothing about who sent them (decision 0147).
+  "kv_namespaces": [
+    { "binding": "DOWNLOADS", "id": "9ad97a5609c342e4b49f10c2e3dae2c5" },
+    { "binding": "REPORTS", "id": "3bcc4d99a5ec436d9c5ab7aa9a430f6e" },
+  ],
 }

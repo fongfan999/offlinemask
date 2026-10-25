@@ -76,14 +76,20 @@ test("pack files come only from the project's Cloudflare R2 store (privacy §4)"
   assert.match(read("../../landing/privacy.html"), /Cloudflare R2/, UPDATE);
 });
 
-test("links from the app open only OfflineMask.com (privacy §4)", () => {
+test("links from the app open only OfflineMask.com and its report page (privacy §4)", () => {
   const caps = JSON.parse(read("../src-tauri/capabilities/default.json"));
   const opener = caps.permissions.find((p) => p.identifier === "opener:allow-open-url");
   assert.deepEqual(
     opener.allow.map((a) => a.url),
-    ["https://offlinemask.com/"],
+    ["https://offlinemask.com/", "https://offlinemask.com/bao-loi#*"],
     UPDATE,
   );
+  // A report rides in the fragment, which the browser never sends; the user presses Gửi
+  // on the page (decision 0147).
+  assert.match(read("../src/core/report.ts"), /return `\$\{reportPage\}#\$\{fields\}`;/, UPDATE);
+  const page = read("../../landing/privacy.html");
+  assert.match(page, /Bạn bấm Mở trang báo lỗi, rồi bấm Gửi trên trang đó/, UPDATE);
+  assert.match(page, /OfflineMask chỉ dùng mạng trong bốn trường hợp/, UPDATE);
 });
 
 test("the app's system permissions are the ones the page explains (privacy §5)", () => {
