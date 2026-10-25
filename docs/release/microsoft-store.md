@@ -18,7 +18,7 @@ Upload the unsigned `OfflineMask_<version>_x64.msix` from the `msix-windows-x64`
 - **Privacy policy URL:** `https://offlinemask.com/privacy`
 - **Website:** `https://offlinemask.com`
 - **Support contact:** `https://github.com/fongfan999/offlinemask/issues`
-- **Does this product access, collect or transmit personal information?** No. Everything is processed on the device; the only network use is the recognition pack download that the user starts.
+- **Does this product access, collect or transmit personal information?** No. Everything is processed on the device. The app uses the network only when the user clicks: to download the recognition pack, or to open OfflineMask.com in the browser (including the *Báo lỗi* page, where the user presses *Gửi* themselves).
 - **System requirements:** x64, 8 GB memory recommended when the recognition pack is used.
 
 ## Age ratings (IARC questionnaire)
@@ -43,10 +43,12 @@ OfflineMask thay họ tên, số tài khoản, số điện thoại, CCCD, email
 Không tài khoản, không máy chủ, không thống kê sử dụng. Ứng dụng chỉ dùng mạng khi bạn bấm tải gói nhận diện. Hãy luôn xem lại kết quả trước khi chia sẻ.
 ```
 
-**What's new in this version**
+**What's new in this version** (2.2.0; the first submission said "Bản đầu tiên trên Microsoft Store.")
 
 ```
-Bản đầu tiên trên Microsoft Store.
+• Báo lỗi: viết vài dòng về lỗi gặp phải, OfflineMask mở trang báo lỗi trên OfflineMask.com đã điền sẵn để bạn bấm Gửi. Ứng dụng vẫn không tự kết nối mạng.
+• Lịch sử tự xóa sau 1, 7, 30 hoặc 90 ngày (mặc định 30 ngày), chọn trong Cài đặt › Mật mã.
+• Nút OfflineMask chỉ ẩn đúng đoạn văn bản bạn đã chọn, không bao giờ lấy nội dung trong bộ nhớ tạm.
 ```
 
 **Product features** (one per line in Partner Center)
