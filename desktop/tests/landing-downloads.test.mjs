@@ -62,11 +62,14 @@ test("the Worker redirects downloads, answers the version and serves the rest as
   assert.equal(await (await get("/")).text(), "asset");
 });
 
-test("a download adds one to its month and platform, and nothing else", async (t) => {
+test("a download adds one to its day and platform, and nothing else", async (t) => {
   t.mock.method(globalThis, "fetch", async (input) => github(String(input)));
   const store = new Map();
   const env = {
-    DOWNLOADS: { get: async (key) => store.get(key) ?? null, put: async (k, v) => store.set(k, v) },
+    DOWNLOADS: {
+      get: async (key) => store.get(key)?.[0] ?? null,
+      put: async (k, v, { metadata }) => store.set(k, [v, metadata]),
+    },
   };
   const pending = [];
   const context = { waitUntil: (promise) => pending.push(promise) };
@@ -76,8 +79,8 @@ test("a download adds one to its month and platform, and nothing else", async (t
   assert.equal((await get("/download/deb")).status, 302);
   await get("/latest.json");
   await Promise.all(pending);
-  const month = new Date().toISOString().slice(0, 7);
-  assert.deepEqual(Object.fromEntries(store), { [`${month} deb`]: "2" });
+  const day = new Date().toISOString().slice(0, 10);
+  assert.deepEqual(Object.fromEntries(store), { [`${day} deb`]: ["2", { downloads: 2 }] });
 });
 
 test("a broken counter never stops a download", async (t) => {

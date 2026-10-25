@@ -4,7 +4,7 @@
 //   /download/<platform> a redirect straight to that release's file
 // It asks GitHub, never the visitor's browser, so the page still loads nothing from third
 // parties. It reads no cookies and keeps no logs (observability is off in wrangler.jsonc); each
-// download adds one to that month's count for its platform (decision 0144), nothing else.
+// download adds one to that day's count for its platform (decision 0144), nothing else.
 
 const repository = "https://github.com/fongfan999/offlinemask";
 const raw = "https://raw.githubusercontent.com/fongfan999/offlinemask";
@@ -59,11 +59,15 @@ async function cachedRelease(request, context) {
   return release;
 }
 
-/** Adds one to "2026-10 deb" in KV. Two downloads in the same moment may count once. */
+/**
+ * Adds one to "2026-10-25 deb" in KV. The count is also the key's metadata, so one key listing
+ * returns every day's numbers. Two downloads in the same moment may count once.
+ */
 async function count(store, platform) {
-  const key = `${new Date().toISOString().slice(0, 7)} ${platform}`;
+  const key = `${new Date().toISOString().slice(0, 10)} ${platform}`;
   try {
-    await store?.put(key, String((Number(await store.get(key)) || 0) + 1));
+    const downloads = (Number(await store?.get(key)) || 0) + 1;
+    await store?.put(key, String(downloads), { metadata: { downloads } });
   } catch {
     // A missed count never stops a download.
   }

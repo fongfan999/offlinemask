@@ -10,10 +10,16 @@ The app has no telemetry, and that stays true. That left only GitHub's per-file 
 
 - **An update check or ping from the app.** Ruled out: the app promises no automatic network access.
 - **A browser analytics script (Cloudflare Web Analytics).** Unnecessary for now. Cloudflare's zone analytics already shows visits and requests from the server side, with nothing loaded in the browser.
-- **Count in the Worker that already answers `/download/<platform>`.** Chosen. The first vers- `landing/worker.js` adds one to a key in the `offlinemask-downloads` KV namespace (binding `DOWNLOADS` in `wrangler.jsonc`) after each successful download redirect. The key is the UTC month and the platform, for example `2026-10 deb`, and the value is the count as text. It records no IP address, country, user agent, referrer, cookie or identifier. `/latest.json` and failed lookups write nothing. The write runs in `waitUntil`, so it never delays the redirect, and a KV error is swallowed so it never stops a download.
+- **Count in the Worker that already answers `/download/<platform>`.** Chosen. The first vers- `landing/worker.js` adds one to a key in the `offlinemask-downloads` KV namespace (binding `DOWNLOADS` in `wrangler.jsonc`) after each successful download redirect. The key is the UTC day and the platform, for example `2026-10-25 deb`, so the owner can chart downloads day by day. The value is the count as text, repeated as `{ downloads }` metadata so a single key listing returns every count. It records no IP address, country, user agent, referrer, cookie or identifier. `/latest.json` and failed lookups write nothing. The write runs in `waitUntil`, so it never delays the redirect, and a KV error is swallowed so it never stops a download.
 - KV is not an atomic counter: two downloads of one platform in the same moment can count once. That is acceptable at this volume. The free plan's 1,000 writes a day caps counting, not downloads.
-- Section 7 of `landing/privacy.html` now says that it covers the website, not the app, and that each download adds one to that month's count for its platform and nothing else. It also says Cloudflare shows aggregate visit numbers. The app's promises are unchanged.
-- To read the counts, open Cloudflare → Storage & Databases → KV → `offlinemask-downloads`. Visits stay in Cloudflare's own zone analytics.
+- Section 7 of `landing/privacy.html` now says that it covers the website, not the app, and that each download adds one to that day's count for its platform and nothing else. It also says Cloudflare shows aggregate visit numbers. The app's promises are unchanged.
+- To read the counts, open Cloudflare → Storage & Databases → KV → `offlinemask-downloads`. For a chart, list every key with its metadata in one call and sum days into months as needed:
+
+  ```sh
+  CLOUDFLARE_ACCOUNT_ID=90814f99c119cd5dc08362580f81a76f mise exec -- pnpm -C landing exec wrangler kv key list --namespace-id 9ad97a5609c342e4b49f10c2e3dae2c5 --remote
+  ```
+
+  Visits stay in Cloudflare's own zone analytics.
 
 dflare shows aggregate visit numbers. The app's promises are unchanged.
 - Read the counts with the SQL API, using a token with Account Analytics Read:
@@ -27,4 +33,4 @@ dflare shows aggregate visit numbers. The app's promises are unchanged.
 
 ## Verification
 
-`desktop/tests/landing-downloads.test.mjs` checks that two downloads leave exactly `{ "<month> deb": "2" }`, that `/latest.json` writes nothing, and that a failing KV still redirects. `pnpm lint`, `pnpm test` and a Wrangler dry run (which lists the KV binding) pass. Not verified: a count written by the deployed Worker.
+`desktop/tests/landing-downloads.test.mjs` checks that two downloads leave exactly `"<day> deb"` = `"2"` with `{ downloads: 2 }` metadata, that `/latest.json` writes nothing, and that a failing KV still redirects. `pnpm lint`, `pnpm test` and a Wrangler dry run (which lists the KV binding) pass. Not verified: a count written by the deployed Worker.
