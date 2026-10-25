@@ -1,0 +1,115 @@
+/* The blog: the privacy page's reading layout, plus a list of posts and the parts Markdown
+   produces (decision 0146). */
+.om-blog-list {
+  display: grid;
+  gap: 36px;
+  margin-top: 48px;
+  padding: 0;
+  list-style: none;
+}
+.om-blog-list li {
+  padding-top: 24px;
+  border-top: 1px solid var(--line);
+}
+.om-blog-list time {
+  color: var(--muted);
+  font-size: 14px;
+}
+.om-doc .om-blog-list h2 {
+  margin-top: 6px;
+  font-size: 24px;
+}
+.om-doc .om-blog-list h2 a {
+  color: var(--ink);
+  text-decoration: none;
+}
+.om-doc .om-blog-list h2 a:hover {
+  color: var(--accent);
+}
+.om-doc .om-maker-label a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.om-blog-body {
+  margin-top: 40px;
+  font-size: 18px;
+  line-height: 1.7;
+}
+.om-blog-body h2 {
+  margin-top: 48px;
+}
+.om-blog-body h3 {
+  margin-top: 32px;
+  font: 600 20px/1.35 var(--sans);
+}
+.om-blog-body ol {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  padding-left: 22px;
+  color: var(--muted);
+  list-style: decimal;
+}
+.om-blog-body blockquote {
+  margin-top: 20px;
+  padding: 4px 0 4px 20px;
+  border-left: 3px solid var(--accent);
+}
+.om-blog-body :not(pre) > code {
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: var(--paper-sunk);
+  color: var(--ink);
+  font: 0.88em var(--mono);
+}
+.om-blog-body img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-top: 24px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+.om-blog-body table {
+  display: block;
+  overflow-x: auto;
+  margin-top: 16px;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.om-blog-body th,
+.om-blog-body td {
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
+.om-blog-body th {
+  background: var(--paper-sunk);
+  color: var(--ink);
+}
+
+.om-blog-cta {
+  margin-top: 56px;
+  padding: 28px;
+  border-radius: 16px;
+  background: var(--accent-soft);
+}
+.om-doc .om-blog-cta p {
+  margin-top: 0;
+  color: var(--ink);
+}
+.om-doc .om-blog-cta .om-button {
+  margin-top: 20px;
+  background: var(--accent);
+  color: var(--on-accent) !important;
+  text-decoration: none;
+  box-shadow: none;
+}
+.om-blog-more {
+  margin-top: 64px;
+}
+.om-blog-more .om-blog-list {
+  margin-top: 8px;
+}

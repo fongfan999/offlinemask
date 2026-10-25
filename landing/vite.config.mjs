@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import { releaseDay } from "./latest.js";
+import { fill, images, indexPage, postPage, posts, rss } from "./posts.js";
 import { robots, sitemap, structuredData } from "./search.js";
 import worker, { latestRelease } from "./worker.js";
 
@@ -29,6 +30,9 @@ const withRelease = (html) =>
     .replaceAll("__OM_RELEASE_DATE__", release.date ? releaseDay(release.date) : "")
     .replaceAll("__OM_STORE_ID__", storeId);
 const productPage = () => readFileSync(fragment, "utf8");
+const home = fileURLToPath(new URL("./index.html", import.meta.url));
+const blogTemplate = new URL("./blog/index.html", import.meta.url);
+const postPath = (url) => /^\/blog\/([a-z0-9-]+)$/.exec(url.split("?")[0])?.[1];
 export default defineConfig({
   root: fileURLToPath(new URL(".", import.meta.url)),
   base: "./",
@@ -63,7 +67,7 @@ export default defineConfig({
           source: readFileSync(new URL("./og/og.png", import.meta.url)),
         });
         // Crawlers' files (decision 0145); the site's other paths are its three pages.
-        this.emitFile({ type: "asset", fileName: "sitemap.xml", source: sitemap() });
+        this.emitFile({ type: "asset", fileName: "sitemap.xml", source: sitemap(posts()) });
         this.emitFile({ type: "asset", fileName: "robots.txt", source: robots() });
       },
       configureServer(server) {
@@ -97,22 +101,23 @@ export default defineConfig({
         handler(html, { filename, bundle }) {
           // The home page's hero uses all four font files; asking for them up front means they
           // usually arrive before the first paint rather than swapping in after it.
-          const fonts = filename.endsWith("index.html")
-            ? Object.keys(bundle)
-                .filter((file) => file.endsWith(".woff2"))
-                .map(
-                  (file) =>
-                    `<link rel="preload" href="./${file}" as="font" type="font/woff2" crossorigin>`,
-                )
-                .join("")
-            : "";
+          const fonts =
+            filename === home
+              ? Object.keys(bundle)
+                  .filter((file) => file.endsWith(".woff2"))
+                  .map(
+                    (file) =>
+                      `<link rel="preload" href="./${file}" as="font" type="font/woff2" crossorigin>`,
+                  )
+                  .join("")
+              : "";
           return html
             .replace("</title>", `</title>${fonts}`)
             .replace(
-              /<link rel="stylesheet"[^>]*href="\.\/(assets\/[^"]+\.css)"[^>]*>/g,
-              (_, file) =>
-                // The stylesheet's URLs are relative to assets/; the page sits one level up.
-                `<style>${bundle[file].source.replace(/url\(\.\//g, "url(./assets/")}</style>`,
+              /<link rel="stylesheet"[^>]*href="(\.\/|(?:\.\.\/)+)(assets\/[^"]+\.css)"[^>]*>/g,
+              (_, up, file) =>
+                // The stylesheet's URLs are relative to assets/; the page reaches it through `up`.
+                `<style>${bundle[file].source.replace(/url\(\.\//g, `url(${up}assets/`)}</style>`,
             )
             .replace(
               /<(script type="module"|link rel="modulepreload") /g,
@@ -122,6 +127,60 @@ export default defineConfig({
       },
       generateBundle(_, bundle) {
         for (const file of Object.keys(bundle)) if (file.endsWith(".css")) delete bundle[file];
+      },
+    },
+    {
+      // The blog (decision 0146): blog/index.html is the template for the list and for every
+      // post. The dev server fills it per request; the build fills it once the page is final
+      // (its stylesheet inlined), so each post is the same page with other head and main.
+      name: "offlinemask-blog",
+      enforce: "post",
+      transformIndexHtml: {
+        order: "pre",
+        handler(html, { path, server }) {
+          if (!server || !html.includes("<!-- blog-main -->")) return html;
+          const entries = posts();
+          const post = entries.find(({ slug }) => slug === postPath(path));
+          return fill(html, post ? postPage(post, entries) : indexPage(entries));
+        },
+      },
+      configureServer(server) {
+        server.middlewares.use(async (request, response, next) => {
+          if (!postPath(request.url)) return next();
+          try {
+            const html = await server.transformIndexHtml(
+              request.url,
+              readFileSync(blogTemplate, "utf8"),
+            );
+            response.setHeader("content-type", "text/html; charset=utf-8");
+            response.end(html);
+          } catch (error) {
+            next(error);
+          }
+        });
+        server.watcher.add(fileURLToPath(new URL("./blog/posts/", import.meta.url)));
+        server.watcher.on("change", (path) => {
+          if (path.endsWith(".md")) server.ws.send({ type: "full-reload" });
+        });
+      },
+      generateBundle(_, bundle) {
+        const page = bundle["blog/index.html"];
+        if (!page) return;
+        const entries = posts();
+        for (const post of entries)
+          this.emitFile({
+            type: "asset",
+            fileName: `blog/${post.slug}.html`,
+            source: fill(page.source, postPage(post, entries)),
+          });
+        page.source = fill(page.source, indexPage(entries));
+        this.emitFile({ type: "asset", fileName: "blog/rss.xml", source: rss(entries) });
+        for (const picture of new Set(entries.flatMap(({ pictures }) => pictures)))
+          this.emitFile({
+            type: "asset",
+            fileName: `blog/images/${picture}`,
+            source: readFileSync(new URL(picture, images)),
+          });
       },
     },
   ],
@@ -134,6 +193,7 @@ export default defineConfig({
         index: fileURLToPath(new URL("./index.html", import.meta.url)),
         privacy: fileURLToPath(new URL("./privacy.html", import.meta.url)),
         install: fileURLToPath(new URL("./install.html", import.meta.url)),
+        blog: fileURLToPath(blogTemplate),
       },
     },
   },

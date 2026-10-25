@@ -34,12 +34,14 @@ test("the home page's structured data is one safe JSON-LD script", () => {
   assert.equal(questions.mainEntity.length, faq(fragment).length);
 });
 
-test("the sitemap lists the three pages and robots.txt points to it", () => {
-  const urls = [...sitemap().matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url);
-  assert.deepEqual(
-    urls,
-    pages.map((page) => `https://offlinemask.com${page}`),
-  );
+test("the sitemap lists the pages and each post, and robots.txt points to it", () => {
+  const xml = sitemap([{ slug: "mot-bai", updated: "2026-10-27" }]);
+  const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url);
+  assert.deepEqual(urls, [
+    ...pages.map((page) => `https://offlinemask.com${page}`),
+    "https://offlinemask.com/blog/mot-bai",
+  ]);
+  assert.match(xml, /mot-bai<\/loc><lastmod>2026-10-27<\/lastmod>/);
   assert.match(robots(), /^User-agent: \*\nAllow: \/\n/);
   assert.match(robots(), /^Sitemap: https:\/\/offlinemask\.com\/sitemap\.xml$/m);
 });

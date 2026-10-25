@@ -3,7 +3,7 @@
 // from the page's own questions, so the structured data always says what the page says.
 
 export const site = "https://offlinemask.com";
-export const pages = ["/", "/privacy", "/install"];
+export const pages = ["/", "/privacy", "/install", "/blog/"];
 
 const entities = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", nbsp: " " };
 const text = (html) =>
@@ -68,10 +68,17 @@ export function structuredData({ fragment, description, version }) {
   return `<script type="application/ld+json">${json}</script>`;
 }
 
-export const sitemap = () =>
+/** The pages, then each blog post with the day it last changed (`posts()` from posts.js). */
+export const sitemap = (posts = []) =>
   `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-${pages.map((page) => `  <url><loc>${site}${page}</loc></url>`).join("\n")}
+${[
+  ...pages.map((page) => `  <url><loc>${site}${page}</loc></url>`),
+  ...posts.map(
+    ({ slug, updated }) =>
+      `  <url><loc>${site}/blog/${slug}</loc><lastmod>${updated}</lastmod></url>`,
+  ),
+].join("\n")}
 </urlset>
 `;
 
