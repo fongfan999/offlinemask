@@ -62,6 +62,19 @@ test("the Worker redirects downloads, answers the version and serves the rest as
   assert.equal(await (await get("/")).text(), "asset");
 });
 
+test("a download is counted by platform and country only", async (t) => {
+  t.mock.method(globalThis, "fetch", async (input) => github(String(input)));
+  const points = [];
+  const env = { DOWNLOADS: { writeDataPoint: (point) => points.push(point) } };
+  const request = new Request("https://offlinemask.com/download/deb", {
+    headers: { "cf-connecting-ip": "203.0.113.7", "user-agent": "Test" },
+  });
+  Object.defineProperty(request, "cf", { value: { country: "VN" } });
+  assert.equal((await worker.fetch(request, env)).status, 302);
+  await worker.fetch(new Request("https://offlinemask.com/latest.json"), env);
+  assert.deepEqual(points, [{ blobs: ["deb", "VN"], indexes: ["deb"] }]);
+});
+
 test("GitHub being down gives a short retry message, not a GitHub page", async (t) => {
   t.mock.method(globalThis, "fetch", async () => new Response("", { status: 502 }));
   const reply = await worker.fetch(new Request("https://offlinemask.com/download/deb"), {});

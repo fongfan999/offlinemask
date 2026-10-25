@@ -3,7 +3,8 @@
 //   /latest.json         the newest version, its release day and its download paths
 //   /download/<platform> a redirect straight to that release's file
 // It asks GitHub, never the visitor's browser, so the page still loads nothing from third
-// parties. It reads no cookies and keeps no logs (observability is off in wrangler.jsonc).
+// parties. It reads no cookies and keeps no logs (observability is off in wrangler.jsonc); each
+// download adds one row of platform and country to a count (decision 0144), nothing else.
 
 const repository = "https://github.com/fongfan999/offlinemask";
 const raw = "https://raw.githubusercontent.com/fongfan999/offlinemask";
@@ -85,7 +86,13 @@ export default {
     if (platform && Object.hasOwn(platforms, platform)) {
       try {
         const target = (await cachedRelease(request, context)).downloads[platform];
-        if (target) return Response.redirect(target, 302);
+        if (target) {
+          env.DOWNLOADS?.writeDataPoint({
+            blobs: [platform, request.cf?.country ?? ""],
+            indexes: [platform],
+          });
+          return Response.redirect(target, 302);
+        }
       } catch {
         return unavailable();
       }
