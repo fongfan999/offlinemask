@@ -1,3 +1,4 @@
+import { blocksToMarkdown, toBlocks } from "./blocks.ts";
 import {
   applyReplacements,
   DocFileError,
@@ -47,7 +48,6 @@ interface TextItem {
   str: string;
   transform: number[];
   width: number;
-  hasEOL: boolean;
 }
 interface Line {
   y: number;
@@ -57,52 +57,52 @@ interface Line {
   text: string;
 }
 
-/** Text items into lines: items on the same baseline join, a gap wider than about a
- * fifth of the font size becomes a space (many PDFs place words without spaces), and a
- * wide gap a tab, as between table cells. Items are taken in the file's own order,
- * which is how most PDFs store columns: one column after the other. */
+/** Text items into lines, by where they sit on the page rather than the order the file
+ * stores them: invoice and report generators often write a header last or a table cell
+ * by cell. Items on the same baseline form a line, left to right; a gap wider than
+ * about a fifth of the font size becomes a space (many PDFs place words without
+ * spaces), and a gap wider than the font size a tab, as between table cells or the two
+ * halves of a form. pdf.js's own space items are skipped: they are wider than the gap
+ * they stand for. Two columns of prose therefore read side by side, line by line. */
 export function itemsToLines(items: readonly TextItem[]): Line[] {
-  const lines: Line[] = [];
-  let line: Line | undefined;
-  let broken = false;
-  for (const item of items) {
-    const [, , c = 0, d = 0, x = 0, y = 0] = item.transform;
-    const size = Math.hypot(c, d) || 10;
-    const sameLine =
-      line &&
-      !broken &&
-      Math.abs(y - line.y) < Math.max(line.size, size) * 0.5 &&
-      x > line.end - Math.max(line.size, size) * 0.5;
-    if (!item.str.trim()) {
-      // pdf.js gives a gap as a space item as wide as the gap.
-      if (line && sameLine && item.str) {
-        line.text += item.width > size * 2 ? "\t" : /\s$/.test(line.text) ? "" : " ";
-        line.end = Math.max(line.end, x + item.width);
-      }
-      broken ||= item.hasEOL;
-      continue;
-    }
-    if (line && sameLine) {
-      const gap = x - line.end;
-      const spaced = /\s$/.test(line.text) || /^\s/.test(item.str);
-      if (!line.text.endsWith("\t"))
-        line.text += gap > size * 2 ? "\t" : gap > size * 0.15 && !spaced ? " " : "";
-      line.text += item.str;
-      line.end = Math.max(line.end, x + item.width);
-      line.size = Math.max(line.size, size);
-    } else {
-      line = { y, size, x, end: x + item.width, text: item.str };
-      lines.push(line);
-    }
-    broken = item.hasEOL;
+  const pieces = items
+    .filter((item) => item.str.trim())
+    .map((item) => {
+      const [, , c = 0, d = 0, x = 0, y = 0] = item.transform;
+      return { text: item.str, x, y, end: x + item.width, size: Math.hypot(c, d) || 10 };
+    })
+    .sort((a, b) => b.y - a.y || a.x - b.x);
+  const rows: (typeof pieces)[] = [];
+  for (const piece of pieces) {
+    const row = rows.at(-1);
+    if (row && Math.abs(row[0]!.y - piece.y) < Math.min(row[0]!.size, piece.size) * 0.5)
+      row.push(piece);
+    else rows.push([piece]);
   }
-  return lines;
+  return rows.map((row) => {
+    row.sort((a, b) => a.x - b.x);
+    const line: Line = { y: row[0]!.y, size: 0, x: row[0]!.x, end: -Infinity, text: "" };
+    for (const piece of row) {
+      if (line.text) {
+        const gap = piece.x - line.end;
+        const spaced = /\s$/.test(line.text) || /^\s/.test(piece.text);
+        line.text += gap > piece.size ? "\t" : gap > piece.size * 0.15 && !spaced ? " " : "";
+      }
+      line.text += piece.text;
+      line.end = Math.max(line.end, piece.end);
+      line.size = Math.max(line.size, piece.size);
+    }
+    return line;
+  });
 }
 
 const listStart = /^\s*([•●▪◦○■□\-–*+]|\d{1,3}[.)]|[a-zđ][.)])\s/iu;
+/** "Mã số thuế: …", "Địa chỉ: …", "Điều 2: …": a form or contract line of its own. */
+const labelStart = /^[^\t:]{1,40}:(\s|$)/u;
 /** Lines into paragraphs. Lines of a paragraph join with a space, so a name wrapped
- * onto the next line is read whole. A larger gap, a jump back up (the next column), a
- * list item or a table row starts a new paragraph. */
+ * onto the next line is read whole. A larger gap, a line starting elsewhere than the
+ * one before (a centred title, an indented block), a list item, a labelled line or a
+ * table row starts a new paragraph. */
 export function linesToParagraphs(lines: readonly Line[]): string[] {
   const paragraphs: string[] = [];
   let previous: Line | undefined;
@@ -119,7 +119,9 @@ export function linesToParagraphs(lines: readonly Line[]): string[] {
       previous.y - line.y < size * 1.8 &&
       !text.includes("\t") &&
       !previous.text.includes("\t") &&
-      !listStart.test(text);
+      Math.abs(line.x - previous.x) < size * 3 &&
+      !listStart.test(text) &&
+      !labelStart.test(text);
     if (joins) paragraphs[paragraphs.length - 1] += " " + text;
     else paragraphs.push(text);
     previous = line;
@@ -367,16 +369,22 @@ const placeholders: Record<Exclude<PdfPageKind, "text">, string> = {
   "old-font": "(Trang dùng phông chữ cũ, chưa đọc được — không có trong bản đã ẩn)",
 };
 /** The masked document as Markdown: each page under its own heading, its paragraphs
- * with the replacements applied, and a line in place of a page that could not be read. */
+ * with the replacements applied, rows of cells as tables (`blocks.ts`), and a line in
+ * place of a page that could not be read. */
 export function writePdfText(source: PdfSource, edits: DocEdits): Uint8Array {
   const blocks: string[] = [];
   for (const page of source.pages) {
     blocks.push(`## Trang ${page.number}`);
     if (page.kind !== "text") blocks.push(placeholders[page.kind]);
-    for (const id of page.paragraphs)
-      blocks.push(
-        applyReplacements(source.paragraphs[id]!.text, edits.paragraphs.get(id) ?? []).text,
-      );
+    blocks.push(
+      ...blocksToMarkdown(
+        toBlocks(
+          page.paragraphs.map((id) =>
+            applyReplacements(source.paragraphs[id]!.text, edits.paragraphs.get(id) ?? []),
+          ),
+        ),
+      ),
+    );
   }
   return new TextEncoder().encode(blocks.join("\n\n") + "\n");
 }

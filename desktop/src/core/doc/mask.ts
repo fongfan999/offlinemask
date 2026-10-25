@@ -68,15 +68,27 @@ export function restoreParagraphs(
   return { edits, restored, unknown: [...unknown] };
 }
 
-/** First paragraphs with their replacements applied, and where each landed. */
+const pagePart = /^page-(\d+)$/;
+/** How many paragraphs a preview shows: the first 20, or for a PDF its whole first page
+ * if that is longer, up to 200 (decision 0149). */
+export function previewLength(paragraphs: readonly DocParagraph[], least: number): number {
+  const first = paragraphs[0]?.part;
+  if (!first || !pagePart.test(first)) return least;
+  const onFirstPage = paragraphs.findIndex((paragraph) => paragraph.part !== first);
+  return Math.min(200, Math.max(least, onFirstPage < 0 ? paragraphs.length : onFirstPage));
+}
+/** First paragraphs with their replacements applied, and where each landed; a PDF's
+ * paragraphs also say which page they are on. */
 export function previewParagraphs(
   paragraphs: readonly DocParagraph[],
   edits: ReadonlyMap<number, readonly Replacement[]> | undefined,
   limit: number,
-): { text: string; marks: { start: number; end: number }[] }[] {
-  return paragraphs
-    .slice(0, limit)
-    .map((paragraph) => applyReplacements(paragraph.text, edits?.get(paragraph.id) ?? []));
+): { text: string; marks: { start: number; end: number }[]; page?: number }[] {
+  return paragraphs.slice(0, limit).map((paragraph) => {
+    const page = pagePart.exec(paragraph.part)?.[1];
+    const applied = applyReplacements(paragraph.text, edits?.get(paragraph.id) ?? []);
+    return page ? { ...applied, page: Number(page) } : applied;
+  });
 }
 
 /** The document's edits without the values the user chose to keep (decision 0079). */

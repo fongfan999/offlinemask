@@ -18,6 +18,7 @@ import {
 } from "../composables/context.ts";
 import { docPreviewParagraphs, isPdfSession, type DocRestore } from "../composables/useDocRun.ts";
 import { applyReplacements } from "../core/doc/docx.ts";
+import { previewLength, previewParagraphs } from "../core/doc/mask.ts";
 import { sampleDocName, sampleDocx } from "../core/doc/sample.ts";
 import type { DocSession } from "../core/sessions.ts";
 
@@ -92,9 +93,11 @@ const draftView = computed(() => {
   const current = draft.value;
   if (!current) return [];
   if (showOriginal.value)
-    return current.paragraphs
-      .slice(0, docPreviewParagraphs)
-      .map((paragraph) => ({ text: paragraph.text, marks: [] }));
+    return previewParagraphs(
+      current.paragraphs,
+      undefined,
+      previewLength(current.paragraphs, docPreviewParagraphs),
+    );
   return doc.preview.value;
 });
 const restoreView = computed(() => {
@@ -303,7 +306,7 @@ defineExpose({
         <MaskProgress v-if="doc.progress.value" :progress="doc.progress.value" />
         <DocPreview v-else :paragraphs="draftView" :label="`Xem trước ${draft.fileName}`" />
         <p v-if="!doc.progress.value" class="sheet-caption-line">
-          Xem trước {{ Math.min(docPreviewParagraphs, draft.paragraphs.length) }} /
+          Xem trước {{ draftView.length }} /
           {{ draft.paragraphs.length.toLocaleString("vi-VN") }} đoạn đầu<template
             v-if="doc.previewScanning.value"
           >
@@ -347,8 +350,8 @@ defineExpose({
       </p>
       <DocPreview :paragraphs="session.preview" :label="`Bản đã ẩn, ${session.fileName}`" />
       <p class="sheet-caption-line">
-        {{ Math.min(docPreviewParagraphs, session.paragraphs) }} /
-        {{ session.paragraphs.toLocaleString("vi-VN") }} đoạn đầu của bản đã ẩn
+        {{ session.preview.length }} / {{ session.paragraphs.toLocaleString("vi-VN") }} đoạn đầu của
+        bản đã ẩn
       </p>
       <ReviewList
         v-if="review?.length"

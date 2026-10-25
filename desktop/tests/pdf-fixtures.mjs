@@ -141,6 +141,28 @@ export const fixtures = {
     );
     return save(doc);
   },
+  /** An e-invoice as report generators write it: the table cell by cell, close
+   * columns of numbers, and the header block last although it sits at the top. */
+  async invoice() {
+    const { doc, draw } = await newDocument();
+    const page = doc.addPage(A4);
+    const rows = [
+      ["STT", "Tên hàng hóa", "Số lượng", "Đơn giá", "Thành tiền"],
+      ["1", "Đùi gà", "0,516", "110.380", "56.956"],
+      ["2", "Bánh pizza bò", "1", "41.852", "41.852"],
+    ];
+    const columns = [50, 80, 200, 260, 320];
+    rows.forEach((cells, row) =>
+      cells.forEach((cell, column) => draw(page, cell, columns[column], 700 - row * 14, 9)),
+    );
+    draw(page, "Tổng cộng", 80, 640, 9);
+    draw(page, "98.808", 320, 640, 9);
+    draw(page, "HÓA ĐƠN GIÁ TRỊ GIA TĂNG", 200, 800, 12);
+    draw(page, "Tên đơn vị: Công ty Cổ phần Bình Minh", 50, 770, 9);
+    draw(page, "Mã số thuế: 0101234567", 50, 756, 9);
+    draw(page, "Địa chỉ: 12 Lê Lợi, Quận 1", 50, 742, 9);
+    return save(doc);
+  },
   /** "ễ" and "ế" stored as "ê" and a combining mark, as some PDF software writes it. */
   async decomposed() {
     const { doc, draw } = await newDocument();

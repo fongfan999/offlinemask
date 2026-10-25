@@ -1,8 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { PDFDocument } from "pdf-lib";
+import { PDFDocument, StandardFonts } from "pdf-lib";
+import { blocksToMarkdown, splitCells, toBlocks } from "../src/core/doc/blocks.ts";
+import { decodePrivateSessions, encodePrivateSessions } from "../src/core/sessions.ts";
 import { openDocument, writeDocument } from "../src/core/doc/document.ts";
-import { maskParagraphs, restoreParagraphs } from "../src/core/doc/mask.ts";
+import {
+  maskParagraphs,
+  previewLength,
+  previewParagraphs,
+  restoreParagraphs,
+} from "../src/core/doc/mask.ts";
 import {
   countLargeImages,
   looksLikeOldFont,
@@ -46,11 +53,25 @@ test("words drawn without space characters are read with spaces", async () => {
   assert.deepEqual(texts(opened), ["Người thuê là Trần Thị Mai, điện thoại 0912345678."]);
 });
 
-test("columns written one after the other stay apart", async () => {
+test("text is read by its place on the page: columns side by side, line by line", async () => {
   const opened = await openPdf(await fixtures.twoColumns());
   assert.deepEqual(texts(opened), [
-    "Bên A: Công ty Bình Minh Mã số thuế 0101234567",
-    "Bên B: Lê Văn Hùng Email hung.le@example.com",
+    "Bên A: Công ty Bình Minh\tBên B: Lê Văn Hùng",
+    "Mã số thuế 0101234567\tEmail hung.le@example.com",
+  ]);
+});
+
+test("an invoice reads from the top, a row per line, labelled lines apart", async () => {
+  const opened = await openPdf(await fixtures.invoice());
+  assert.deepEqual(texts(opened), [
+    "HÓA ĐƠN GIÁ TRỊ GIA TĂNG",
+    "Tên đơn vị: Công ty Cổ phần Bình Minh",
+    "Mã số thuế: 0101234567",
+    "Địa chỉ: 12 Lê Lợi, Quận 1",
+    "STT\tTên hàng hóa\tSố lượng\tĐơn giá\tThành tiền",
+    "1\tĐùi gà\t0,516\t110.380\t56.956",
+    "2\tBánh pizza bò\t1\t41.852\t41.852",
+    "Tổng cộng\t98.808",
   ]);
 });
 
@@ -285,4 +306,99 @@ test("pages are read without async iteration of streams, which WebKit lacks", as
     if (iterator) Object.defineProperty(prototype, Symbol.asyncIterator, iterator);
     if (values) Object.defineProperty(prototype, "values", values);
   }
+});
+
+test("rows of cells become Markdown tables, a lone row reads inline", () => {
+  const blocks = toBlocks([
+    { text: "Ký hiệu: 1C25MBE\tSố: 35637720", marks: [] },
+    { text: "Đơn vị bán hàng: Bình Minh", marks: [] },
+    { text: "Tên hàng\tSố lượng", marks: [] },
+    { text: "Bánh | pizza\t1", marks: [] },
+    { text: "[TEN_1_4aae]\t2\textra", marks: [{ start: 0, end: 12 }] },
+    { text: "Tổng cộng", marks: [] },
+  ]);
+  assert.deepEqual(blocksToMarkdown(blocks), [
+    "Ký hiệu: 1C25MBE · Số: 35637720",
+    "Đơn vị bán hàng: Bình Minh",
+    "|  |  |  |\n| --- | --- | --- |\n| Tên hàng | Số lượng |  |\n| Bánh \\| pizza | 1 |  |\n| [TEN_1_4aae] | 2 | extra |",
+    "Tổng cộng",
+  ]);
+  assert.deepEqual(blocks[2].rows[2][0].marks, [{ start: 0, end: 12 }]);
+});
+
+test("a wrapped line between two rows stays in the table", () => {
+  const blocks = toBlocks([
+    { text: "3\tKH\t87.524", marks: [] },
+    { text: "280g", marks: [] },
+    { text: "4\tG1\t27.870", marks: [] },
+    { text: "Tổng cộng", marks: [] },
+  ]);
+  assert.deepEqual(
+    blocks.map((block) => block.kind),
+    ["table", "paragraph"],
+  );
+  assert.equal(blocks[0].rows.length, 3);
+});
+
+test("marks follow the text into its cells", () => {
+  assert.deepEqual(
+    splitCells({
+      text: "Ông [TEN_1]\t[SDT_1] gọi",
+      marks: [
+        { start: 4, end: 11 },
+        { start: 12, end: 19 },
+      ],
+    }),
+    [
+      { text: "Ông [TEN_1]", marks: [{ start: 4, end: 11 }] },
+      { text: "[SDT_1] gọi", marks: [{ start: 0, end: 7 }] },
+    ],
+  );
+});
+
+test("the invoice's masked Markdown has its table", async () => {
+  const output = maskValues(await openPdf(await fixtures.invoice()), [
+    ["Công ty Cổ phần Bình Minh", "TO_CHUC"],
+  ]);
+  assert.match(
+    output,
+    /\| --- \| --- \| --- \| --- \| --- \|\n\| STT \| Tên hàng hóa \| Số lượng \| Đơn giá \| Thành tiền \|\n\| 1 \| Đùi gà \| 0,516 \| 110.380 \| 56.956 \|/,
+  );
+  assert.match(output, /Tên đơn vị: \[TO_CHUC_1_4aae\]/);
+});
+
+test("a PDF's preview covers its whole first page and knows its pages", async () => {
+  const short = await openPdf(await fixtures.mixedScan());
+  assert.equal(previewLength(short.paragraphs, 20), 20);
+  const long = await PDFDocument.create();
+  const font = await long.embedFont(StandardFonts.Helvetica);
+  const first = long.addPage();
+  for (let line = 0; line < 30; line++)
+    first.drawText(`Line ${line}`, { x: 50, y: 800 - line * 20, size: 10, font });
+  long.addPage().drawText("Second page", { x: 50, y: 800, size: 10, font });
+  const opened = await openPdf(await long.save());
+  assert.equal(previewLength(opened.paragraphs, 20), 30);
+  const preview = previewParagraphs(opened.paragraphs, undefined, 31);
+  assert.deepEqual([preview[0].page, preview[30].page], [1, 2]);
+});
+
+test("saved PDF previews keep their pages; damaged pages are refused", async () => {
+  const session = {
+    id: "4aae0000-0000-4000-8000-000000000009",
+    number: 1,
+    format: "word",
+    fixture: "private-doc-v1",
+    createdAt: "2026-10-25T05:00:00.000Z",
+    fileName: "Hóa đơn.pdf",
+    paragraphs: 2,
+    preview: [
+      { text: "Tổng cộng", marks: [], page: 1 },
+      { text: "Trang hai", marks: [], page: 2 },
+    ],
+    findings: [],
+    masked: 0,
+  };
+  assert.deepEqual(decodePrivateSessions(encodePrivateSessions([session])), [session]);
+  const damaged = { ...session, preview: [{ text: "x", marks: [], page: 0 }] };
+  assert.throws(() => decodePrivateSessions(encodePrivateSessions([damaged])));
 });

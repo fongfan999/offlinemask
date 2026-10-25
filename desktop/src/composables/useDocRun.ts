@@ -15,6 +15,7 @@ import {
   editedPlaces,
   keepReplacements,
   maskParagraphs,
+  previewLength,
   previewParagraphs,
   restoreParagraphs,
 } from "../core/doc/mask.ts";
@@ -144,14 +145,18 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
   const preview = computed(() => {
     const current = draft.value;
     if (!current) return [];
-    const head = current.paragraphs.slice(0, docPreviewParagraphs);
+    const head = current.paragraphs.slice(
+      0,
+      previewLength(current.paragraphs, docPreviewParagraphs),
+    );
     const result = maskParagraphs(head, previewDetections.value, aliasScope(current.sessionId));
-    return previewParagraphs(head, result.edits.paragraphs, docPreviewParagraphs);
+    return previewParagraphs(head, result.edits.paragraphs, head.length);
   });
   let previewRun = 0;
   watch([draft, options], async () => {
     const run = ++previewRun;
-    const head = (draft.value?.paragraphs ?? []).slice(0, docPreviewParagraphs);
+    const paragraphs = draft.value?.paragraphs ?? [];
+    const head = paragraphs.slice(0, previewLength(paragraphs, docPreviewParagraphs));
     if (!head.length) return;
     previewScanning.value = true;
     try {
@@ -258,7 +263,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
         preview: previewParagraphs(
           current.paragraphs,
           result.edits.paragraphs,
-          docPreviewParagraphs,
+          previewLength(current.paragraphs, docPreviewParagraphs),
         ),
         findings: result.findings,
         masked: result.masked,
@@ -324,7 +329,11 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
     if (!original || stored?.format !== "word") return;
     const now = kept.set(session.id, aliases, keep);
     const edits = keepReplacements(original.edits, now);
-    stored.preview = previewParagraphs(original.paragraphs, edits.paragraphs, docPreviewParagraphs);
+    stored.preview = previewParagraphs(
+      original.paragraphs,
+      edits.paragraphs,
+      previewLength(original.paragraphs, docPreviewParagraphs),
+    );
     stored.findings = original.findings.filter((finding) => !now.has(finding.alias));
     stored.masked = editedPlaces(edits);
   }

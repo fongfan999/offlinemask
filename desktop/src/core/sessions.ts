@@ -56,7 +56,8 @@ export interface DocSession {
   createdAt: string;
   fileName: string;
   paragraphs: number;
-  preview: { text: string; marks: { start: number; end: number }[] }[];
+  /** `page` for a PDF's paragraphs (decision 0149). */
+  preview: { text: string; marks: { start: number; end: number }[]; page?: number }[];
   findings: Finding[];
   masked: number;
 }
@@ -256,6 +257,8 @@ function decodeDocSession(s: DocSession): DocSession {
       (paragraph) =>
         paragraph &&
         isString(paragraph.text) &&
+        (paragraph.page === undefined ||
+          (Number.isSafeInteger(paragraph.page) && paragraph.page >= 1)) &&
         Array.isArray(paragraph.marks) &&
         paragraph.marks.every(
           (mark) =>
@@ -283,6 +286,7 @@ function decodeDocSession(s: DocSession): DocSession {
     preview: s.preview.map((paragraph) => ({
       text: paragraph.text,
       marks: paragraph.marks.map((mark) => ({ start: mark.start, end: mark.end })),
+      ...(paragraph.page === undefined ? {} : { page: paragraph.page }),
     })),
     findings: s.findings.map((f) => ({
       id: f.id,

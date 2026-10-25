@@ -1252,6 +1252,38 @@ th {
   font-family: inherit;
   font-size: inherit;
 }
+/* A PDF's preview reads like its Markdown (decision 0149): page headings, tables, and a
+   lone row of cells inline. */
+.doc-page-heading {
+  margin: 18px 0 8px;
+  color: var(--muted);
+  font: 600 11px var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.doc-page-heading:first-child {
+  margin-top: 0;
+}
+.doc-row span + span::before {
+  content: " · ";
+  color: var(--muted);
+}
+.doc-table {
+  margin: 0 0 12px;
+  overflow-x: auto;
+  white-space: normal;
+}
+.doc-table table {
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.doc-table td {
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  text-align: left;
+  vertical-align: top;
+}
 /* A card that ends without a footer keeps its bottom padding. */
 .step-panel > :last-child:not(.card-footer) {
   margin-bottom: 22px;
