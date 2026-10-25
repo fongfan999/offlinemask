@@ -521,6 +521,10 @@ export function initOfflineMask(root) {
     if (event.target.closest('a[href="#om-platforms"]')) platforms.open = true;
   };
   root.addEventListener("click", showPlatforms);
+  // Opening the list makes the page longer, so the dock's "to the end of the page" trigger is
+  // measured again; on a phone the list opens by itself once no platform is detected.
+  const refreshTriggers = () => ScrollTrigger.refresh();
+  platforms.addEventListener("toggle", refreshTriggers);
   let disposed = false;
 
   root.classList.add("om-js");
@@ -675,6 +679,7 @@ export function initOfflineMask(root) {
     }
     detail.textContent = detailText;
     root.removeEventListener("click", showPlatforms);
+    platforms.removeEventListener("toggle", refreshTriggers);
     dock.classList.remove("om-hidden");
     root.classList.remove("om-js");
     washWatch.disconnect();

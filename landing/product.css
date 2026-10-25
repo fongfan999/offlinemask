@@ -876,6 +876,7 @@
   white-space: nowrap;
 }
 .om-scene-crumb {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
 }
@@ -2145,28 +2146,34 @@
   .om-scene-pill {
     display: none;
   }
+  /* The sample sheet keeps two columns on a phone, so nothing scrolls sideways inside the card. */
+  .om-sheet th:nth-child(4),
+  .om-sheet td:nth-child(4) {
+    display: none;
+  }
+  /* The document behind the sheet peeks out less, so it stays inside the card. */
+  .om-doc-peek {
+    inset: 0 -4px 40px 18px;
+    transform: rotate(1.6deg);
+  }
   .om-scene-body {
     padding: 20px;
   }
   .om-scene-foot {
     padding: 12px 16px;
   }
+  /* The four role tabs wrap onto two rows: all visible, nothing clipped at the edge. */
   .om-roles {
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    overflow-x: auto;
-    margin-inline: calc(-1 * var(--gutter));
-    padding-inline: var(--gutter);
-    scrollbar-width: none;
+    gap: 8px 6px;
+    margin-bottom: 26px;
   }
   .om-role {
-    flex: none;
     padding: 8px 14px;
     font-size: 14px;
   }
   .om-view-toggle button {
-    padding: 2px 9px;
-    font-size: 11px;
+    padding: 3px 10px;
+    font-size: 12px;
   }
 }
 @media (prefers-reduced-motion: reduce) {
