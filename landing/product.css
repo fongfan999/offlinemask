@@ -2168,11 +2168,21 @@
     margin-top: 56px;
     padding-block: 64px 40px;
   }
+  /* The pauses between the lower sections were sized for a desktop: about half a phone screen of
+     empty paper before the questions, before the download band and after its list of builds. */
+  .om-faq {
+    padding-block: 80px 24px;
+  }
   .om-questions summary {
     font-size: 17px;
   }
   .om-download {
-    padding-block: 110px 150px;
+    margin-top: 64px;
+    padding-block: 96px 90px;
+  }
+  /* Footer links at thumb height: 38 px rows instead of 34. */
+  .om-footer nav {
+    gap: 14px;
   }
   /* Nothing installs on a phone, so the pinned download button stays away; the band's list of
      Mac, Windows and Linux builds says what the app runs on. */
