@@ -573,7 +573,7 @@ export function initOfflineMask(root) {
       download.label.textContent = link.dataset.omLabel ?? downloadLabels[platform];
     }
     const kind = link.closest("div").querySelector("dt").textContent;
-    detail.textContent = `${kind} · ${link.textContent} · Miễn phí, không cần tài khoản`;
+    detail.textContent = `${kind} · ${link.textContent} · Không cần tài khoản`;
   });
 
   media.add(
