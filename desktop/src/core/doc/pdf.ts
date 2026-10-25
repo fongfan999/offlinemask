@@ -244,6 +244,21 @@ function annotationTexts(annotations: readonly Annotation[]): string[] {
 
 /** NFC, since PDFs often store "ệ" as a letter and combining marks, and without the
  * control characters some fonts' Unicode maps add after a letter. */
+type PdfPageProxy = Awaited<
+  ReturnType<Awaited<ReturnType<PdfJs["getDocument"]>["promise"]>["getPage"]>
+>;
+/** A page's text items. pdf.js's own `getTextContent` reads its stream with `for await`,
+ * which WebKit's ReadableStream does not support (macOS 26.6), so every PDF failed in
+ * the desktop app; reading the stream with a reader works everywhere. */
+async function pageText(page: PdfPageProxy): Promise<TextItem[]> {
+  const reader = page.streamTextContent().getReader();
+  const items: TextItem[] = [];
+  for (let chunk = await reader.read(); !chunk.done; chunk = await reader.read())
+    for (const item of (chunk.value as { items: object[] }).items)
+      if ("str" in item) items.push(item as TextItem);
+  return items;
+}
+
 // eslint-disable-next-line no-control-regex -- removing control characters is the point
 const controls = /[\u0000-\u0008\u000b-\u001f\u007f]/g;
 const clean = (text: string) => text.replace(controls, "").normalize("NFC");
@@ -300,8 +315,7 @@ export async function openPdf(
       }
       if (stopped?.()) throw new DocFileError("cancelled");
       const page = await document.getPage(number);
-      const content = await page.getTextContent();
-      const items = content.items.filter((item): item is TextItem & typeof item => "str" in item);
+      const items = await pageText(page);
       const text = clean(items.map((item) => item.str).join(""));
       const kind: PdfPageKind =
         text.replace(/\s/g, "").length < 5

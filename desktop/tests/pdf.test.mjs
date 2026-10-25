@@ -268,3 +268,21 @@ test("a PDF's Markdown returned by the AI is restored line by line, endings kept
     "Tóm tắt:\r\n\r\nHợp đồng này được ký giữa ông Nguyễn Văn An và công ty.\r\nHết.",
   );
 });
+
+test("pages are read without async iteration of streams, which WebKit lacks", async () => {
+  const prototype = ReadableStream.prototype;
+  const iterator = Object.getOwnPropertyDescriptor(prototype, Symbol.asyncIterator);
+  const values = Object.getOwnPropertyDescriptor(prototype, "values");
+  delete prototype[Symbol.asyncIterator];
+  delete prototype.values;
+  try {
+    const opened = await openPdf(await fixtures.wrappedName());
+    assert.equal(
+      opened.paragraphs[0].text,
+      "Hợp đồng này được ký giữa ông Nguyễn Văn An và công ty.",
+    );
+  } finally {
+    if (iterator) Object.defineProperty(prototype, Symbol.asyncIterator, iterator);
+    if (values) Object.defineProperty(prototype, "values", values);
+  }
+});
