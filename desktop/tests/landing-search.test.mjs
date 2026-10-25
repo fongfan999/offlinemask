@@ -3,7 +3,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { faq, pages, robots, sitemap, structuredData } from "../../landing/search.js";
+import { faq, llms, pages, robots, sitemap, structuredData } from "../../landing/search.js";
 
 const fragment = readFileSync(new URL("../../landing/product.html", import.meta.url), "utf8");
 
@@ -44,4 +44,20 @@ test("the sitemap lists the pages and each post, and robots.txt points to it", (
   assert.match(xml, /mot-bai<\/loc><lastmod>2026-10-27<\/lastmod>/);
   assert.match(robots(), /^User-agent: \*\nAllow: \/\n/);
   assert.match(robots(), /^Sitemap: https:\/\/offlinemask\.com\/sitemap\.xml$/m);
+});
+
+test("llms.txt lists the pages and every post with their descriptions", () => {
+  const text = llms({
+    pages: [{ path: "/install", title: "Cài đặt", description: "Cài trong một phút." }],
+    posts: [{ slug: "mot-bai", title: "Một bài", description: "Câu trả lời." }],
+  });
+  assert.match(text, /^# OfflineMask\n\n> /);
+  assert.match(
+    text,
+    /^- \[Cài đặt\]\(https:\/\/offlinemask\.com\/install\): Cài trong một phút\.$/m,
+  );
+  assert.match(
+    text,
+    /^## Blog\n\n- \[Một bài\]\(https:\/\/offlinemask\.com\/blog\/mot-bai\): Câu trả lời\.$/m,
+  );
 });

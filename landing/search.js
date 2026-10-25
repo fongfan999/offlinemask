@@ -82,6 +82,33 @@ ${[
 </urlset>
 `;
 
+/**
+ * `/llms.txt` (decision 0148): what the site is, in the format proposed at llmstxt.org, for AI
+ * assistants that read it: the summary, the pages with their own descriptions, then every post.
+ */
+export const llms = ({ pages: described, posts = [] }) => `# OfflineMask
+
+> OfflineMask là ứng dụng miễn phí trên máy tính, ẩn thông tin riêng (họ tên, số điện thoại, số tài khoản, CCCD…) bằng mã ngay trên máy trước khi bạn hỏi AI như ChatGPT, Claude hay Gemini, rồi đổi mã trong câu trả lời về thông tin thật.
+
+- Miễn phí, không quảng cáo, không cần tài khoản. Có cho macOS (Apple Silicon và Intel), Windows và Linux.
+- Ẩn và khôi phục chạy hoàn toàn trên máy, kể cả khi không có mạng; bảng đối chiếu mã không rời máy. OfflineMask không kết nối với AI nào.
+- Tự nhận ra email, số điện thoại, số tài khoản, số thẻ, CCCD, hộ chiếu, mã số thuế, mật khẩu; thêm họ tên, địa chỉ, tổ chức với gói tiếng Việt tải một lần.
+- Làm việc với văn bản, bảng tính (XLSX, XLS, ODS, CSV) và tài liệu (DOCX, ODT), giữ nguyên định dạng. Chưa hỗ trợ PDF và hình ảnh.
+- Ẩn nhanh trên macOS và Windows: bôi đen chữ trong bất kỳ ứng dụng nào để ẩn và khôi phục tại chỗ.
+
+## Trang
+
+${described.map(({ path, title, description }) => `- [${title}](${site}${path}): ${description}`).join("\n")}
+
+## Blog
+
+${posts.map(({ slug, title, description }) => `- [${title}](${site}/blog/${slug}): ${description}`).join("\n")}
+
+## Optional
+
+- [Mã nguồn trên GitHub](https://github.com/fongfan999/offlinemask): mã nguồn mở của ứng dụng và trang web.
+`;
+
 // Cloudflare may put its managed content-signal notes above these lines; they leave crawling open.
 export const robots = () => `User-agent: *
 Allow: /

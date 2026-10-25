@@ -2,6 +2,7 @@
 // checks in landing/posts.js are what stand between a bad post and the live site.
 import test from "node:test";
 import assert from "node:assert/strict";
+import { card } from "../../landing/cards.js";
 import { fill, indexPage, parse, postPage, posts, rss } from "../../landing/posts.js";
 
 const words = (count) => Array.from({ length: count }, () => "chữ").join(" ");
@@ -56,7 +57,18 @@ test("pages carry the post's metadata and escape it", () => {
   const json = JSON.parse(/<script type="application\/ld\+json">(.*?)<\/script>/.exec(page)[1]);
   assert.equal(json["@graph"][0]["@type"], "BlogPosting");
   assert.equal(json["@graph"][0].headline, 'Dấu "ngoặc" & <thẻ>');
+  assert.equal(json["@graph"][0].image, "https://offlinemask.com/blog/mot-bai.png");
+  assert.match(
+    page,
+    /<meta property="og:image" content="https:\/\/offlinemask\.com\/blog\/mot-bai\.png" \/>/,
+  );
   assert.doesNotMatch(page, /blog-(head|main)/);
   assert.match(fill("<!-- blog-main -->", indexPage([parsed])), /href="\.\/mot-bai"/);
   assert.match(rss([parsed]), /<link>https:\/\/offlinemask\.com\/blog\/mot-bai<\/link>/);
+});
+
+test("a post's share image is a 1200×630 PNG", async () => {
+  const png = await card({ title: "Ẩn số tài khoản trước khi gửi cho AI", date: "2026-10-25" });
+  assert.equal(png.subarray(1, 4).toString(), "PNG");
+  assert.deepEqual([png.readUInt32BE(16), png.readUInt32BE(20)], [1200, 630]);
 });

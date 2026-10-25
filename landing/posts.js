@@ -119,7 +119,7 @@ export function posts() {
   return list.sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
 }
 
-const shareTags = ({ title, description, url, type }) => `
+const shareTags = ({ title, description, url, type, image = `${site}/og.png` }) => `
     <meta name="description" content="${escape(description)}" />
     <link rel="canonical" href="${url}" />
     <meta property="og:title" content="${escape(title)}" />
@@ -127,7 +127,7 @@ const shareTags = ({ title, description, url, type }) => `
     <meta property="og:type" content="${type}" />
     <meta property="og:locale" content="vi_VN" />
     <meta property="og:url" content="${url}" />
-    <meta property="og:image" content="${site}/og.png" />
+    <meta property="og:image" content="${image}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
@@ -175,7 +175,7 @@ export function postPage(post, entries) {
     datePublished: post.date,
     dateModified: post.updated,
     inLanguage: "vi",
-    image: `${site}/og.png`,
+    image: `${url}.png`,
     author: publisher,
     publisher,
   };
@@ -188,7 +188,7 @@ export function postPage(post, entries) {
     ],
   };
   return {
-    head: `<title>${escape(post.title)} — OfflineMask</title>${shareTags({ title: post.title, description: post.description, url, type: "article" })}
+    head: `<title>${escape(post.title)} — OfflineMask</title>${shareTags({ title: post.title, description: post.description, url, type: "article", image: `${url}.png` })}
     <meta property="article:published_time" content="${post.date}" />
     <meta property="article:modified_time" content="${post.updated}" />
     ${json({ "@graph": [article, trail] })}`,

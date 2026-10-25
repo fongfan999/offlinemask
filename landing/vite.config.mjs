@@ -2,8 +2,18 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import { releaseDay } from "./latest.js";
-import { fill, images, indexPage, postPage, posts, rss } from "./posts.js";
-import { robots, sitemap, structuredData } from "./search.js";
+import {
+  blogDescription,
+  blogTitle,
+  fill,
+  images,
+  indexPage,
+  postPage,
+  posts,
+  rss,
+} from "./posts.js";
+import { card } from "./cards.js";
+import { llms, pages, robots, sitemap, structuredData } from "./search.js";
 import worker, { latestRelease } from "./worker.js";
 
 const fragment = new URL("./product.html", import.meta.url);
@@ -32,6 +42,17 @@ const withRelease = (html) =>
 const productPage = () => readFileSync(fragment, "utf8");
 const home = fileURLToPath(new URL("./index.html", import.meta.url));
 const blogTemplate = new URL("./blog/index.html", import.meta.url);
+// Each page's own title and description, for llms.txt.
+const pageFiles = { "/": "index.html", "/privacy": "privacy.html", "/install": "install.html" };
+const describe = (path) => {
+  if (!pageFiles[path]) return { path, title: blogTitle, description: blogDescription };
+  const html = readFileSync(new URL(pageFiles[path], import.meta.url), "utf8");
+  return {
+    path,
+    title: /<title>([^<]+)<\/title>/.exec(html)[1].replace(/ — OfflineMask$/, ""),
+    description: /<meta\s+name="description"\s+content="([^"]+)"/.exec(html)[1],
+  };
+};
 const postPath = (url) => /^\/blog\/([a-z0-9-]+)$/.exec(url.split("?")[0])?.[1];
 export default defineConfig({
   root: fileURLToPath(new URL(".", import.meta.url)),
@@ -69,6 +90,11 @@ export default defineConfig({
         // Crawlers' files (decision 0145); the site's other paths are its three pages.
         this.emitFile({ type: "asset", fileName: "sitemap.xml", source: sitemap(posts()) });
         this.emitFile({ type: "asset", fileName: "robots.txt", source: robots() });
+        this.emitFile({
+          type: "asset",
+          fileName: "llms.txt",
+          source: llms({ pages: pages.map(describe), posts: posts() }),
+        });
       },
       configureServer(server) {
         // The dev server answers the Worker's paths with the Worker itself; reports it is sent
@@ -154,6 +180,13 @@ export default defineConfig({
       },
       configureServer(server) {
         server.middlewares.use(async (request, response, next) => {
+          const image = /^\/blog\/([a-z0-9-]+)\.png$/.exec(request.url.split("?")[0])?.[1];
+          const post = image && posts().find(({ slug }) => slug === image);
+          if (!post) return next();
+          response.setHeader("content-type", "image/png");
+          response.end(await card(post));
+        });
+        server.middlewares.use(async (request, response, next) => {
           if (!postPath(request.url)) return next();
           try {
             const html = await server.transformIndexHtml(
@@ -171,7 +204,7 @@ export default defineConfig({
           if (path.endsWith(".md")) server.ws.send({ type: "full-reload" });
         });
       },
-      generateBundle(_, bundle) {
+      async generateBundle(_, bundle) {
         const page = bundle["blog/index.html"];
         if (!page) return;
         const entries = posts();
@@ -180,6 +213,12 @@ export default defineConfig({
             type: "asset",
             fileName: `blog/${post.slug}.html`,
             source: fill(page.source, postPage(post, entries)),
+          });
+        for (const post of entries)
+          this.emitFile({
+            type: "asset",
+            fileName: `blog/${post.slug}.png`,
+            source: await card(post),
           });
         page.source = fill(page.source, indexPage(entries));
         this.emitFile({ type: "asset", fileName: "blog/rss.xml", source: rss(entries) });
