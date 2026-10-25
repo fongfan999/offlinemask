@@ -28,14 +28,20 @@ import {
 function recorder() {
   const lists = { hide: new Set(), keep: new Set(), ignore: new Set() };
   const add = (list) => (value) => (lists[list].add(String(value)), value);
+  const contexts = new Map();
   return {
     hide: add("hide"),
+    /** A short value that must be hidden only where it stands in `context` ("bà Trang"),
+     * not everywhere ("Trang 1/1"). Returns the context, to be placed as it is. */
+    hideIn: (value, context) => (contexts.set(context, { value, in: context }), context),
     keep: add("keep"),
     ignore: add("ignore"),
     lists: () => {
       // A value both hidden and kept is a generator mistake; hiding wins.
       for (const value of lists.hide) lists.keep.delete(value);
-      return Object.fromEntries(Object.entries(lists).map(([key, set]) => [key, [...set]]));
+      const result = Object.fromEntries(Object.entries(lists).map(([key, set]) => [key, [...set]]));
+      result.hide.push(...contexts.values());
+      return result;
     },
   };
 }
@@ -418,7 +424,7 @@ function contract(rng, layout) {
         text: "Bên A bàn giao nhà đúng thời hạn và bảo đảm cho Bên B sử dụng ổn định trong thời gian thuê. Bên B sử dụng nhà đúng mục đích, giữ gìn nhà và thanh toán đủ tiền thuê. Mọi thay đổi phải được hai bên thỏa thuận bằng văn bản.",
       },
       {
-        text: `Khi cần liên hệ, Bên B gọi cho ${owner.title.toLowerCase()} ${r.hide(owner.name.split(" ").at(-1))} theo số ${r.hide(owner.phone)}.`,
+        text: `Khi cần liên hệ, Bên B gọi cho ${r.hideIn(owner.name.split(" ").at(-1), `${owner.title.toLowerCase()} ${owner.name.split(" ").at(-1)}`)} theo số ${r.hide(owner.phone)}.`,
       },
       { text: r.keep("Điều 4. Điều khoản chung"), bold: true },
       { text: "Hợp đồng được lập thành 02 bản có giá trị pháp lý như nhau, mỗi bên giữ 01 bản." },

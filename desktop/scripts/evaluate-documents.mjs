@@ -6,7 +6,8 @@
 //
 // For each document (.pdf, .docx, .odt) the folder holds `<document>.expect.json`:
 //
-//   { "hide": ["values that must be masked wherever they appear"],
+//   { "hide": ["values that must be masked wherever they appear",
+//              { "value": "Trang", "in": "bà Trang" }],   // a short value, only in context
 //     "keep": ["text that must stay readable"],
 //     "ignore": ["values that may be masked or not, such as a bank's name"],
 //     "draft": true }            // until the owner has reviewed the lists
@@ -87,11 +88,15 @@ function evaluate({ opened, edits }, expected) {
   const covered = (paragraph, start, end) =>
     (edits.paragraphs.get(paragraph.id) ?? []).some((r) => r.start <= start && r.end >= end);
   const result = { notRead: [], leaked: [], over: [], unlisted: [] };
-  for (const value of expected.hide ?? []) {
+  for (const entry of expected.hide ?? []) {
+    const value = typeof entry === "string" ? entry : entry.value;
+    const context = typeof entry === "string" ? entry : entry.in;
+    const offset = context.indexOf(value);
     let found = false;
     for (const paragraph of opened.paragraphs) {
-      for (let at = paragraph.text.indexOf(value); at >= 0; at = paragraph.text.indexOf(value, at + 1)) {
+      for (let near = paragraph.text.indexOf(context); near >= 0; near = paragraph.text.indexOf(context, near + 1)) {
         found = true;
+        const at = near + offset;
         for (let i = at; i < at + value.length; i++)
           if (!/\s/u.test(paragraph.text[i]) && !covered(paragraph, i, i + 1)) {
             result.leaked.push(value);
@@ -100,7 +105,7 @@ function evaluate({ opened, edits }, expected) {
       }
     }
     // A value the reader split differently (a line break, two spaces) is matched loosely.
-    if (!found && !opened.paragraphs.some((p) => squeeze(p.text).includes(squeeze(value))))
+    if (!found && !opened.paragraphs.some((p) => squeeze(p.text).includes(squeeze(context))))
       result.notRead.push(value);
   }
   for (const value of expected.keep ?? [])
@@ -113,7 +118,7 @@ function evaluate({ opened, edits }, expected) {
       const value = paragraph.text.slice(replacement.start, replacement.end);
       masked.add(value);
       const listed = [
-        ...(expected.hide ?? []),
+        ...(expected.hide ?? []).map((entry) => (typeof entry === "string" ? entry : entry.value)),
         ...(expected.keep ?? []),
         ...(expected.ignore ?? []),
       ].some(

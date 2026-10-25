@@ -30,3 +30,7 @@ The reader read every value. The failures are detection, in families:
 7. **Job titles and relations (4):** "Nhân viên", "Trưởng nhóm", "Bố" in the CV's tables; "Lai nhap von".
 
 Values are not recorded beyond these examples, which are invented.
+
+## After decision 0154 (leaks)
+
+Leaks went to 0 on seed 1 and on seeds 2–7 (162 more documents, generated with other values), with the owner's ten invoices still clean. Over-masking on seed 1 went from 85 to 83. Seed 1 now: not read 0, leaked 0, over-masked 83, unlisted 7.

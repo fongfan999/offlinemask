@@ -266,5 +266,25 @@
       "3\tMì Xào Hải Sản\tPhần",
       "4\tGhẹ Xanh Bình Thuận\tKg"
     ]
+  },
+  {
+    "id": "bank-statement",
+    "text": "SAO KÊ TÀI KHOẢN\nChủ tài khoản: TRẦN THỊ HẠNH · Số tài khoản: 0071002345678\nĐịa chỉ: 25 Lý Thường Kiệt, Phường Hoàn Kiếm, Thành phố Hà Nội\n05/10/2026\tFT26001234567\tCT DEN:FT26001234567 LE MINH TUAN chuyen tien thue nha T10\t\t3.500.000\t12.500.000\n07/10/2026\tFT26007654321\tTRAN THI HANH chuyen tien den TK 19033445566778 PHAM QUOC BAO\t1.200.000\t\t11.300.000\n09/10/2026\tFT26009999999\tTRA LUONG THANG 9 CONG TY TNHH THUONG MAI DICH VU SAO MAI\t\t25.000.000\t36.300.000\n10/10/2026\tFT26010101010\tPhi duy tri dich vu SMS Banking\t11.000\t\t36.289.000",
+    "sensitive": [
+      "TRẦN THỊ HẠNH",
+      "0071002345678",
+      "25 Lý Thường Kiệt, Phường Hoàn Kiếm, Thành phố Hà Nội",
+      "LE MINH TUAN",
+      "TRAN THI HANH",
+      "19033445566778",
+      "PHAM QUOC BAO",
+      "CONG TY TNHH THUONG MAI DICH VU SAO MAI"
+    ],
+    "retain": [
+      "chuyen tien thue nha T10",
+      "Phi duy tri dich vu SMS Banking",
+      "3.500.000",
+      "25.000.000"
+    ]
   }
 ]

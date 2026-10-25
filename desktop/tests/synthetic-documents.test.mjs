@@ -24,7 +24,7 @@ test("the reader reads every value a synthetic document places, in PDF and Word"
     assert.ok(expect.hide.length > 3, `${name} hides something`);
     const opened = await openDocument(bytes, name);
     const text = squeeze(opened.paragraphs.map((paragraph) => paragraph.text).join("\n"));
-    for (const value of [...expect.hide, ...expect.keep])
+    for (const value of [...expect.hide.map((entry) => entry.in ?? entry), ...expect.keep])
       assert.ok(text.includes(squeeze(value)), `${name}: ${JSON.stringify(value)} not read`);
   }
 });

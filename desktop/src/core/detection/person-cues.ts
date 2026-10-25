@@ -1,0 +1,90 @@
+import type { Detection } from "./types.ts";
+
+/** Names found by where documents put them rather than by a model (decision 0154): after a
+ * form of address ("Ông", "Bà", "Anh", "Chị") or "mang tên" / "đứng tên" (an account or a
+ * deed in someone's name), and under a signature note ("(Ký, ghi rõ họ
+ * tên)"). Both need a name to look like a Vietnamese one: it starts with a family name and
+ * every word is one capitalised syllable. */
+export const familyNames = new Set(
+  "nguyen tran le pham hoang huynh phan vu vo dang bui do ho ngo duong ly truong dinh dao doan lam mai trinh cao luong quach ta to vuong ha kieu thai phung luu luc tang khuc nong thach tieu lai banh chu chau hua lo tong ung vi diep giang khong kim mac nghiem quan than ton van vien".split(
+    " ",
+  ),
+);
+/** One Vietnamese syllable without tone marks: onset, one to three vowels, final. */
+const syllable =
+  /^(?:ngh|ng|nh|ch|gh|gi|kh|ph|qu|th|tr|[bcdghklmnprstvx])?[aeiouy]{1,3}(?:ng|nh|ch|[cmnpt])?$/;
+export const plain = (word: string) =>
+  word.normalize("NFD").replace(/\p{M}/gu, "").replace(/[đĐ]/g, "d").toLowerCase();
+export const isSyllable = (word: string) => syllable.test(plain(word));
+
+/** Two to four capitalised syllables starting with a family name. */
+export function looksLikeName(value: string): boolean {
+  const words = value.normalize("NFC").trim().split(/\s+/u);
+  return (
+    words.length >= 2 &&
+    words.length <= 5 &&
+    familyNames.has(plain(words[0]!)) &&
+    words.every((word) => /^\p{Lu}/u.test(word) && isSyllable(word))
+  );
+}
+
+const word = "\\p{Lu}[\\p{L}\\p{M}]*";
+const addressed = new RegExp(
+  `(?<![\\p{L}\\p{M}])(Ông|Bà|Anh|Chị|ông|bà|anh|chị|ÔNG|BÀ|mang tên|đứng tên)[^\\S\\r\\n]+(${word}(?:[^\\S\\r\\n]+${word}){0,4})`,
+  "gu",
+);
+/** A signature note; the names are on one of the next two non-empty lines. */
+const signature = /\((?:ký|Ký|KÝ)[^)\r\n]*\)[^\r\n]*/gu;
+
+function finding(start: number, end: number, source: string): Detection {
+  return {
+    start,
+    end,
+    type: "TEN",
+    label: "Họ và tên",
+    priority: 110,
+    source,
+    reason:
+      "Họ tên theo vị trí trong văn bản (sau cách xưng hô hoặc dưới chữ ký); hãy kiểm tra lại.",
+  };
+}
+
+export function detectPersonCues(text: string): Detection[] {
+  const found: Detection[] = [];
+  for (const match of text.matchAll(addressed)) {
+    // The longest prefix that still looks like a name: "Bà Võ Minh Yến cam kết" stops at "kết".
+    const words = match[2]!.split(/[^\S\r\n]+/u);
+    const start = match.index! + match[0].length - match[2]!.length;
+    let count = words.length;
+    while (count >= 2 && !looksLikeName(words.slice(0, count).join(" "))) count--;
+    // A given name alone after a lowercase form of address in a sentence: "gọi cho bà Trang".
+    if (count < 2 && !(/^(?:ông|bà|anh|chị)$/u.test(match[1]!) && isSyllable(words[0]!))) continue;
+    const value = words.slice(0, Math.max(count, 1)).join(" ");
+    found.push(finding(start, start + value.length, "Cách xưng hô · person-cues-v1"));
+  }
+  for (const match of text.matchAll(signature)) {
+    let lineStart = match.index! + match[0].length;
+    for (let checked = 0; checked < 2;) {
+      const next = /\r?\n[^\S\r\n]*/u.exec(text.slice(lineStart));
+      if (!next || next.index !== 0) break;
+      lineStart += next[0].length;
+      const lineEnd = text.slice(lineStart).search(/\r?\n/u);
+      const line = text.slice(lineStart, lineEnd < 0 ? text.length : lineStart + lineEnd);
+      if (!line.trim()) continue;
+      checked++;
+      // Signatures side by side share a line: " · " (the PDF reader) or a tab (Word).
+      let offset = 0;
+      for (const cell of line.split(/[^\S\r\n]*(?:·|\t)[^\S\r\n]*/u)) {
+        const at = line.indexOf(cell, offset);
+        offset = at + cell.length;
+        const value = cell.trim();
+        if (value && looksLikeName(value)) {
+          const start = lineStart + at + cell.indexOf(value);
+          found.push(finding(start, start + value.length, "Chữ ký · person-cues-v1"));
+        }
+      }
+      lineStart += line.length;
+    }
+  }
+  return found;
+}

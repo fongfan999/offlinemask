@@ -168,8 +168,9 @@ const bridges = (spans: readonly { x: number; end: number }[], line: Line, regio
     (piece) => spans.filter((span) => piece.x < span.end && piece.end > span.x).length > 1,
   );
 
-/** Lines of a table as its rows, one cell per column. Lines closer together than a line
- * and a quarter are one row whose cells wrap (a header over three lines, a product name
+/** Lines of a table as its rows, one cell per column. Lines closer together than 1.4 font
+ * sizes are one row whose cells wrap (wrapped lines sit about 1.15–1.25 apart, rows 1.5 or
+ * more: a header over three lines, a product name
  * over two around its numbers); each cell reads top to bottom. A piece between columns
  * goes to the next column to its right. Two neighbouring columns
  * never filled in the same row, and close together, are one: a centred heading over
@@ -202,7 +203,7 @@ function tableRows(region: readonly Line[], table: number): Line[] {
   for (const line of region) {
     const band = bands.at(-1);
     const previous = band?.at(-1);
-    if (previous && previous.y - line.y < Math.max(previous.size, line.size) * 1.25)
+    if (previous && previous.y - line.y < Math.max(previous.size, line.size) * 1.4)
       band!.push(line);
     else bands.push([line]);
   }
@@ -264,7 +265,13 @@ export function alignTables(lines: readonly Line[], first = 0): Line[] {
       const previous = region.at(-1)!;
       if (previous.y - line.y > Math.max(previous.size, line.size) * 5) break;
       const spans = columnSpans(region.flatMap((member) => words(member.pieces)));
-      if (isTableRow(line) ? bridges(spans, line, region) : !wrapped(index)) break;
+      // A short line within a row's height continues the row above (its wrapped cell),
+      // even as the table's last line or before a page break.
+      const continues =
+        !isRow(line) &&
+        line.text.length <= 60 &&
+        previous.y - line.y < Math.max(previous.size, line.size) * 1.4;
+      if (isTableRow(line) ? bridges(spans, line, region) : !wrapped(index) && !continues) break;
       region.push(line);
       index++;
     }
@@ -281,7 +288,8 @@ export function alignTables(lines: readonly Line[], first = 0): Line[] {
 
 const listStart = /^\s*([•●▪◦○■□\-–*+]|\d{1,3}[.)]|[a-zđ][.)])\s/iu;
 /** "Mã số thuế: …", "Địa chỉ: …", "Điều 2: …": a form or contract line of its own. */
-const labelStart = /^[^\t:]{1,40}:(\s|$)/u;
+// A label starts with a capital: "điểm làm việc: …" is a wrapped line of prose.
+const labelStart = /^\p{Lu}[^\t:]{0,39}:(\s|$)/u;
 /** Lines into paragraphs. Lines of a paragraph join with a space, so a name wrapped
  * onto the next line is read whole. A larger gap, a line starting elsewhere than the
  * one before, not centred with it and not under a value on it (an indented block), a

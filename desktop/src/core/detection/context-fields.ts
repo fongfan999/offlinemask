@@ -129,7 +129,8 @@ export function detectContextFields(
       acronym = false,
       tokens = 0;
     for (; tokens < 12; tokens++) {
-      const token = /^[^\S\r\n]+([\p{L}\p{M}\p{N}]+(?:[-'’][\p{L}\p{M}\p{N}]+)*)/u.exec(
+      // A name never continues into the next table cell (a tab).
+      const token = /^[^\S\r\n\t]+([\p{L}\p{M}\p{N}]+(?:[-'’][\p{L}\p{M}\p{N}]+)*)/u.exec(
         text.slice(cursor, cursor + 160),
       );
       if (!token || cursor + token[0].length - start > 180) break;
@@ -163,7 +164,10 @@ export function detectContextFields(
     const seeded = seeds.some(
       (d) => ["TO_CHUC", "TEN", "DIA_CHI"].includes(d.type) && d.start < end && d.end > start,
     );
-    if (!labelled && !seeded) continue;
+    // A legal prefix and name all in capitals ("CONG TY TNHH THUONG MAI …" in a salary
+    // transfer) is a company without a label or a model's word for it (decision 0154).
+    const shouted = !/\p{Ll}/u.test(text.slice(start, end)) && capitals >= 2;
+    if (!labelled && !seeded && !shouted) continue;
     fields.detections.push(finding(start, end, "TO_CHUC", "Tổ chức"));
   }
   return fields;

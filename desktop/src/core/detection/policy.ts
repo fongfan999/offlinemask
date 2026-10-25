@@ -1,7 +1,8 @@
 import type { Detection } from "./types.ts";
 import { mergeModelDetections, plausibleModelDetections } from "./model-policy.ts";
 import { completeAddressBoundaries } from "./address-boundaries.ts";
-import { detectBankingIdentifiers } from "./banking.ts";
+import { detectBankingIdentifiers, detectTransferNames } from "./banking.ts";
+import { detectPersonCues } from "./person-cues.ts";
 import { detectContactDetails } from "./contact.ts";
 import { detectLabelledFields, reconcileLabelledFields } from "./labelled-fields.ts";
 import { reconcileStructuredValues } from "./structured-values.ts";
@@ -27,6 +28,8 @@ export function applyDetectionPolicy(text: string, predictions: readonly Detecti
     text,
     reconcileContextFields(text, [
       ...detectBankingIdentifiers(text),
+      ...detectTransferNames(text),
+      ...detectPersonCues(text),
       ...detectContactDetails(text),
       ...reconcileLabelledFields(text, completed, fields),
     ]),

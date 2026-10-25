@@ -3,9 +3,9 @@ import { textGraphemes } from "../unicode.ts";
 
 // Labels identify a bounded field, not an arbitrary person or place in prose.
 const nameLabels =
-  "ho va ten|ho ten|ten khach hang|ten nguoi nhan|ten nguoi gui|ten tren giay to|khach hang|nguoi thu huong|nguoi yeu cau|nguoi nhan|nguoi gui";
+  "ho va ten|ho ten|ten khach hang|ten nguoi nhan|ten nguoi gui|ten tren giay to|ten chu tai khoan|chu tai khoan|ten tai khoan|khach hang|nguoi thu huong|nguoi yeu cau|nguoi nhan|nguoi gui";
 const addressLabels =
-  "dia chi lien he|dia chi nhan thu|dia chi thuong tru|dia chi|noi nhan|noi o|thuong tru|d/c";
+  "dia chi lien he|dia chi nhan thu|dia chi thuong tru|dia chi|dia diem lam viec|dia diem kinh doanh|noi nhan|noi o|thuong tru|d/c";
 const otherLabels =
   "email|dien thoai|sdt|so dien thoai|stk|so tai khoan|tai khoan|cccd|cmnd|ma giao dich|ma khach hang|ngay sinh|ngay tiep nhan|so tien|noi dung|phi";
 const fields = new RegExp(
@@ -72,7 +72,8 @@ export function detectLabelledFields(text: string): LabelledFields {
     let end = start;
     for (; end < limit; end++) {
       const character = text[end]!;
-      if (/[;!?\r\n:：]/u.test(character) || (isName && character === ",")) break;
+      // A tab or " · " parts two fields on one line (Word, the PDF reader; decision 0154).
+      if (/[;!?\r\n:：\t·]/u.test(character) || (isName && character === ",")) break;
       if (character === ".") {
         const word = fold(text.slice(start, end)).match(/([a-z]+)$/)?.[1];
         if (isAddress && word && /^(p|q|tp|tx|tt)$/.test(word)) continue;
