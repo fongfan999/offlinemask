@@ -8,6 +8,7 @@
 //
 //   { "hide": ["values that must be masked wherever they appear"],
 //     "keep": ["text that must stay readable"],
+//     "ignore": ["values that may be masked or not, such as a bank's name"],
 //     "draft": true }            // until the owner has reviewed the lists
 //
 // --draft writes a draft for documents that have none: "hide" lists what the app masks
@@ -111,7 +112,11 @@ function evaluate({ opened, edits }, expected) {
     for (const replacement of edits.paragraphs.get(paragraph.id) ?? []) {
       const value = paragraph.text.slice(replacement.start, replacement.end);
       masked.add(value);
-      const listed = [...(expected.hide ?? []), ...(expected.keep ?? [])].some(
+      const listed = [
+        ...(expected.hide ?? []),
+        ...(expected.keep ?? []),
+        ...(expected.ignore ?? []),
+      ].some(
         (entry) => entry.includes(value) || value.includes(entry),
       );
       if (!listed) result.unlisted.push(value);
