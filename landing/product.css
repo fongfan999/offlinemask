@@ -90,7 +90,18 @@
   flex-shrink: 0;
 }
 
-/* Logo lockup (brand/README.md): the mark on a cobalt tile, as in the app. */
+/* Logo lockup (brand/README.md): the mark on a cobalt tile, then the wordmark, as in the app. */
+.om-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px;
+  font-weight: 750;
+  letter-spacing: -0.04em;
+}
+.om-brand > span > span {
+  color: var(--accent);
+}
 .om-brand .om-mark {
   position: relative;
   width: 34px;
@@ -103,15 +114,16 @@
 .om-brand .om-mark::after {
   content: "";
   position: absolute;
-  inset: 15%;
+  /* The mark fills 82% of the tile, as in the app's sidebar (28 px in 34 px). */
+  inset: 9%;
   background: var(--on-accent);
   -webkit-mask: url("../brand/mark-mono-black.svg") center / contain no-repeat;
   mask: url("../brand/mark-mono-black.svg") center / contain no-repeat;
 }
 
-/* The top logo: the mark alone, fixed at the top centre, where the pill used to be. A paper
-   ring keeps the cobalt tile visible over the cobalt bands. On load the swipe is painted on
-   from left to right and the eyes blink once; hovering blinks them again. */
+/* The top logo: the lockup in a paper chip, fixed at the top centre. On load the swipe is
+   painted on from left to right, the name follows, and the eyes blink once; hovering blinks
+   them again (decision 0141). */
 .om-top {
   position: fixed;
   top: 16px;
@@ -120,23 +132,25 @@
   translate: -50% 0;
 }
 .om-logo {
-  display: block;
-  width: 42px;
-  height: 42px;
-  border-radius: 24%;
-  box-shadow:
-    0 0 0 2px var(--paper-raised),
-    0 8px 22px -10px #0f1a4a73;
-  transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
-}
-.om-logo:hover,
-.om-logo:focus-visible {
-  transform: rotate(-6deg) scale(1.06);
+  gap: 12px;
+  padding: 5px 20px 5px 5px;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 70%, transparent);
+  border-radius: 18px;
+  /* Near-opaque instead of a live backdrop blur, which re-blurs the page on every scroll frame. */
+  background: color-mix(in srgb, var(--paper-raised) 96%, transparent);
+  box-shadow: 0 8px 26px -12px #0f1a4a59;
+  font-size: 24px;
+  line-height: 1;
 }
 .om-logo svg {
   display: block;
-  width: 100%;
-  height: 100%;
+  width: 52px;
+  height: 52px;
+  transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+.om-logo:hover svg,
+.om-logo:focus-visible svg {
+  transform: rotate(-6deg) scale(1.06);
 }
 .om-logo-tile {
   fill: var(--accent);
@@ -148,11 +162,14 @@
 .om-logo-band {
   animation: om-logo-paint 0.7s cubic-bezier(0.6, 0, 0.3, 1) 0.15s both;
 }
+.om-logo-name {
+  animation: om-logo-paint 0.45s cubic-bezier(0.6, 0, 0.3, 1) 0.6s both;
+}
 .om-logo-lid {
   transform: scaleY(0);
   transform-box: fill-box;
   transform-origin: center;
-  animation: om-logo-blink 0.24s ease-in-out 1s;
+  animation: om-logo-blink 0.24s ease-in-out 1.15s;
 }
 .om-logo:hover .om-logo-lid,
 .om-logo:focus-visible .om-logo-lid {
@@ -178,8 +195,9 @@
   }
 }
 @media (prefers-reduced-motion: reduce) {
-  .om-logo,
+  .om-logo svg,
   .om-logo-band,
+  .om-logo-name,
   .om-logo-lid {
     transition: none;
     animation: none !important;
@@ -2025,8 +2043,14 @@
     top: 12px;
   }
   .om-logo {
-    width: 38px;
-    height: 38px;
+    gap: 10px;
+    padding: 4px 16px 4px 4px;
+    border-radius: 15px;
+    font-size: 20px;
+  }
+  .om-logo svg {
+    width: 44px;
+    height: 44px;
   }
   .om-hero {
     padding-top: 112px;

@@ -33,7 +33,7 @@ mise exec -- pnpm tauri icon brand/tile-cobalt.svg
 
 One logo everywhere: in the app, on offlinemask.com, in share images and in videos.
 
-- **Lockup:** the mark on a cobalt tile (22% radius, mark at about 70% of the tile, in `--on-accent`), then the wordmark. The bare mark, without a tile, is for small inline uses only: buttons such as Ẩn nhanh, running text and the favicon.
+- **Lockup:** the mark on a cobalt tile (22% radius, mark at about 82% of the tile as in the app sidebar; the app icon uses 84%; in `--on-accent`), then the wordmark. The bare mark, without a tile, is for small inline uses only: buttons such as Ẩn nhanh, running text and the favicon.
 - **Wordmark:** "Offline" in ink and "Mask" in cobalt, set in **Noto Sans at weight 750 and −0.04em tracking**. It never depends on the system font: the app bundles the Latin file of `@fontsource-variable/noto-sans` 5.3.0 as the "OfflineMask Wordmark" face, and the website uses the same package. On cobalt, "Offline" is paper and "Mask" is a light cobalt (`#b3c3ff`).
 - **Large wordmarks** (the website hero, the footer, share images) use the same lettering at size; tracking may tighten to −0.055em at display sizes. Never set the name in the serif or in italics. The serif (Noto Serif) is for headlines, not for the brand name.
 - In body text, write the name as plain text, "OfflineMask", and the website as "OfflineMask.com"; links stay lowercase.
