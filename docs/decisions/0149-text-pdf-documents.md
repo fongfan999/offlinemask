@@ -13,7 +13,7 @@ Text, spreadsheets and Word are masked; PDF is the format people most often have
 
 ### Output is masked text, not a rebuilt PDF
 
-Phase 1 reads the text out of the PDF, masks it with the same detector and alias book as Word, and gives back **text**: "Sao chép" and "Tải tệp đã ẩn" saving `<tên> (đã ẩn).md`. It does not write a PDF.
+Phase 1 reads the text out of the PDF, masks it with the same detector and alias book as Word, and gives back **text**: "Sao chép" and "Tải tệp đã ẩn" saving `<tên> (offlinemasked).md` (the suffix was "(đã ẩn)" until [0150](0150-offlinemasked-suffix.md)). It does not write a PDF.
 
 This is how the redaction is true: the output is built **only from the text we extracted and masked**. Nothing from the original file is copied across, so nothing can ride along. The original name never reaches the output under a box, there is no metadata, no annotation, no attachment, no hidden layer, no earlier revision, no embedded font or image. What the user sends to AI is exactly what the preview shows.
 
@@ -154,7 +154,7 @@ Against the budgets:
 
 **Workers are built as ES modules** (`worker.format: "es"` in `vite.config.ts`). Vite's default builds each worker as one file with every dynamic import inlined, which put pdf.js in the files worker: 3.8 MB instead of 2.0 MB, loaded for every spreadsheet and Word file. As ES modules the files worker is 1.07 MB and pdf.js (0.49 MB and 1.24 MB) loads only when a PDF opens; SheetJS's code-page tables and the detection worker's native-recognition code split out the same way. Both workers were already started with `type: "module"`, and development always ran them as ES modules.
 
-**Checked** in the browser preview (Chromium, development server and a production build): a three-page PDF with a phone number, an email, an account number, a scanned page and a large image opened with its two notes; masking, "Sao chép" (the copied Markdown has the three page headings and the scanned page's line), "Tải tệp đã ẩn (.md)" saving `Hợp đồng thuê (đã ẩn).md`, and restoring a dropped `.md` reply (2 aliases restored, a foreign one listed, saved as `Trả lời (đã khôi phục).md`); the Word sample and the spreadsheet sample still open; an image dropped on the home page gets "Hình ảnh sắp được hỗ trợ…"; no request left localhost. `pnpm lint`, `pnpm typecheck` and `pnpm test` (380) pass.
+**Checked** in the browser preview (Chromium, development server and a production build): a three-page PDF with a phone number, an email, an account number, a scanned page and a large image opened with its two notes; masking, "Sao chép" (the copied Markdown has the three page headings and the scanned page's line), "Tải tệp đã ẩn (.md)" saving `Hợp đồng thuê (đã ẩn).md` (now `(offlinemasked)`, [0150](0150-offlinemasked-suffix.md)), and restoring a dropped `.md` reply (2 aliases restored, a foreign one listed, saved as `Trả lời (đã khôi phục).md`); the Word sample and the spreadsheet sample still open; an image dropped on the home page gets "Hình ảnh sắp được hỗ trợ…"; no request left localhost. `pnpm lint`, `pnpm typecheck` and `pnpm test` (380) pass.
 
 **Not checked:** the desktop app's WebKit and its module workers loading chunks from the app's asset protocol (`pnpm desktop:dev` or a release build), the Finder service with a PDF, a phone-width layout of the new progress line, and recognition with the pack installed (the models are not downloaded on this machine).
 

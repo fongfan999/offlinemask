@@ -1,9 +1,11 @@
 import { computed, ref, shallowRef, watch, type Ref } from "vue";
 import {
   exportName,
+  maskedSuffix,
   saveFile,
   SheetAdapterError,
   type SheetFiles,
+  withoutMaskedSuffix,
 } from "../adapters/sheet-files.ts";
 import type { DocumentFormat } from "../core/doc/document.ts";
 import { maxDocBytes, type DocEdits, type DocParagraph, type DocError } from "../core/doc/docx.ts";
@@ -51,9 +53,9 @@ const returnedForPdf = /\.(md|txt|docx|odt)$/i;
 export const unsupportedReturn = "Chỉ khôi phục được tệp .md, .txt, .docx hoặc .odt.";
 /** A PDF session is told apart by its file name; its session data is a Word one's. */
 export const isPdfSession = (session: { fileName: string }) => /\.pdf$/i.test(session.fileName);
-/** "Hợp đồng.pdf" → "Hợp đồng (đã ẩn).md". */
+/** "Hợp đồng.pdf" → "Hợp đồng (offlinemasked).md". */
 export function maskedName(fileName: string): string {
-  const name = exportName(fileName, "đã ẩn");
+  const name = exportName(fileName, maskedSuffix);
   return /\.pdf$/i.test(fileName) ? name.replace(/\.pdf$/i, ".md") : name;
 }
 
@@ -360,10 +362,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
   }
   async function downloadRestored(restore: DocRestore): Promise<boolean> {
     const bytes = await files.writeDoc(restore.handle, restore.edits);
-    return saveFile(
-      bytes,
-      exportName(restore.fileName.replace(/ \(đã ẩn\)(?=\.[^.]+$)/, ""), "đã khôi phục"),
-    );
+    return saveFile(bytes, exportName(withoutMaskedSuffix(restore.fileName), "đã khôi phục"));
   }
   function closeReturned(restore: DocRestore | null) {
     if (restore) files.close(restore.handle);

@@ -1,10 +1,12 @@
 import { computed, ref, shallowRef, watch, type Ref } from "vue";
 import {
   exportName,
+  maskedSuffix,
   saveFile,
   SheetAdapterError,
   fileErrorMessages,
   type SheetFiles,
+  withoutMaskedSuffix,
 } from "../adapters/sheet-files.ts";
 import { detectionOptions, localOptions, type DetectionOption } from "../core/detection/options.ts";
 import type { Detection } from "../core/detection/types.ts";
@@ -341,7 +343,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     if (!original) return false;
     const edits = keepCells(original.edits, original.findings, kept.of(session.id));
     const bytes = await files.write(original.handle, edits);
-    return saveFile(bytes, exportName(savedName(session.fileName), "đã ẩn"));
+    return saveFile(bytes, exportName(savedName(session.fileName), maskedSuffix));
   }
 
   /** Open the file that came back from the AI and swap this session's aliases back. */
@@ -360,7 +362,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     const bytes = await files.write(restore.handle, restore.edits);
     return saveFile(
       bytes,
-      exportName(savedName(restore.fileName).replace(/ \(đã ẩn\)(?=\.[^.]+$)/, ""), "đã khôi phục"),
+      exportName(withoutMaskedSuffix(savedName(restore.fileName)), "đã khôi phục"),
     );
   }
   function closeReturned(restore: SheetRestore | null) {

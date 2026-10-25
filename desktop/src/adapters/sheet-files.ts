@@ -135,7 +135,13 @@ const fileKinds = {
   odt: "OpenDocument",
   ods: "OpenDocument",
 } as const;
-/** "Sổ khách.xlsx" + "da-an" → "Sổ khách (đã ẩn).xlsx". */
+/** The suffix of a masked copy's name, in every format: "Sổ khách (offlinemasked).xlsx".
+ * Copies saved before it was chosen end in "(đã ẩn)". */
+export const maskedSuffix = "offlinemasked";
+const maskedMark = / \((offlinemasked|đã ẩn)\)(?=\.[^.]+$)/;
+/** A returned file's name without the masked suffix, to name its restored copy. */
+export const withoutMaskedSuffix = (name: string) => name.replace(maskedMark, "");
+/** "Sổ khách.xlsx" + "offlinemasked" → "Sổ khách (offlinemasked).xlsx". */
 export function exportName(original: string, suffix: string): string {
   const dot = original.lastIndexOf(".");
   const base = dot > 0 ? original.slice(0, dot) : original;
