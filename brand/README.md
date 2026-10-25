@@ -1,6 +1,6 @@
 # OfflineMask — brand kit
 
-The mark is **the mask**: a wide cobalt brush swipe, the thing that hides a value, with two eye holes. Whoever is behind it still sees, and what matters stays readable. At 16 px it reads as a ninja, at 1024 px as a brush stroke. It is drawn with the same brush as Phong Phan's personal **P?!** mark (a centerline, a variable-width profile, one filled path), so the two sit together on wotdafong.dev, but it is the product's mark; the personal mark is never used as the app logo.
+The mark is **the mask**: a wide cobalt brush swipe, the thing that hides a value, with two eye holes. Whoever is behind it still sees, and what matters stays readable. At 16 px it reads as a ninja, at 1024 px as a brush stroke. It is drawn with the same brush as Wot Da Fong's personal **P?!** mark (a centerline, a variable-width profile, one filled path), so the two sit together on wotdafong.dev, but it is the product's mark; the personal mark is never used as the app logo.
 
 It was chosen from twelve sketches in two rounds (`sketches-round-1.png`, `sketches.png`); [Decision 0093](../docs/decisions/0093-brush-mark-and-sketches.md) says why the others lost. The earlier alias mark `[—]` ([Decision 0053](../docs/decisions/0053-product-mark.md)) is retired.
 
