@@ -2068,21 +2068,32 @@
     --gutter: 18px;
     font-size: 16px;
   }
+  /* A phone shows the wordmark right under the lockup, so the lockup stays small: a 44 px chip
+     against the 64 px one on wide screens. */
   .om-top {
     top: 12px;
   }
   .om-logo {
-    gap: 10px;
-    padding: 4px 16px 4px 4px;
-    border-radius: 15px;
-    font-size: 20px;
+    gap: 8px;
+    padding: 3px 14px 3px 3px;
+    border-radius: 13px;
+    font-size: 17px;
   }
   .om-logo svg {
-    width: 44px;
-    height: 44px;
+    width: 36px;
+    height: 36px;
   }
   .om-hero {
-    padding-top: 112px;
+    padding-top: 88px;
+  }
+  .om-video-open {
+    margin-top: 20px;
+    padding: 7px 16px 7px 8px;
+    font-size: 14px;
+  }
+  .om-video-open span {
+    width: 28px;
+    height: 28px;
   }
   .om-hero > .om-wash {
     bottom: 22%;
@@ -2092,7 +2103,7 @@
     font-size: 14vw;
   }
   .om-hero-window {
-    margin-top: 36px;
+    margin-top: 30px;
   }
   .om-sticker {
     top: -36px;
