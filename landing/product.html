@@ -826,7 +826,10 @@
           Hỏi AI thoải mái.<br /><em>Giữ khách hàng cho riêng bạn.</em>
         </h2>
         <p class="om-download-version">
-          Bản mới nhất <strong>__OM_VERSION__</strong> · phát hành ngày __OM_RELEASE_DATE__
+          Bản mới nhất <strong data-om-version>__OM_VERSION__</strong
+          ><span data-om-release>
+            · phát hành ngày <span data-om-release-date>__OM_RELEASE_DATE__</span></span
+          >
         </p>
         <a class="om-button" href="#om-platforms" data-om-download
           ><span data-om-download-label>Chọn bản tải về</span> <span aria-hidden="true">↓</span></a
@@ -840,13 +843,8 @@
             <div>
               <dt>Máy Mac</dt>
               <dd>
-                <a
-                  href="__OM_DOWNLOAD__/OfflineMask___OM_VERSION___aarch64.dmg"
-                  data-om-platform="mac-arm"
-                  >Chip Apple (M1 trở về sau)</a
-                ><a
-                  href="__OM_DOWNLOAD__/OfflineMask___OM_VERSION___x64.dmg"
-                  data-om-platform="mac-intel"
+                <a href="/download/mac-arm" data-om-platform="mac-arm">Chip Apple (M1 trở về sau)</a
+                ><a href="/download/mac-intel" data-om-platform="mac-intel"
                   >Chip Intel (máy đời cũ)</a
                 >
               </dd>
@@ -865,9 +863,8 @@
             <div>
               <dt>Linux</dt>
               <dd>
-                <a href="__OM_DOWNLOAD__/OfflineMask___OM_VERSION___amd64.deb"
-                  >Ubuntu, Debian (.deb)</a
-                ><a href="__OM_DOWNLOAD__/OfflineMask-__OM_VERSION__-1.x86_64.rpm">Fedora (.rpm)</a>
+                <a href="/download/deb">Ubuntu, Debian (.deb)</a
+                ><a href="/download/rpm">Fedora (.rpm)</a>
               </dd>
             </div>
           </dl>
@@ -890,7 +887,8 @@
   <div class="om-dock" data-om-dock>
     <a class="om-dock-button" href="#om-download" data-om-download
       ><span data-om-download-label>Tải OfflineMask</span>
-      <span class="om-dock-version">__OM_VERSION__</span> <span aria-hidden="true">↓</span></a
+      <span class="om-dock-version" data-om-version>__OM_VERSION__</span>
+      <span aria-hidden="true">↓</span></a
     >
   </div>
   <footer class="om-footer">

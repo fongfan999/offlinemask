@@ -2,6 +2,7 @@ import { gsap } from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import introPoster from "./media/offlinemask-intro-poster.webp";
+import { showLatest } from "./latest.js";
 
 gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
 
@@ -557,6 +558,7 @@ export function initOfflineMask(root) {
     }),
   ];
 
+  showLatest(root);
   // Without JavaScript, or on an undetected platform (Linux, phones), the buttons lead to the
   // list of downloads, which then starts open; never to GitHub's release page.
   detectPlatform().then((platform) => {

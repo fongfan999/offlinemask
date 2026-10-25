@@ -1,6 +1,6 @@
 # 0139 — Downloads without GitHub, and the newest version at a glance
 
-Date: 25 October 2026. Status: implemented. Owner: the app is live on the Microsoft Store (`9PN76BSDNRQW`); "study the Dia browser and improve the download section… For Mac and Linux, just show options to download, never navigate to GitHub, since users are low tech… make sure it download the latest versions… users should see the latest version at a first glance… make sure users won't lose any settings/configurations each update."
+Date: 25 October 2026. Status: implemented; how the newest release is found is superseded by [0140](0140-latest-release-at-request-time.md). Owner: the app is live on the Microsoft Store (`9PN76BSDNRQW`); "study the Dia browser and improve the download section… For Mac and Linux, just show options to download, never navigate to GitHub, since users are low tech… make sure it download the latest versions… users should see the latest version at a first glance… make sure users won't lose any settings/configurations each update."
 
 ## What Dia does
 
