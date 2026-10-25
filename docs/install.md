@@ -33,14 +33,23 @@ Chỉ cần làm một lần cho mỗi phiên bản.
 
 ## Windows
 
+Cài từ [Microsoft Store](https://apps.microsoft.com/detail/9PN76BSDNRQW): Microsoft ký gói nên không có cảnh báo, và Store tự cập nhật.
+
+Máy không có Store (thường do bộ phận IT tắt):
+
 1. Chạy `…_x64-setup.exe` (hoặc `.msi`).
 2. Nếu SmartScreen hiện **Windows đã bảo vệ PC của bạn**, chọn **Thông tin thêm → Vẫn chạy**.
+
+Bản Store và bản cài từ tệp giữ dữ liệu ở hai chỗ khác nhau; chuyển từ tệp cài sang Store là bắt đầu lại từ đầu. Đã cài bằng tệp thì cập nhật bằng tệp cài bản mới để giữ cài đặt và lịch sử.
 
 ## Linux
 
 - `.deb`: `sudo apt install ./OfflineMask_<phiên bản>_amd64.deb`
 - `.rpm`: `sudo dnf install ./OfflineMask-<phiên bản>-1.x86_64.rpm`
-- `.AppImage`: `chmod +x OfflineMask_<phiên bản>_amd64.AppImage`, rồi chạy tệp.
+
+## Cập nhật
+
+OfflineMask không tự kiểm tra bản mới. Số phiên bản đang dùng nằm trong **Cài đặt**; bản mới nhất ghi ở [offlinemask.com](https://offlinemask.com). Cài bản mới đè lên bản cũ (trên Mac chọn **Thay thế** khi kéo vào Applications): kho mã hóa, lịch sử, cài đặt và gói tiếng Việt vẫn giữ nguyên, vì chúng nằm trong thư mục dữ liệu theo mã ứng dụng `dev.offlinemask.desktop`, không nằm trong ứng dụng. Bản Store được Store cập nhật và giữ dữ liệu của gói.
 
 ## Tự kiểm chứng xử lý offline
 

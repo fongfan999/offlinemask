@@ -808,20 +808,11 @@
           </h3>
           <div class="om-a" id="om-a-9" role="region" aria-labelledby="om-q-9">
             <div>
-              <!-- windows-direct -->
-              <p>
-                Không sao, đây là bước kiểm tra quen thuộc khi mở một ứng dụng mới tải về. Bạn chỉ
-                cần xác nhận mở một lần.
-                <a href="./install.html" target="_blank" rel="noopener">Xem hướng dẫn từng bước</a>.
-              </p>
-              <!-- /windows-direct -->
-              <!-- windows-store -->
               <p>
                 Không sao. Bản từ Microsoft Store mở ngay. Trên Mac, đây là bước kiểm tra quen thuộc
                 khi mở một ứng dụng mới tải về; bạn chỉ cần xác nhận mở một lần.
                 <a href="./install.html" target="_blank" rel="noopener">Xem hướng dẫn từng bước</a>.
               </p>
-              <!-- /windows-store -->
             </div>
           </div>
         </div>
@@ -834,84 +825,57 @@
         <h2 id="om-download-title" class="om-display">
           Hỏi AI thoải mái.<br /><em>Giữ khách hàng cho riêng bạn.</em>
         </h2>
-        <p>Phiên bản __OM_VERSION__ · Mã nguồn công khai · Không cần tài khoản</p>
-        <a
-          class="om-button"
-          href="https://github.com/fongfan999/offlinemask/releases/latest"
-          data-om-download
+        <p class="om-download-version">
+          Bản mới nhất <strong>__OM_VERSION__</strong> · phát hành ngày __OM_RELEASE_DATE__
+        </p>
+        <a class="om-button" href="#om-platforms" data-om-download
           ><span data-om-download-label>Chọn bản tải về</span> <span aria-hidden="true">↓</span></a
         >
-        <p class="om-download-platforms" data-om-download-detail>macOS · Windows · Linux</p>
-        <details class="om-platforms">
-          <summary>Tất cả bản tải về</summary>
+        <p class="om-download-platforms" data-om-download-detail>
+          Miễn phí · Không cần tài khoản · macOS, Windows, Linux
+        </p>
+        <details class="om-platforms" id="om-platforms" data-om-platforms>
+          <summary>Chọn bản cho máy khác</summary>
           <dl>
             <div>
-              <dt>macOS</dt>
+              <dt>Máy Mac</dt>
               <dd>
                 <a
-                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___aarch64.dmg"
+                  href="__OM_DOWNLOAD__/OfflineMask___OM_VERSION___aarch64.dmg"
                   data-om-platform="mac-arm"
-                  >Apple Silicon · .dmg</a
+                  >Chip Apple (M1 trở về sau)</a
                 ><a
-                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___x64.dmg"
+                  href="__OM_DOWNLOAD__/OfflineMask___OM_VERSION___x64.dmg"
                   data-om-platform="mac-intel"
-                  >Intel · .dmg</a
+                  >Chip Intel (máy đời cũ)</a
                 >
               </dd>
             </div>
             <div>
               <dt>Windows</dt>
               <dd>
-                <!-- windows-direct -->
                 <a
-                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___x64-setup.exe"
-                  data-om-platform="windows"
-                  >Bộ cài .exe</a
-                ><a
-                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___x64_en-US.msi"
-                  >.msi</a
-                >
-                <!-- /windows-direct -->
-                <!-- windows-store -->
-                <a
-                  href="https://apps.microsoft.com/detail/__OM_STORE_ID__"
+                  href="https://apps.microsoft.com/detail/__OM_STORE_ID__?hl=vi-VN&amp;gl=VN"
                   data-om-platform="windows"
                   data-om-label="Tải từ Microsoft Store"
                   >Microsoft Store</a
                 ><a href="./install.html#windows">Máy không có Store?</a>
-                <!-- /windows-store -->
               </dd>
             </div>
             <div>
               <dt>Linux</dt>
               <dd>
-                <a
-                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___amd64.AppImage"
-                  >.AppImage</a
-                ><a
-                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask___OM_VERSION___amd64.deb"
-                  >.deb</a
-                ><a
-                  href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/OfflineMask-__OM_VERSION__-1.x86_64.rpm"
-                  >.rpm</a
-                >
+                <a href="__OM_DOWNLOAD__/OfflineMask___OM_VERSION___amd64.deb"
+                  >Ubuntu, Debian (.deb)</a
+                ><a href="__OM_DOWNLOAD__/OfflineMask-__OM_VERSION__-1.x86_64.rpm">Fedora (.rpm)</a>
               </dd>
             </div>
           </dl>
-          <p>
-            <a
-              href="https://github.com/fongfan999/offlinemask/releases/download/v__OM_VERSION__/SHA256SUMS.txt"
-              >SHA256SUMS.txt</a
-            >
-            để đối chiếu tệp tải về ·
-            <a href="https://github.com/fongfan999/offlinemask/releases/tag/v__OM_VERSION__"
-              >Ghi chú phát hành ↗</a
-            >
-          </p>
         </details>
         <p class="om-release-note">
-          Đã thử kỹ trên máy Mac chip Apple; bản cho Windows và Linux đang được thử thêm. Lần mở đầu
-          tiên, máy có thể hỏi lại.
+          Đang dùng bản cũ hơn? Mở OfflineMask › Cài đặt để xem số phiên bản. Cài bản mới đè lên bản
+          cũ, mọi cài đặt và lịch sử vẫn giữ nguyên. Bản từ Microsoft Store tự cập nhật; bản Linux
+          đang được thử thêm.
           <a href="./install.html">Xem cách cài đặt</a>
         </p>
       </div>
@@ -924,11 +888,9 @@
     </button>
   </dialog>
   <div class="om-dock" data-om-dock>
-    <a
-      class="om-dock-button"
-      href="https://github.com/fongfan999/offlinemask/releases/latest"
-      data-om-download
-      ><span data-om-download-label>Tải OfflineMask</span> <span aria-hidden="true">↓</span></a
+    <a class="om-dock-button" href="#om-download" data-om-download
+      ><span data-om-download-label>Tải OfflineMask</span>
+      <span class="om-dock-version">__OM_VERSION__</span> <span aria-hidden="true">↓</span></a
     >
   </div>
   <footer class="om-footer">

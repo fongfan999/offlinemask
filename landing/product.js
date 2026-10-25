@@ -6,8 +6,8 @@ import introPoster from "./media/offlinemask-intro-poster.webp";
 gsap.registerPlugin(ScrollTrigger, ScrambleTextPlugin);
 
 const downloadLabels = {
-  "mac-arm": "Tải cho macOS",
-  "mac-intel": "Tải cho macOS",
+  "mac-arm": "Tải cho máy Mac",
+  "mac-intel": "Tải cho máy Mac",
   windows: "Tải cho Windows",
 };
 
@@ -514,6 +514,12 @@ export function initOfflineMask(root) {
   }));
   const detail = root.querySelector("[data-om-download-detail]");
   const detailText = detail.textContent;
+  const platforms = root.querySelector("[data-om-platforms]");
+  // The main button points at the choices until the visitor's own download is known.
+  const showPlatforms = (event) => {
+    if (event.target.closest('a[href="#om-platforms"]')) platforms.open = true;
+  };
+  root.addEventListener("click", showPlatforms);
   let disposed = false;
 
   root.classList.add("om-js");
@@ -551,15 +557,21 @@ export function initOfflineMask(root) {
     }),
   ];
 
-  // Without JavaScript, or on an undetected platform, the buttons open the release page.
+  // Without JavaScript, or on an undetected platform (Linux, phones), the buttons lead to the
+  // list of downloads, which then starts open; never to GitHub's release page.
   detectPlatform().then((platform) => {
+    if (disposed) return;
     const link = platform && root.querySelector(`[data-om-platform="${platform}"]`);
-    if (disposed || !link) return;
+    if (!link) {
+      platforms.open = true;
+      return;
+    }
     for (const download of downloads) {
       download.link.href = link.href;
       download.label.textContent = link.dataset.omLabel ?? downloadLabels[platform];
     }
-    detail.textContent = `${link.textContent} · Máy khác? Xem tất cả bản tải về`;
+    const kind = link.closest("div").querySelector("dt").textContent;
+    detail.textContent = `${kind} · ${link.textContent} · Miễn phí, không cần tài khoản`;
   });
 
   media.add(
@@ -660,6 +672,7 @@ export function initOfflineMask(root) {
       download.label.textContent = download.text;
     }
     detail.textContent = detailText;
+    root.removeEventListener("click", showPlatforms);
     dock.classList.remove("om-hidden");
     root.classList.remove("om-js");
     washWatch.disconnect();

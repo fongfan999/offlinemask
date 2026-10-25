@@ -6,6 +6,8 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ### Changed
 
+- offlinemask.com shows the newest version and its release date beside the download button and on the bottom bar, so you can compare it with the version in Settings. Windows downloads from the Microsoft Store; Mac and Linux files download directly, never through a GitHub page, and always from the newest published release. Installing a newer version over an older one keeps your settings, history and Vietnamese pack ([0139](docs/decisions/0139-downloads-without-github.md)).
+
 - The privacy page now names the connections the system's web view makes by itself: on Windows, WebView2 checks for its own updates at edge.microsoft.com and looks up names through the machine's DNS. They carry nothing you put into OfflineMask; the app itself still uses the network only when you click ([0138](docs/decisions/0138-system-web-view-connections.md)).
 
 ## [2.1.1] — 2026-10-24

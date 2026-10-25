@@ -1747,11 +1747,6 @@
   border-radius: 50% 50% 0 0 / 72px 72px 0 0;
 }
 
-.om-download-inner > p:not([class]) {
-  margin-top: 22px !important;
-  font-size: 17px;
-  opacity: 0.85;
-}
 .om-button {
   display: inline-flex;
   align-items: center;
@@ -1768,6 +1763,17 @@
 }
 .om-button:hover {
   transform: translateY(-2px);
+}
+.om-download-version {
+  margin-top: 22px !important;
+  font-size: 17px;
+}
+.om-download-version strong {
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: #ffffff26;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
 }
 .om-download-platforms {
   margin-top: 14px !important;
@@ -1810,10 +1816,6 @@
   text-decoration: underline;
   text-underline-offset: 3px;
 }
-.om-platforms > p {
-  font-size: 14px;
-  opacity: 0.85;
-}
 .om-release-note {
   max-width: 580px;
   margin: 26px auto 0 !important;
@@ -1854,6 +1856,14 @@
   font-weight: 600;
   box-shadow: 0 16px 36px -14px #0b154aa6;
   transition: transform 0.2s;
+}
+.om-dock-version {
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--paper) 16%, transparent);
+  font-size: 13px;
+  font-weight: 550;
+  font-variant-numeric: tabular-nums;
 }
 .om-dock-button:hover {
   transform: translateY(-2px);

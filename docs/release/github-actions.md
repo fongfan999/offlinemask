@@ -13,6 +13,7 @@ git tag -a v2.1.0 -m "OfflineMask 2.1.0" && git push origin main v2.1.0
 ```
 
 3. Pushing the tag starts the workflow automatically; there is nothing to click. Only tags that start with `v` trigger it, and a tag that exists only on your machine does nothing until it is pushed. The workflow checks that the tag equals the version, builds on four runners, and attaches the files to the release for that tag. If no release exists it creates a **draft** with the changelog section as notes; publish it after looking at the files. If the release already exists (as for 2.0.0), the files are added to it.
+4. After publishing, push to `main` (an empty commit will do) so offlinemask.com rebuilds. Its Mac and Linux links and the "Bản mới nhất" version come from the newest published release, read at build time; a draft is ignored ([0139](../decisions/0139-downloads-without-github.md)). Upload the MSIX to Partner Center for Windows ([microsoft-store.md](microsoft-store.md)).
 
 To build or rebuild an existing tag, open Actions › Desktop: Release › Run workflow on `main` and enter the tag name; the workflow as it is on `main` checks out that tag. Leave the tag empty for a **dry run**: the chosen branch is built, the bundles stay as run artifacts for 90 days, and nothing is attached to any release. From the command line:
 

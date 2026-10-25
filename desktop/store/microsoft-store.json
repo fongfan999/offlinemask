@@ -1,6 +1,6 @@
 {
   "$comment": "Microsoft Store identity (decision 0117). Copy the values from Partner Center → Product management → Product identity. While identityName is empty, builds use a test identity and the package cannot be uploaded.",
-  "storeId": "",
+  "storeId": "9PN76BSDNRQW",
   "identityName": "WotDaFong.OfflineMask",
   "publisher": "CN=1AE90961-8E70-4358-8DAA-9714DE006FEA",
   "publisherDisplayName": "Wot Da Fong"

@@ -25,8 +25,8 @@
         <p class="om-maker-label">Hướng dẫn cài đặt</p>
         <h1>Cài đặt OfflineMask</h1>
         <p class="om-doc-lead">
-          Chỉ mất khoảng một phút. Lần đầu mở, máy sẽ hỏi bạn có muốn mở ứng dụng mới tải về không.
-          Đó là bước kiểm tra quen thuộc, bạn chỉ cần xác nhận một lần.
+          Chỉ mất khoảng một phút. Trên Mac, lần đầu mở máy sẽ hỏi bạn có muốn mở ứng dụng mới tải
+          về không. Đó là bước kiểm tra quen thuộc, bạn chỉ cần xác nhận một lần.
         </p>
 
         <nav class="om-doc-toc" aria-label="Mục lục">
@@ -34,6 +34,7 @@
             <li><a href="#macos">Máy Mac</a></li>
             <li><a href="#windows">Windows</a></li>
             <li><a href="#linux">Linux</a></li>
+            <li><a href="#cap-nhat">Cập nhật</a></li>
           </ol>
         </nav>
 
@@ -55,23 +56,42 @@
 
         <h2 id="windows"><span>2</span>Windows</h2>
         <ol class="om-doc-flow">
-          <li><strong>Mở tệp cài đặt vừa tải.</strong></li>
           <li>
-            Nếu hiện <strong>“Windows đã bảo vệ PC của bạn”</strong>, bấm
-            <strong>Thông tin thêm</strong> rồi <strong>Vẫn chạy</strong>.
+            <strong>Mở trang OfflineMask trên Microsoft Store</strong>
+            <a href="https://apps.microsoft.com/detail/__OM_STORE_ID__?hl=vi-VN&amp;gl=VN"
+              >tại đây</a
+            >.
           </li>
-          <li><strong>Cài như mọi ứng dụng khác.</strong></li>
+          <li><strong>Bấm Tải xuống</strong> (hoặc Nhận). Store tự cài và mở ứng dụng.</li>
         </ol>
-        <p>Tải từ Microsoft Store thì không cần bước 2: ứng dụng mở ngay.</p>
-
+        <p>Từ đó, Store tự cập nhật OfflineMask lên bản mới; cài đặt và lịch sử vẫn giữ nguyên.</p>
+        <p>
+          <strong>Máy không có Store,</strong> hoặc bạn đã cài OfflineMask bằng tệp cài đặt trước
+          đây? Tải
+          <a href="__OM_DOWNLOAD__/OfflineMask___OM_VERSION___x64-setup.exe"
+            >tệp cài đặt bản __OM_VERSION__</a
+          >
+          và mở nó. Nếu hiện <strong>“Windows đã bảo vệ PC của bạn”</strong>, bấm
+          <strong>Thông tin thêm</strong> rồi <strong>Vẫn chạy</strong>. Cài đè lên bản cũ bằng tệp
+          này thì giữ được cài đặt và lịch sử; bản từ Store bắt đầu lại từ đầu.
+        </p>
         <h2 id="linux"><span>3</span>Linux</h2>
         <p>
-          Tải bản cho Linux từ
-          <a href="https://github.com/fongfan999/offlinemask/releases/latest">trang phát hành</a> và
-          cài như các ứng dụng khác trên máy bạn.
+          Tải tệp hợp với máy bạn:
+          <a href="__OM_DOWNLOAD__/OfflineMask___OM_VERSION___amd64.deb">Ubuntu, Debian (.deb)</a>
+          hoặc
+          <a href="__OM_DOWNLOAD__/OfflineMask-__OM_VERSION__-1.x86_64.rpm">Fedora (.rpm)</a>, rồi
+          mở tệp để cài như các ứng dụng khác. Bản Linux đang được thử thêm.
         </p>
-
-        <h2 id="tiep-theo"><span>4</span>Sau khi cài</h2>
+        <h2 id="cap-nhat"><span>4</span>Cập nhật lên bản mới</h2>
+        <p>
+          OfflineMask không kết nối Internet nên không tự báo bản mới. Bản mới nhất là
+          <strong>__OM_VERSION__</strong> (phát hành ngày __OM_RELEASE_DATE__); số phiên bản bạn
+          đang dùng nằm trong OfflineMask › Cài đặt. Nếu cũ hơn, tải bản mới và cài đè lên: trên
+          Mac, kéo vào Applications rồi chọn <strong>Thay thế</strong>. Mọi cài đặt, gói tiếng Việt
+          và lịch sử vẫn giữ nguyên. Bản từ Microsoft Store tự cập nhật.
+        </p>
+        <h2 id="tiep-theo"><span>5</span>Sau khi cài</h2>
         <p>
           Mở OfflineMask, dán một đoạn văn bản hoặc mở một tệp để thử. Muốn tự thấy ứng dụng chạy
           offline? Tắt Wi‑Fi rồi dùng thử. Xem thêm về <a href="./privacy.html">quyền riêng tư</a>.
