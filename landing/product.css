@@ -2180,6 +2180,17 @@
   .om-scene-pill {
     display: none;
   }
+  /* The sample documents and chat bubbles are set at the page's own body size on a phone, so the
+     illustrations stop towering over the steps they explain. The section intros stop reading as
+     a second heading. */
+  .om-scene-doc,
+  .om-bubble {
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .om-display-sub {
+    font-size: 17px;
+  }
   /* The sample sheet keeps two columns on a phone, so nothing scrolls sideways inside the card. */
   .om-sheet th:nth-child(4),
   .om-sheet td:nth-child(4) {
