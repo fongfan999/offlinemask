@@ -899,6 +899,9 @@ a.quiet-button {
   position: sticky;
   bottom: 0;
   z-index: 2;
+  /* The same space above the action row as below a panel without one; it merges with
+     the margin of whatever sits above. */
+  margin-top: 22px;
   padding: 16px 24px;
   border-top: 1px solid var(--line);
   background: var(--paper-raised);
