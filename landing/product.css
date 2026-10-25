@@ -1898,11 +1898,32 @@
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
-.om-footer nav a:hover {
+.om-footer a:hover {
   color: var(--accent);
 }
+.om-footer-version {
+  margin-left: 4px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.om-footer-bottom {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px 28px;
+  margin-top: 48px;
+  padding-top: 22px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 14px;
+}
 .om-footer-mark {
-  margin: 56px 0 -0.22em !important;
+  margin: 40px 0 -0.22em !important;
   color: var(--accent-soft);
   font: 750 14.5vw/0.8 var(--sans);
   letter-spacing: -0.055em;
