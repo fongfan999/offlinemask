@@ -42,6 +42,17 @@ A page counts as scanned when it has no extractable text (or only a handful of c
 - **Some pages scanned:** the file opens. Above the preview: "Trang 3, 7 là ảnh scan nên chưa đọc được. Bản đã ẩn sẽ không có nội dung các trang này." In the output those pages appear as `## Trang 3` followed by `(Trang ảnh scan — không có trong bản đã ẩn)`, so the AI and the user see the gap instead of silently losing a page.
 - Because the output is text built from what we read, a scanned page can never leak through: its picture is simply not in the output. The message is about completeness, not about risk.
 
+### Images inside a PDF that has text
+
+Most text PDFs also carry pictures: a logo, a signature, a stamp, a photo of an ID card pasted into a form, a screenshot of a table. Phase 1 does not read them, and the output, being text, does not contain them.
+
+- **No leak:** a CCCD photo or a signature in the original is not in the masked copy, because nothing but extracted text goes there. This is the same property that makes scanned pages safe.
+- **But it may be missing something the AI needs,** such as a table pasted as a screenshot. The user is told, per page, without opening or decoding any picture: "Trang 2, 4 có hình ảnh. Hình ảnh không có trong bản đã ẩn; nếu trong ảnh có chữ cần gửi, hãy gõ lại hoặc chờ hỗ trợ ảnh." In the output, such a page ends with `(Trang có hình ảnh — không có trong bản đã ẩn)`.
+- **Small images are ignored** for this notice (logos, icons, bullet glyphs drawn as images, under roughly 1/20 of the page's area), or nearly every business PDF would carry the warning and people would stop reading it.
+- **How images are noticed matters for speed.** pdf.js's operator list tells which images a page paints and where, but asking for it may decode the pictures, which is the most expensive thing a PDF reader does. Implementation must find a way that reads the page's drawing commands without decoding image data and confirm it by measurement (below); if pdf.js offers none, the notice falls back to "this file contains images" once per file, read from the file's structure, rather than paying to decode.
+
+A page with **no text and no image** (a blank separator page) is skipped silently.
+
 Other files that cannot be read honestly are refused with their own reason:
 
 - **Password to open:** "PDF này cần mật khẩu để mở. Hãy mở bằng trình đọc PDF, lưu lại bản không mật khẩu rồi thử lại." (A PDF that only restricts printing or copying opens normally; those restrictions are not about reading.)
@@ -68,9 +79,32 @@ Nothing here changes networking, what is stored or where, permissions or input o
 5. Sample: "Thử với tệp mẫu" for PDF builds an invented two-page contract with one scanned page, generated at test/build time, never a real document.
 6. PRD line, this decision's follow-up record with versions and measurements, and `docs/product-direction.md`'s table.
 
-**Fixtures, one per failure class** (the owner checks real files against the masked copy): words without space characters; two columns; a table; decomposed Vietnamese; a name split across lines; an invisible OCR text layer; form field values; a comment annotation; one scanned page among text pages; an all-scanned file; a TCVN3-encoded page; a password-protected file; a file with a print restriction only. Test PDFs are written by a small generator in `tests/`, not checked in from real sources. Keep `pnpm test`, `pnpm test:models` and `pnpm lint` green.
+**Fixtures, one per failure class** (the owner checks real files against the masked copy): words without space characters; two columns; a table; decomposed Vietnamese; a name split across lines; an invisible OCR text layer; form field values; a comment annotation; a text page with a large embedded picture and one with only a small logo; one scanned page among text pages; an all-scanned file; a TCVN3-encoded page; a password-protected file; a file with a print restriction only. Test PDFs are written by a small generator in `tests/`, not checked in from real sources. Keep `pnpm test`, `pnpm test:models` and `pnpm lint` green.
 
-**Effect on the user's computer:** small. pdf.js adds about a megabyte or two of JavaScript, loaded only when a PDF opens; reading a 50-page PDF takes about as long as opening it in a viewer, and recognition then runs as it does for Word. Measure on the owner's Mac and on an Intel/WASM build (decision 0128's 4 GB limit) with the largest fixture before shipping.
+## Performance
+
+Everything runs on the user's computer, offline: there is no server to absorb a slow file, and the recognition models already use most of the memory budget (on the WASM backend they live in the web process, which WebKit kills past 4 GB, decision 0128). PDF reading must therefore stay a small cost next to recognition.
+
+**Do only the work text needs.** pdf.js is a viewer; most of its cost is drawing. Phase 1 never draws:
+
+- No rendering, no canvas, no page images. Only the text of each page is asked for.
+- Image data is never decoded (see above), fonts are not loaded into the page (`disableFontFace`), and CMaps and standard fonts are bundled locally and loaded only for a PDF that needs them. This is also what keeps the reader offline.
+- pdf.js is loaded on demand, the first time a PDF opens, so the app's start-up and the other pages pay nothing.
+
+**Stream, don't hold.** Pages are read one at a time in the worker; after each, its page object is cleaned up and only its paragraphs are kept. The preview shows as soon as the first pages are read, while the rest are read in the background behind the shared progress panel with Hủy. The PDF's bytes are released once reading finishes; the masked output is written from paragraphs, never from the PDF.
+
+**Recognition stays the expensive part and is already tuned:** the shared `scanTexts` reads each distinct text once, skips texts without letters, and works in small batches (0078). Repeated page headers, footers and page numbers, common in PDFs, therefore cost once.
+
+**Budgets, measured before shipping** on the owner's Mac (native recognition) and an Intel/WASM build, with the largest fixture (300 pages, mixed text and images) and a real 20 MB statement:
+
+| | Target |
+| --- | --- |
+| pdf.js loaded and first page in the preview | under 1 s |
+| Text extraction, without recognition | under 20 ms per page on average |
+| Memory added by reading, at its peak | under 150 MB above the same document as Word |
+| Hủy | stops within one batch |
+
+A budget that is missed is reported in the implementing decision with the measurement, not loosened silently. The limits of 20 MB and 300 pages are revisited with those numbers.
 
 ## Not decided here
 
