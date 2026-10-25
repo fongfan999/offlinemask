@@ -150,21 +150,38 @@ const pageRef = useTemplateRef<PageHandle>("pageRef");
 const sidebar = useTemplateRef<InstanceType<typeof AppSidebar>>("sidebar");
 const sidebarToggle = useTemplateRef<HTMLButtonElement>("sidebarToggle");
 
+/** History past its keep period goes while the app runs too (decision 0143): it can sit
+ * in the tray for weeks. Checked hourly and whenever the window comes back. */
+function expireHistory() {
+  if (vault.state.value !== "unlocked") return;
+  const target = active.value ? format.value : null;
+  const removed = store.expire();
+  for (const id of removed) quick.forget(id);
+  if (target && activeId.value && removed.includes(activeId.value)) void navigate(target);
+}
+const expireTimer = setInterval(expireHistory, 60 * 60 * 1000);
 /** Back to the front: the models may have been paged out while the app sat idle. */
 function warmWhenVisible() {
-  if (document.visibilityState === "visible") run.warmUp();
+  if (document.visibilityState !== "visible") return;
+  run.warmUp();
+  expireHistory();
+}
+function onFocus() {
+  run.warmUp();
+  expireHistory();
 }
 onMounted(() => {
-  window.addEventListener("focus", run.warmUp);
+  window.addEventListener("focus", onFocus);
   document.addEventListener("visibilitychange", warmWhenVisible);
   void pack.start();
   void vault.start();
   void quick.start();
 });
 onBeforeUnmount(() => {
-  window.removeEventListener("focus", run.warmUp);
+  window.removeEventListener("focus", onFocus);
   document.removeEventListener("visibilitychange", warmWhenVisible);
   clearTimeout(saveTimer);
+  clearInterval(expireTimer);
   pack.stop();
   quick.stop();
   run.destroy();

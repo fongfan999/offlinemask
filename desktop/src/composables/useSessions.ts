@@ -3,6 +3,10 @@ import {
   decodeSessions,
   encodeSessions,
   historyKey,
+  isExpired,
+  keepDaysKey,
+  parseKeepDays,
+  type KeepDays,
   type Session,
   isPrivate,
   type PrivateSession,
@@ -24,7 +28,16 @@ function defaultStorage(): HistoryStorage | null {
 export function useSessions(storage: HistoryStorage | null = defaultStorage()) {
   const sessions = ref<Session[]>([]);
   const storageError = ref("");
+  /** How long private history is kept (decision 0143); a plain preference, not private. */
+  const keepDays = ref<KeepDays>(parseKeepDays(readPreference(keepDaysKey)));
   let unreadable = false;
+  function readPreference(key: string) {
+    try {
+      return storage?.getItem(key);
+    } catch {
+      return null;
+    }
+  }
   try {
     sessions.value = decodeSessions(storage?.getItem(historyKey) ?? null);
   } catch {
@@ -55,15 +68,49 @@ export function useSessions(storage: HistoryStorage | null = defaultStorage()) {
   function find(id: string | null) {
     return sessions.value.find((session) => session.id === id);
   }
-  /** Replace the private sessions with the vault's copy, newest first with samples. */
-  function load(privateSessions: readonly PrivateSession[]) {
+  /** Replace the private sessions with the vault's copy, newest first with samples.
+   * Entries past the keep period are dropped on the way in. */
+  function load(privateSessions: readonly PrivateSession[], now = Date.now()) {
     sessions.value = [
       ...sessions.value.filter((session) => !isPrivate(session)),
-      ...privateSessions,
+      ...privateSessions.filter((session) => !isExpired(session, keepDays.value, now)),
     ].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt));
+  }
+  /** Private entries a keep period of `days` would delete at `now`. */
+  function expiring(days: number, now = Date.now()) {
+    return sessions.value.filter((session) => isExpired(session, days, now));
+  }
+  /** Deletes the private entries past the keep period; returns their ids. */
+  function expire(now = Date.now()) {
+    const ids = expiring(keepDays.value, now).map((session) => session.id);
+    if (ids.length) sessions.value = sessions.value.filter((session) => !ids.includes(session.id));
+    return ids;
+  }
+  /** Changes the keep period and applies it at once. */
+  function setKeepDays(days: KeepDays, now = Date.now()) {
+    keepDays.value = days;
+    try {
+      storage?.setItem(keepDaysKey, String(days));
+    } catch {
+      // Unwritable storage: the choice holds until the app closes.
+    }
+    return expire(now);
   }
   function removePrivate() {
     sessions.value = sessions.value.filter((session) => !isPrivate(session));
   }
-  return { sessions, storageError, save, add, remove, find, load, removePrivate };
+  return {
+    sessions,
+    storageError,
+    keepDays,
+    save,
+    add,
+    remove,
+    find,
+    load,
+    expiring,
+    expire,
+    setKeepDays,
+    removePrivate,
+  };
 }

@@ -137,6 +137,18 @@ test("the circle reads only in AI places, by app and page host (privacy §5)", (
   assert.match(page, /Nút chỉ hiện ở nơi có AI/, UPDATE);
 });
 
+test("history deletes itself after the periods the page names (privacy §3)", () => {
+  // Decision 0143: no keep-forever choice. Changing the choices or the default changes the page.
+  const core = read("../src/core/sessions.ts");
+  assert.match(core, /keepDayChoices = \[1, 7, 30, 90\] as const/, UPDATE);
+  assert.match(core, /defaultKeepDays: KeepDays = 30;/, UPDATE);
+  assert.match(
+    read("../../landing/privacy.html"),
+    /Tự xóa sau 30 ngày \(bạn chọn 1, 7, 30 hoặc 90 ngày trong Cài đặt\)/,
+    UPDATE,
+  );
+});
+
 test("the privacy page carries an update date", () => {
   assert.match(read("../../landing/privacy.html"), /Cập nhật ngày \d{1,2} tháng \d{1,2} năm \d{4}/);
 });

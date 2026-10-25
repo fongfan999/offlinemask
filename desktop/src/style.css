@@ -2339,6 +2339,19 @@ td.alias {
 .vault-settings .model-uninstall .lock-reset-actions {
   justify-content: flex-start;
 }
+/* Keep period (decision 0143): a row like Giao diện, its confirmation right below. */
+.vault-keep {
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+  flex-wrap: wrap;
+}
+.vault-keep h3 {
+  margin: 0;
+}
+.vault-settings .vault-keep-confirm {
+  margin-top: 12px;
+}
 /* Values a masked file hides, to keep some before saving (decision 0079). */
 .review-list {
   margin: 18px 24px 0;

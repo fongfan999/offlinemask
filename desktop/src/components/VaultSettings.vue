@@ -3,12 +3,13 @@ import { computed, nextTick, ref, useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
 import PasscodeField from "./PasscodeField.vue";
 import PasscodeSetup from "./PasscodeSetup.vue";
-import { sessionsKey, useProvided, vaultKey } from "../composables/context.ts";
-import { isPrivate } from "../core/sessions.ts";
+import { quickKey, sessionsKey, useProvided, vaultKey } from "../composables/context.ts";
+import { isPrivate, keepDayChoices, type KeepDays } from "../core/sessions.ts";
 
 /** App passcode: optional. Set it here or from the review screen; change or wipe it here. */
 const vault = useProvided(vaultKey);
 const store = useProvided(sessionsKey);
+const quick = useProvided(quickKey);
 
 const current = ref("");
 const next = ref("");
@@ -49,6 +50,28 @@ async function change() {
     changeOpen.value = false;
     await announce("Đã đổi mật mã. Lần sau hãy mở ứng dụng bằng mật mã mới.");
   }
+}
+/** A shorter keep period that would delete entries waits for a confirmation. */
+const pendingDays = ref<KeepDays | null>(null);
+const pendingCount = computed(() =>
+  pendingDays.value === null ? 0 : store.expiring(pendingDays.value).length,
+);
+async function chooseKeepDays(days: KeepDays) {
+  notice.value = "";
+  pendingDays.value = null;
+  if (days === store.keepDays.value) return;
+  if (store.expiring(days).length > 0) pendingDays.value = days;
+  else await applyKeepDays(days);
+}
+async function applyKeepDays(days: KeepDays) {
+  pendingDays.value = null;
+  const removed = store.setKeepDays(days);
+  for (const id of removed) quick.forget(id);
+  await announce(
+    removed.length
+      ? `Đã xóa ${removed.length} mục cũ. Lịch sử giờ tự xóa sau ${days} ngày.`
+      : `Lịch sử sẽ tự xóa sau ${days} ngày.`,
+  );
 }
 async function wipe() {
   notice.value = "";
@@ -110,9 +133,34 @@ async function wipe() {
     </template>
     <template v-else>
       <p class="model-description">
-        Ứng dụng hỏi mật mã khi khởi động. Lịch sử được mã hóa bằng mật mã này và lưu trên máy;
-        không gì rời khỏi máy.
+        Ứng dụng hỏi mật mã khi khởi động. Lịch sử được mã hóa bằng mật mã này, lưu trên máy và tự
+        xóa khi quá hạn bên dưới; không gì rời khỏi máy.
       </p>
+      <div class="settings-tool-row vault-keep">
+        <h3 id="keep-title">Tự xóa lịch sử sau</h3>
+        <fieldset class="theme-switch" aria-labelledby="keep-title">
+          <label v-for="days in keepDayChoices" :key="days">
+            <input
+              type="radio"
+              name="keep-days"
+              :value="days"
+              :checked="(pendingDays ?? store.keepDays.value) === days"
+              @change="chooseKeepDays(days)"
+            />{{ days }} ngày
+          </label>
+        </fieldset>
+      </div>
+      <div v-if="pendingDays !== null" class="model-uninstall vault-keep-confirm" role="alert">
+        <p>
+          {{ pendingCount }} mục cũ hơn {{ pendingDays }} ngày sẽ bị xóa ngay. Không thể hoàn tác.
+        </p>
+        <div class="model-uninstall-actions">
+          <button class="quiet-button danger-button" @click="applyKeepDays(pendingDays)">
+            Xóa và áp dụng
+          </button>
+          <button class="quiet-button" @click="pendingDays = null">Hủy</button>
+        </div>
+      </div>
       <div class="model-details">
         <details
           :open="changeOpen"

@@ -66,6 +66,21 @@ export function isPrivate(session: Session): session is PrivateSession {
   return session.fixture !== "sample-v1";
 }
 export const sheetPreviewRows = 20;
+/** History deletes itself after one of these periods, counted from when each entry
+ * was created (decision 0143). There is no "keep forever": nobody remembers what they
+ * masked months ago, and an old alias table is only a liability. */
+export const keepDayChoices = [1, 7, 30, 90] as const;
+export type KeepDays = (typeof keepDayChoices)[number];
+export const defaultKeepDays: KeepDays = 30;
+export const keepDaysKey = "offlinemask.history-keep-days";
+export function parseKeepDays(raw: string | null | undefined): KeepDays {
+  return keepDayChoices.find((days) => String(days) === raw) ?? defaultKeepDays;
+}
+const dayMs = 24 * 60 * 60 * 1000;
+/** Whether a private entry is older than the keep period at `now`; samples never expire. */
+export function isExpired(session: Session, days: number, now = Date.now()): boolean {
+  return isPrivate(session) && now - Date.parse(session.createdAt) >= days * dayMs;
+}
 export const historyKey = "offlinemask.sample-sessions.v1";
 export function createSession(format: "text", existing: readonly Session[]): SampleSession {
   return {

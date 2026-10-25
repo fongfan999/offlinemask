@@ -6,6 +6,8 @@ import {
   createTextSession,
   encodeSessions,
   historyKey,
+  keepDaysKey,
+  parseKeepDays,
 } from "../src/core/sessions.ts";
 import { localOptions } from "../src/core/detection/options.ts";
 import { useSessions, historyReadError } from "../src/composables/useSessions.ts";
@@ -122,6 +124,45 @@ test("sessions: stored sample history round trips through the store", () => {
   const store = useSessions(memoryStorage({ [historyKey]: encodeSessions([sample]) }));
   assert.equal(store.sessions.value.length, 1);
   assert.equal(store.sessions.value[0].decisions.name, "keep");
+});
+
+test("sessions: history past its keep period is deleted; samples and recent entries stay", () => {
+  const day = 24 * 60 * 60 * 1000;
+  const now = Date.parse("2026-10-25T12:00:00Z");
+  const aged = (days) => {
+    const session = createTextSession("Không có gì", [], []);
+    session.createdAt = new Date(now - days * day).toISOString();
+    return session;
+  };
+  assert.equal(parseKeepDays(null), 30);
+  assert.equal(parseKeepDays("7"), 7);
+  assert.equal(parseKeepDays("0"), 30, "no keep-forever or unknown values");
+
+  const storage = memoryStorage();
+  const store = useSessions(storage);
+  const sample = createSession("text", []);
+  sample.createdAt = new Date(now - 400 * day).toISOString();
+  store.add(sample);
+  const [fresh, month, old] = [aged(2), aged(29), aged(31)];
+  store.load([fresh, month, old], now);
+  assert.deepEqual(
+    store.sessions.value.map((s) => s.id),
+    [fresh.id, month.id, sample.id],
+    "the vault's expired entry is dropped on unlock",
+  );
+
+  assert.deepEqual(
+    store.expiring(7, now).map((s) => s.id),
+    [month.id],
+  );
+  assert.deepEqual(store.setKeepDays(7, now), [month.id]);
+  assert.equal(storage.getItem(keepDaysKey), "7");
+  assert.deepEqual(
+    store.sessions.value.map((s) => s.id),
+    [fresh.id, sample.id],
+  );
+  assert.deepEqual(store.expire(now + 5 * day), [fresh.id], "later checks expire it in turn");
+  assert.equal(useSessions(storage).keepDays.value, 7, "the choice is remembered");
 });
 
 test("pack: pushes replace polling and actions refresh once", async () => {
