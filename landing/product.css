@@ -993,7 +993,10 @@
   overflow: hidden;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 2;
-  padding: 12px 14px;
+  /* The clamp clips at the padding edge, so a padding-bottom would show the top of the third
+     line. The bottom space is a border in the box's own colour, which sits outside the clip. */
+  padding: 12px 14px 0;
+  border-bottom: 12px solid var(--paper-sunk);
   border-radius: 12px;
   background: var(--paper-sunk);
   color: var(--muted);
@@ -2193,14 +2196,10 @@
   .om-scene-foot {
     padding: 12px 16px;
   }
-  /* The four role tabs wrap onto two rows: all visible, nothing clipped at the edge. */
+  /* No role tabs on a phone: the three illustrations they change sit far below, off screen, so
+     a tap would seem to do nothing. The default example (customer care) is shown. */
   .om-roles {
-    gap: 8px 6px;
-    margin-bottom: 26px;
-  }
-  .om-role {
-    padding: 8px 14px;
-    font-size: 14px;
+    display: none;
   }
   .om-view-toggle button {
     padding: 3px 10px;
