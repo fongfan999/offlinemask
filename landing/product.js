@@ -525,30 +525,6 @@ export function initOfflineMask(root) {
   // measured again; on a phone the list opens by itself once no platform is detected.
   const refreshTriggers = () => ScrollTrigger.refresh();
   platforms.addEventListener("toggle", refreshTriggers);
-  // Phones: the share sheet carries the site's address to the visitor's computer (Mail, Notes,
-  // AirDrop…); without one, the address is copied. The page itself sends nothing anywhere.
-  const share = root.querySelector("[data-om-share]");
-  const shareLabel = share.innerHTML;
-  const siteUrl = document.querySelector('link[rel="canonical"]')?.href ?? location.href;
-  const shareLink = async () => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: "OfflineMask",
-          text: "Tải OfflineMask cho máy tính",
-          url: siteUrl,
-        });
-      } else {
-        await navigator.clipboard.writeText(siteUrl);
-        share.textContent = "Đã sao chép link";
-        setTimeout(() => (share.innerHTML = shareLabel), 2500);
-      }
-    } catch {
-      // The visitor closed the share sheet, or the clipboard is unavailable.
-    }
-  };
-  share.hidden = false;
-  share.addEventListener("click", shareLink);
   let disposed = false;
 
   root.classList.add("om-js");
@@ -704,9 +680,6 @@ export function initOfflineMask(root) {
     detail.textContent = detailText;
     root.removeEventListener("click", showPlatforms);
     platforms.removeEventListener("toggle", refreshTriggers);
-    share.removeEventListener("click", shareLink);
-    share.hidden = true;
-    share.innerHTML = shareLabel;
     dock.classList.remove("om-hidden");
     root.classList.remove("om-js");
     washWatch.disconnect();
