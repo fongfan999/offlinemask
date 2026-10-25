@@ -109,80 +109,80 @@
   mask: url("../brand/mark-mono-black.svg") center / contain no-repeat;
 }
 
-/* Floating navigation */
-.om-nav {
+/* The top logo: the mark alone, fixed in the corner, away from the centred headings. A paper
+   ring keeps the cobalt tile visible over the cobalt bands. On load the swipe is painted on
+   from left to right and the eyes blink once; hovering blinks them again. */
+.om-top {
   position: fixed;
-  inset: 16px 16px auto;
+  top: 16px;
+  left: 16px;
   z-index: 40;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
 }
-.om-nav-pill {
-  pointer-events: auto;
-  border: 1px solid color-mix(in srgb, var(--line-strong) 70%, transparent);
-  /* Near-opaque instead of a live backdrop blur, which re-blurs the page on every scroll frame. */
-  background: color-mix(in srgb, var(--paper-raised) 96%, transparent);
-  box-shadow: 0 6px 24px -10px #0f1a4a40;
-}
-.om-nav-pill {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  padding: 6px 22px 6px 8px;
-  border-radius: 14px;
-  font-size: 15px;
-  font-weight: 500;
-}
-.om-nav-pill a:not(.om-brand):hover {
-  color: var(--accent);
-}
-.om-brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 4px;
-  font-weight: 750;
-  letter-spacing: -0.04em;
-}
-.om-brand > span > span {
-  color: var(--accent);
-}
-/* The logo is the home link: on hover or focus the mark tips and the name slides out. */
-.om-nav-pill .om-brand {
-  gap: 0;
-  padding: 4px 6px;
-  border-radius: 10px;
-  transition: background 0.2s;
-}
-.om-nav-pill .om-brand:hover,
-.om-nav-pill .om-brand:focus-visible {
-  background: var(--accent-soft);
-}
-.om-nav-pill .om-mark {
+.om-logo {
+  display: block;
+  width: 42px;
+  height: 42px;
+  border-radius: 24%;
+  box-shadow:
+    0 0 0 2px var(--paper-raised),
+    0 8px 22px -10px #0f1a4a73;
   transition: transform 0.35s cubic-bezier(0.3, 1.6, 0.5, 1);
 }
-.om-nav-pill .om-brand:hover .om-mark,
-.om-nav-pill .om-brand:focus-visible .om-mark {
-  transform: rotate(-10deg) scale(1.08);
+.om-logo:hover,
+.om-logo:focus-visible {
+  transform: rotate(-6deg) scale(1.06);
 }
-.om-brand-name {
-  display: inline-block;
-  max-width: 0;
-  overflow: hidden;
-  white-space: nowrap;
-  opacity: 0;
-  font-size: 16px;
-  transition:
-    max-width 0.35s ease,
-    opacity 0.25s ease,
-    padding 0.35s ease;
+.om-logo svg {
+  display: block;
+  width: 100%;
+  height: 100%;
 }
-.om-nav-pill .om-brand:hover .om-brand-name,
-.om-nav-pill .om-brand:focus-visible .om-brand-name {
-  max-width: 130px;
-  padding-left: 8px;
-  opacity: 1;
+.om-logo-tile {
+  fill: var(--accent);
+}
+.om-logo-band,
+.om-logo-lid {
+  fill: var(--on-accent);
+}
+.om-logo-band {
+  animation: om-logo-paint 0.7s cubic-bezier(0.6, 0, 0.3, 1) 0.15s both;
+}
+.om-logo-lid {
+  transform: scaleY(0);
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: om-logo-blink 0.24s ease-in-out 1s;
+}
+.om-logo:hover .om-logo-lid,
+.om-logo:focus-visible .om-logo-lid {
+  animation: om-logo-blink-again 0.24s ease-in-out;
+}
+@keyframes om-logo-paint {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+@keyframes om-logo-blink {
+  50% {
+    transform: scaleY(1);
+  }
+}
+/* The same blink under another name, so hovering restarts it. */
+@keyframes om-logo-blink-again {
+  50% {
+    transform: scaleY(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .om-logo,
+  .om-logo-band,
+  .om-logo-lid {
+    transition: none;
+    animation: none !important;
+  }
 }
 
 /* Cobalt wash: layered light on cobalt with slowly drifting blots of colour */
@@ -1955,10 +1955,6 @@
   }
 }
 @media (max-width: 860px) {
-  .om-nav-pill a[href="#om-privacy"],
-  .om-nav-pill a[href="#om-features"] {
-    display: none;
-  }
   .om-cards {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -2024,12 +2020,13 @@
     --gutter: 18px;
     font-size: 16px;
   }
-  .om-nav {
-    inset: 10px 10px auto;
+  .om-top {
+    top: 12px;
+    left: 12px;
   }
-  .om-nav-pill {
-    gap: 16px;
-    font-size: 14px;
+  .om-logo {
+    width: 38px;
+    height: 38px;
   }
   .om-hero {
     padding-top: 112px;
