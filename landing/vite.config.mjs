@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import { releaseDay } from "./latest.js";
+import { robots, sitemap, structuredData } from "./search.js";
 import worker, { latestRelease } from "./worker.js";
 
 const fragment = new URL("./product.html", import.meta.url);
@@ -37,7 +38,18 @@ export default defineConfig({
       name: "offlinemask-product-page",
       transformIndexHtml: {
         order: "pre",
-        handler: (html) => withRelease(html.replace("<!-- product-page -->", productPage())),
+        handler: (html) =>
+          withRelease(
+            html
+              .replace("<!-- product-page -->", productPage())
+              .replace("<!-- structured-data -->", () =>
+                structuredData({
+                  fragment: productPage(),
+                  description: /<meta\s+name="description"\s+content="([^"]+)"/.exec(html)[1],
+                  version: release.version,
+                }),
+              ),
+          ),
       },
       generateBundle() {
         this.emitFile({
@@ -50,6 +62,9 @@ export default defineConfig({
           fileName: "og.png",
           source: readFileSync(new URL("./og/og.png", import.meta.url)),
         });
+        // Crawlers' files (decision 0145); the site's other paths are its three pages.
+        this.emitFile({ type: "asset", fileName: "sitemap.xml", source: sitemap() });
+        this.emitFile({ type: "asset", fileName: "robots.txt", source: robots() });
       },
       configureServer(server) {
         // The dev server answers the Worker's paths with the Worker itself.
