@@ -4,6 +4,15 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.2.0] — 2026-10-25
+
+Report a problem from the app in two clicks, and history that deletes itself.
+
+### Added
+
+- *Báo lỗi* in the sidebar: pick what went wrong and write a line or two, and OfflineMask opens a report page on OfflineMask.com with it filled in. The app itself still has no internet access; nothing is sent until you press *Gửi* on the website, and the report carries only what the page shows (the app version, the system family and the screen you were on) ([0147](docs/decisions/0147-bug-reports-through-the-website.md)).
+- History deletes itself: Cài đặt › Mật mã · Lưu lịch sử offers *Tự xóa lịch sử sau* 1, 7, 30 or 90 days, 30 by default, counted from when each entry was made. Choosing a shorter period asks before it deletes older entries ([0143](docs/decisions/0143-history-deletes-itself.md)).
+
 ### Fixed
 
 - A click on the OfflineMask circle after its selection was gone (another window had come to the front) could mask whatever was on the clipboard. The circle now acts only on the selection it was shown for and otherwise does nothing ([0141](docs/decisions/0141-circle-never-falls-back-to-clipboard.md)).
