@@ -109,14 +109,15 @@
   mask: url("../brand/mark-mono-black.svg") center / contain no-repeat;
 }
 
-/* The top logo: the mark alone, fixed in the corner, away from the centred headings. A paper
+/* The top logo: the mark alone, fixed at the top centre, where the pill used to be. A paper
    ring keeps the cobalt tile visible over the cobalt bands. On load the swipe is painted on
    from left to right and the eyes blink once; hovering blinks them again. */
 .om-top {
   position: fixed;
   top: 16px;
-  left: 16px;
+  left: 50%;
   z-index: 40;
+  translate: -50% 0;
 }
 .om-logo {
   display: block;
@@ -2022,7 +2023,6 @@
   }
   .om-top {
     top: 12px;
-    left: 12px;
   }
   .om-logo {
     width: 38px;
