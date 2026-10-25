@@ -57,7 +57,12 @@ defineExpose({ open });
     <form @submit.prevent="send">
       <header class="report-header">
         <h2 id="report-title">Báo lỗi</h2>
-        <button type="button" class="report-close" aria-label="Đóng" @click="dialog?.close()">
+        <button
+          type="button"
+          class="icon-button report-close"
+          aria-label="Đóng"
+          @click="dialog?.close()"
+        >
           <AppIcon name="close" :size="16" />
         </button>
       </header>

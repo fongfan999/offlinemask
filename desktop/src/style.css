@@ -3487,16 +3487,8 @@ td.alias {
   font-size: 18px;
 }
 .report-close {
-  display: grid;
-  place-items: center;
   width: 32px;
   height: 32px;
-  border-radius: 50%;
-  color: var(--muted);
-}
-.report-close:hover {
-  background: var(--paper-sunk);
-  color: var(--ink);
 }
 .report-offline {
   display: flex;
