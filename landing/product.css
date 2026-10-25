@@ -2086,9 +2086,14 @@
   .om-hero {
     padding-top: 88px;
   }
+  /* A phone keeps only the rhyme under the wordmark; the video it points to explains the rest. */
   .om-hero-sub {
     margin-top: 16px !important;
+    font-size: 17px;
     line-height: 1.55;
+  }
+  .om-hero-lead {
+    display: none;
   }
   .om-video-open {
     margin-top: 20px;
