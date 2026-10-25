@@ -362,3 +362,38 @@ test("in a table cell describing goods, a model's name, place or organization is
     ["TEN", "Trần Thị Mai"],
   ]);
 });
+
+test("a row whose unit column holds a unit lists goods; a row without one keeps its names", () => {
+  const text =
+    "3\tỐc Hương Thiên Nhiên\tKg\t0,64\n8\tMì Xào Hải Sản\tPhần\t1,00\nHÓA ĐƠN BÁN HÀNG\nNgười nhận\tLê Văn Dương\tHà Nội";
+  const detections = plausibleModelDetections(text, [
+    { ...span(text, "Ốc Hương Thiên Nhiên", "PERSON"), type: "TEN", score: 0.99 },
+    { ...span(text, "Xào Hải Sản", "LOCATION"), type: "DIA_CHI", score: 0.76 },
+    { ...span(text, "BÁN HÀNG", "PERSON"), type: "TEN", score: 0.82 },
+    { ...span(text, "Lê Văn Dương", "PERSON"), type: "TEN", score: 0.9 },
+    { ...span(text, "Hà Nội", "LOCATION"), type: "DIA_CHI", score: 0.9 },
+  ]);
+  assert.deepEqual(values(text, detections), [
+    ["TEN", "Lê Văn Dương"],
+    ["DIA_CHI", "Hà Nội"],
+  ]);
+});
+
+test("a household business is one organization after its legal prefix", () => {
+  const text = "Ký bởi: HỘ KINH DOANH HẢI SẢN BÌNH MINH";
+  const { complete } = applyDetectionPolicy(text, [
+    {
+      start: 11,
+      end: text.length,
+      type: "TEN",
+      label: "Họ và tên",
+      source: "m",
+      reason: "r",
+      priority: 50,
+    },
+  ]);
+  assert.deepEqual(
+    complete.filter((d) => d.type === "TO_CHUC").map((d) => text.slice(d.start, d.end)),
+    ["HỘ KINH DOANH HẢI SẢN BÌNH MINH"],
+  );
+});

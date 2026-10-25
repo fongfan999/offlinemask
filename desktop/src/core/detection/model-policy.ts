@@ -134,6 +134,7 @@ const boilerplatePhrases = [
   "mã số thuế",
   "người mua hàng",
   "người bán hàng",
+  "bán hàng",
   "mã tra cứu",
   "trang tra cứu",
   "tra cứu",
@@ -354,10 +355,14 @@ function withoutBrands(text: string, detection: Detection): Detection | undefine
  * cell (text with a tab on at least one side, as the PDF reader writes rows) that has
  * one describes goods: a model's name, place or organization there is product wording
  * ("AN ĐÌNH Gạo Japonica BB-3kg", "OLALA Trứng Gà Sạch hộp", "WINECO Cải ngọt 300g"),
- * whatever its score (decision 0151). A sentence is not a cell: "Gửi 2 hộp bánh cho anh
- * Nguyễn Văn An" keeps its name. */
+ * whatever its score (decision 0151); so is one anywhere in a row whose unit column holds
+ * a unit ("3 | Ốc Hương Thiên Nhiên | Kg | 0,64"). A sentence is not a cell: "Gửi 2 hộp
+ * bánh cho anh Nguyễn Văn An" keeps its name. */
 const productMeasure =
   /\d+(?:[.,]\d+)?[^\S\r\n]?(?:g|gr|kg|mg|ml|l|lít|cm|mm)(?![\p{L}\p{N}])|(?<![\p{L}\p{M}])(?:gói|goi|hộp|hop|khay|kh|chai|lon|túi|thùng|bịch|hũ|vỉ|lốc|kg|ml|g1|cái|cai|chiếc|bộ|cuộn)(?![\p{L}\p{M}\p{N}])/iu;
+/** A unit on its own in a cell: the "Đơn vị tính" column of a goods table. */
+const unitCell =
+  /^(?:kg|g|gr|mg|ml|l|lít|lit|hộp|hop|gói|goi|khay|kh|chai|lon|cái|cai|chiếc|chiec|bộ|bo|cuộn|cuon|phần|phan|suất|suat|đĩa|dia|ly|cốc|coc|thùng|thung|túi|tui|bịch|bich|hũ|hu|vỉ|vi|lốc|loc|tờ|to|quyển|quyen|cây|cay|bó|con|g1)$/iu;
 function productCell(text: string, start: number, end: number): boolean {
   const tab = text.lastIndexOf("\t", start - 1);
   const line = text.lastIndexOf("\n", start - 1);
@@ -369,7 +374,11 @@ function productCell(text: string, start: number, end: number): boolean {
     nextLine < 0 ? text.length : nextLine,
   );
   const tabbed = (tab > line && tab >= 0) || (nextTab >= 0 && (nextLine < 0 || nextTab < nextLine));
-  return tabbed && productMeasure.test(text.slice(cellStart, cellEnd));
+  if (!tabbed) return false;
+  if (productMeasure.test(text.slice(cellStart, cellEnd))) return true;
+  // A row whose unit column holds a unit ("Kg", "Phần", "Lon") lists goods.
+  const row = text.slice(line + 1, nextLine < 0 ? text.length : nextLine);
+  return row.split("\t").some((cell) => unitCell.test(cell.trim()));
 }
 
 /** Combine overlapping evidence across models/windows without dropping exposed tails. */

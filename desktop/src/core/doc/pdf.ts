@@ -157,10 +157,13 @@ function columnSpans(pieces: readonly Piece[]): { x: number; end: number }[] {
   return spans;
 }
 /** A row of three or more cells with a piece covering parts of two columns belongs to a
- * different table. A row of fewer cells may straddle them: a total ("Tổng cộng") in a
- * cell merged across columns. */
-const bridges = (spans: readonly { x: number; end: number }[], line: Line) =>
-  line.text.split("\t").length >= 3 &&
+ * different table, unless it has as many cells as the table's rows: a longer product
+ * name reaching under a centred heading is still a row of the same table. A row of
+ * fewer cells may straddle columns: a total ("Tổng cộng") in a cell merged across them. */
+const cellCount = (line: Line) => line.text.split("\t").length;
+const bridges = (spans: readonly { x: number; end: number }[], line: Line, region: Line[]) =>
+  cellCount(line) >= 3 &&
+  !region.some((member) => cellCount(member) === cellCount(line)) &&
   words(line.pieces).some(
     (piece) => spans.filter((span) => piece.x < span.end && piece.end > span.x).length > 1,
   );
@@ -261,12 +264,17 @@ export function alignTables(lines: readonly Line[], first = 0): Line[] {
       const previous = region.at(-1)!;
       if (previous.y - line.y > Math.max(previous.size, line.size) * 5) break;
       const spans = columnSpans(region.flatMap((member) => words(member.pieces)));
-      if (isTableRow(line) ? bridges(spans, line) : !wrapped(index)) break;
+      if (isTableRow(line) ? bridges(spans, line, region) : !wrapped(index)) break;
       region.push(line);
       index++;
     }
-    if (region.filter(isTableRow).length < 2) out.push(...region.map(inline));
-    else out.push(...tableRows(region, table++));
+    const rows = region.filter(isTableRow).length < 2 ? [] : tableRows(region, table);
+    // A table needs two rows; wrapped lines may band into one, which reads inline.
+    if (rows.length < 2) out.push(...region.map(inline));
+    else {
+      out.push(...rows);
+      table++;
+    }
   }
   return out;
 }
@@ -276,8 +284,8 @@ const listStart = /^\s*([•●▪◦○■□\-–*+]|\d{1,3}[.)]|[a-zđ][.)])\
 const labelStart = /^[^\t:]{1,40}:(\s|$)/u;
 /** Lines into paragraphs. Lines of a paragraph join with a space, so a name wrapped
  * onto the next line is read whole. A larger gap, a line starting elsewhere than the
- * one before (a centred title, an indented block), a list item, a labelled line or a
- * table row starts a new paragraph. */
+ * one before, not centred with it and not under a value on it (an indented block), a
+ * list item, a labelled line or a table row starts a new paragraph. */
 export function linesToParagraphs(lines: readonly Line[]): { text: string; table?: number }[] {
   const paragraphs: { text: string; table?: number }[] = [];
   let previous: Line | undefined;
@@ -297,7 +305,11 @@ export function linesToParagraphs(lines: readonly Line[]): { text: string; table
       previous.table === undefined &&
       !line.inline &&
       !previous.inline &&
-      Math.abs(line.x - previous.x) < size * 3 &&
+      // Left-aligned, centred on the same middle (a title), or within a "Label: value"
+      // line above, under its value ("Ký bởi: HỘ KINH DOANH … / NAM").
+      (Math.abs(line.x - previous.x) < size * 3 ||
+        Math.abs(line.x + line.end - previous.x - previous.end) / 2 < size * 2 ||
+        (labelStart.test(previous.text) && line.x > previous.x && line.x < previous.end)) &&
       !listStart.test(text) &&
       !labelStart.test(text);
     if (joins) paragraphs[paragraphs.length - 1]!.text += " " + text;

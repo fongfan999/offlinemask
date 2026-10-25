@@ -17,7 +17,7 @@ const datePrefix = new RegExp(
 );
 const numericDate = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?![a-z0-9_/])/;
 const legalPrefix =
-  /(?<![a-z0-9_])(?:cong ty(?: (?:tnhh|co phan|trach nhiem huu han))?|hop tac xa|doanh nghiep tu nhan)(?![a-z0-9_])/g;
+  /(?<![a-z0-9_])(?:cong ty(?: (?:tnhh|co phan|trach nhiem huu han))?|hop tac xa|doanh nghiep tu nhan|ho kinh doanh)(?![a-z0-9_])/g;
 const bridge = new RegExp(
   `^${horizontal}*(?:[:：=]${horizontal}*|${horizontal}+(?:(?:cua${horizontal}+(?:khach(?:${horizontal}+hang)?|toi)${horizontal}+)?(?:duoc${horizontal}+ghi${horizontal}+)?(?:la${horizontal}+)?)?)`,
 );

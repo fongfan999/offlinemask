@@ -31,7 +31,8 @@ function folded(value: string) {
   return value.normalize("NFD").replace(/\p{M}/gu, "").replace(/[đĐ]/g, "d").toLowerCase();
 }
 
-/** Components stop at sentence/field boundaries; administrative abbreviations keep their dots. */
+/** Components stop at sentence/field boundaries, including a tab (a table cell, decision
+ * 0151); administrative abbreviations keep their dots. */
 function components(text: string) {
   const result: { start: number; end: number }[] = [];
   let start = 0;
@@ -42,7 +43,7 @@ function components(text: string) {
   }
   for (let i = 0; i < text.length; i++) {
     const char = text[i]!;
-    if (!/[,;!?\r\n.]/u.test(char)) continue;
+    if (!/[,;!?\r\n.\t]/u.test(char)) continue;
     if (char === "\r" || char === "\n") {
       const next = i + (char === "\r" && text[i + 1] === "\n" ? 2 : 1);
       if (

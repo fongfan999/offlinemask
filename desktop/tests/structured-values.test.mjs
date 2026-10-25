@@ -155,3 +155,11 @@ test("local-only routing masks role-labelled accounts offline and does not treat
     /Models required/,
   );
 });
+
+test("a tax code may be a 12-digit CCCD, after labels that say so", () => {
+  assert.deepEqual(entries("Mã số thuế (CCCD): 031096007594"), [["GIAY_TO", "031096007594"]]);
+  assert.deepEqual(entries("MST/CCCD chủ hộ: 0315638910"), [["GIAY_TO", "0315638910"]]);
+  assert.deepEqual(entries("MST / CCCD: 001203004567"), [["GIAY_TO", "001203004567"]]);
+  assert.deepEqual(entries("Mã số thuế: 0104918404-001"), [["GIAY_TO", "0104918404-001"]]);
+  assert.deepEqual(entries("Mã số thuế: 12345"), []);
+});

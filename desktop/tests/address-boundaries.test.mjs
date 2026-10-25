@@ -94,3 +94,11 @@ test("a model-labelled room or floor number alone cannot pull ordinary building 
     assert.equal(result(text, [value]).a.findings[0].value, value);
   }
 });
+
+test("an address never reaches across table cells", () => {
+  const text = "3\tỐc Hương Thiên Nhiên\tKg\t0,64\t1.360.000";
+  const { output } = result(text, ["Hương Thiên Nhiên"]);
+  assert.equal(output.split("\t").length, 5);
+  assert.match(output, /^3\t/);
+  assert.match(output, /\tKg\t0,64\t1\.360\.000$/);
+});

@@ -182,6 +182,38 @@ export const fixtures = {
     at("Dia chi: 12 Le Loi, Quan 1", 50, 756);
     return save(doc);
   },
+  /** A household business's invoice as MISA meInvoice lays it out: the name column's
+   * heading centred over shorter and longer product names, the title and number on
+   * wrapped lines, and the signature's name wrapped under the value of its label. */
+  async householdInvoice() {
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
+    const page = doc.addPage(A4);
+    const size = 9;
+    const at = (text, x, y) => page.drawText(text, { x, y, size, font });
+    at("HOA DON BAN HANG", 200, 800);
+    at("Ky hieu: 2C26ABC", 430, 800);
+    at("Ngay 08 thang 08 nam 2026", 200, 790);
+    at("So: 00002486", 430, 790);
+    const columns = [40, 66, 295, 381, 450, 525];
+    ["STT", "", "Don vi tinh", "So luong", "Don gia", "Thanh tien"].forEach(
+      (cell, column) => cell && at(cell, columns[column], 700),
+    );
+    at("Ten hang hoa", 129, 700);
+    ["1", "Khan thom", "Cai", "8,00", "3.000", "24.000"].forEach((cell, column) =>
+      at(cell, columns[column], 684),
+    );
+    ["2", "Ngao hai coi lon nhat", "Kg", "0,64", "880.000", "563.200"].forEach((cell, column) =>
+      at(cell, columns[column], 668),
+    );
+    ["3", "So Duong", "Kg", "0,74", "880.000", "651.200"].forEach((cell, column) =>
+      at(cell, columns[column], 652),
+    );
+    at("Ky boi: HO KINH DOANH HAI SAN BINH", 344, 600);
+    at("MINH", 344 + font.widthOfTextAtSize("Ky boi: ", size), 587);
+    at("Ky ngay: 08/08/2026", 344, 574);
+    return save(doc);
+  },
   /** "ễ" and "ế" stored as "ê" and a combining mark, as some PDF software writes it. */
   async decomposed() {
     const { doc, draw } = await newDocument();

@@ -246,5 +246,25 @@
       "OLALA Trứng Gà Sạch",
       "Chuối vàng\tKG"
     ]
+  },
+  {
+    "id": "household-invoice",
+    "text": "HỘ KINH DOANH HẢI SẢN BÌNH MINH\nMã số thuế (CCCD): 079203004512\nĐịa chỉ: 12 Lê Thánh Tôn, Phường Bến Nghé, Thành phố Hồ Chí Minh, Việt Nam.\nĐiện thoại: 0912345678\nSố tài khoản: 1234567890 - Ngân hàng ACB\nHÓA ĐƠN BÁN HÀNG · Ký hiệu: 2C26ABC\nTên đơn vị: CÔNG TY TNHH SAO MAI\nMST/CCCD chủ hộ: 0109876543\nSTT\tTên hàng hóa, dịch vụ\tĐơn vị tính\tSố lượng\tĐơn giá\tThành tiền\n1\tỐc Hương Thiên Nhiên\tKg\t0,64\t1.360.000\t870.400\n2\tSò Dương\tKg\t0,74\t880.000\t651.200\n3\tMì Xào Hải Sản\tPhần\t1,00\t168.000\t168.000\n4\tGhẹ Xanh Bình Thuận\tKg\t0,70\t1.298.000\t908.600\nKý bởi: HỘ KINH DOANH HẢI SẢN BÌNH MINH",
+    "sensitive": [
+      "HỘ KINH DOANH HẢI SẢN BÌNH MINH",
+      "079203004512",
+      "12 Lê Thánh Tôn, Phường Bến Nghé, Thành phố Hồ Chí Minh, Việt Nam",
+      "0912345678",
+      "1234567890",
+      "CÔNG TY TNHH SAO MAI",
+      "0109876543"
+    ],
+    "retain": [
+      "HÓA ĐƠN BÁN HÀNG",
+      "1\tỐc Hương Thiên Nhiên\tKg\t0,64",
+      "2\tSò Dương\tKg",
+      "3\tMì Xào Hải Sản\tPhần",
+      "4\tGhẹ Xanh Bình Thuận\tKg"
+    ]
   }
 ]

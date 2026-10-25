@@ -119,7 +119,6 @@ test("bounded identifier recognition rejects partial codes and leaves amounts an
     "Hộ chiếu: chưa cung cấp",
     "MST: đang cập nhật",
     "Mã số thuế: 123456789",
-    "Mã số thuế: 123456789012",
     "Mã số thuế: 12345678901234",
     "Mã số thuế: 0319264857-1234",
     "MST 0319264857A",
@@ -132,6 +131,8 @@ test("bounded identifier recognition rejects partial codes and leaves amounts an
     "passport policy requires review",
   ])
     assert.deepEqual(entries(text), [], text);
+  // Since July 2025 a person's tax code is their 12-digit CCCD (decision 0151).
+  assert.deepEqual(entries("Mã số thuế: 123456789012"), [["GIAY_TO", "123456789012"]]);
 });
 
 test("street type between house number and name stays inside a bounded address", () => {

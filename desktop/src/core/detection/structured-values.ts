@@ -54,7 +54,10 @@ const specifications = [
   {
     label: "Mã số thuế",
     type: "GIAY_TO",
-    pattern: "ma so thue|mst|tax (?:id|number)",
+    // Since July 2025 a person's or a household business's tax code is their 12-digit
+    // CCCD: "Mã số thuế (CCCD):", "MST/CCCD chủ hộ:" (decision 0151).
+    pattern:
+      "(?:ma so thue|mst)(?:[^\\S\\r\\n]*\\([^\\S\\r\\n]*cccd[^\\S\\r\\n]*\\)|[^\\S\\r\\n]*\\/[^\\S\\r\\n]*cccd)?(?: chu ho)?|tax (?:id|number)",
     kind: "tax",
   },
   {
@@ -195,7 +198,7 @@ export function detectStructuredValues(text: string): LabelledFields {
                 : spec.kind === "passport"
                   ? /^[a-z]{1,2}\d{6,8}(?![\p{L}\p{N}_-])/iu
                   : spec.kind === "tax"
-                    ? /^(?:\d{10}(?:-\d{3})?|\d{13})(?![\p{L}\p{N}_-]|[ -]\d)/u
+                    ? /^(?:\d{10}(?:-\d{3})?|\d{12}|\d{13})(?![\p{L}\p{N}_-]|[ -]\d)/u
                     : spec.kind === "postcode"
                       ? /^\d{5,6}(?![\p{L}\p{N}_-])/u
                       : spec.kind === "date"

@@ -396,3 +396,19 @@ test("saved PDF previews keep their pages; damaged pages are refused", async () 
   const damaged = { ...session, preview: [{ text: "x", marks: [], page: 0 }] };
   assert.throws(() => decodePrivateSessions(encodePrivateSessions([damaged])));
 });
+
+test("a household invoice: one item table, its title inline, its signature on one line", async () => {
+  const opened = await openPdf(await fixtures.householdInvoice());
+  assert.deepEqual(texts(opened), [
+    "HOA DON BAN HANG · Ky hieu: 2C26ABC",
+    "Ngay 08 thang 08 nam 2026 · So: 00002486",
+    "STT\tTen hang hoa\tDon vi tinh\tSo luong\tDon gia\tThanh tien",
+    "1\tKhan thom\tCai\t8,00\t3.000\t24.000",
+    "2\tNgao hai coi lon nhat\tKg\t0,64\t880.000\t563.200",
+    "3\tSo Duong\tKg\t0,74\t880.000\t651.200",
+    "Ky boi: HO KINH DOANH HAI SAN BINH MINH",
+    "Ky ngay: 08/08/2026",
+  ]);
+  assert.equal(new Set(opened.paragraphs.slice(2, 6).map((paragraph) => paragraph.table)).size, 1);
+  assert.equal(opened.paragraphs[0].table, undefined);
+});

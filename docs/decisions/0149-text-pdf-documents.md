@@ -170,6 +170,12 @@ Against the budgets:
   - On the owner's invoice the result matches the paper: the nine-column item table with every value under its heading and the total in the last column, then the five-column tax summary.
 - The owner asked for a preview of at least one page, rendered like the Markdown. A PDF's preview now shows its whole first page (at least 20 paragraphs, at most 200), with a "Trang N" heading per page and the same tables and inline rows, aliases highlighted inside cells; Word previews are unchanged. Preview paragraphs carry an optional `page` and `table`, which the vault codec accepts and checks (older sessions have neither).
 
+**A household business's invoice (MISA meInvoice)** showed three more reading cases, each now covered by the `householdInvoice` fixture:
+
+- A longer product name reaching under the name column's centred heading looked like a row straddling a column gap, and split the item table after its first row. A row with as many cells as rows already in the table is never the start of another table.
+- The title and the invoice number, on lines close enough to band into one row, made a one-row "table". A table needs two rows; otherwise its lines read inline ("HÓA ĐƠN BÁN HÀNG · Ký hiệu: 2C26MHN").
+- The signature "Ký bởi: HỘ KINH DOANH HẢI SẢN HẢI / NAM" wraps with a hanging indent, the second line under the value. Lines now also join when they are centred on the same middle, or when the line above is a "Label: value" line and the new line starts within it.
+
 **Not checked:** the desktop app's WebKit and its module workers loading chunks from the app's asset protocol (`pnpm desktop:dev` or a release build), the Finder service with a PDF, a phone-width layout of the new progress line, and recognition with the pack installed (the models are not downloaded on this machine).
 
 **Seen in testing:** with the tests' two-subset Noto font, pdf.js sometimes puts a space inside a word where the font switches back from the Vietnamese subset ("Ngọ c"). The same text in one font reads correctly, so it is left as a property of the fixture font; a real PDF that switches fonts inside a word could show it too.
