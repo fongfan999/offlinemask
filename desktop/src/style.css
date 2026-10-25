@@ -1264,10 +1264,6 @@ th {
 .doc-page-heading:first-child {
   margin-top: 0;
 }
-.doc-row span + span::before {
-  content: " · ";
-  color: var(--muted);
-}
 .doc-table {
   margin: 0 0 12px;
   overflow-x: auto;
@@ -1283,6 +1279,10 @@ th {
   border: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
+}
+.doc-table tr:first-child td {
+  background: var(--paper-sunk);
+  font-weight: 600;
 }
 /* A card that ends without a footer keeps its bottom padding. */
 .step-panel > :last-child:not(.card-footer) {

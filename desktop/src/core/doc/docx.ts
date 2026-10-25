@@ -54,6 +54,8 @@ export interface DocParagraph {
   /** A field instruction (`w:instrText`, e.g. "PAGE \\* MERGEFORMAT" or a mailto link):
    * Word syntax, not prose, so only its contact values are ever replaced. */
   field?: boolean;
+  /** A PDF table row's table (decision 0149): rows of one table share it. */
+  table?: number;
 }
 /** A replacement in paragraph-text offsets. */
 export interface Replacement {

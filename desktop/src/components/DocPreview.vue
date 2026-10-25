@@ -4,10 +4,10 @@ import { toBlocks, type Block, type Marked } from "../core/doc/blocks.ts";
 
 /** The first paragraphs of a document, as a page, with replaced text highlighted:
  * aliases in the masked copy, values in a restored one. A PDF's paragraphs carry their
- * page, and read as its Markdown does (decision 0149): a heading per page, rows of
- * cells as tables, a lone row inline. */
+ * page and table, and read as its Markdown does (decision 0149): a heading per page and
+ * each table's rows in columns, its first row as the header. */
 const props = defineProps<{
-  paragraphs: readonly (Marked & { page?: number })[];
+  paragraphs: readonly (Marked & { page?: number; table?: number })[];
   label: string;
   tone?: "alias" | "value";
 }>();
@@ -54,11 +54,6 @@ const MarkedText: FunctionalComponent<{ content: Marked; tone: "alias" | "value"
       <template v-for="(block, position) in section.blocks" :key="position">
         <p v-if="block.kind === 'paragraph'">
           <MarkedText :content="block.content" :tone="tone ?? 'alias'" />
-        </p>
-        <p v-else-if="block.kind === 'row'" class="doc-row">
-          <span v-for="(cell, column) in block.cells" :key="column"
-            ><MarkedText :content="cell" :tone="tone ?? 'alias'"
-          /></span>
         </p>
         <div v-else class="doc-table">
           <table>

@@ -56,23 +56,30 @@ test("words drawn without space characters are read with spaces", async () => {
 test("text is read by its place on the page: columns side by side, line by line", async () => {
   const opened = await openPdf(await fixtures.twoColumns());
   assert.deepEqual(texts(opened), [
-    "Bên A: Công ty Bình Minh\tBên B: Lê Văn Hùng",
-    "Mã số thuế 0101234567\tEmail hung.le@example.com",
+    "Bên A: Công ty Bình Minh · Bên B: Lê Văn Hùng",
+    "Mã số thuế 0101234567 · Email hung.le@example.com",
   ]);
 });
 
-test("an invoice reads from the top, a row per line, labelled lines apart", async () => {
+test("an invoice reads from the top, its tables in columns, its form lines inline", async () => {
   const opened = await openPdf(await fixtures.invoice());
   assert.deepEqual(texts(opened), [
-    "HÓA ĐƠN GIÁ TRỊ GIA TĂNG",
-    "Tên đơn vị: Công ty Cổ phần Bình Minh",
-    "Mã số thuế: 0101234567",
-    "Địa chỉ: 12 Lê Lợi, Quận 1",
-    "STT\tTên hàng hóa\tSố lượng\tĐơn giá\tThành tiền",
-    "1\tĐùi gà\t0,516\t110.380\t56.956",
-    "2\tBánh pizza bò\t1\t41.852\t41.852",
-    "Tổng cộng\t98.808",
+    "HOA DON GIA TRI GIA TANG",
+    "Ten don vi: Cong ty Co phan Binh Minh",
+    "Dia chi: 12 Le Loi, Quan 1",
+    "Hinh thuc thanh toan: TM · Ma so thue: 0101234567",
+    "STT\tTen hang hoa\tSo luong\tDon gia\tThanh tien truoc thue",
+    "1\tDui ga\t0,516\t110.380\t56.956",
+    "2\tThit bo Uc xay (Minced) 250g\t1\t87.524\t87.524",
+    "\tTong cong\t\t\t144.480",
+    "Tong hop\tThue suat\tGia tri",
+    "Tong tien chiu thue suat:\t5%\t144.480",
   ]);
+  const tables = opened.paragraphs.map((paragraph) => paragraph.table);
+  assert.equal(new Set(tables.slice(4, 8)).size, 1);
+  assert.equal(new Set(tables.slice(8, 10)).size, 1);
+  assert.notEqual(tables[4], tables[8]);
+  assert.deepEqual(tables.slice(0, 4), [undefined, undefined, undefined, undefined]);
 });
 
 test("table rows become their own paragraphs with tabs between cells", async () => {
@@ -308,36 +315,22 @@ test("pages are read without async iteration of streams, which WebKit lacks", as
   }
 });
 
-test("rows of cells become Markdown tables, a lone row reads inline", () => {
+test("rows of one table become a Markdown table, its first row the header", () => {
   const blocks = toBlocks([
-    { text: "Ký hiệu: 1C25MBE\tSố: 35637720", marks: [] },
     { text: "Đơn vị bán hàng: Bình Minh", marks: [] },
-    { text: "Tên hàng\tSố lượng", marks: [] },
-    { text: "Bánh | pizza\t1", marks: [] },
-    { text: "[TEN_1_4aae]\t2\textra", marks: [{ start: 0, end: 12 }] },
+    { text: "Tên hàng\tSố lượng", marks: [], table: 1000 },
+    { text: "Bánh | pizza\t1", marks: [], table: 1000 },
+    { text: "[TEN_1_4aae]\t2\textra", marks: [{ start: 0, end: 12 }], table: 1000 },
+    { text: "Tổng hợp\tGiá trị", marks: [], table: 1001 },
     { text: "Tổng cộng", marks: [] },
   ]);
   assert.deepEqual(blocksToMarkdown(blocks), [
-    "Ký hiệu: 1C25MBE · Số: 35637720",
     "Đơn vị bán hàng: Bình Minh",
-    "|  |  |  |\n| --- | --- | --- |\n| Tên hàng | Số lượng |  |\n| Bánh \\| pizza | 1 |  |\n| [TEN_1_4aae] | 2 | extra |",
+    "| Tên hàng | Số lượng |  |\n| --- | --- | --- |\n| Bánh \\| pizza | 1 |  |\n| [TEN_1_4aae] | 2 | extra |",
+    "| Tổng hợp | Giá trị |\n| --- | --- |",
     "Tổng cộng",
   ]);
-  assert.deepEqual(blocks[2].rows[2][0].marks, [{ start: 0, end: 12 }]);
-});
-
-test("a wrapped line between two rows stays in the table", () => {
-  const blocks = toBlocks([
-    { text: "3\tKH\t87.524", marks: [] },
-    { text: "280g", marks: [] },
-    { text: "4\tG1\t27.870", marks: [] },
-    { text: "Tổng cộng", marks: [] },
-  ]);
-  assert.deepEqual(
-    blocks.map((block) => block.kind),
-    ["table", "paragraph"],
-  );
-  assert.equal(blocks[0].rows.length, 3);
+  assert.deepEqual(blocks[1].rows[2][0].marks, [{ start: 0, end: 12 }]);
 });
 
 test("marks follow the text into its cells", () => {
@@ -356,15 +349,16 @@ test("marks follow the text into its cells", () => {
   );
 });
 
-test("the invoice's masked Markdown has its table", async () => {
+test("the invoice's masked Markdown has its tables", async () => {
   const output = maskValues(await openPdf(await fixtures.invoice()), [
-    ["Công ty Cổ phần Bình Minh", "TO_CHUC"],
+    ["Cong ty Co phan Binh Minh", "TO_CHUC"],
   ]);
   assert.match(
     output,
-    /\| --- \| --- \| --- \| --- \| --- \|\n\| STT \| Tên hàng hóa \| Số lượng \| Đơn giá \| Thành tiền \|\n\| 1 \| Đùi gà \| 0,516 \| 110.380 \| 56.956 \|/,
+    /\| STT \| Ten hang hoa \| So luong \| Don gia \| Thanh tien truoc thue \|\n\| --- \| --- \| --- \| --- \| --- \|\n\| 1 \| Dui ga \| 0,516 \| 110.380 \| 56.956 \|/,
   );
-  assert.match(output, /Tên đơn vị: \[TO_CHUC_1_4aae\]/);
+  assert.match(output, /\| Tong hop \| Thue suat \| Gia tri \|\n\| --- \| --- \| --- \|\n/);
+  assert.match(output, /Ten don vi: \[TO_CHUC_1_4aae\]/);
 });
 
 test("a PDF's preview covers its whole first page and knows its pages", async () => {

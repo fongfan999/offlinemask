@@ -49,21 +49,50 @@ interface TextItem {
   transform: number[];
   width: number;
 }
+interface Piece {
+  text: string;
+  x: number;
+  y: number;
+  end: number;
+  size: number;
+}
 interface Line {
   y: number;
   size: number;
   x: number;
   end: number;
   text: string;
+  /** The text items on the line, left to right, for finding a table's columns. */
+  pieces: Piece[];
+  /** Set on the rows of a table; rows of one table share it. */
+  table?: number;
+  /** A row read inline ("a · b"): a line of its own, never joined to the next. */
+  inline?: boolean;
+}
+
+/** Pieces left to right as text: a gap wider than about a fifth of the font size is a
+ * space (many PDFs place words without spaces), and with `tabs` a gap wider than the
+ * font size is a tab, as between table cells or the two halves of a form. */
+function joinPieces(pieces: readonly Piece[], tabs: boolean): string {
+  let text = "";
+  let end = -Infinity;
+  for (const piece of pieces) {
+    if (text) {
+      const gap = piece.x - end;
+      const spaced = /\s$/.test(text) || /^\s/.test(piece.text);
+      text += tabs && gap > piece.size ? "\t" : gap > piece.size * 0.15 && !spaced ? " " : "";
+    }
+    text += piece.text;
+    end = Math.max(end, piece.end);
+  }
+  return text;
 }
 
 /** Text items into lines, by where they sit on the page rather than the order the file
  * stores them: invoice and report generators often write a header last or a table cell
- * by cell. Items on the same baseline form a line, left to right; a gap wider than
- * about a fifth of the font size becomes a space (many PDFs place words without
- * spaces), and a gap wider than the font size a tab, as between table cells or the two
- * halves of a form. pdf.js's own space items are skipped: they are wider than the gap
- * they stand for. Two columns of prose therefore read side by side, line by line. */
+ * by cell. Items on the same baseline form a line, left to right (`joinPieces`).
+ * pdf.js's own space items are skipped: they are wider than the gap they stand for.
+ * Two columns of prose therefore read side by side, line by line. */
 export function itemsToLines(items: readonly TextItem[]): Line[] {
   const pieces = items
     .filter((item) => item.str.trim())
@@ -72,7 +101,7 @@ export function itemsToLines(items: readonly TextItem[]): Line[] {
       return { text: item.str, x, y, end: x + item.width, size: Math.hypot(c, d) || 10 };
     })
     .sort((a, b) => b.y - a.y || a.x - b.x);
-  const rows: (typeof pieces)[] = [];
+  const rows: Piece[][] = [];
   for (const piece of pieces) {
     const row = rows.at(-1);
     if (row && Math.abs(row[0]!.y - piece.y) < Math.min(row[0]!.size, piece.size) * 0.5)
@@ -81,19 +110,165 @@ export function itemsToLines(items: readonly TextItem[]): Line[] {
   }
   return rows.map((row) => {
     row.sort((a, b) => a.x - b.x);
-    const line: Line = { y: row[0]!.y, size: 0, x: row[0]!.x, end: -Infinity, text: "" };
-    for (const piece of row) {
-      if (line.text) {
-        const gap = piece.x - line.end;
-        const spaced = /\s$/.test(line.text) || /^\s/.test(piece.text);
-        line.text += gap > piece.size ? "\t" : gap > piece.size * 0.15 && !spaced ? " " : "";
-      }
-      line.text += piece.text;
-      line.end = Math.max(line.end, piece.end);
-      line.size = Math.max(line.size, piece.size);
-    }
-    return line;
+    return {
+      y: row[0]!.y,
+      size: Math.max(...row.map((piece) => piece.size)),
+      x: row[0]!.x,
+      end: Math.max(...row.map((piece) => piece.end)),
+      text: joinPieces(row, true),
+      pieces: row,
+    };
   });
+}
+
+const isRow = (line: Line) => line.text.includes("\t");
+/** A line of a form, not of a table: two or more "Label: value" parts side by side. */
+const isFormRow = (line: Line) =>
+  line.text.split("\t").filter((cell) => labelStart.test(cell.trim())).length >= 2;
+const isTableRow = (line: Line) => isRow(line) && !isFormRow(line);
+/** A line's words and phrases: pieces closer than half the font size joined. pdf.js
+ * splits a word where its font changes, and a word must not straddle two cells; a gap
+ * wider than a word space ("Đơn vị tính   Số lượng") parts two cells. */
+function words(pieces: readonly Piece[]): Piece[] {
+  const groups: Piece[][] = [];
+  for (const piece of pieces) {
+    const group = groups.at(-1);
+    const last = group?.at(-1);
+    if (last && piece.x - last.end <= piece.size * 0.5) group!.push(piece);
+    else groups.push([piece]);
+  }
+  return groups.map((group) => ({
+    text: joinPieces(group, false),
+    x: group[0]!.x,
+    y: group[0]!.y,
+    end: Math.max(...group.map((piece) => piece.end)),
+    size: Math.max(...group.map((piece) => piece.size)),
+  }));
+}
+/** Where a table's columns are: the stretches of x covered by its words, merged where
+ * they overlap or touch; the gaps between them are the gutters. */
+function columnSpans(pieces: readonly Piece[]): { x: number; end: number }[] {
+  const spans: { x: number; end: number }[] = [];
+  for (const piece of [...pieces].sort((a, b) => a.x - b.x)) {
+    const last = spans.at(-1);
+    if (last && piece.x <= last.end) last.end = Math.max(last.end, piece.end);
+    else spans.push({ x: piece.x, end: piece.end });
+  }
+  return spans;
+}
+/** A row of three or more cells with a piece covering parts of two columns belongs to a
+ * different table. A row of fewer cells may straddle them: a total ("Tổng cộng") in a
+ * cell merged across columns. */
+const bridges = (spans: readonly { x: number; end: number }[], line: Line) =>
+  line.text.split("\t").length >= 3 &&
+  words(line.pieces).some(
+    (piece) => spans.filter((span) => piece.x < span.end && piece.end > span.x).length > 1,
+  );
+
+/** Lines of a table as its rows, one cell per column. Lines closer together than a line
+ * and a quarter are one row whose cells wrap (a header over three lines, a product name
+ * over two around its numbers); each cell reads top to bottom. A piece between columns
+ * goes to the next column to its right. Two neighbouring columns
+ * never filled in the same row, and close together, are one: a centred heading over
+ * right-aligned numbers. */
+function tableRows(region: readonly Line[], table: number): Line[] {
+  // Columns come from rows of three or more cells; a total or a wrapped line may cross them.
+  const structural = region.filter((line) => line.text.split("\t").length >= 3);
+  const spans = columnSpans(
+    (structural.length ? structural : region).flatMap((line) => words(line.pieces)),
+  );
+  const lineWords = new Map(region.map((line) => [line, words(line.pieces)]));
+  const column = (piece: Piece) => {
+    const centre = (piece.x + piece.end) / 2;
+    const index = spans.findIndex((span) => centre >= span.x && centre <= span.end);
+    return index < 0 ? spans.findIndex((span) => piece.x < span.end) : index;
+  };
+  const size = Math.max(...region.map((line) => line.size));
+  for (let index = 0; index + 1 < spans.length;) {
+    const together = region.some(
+      (line) =>
+        lineWords.get(line)!.some((piece) => column(piece) === index) &&
+        lineWords.get(line)!.some((piece) => column(piece) === index + 1),
+    );
+    if (!together && spans[index + 1]!.x - spans[index]!.end < size * 3) {
+      spans[index]!.end = spans[index + 1]!.end;
+      spans.splice(index + 1, 1);
+    } else index++;
+  }
+  const bands: Line[][] = [];
+  for (const line of region) {
+    const band = bands.at(-1);
+    const previous = band?.at(-1);
+    if (previous && previous.y - line.y < Math.max(previous.size, line.size) * 1.25)
+      band!.push(line);
+    else bands.push([line]);
+  }
+  return bands.map((band) => {
+    const cells = spans.map((_, index) =>
+      band
+        .map((line) =>
+          joinPieces(
+            lineWords.get(line)!.filter((piece) => column(piece) === index),
+            false,
+          ).trim(),
+        )
+        .filter(Boolean)
+        .join(" "),
+    );
+    return {
+      ...band[0]!,
+      text: cells.join("\t"),
+      pieces: band.flatMap((line) => line.pieces),
+      table,
+    };
+  });
+}
+
+/** Finds tables among the lines and lays each out in columns (decision 0149). A table
+ * starts at a row of cells and takes the rows below it, and the short lines between
+ * them (wrapped cells), until a line that is neither, a gap of more than five lines
+ * (invoices leave empty item rows above the total), or a row whose text straddles one of its column gaps (the next table). Tables
+ * are numbered from `first`. A form line ("Mã số thuế: … · Mã ĐVQHNS: …") and a lone row
+ * read inline, their parts separated by " · ". */
+export function alignTables(lines: readonly Line[], first = 0): Line[] {
+  let table = first;
+  const inline = (line: Line): Line =>
+    isRow(line) ? { ...line, text: line.text.split("\t").join(" · "), inline: true } : line;
+  const out: Line[] = [];
+  const wrapped = (index: number) => {
+    let next = index;
+    while (lines[next] && !isRow(lines[next]!) && lines[next]!.text.length <= 60) next++;
+    return next > index && !!lines[next] && isTableRow(lines[next]!);
+  };
+  for (let index = 0; index < lines.length;) {
+    if (!isTableRow(lines[index]!)) {
+      out.push(inline(lines[index++]!));
+      continue;
+    }
+    const region = [lines[index++]!];
+    // A heading that wraps in one column only leaves a short line just above the table.
+    while (
+      out.length &&
+      !isRow(out.at(-1)!) &&
+      !out.at(-1)!.inline &&
+      out.at(-1)!.text.length <= 60 &&
+      !labelStart.test(out.at(-1)!.text) &&
+      out.at(-1)!.y - region[0]!.y < Math.max(out.at(-1)!.size, region[0]!.size) * 1.25
+    )
+      region.unshift(out.pop()!);
+    while (index < lines.length) {
+      const line = lines[index]!;
+      const previous = region.at(-1)!;
+      if (previous.y - line.y > Math.max(previous.size, line.size) * 5) break;
+      const spans = columnSpans(region.flatMap((member) => words(member.pieces)));
+      if (isTableRow(line) ? bridges(spans, line) : !wrapped(index)) break;
+      region.push(line);
+      index++;
+    }
+    if (region.filter(isTableRow).length < 2) out.push(...region.map(inline));
+    else out.push(...tableRows(region, table++));
+  }
+  return out;
 }
 
 const listStart = /^\s*([•●▪◦○■□\-–*+]|\d{1,3}[.)]|[a-zđ][.)])\s/iu;
@@ -103,27 +278,30 @@ const labelStart = /^[^\t:]{1,40}:(\s|$)/u;
  * onto the next line is read whole. A larger gap, a line starting elsewhere than the
  * one before (a centred title, an indented block), a list item, a labelled line or a
  * table row starts a new paragraph. */
-export function linesToParagraphs(lines: readonly Line[]): string[] {
-  const paragraphs: string[] = [];
+export function linesToParagraphs(lines: readonly Line[]): { text: string; table?: number }[] {
+  const paragraphs: { text: string; table?: number }[] = [];
   let previous: Line | undefined;
   for (const line of lines) {
     const text = line.text
       .replace(/[ \u00a0]+/g, " ")
       .replace(/ ?\t ?/g, "\t")
-      .trim();
-    if (!text) continue;
+      // Spaces only: a table row may start or end with an empty cell.
+      .replace(/^ +| +$/g, "");
+    if (!text.trim()) continue;
     const size = Math.max(previous?.size ?? 0, line.size);
     const joins =
       previous &&
       previous.y - line.y > 0 &&
       previous.y - line.y < size * 1.8 &&
-      !text.includes("\t") &&
-      !previous.text.includes("\t") &&
+      line.table === undefined &&
+      previous.table === undefined &&
+      !line.inline &&
+      !previous.inline &&
       Math.abs(line.x - previous.x) < size * 3 &&
       !listStart.test(text) &&
       !labelStart.test(text);
-    if (joins) paragraphs[paragraphs.length - 1] += " " + text;
-    else paragraphs.push(text);
+    if (joins) paragraphs[paragraphs.length - 1]!.text += " " + text;
+    else paragraphs.push(line.table === undefined ? { text } : { text, table: line.table });
     previous = line;
   }
   return paragraphs;
@@ -325,12 +503,21 @@ export async function openPdf(
           : looksLikeOldFont(text)
             ? "old-font"
             : "text";
-      const texts = kind === "text" ? linesToParagraphs(itemsToLines(items)).map(clean) : [];
-      texts.push(...annotationTexts((await page.getAnnotations()) as Annotation[]).map(clean));
+      // Tables are numbered per page from page × 1000, unique in the document.
+      const texts =
+        kind === "text" ? linesToParagraphs(alignTables(itemsToLines(items), number * 1000)) : [];
+      texts.push(
+        ...annotationTexts((await page.getAnnotations()) as Annotation[]).map((text) => ({ text })),
+      );
       const ids: number[] = [];
-      for (const paragraph of texts) {
+      for (const { text: paragraph, table } of texts) {
         ids.push(paragraphs.length);
-        paragraphs.push({ id: paragraphs.length, part: `page-${number}`, text: paragraph });
+        paragraphs.push({
+          id: paragraphs.length,
+          part: `page-${number}`,
+          text: clean(paragraph),
+          ...(table === undefined ? {} : { table }),
+        });
       }
       pages.push({ number, kind, paragraphs: ids });
       page.cleanup();
@@ -379,9 +566,10 @@ export function writePdfText(source: PdfSource, edits: DocEdits): Uint8Array {
     blocks.push(
       ...blocksToMarkdown(
         toBlocks(
-          page.paragraphs.map((id) =>
-            applyReplacements(source.paragraphs[id]!.text, edits.paragraphs.get(id) ?? []),
-          ),
+          page.paragraphs.map((id) => ({
+            ...applyReplacements(source.paragraphs[id]!.text, edits.paragraphs.get(id) ?? []),
+            table: source.paragraphs[id]!.table,
+          })),
         ),
       ),
     );

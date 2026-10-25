@@ -141,26 +141,45 @@ export const fixtures = {
     );
     return save(doc);
   },
-  /** An e-invoice as report generators write it: the table cell by cell, close
-   * columns of numbers, and the header block last although it sits at the top. */
+  /** An e-invoice as report generators write it (laid out like a real VAT invoice):
+   * the table cell by cell, a heading over two lines, a product name wrapped around its
+   * numbers, two empty rows before the total, a tax summary below with a centred heading
+   * over right-aligned numbers, a form line of two labels, and the header block written
+   * last although it sits at the top. In Helvetica without accents: this is about where
+   * text sits, and the tests' split Noto font makes pdf.js break words where it switches. */
   async invoice() {
-    const { doc, draw } = await newDocument();
+    const doc = await PDFDocument.create();
+    const font = await doc.embedFont(StandardFonts.Helvetica);
     const page = doc.addPage(A4);
-    const rows = [
-      ["STT", "Tên hàng hóa", "Số lượng", "Đơn giá", "Thành tiền"],
-      ["1", "Đùi gà", "0,516", "110.380", "56.956"],
-      ["2", "Bánh pizza bò", "1", "41.852", "41.852"],
-    ];
+    const size = 9;
+    const at = (text, x, y) => page.drawText(text, { x, y, size, font });
+    const right = (text, end, y) => at(text, end - font.widthOfTextAtSize(text, size), y);
     const columns = [50, 80, 200, 260, 320];
-    rows.forEach((cells, row) =>
-      cells.forEach((cell, column) => draw(page, cell, columns[column], 700 - row * 14, 9)),
+    at("Thanh tien", columns[4], 716);
+    ["STT", "Ten hang hoa", "So luong", "Don gia", "truoc thue"].forEach((cell, column) =>
+      at(cell, columns[column], 706),
     );
-    draw(page, "Tổng cộng", 80, 640, 9);
-    draw(page, "98.808", 320, 640, 9);
-    draw(page, "HÓA ĐƠN GIÁ TRỊ GIA TĂNG", 200, 800, 12);
-    draw(page, "Tên đơn vị: Công ty Cổ phần Bình Minh", 50, 770, 9);
-    draw(page, "Mã số thuế: 0101234567", 50, 756, 9);
-    draw(page, "Địa chỉ: 12 Lê Lợi, Quận 1", 50, 742, 9);
+    ["1", "Dui ga", "0,516", "110.380", "56.956"].forEach((cell, column) =>
+      at(cell, columns[column], 690),
+    );
+    at("Thit bo Uc xay", columns[1], 674);
+    ["2", "1", "87.524", "87.524"].forEach((cell, column) =>
+      at(cell, columns[[0, 2, 3, 4][column]], 669),
+    );
+    at("(Minced) 250g", columns[1], 664);
+    at("Tong cong", 110, 620);
+    at("144.480", columns[4], 620);
+    at("Tong hop", 50, 598);
+    at("Thue suat", 165, 598);
+    at("Gia tri", 255, 598);
+    at("Tong tien chiu thue suat:", 50, 584);
+    at("5%", 170, 584);
+    right("144.480", 330, 584);
+    at("Hinh thuc thanh toan: TM", 50, 740);
+    at("Ma so thue: 0101234567", 200, 740);
+    at("HOA DON GIA TRI GIA TANG", 200, 800);
+    at("Ten don vi: Cong ty Co phan Binh Minh", 50, 770);
+    at("Dia chi: 12 Le Loi, Quan 1", 50, 756);
     return save(doc);
   },
   /** "ễ" and "ế" stored as "ê" and a combining mark, as some PDF software writes it. */
