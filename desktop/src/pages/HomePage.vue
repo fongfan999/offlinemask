@@ -36,7 +36,7 @@ const quickOffer = computed(
 
 /** One place to start (decision 0089): drop or choose any supported file, or paste
  * text anywhere on the page; the app opens the right page with it. */
-const accept = ".xlsx,.xls,.ods,.csv,.docx,.odt,.txt,.md";
+const accept = ".xlsx,.xls,.ods,.csv,.docx,.odt,.pdf,.txt,.md";
 const pasteKey = /Mac|iPhone|iPad/.test(navigator.userAgent) ? "⌘V" : "Ctrl+V";
 const startError = ref("");
 async function startWith(file: File) {
@@ -154,7 +154,7 @@ const packNotice = computed<PackNotice | null>(() => {
     <FileDropZone
       icon="upload"
       title="Kéo thả tệp hoặc dán văn bản"
-      :hint="`Excel, CSV, Word, TXT · dán bằng ${pasteKey}`"
+      :hint="`Excel, CSV, Word, PDF, TXT · dán bằng ${pasteKey}`"
       :accept="accept"
       compact
       @file="startWith"

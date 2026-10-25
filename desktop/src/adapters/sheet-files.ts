@@ -1,6 +1,7 @@
 import { isTauri } from "@tauri-apps/api/core";
 import type { CellEdits, SheetTable } from "../core/sheet/mask.ts";
 import type { FileError } from "../core/sheet/files.ts";
+import type { DocumentFormat } from "../core/doc/document.ts";
 import type { DocEdits, DocParagraph } from "../core/doc/docx.ts";
 import type { FilesRequest, FilesResponse } from "../workers/files.worker.ts";
 
@@ -24,21 +25,33 @@ export class SheetAdapterError extends Error {
 export function createSheetFiles() {
   let worker: Worker | undefined;
   let sequence = 0;
-  const waiting = new Map<number, { resolve: (value: FilesResponse) => void }>();
+  const waiting = new Map<
+    number,
+    { resolve: (value: FilesResponse) => void; progress?: (done: number, total: number) => void }
+  >();
   function ensure() {
     if (worker) return worker;
     worker = new Worker(new URL("../workers/files.worker.ts", import.meta.url), { type: "module" });
     worker.onmessage = (event: MessageEvent<FilesResponse>) => {
+      if (event.data.type === "progress") {
+        waiting.get(event.data.id)?.progress?.(event.data.done, event.data.total);
+        return;
+      }
       waiting.get(event.data.id)?.resolve(event.data);
       waiting.delete(event.data.id);
     };
     return worker;
   }
-  function send(request: FilesRequest, transfer: Transferable[] = []): Promise<FilesResponse> {
+  function send(
+    request: FilesRequest,
+    transfer: Transferable[] = [],
+    progress?: (done: number, total: number) => void,
+  ): Promise<FilesResponse> {
     return new Promise((resolve) => {
-      if (request.type !== "close") waiting.set(request.id, { resolve });
+      const answered = request.type !== "close" && request.type !== "cancel";
+      if (answered) waiting.set(request.id, { resolve, progress });
       ensure().postMessage(request, transfer);
-      if (request.type === "close") resolve({ type: "failed", id: -1, code: "unreadable" });
+      if (!answered) resolve({ type: "failed", id: -1, code: "unreadable" });
     });
   }
   return {
@@ -57,15 +70,40 @@ export function createSheetFiles() {
       if (reply.type !== "written") throw new SheetAdapterError("unreadable");
       return new Uint8Array(reply.bytes);
     },
+    /** Open a document; a PDF reports its pages through `progress` and stops when
+     * `signal` aborts (the promise then rejects with code "cancelled"). */
     async openDoc(
       file: File,
-    ): Promise<{ handle: string; paragraphs: DocParagraph[]; notes: string[]; mailto: string[] }> {
+      {
+        progress,
+        signal,
+      }: { progress?: (done: number, total: number) => void; signal?: AbortSignal } = {},
+    ): Promise<{
+      handle: string;
+      format: DocumentFormat;
+      paragraphs: DocParagraph[];
+      notes: string[];
+      mailto: string[];
+    }> {
       const handle = crypto.randomUUID();
       const bytes = await file.arrayBuffer();
-      const reply = await send({ type: "open-doc", id: ++sequence, handle, bytes }, [bytes]);
+      const id = ++sequence;
+      const cancel = () => void send({ type: "cancel", id });
+      signal?.addEventListener("abort", cancel, { once: true });
+      const reply = await send(
+        { type: "open-doc", id, handle, name: file.name, bytes },
+        [bytes],
+        progress,
+      ).finally(() => signal?.removeEventListener("abort", cancel));
       if (reply.type === "failed") throw new SheetAdapterError(reply.code as FileError);
       if (reply.type !== "opened-doc") throw new SheetAdapterError("unreadable");
-      return { handle, paragraphs: reply.paragraphs, notes: reply.notes, mailto: reply.mailto };
+      return {
+        handle,
+        format: reply.format,
+        paragraphs: reply.paragraphs,
+        notes: reply.notes,
+        mailto: reply.mailto,
+      };
     },
     async writeDoc(handle: string, edits: DocEdits): Promise<Uint8Array> {
       const reply = await send({ type: "write-doc", id: ++sequence, handle, edits });
@@ -82,6 +120,8 @@ export type SheetFiles = ReturnType<typeof createSheetFiles>;
 const mimeTypes = {
   xlsx: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   csv: "text/csv",
+  md: "text/markdown",
+  txt: "text/plain",
   docx: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   odt: "application/vnd.oasis.opendocument.text",
   ods: "application/vnd.oasis.opendocument.spreadsheet",
@@ -89,6 +129,8 @@ const mimeTypes = {
 const fileKinds = {
   xlsx: "Excel",
   csv: "CSV",
+  md: "Markdown",
+  txt: "Văn bản",
   docx: "Word",
   odt: "OpenDocument",
   ods: "OpenDocument",
@@ -107,9 +149,7 @@ export function exportName(original: string, suffix: string): string {
 export async function saveFile(bytes: Uint8Array, name: string): Promise<boolean> {
   const extension = name.toLowerCase().split(".").pop();
   const format =
-    extension === "csv" || extension === "docx" || extension === "odt" || extension === "ods"
-      ? extension
-      : "xlsx";
+    extension && extension in mimeTypes ? (extension as keyof typeof mimeTypes) : "xlsx";
   if (isTauri()) {
     const [{ save }, { writeFile }] = await Promise.all([
       import("@tauri-apps/plugin-dialog"),

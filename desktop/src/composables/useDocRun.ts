@@ -5,6 +5,7 @@ import {
   SheetAdapterError,
   type SheetFiles,
 } from "../adapters/sheet-files.ts";
+import type { DocumentFormat } from "../core/doc/document.ts";
 import { maxDocBytes, type DocEdits, type DocParagraph, type DocError } from "../core/doc/docx.ts";
 import {
   editedAliases,
@@ -27,7 +28,7 @@ import type { SheetProgress } from "./useSheetRun.ts";
 export const docPreviewParagraphs = 20;
 export const docErrorMessages: Record<DocError, string> = {
   unsupported:
-    "Chỉ hỗ trợ tệp .docx và .odt. Tệp .doc cũ hãy mở bằng Word và lưu lại thành .docx trước.",
+    "Chỉ hỗ trợ tệp .docx, .odt và .pdf. Tệp .doc cũ hãy mở bằng Word và lưu lại thành .docx trước.",
   "too-large": "Tệp lớn hơn 20 MB. Hãy chia nhỏ tài liệu rồi thử lại.",
   unreadable:
     "Chưa đọc được tệp này. Hãy kiểm tra tệp mở được trong Word hoặc LibreOffice và không có mật khẩu.",
@@ -38,14 +39,28 @@ export const docErrorMessages: Record<DocError, string> = {
   scanned: "PDF này là ảnh scan nên OfflineMask chưa đọc được chữ. Hỗ trợ ảnh scan sắp có.",
   "old-font":
     "Chữ trong PDF này dùng phông chữ cũ (như TCVN3, VNI) nên chưa đọc được. Hãy mở tệp gốc, chuyển sang Unicode rồi xuất lại PDF.",
+  cancelled: "",
 };
 export const docFailure =
   "Chưa xử lý được tài liệu trên thiết bị. Tệp gốc không bị thay đổi. Hãy thử lại.";
-const documentName = /\.(docx|odt)$/i;
+const documentName = /\.(docx|odt|pdf)$/i;
+/** What the AI may return for each kind of document: a document like the one sent, or,
+ * for a PDF, whose masked copy is Markdown (decision 0149), text or a document. */
+const returnedName = /\.(docx|odt)$/i;
+const returnedForPdf = /\.(md|txt|docx|odt)$/i;
+export const unsupportedReturn = "Chỉ khôi phục được tệp .md, .txt, .docx hoặc .odt.";
+/** A PDF session is told apart by its file name; its session data is a Word one's. */
+export const isPdfSession = (session: { fileName: string }) => /\.pdf$/i.test(session.fileName);
+/** "Hợp đồng.pdf" → "Hợp đồng (đã ẩn).md". */
+export function maskedName(fileName: string): string {
+  const name = exportName(fileName, "đã ẩn");
+  return /\.pdf$/i.test(fileName) ? name.replace(/\.pdf$/i, ".md") : name;
+}
 
 export interface DocDraft {
   sessionId: string;
   fileName: string;
+  format: DocumentFormat;
   handle: string;
   paragraphs: DocParagraph[];
   notes: string[];
@@ -61,6 +76,7 @@ export interface DocRestore {
 }
 interface Original {
   handle: string;
+  format: DocumentFormat;
   edits: DocEdits;
   paragraphs: DocParagraph[];
   notes: string[];
@@ -83,12 +99,15 @@ function errorMessage(error: unknown) {
     : docErrorMessages.unreadable;
 }
 
-/** The document flow (decisions 0078, 0084): open a .docx or .odt, preview the first paragraphs with the
+/** The document flow (decisions 0078, 0084, 0149): open a .docx, .odt or .pdf, preview the first paragraphs with the
  * aliases they will get, mask every paragraph in the background, save a masked copy,
  * and later restore the AI's returned document. Documents stay in the worker, in RAM. */
 export function useDocRun({ detector, files, pack, sessions, onSession }: DocRunDependencies) {
   const draft = shallowRef<DocDraft | null>(null);
   const opening = ref(false);
+  /** Pages read while a PDF opens. */
+  const openingProgress = ref<{ done: number; total: number } | null>(null);
+  let openingAbort: AbortController | undefined;
   const fileError = ref("");
   const processing = ref(false);
   const progress = ref<SheetProgress | null>(null);
@@ -161,23 +180,35 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
       return;
     }
     opening.value = true;
+    openingProgress.value = null;
+    const abort = (openingAbort = new AbortController());
     try {
-      const opened = await files.openDoc(file);
+      const opened = await files.openDoc(file, {
+        progress: (done, total) => (openingProgress.value = { done, total }),
+        signal: abort.signal,
+      });
       discardDraft();
       previewDetections.value = new Map();
       draft.value = {
         sessionId: newSessionId(sessions.value),
         fileName: file.name,
+        format: opened.format,
         handle: opened.handle,
         paragraphs: opened.paragraphs,
         notes: opened.notes,
         mailto: opened.mailto,
       };
     } catch (error) {
-      fileError.value = errorMessage(error);
+      if (!abort.signal.aborted) fileError.value = errorMessage(error);
     } finally {
       opening.value = false;
+      openingProgress.value = null;
+      openingAbort = undefined;
     }
+  }
+  /** Hủy while a PDF is read: the worker stops at the next page. */
+  function cancelOpen() {
+    openingAbort?.abort();
   }
   function discardDraft() {
     const handle = draft.value?.handle;
@@ -231,6 +262,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
       };
       originals.set(id, {
         handle: current.handle,
+        format: current.format,
         edits: result.edits,
         paragraphs: current.paragraphs,
         notes: current.notes,
@@ -267,6 +299,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
     draft.value = {
       sessionId: newSessionId(sessions.value),
       fileName: session.fileName,
+      format: original.format,
       handle: original.handle,
       paragraphs: original.paragraphs,
       notes: original.notes,
@@ -292,15 +325,25 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
     stored.findings = original.findings.filter((finding) => !now.has(finding.alias));
     stored.masked = editedPlaces(edits);
   }
-  async function download(session: DocSession): Promise<boolean> {
+  function masked(session: DocSession) {
     const original = originals.get(session.id);
-    if (!original) return false;
-    const edits = keepReplacements(original.edits, kept.of(session.id));
-    const bytes = await files.writeDoc(original.handle, edits);
-    return saveFile(bytes, exportName(session.fileName, "đã ẩn"));
+    if (!original) return null;
+    return files.writeDoc(original.handle, keepReplacements(original.edits, kept.of(session.id)));
+  }
+  async function download(session: DocSession): Promise<boolean> {
+    const bytes = await masked(session);
+    return bytes ? saveFile(bytes, maskedName(session.fileName)) : false;
+  }
+  /** A PDF's masked Markdown to the clipboard, to paste straight into the AI. */
+  async function copyMasked(session: DocSession): Promise<boolean> {
+    const bytes = await masked(session);
+    if (!bytes) return false;
+    await navigator.clipboard.writeText(new TextDecoder().decode(bytes));
+    return true;
   }
   async function openReturned(session: DocSession, file: File): Promise<DocRestore | string> {
-    if (!documentName.test(file.name)) return docErrorMessages.unsupported;
+    if (!(isPdfSession(session) ? returnedForPdf : returnedName).test(file.name))
+      return isPdfSession(session) ? unsupportedReturn : docErrorMessages.unsupported;
     if (file.size > maxDocBytes) return docErrorMessages["too-large"];
     try {
       const opened = await files.openDoc(file);
@@ -329,6 +372,8 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
   return {
     draft,
     opening,
+    openingProgress,
+    cancelOpen,
     fileError,
     processing,
     progress,
@@ -344,6 +389,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
     review,
     setKept,
     download,
+    copyMasked,
     openReturned,
     downloadRestored,
     closeReturned,

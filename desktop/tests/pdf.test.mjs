@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { PDFDocument } from "pdf-lib";
-import { maskParagraphs } from "../src/core/doc/mask.ts";
+import { openDocument, writeDocument } from "../src/core/doc/document.ts";
+import { maskParagraphs, restoreParagraphs } from "../src/core/doc/mask.ts";
 import {
   countLargeImages,
   looksLikeOldFont,
@@ -206,4 +207,64 @@ test("old-font text is told apart from Vietnamese and other languages", () => {
 test("page lists collapse runs", () => {
   assert.equal(pageList([2]), "2");
   assert.equal(pageList([3, 5, 6, 7, 9]), "3, 5–7, 9");
+});
+
+test("documents route a PDF by its header and write it as Markdown", async () => {
+  const opened = await openDocument(await fixtures.wrappedName(), "Hợp đồng.pdf");
+  assert.equal(opened.source.format, "pdf");
+  assert.deepEqual(opened.mailto, []);
+  const { edits } = maskParagraphs(opened.paragraphs, new Map(), scope);
+  const written = new TextDecoder().decode(await writeDocument(opened.source, edits));
+  assert.match(written, /^## Trang 1\n\nHợp đồng này/);
+});
+
+test("reading stops at the next page once cancelled, and reports pages as it goes", async () => {
+  const pages = [];
+  const opened = await openPdf(await fixtures.mixedScan(), {
+    onPage: (done, total) => pages.push([done, total]),
+  });
+  assert.equal(opened.source.pages.length, 3);
+  assert.deepEqual(pages, [
+    [1, 3],
+    [2, 3],
+    [3, 3],
+  ]);
+  let read = 0;
+  await assert.rejects(
+    openPdf(await fixtures.mixedScan(), { onPage: () => read++, stopped: () => read >= 1 }),
+    failure("cancelled"),
+  );
+  assert.equal(read, 1);
+});
+
+test("a PDF's Markdown returned by the AI is restored line by line, endings kept", async () => {
+  const opened = await openPdf(await fixtures.wrappedName());
+  const detections = new Map([
+    [
+      0,
+      [
+        {
+          start: 30,
+          end: 43,
+          type: "TEN",
+          label: "TEN",
+          source: "test",
+          reason: "test",
+          priority: 1,
+        },
+      ],
+    ],
+  ]);
+  const { edits, findings } = maskParagraphs(opened.paragraphs, detections, scope);
+  const markdown = new TextDecoder().decode(writePdfText(opened.source, edits));
+  const reply = `Tóm tắt:\r\n\r\n${markdown.split("\n\n")[1]}\r\nHết.`;
+  const returned = await openDocument(new TextEncoder().encode(reply), "trả lời.md");
+  assert.equal(returned.source.format, "plain");
+  const restored = restoreParagraphs(returned.paragraphs, findings);
+  assert.equal(restored.restored, 1);
+  const written = new TextDecoder().decode(await writeDocument(returned.source, restored.edits));
+  assert.equal(
+    written,
+    "Tóm tắt:\r\n\r\nHợp đồng này được ký giữa ông Nguyễn Văn An và công ty.\r\nHết.",
+  );
 });

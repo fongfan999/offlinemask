@@ -27,6 +27,9 @@ export default defineConfig(() => ({
     },
   },
   worker: {
+    // Workers are started as modules, so they can load code on demand: pdf.js stays
+    // out of the files worker until a PDF opens (decision 0149).
+    format: "es" as const,
     rollupOptions: { output: { assetFileNames } },
   },
 

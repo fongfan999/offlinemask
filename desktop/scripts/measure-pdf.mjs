@@ -56,8 +56,10 @@ async function measure(name, bytes) {
   const imagesTime = performance.now() - imagesStart;
   const start = performance.now();
   let firstPage = 0;
-  const opened = await openPdf(bytes.slice(), (read) => {
-    if (read === 1) firstPage = performance.now() - start;
+  const opened = await openPdf(bytes.slice(), {
+    onPage: (read) => {
+      if (read === 1) firstPage = performance.now() - start;
+    },
   });
   const total = performance.now() - start;
   clearInterval(sample);

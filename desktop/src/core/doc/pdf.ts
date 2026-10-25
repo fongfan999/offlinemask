@@ -248,9 +248,20 @@ function annotationTexts(annotations: readonly Annotation[]): string[] {
 const controls = /[\u0000-\u0008\u000b-\u001f\u007f]/g;
 const clean = (text: string) => text.replace(controls, "").normalize("NFC");
 
+export interface PdfReading {
+  /** Called after each page. */
+  onPage?: (read: number, total: number) => void;
+  /** Checked between pages; reading stops with "cancelled" once it returns true. */
+  stopped?: () => boolean;
+}
+/** pdf.js works through promises, which never let a waiting message (such as Hủy) in;
+ * a timer every so often does. */
+const yieldEvery = 50;
+const nextTask = () => new Promise((resolve) => setTimeout(resolve, 0));
+
 export async function openPdf(
   bytes: Uint8Array,
-  onPage?: (read: number, total: number) => void,
+  { onPage, stopped }: PdfReading = {},
 ): Promise<{ source: PdfSource; paragraphs: DocParagraph[]; notes: string[] }> {
   if (bytes.byteLength > maxDocBytes) throw new DocFileError("too-large");
   const largeImages = countLargeImages(bytes);
@@ -281,7 +292,13 @@ export async function openPdf(
     if (document.numPages > maxPdfPages) throw new DocFileError("too-many-pages");
     const pages: PdfPage[] = [];
     const paragraphs: DocParagraph[] = [];
+    let yielded = performance.now();
     for (let number = 1; number <= document.numPages; number++) {
+      if (performance.now() - yielded > yieldEvery) {
+        await nextTask();
+        yielded = performance.now();
+      }
+      if (stopped?.()) throw new DocFileError("cancelled");
       const page = await document.getPage(number);
       const content = await page.getTextContent();
       const items = content.items.filter((item): item is TextItem & typeof item => "str" in item);

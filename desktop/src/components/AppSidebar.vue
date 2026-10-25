@@ -25,12 +25,9 @@ const emit = defineEmits<{ navigate: [destination: Page, id?: string | null]; cl
 const formats = [
   { page: "text", icon: "text", label: "Văn bản", types: "TXT, MD" },
   { page: "excel", icon: "table", label: "Bảng tính", types: "XLSX, XLS, ODS, CSV" },
-  { page: "word", icon: "file", label: "Tài liệu", types: "DOCX, ODT" },
+  { page: "word", icon: "file", label: "Tài liệu", types: "DOCX, ODT, PDF" },
 ] as const;
-const upcomingFormats = [
-  { label: "PDF", icon: "pdf", types: "" },
-  { label: "Hình ảnh", icon: "image", types: "JPG, PNG" },
-];
+const upcomingFormats = [{ label: "Hình ảnh", icon: "image", types: "JPG, PNG" }];
 /** What the report says the user was looking at. */
 const screens: Record<Page, string> = {
   home: "Trang chủ",

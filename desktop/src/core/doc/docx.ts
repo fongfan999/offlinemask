@@ -16,7 +16,8 @@ export type DocError =
   | "password"
   | "too-many-pages"
   | "scanned"
-  | "old-font";
+  | "old-font"
+  | "cancelled";
 export class DocFileError extends Error {
   readonly code: DocError;
   constructor(code: DocError) {

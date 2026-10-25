@@ -1,6 +1,6 @@
 # 0149 — PDF files that contain text (phase 1)
 
-Date: 25 October 2026. Status: step 1 of the plan (the reader, its fixtures and the measurements) implemented on 25 October 2026; steps 2–6 not started, so the app does not open PDFs yet. Owner: "what should we do next?" for PDF and images → PDFs that already contain text first; scanned PDFs and images later, together, because both need OCR. This record is the plan for phase 1; "Reader: what was built and measured" records what implementation found, including where it changed the plan.
+Date: 25 October 2026. Status: steps 1–4 and 6 of the plan implemented on 25 October 2026, so the app opens PDFs on the Tài liệu page; step 5 (a PDF sample) not started. Owner: "what should we do next?" for PDF and images → PDFs that already contain text first; scanned PDFs and images later, together, because both need OCR. This record is the plan for phase 1; "Reader: what was built and measured" and "In the app" record what implementation found, including where it changed the plan.
 
 ## Problem
 
@@ -58,9 +58,9 @@ Other files that cannot be read honestly are refused with their own reason:
 
 ### Where it lives
 
-- PDF joins **Tài liệu**, as 0078 anticipated: the drop zone and picker accept `.docx`, `.odt` and `.pdf`; the home card's file line reads "Word, PDF". `fileKind` sends `.pdf` to the document page; the faded "PDF · Sắp có" sidebar item goes away; "Hình ảnh · Sắp có" stays, and the start box's upcoming message becomes about images only.
-- Steps 1 and 3 are the same as Word. Step 2's download is `.md` instead of the original format, and the button says so ("Tải tệp đã ẩn (.md)"). Step 3 restores what the AI returned: a pasted reply, or a dropped `.md`, `.txt` or `.docx`. There is no restored PDF.
-- The document source gains a `pdf` format beside `docx` and `odt`; masking goes through `core/doc/mask.ts` unchanged. A PDF session is a `private-doc-v1` session with the same fields (file name, paragraph count, the first 20 masked paragraphs with their marks, the alias table, never the document); the vault codec accepts the new format value.
+- PDF joins **Tài liệu**, as 0078 anticipated: the drop zone and picker accept `.docx`, `.odt` and `.pdf`; the home start box's hint reads "Excel, CSV, Word, PDF, TXT". `fileKind` sends `.pdf` to the document page; the faded "PDF · Sắp có" sidebar item goes away; "Hình ảnh · Sắp có" stays, and the start box's upcoming message becomes about images only.
+- Steps 1 and 3 are the same as Word. Step 2's download is `.md` instead of the original format, and the button says so ("Tải tệp đã ẩn (.md)"). Step 3 restores what the AI returned: a pasted reply, or a dropped `.md`, `.txt`, `.docx` or `.odt`. There is no restored PDF. Step 2 also offers "Sao chép", which copies the masked Markdown to paste straight into the AI and opens step 3 on the pasted-reply tab.
+- The document source gains a `pdf` format beside `docx` and `odt`; masking goes through `core/doc/mask.ts` unchanged. A PDF session is a `private-doc-v1` session with exactly the same fields (file name, paragraph count, the first 20 masked paragraphs with their marks, the alias table, never the document). It is told apart by its file name ending in `.pdf`, so the vault codec and stored sessions need no change.
 
 ## Privacy page and PRD
 
@@ -71,11 +71,11 @@ Nothing here changes networking, what is stored or where, permissions or input o
 ## Plan
 
 1. **Done.** `core/doc/pdf.ts`: open with pdf.js in the worker, read pages into paragraphs with page headings, classify each page (text, scanned, unreadable font), refuse encrypted files. Fixtures first (below).
-2. `document.ts` and `file-kind.ts`: route `.pdf`; add the `pdf` source format; write output as Markdown instead of a file copy.
-3. Tài liệu page: accept PDF, the scanned-pages notice, the `.md` download label, restore from `.md`/`.txt`.
-4. Sidebar and home: remove the PDF "Sắp có" item, update the card's file line and the start box messages.
+2. **Done.** `document.ts` and `file-kind.ts`: route `.pdf`; add the `pdf` source format; write output as Markdown instead of a file copy.
+3. **Done.** Tài liệu page: accept PDF, the scanned-pages notice, the `.md` download label, restore from `.md`/`.txt`.
+4. **Done.** Sidebar and home: remove the PDF "Sắp có" item, update the card's file line and the start box messages.
 5. Sample: "Thử với tệp mẫu" for PDF builds an invented two-page contract with one scanned page, generated at test/build time, never a real document.
-6. PRD line, this decision's follow-up record with versions and measurements, and `docs/product-direction.md`'s table.
+6. **Done.** PRD line, this decision's follow-up record with versions and measurements, and `docs/product-direction.md`'s table.
 
 **Fixtures, one per failure class** (the owner checks real files against the masked copy): words without space characters; two columns; a table; decomposed Vietnamese; a name split across lines; an invisible OCR text layer; form field values; a comment annotation; a text page with a large embedded picture and one with only a small logo; one scanned page among text pages; an all-scanned file; a TCVN3-encoded page; a password-protected file; a file with a print restriction only. Test PDFs are written by a small generator in `tests/`, not checked in from real sources. Keep `pnpm test`, `pnpm test:models` and `pnpm lint` green.
 
@@ -145,6 +145,22 @@ Against the budgets:
 - Context7 was not available in this session; options were checked against the package's own type declarations and source.
 
 `pnpm lint`, `pnpm typecheck` and `pnpm test` (377) pass. `pnpm test:models` fails on this machine with and without these changes, because the model files are not downloaded here.
+
+## In the app
+
+**Routing.** `core/doc/document.ts` opens a PDF when its first kilobyte holds `%PDF-`, whatever its name; `.md` and `.txt` open as a new `plain` source (`core/doc/plain.ts`: each non-empty line a paragraph, every line ending kept on writing), used only to restore what the AI returned for a PDF. `fileKind` sends `.pdf` to Tài liệu, from the home page, the Tài liệu drop zone and the macOS Finder service, whose `Info.plist` now offers `com.adobe.pdf`.
+
+**Progress and Hủy while reading.** The worker sends a `progress` message after each page, and the page shows "Đang đọc trang 12 / 300" under the drop zone with Hủy. Hủy sends a `cancel` message; the reader checks it before each page. pdf.js works through promises, which never let a waiting message in, so the reader yields to the event loop with a timer whenever 50 ms have passed since the last yield (a timer every page would cost up to 4 ms a page). In the browser preview a 300-page file read at about 85 pages a second, and Hủy returned to the drop zone 44 ms after the click, with no error.
+
+**Workers are built as ES modules** (`worker.format: "es"` in `vite.config.ts`). Vite's default builds each worker as one file with every dynamic import inlined, which put pdf.js in the files worker: 3.8 MB instead of 2.0 MB, loaded for every spreadsheet and Word file. As ES modules the files worker is 1.07 MB and pdf.js (0.49 MB and 1.24 MB) loads only when a PDF opens; SheetJS's code-page tables and the detection worker's native-recognition code split out the same way. Both workers were already started with `type: "module"`, and development always ran them as ES modules.
+
+**Checked** in the browser preview (Chromium, development server and a production build): a three-page PDF with a phone number, an email, an account number, a scanned page and a large image opened with its two notes; masking, "Sao chép" (the copied Markdown has the three page headings and the scanned page's line), "Tải tệp đã ẩn (.md)" saving `Hợp đồng thuê (đã ẩn).md`, and restoring a dropped `.md` reply (2 aliases restored, a foreign one listed, saved as `Trả lời (đã khôi phục).md`); the Word sample and the spreadsheet sample still open; an image dropped on the home page gets "Hình ảnh sắp được hỗ trợ…"; no request left localhost. `pnpm lint`, `pnpm typecheck` and `pnpm test` (380) pass.
+
+**Not checked:** the desktop app's WebKit and its module workers loading chunks from the app's asset protocol (`pnpm desktop:dev` or a release build), the Finder service with a PDF, a phone-width layout of the new progress line, and recognition with the pack installed (the models are not downloaded on this machine).
+
+**Seen in testing:** with the tests' two-subset Noto font, pdf.js sometimes puts a space inside a word where the font switches back from the Vietnamese subset ("Ngọ c"). The same text in one font reads correctly, so it is left as a property of the fixture font; a real PDF that switches fonts inside a word could show it too.
+
+**Not changed:** `landing/product.html` still says "Chưa hỗ trợ PDF và hình ảnh" and lists no PDF. Pushing to main deploys the site, and the released app cannot open PDFs until the next release; update it with that release.
 
 ## Not decided here
 

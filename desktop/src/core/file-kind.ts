@@ -8,16 +8,16 @@ export function fileKind(name: string): FileKind {
   const lower = name.toLowerCase();
   if (/\.(txt|md)$/.test(lower)) return "text";
   if (/\.(xlsx|xls|ods|csv)$/.test(lower)) return "excel";
-  if (/\.(docx|odt)$/.test(lower)) return "word";
+  if (/\.(docx|odt|pdf)$/.test(lower)) return "word";
   if (/\.doc$/.test(lower)) return "legacy-doc";
-  if (/\.(pdf|jpe?g|png|heic|webp)$/.test(lower)) return "upcoming";
+  if (/\.(jpe?g|png|heic|webp)$/.test(lower)) return "upcoming";
   return "unknown";
 }
 
 /** Why a file cannot open, in the words of the home page's start box. */
 export const fileKindErrors: Record<Exclude<FileKind, Format>, string> = {
   "legacy-doc": "Tệp .doc cũ hãy mở bằng Word và lưu lại thành .docx trước.",
-  upcoming: "PDF và hình ảnh sắp được hỗ trợ. Hiện mở được Excel, CSV, Word và tệp văn bản.",
+  upcoming: "Hình ảnh sắp được hỗ trợ. Hiện mở được Excel, CSV, Word, PDF và tệp văn bản.",
   unknown:
-    "Chưa mở được loại tệp này. Hãy dùng Excel (.xlsx, .xls), .ods, .csv, Word (.docx), .odt hoặc .txt.",
+    "Chưa mở được loại tệp này. Hãy dùng Excel (.xlsx, .xls), .ods, .csv, Word (.docx), .odt, .pdf hoặc .txt.",
 };

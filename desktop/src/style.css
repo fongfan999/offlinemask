@@ -1294,6 +1294,10 @@ th {
   margin-top: 10px;
   font: 11px var(--mono);
 }
+/* Pages read while a PDF opens, with Hủy at the end (decision 0149). */
+.opening-progress .quiet-button {
+  margin-left: auto;
+}
 .sheet-note {
   display: flex;
   align-items: flex-start;
