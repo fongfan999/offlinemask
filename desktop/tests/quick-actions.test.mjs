@@ -712,11 +712,20 @@ test("the popover asks above a fresh selection and its button replaces that sele
   adapter.clearedHandler();
   await new Promise((resolve) => setTimeout(resolve, 0));
   assert.deepEqual(adapter.calls.at(-1), ["dismiss"]);
-  // After the dismissal the button is back to the clipboard flow.
+  // A click that arrives after the selection is gone (another window came in front)
+  // does nothing: the clipboard is never masked in its place (decision 0141).
   adapter.clipboard = phoneText;
+  const texts = run.texts.length;
+  const writes = adapter.calls.filter((call) => call[0] === "write").length;
   adapter.command("mask");
+  adapter.command("restore");
   await new Promise((resolve) => setTimeout(resolve, 0));
+  await new Promise((resolve) => setTimeout(resolve, 0));
+  assert.equal(run.texts.length, texts);
+  assert.equal(adapter.calls.filter((call) => call[0] === "write").length, writes);
   assert.equal(adapter.calls.filter((call) => call[0] === "paste").length, 1);
+  assert.equal(adapter.clipboard, phoneText);
+  assert.deepEqual(adapter.calls.at(-1), ["dismiss"]);
 
   // An empty selection shows nothing, and says why in Settings.
   const before = quick.lastStatus.value;

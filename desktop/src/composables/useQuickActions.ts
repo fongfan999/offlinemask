@@ -799,7 +799,11 @@ export function useQuickActions({
       pendingSelection = null;
       if (selection.action === "unknown" || command === "unknown") void explainUnknown();
       else void actOnSelection(command as "mask" | "restore", selection);
-    } else if (command !== "unknown") void act(command);
+    }
+    // The circle's click acts only on the selection it was shown for. With none left (it
+    // was cleared, another window came in front), the click does nothing: the clipboard
+    // is never masked in its place (decision 0141).
+    else if (adapter.desktop) void adapter.dismissPanel().catch(() => {});
   }
 
   let stopCommands: (() => void) | undefined;

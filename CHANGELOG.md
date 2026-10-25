@@ -4,6 +4,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+### Fixed
+
+- A click on the OfflineMask circle after its selection was gone (another window had come to the front) could mask whatever was on the clipboard. The circle now acts only on the selection it was shown for and otherwise does nothing ([0141](docs/decisions/0141-circle-never-falls-back-to-clipboard.md)).
+
 ### Changed
 
 - offlinemask.com shows the newest version and its release date beside the download button and on the bottom bar, so you can compare it with the version in Settings. Windows downloads from the Microsoft Store; Mac and Linux files download directly, never through a GitHub page, and always from the newest published release, which the site looks up when you visit. Installing a newer version over an older one keeps your settings, history and Vietnamese pack ([0139](docs/decisions/0139-downloads-without-github.md), [0140](docs/decisions/0140-latest-release-at-request-time.md)).
