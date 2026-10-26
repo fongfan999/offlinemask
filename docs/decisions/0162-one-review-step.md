@@ -1,6 +1,6 @@
-# 0161 — Step 2 says the same things on every page
+# 0162 — Step 2 says the same things on every page
 
-Date: 26 October 2026. Status: implemented; checked in the Vite preview at 1280×900. Owner's request after 0160: review step 2 for consistency.
+Date: 26 October 2026. Status: implemented; checked in the Vite preview at 1280×900. Owner's request after 0161: review step 2 for consistency.
 
 ## Problem
 

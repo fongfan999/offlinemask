@@ -1,4 +1,4 @@
-# 0160 — One restore step for text, spreadsheets and documents
+# 0161 — One restore step for text, spreadsheets and documents
 
 Date: 26 October 2026. Status: implemented; checked in the Vite preview. Owner's review: step 3 differed between file types "from UI/UX to copies".
 
