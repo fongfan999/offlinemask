@@ -9,6 +9,7 @@ import { existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { build } from 'vite';
+import { checkWorkerChunks } from './check-worker-chunks.mjs';
 import runtimes from './native-runtimes.json' with { type: 'json' };
 const root = fileURLToPath(new URL('../', import.meta.url));
 const qa = process.argv.includes('--qa');
@@ -71,6 +72,7 @@ if (process.platform === 'darwin') {
 }
 const frontend = join(stage, 'frontend');
 await build({ configFile: join(root, 'vite.config.ts'), define: { 'import.meta.env.VITE_NATIVE_RECOGNITION': JSON.stringify('1') }, build: { outDir: frontend, emptyOutDir: true, copyPublicDir: false } });
+checkWorkerChunks(join(frontend, 'assets'));
 // Native graphs never use the browser WASM binary. Neither engine includes weights.
 for (const name of await readdir(join(root, 'public'))) {
   if (!['models', 'runtime'].includes(name)) await cp(join(root, 'public', name), join(frontend, name), { recursive: true });

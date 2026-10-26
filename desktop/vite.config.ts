@@ -31,6 +31,18 @@ export default defineConfig(() => ({
     // out of the files worker until a PDF opens (decision 0149).
     format: "es" as const,
     rollupOptions: { output: { assetFileNames } },
+    // Shared code goes into a chunk of its own, never exported from the worker's
+    // entry: WebKit evaluates a module worker's entry a second time when a chunk
+    // imports it back, and the fresh copy swallows the replies the first one waits
+    // for (masking stalled at 0 % in the 2.3.0 build). Vite sets
+    // preserveEntrySignatures to false for worker bundles after merging the options
+    // above, so a plugin sets it back in the options hook.
+    plugins: () => [
+      {
+        name: "offlinemask:worker-entry-signatures",
+        options: (options) => ({ ...options, preserveEntrySignatures: "strict" as const }),
+      },
+    ],
   },
 
   // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
