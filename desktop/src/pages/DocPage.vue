@@ -6,6 +6,7 @@ import DocPreview from "../components/DocPreview.vue";
 import FileDropZone from "../components/FileDropZone.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import PasscodeSetup from "../components/PasscodeSetup.vue";
+import RestoreIntro from "../components/RestoreIntro.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import ReviewList from "../components/ReviewList.vue";
 import {
@@ -139,7 +140,7 @@ async function download() {
   try {
     if (await doc.download(props.session)) {
       status.value =
-        "Đã lưu tệp đã ẩn. Gửi tệp này cho AI; khi có tệp trả về, mở ở bước Khôi phục.";
+        "Đã lưu tệp đã ẩn. Gửi tệp này cho công cụ AI bạn dùng (ChatGPT, Claude, Gemini…), rồi đưa tệp hoặc câu trả lời AI trả về vào bước Khôi phục.";
       restoreStep.value = true;
     }
   } catch {
@@ -152,7 +153,8 @@ async function copyMasked() {
   status.value = "";
   try {
     if (await doc.copyMasked(props.session)) {
-      status.value = "Đã sao chép bản đã ẩn. Dán vào AI; khi có câu trả lời, dán ở bước Khôi phục.";
+      status.value =
+        "Đã sao chép bản đã ẩn. Dán vào công cụ AI bạn dùng (ChatGPT, Claude, Gemini…), rồi đưa câu trả lời của AI vào bước Khôi phục.";
       restoreKind.value = "text";
       restoreStep.value = true;
     }
@@ -428,15 +430,12 @@ defineExpose({
         </div>
       </header>
       <template v-if="restoreKind === 'file'">
+        <div class="restore-body"><RestoreIntro subject="tài liệu" /></div>
         <FileDropZone
           v-if="!restore"
           icon="undo"
           title="Kéo thả tệp AI trả về vào đây"
-          :hint="
-            pdf
-              ? '.md, .txt, .docx, .odt · mã thay thế được đổi lại thành thông tin thật'
-              : 'mã thay thế được đổi lại thành thông tin thật'
-          "
+          :hint="pdf ? '.md, .txt, .docx, .odt' : '.docx, .odt'"
           :accept="pdf ? '.md,.txt,.docx,.odt' : '.docx,.odt'"
           :busy="restoreBusy"
           @file="openReturned"
@@ -482,6 +481,7 @@ defineExpose({
         <RestorePanel
           :session-id="session.id"
           :analysis="{ findings: session.findings, spans: [] }"
+          subject="tài liệu"
           new-label="Ẩn tài liệu mới"
           @new-text="newDoc"
           @pasted="(pasted) => (replyPasted = pasted)"

@@ -435,7 +435,7 @@ async function copy(restore = false) {
     copied.value = true;
     copyStatus.value =
       restore && privateSession.value
-        ? "Đã sao chép. Dán vào công cụ AI bạn dùng (ChatGPT, Claude, Gemini…); khi có câu trả lời, dán vào ô này."
+        ? "Đã sao chép bản đã ẩn. Dán vào công cụ AI bạn dùng (ChatGPT, Claude, Gemini…), rồi đưa câu trả lời của AI vào bước Khôi phục."
         : "Đã sao chép. Bạn có thể dán vào nơi mình chọn.";
     if (restore && privateSession.value) openStep(3);
     // The trip Ẩn nhanh saves: offer it once (decision 0098).

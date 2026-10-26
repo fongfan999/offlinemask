@@ -1455,6 +1455,10 @@ td.alias {
   line-height: 1.6;
   color: var(--ink);
 }
+/* A returned file's drop zone sits under the same line as a pasted reply. */
+.restore-body + .drop-zone {
+  margin-top: 12px;
+}
 .restore-input {
   margin: 0;
   width: 100%;

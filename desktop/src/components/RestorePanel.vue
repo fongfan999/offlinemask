@@ -1,12 +1,21 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
-import BrandMark from "./BrandMark.vue";
 import HighlightedText from "./HighlightedText.vue";
+import RestoreIntro from "./RestoreIntro.vue";
 import { restoreAliases, type Restoration } from "../core/restore.ts";
 import type { TextAnalysis } from "../core/text.ts";
 
-const props = defineProps<{ sessionId: string; analysis: TextAnalysis; newLabel?: string }>();
+const props = withDefaults(
+  defineProps<{
+    sessionId: string;
+    analysis: TextAnalysis;
+    /** What was masked, as the page names it: văn bản, bảng tính, tài liệu. */
+    subject?: string;
+    newLabel?: string;
+  }>(),
+  { subject: "văn bản", newLabel: "Ẩn văn bản mới" },
+);
 /** After copying, the next step is another reply or a new text; nothing needs "finishing".
  * `pasted` tells the page a reply is in, so its "paste the reply here" note can go. */
 const emit = defineEmits<{ newText: []; pasted: [boolean] }>();
@@ -48,7 +57,7 @@ const status = computed(() => {
   const current = result.value;
   if (!current) return "";
   if (!current.restored && !current.unknown.length)
-    return "Không tìm thấy mã thay thế của văn bản này trong nội dung đã dán.";
+    return `Không tìm thấy mã thay thế của ${props.subject} này trong nội dung đã dán.`;
   return current.restored === 1
     ? "Đã khôi phục 1 mã thay thế."
     : `Đã khôi phục ${current.restored.toLocaleString("vi-VN")} mã thay thế.`;
@@ -56,7 +65,7 @@ const status = computed(() => {
 const unknownNote = computed(() => {
   const unknown = result.value?.unknown ?? [];
   if (!unknown.length) return "";
-  return `${unknown.length === 1 ? "1 mã thay thế" : `${unknown.length} mã thay thế`} không thuộc văn bản này được giữ nguyên: ${unknown.join(", ")}.`;
+  return `${unknown.length === 1 ? "1 mã thay thế" : `${unknown.length} mã thay thế`} không thuộc ${props.subject} này được giữ nguyên: ${unknown.join(", ")}.`;
 });
 
 /** Clear the box for the AI's next reply in the same conversation. */
@@ -71,7 +80,7 @@ async function copy() {
   try {
     await navigator.clipboard.writeText(current.text);
     copied.value = true;
-    copyStatus.value = "Đã sao chép bản khôi phục.";
+    copyStatus.value = "Đã sao chép bản đã khôi phục.";
   } catch {
     output.value?.field?.focus();
     output.value?.field?.select();
@@ -84,10 +93,7 @@ async function copy() {
   <!-- Once a reply is in, the result is what matters: the pasted reply shrinks and the
        restored copy gets the room, under its own label (decision 0134). -->
   <div class="restore-body" :class="{ 'has-result': result?.restored }">
-    <p class="restore-intro">
-      <BrandMark variant="restore" :size="16" class="inline-mark" />Dán câu trả lời của AI vào đây.
-      Mã thay thế của văn bản này được đổi lại thành thông tin thật, ngay trên máy bạn.
-    </p>
+    <RestoreIntro :subject="subject" />
     <label class="sr-only" for="restore-input">Câu trả lời của AI chứa mã thay thế</label>
     <textarea
       id="restore-input"
@@ -126,11 +132,11 @@ async function copy() {
       <template v-if="copied">
         <button class="quiet-button" @click="anotherReply">Dán câu trả lời khác</button>
         <button class="quiet-button" @click="emit('newText')">
-          <AppIcon name="plus" :size="15" />{{ newLabel ?? "Ẩn văn bản mới" }}
+          <AppIcon name="plus" :size="15" />{{ newLabel }}
         </button>
       </template>
       <button v-else class="primary-action" @click="copy">
-        <AppIcon name="copy" :size="17" />Sao chép bản khôi phục
+        <AppIcon name="copy" :size="17" />Sao chép bản đã khôi phục
       </button>
     </template>
   </footer>

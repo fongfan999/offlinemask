@@ -5,6 +5,7 @@ import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import PasscodeSetup from "../components/PasscodeSetup.vue";
+import RestoreIntro from "../components/RestoreIntro.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import ReviewList from "../components/ReviewList.vue";
 import SheetPreview from "../components/SheetPreview.vue";
@@ -138,7 +139,7 @@ async function download() {
   try {
     if (await sheet.download(props.session)) {
       status.value =
-        "Đã lưu tệp đã ẩn. Gửi tệp này cho AI; khi có tệp trả về, mở ở bước Khôi phục.";
+        "Đã lưu tệp đã ẩn. Gửi tệp này cho công cụ AI bạn dùng (ChatGPT, Claude, Gemini…), rồi đưa tệp hoặc câu trả lời AI trả về vào bước Khôi phục.";
       restoreStep.value = true;
     }
   } catch {
@@ -456,11 +457,12 @@ defineExpose({
         </div>
       </header>
       <template v-if="restoreKind === 'file'">
+        <div class="restore-body"><RestoreIntro subject="bảng tính" /></div>
         <FileDropZone
           v-if="!restore"
           icon="undo"
           title="Kéo thả tệp AI trả về vào đây"
-          hint="mã thay thế được đổi lại thành thông tin thật"
+          hint=".xlsx, .xls, .ods, .csv"
           accept=".xlsx,.xls,.ods,.csv"
           :busy="restoreBusy"
           @file="openReturned"
@@ -509,6 +511,7 @@ defineExpose({
         <RestorePanel
           :session-id="session.id"
           :analysis="{ findings: session.findings, spans: [] }"
+          subject="bảng tính"
           new-label="Ẩn bảng tính mới"
           @new-text="newSheet"
           @pasted="(pasted) => (replyPasted = pasted)"
