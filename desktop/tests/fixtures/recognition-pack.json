@@ -288,5 +288,31 @@
       "3.500.000",
       "25.000.000"
     ]
+  },
+  {
+    "id": "government-decision",
+    "text": "ỦY BAN NHÂN DÂN THÀNH PHỐ HẢI PHÒNG SỞ NỘI VỤ\tCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM Độc lập - Tự do - Hạnh phúc\nSố: 2417/QĐ-SNV-TCTN\tThành phố Hải Phòng, ngày 12 tháng 8 năm 2026\nQUYẾT ĐỊNH\nVề việc hưởng trợ cấp thất nghiệp GIÁM ĐỐC SỞ NỘI VỤ THÀNH PHỐ HẢI PHÒNG\nCăn cứ hồ sơ đề nghị hưởng trợ cấp thất nghiệp của ông/bà Đỗ Minh Quân; Theo đề nghị của Giám đốc Trung tâm Dịch vụ việc làm Thành phố Hải Phòng.\nĐiều 1. Trợ cấp thất nghiệp đối với:\nÔng/ bà Đỗ Minh Quân · Sinh ngày 14/02/1991.\nSố định danh cá nhân: 031091012345 Ngày cấp: 05/06/2022.\nNơi thường trú: số 7 ngõ 12 Lạch Tray, phường Đổng Quốc Bình, quận Ngô Quyền, Thành phố Hải Phòng.\nNơi ở hiện nay: Căn hộ số B12.05 thuộc khu chung cư Hoàng Huy, phường Sở Dầu, Thành phố Hải Phòng. Tổng số tháng đóng bảo hiểm thất nghiệp: 36 tháng.\n- Tên chủ tài khoản: Đỗ Minh Quân · Số tài khoản: 1903456789012.\nNơi đăng ký khám, chữa bệnh ban đầu: BỆNH VIỆN ĐA KHOA QUỐC TẾ HẢI PHÒNG.\nĐiều 4. Giám đốc Bảo hiểm xã hội Thành phố Hải Phòng và ông/bà có tên trên chịu trách nhiệm thi hành Quyết định này./.\nNơi nhận: · KT. GIÁM ĐỐC\n- Như Điều 4; · PHÓ GIÁM ĐỐC\n- Lưu: VT, TTDVVL.\nVũ Thị Hồng Nhung",
+    "sensitive": [
+      "Đỗ Minh Quân",
+      "14/02/1991",
+      "031091012345",
+      "số 7 ngõ 12 Lạch Tray, phường Đổng Quốc Bình, quận Ngô Quyền, Thành phố Hải Phòng",
+      "Căn hộ số B12.05 thuộc khu chung cư Hoàng Huy, phường Sở Dầu, Thành phố Hải Phòng",
+      "1903456789012",
+      "BỆNH VIỆN ĐA KHOA QUỐC TẾ HẢI PHÒNG",
+      "Vũ Thị Hồng Nhung"
+    ],
+    "retain": [
+      "ỦY BAN NHÂN DÂN THÀNH PHỐ HẢI PHÒNG SỞ NỘI VỤ",
+      "Thành phố Hải Phòng, ngày 12 tháng 8 năm 2026",
+      "QUYẾT ĐỊNH",
+      "GIÁM ĐỐC SỞ NỘI VỤ THÀNH PHỐ HẢI PHÒNG",
+      "Trung tâm Dịch vụ việc làm Thành phố Hải Phòng",
+      "Bảo hiểm xã hội Thành phố Hải Phòng",
+      "thi hành Quyết định này",
+      "Như Điều 4",
+      "Lưu: VT, TTDVVL",
+      "36 tháng"
+    ]
   }
 ]

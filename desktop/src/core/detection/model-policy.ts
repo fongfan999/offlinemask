@@ -151,6 +151,21 @@ const boilerplatePhrases = [
   "ghi có",
   "số dư",
   "loại tiền",
+  // Official documents (decision 0159): the kinds of document and the "Nơi nhận" block,
+  // which a model reads as a place or a name ("thi hành Quyết định này", "Như Điều 4",
+  // "Lưu: VT").
+  "quyết định",
+  "nghị định",
+  "thông tư",
+  "công văn",
+  "nơi nhận",
+  "như điều \\d+",
+  "như trên",
+  // "Lưu: VT, TTDVVL": the units that file the document, as initials.
+  "lưu:(?: [\\p{Lu}][\\p{Lu}.]*,?)*",
+  "kt\\.",
+  "tm\\.",
+  "tl\\.",
 ];
 /** Countries and regions: a span that is only one of these is where something comes
  * from ("Thịt bò Úc"), not anyone's address; an address that ends in one is kept whole. */
@@ -324,11 +339,86 @@ export function modelDetections(text: string, spans: readonly DecodedEntitySpan[
   return plausibleModelDetections(text, detections);
 }
 
+/** State bodies and public services as an official document names them ("Ủy ban nhân
+ * dân Thành phố Hồ Chí Minh", "SỞ NỘI VỤ", "Bảo hiểm xã hội", "Trung tâm Dịch vụ việc
+ * làm", "Công an phường …"): not anyone's private data, and the place after one is its
+ * jurisdiction, not a residence (decision 0159). A body's range is its term, extended
+ * over every place or organization a model found touching it, so the city inside
+ * "Sở Nội vụ Thành phố Hồ Chí Minh" goes with the body. */
+const publicBody = new RegExp(
+  `(?<![\\p{L}\\p{M}])(?:${[
+    "ủy ban nhân dân",
+    "uỷ ban nhân dân",
+    "ubnd",
+    "hội đồng nhân dân",
+    "hđnd",
+    "chính phủ",
+    "quốc hội",
+    "bảo hiểm xã hội",
+    "bhxh",
+    "trung tâm dịch vụ việc làm",
+    "công an",
+    "t(?:òa|oà) án(?: nhân dân)?",
+    "viện kiểm sát(?: nhân dân)?",
+    "kho bạc nhà nước",
+    "ngân hàng nhà nước",
+    "bưu điện",
+    "(?:bộ|sở) (?:nội vụ|y tế|tài chính|xây dựng|tư pháp|công thương|ngoại giao|ngoại vụ|du lịch|quốc phòng|giáo dục(?: và đào tạo)?|lao động(?:,? thương binh và xã hội)?|giao thông(?: vận tải)?|kế hoạch và đầu tư|tài nguyên và môi trường|khoa học và công nghệ|thông tin và truyền thông|văn h(?:óa|oá)(?:, thể thao và du lịch)?|nông nghiệp(?: và (?:phát triển nông thôn|môi trường))?)",
+    "(?:chi |tổng )?cục (?:thuế|hải quan|thống kê|đăng kiểm|việc làm|thi hành án dân sự|quản lý thị trường|cảnh sát giao thông)",
+  ].join("|")})(?![\\p{L}\\p{M}])`,
+  "giu",
+);
+// Up to two words between a body and the place a model found after it: the unit's kind,
+// which a model leaves out or cuts ("Ủy ban nhân dân [Thành phố] Hồ Chí Minh", "Bảo hiểm
+// xã hội [Thành] phố Hồ Chí Minh").
+const unitGap = /^[^\S\r\n\t]*(?:[\p{L}\p{M}]+\.?[^\S\r\n\t]+){0,2}$/u;
+function publicBodyRanges(text: string, detections: readonly Detection[]): [number, number][] {
+  const ranges: [number, number][] = [];
+  for (const match of text.matchAll(publicBody)) {
+    let start = match.index,
+      end = match.index + match[0].length;
+    for (let grown = true; grown;) {
+      grown = false;
+      for (const d of detections) {
+        if (!contextual.has(d.type)) continue;
+        // A "name" that is a piece of the place ("HỒ" then "CHÍ MINH") joins; a real name
+        // after a body ("Giám đốc Sở Y tế Nguyễn Văn An") does not.
+        const joins =
+          (d.start < end || unitGap.test(text.slice(end, d.start))) &&
+          (d.type !== "TEN" || !looksLikeKnownName(text.slice(d.start, d.end)));
+        if (d.end > end && joins) {
+          end = d.end;
+          grown = true;
+        }
+        if (d.type === "TO_CHUC" && d.start < start && d.end > start) {
+          start = d.start;
+          grown = true;
+        }
+      }
+    }
+    ranges.push([start, end]);
+  }
+  return ranges;
+}
+/** The place of issue before the date of an official document ("Thành phố Hồ Chí Minh,
+ * ngày 23 tháng 9 năm 2026"): up to six words without a number at the start of a line or
+ * cell, followed by the date, are where the document was signed, not where anyone lives
+ * (decision 0159). Read from the text, so every model's pass shields the same range. */
+const issuePlace =
+  /(?:^|[\t\r\n])[^\S\r\n]*((?:[\p{L}\p{M}]+\.?[^\S\r\n]+){0,5}[\p{L}\p{M}]+\.?)[^\S\r\n]*,?[^\S\r\n]*ngày[^\S\r\n]+\d{1,2}[^\S\r\n]+tháng[^\S\r\n]+\d{1,2}[^\S\r\n]+năm[^\S\r\n]+\d{4}(?!\p{N})/giu;
+function issuePlaceRanges(text: string): [number, number][] {
+  return [...text.matchAll(issuePlace)].map((match) => {
+    const start = match.index + match[0].indexOf(match[1]!);
+    return [start, start + match[1]!.length];
+  });
+}
+
 /** Drop the spans no name, place or organization can be. Applied per model window and
  * again on the whole text, where a phrase cut by a window edge is whole. Decomposed
  * text skips the phrase check: ranges are NFC positions, and the window text is NFC. */
 export function plausibleModelDetections(text: string, detections: readonly Detection[]) {
   const phrases = text === text.normalize("NFC") ? boilerplateRanges(text) : [];
+  const shielded = [...publicBodyRanges(text, detections), ...issuePlaceRanges(text)];
   return detections.flatMap((detection) => {
     const d = detection.type === "TEN" ? withoutBrands(text, detection) : detection;
     if (!d) return [];
@@ -336,6 +426,7 @@ export function plausibleModelDetections(text: string, detections: readonly Dete
     if (!plausibleContextualSpan(d.type, value)) return [];
     if (!contextual.has(d.type)) return [d];
     if (phrases.some(([start, end]) => start <= d.start && d.end <= end)) return [];
+    if (shielded.some(([start, end]) => start <= d.start && d.end <= end)) return [];
     if (productCell(text, d.start, d.end)) return [];
     if (wordingColumn(text, d.start, d.end)) return [];
     if (transactionCell(text, d.start, d.end, d.type, value)) return [];

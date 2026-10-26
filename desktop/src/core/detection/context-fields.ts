@@ -17,7 +17,7 @@ const datePrefix = new RegExp(
 );
 const numericDate = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?![a-z0-9_/])/;
 const legalPrefix =
-  /(?<![a-z0-9_])(?:cong ty(?: (?:tnhh|co phan|trach nhiem huu han))?|hop tac xa|doanh nghiep tu nhan|ho kinh doanh)(?![a-z0-9_])/g;
+  /(?<![a-z0-9_])(?:cong ty(?: (?:tnhh|co phan|trach nhiem huu han))?|hop tac xa|doanh nghiep tu nhan|ho kinh doanh|benh vien|phong kham(?: da khoa)?|truong (?:dai hoc|cao dang|thpt|thcs|tieu hoc|mam non))(?![a-z0-9_])/g;
 const bridge = new RegExp(
   `^${horizontal}*(?:[:：=]${horizontal}*|${horizontal}+(?:(?:cua${horizontal}+(?:khach(?:${horizontal}+hang)?|toi)${horizontal}+)?(?:duoc${horizontal}+ghi${horizontal}+)?(?:la${horizontal}+)?)?)`,
 );
@@ -129,16 +129,19 @@ export function detectContextFields(
       acronym = false,
       tokens = 0;
     for (; tokens < 12; tokens++) {
-      // A name never continues into the next table cell (a tab).
-      const token = /^[^\S\r\n\t]+([\p{L}\p{M}\p{N}]+(?:[-'’][\p{L}\p{M}\p{N}]+)*)/u.exec(
-        text.slice(cursor, cursor + 160),
-      );
+      // A name never continues into the next table cell (a tab). An abbreviation with its
+      // period before another capital ("TP. HCM") is one token (decision 0159).
+      const token =
+        /^[^\S\r\n\t]+([\p{Lu}]{1,3}\.(?=[^\S\r\n]+[\p{Lu}\p{N}])|[\p{L}\p{M}\p{N}]+(?:[-'’][\p{L}\p{M}\p{N}]+)*)/u.exec(
+          text.slice(cursor, cursor + 160),
+        );
       if (!token || cursor + token[0].length - start > 180) break;
       const word = token[1]!,
         lower = fold(word);
       const tail = fold(text.slice(cursor, cursor + 60)).trimStart();
       if (
-        /^(?:da|dang|se|khong|yeu cau|de nghi|tong so|so tien|so ho so|ngay giao dich|co ma|co tai khoan)\b/u.test(
+        // "đã" ends a name, "đa khoa" (a general hospital) does not (decision 0159).
+        /^(?:da(?! khoa)|dang|se|khong|yeu cau|de nghi|tong so|so tien|so ho so|ngay giao dich|co ma|co tai khoan)\b/u.test(
           tail,
         )
       )

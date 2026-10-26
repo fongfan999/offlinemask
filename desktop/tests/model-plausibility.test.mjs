@@ -548,3 +548,54 @@ test("a cell under a wording heading (a relation, a job title, goods) is not a n
     ["Bùi Bảo Trang", "Công ty TNHH Hoa Mai"],
   );
 });
+
+test("an official decision: public bodies and the place of issue stay, the identifier, residence and hospital are hidden", () => {
+  const text = [
+    "ỦY BAN NHÂN DÂN THÀNH PHỐ HẢI PHÒNG SỞ NỘI VỤ\tCỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM",
+    "Số: 2417/QĐ-SNV\tThành phố Hải Phòng, ngày 12 tháng 8 năm 2026",
+    "Theo đề nghị của Giám đốc Trung tâm Dịch vụ việc làm Thành phố Hải Phòng và Bảo hiểm xã hội Thành phố Hải Phòng.",
+    "Số định danh cá nhân: 031091012345 Ngày cấp: 05/06/2022.",
+    "Nơi ở hiện nay: Căn hộ số B12.05 thuộc khu chung cư Hoàng Huy, phường Sở Dầu, Thành phố Hải Phòng. Tổng số tháng: 36 tháng.",
+    "Nơi đăng ký khám, chữa bệnh ban đầu: BỆNH VIỆN ĐA KHOA QUỐC TẾ HẢI PHÒNG TP. HP.",
+    "Giám đốc Công an phường Sở Dầu chịu trách nhiệm thi hành Quyết định này./.",
+    "- Như Điều 4; · PHÓ GIÁM ĐỐC",
+    "- Lưu: VT, TTDVVL.",
+  ].join("\n");
+  const at = (value, after) => text.indexOf(after) + after.length;
+  const spans = [
+    span(text, "THÀNH PHỐ HẢI PHÒNG", "LOCATION"),
+    span(text, "Thành phố Hải Phòng", "LOCATION", at("", "Số: 2417")),
+    span(text, "Trung tâm Dịch vụ việc làm Thành phố Hải Phòng", "ORGANIZATION"),
+    span(text, "Hải Phòng", "LOCATION", at("", "Trung tâm Dịch vụ việc làm Thành phố")),
+    span(text, "Hải Phòng", "LOCATION", at("", "Bảo hiểm xã hội Thành phố")),
+    span(text, "số B12.", "LOCATION"),
+    span(text, "chung cư Hoàng Huy, phường Sở Dầu, Thành phố Hải Phòng", "LOCATION"),
+    span(text, "VIỆN", "PERSON"),
+    span(text, "KHOA QUỐC TẾ HẢI PHÒNG TP. HP", "LOCATION"),
+    span(text, "Sở Dầu", "LOCATION", at("", "Công an phường")),
+    span(text, "Quyết định", "LOCATION"),
+    span(text, "Như Điều 4", "PERSON"),
+    span(text, "Lưu", "PERSON"),
+  ];
+  const { complete } = applyDetectionPolicy(text, modelDetections(text, spans));
+  assert.deepEqual(
+    values(
+      text,
+      [...complete].sort((a, b) => a.start - b.start),
+    ),
+    [
+      ["CCCD", "031091012345"],
+      [
+        "DIA_CHI",
+        "Căn hộ số B12.05 thuộc khu chung cư Hoàng Huy, phường Sở Dầu, Thành phố Hải Phòng",
+      ],
+      ["TO_CHUC", "BỆNH VIỆN ĐA KHOA QUỐC TẾ HẢI PHÒNG TP. HP"],
+    ],
+  );
+  // A residence before a date in prose is still an address: it has a number and sits mid-line.
+  const signed = "Ký tại 12 Lê Lợi, Quận 1, ngày 3 tháng 4 năm 2026.";
+  assert.deepEqual(
+    values(signed, modelDetections(signed, [span(signed, "12 Lê Lợi, Quận 1", "LOCATION")])),
+    [["DIA_CHI", "12 Lê Lợi, Quận 1"]],
+  );
+});

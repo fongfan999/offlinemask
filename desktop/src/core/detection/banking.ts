@@ -23,7 +23,9 @@ const rules: readonly Rule[] = [
     type: "CCCD",
     label: "Số giấy tờ tùy thân",
     pattern:
-      /(?<![\p{L}\p{N}_])(?:cccd|cmnd|căn cước(?: công dân)?|chứng minh nhân dân)\s*(?:số\s*)?[:：#-]?\s*(\d{12}|\d{9})(?![\p{L}\p{N}_])/giu,
+      // "Số định danh cá nhân" is the official name of the 12-digit number on decisions and
+      // forms (decision 0159).
+      /(?<![\p{L}\p{N}_])(?:cccd|cmnd|căn cước(?: công dân)?|chứng minh nhân dân|(?:số|mã)\s+định danh(?: cá nhân)?|định danh cá nhân)\s*(?:số\s*)?[:：#-]?\s*(\d{12}|\d{9})(?![\p{L}\p{N}_])/giu,
     reason: "Dãy 9 hoặc 12 chữ số sau nhãn giấy tờ; chưa xác minh tính hợp lệ.",
   },
   {

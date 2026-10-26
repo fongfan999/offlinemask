@@ -5,7 +5,7 @@ import { textGraphemes } from "../unicode.ts";
 const nameLabels =
   "ho va ten|ho ten|ten khach hang|ten nguoi nhan|ten nguoi gui|ten tren giay to|ten chu tai khoan|chu tai khoan|ten tai khoan|khach hang|nguoi thu huong|nguoi yeu cau|nguoi nhan|nguoi gui";
 const addressLabels =
-  "dia chi lien he|dia chi nhan thu|dia chi thuong tru|dia chi|dia diem lam viec|dia diem kinh doanh|noi nhan|noi o|thuong tru|d/c";
+  "dia chi lien he|dia chi nhan thu|dia chi thuong tru|dia chi hien tai|dia chi|dia diem lam viec|dia diem kinh doanh|noi nhan|noi o hien nay|cho o hien nay|noi cu tru|noi o|ho khau thuong tru|noi dang ky thuong tru|thuong tru|d/c";
 const otherLabels =
   "email|dien thoai|sdt|so dien thoai|stk|so tai khoan|tai khoan|cccd|cmnd|ma giao dich|ma khach hang|ngay sinh|ngay tiep nhan|so tien|noi dung|phi";
 const fields = new RegExp(
@@ -75,6 +75,9 @@ export function detectLabelledFields(text: string): LabelledFields {
       // A tab or " · " parts two fields on one line (Word, the PDF reader; decision 0154).
       if (/[;!?\r\n:：\t·]/u.test(character) || (isName && character === ",")) break;
       if (character === ".") {
+        // A period between a letter or digit and a digit is inside a value ("A34.07").
+        if (/[\p{L}\p{N}]/u.test(text[end - 1] ?? "") && /\p{N}/u.test(text[end + 1] ?? ""))
+          continue;
         const word = fold(text.slice(start, end)).match(/([a-z]+)$/)?.[1];
         if (isAddress && word && /^(p|q|tp|tx|tt)$/.test(word)) continue;
         break;
