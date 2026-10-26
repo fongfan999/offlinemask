@@ -599,3 +599,119 @@ test("an official decision: public bodies and the place of issue stay, the ident
     [["DIA_CHI", "12 Lê Lợi, Quận 1"]],
   );
 });
+
+test("the wider set (decision 0160): departments, roles, package names, countries and a letterhead", () => {
+  // A department or ward is wording, as a cell, a span or the word after the unit's kind.
+  const dept = "Bệnh viện Chợ Rẫy Khoa Nhi\nPhòng ban: Phòng Kỹ thuật · Chức vụ: Kỹ sư phần mềm";
+  assert.deepEqual(
+    values(
+      dept,
+      modelDetections(dept, [
+        span(dept, "Rẫy Khoa Nhi", "PERSON"),
+        span(dept, "Nhi", "ORGANIZATION"),
+        span(dept, "Phòng Kỹ thuật", "ORGANIZATION"),
+        span(dept, "thuật", "ORGANIZATION"),
+      ]),
+    ),
+    [],
+  );
+  // A model's organization that runs into the department line ends before it.
+  const school = "Trường Đại học Kinh tế Quốc dân Phòng Đào tạo";
+  assert.deepEqual(
+    values(school, modelDetections(school, [span(school, school, "ORGANIZATION")])),
+    [["TO_CHUC", "Trường Đại học Kinh tế Quốc dân"]],
+  );
+  // "Khoa" as a middle name is a name.
+  const poet = "Nhà thơ Nguyễn Khoa Điềm";
+  assert.deepEqual(
+    values(poet, modelDetections(poet, [span(poet, "Nguyễn Khoa Điềm", "PERSON")])),
+    [["TEN", "Nguyễn Khoa Điềm"]],
+  );
+  // A role in capitals after the date line is not a name; a name in capitals after a label is.
+  const role = "Cần Thơ, ngày 22 tháng 12 năm 2026 TL. HIỆU TRƯỞNG TRƯỞNG PHÒNG ĐÀO TẠO";
+  assert.deepEqual(
+    values(role, modelDetections(role, [span(role, "HIỆU TRƯỞNG TRƯỞNG PHÒNG ĐÀO TẠO", "PERSON")])),
+    [],
+  );
+  const patient = "Họ tên người bệnh: HOÀNG KIM VY · Giới tính: Nam";
+  assert.deepEqual(
+    values(
+      patient,
+      modelDetections(patient, [
+        span(patient, "HOÀNG KIM VY", "PERSON"),
+        span(patient, "Nam", "PERSON"),
+      ]),
+    ),
+    [["TEN", "HOÀNG KIM VY"]],
+  );
+  // A package name under "Gói cước", a title's "THÁNG", a rank and a country.
+  const bill =
+    "Dịch vụ\tGói cước\tThành tiền\n\nInternet cáp quang\tGiga Home\t280.000\n\nPHIẾU LƯƠNG THÁNG 02/2026\nQuốc tịch: Việt Nam · Thiếu tá";
+  assert.deepEqual(
+    values(
+      bill,
+      modelDetections(bill, [
+        span(bill, "Giga Home", "ORGANIZATION"),
+        span(bill, "THÁNG", "LOCATION"),
+        span(bill, "Việt Nam", "ORGANIZATION"),
+        span(bill, "Thiếu tá", "PERSON"),
+      ]),
+    ),
+    [],
+  );
+  // A letterhead the reader joined: the company stops before its address, which the ward
+  // after the comma seeds; the policy gives one organization and one address.
+  const head =
+    "Công ty TNHH MTV Thương mại Tổng hợp Tân Phong 370 Huỳnh Văn Bánh, Phường Hải Châu, Thành phố Đà Nẵng";
+  const { complete } = applyDetectionPolicy(
+    head,
+    modelDetections(head, [
+      span(head, "Công ty TNHH MTV Thương mại Tổng hợp Tân Phong", "ORGANIZATION"),
+      span(head, "Phường Hải Châu, Thành phố Đà Nẵng", "LOCATION"),
+    ]),
+  );
+  assert.deepEqual(
+    values(
+      head,
+      [...complete].sort((a, b) => a.start - b.start),
+    ).filter(([, v]) => v.length > 12),
+    [
+      ["TO_CHUC", "Công ty TNHH MTV Thương mại Tổng hợp Tân Phong"],
+      ["DIA_CHI", "370 Huỳnh Văn Bánh, Phường Hải Châu, Thành phố Đà Nẵng"],
+      ["DIA_CHI", "Phường Hải Châu, Thành phố Đà Nẵng"],
+    ],
+  );
+  // Labelled codes of people, a personal tax code, a residence label of a bill, a birth
+  // date label of a decision, and an address that the reader joined to the next sentence.
+  const record = [
+    "Mã nhân viên: NV84521 · Mã số thuế cá nhân: 8053087565",
+    "Số thẻ BHYT: GD1481125110612 · Mã bệnh nhân: BN98154667",
+    "Mã số sinh viên: 21924580 · Mã thuê bao: SGH5979459",
+    "Địa chỉ lắp đặt: 121/15 Lê Lợi, Phường Hoàn Kiếm, Thành phố Hà Nội",
+    "Ngày, tháng, năm sinh: 25/11/1996",
+    "Nơi ở hiện nay: 312 đường Lý Thường Kiệt, P. Tân Định, TP. Hồ Chí Minh Tổng số tháng đóng: 55 tháng.",
+  ].join("\n");
+  assert.deepEqual(
+    values(
+      record,
+      [...applyDetectionPolicy(record, []).complete].sort((a, b) => a.start - b.start),
+    ),
+    [
+      ["MA_SO", "NV84521"],
+      ["GIAY_TO", "8053087565"],
+      ["MA_SO", "GD1481125110612"],
+      ["MA_SO", "BN98154667"],
+      ["MA_SO", "21924580"],
+      ["MA_SO", "SGH5979459"],
+      ["DIA_CHI", "121/15 Lê Lợi, Phường Hoàn Kiếm, Thành phố Hà Nội"],
+      ["NGAY_SINH", "25/11/1996"],
+      ["DIA_CHI", "312 đường Lý Thường Kiệt, P. Tân Định, TP. Hồ Chí Minh"],
+    ],
+  );
+  // A company name ending in "Phong" is whole; a department line after a school is not.
+  const firm = "HỘ KINH DOANH TẠP HÓA TÂN PHONG Tôi tên là Lê An";
+  assert.deepEqual(
+    values(firm, applyDetectionPolicy(firm, []).complete).filter(([t]) => t === "TO_CHUC"),
+    [["TO_CHUC", "HỘ KINH DOANH TẠP HÓA TÂN PHONG"]],
+  );
+});

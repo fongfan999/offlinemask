@@ -1,6 +1,7 @@
-// Writes the synthetic document set (decision 0153): invented invoices, bank statements,
-// contracts and forms in several layouts, as PDF and Word, each with the lists of what
-// must be hidden and kept that `pnpm eval:documents` measures.
+// Writes the synthetic document set (decisions 0153 and 0160): invented invoices, bank
+// statements, contracts, forms, decisions, payslips, medical records, utility bills,
+// letters, minutes, transcripts and orders in several layouts, as PDF and Word, each with
+// the lists of what must be hidden and kept that `pnpm eval:documents` measures.
 //
 //   mise exec -- node scripts/generate-documents.mjs [folder] [--seed n] [--variants n]
 //

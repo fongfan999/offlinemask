@@ -42,6 +42,15 @@ const rules: readonly Rule[] = [
       /(?<![\p{L}\p{N}_])(?:mã khách hàng|mã kh|customer (?:id|code))\s*[:：#-]?\s*([A-Z0-9][A-Z0-9_-]{2,39})(?![\p{L}\p{N}_-])/giu,
     reason: "Mã sau nhãn khách hàng.",
   },
+  {
+    type: "MA_SO",
+    label: "Mã số",
+    // The codes an organization gives a person: employee, student, patient, health-insurance
+    // card, social-insurance book, subscriber and member numbers (decision 0160).
+    pattern:
+      /(?<![\p{L}\p{N}_])(?:mã nhân viên|mã nv|mã nhân sự|mã sinh viên|mã số sinh viên|mssv|mã học viên|mã học sinh|mã bệnh nhân|mã bn|mã hồ sơ bệnh án|số thẻ bhyt|mã thẻ bhyt|số thẻ bảo hiểm(?: y tế)?|mã số bhxh|số sổ bhxh|mã thuê bao|số thuê bao|mã hội viên|mã thành viên)\s*[:：#-]?\s*([A-Z0-9][A-Z0-9_-]{2,39})(?![\p{L}\p{N}_-])/giu,
+    reason: "Mã sau nhãn mã số nhân viên, sinh viên, bệnh nhân, thẻ bảo hiểm hoặc thuê bao.",
+  },
 ];
 
 const nameWord = "[A-Z]{1,7}";

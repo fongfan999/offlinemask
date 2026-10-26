@@ -13,6 +13,8 @@ import {
   phone,
   unaccented,
 } from "./data.mjs";
+import { nationalHeader, recorder } from "./model.mjs";
+import { moreKinds } from "./kinds-more.mjs";
 
 /** The synthetic document kinds (decision 0153). Each builds a layout-neutral model for
  * `render-pdf.mjs` and `render-docx.mjs` and records every invented value it places:
@@ -25,31 +27,6 @@ import {
  *   { signatures: [{ role, note?, name }] }
  *   { space } / { pageBreak: true }
  * A document has { font: "sans" | "serif", size, blocks }. */
-function recorder() {
-  const lists = { hide: new Set(), keep: new Set(), ignore: new Set() };
-  const add = (list) => (value) => (lists[list].add(String(value)), value);
-  const contexts = new Map();
-  return {
-    hide: add("hide"),
-    /** A short value that must be hidden only where it stands in `context` ("bà Trang"),
-     * not everywhere ("Trang 1/1"). Returns the context, to be placed as it is. */
-    hideIn: (value, context) => (contexts.set(context, { value, in: context }), context),
-    keep: add("keep"),
-    ignore: add("ignore"),
-    lists: () => {
-      // A value both hidden and kept is a generator mistake; hiding wins.
-      for (const value of lists.hide) lists.keep.delete(value);
-      const result = Object.fromEntries(Object.entries(lists).map(([key, set]) => [key, [...set]]));
-      result.hide.push(...contexts.values());
-      return result;
-    },
-  };
-}
-const nationalHeader = (r) => [
-  { title: r.keep("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM"), size: 1 },
-  { text: r.keep("Độc lập - Tự do - Hạnh phúc"), align: "center", bold: true },
-  { space: 8 },
-];
 const issuer = "Cục Cảnh sát quản lý hành chính về trật tự xã hội";
 
 function invoice(rng, layout) {
@@ -619,4 +596,5 @@ export const kinds = {
   statement: { layouts: ["classic", "compact"], build: statement },
   contract: { layouts: ["rental", "labour"], build: contract },
   form: { layouts: ["cv", "application"], build: form },
+  ...moreKinds,
 };

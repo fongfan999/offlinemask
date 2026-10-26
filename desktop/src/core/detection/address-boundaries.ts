@@ -7,6 +7,101 @@ const addressContext =
 const factWords =
   /\b(?:giao dich|ho so|yeu cau|so tien|dien thoai|email|stk|tai khoan|cccd|chi phi|ban lam viec|can sua|cam on)\b/;
 const house = /^\d{1,5}[a-z]?(?:\/\d{1,5}[a-z]?)*\s+/;
+/** The provinces and cities (the 34 since July 2025 and the names before), a closed public
+ * list like the countries of 0155: an address ends after one of them (decision 0160). */
+export const provinces = [
+  "hà nội",
+  "hồ chí minh",
+  "hải phòng",
+  "đà nẵng",
+  "cần thơ",
+  "huế",
+  "lai châu",
+  "điện biên",
+  "sơn la",
+  "lào cai",
+  "tuyên quang",
+  "thái nguyên",
+  "cao bằng",
+  "lạng sơn",
+  "quảng ninh",
+  "bắc ninh",
+  "phú thọ",
+  "hưng yên",
+  "ninh bình",
+  "thanh hóa",
+  "thanh hoá",
+  "nghệ an",
+  "hà tĩnh",
+  "quảng trị",
+  "quảng ngãi",
+  "gia lai",
+  "đắk lắk",
+  "khánh hòa",
+  "khánh hoà",
+  "lâm đồng",
+  "đồng nai",
+  "tây ninh",
+  "đồng tháp",
+  "vĩnh long",
+  "an giang",
+  "cà mau",
+  "bình dương",
+  "bà rịa - vũng tàu",
+  "bà rịa – vũng tàu",
+  "vũng tàu",
+  "hải dương",
+  "nam định",
+  "thái bình",
+  "bắc giang",
+  "vĩnh phúc",
+  "hà nam",
+  "hòa bình",
+  "hoà bình",
+  "yên bái",
+  "hà giang",
+  "bắc kạn",
+  "quảng bình",
+  "quảng nam",
+  "bình định",
+  "phú yên",
+  "ninh thuận",
+  "bình thuận",
+  "kon tum",
+  "đắk nông",
+  "bình phước",
+  "long an",
+  "tiền giang",
+  "bến tre",
+  "trà vinh",
+  "hậu giang",
+  "sóc trăng",
+  "bạc liêu",
+  "kiên giang",
+  "thừa thiên huế",
+  "hcm",
+];
+/** Where a labelled address ends when the reader joined the next sentence to it
+ * ("… TP. Hồ Chí Minh Tổng số tháng …"): after the province or city, when a capitalized
+ * word follows without a comma. Returns the end within `value`, or undefined. */
+export function provinceEnd(value: string): number | undefined {
+  const names = [...provinces]
+    .sort((a, b) => b.length - a.length)
+    .join("|")
+    .replace(/ /g, "[^\\S\\r\\n]+");
+  const text = value.normalize("NFC");
+  const name = new RegExp(
+    // With its kind: a street named after a province ("Điện Biên Phủ", "Cao Bằng") has none.
+    `(?:^|[\\s,])(?:thành phố|tỉnh|tp\\.?|t\\.)[^\\S\\r\\n]*(?:${names})(?![\\p{L}\\p{M}])(?:,[^\\S\\r\\n]*việt nam)?`,
+    "giu",
+  );
+  for (const match of text.matchAll(name)) {
+    const end = match.index + match[0].length;
+    // Case matters here: a new sentence starts with a capital, prose does not.
+    if (/^[^\S\r\n]+(?!Việt Nam)\p{Lu}/u.test(text.slice(end))) return end;
+  }
+  return undefined;
+}
 const road = /^(?:duong|pho|dai lo)\s+/;
 const properValue =
   /^(?:[\p{Lu}\p{N}][\p{L}\p{M}\p{N}/-]*)(?:\s+[\p{Lu}\p{N}][\p{L}\p{M}\p{N}/-]*){0,9}$/u;
@@ -76,8 +171,16 @@ export function completeAddressBoundaries(
   const seeds = detections.filter((d) => d.type === "DIA_CHI");
   if (!seeds.length) return [...detections];
   const candidates: { start: number; end: number; seeded: boolean }[] = [];
-  for (const component of components(text)) {
+  const parts = components(text);
+  for (const [index, component] of parts.entries()) {
     if (component.end - component.start > 180) continue;
+    // A numbered street before a comma is seeded by the ward or city after it ("370 Huỳnh
+    // Văn Bánh, Phường Hải Châu …"), which the model found (decision 0160).
+    const following = parts[index + 1];
+    const continues =
+      !!following &&
+      /^[^\S\r\n]*,[^\S\r\n]*$/u.test(text.slice(component.end, following.start)) &&
+      seeds.some((d) => d.start < following.end && d.end > following.start);
     const source = text.slice(component.start, component.end);
     // Build a folded index only for matching labels; keep exact source offsets.
     let search = "";
@@ -96,6 +199,14 @@ export function completeAddressBoundaries(
       const prefix = tail.match(unit)?.[0];
       const number = tail.match(house)?.[0];
       const start = component.start + offsets[at]!;
+      // A word inside an organization's or a person's name ("… Tân Phong 370 Huỳnh Văn
+      // Bánh": "Phong" is not a room) cannot start the address (decision 0160).
+      if (
+        detections.some(
+          (d) => (d.type === "TO_CHUC" || d.type === "TEN") && d.start < start && d.end > start,
+        )
+      )
+        continue;
       const seeded = seeds.some((d) => d.start < component.end && d.end > start);
       const raw = text.slice(start, component.end).normalize("NFC");
       const valueStart = at + (prefix?.length ?? 0);
@@ -114,9 +225,9 @@ export function completeAddressBoundaries(
       const streetName = source.slice(offsets[streetNameStart] ?? source.length).normalize("NFC");
       const street =
         !!number &&
-        (roadPrefix ? properValue.test(streetName) : properValue.test(raw)) &&
+        properValue.test((roadPrefix ? streetName : raw).split(",")[0]!.trim()) &&
         /\p{L}/u.test(raw) &&
-        (seeded || hasContext);
+        (seeded || continues || hasContext);
       const locality =
         at === 0 && seeds.some((d) => d.start <= start && d.end > start) && properValue.test(raw);
       if (!(typed || street || locality) || factWords.test(tail)) continue;

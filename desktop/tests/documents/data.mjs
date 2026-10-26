@@ -283,3 +283,138 @@ export function inWords(value) {
 }
 export const date = (rng, year = 2026) =>
   `${String(rng.int(1, 28)).padStart(2, "0")}/${String(rng.int(1, 12)).padStart(2, "0")}/${year}`;
+
+// More invented data for the wider set (decision 0160): state bodies and the public
+// services an official document names, hospitals, schools, utilities, codes with the
+// right shape, and the wording of payslips, records and bills.
+
+export const cities = [
+  "Thành phố Hồ Chí Minh",
+  "Thành phố Hà Nội",
+  "Thành phố Đà Nẵng",
+  "Thành phố Cần Thơ",
+  "Thành phố Hải Phòng",
+  "tỉnh Lâm Đồng",
+  "tỉnh Khánh Hòa",
+  "tỉnh Nghệ An",
+  "tỉnh Đồng Nai",
+  "tỉnh Quảng Ninh",
+];
+const departments = [
+  "Sở Nội vụ",
+  "Sở Y tế",
+  "Sở Tài chính",
+  "Sở Xây dựng",
+  "Sở Giáo dục và Đào tạo",
+  "Sở Lao động - Thương binh và Xã hội",
+  "Sở Tư pháp",
+  "Sở Công Thương",
+  "Sở Giao thông vận tải",
+];
+/** A state body with its jurisdiction, as a decision's header writes it. */
+export function stateBody(rng) {
+  const city = rng.pick(cities);
+  const department = rng.pick(departments);
+  const capital = (text) => text.toUpperCase();
+  return {
+    city,
+    department,
+    committee: `Ủy ban nhân dân ${city}`,
+    committeeCapitals: `ỦY BAN NHÂN DÂN ${capital(city)}`,
+    departmentWithCity: `${department} ${city}`,
+    departmentCapitals: `${capital(department)} ${capital(city)}`,
+    social: `Bảo hiểm xã hội ${city}`,
+    jobs: `Trung tâm Dịch vụ việc làm ${city}`,
+    police: `Công an ${rng.pick(["phường Bến Thành", "phường Hoàn Kiếm", "xã Sông Lũy", "phường Hải Châu"])}`,
+    tax: `Chi cục Thuế khu vực ${rng.pick(["I", "II", "III", "XV"])}`,
+    issuePlace: `${city.replace(/^tỉnh /, "")}, ngày ${rng.int(1, 28)} tháng ${rng.int(1, 12)} năm 2026`,
+  };
+}
+export const hospitals = [
+  "Bệnh viện Đa khoa Tâm Anh",
+  "BỆNH VIỆN ĐA KHOA QUỐC TẾ VINMEC",
+  "Bệnh viện Chợ Rẫy",
+  "Bệnh viện Nhi Trung ương",
+  "Phòng khám Đa khoa Hoàn Mỹ",
+  "Bệnh viện Đại học Y Dược",
+];
+export const schools = [
+  "Trường Đại học Bách khoa",
+  "Trường Đại học Kinh tế Quốc dân",
+  "TRƯỜNG ĐẠI HỌC CẦN THƠ",
+  "Trường Cao đẳng Kỹ thuật Cao Thắng",
+  "Trường THPT Lê Quý Đôn",
+  "Trường THCS Nguyễn Du",
+];
+export const utilities = {
+  electric: ["Tổng công ty Điện lực TP. Hồ Chí Minh", "Công ty Điện lực Hà Nội"],
+  internet: ["VNPT", "Viettel", "FPT Telecom"],
+};
+/** A health-insurance card number: two letters, a digit, two province digits, ten digits. */
+export const bhyt = (rng) =>
+  `${rng.pick(["DN", "HC", "GD", "HS", "SV", "TE"])}${rng.int(1, 5)}${rng.pick(["79", "01", "48", "92", "31"])}${rng.digits(10)}`;
+export const plate = (rng) =>
+  `${rng.pick(["51", "30", "43", "65", "15"])}${rng.pick(["A", "B", "C", "G", "H", "K"])}-${rng.digits(3)}.${rng.digits(2)}`;
+export const employeeCode = (rng) => `NV${rng.digits(5)}`;
+export const studentId = (rng) => `${rng.pick(["20", "21", "22", "23"])}${rng.digits(6)}`;
+export const customerCode = (rng) => `PE${rng.digits(8)}`;
+export const positions = [
+  "Nhân viên kinh doanh",
+  "Kế toán viên",
+  "Kỹ sư phần mềm",
+  "Chuyên viên nhân sự",
+  "Trưởng phòng Kinh doanh",
+  "Nhân viên kho",
+  "Thiết kế đồ họa",
+  "Điều dưỡng",
+];
+export const divisions = [
+  "Phòng Kinh doanh",
+  "Phòng Kế toán",
+  "Phòng Nhân sự",
+  "Phòng Kỹ thuật",
+  "Bộ phận Kho vận",
+  "Ban Giám đốc",
+];
+export const diagnoses = [
+  "Viêm họng cấp",
+  "Tăng huyết áp vô căn",
+  "Viêm dạ dày",
+  "Rối loạn tiền đình",
+  "Đái tháo đường type 2",
+  "Viêm phế quản cấp",
+];
+export const labTests = [
+  ["Glucose", "mg/dL", "70 - 100"],
+  ["Cholesterol toàn phần", "mg/dL", "< 200"],
+  ["Creatinine", "mg/dL", "0,6 - 1,2"],
+  ["ALT (SGPT)", "U/L", "< 40"],
+  ["Hồng cầu", "T/L", "4,0 - 5,5"],
+  ["Bạch cầu", "G/L", "4,0 - 10,0"],
+  ["Tiểu cầu", "G/L", "150 - 400"],
+];
+export const subjects = [
+  "Toán cao cấp A1",
+  "Vật lý đại cương",
+  "Lập trình C",
+  "Kinh tế vi mô",
+  "Tiếng Anh 2",
+  "Cơ sở dữ liệu",
+  "Giáo dục thể chất",
+  "Triết học Mác - Lênin",
+];
+export const orderItems = [
+  ["Áo thun cotton nam size L", [120000, 250000]],
+  ["Giày thể thao Bitis Hunter", [600000, 900000]],
+  ["Nồi cơm điện Sharp 1.8L", [800000, 1500000]],
+  ["Sách Đắc Nhân Tâm", [60000, 90000]],
+  ["Tai nghe Bluetooth Sony", [900000, 2500000]],
+  ["Bình giữ nhiệt Lock&Lock 500ml", [150000, 300000]],
+  ["Bộ chăn ga Everon 1m6", [1200000, 2500000]],
+];
+export const violations = [
+  "Điều khiển xe mô tô không đội mũ bảo hiểm",
+  "Vượt đèn đỏ tại ngã tư",
+  "Đỗ xe nơi có biển cấm đỗ",
+  "Không chấp hành hiệu lệnh của đèn tín hiệu giao thông",
+];

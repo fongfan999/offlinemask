@@ -41,6 +41,7 @@ export function filterDetections(
     GIAY_TO: "banking",
     GD: "banking",
     KH: "banking",
+    MA_SO: "banking",
   };
   return detections.filter((detection) => options.includes(categories[detection.type] ?? "other"));
 }

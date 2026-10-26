@@ -314,5 +314,37 @@
       "Lưu: VT, TTDVVL",
       "36 tháng"
     ]
+  },
+  {
+    "id": "records-and-bills",
+    "text": "Công ty TNHH Công nghệ Kim Ngân\nSố 65 Nguyễn Huệ, Phường Ninh Kiều, Thành phố Cần Thơ\nPHIẾU LƯƠNG THÁNG 10/2026\nHọ và tên: Đặng Ngọc Yến · Mã nhân viên: NV84521\nPhòng ban: Phòng Kỹ thuật · Chức vụ: Kỹ sư phần mềm\nSố tài khoản: 8053087565 - BIDV · Mã số thuế cá nhân: 0519440084\nBệnh viện Chợ Rẫy Khoa Nhi\nPHIẾU KHÁM BỆNH\nHọ tên người bệnh: HOÀNG KIM VY · Ngày sinh: 04/05/2002\nGiới tính: Nữ · Mã bệnh nhân: BN22170874\nSố thẻ BHYT: TE1013023846051 · Điện thoại: 0332 219 033\nChẩn đoán: Viêm họng cấp\nTHÔNG BÁO CƯỚC DỊCH VỤ\nTên khách hàng: Trần Minh Khoa · Mã thuê bao: SGH5979459\nĐịa chỉ lắp đặt: 121/15 Lê Lợi, Phường Hoàn Kiếm, Thành phố Hà Nội\nDịch vụ\tGói cước\tThành tiền\nInternet cáp quang\tGiga Home\t280.000",
+    "sensitive": [
+      "Công ty TNHH Công nghệ Kim Ngân",
+      "Số 65 Nguyễn Huệ, Phường Ninh Kiều, Thành phố Cần Thơ",
+      "Đặng Ngọc Yến",
+      "NV84521",
+      "8053087565",
+      "0519440084",
+      "HOÀNG KIM VY",
+      "04/05/2002",
+      "BN22170874",
+      "TE1013023846051",
+      "0332 219 033",
+      "Trần Minh Khoa",
+      "SGH5979459",
+      "121/15 Lê Lợi, Phường Hoàn Kiếm, Thành phố Hà Nội"
+    ],
+    "retain": [
+      "PHIẾU LƯƠNG THÁNG 10/2026",
+      "Phòng ban: Phòng Kỹ thuật",
+      "Kỹ sư phần mềm",
+      "Khoa Nhi",
+      "PHIẾU KHÁM BỆNH",
+      "Giới tính: Nữ",
+      "Viêm họng cấp",
+      "THÔNG BÁO CƯỚC DỊCH VỤ",
+      "Giga Home",
+      "280.000"
+    ]
   }
 ]

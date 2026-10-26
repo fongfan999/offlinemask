@@ -9,7 +9,7 @@ import {
 
 const horizontal = "[^\\S\\r\\n]";
 const fieldLabels = new RegExp(
-  `(?<![a-z0-9_])(ngay sinh|sinh ngay|date of birth|dob|ngay giao dich|ngay hach toan|ngay hen(?: tra ket qua)?|phien ban(?: phan mem)?|version|ma http|http status|so ho so da xu ly|tong so chung tu)(?![a-z0-9_])`,
+  `(?<![a-z0-9_])(ngay sinh|sinh ngay|ngay, thang, nam sinh|ngay thang nam sinh|date of birth|dob|ngay giao dich|ngay hach toan|ngay hen(?: tra ket qua)?|phien ban(?: phan mem)?|version|ma http|http status|so ho so da xu ly|tong so chung tu)(?![a-z0-9_])`,
   "g",
 );
 const datePrefix = new RegExp(
@@ -83,7 +83,10 @@ export function detectContextFields(
     const labelStart = match.index,
       labelEnd = labelStart + match[0].length;
     const after = search.value.slice(labelEnd, labelEnd + 140);
-    const birthday = /^(ngay sinh|sinh ngay|date of birth|dob)$/.test(match[1]!);
+    const birthday =
+      /^(ngay sinh|sinh ngay|ngay, thang, nam sinh|ngay thang nam sinh|date of birth|dob)$/.test(
+        match[1]!,
+      );
     // A bounded capitalized name followed by an explicit copula. Do not suppress
     // that intervening name when reconciling the field label with model evidence.
     const originalAfter = text.slice(search.ends[labelEnd - 1]!, search.ends[labelEnd - 1]! + 180);
@@ -127,7 +130,8 @@ export function detectContextFields(
       end = prefixEnd,
       capitals = 0,
       acronym = false,
-      tokens = 0;
+      tokens = 0,
+      last = "";
     for (; tokens < 12; tokens++) {
       // A name never continues into the next table cell (a tab). An abbreviation with its
       // period before another capital ("TP. HCM") is one token (decision 0159).
@@ -140,19 +144,47 @@ export function detectContextFields(
         lower = fold(word);
       const tail = fold(text.slice(cursor, cursor + 60)).trimStart();
       if (
-        // "đã" ends a name, "đa khoa" (a general hospital) does not (decision 0159).
-        /^(?:da(?! khoa)|dang|se|khong|yeu cau|de nghi|tong so|so tien|so ho so|ngay giao dich|co ma|co tai khoan)\b/u.test(
+        // "đã" ends a name; so do an address ("Số 47 …", "370 Huỳnh …" once the name has
+        // two capitals), an article ("Điều 2"), a page and a department or ward line
+        // ("Phòng Đào tạo", "Khoa Nhi") that the reader joined to the name (decisions
+        // 0159, 0160). "Đa khoa", "Bách khoa" and "Phòng khám" are parts of names.
+        /^(?:da(?! khoa)|dang|se|khong|yeu cau|de nghi|tong so|so tien|so ho so|ngay giao dich|co ma|co tai khoan|so \d+|dieu \d+|trang \d+|toi|chung toi)\b/u.test(
           tail,
-        )
+        ) ||
+        (/^khoa\b/u.test(tail) && !/^(?:da|chuyen|bach)$/u.test(last)) ||
+        (lower === "phong" &&
+          /ò/iu.test(word.normalize("NFC")) &&
+          last !== "hai" &&
+          !/^phong kham/u.test(tail)) ||
+        (capitals >= 2 && /^\d+(?:\/\d+)?\s+[a-z]/u.test(tail))
       )
         break;
+      last = lower;
       const capital = /^[\p{Lu}\p{N}]/u.test(word.normalize("NFC"));
-      if (!capital && !/^(san|vu|mai|xuat|nghiep|va|co|phan|trach|nhiem|huu|han)$/u.test(lower))
+      // Lowercase connectors of company names ("Vận tải", "Dịch vụ", "Xây dựng": the second
+      // syllable of a trade written in Title Case), and of institutions ("Đa khoa", "Đại
+      // học", "Trung ương"). A syllable that also folds to a preposition ("tại", "từ",
+      // "vẫn", "đóng") counts only in its trade spelling.
+      const spelled = {
+        tai: /^tải$/iu,
+        tu: /^(?:tư|tử)$/iu,
+        van: /^(?:vận|văn)$/iu,
+        dong: /^(?:động|đồng)$/iu,
+      }[lower];
+      if (
+        !capital &&
+        (!/^(san|vu|mai|xuat|nghiep|va|co|phan|trach|nhiem|huu|han|khoa|hoc|uong|tai|dich|thuong|xay|dung|dau|tu|cong|nghe|ky|thuat|phat|trien|nhap|khau|thuc|pham|nong|dien|may|tinh|quang|cao|van|chuyen|giao|nhan|bat|dong|ly|kinh|doanh|tong|hop|chinh|bao|hiem|duc|te|lich|hang|truong|thiet|ke|noi|that|det|nhua|thep|khi|phap|mem|lieu|lap|tin|lac|tri|trang|suc|khoe|cham|soc|thu|y|hoa)$/u.test(
+          lower,
+        ) ||
+          (spelled && !spelled.test(word.normalize("NFC"))))
+      )
         break;
       if (capital) capitals++;
       acronym ||= /^[\p{Lu}]{2,}[\p{N}]*$/u.test(word.normalize("NFC"));
       cursor += token[0].length;
-      if (capital) end = cursor; // never end on a dangling lowercase connector
+      // Never end on a dangling lowercase connector, except the syllable that completes a
+      // compound ("Trung ương", "Đa khoa", "Đại học", "Y tế").
+      if (capital || /^(?:uong|khoa|hoc|te)$/u.test(lower)) end = cursor;
     }
     if (end === prefixEnd || (capitals < 2 && !acronym)) continue;
     // Reject an overlong name rather than quietly complete just its first tokens.

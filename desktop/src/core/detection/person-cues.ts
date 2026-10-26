@@ -80,7 +80,16 @@ export function detectPersonCues(text: string): Detection[] {
     const words = match[2]!.split(/[^\S\r\n]+/u);
     const start = match.index! + match[0].length - match[2]!.length;
     let count = words.length;
-    while (count >= 2 && !looksLikeName(words.slice(0, count).join(" "))) count--;
+    // A fourth word must be a name syllable: the reader may join the next sentence
+    // ("Ông Nguyễn Hữu Khang Chúng tôi …", decision 0160).
+    while (
+      count >= 2 &&
+      !(
+        looksLikeName(words.slice(0, count).join(" ")) &&
+        (count <= 3 || looksLikeKnownName(words.slice(0, count).join(" ")))
+      )
+    )
+      count--;
     // A given name alone after a lowercase form of address in a sentence: "gọi cho bà Trang".
     if (count < 2 && !(/^(?:ông|bà|anh|chị)$/u.test(match[1]!) && isSyllable(words[0]!))) continue;
     const value = words.slice(0, Math.max(count, 1)).join(" ");
@@ -102,7 +111,9 @@ export function detectPersonCues(text: string): Detection[] {
         const at = line.indexOf(cell, offset);
         offset = at + cell.length;
         const value = cell.trim();
-        if (value && looksLikeName(value)) {
+        // A role in capitals beside a signature ("CHỦ TRÌ", "THƯ KÝ") is not a name: in
+        // capitals, the syllables must be ones names are made of (decision 0160).
+        if (value && looksLikeName(value) && (/\p{Ll}/u.test(value) || looksLikeKnownName(value))) {
           const start = lineStart + at + cell.indexOf(value);
           found.push(finding(start, start + value.length, "Chữ ký · person-cues-v1"));
         }

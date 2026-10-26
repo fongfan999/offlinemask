@@ -57,7 +57,7 @@ const specifications = [
     // Since July 2025 a person's or a household business's tax code is their 12-digit
     // CCCD: "Mã số thuế (CCCD):", "MST/CCCD chủ hộ:" (decision 0155).
     pattern:
-      "(?:ma so thue|mst)(?:[^\\S\\r\\n]*\\([^\\S\\r\\n]*cccd[^\\S\\r\\n]*\\)|[^\\S\\r\\n]*\\/[^\\S\\r\\n]*cccd)?(?: chu ho)?|tax (?:id|number)",
+      "(?:ma so thue|mst)(?:[^\\S\\r\\n]*\\([^\\S\\r\\n]*cccd[^\\S\\r\\n]*\\)|[^\\S\\r\\n]*\\/[^\\S\\r\\n]*cccd)?(?: chu ho| ca nhan| doanh nghiep)?|tax (?:id|number)",
     kind: "tax",
   },
   {

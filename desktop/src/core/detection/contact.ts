@@ -19,7 +19,7 @@ export function detectContactDetails(text: string): Detection[] {
   // An amount with thousands separators ("69.600.000") is not a phone number, however
   // the library parses its digits; a phone number is never grouped in threes from a
   // group of one to three (decision 0156).
-  const amount = /^\d{1,3}(?:[.,]\d{3})+$/;
+  const amount = /^\d{1,3}(?:[.,]\d{3})+(?:\s+\d{1,3}(?:[.,]\d{3})+)*$/;
   const phones: Detection[] = findPhoneNumbersInText(text, "VN")
     .filter((match) => !amount.test(text.slice(match.startsAt, match.endsAt)))
     .map((match) => ({

@@ -34,7 +34,18 @@ export function applyDetectionPolicy(text: string, predictions: readonly Detecti
       ...reconcileLabelledFields(text, completed, fields),
     ]),
   );
-  return { modelOnly, complete: joinAdjacentOrganizations(text, complete) };
+  // A model span cut at a field's or an organization's boundary leaves a piece ("Rẫy Khoa
+  // Nhi" after "Bệnh viện Chợ Rẫy" gives "Khoa Nhi"; "Chợ Rẫy Điều" gives "Điều") that
+  // never went through the plausibility rules as itself (decision 0160).
+  const pieces = complete.filter((d) => d.score !== undefined);
+  const rules = complete.filter((d) => d.score === undefined);
+  return {
+    modelOnly,
+    complete: joinAdjacentOrganizations(text, [
+      ...rules,
+      ...plausibleModelDetections(text, pieces),
+    ]),
+  };
 }
 
 /** Two organization spans with only spaces between them are one organization: a rule
