@@ -34,7 +34,7 @@ Category **Utility / Productivity**. Answer **No** to violence, sexual content, 
 
 OfflineMask thay họ tên, số tài khoản, số điện thoại, CCCD, email và các thông tin riêng tư khác bằng mã ngay trên máy, trước khi bạn dán vào ChatGPT, Claude, Gemini hay công cụ AI nào khác. Khi AI trả lời, dán câu trả lời vào lại: thông tin thật trở về đúng chỗ.
 
-• Văn bản, bảng tính (Excel, CSV, ODS) và tài liệu Word giữ nguyên định dạng.
+• Văn bản, bảng tính (Excel, CSV, ODS) và tài liệu Word giữ nguyên định dạng. PDF có chữ cho ra bản Markdown đã ẩn.
 • Xem lại từng thông tin được ẩn, giữ hoặc ẩn thêm chỉ với một lần bấm.
 • Gói nhận diện tiếng Việt (tùy chọn) nhận ra họ tên, địa chỉ, tổ chức và ngày sinh.
 • Ẩn nhanh: chọn văn bản trong ứng dụng bất kỳ và ẩn ngay tại chỗ.
@@ -43,12 +43,12 @@ OfflineMask thay họ tên, số tài khoản, số điện thoại, CCCD, email
 Không tài khoản, không máy chủ, không thống kê sử dụng. Ứng dụng chỉ dùng mạng khi bạn bấm tải gói nhận diện. Hãy luôn xem lại kết quả trước khi chia sẻ.
 ```
 
-**What's new in this version** (2.2.0; the first submission said "Bản đầu tiên trên Microsoft Store.")
+**What's new in this version** (2.3.0; 2.2.0 listed Báo lỗi, history that deletes itself and the circle acting only on the selection; the first submission said "Bản đầu tiên trên Microsoft Store.")
 
 ```
-• Báo lỗi: viết vài dòng về lỗi gặp phải, OfflineMask mở trang báo lỗi trên OfflineMask.com đã điền sẵn để bạn bấm Gửi. Ứng dụng vẫn không tự kết nối mạng.
-• Lịch sử tự xóa sau 1, 7, 30 hoặc 90 ngày (mặc định 30 ngày), chọn trong Cài đặt › Mật mã.
-• Nút OfflineMask chỉ ẩn đúng đoạn văn bản bạn đã chọn, không bao giờ lấy nội dung trong bộ nhớ tạm.
+• Mở được PDF có chữ trong mục Tài liệu: bảng vẫn là bảng, bản đã ẩn là tệp Markdown chỉ chứa chữ đọc được từ PDF nên không mang theo gì ẩn trong tệp gốc. PDF scan và hình ảnh sẽ có sau.
+• Tệp lưu ra có tên "(OfflineMasked)", tệp khôi phục là "(OfflineUnmasked)", dễ nhận ra ở mọi định dạng.
+• Hóa đơn, sao kê và hợp đồng được ẩn đúng hơn: tiêu đề in hoa, tên hàng hóa, thương hiệu và nội dung chuyển khoản không còn bị ẩn nhầm; số tài khoản sau "TK", chủ tài khoản và tên trong nội dung chuyển khoản không còn bị bỏ sót.
 ```
 
 **Product features** (one per line in Partner Center)
@@ -57,6 +57,7 @@ Không tài khoản, không máy chủ, không thống kê sử dụng. Ứng d�
 Ẩn họ tên, số tài khoản, CCCD, số điện thoại và email ngay trên máy
 Khôi phục thông tin thật trong câu trả lời của AI
 Bảng tính và tài liệu Word giữ nguyên định dạng
+PDF có chữ cho ra bản Markdown đã ẩn
 Gói nhận diện tiếng Việt tùy chọn, chạy offline
 Ẩn nhanh văn bản đang chọn trong ứng dụng bất kỳ
 Lịch sử được mã hóa khi bạn đặt mật mã
