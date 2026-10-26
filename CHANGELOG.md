@@ -4,6 +4,26 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.3.0] — 2026-10-26
+
+PDFs that contain text open on Tài liệu, saved copies are named (OfflineMasked), and masking is measured on whole sets of documents: 0 leaked and 0 over-masked on 189 invented invoices, statements, contracts and forms.
+
+### Added
+
+- Tài liệu opens PDFs that contain text, from the home page, the drop zone and the Finder service (the sidebar says "DOCX, ODT, PDF"; the "Sắp có" item for PDF is gone, Hình ảnh stays). The masked copy is Markdown built only from the text read out of the file, so nothing hidden in the PDF (its metadata, form fields, earlier revisions) can follow it to the AI. Text is read by its place on the page, so tables become Markdown tables with each value under its heading, "Label: value" lines stay together, and the preview shows the first page the same way. A page without readable text (a scan) or in an old font is named, pictures are counted, and reading shows "Đang đọc trang 12 / 300" with Hủy. Restore takes the AI's .md or .txt reply, as well as .docx and .odt. Scanned PDFs and images are still to come ([0149](docs/decisions/0149-text-pdf-documents.md)).
+
+### Changed
+
+- Saved copies are named `<name> (OfflineMasked).<extension>` and restored ones `<name> (OfflineUnmasked).<extension>`, in every format, instead of "(đã ẩn)" and "(đã khôi phục)". Restoring still recognises the old names ([0150](docs/decisions/0150-offlinemasked-suffix.md)).
+- Masking is now judged on whole sets of documents rather than on the file that showed a problem: a private set of real documents that stays on the owner's machine, with only counts recorded ([0152](docs/decisions/0152-document-evaluation-set.md)), and a public set of invented invoices, bank statements, contracts and forms generated as PDF and Word with their answers written for them, 189 documents over seven seeds ([0153](docs/decisions/0153-synthetic-document-set.md)). Every fix below was measured on both.
+
+### Fixed
+
+- Invoices: "HÓA ĐƠN GIÁ TRỊ GIA TĂNG", column headings, "Trang 1/1", a country on its own ("Thịt bò Úc") and brands in capitals (VISSAN, WINECO) are no longer masked as names, places or organizations, goods in a table row keep their names, and one company gets one alias. A tax code that is a 12-digit CCCD ("Mã số thuế (CCCD)", "MST/CCCD chủ hộ") is masked, "Hộ kinh doanh …" is one organization, and an address stops at a table cell ([0155](docs/decisions/0155-invoice-false-detections.md)).
+- Bank statements and contracts no longer leak: account numbers after "TK", longer labels ("Tài khoản thụ hưởng:"), a field that ends at the next one on the same line, account holders, names by their position in transfer text, names after a form of address ("Bà Võ Minh Yến") and under a signature note, and a company in capitals in transfer text. 0 leaks on the 189 generated documents ([0154](docs/decisions/0154-statement-and-contract-leaks.md)).
+- Over-masking closed by structure: Word and ODT tables are read by row like PDF tables, and show as tables in the preview; a heading in capitals ("SAO KÊ TÀI KHOẢN", "HỢP ĐỒNG THUÊ NHÀ"), unaccented transaction wording ("TRA LUONG THANG 9") and a cell under a wording column ("Quan hệ", "Chức vụ", "Tên hàng hóa") are not names, places or organizations; an amount with thousands separators is not a phone number; a currency code is not a place. 0 over-masked and 0 leaked on the 189 generated documents and the owner's invoices, and the pack gate's known miss is gone (21/21) ([0156](docs/decisions/0156-over-masking-by-structure.md)).
+- Each step's action row has the same space above it as below a panel.
+
 ## [2.2.0] — 2026-10-25
 
 Report a problem from the app in two clicks, and history that deletes itself.
