@@ -1,4 +1,4 @@
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import {
   nativeVaultAdapter,
   vaultErrorCode,
@@ -34,6 +34,14 @@ export function useVault(adapter: VaultAdapter = nativeVaultAdapter) {
   const error = ref("");
   /** "Để sau" on the keep-sessions offer hides it for the rest of this launch. */
   const offerDismissed = ref(false);
+  /** The step footers' one line on whether this session is kept. */
+  const savedNote = computed(() =>
+    state.value === "unlocked"
+      ? "Đã lưu vào lịch sử."
+      : state.value === "unavailable"
+        ? "Bản xem trước: không lưu lịch sử."
+        : "",
+  );
   let saving: Promise<void> = Promise.resolve();
   let pending: string | null = null;
 
@@ -135,6 +143,7 @@ export function useVault(adapter: VaultAdapter = nativeVaultAdapter) {
     busy,
     error,
     offerDismissed,
+    savedNote,
     start,
     unlock,
     create,

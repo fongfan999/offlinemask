@@ -4,7 +4,7 @@ import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import HighlightedText from "../components/HighlightedText.vue";
 import MaskProgress from "../components/MaskProgress.vue";
-import PasscodeSetup from "../components/PasscodeSetup.vue";
+import KeepOffer from "../components/KeepOffer.vue";
 import QuickIntro from "../components/QuickIntro.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
@@ -60,18 +60,7 @@ const quick = useProvided(quickKey);
 /** History is a passcode feature (decision 0071). Without one nothing talks about
  * saving: the user chose not to keep anything, and the review screen offers it once. */
 const historyOn = computed(() => vault.state.value === "unlocked");
-const savedNote = computed(() =>
-  historyOn.value
-    ? "Đã lưu vào lịch sử."
-    : vault.state.value === "unavailable"
-      ? "Bản xem trước: không lưu lịch sử."
-      : "",
-);
-const keepOffer = computed(
-  () => privateSession.value && vault.state.value === "none" && !vault.offerDismissed.value,
-);
-const settingPasscode = ref(false);
-const keptNotice = ref("");
+const savedNote = vault.savedNote;
 
 const view = ref<ReviewView>("masked");
 /** The text card shows one step at a time: 1 paste, 2 mask (while processing), 3 copy, 4 restore. */
@@ -730,49 +719,7 @@ defineExpose({
             </button>
           </div>
         </div>
-        <div v-if="keepOffer || keptNotice" class="keep-offer" role="status">
-          <AppIcon name="lock" :size="18" />
-          <div class="keep-offer-body">
-            <template v-if="keptNotice">
-              <strong>{{ keptNotice }}</strong>
-            </template>
-            <template v-else-if="!settingPasscode">
-              <strong>Muốn xem lại văn bản này sau?</strong>
-              <span>Đặt mật mã để bật lịch sử. Các văn bản bạn ẩn được lưu trên máy này.</span>
-            </template>
-            <template v-else>
-              <strong>Đặt mật mã cho OfflineMask</strong>
-              <span
-                >Ứng dụng sẽ hỏi mật mã khi khởi động. Quên mật mã thì phải xóa hết và bắt đầu
-                lại.</span
-              >
-              <PasscodeSetup
-                compact
-                @created="
-                  settingPasscode = false;
-                  keptNotice = 'Đã bật lịch sử. Văn bản này có trong thanh bên.';
-                "
-              />
-            </template>
-          </div>
-          <div v-if="!keptNotice" class="keep-offer-actions">
-            <button
-              class="quiet-button"
-              @click="
-                settingPasscode ? (settingPasscode = false) : (vault.offerDismissed.value = true)
-              "
-            >
-              {{ settingPasscode ? "Hủy" : "Để sau" }}
-            </button>
-            <button
-              v-if="!settingPasscode"
-              class="quiet-button accent"
-              @click="settingPasscode = true"
-            >
-              Đặt mật mã
-            </button>
-          </div>
-        </div>
+        <KeepOffer v-if="privateSession" subject="văn bản" />
         <div v-if="warning" class="review-warning" role="status">
           <AppIcon name="info" :size="18" />
           <div class="review-warning-body">

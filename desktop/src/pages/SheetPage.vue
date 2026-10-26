@@ -3,8 +3,8 @@ import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
+import KeepOffer from "../components/KeepOffer.vue";
 import MaskProgress from "../components/MaskProgress.vue";
-import PasscodeSetup from "../components/PasscodeSetup.vue";
 import RestoreIntro from "../components/RestoreIntro.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import ReviewList from "../components/ReviewList.vue";
@@ -42,8 +42,6 @@ const restoreBusy = ref(false);
 const restoreSaved = ref(false);
 /** A text reply is in the restore box (RestorePanel). */
 const replyPasted = ref(false);
-const settingPasscode = ref(false);
-const keptNotice = ref("");
 
 const draft = sheet.draft;
 const review = computed(() => (props.session ? sheet.review(props.session) : null));
@@ -79,7 +77,7 @@ const subtitle = computed(() => {
     const rows = props.session.sheets.reduce((sum, item) => sum + item.rows, 0);
     return step.value === 3
       ? `Bảng tính #${props.session.number}`
-      : `Bảng tính #${props.session.number} · ${rows.toLocaleString("vi-VN")} dòng · Đọc lại rồi tải tệp đã ẩn về để gửi AI.`;
+      : `Bảng tính #${props.session.number} · ${rows.toLocaleString("vi-VN")} dòng · Đọc lại bản đã ẩn, rồi tải về để gửi AI.`;
   }
   return draft.value
     ? // The card says what to do with the columns; the subtitle only sizes the file.
@@ -393,49 +391,17 @@ defineExpose({
         :groups="review"
         @change="(aliases, keep) => sheet.setKept(session!, aliases, keep)"
       />
-      <div
-        v-if="!historyOn && (vault.state.value === 'none' || keptNotice)"
-        class="keep-offer"
-        role="status"
-      >
-        <AppIcon name="lock" :size="18" />
-        <div class="keep-offer-body">
-          <template v-if="keptNotice"
-            ><strong>{{ keptNotice }}</strong></template
-          >
-          <template v-else-if="!settingPasscode">
-            <strong>Giữ ứng dụng mở để khôi phục tệp này sau.</strong>
-            <span>Đóng ứng dụng sẽ mất bảng mã thay thế. Đặt mật mã để lưu vào lịch sử.</span>
-          </template>
-          <template v-else>
-            <strong>Đặt mật mã cho OfflineMask</strong>
-            <span
-              >Ứng dụng sẽ hỏi mật mã khi khởi động. Quên mật mã thì phải xóa hết và bắt đầu
-              lại.</span
-            >
-            <PasscodeSetup
-              compact
-              @created="
-                settingPasscode = false;
-                keptNotice = 'Đã bật lịch sử. Bảng tính này có trong thanh bên.';
-              "
-            />
-          </template>
-        </div>
-        <div v-if="!keptNotice" class="keep-offer-actions">
-          <button v-if="settingPasscode" class="quiet-button" @click="settingPasscode = false">
-            Hủy
-          </button>
-          <button v-else class="quiet-button accent" @click="settingPasscode = true">
-            Đặt mật mã
-          </button>
-        </div>
-      </div>
+      <KeepOffer subject="bảng tính" />
       <p v-if="!sheet.canDownload(session)" class="sheet-note">
         <AppIcon name="info" :size="14" />Tệp gốc không còn mở trong lần này, nên không tải lại được
         bản đã ẩn. Bạn vẫn khôi phục được tệp AI trả về ở bước 3.
       </p>
       <footer class="card-footer">
+        <span class="action-hint"
+          ><AppIcon v-if="vault.savedNote.value" name="lock" :size="13" />{{
+            vault.savedNote.value
+          }}</span
+        >
         <button v-if="!sheet.canDownload(session)" class="quiet-button" @click="openStep(3)">
           Đến bước Khôi phục<AppIcon name="arrow" :size="15" />
         </button>
@@ -486,6 +452,11 @@ defineExpose({
         </template>
         <p v-if="restoreError" class="input-error drop-error" role="alert">{{ restoreError }}</p>
         <footer class="card-footer">
+          <span class="action-hint"
+            ><AppIcon v-if="vault.savedNote.value" name="lock" :size="13" />{{
+              vault.savedNote.value
+            }}</span
+          >
           <button class="quiet-button" @click="openStep(2)">
             <AppIcon name="eye" :size="15" />Xem lại bản đã ẩn
           </button>
@@ -516,6 +487,9 @@ defineExpose({
           @new-text="newSheet"
           @pasted="(pasted) => (replyPasted = pasted)"
         >
+          <template v-if="vault.savedNote.value" #hint
+            ><AppIcon name="lock" :size="13" />{{ vault.savedNote.value }}</template
+          >
           <button class="quiet-button" @click="openStep(2)">
             <AppIcon name="eye" :size="15" />Xem lại bản đã ẩn
           </button>
