@@ -1455,6 +1455,10 @@ td.alias {
   line-height: 1.6;
   color: var(--ink);
 }
+/* Under the file pages' "restore from" switch, the header's own padding is the gap. */
+.card-header + .restore-body {
+  padding-top: 0;
+}
 /* A returned file's drop zone sits under the same line as a pasted reply. */
 .restore-body + .drop-zone {
   margin-top: 12px;
