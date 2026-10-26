@@ -4,7 +4,7 @@ Date: 25 October 2026. Status: implemented, with the owner's ten invoices as the
 
 ## Problem
 
-Decisions 0149 and 0151 fixed what each new invoice showed: about six reading faults, eight families of model false positives and three rule gaps, one of them a leak. Each fix was checked on the file at hand and on the synthetic fixtures, so nothing showed whether it helped or hurt the other files, and every new document could reopen an old problem. The synthetic gates (`pnpm test`, `pnpm test:models`) stay, but invented text cannot stand for the documents people bring.
+Decisions 0149 and 0155 fixed what each new invoice showed: about six reading faults, eight families of model false positives and three rule gaps, one of them a leak. Each fix was checked on the file at hand and on the synthetic fixtures, so nothing showed whether it helped or hurt the other files, and every new document could reopen an old problem. The synthetic gates (`pnpm test`, `pnpm test:models`) stay, but invented text cannot stand for the documents people bring.
 
 ## Decision
 
@@ -17,9 +17,9 @@ Decisions 0149 and 0151 fixed what each new invoice showed: about six reading fa
 ## What comes next
 
 - **Grow the set** beyond invoices: bank statements, contracts exported from Word, CVs, forms, spreadsheets saved as PDF. A dozen documents per kind is a useful start.
-- **Use structure before word lists.** Tables already say what a column holds ("Tên hàng hóa", "Đơn giá", "Thành tiền"); classifying columns by their heading, as the spreadsheet page does, can replace the goods-cell and brand rules of 0151 with one rule. The set measures whether it does.
+- **Use structure before word lists.** Tables already say what a column holds ("Tên hàng hóa", "Đơn giá", "Thành tiền"); classifying columns by their heading, as the spreadsheet page does, can replace the goods-cell and brand rules of 0155 with one rule. The set measures whether it does.
 - **Judge models on the set.** The pack format allows replacing a model (packs/README.md); candidate models, or one fine-tuned on business documents, can now be compared by leaks and over-masks on real documents instead of by impression.
 
 ## Verified
 
-The first run, with the drafts: 10 documents in 13 s, nothing not read, leaked or over-masked. With the goods-cell rule of 0151 switched off, the same run reported 31 over-masked product names and 5 unlisted masks across all ten invoices, each by value; with the rule restored it returned to zero and listed each value that left its bucket. `pnpm test:models` passes unchanged through the shared runtime (19/20, the same known miss).
+The first run, with the drafts: 10 documents in 13 s, nothing not read, leaked or over-masked. With the goods-cell rule of 0155 switched off, the same run reported 31 over-masked product names and 5 unlisted masks across all ten invoices, each by value; with the rule restored it returned to zero and listed each value that left its bucket. `pnpm test:models` passes unchanged through the shared runtime (19/20, the same known miss).

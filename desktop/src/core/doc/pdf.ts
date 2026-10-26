@@ -290,6 +290,9 @@ const listStart = /^\s*([•●▪◦○■□\-–*+]|\d{1,3}[.)]|[a-zđ][.)])\
 /** "Mã số thuế: …", "Địa chỉ: …", "Điều 2: …": a form or contract line of its own. */
 // A label starts with a capital: "điểm làm việc: …" is a wrapped line of prose.
 const labelStart = /^\p{Lu}[^\t:]{0,39}:(\s|$)/u;
+/** Two or more words and no lowercase letter: a heading or a name in capitals. */
+const capitals = (text: string) =>
+  !/\p{Ll}/u.test(text) && (text.match(/[\p{L}\p{M}]+/gu) ?? []).length >= 2;
 /** Lines into paragraphs. Lines of a paragraph join with a space, so a name wrapped
  * onto the next line is read whole. A larger gap, a line starting elsewhere than the
  * one before, not centred with it and not under a value on it (an indented block), a
@@ -319,7 +322,10 @@ export function linesToParagraphs(lines: readonly Line[]): { text: string; table
         Math.abs(line.x + line.end - previous.x - previous.end) / 2 < size * 2 ||
         (labelStart.test(previous.text) && line.x > previous.x && line.x < previous.end)) &&
       !listStart.test(text) &&
-      !labelStart.test(text);
+      !labelStart.test(text) &&
+      // A heading in capitals is not continued by a line in mixed case ("SAO KÊ TÀI
+      // KHOẢN" over "Từ ngày …", both centred); a wrapped name in capitals stays whole.
+      !(capitals(previous.text) && /\p{Ll}/u.test(text));
     if (joins) paragraphs[paragraphs.length - 1]!.text += " " + text;
     else paragraphs.push(line.table === undefined ? { text } : { text, table: line.table });
     previous = line;

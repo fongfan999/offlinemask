@@ -11,6 +11,19 @@ test("contact libraries detect complete emails and national/international phone 
     ["minh.anh+test@example.com.vn", "+84 901 234 567", "(028) 3822 1234", "+44 20 7946 0958"],
   );
   assert.deepEqual(detectContactDetails("Ngày 09/09/2026: 2.500.000 đồng. STK 001234567890."), []);
+  // Amounts in a statement's columns are not phone numbers, however their digits parse.
+  assert.deepEqual(
+    detectContactDetails(
+      "NGO NGOC NGOC CK hoan tien FT26725057524\t\t3.600.000\t69.600.000\t18.000.000 239.434.000",
+    ),
+    [],
+  );
+  assert.deepEqual(
+    detectContactDetails("Gọi 0901.234.567 hoặc 0901 234 567").map(({ start, end }) =>
+      "0901.234.567 hoặc 0901 234 567".slice(start - 4, end - 4),
+    ),
+    ["0901.234.567", "0901 234 567"],
+  );
 });
 
 test("cancellation and runtime failure reject without leaking source text and allow retry", async (context) => {

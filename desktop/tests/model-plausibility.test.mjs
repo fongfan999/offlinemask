@@ -50,6 +50,13 @@ test("contract parties are roles, not names, places or organizations", () => {
     assert.equal(plausibleContextualSpan(type, value), true, `${type} ${value}`);
 });
 
+test("a currency code on its own is neither a place nor an organization", () => {
+  for (const code of ["VND", "vnđ", "USD", "EUR"])
+    for (const type of ["DIA_CHI", "TO_CHUC", "TEN"])
+      assert.equal(plausibleContextualSpan(type, code), false, `${type} ${code}`);
+  assert.equal(plausibleContextualSpan("TO_CHUC", "Ngân hàng VND"), true);
+});
+
 test("a name, place or organization needs letters: single letters and bare numbers are misreadings", () => {
   for (const [type, value] of [
     ["TEN", "B"],
@@ -73,10 +80,8 @@ test("a predicted span never crosses a field separator or a line, and the partie
         span(header, "Ông TRẦN VĂN HÙNG", "PERSON"),
       ]),
     ),
-    [
-      ["TEN", "CÔNG"],
-      ["TEN", "Ông TRẦN VĂN HÙNG"],
-    ],
+    // The piece left in the company's cell is a word in capitals, not a name (decision 0156).
+    [["TEN", "Ông TRẦN VĂN HÙNG"]],
   );
   const signatures = "Giám Đốc\nTRẦN VĂN HÙNG\n\nLÊ THỊ THU HÀ";
   assert.deepEqual(
@@ -395,5 +400,151 @@ test("a household business is one organization after its legal prefix", () => {
   assert.deepEqual(
     complete.filter((d) => d.type === "TO_CHUC").map((d) => text.slice(d.start, d.end)),
     ["HỘ KINH DOANH HẢI SẢN BÌNH MINH"],
+  );
+});
+
+test("a heading in capitals is not a name, place or organization; a name in capitals is", () => {
+  const headings = [
+    "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM",
+    "Độc lập - Tự do - Hạnh phúc",
+    "SAO KÊ TÀI KHOẢN",
+    "HỢP ĐỒNG THUÊ NHÀ",
+    "ĐẠI DIỆN BÊN A · ĐẠI DIỆN BÊN B",
+    "NGƯỜI LAO ĐỘNG (Bên B):",
+    "NGƯỜI SỬ DỤNG LAO ĐỘNG",
+    "I. THÔNG TIN BẢN THÂN",
+    "II. QUAN HỆ GIA ĐÌNH",
+    "III. QUÁ TRÌNH CÔNG TÁC",
+    "SƠ YẾU LÝ LỊCH",
+    "YÊU CẦU TRA SOÁT GIAO DỊCH. CHƯA CÓ THÔNG TIN KHÁCH HÀNG.",
+  ];
+  for (const heading of headings)
+    for (const label of ["PERSON", "ORGANIZATION", "LOCATION"]) {
+      const whole = modelDetections(heading, [
+        span(heading, heading.replace(/^[IVX]+\. |\s*\(.*$|\s·.*$/u, ""), label),
+      ]);
+      assert.deepEqual(values(heading, whole), [], `${label}: ${heading}`);
+    }
+  // Two words of a heading, as a model cuts them.
+  const cut = "SAO KÊ TÀI KHOẢN";
+  assert.deepEqual(
+    values(
+      cut,
+      modelDetections(cut, [span(cut, "KÊ TÀI KHOẢN", "ORGANIZATION"), span(cut, "SAO", "PERSON")]),
+    ),
+    [],
+  );
+  const cv = "II. QUAN HỆ GIA ĐÌNH";
+  assert.deepEqual(values(cv, modelDetections(cv, [span(cv, "QUAN HỆ GIA ĐÌNH", "PERSON")])), []);
+  // Names, places and organizations in capitals keep their evidence.
+  const kept = [
+    ["NGUYỄN VĂN AN", "PERSON", "NGUYỄN VĂN AN"],
+    ["TRẦN THỊ HỒNG NHUNG", "PERSON", "THỊ HỒNG NHUNG"],
+    ["GIÁM ĐỐC · LÊ MINH TUẤN", "PERSON", "LÊ MINH TUẤN"],
+    ["CÔNG TY TNHH THƯƠNG MẠI SAO MAI", "ORGANIZATION", "CÔNG TY TNHH THƯƠNG MẠI SAO MAI"],
+    ["NGÂN HÀNG TMCP Á CHÂU", "ORGANIZATION", "NGÂN HÀNG TMCP Á CHÂU"],
+    ["SỐ 12 ĐƯỜNG LÊ LỢI, PHƯỜNG BẾN THÀNH", "LOCATION", "ĐƯỜNG LÊ LỢI, PHƯỜNG BẾN THÀNH"],
+    [
+      "THÔN ĐÔNG, XÃ TÂN LẬP, HUYỆN ĐAN PHƯỢNG",
+      "LOCATION",
+      "THÔN ĐÔNG, XÃ TÂN LẬP, HUYỆN ĐAN PHƯỢNG",
+    ],
+  ];
+  for (const [text, label, value] of kept)
+    assert.deepEqual(
+      values(text, modelDetections(text, [span(text, value, label)])).map(([, v]) => v),
+      [value],
+      text,
+    );
+  // A name in capitals after a label is not a heading: the line has lowercase letters.
+  const labelled = "Họ và tên: NGUYỄN VĂN AN";
+  assert.deepEqual(
+    values(labelled, modelDetections(labelled, [span(labelled, "NGUYỄN VĂN AN", "PERSON")])),
+    [["TEN", "NGUYỄN VĂN AN"]],
+  );
+});
+
+test("in a transaction row, unaccented wording is not a name, place or organization; a name in its shape is", () => {
+  const rows = [
+    "05/10/2026\tFT26001234567\tCT DEN:FT26001234567 LE MINH TUAN chuyen tien thue nha T10\t\t3.500.000\t12.500.000",
+    "09/10/2026\tFT26009999999\tTRA LUONG THANG 9 CONG TY TNHH THUONG MAI DICH VU SAO MAI\t\t25.000.000\t36.300.000",
+    "11/10/2026\tThanh toan QR WINMART 641810\t-120.000\t36.169.000",
+    "12/10/2026\tRut tien ATM tai VCB 1234\t-2.000.000\t34.169.000",
+    "13/10/2026\tLai nhap von\t+3.000\t34.172.000",
+  ];
+  const wording = [
+    ["CT DEN", "PERSON"],
+    ["DEN", "LOCATION"],
+    ["TRA LUONG THANG 9", "PERSON"],
+    ["Thanh toan QR", "PERSON"],
+    ["QR WINMART", "ORGANIZATION"],
+    ["ATM", "LOCATION"],
+    ["Lai", "PERSON"],
+  ];
+  for (const [value, label] of wording) {
+    const row = rows.find((r) => r.includes(value));
+    assert.deepEqual(values(row, modelDetections(row, [span(row, value, label)])), [], value);
+  }
+  const named = rows[0];
+  assert.deepEqual(values(named, modelDetections(named, [span(named, "LE MINH TUAN", "PERSON")])), [
+    ["TEN", "LE MINH TUAN"],
+  ]);
+  // Outside a transaction row (no date and amount cells), the models' word stands.
+  const prose = "Gửi cho Thanh Toan QR\tghi chú";
+  assert.deepEqual(values(prose, modelDetections(prose, [span(prose, "Thanh Toan", "PERSON")])), [
+    ["TEN", "Thanh Toan"],
+  ]);
+  // A tab never joins two name pieces: the next cell is another value.
+  const cells = "Bố\tBùi Bảo Trang\t1965";
+  assert.deepEqual(
+    values(
+      cells,
+      modelDetections(cells, [span(cells, "Bố", "PERSON"), span(cells, "Bùi Bảo Trang", "PERSON")]),
+    ).map(([, v]) => v),
+    ["Bố", "Bùi Bảo Trang"],
+  );
+});
+
+test("a cell under a wording heading (a relation, a job title, goods) is not a name or an organization", () => {
+  const table = [
+    "Quan hệ\tHọ và tên\tNăm sinh\tNghề nghiệp",
+    "",
+    "Bố\tBùi Bảo Trang\t1965\tGiáo viên",
+    "",
+    "Mẹ\tLê Thị Thu Hà\t1968\tKinh doanh",
+    "",
+    "Thời gian\tĐơn vị công tác\tChức vụ",
+    "",
+    "2019 - 2022\tCông ty TNHH Hoa Mai\tNhân viên",
+  ].join("\n");
+  const found = plausibleModelDetections(table, [
+    ...["Bố", "Mẹ", "Giáo viên", "Kinh doanh", "Nhân viên"].map((v) => ({
+      ...span(table, v, "PERSON"),
+      type: "TEN",
+      label: "Họ và tên",
+      source: "t",
+      reason: "t",
+      priority: 50,
+    })),
+    {
+      ...span(table, "Bùi Bảo Trang", "PERSON"),
+      type: "TEN",
+      label: "Họ và tên",
+      source: "t",
+      reason: "t",
+      priority: 50,
+    },
+    {
+      ...span(table, "Công ty TNHH Hoa Mai", "ORGANIZATION"),
+      type: "TO_CHUC",
+      label: "Tổ chức",
+      source: "t",
+      reason: "t",
+      priority: 50,
+    },
+  ]);
+  assert.deepEqual(
+    values(table, found).map(([, v]) => v),
+    ["Bùi Bảo Trang", "Công ty TNHH Hoa Mai"],
   );
 });

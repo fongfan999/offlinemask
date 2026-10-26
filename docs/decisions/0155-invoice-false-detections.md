@@ -1,4 +1,4 @@
-# 0151 — Invoices: wording, countries and brands are not private
+# 0155 — Invoices: wording, countries and brands are not private
 
 Date: 25 October 2026. Status: implemented. Owner, after masking a real VAT e-invoice as a PDF (decision 0149): "HÓA ĐƠN", "GIÁ TRỊ GIA TĂNG" and "Trang" were masked as names and "Úc" as an address. No text from the invoice is recorded in the repository; the fixtures are invented.
 

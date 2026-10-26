@@ -32,7 +32,7 @@ function folded(value: string) {
 }
 
 /** Components stop at sentence/field boundaries, including a tab (a table cell, decision
- * 0151); administrative abbreviations keep their dots. */
+ * 0155); administrative abbreviations keep their dots. */
 function components(text: string) {
   const result: { start: number; end: number }[] = [];
   let start = 0;

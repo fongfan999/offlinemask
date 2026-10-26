@@ -238,3 +238,47 @@ test("the masked copy drops Word's first-page thumbnail and its relationship", a
   assert.doesNotMatch(rels, /thumbnail/);
   assert.match(rels, /word\/document\.xml/);
 });
+
+test("a table's rows read as one paragraph each: cells apart by a tab, a cell's paragraphs by a break, nested rows inside their cell", async () => {
+  const cell = (inner) => `<w:tc>${inner}</w:tc>`;
+  const p = (text) => `<w:p><w:r><w:t>${text}</w:t></w:r></w:p>`;
+  const bytes = await docx({
+    body:
+      "<w:tbl>" +
+      `<w:tr>${cell(p("Quan hệ"))}${cell(p("Họ và tên"))}${cell(p("Nghề nghiệp"))}</w:tr>` +
+      `<w:tr>${cell(p("Bố"))}${cell(p("Nguyễn Văn An"))}${cell("<w:p/>")}</w:tr>` +
+      `<w:tr>${cell(p("Mẹ"))}${cell(p("Trần Thị Bình") + p("(đã mất)"))}${cell(`<w:tbl><w:tr>${cell(p("Giáo viên"))}${cell(p("THCS"))}</w:tr></w:tbl>`)}</w:tr>` +
+      "</w:tbl>" +
+      p("Người khai") +
+      `<w:tbl><w:tr>${cell("<w:p/>")}${cell("<w:p/>")}</w:tr></w:tbl>`,
+  });
+  const file = await openDocx(bytes);
+  assert.deepEqual(
+    file.paragraphs.map((paragraph) => [paragraph.text, paragraph.table]),
+    [
+      ["Quan hệ\tHọ và tên\tNghề nghiệp", 0],
+      ["Bố\tNguyễn Văn An\t", 0],
+      ["Mẹ\tTrần Thị Bình\n(đã mất)\tGiáo viên\tTHCS", 0],
+      ["Người khai", undefined],
+    ],
+  );
+  // A replacement inside a row lands in that cell's run and nowhere else.
+  const row = file.paragraphs[1];
+  const at = row.text.indexOf("Nguyễn");
+  const result = maskParagraphs(
+    file.paragraphs,
+    new Map([[row.id, [detection(at, at + "Nguyễn Văn An".length, "TEN")]]]),
+    scope,
+    [],
+  );
+  const xml = await readPart(await writeDocx(file.source, result.edits), "word/document.xml");
+  assert.match(xml, new RegExp(`<w:t>Bố</w:t>.*<w:t>\\[TEN_1_${scope}\\]</w:t>`));
+  assert.doesNotMatch(xml, /Nguyễn Văn An/);
+  assert.deepEqual(
+    previewParagraphs(file.paragraphs, result.edits.paragraphs, 2).map((p) => [p.text, p.table]),
+    [
+      ["Quan hệ\tHọ và tên\tNghề nghiệp", 0],
+      [`Bố\t[TEN_1_${scope}]\t`, 0],
+    ],
+  );
+});

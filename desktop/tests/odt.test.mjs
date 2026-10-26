@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import JSZip from "jszip";
 import { openDocument, writeDocument } from "../src/core/doc/document.ts";
 import { parseOdtPart } from "../src/core/doc/odt.ts";
+import { paragraphText } from "../src/core/doc/docx.ts";
 import { maskParagraphs } from "../src/core/doc/mask.ts";
 
 const scope = "4aae";
@@ -122,4 +123,26 @@ test("a password-protected or foreign package is unreadable", async () => {
   await assert.rejects(openDocument(await locked.generateAsync({ type: "uint8array" })), {
     code: "unreadable",
   });
+});
+
+test("an odt table's rows read as one paragraph each, covered cells keeping their column", () => {
+  const part = parseOdtPart(
+    "content.xml",
+    "<office:text>" +
+      "<table:table><table:table-header-rows><table:table-row>" +
+      "<table:table-cell><text:p>Chức vụ</text:p></table:table-cell><table:table-cell><text:p>Họ và tên</text:p></table:table-cell>" +
+      "</table:table-row></table:table-header-rows>" +
+      '<table:table-row><table:table-cell table:number-columns-spanned="2"><text:p>Giám đốc</text:p><text:p>Nguyễn Văn An</text:p></table:table-cell><table:covered-table-cell/></table:table-row>' +
+      "<table:table-row><table:table-cell><text:p>Kế toán</text:p></table:table-cell><table:table-cell/></table:table-row>" +
+      "</table:table><text:p>Hết bảng</text:p></office:text>",
+  );
+  assert.deepEqual(
+    part.paragraphs.map((pieces, index) => [paragraphText(part, pieces), part.tables[index]]),
+    [
+      ["Chức vụ\tHọ và tên", 0],
+      ["Giám đốc\nNguyễn Văn An\t", 0],
+      ["Kế toán\t", 0],
+      ["Hết bảng", undefined],
+    ],
+  );
 });

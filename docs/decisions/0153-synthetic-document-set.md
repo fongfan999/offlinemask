@@ -24,4 +24,4 @@ Each PDF embeds one complete Vietnamese font, as real documents do: **Be Vietnam
 
 ## First measurement
 
-See [the evaluation](../evaluations/2026-10-26-synthetic-documents.md): the reader read every value in all 27 documents; detection leaked 29 values and over-masked 85, in a few families that point at structure rather than words. Invoice PDFs, which the fixes of 0151 targeted, are clean.
+See [the evaluation](../evaluations/2026-10-26-synthetic-documents.md): the reader read every value in all 27 documents; detection leaked 29 values and over-masked 85, in a few families that point at structure rather than words. Invoice PDFs, which the fixes of 0155 targeted, are clean.

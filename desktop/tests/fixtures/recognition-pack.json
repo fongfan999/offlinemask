@@ -5,8 +5,7 @@
     "sensitive": [],
     "retain": [
       "YÊU CẦU TRA SOÁT GIAO DỊCH. CHƯA CÓ THÔNG TIN KHÁCH HÀNG."
-    ],
-    "knownMiss": "The shipping pack labels two uppercase words as names (recorded in docs/evaluations/recognition-production-v1/README.md). Remove this entry when a pack passes it."
+    ]
   },
   {
     "id": "banking-letter",
@@ -281,7 +280,10 @@
       "CONG TY TNHH THUONG MAI DICH VU SAO MAI"
     ],
     "retain": [
+      "SAO KÊ TÀI KHOẢN",
+      "CT DEN",
       "chuyen tien thue nha T10",
+      "TRA LUONG THANG 9",
       "Phi duy tri dich vu SMS Banking",
       "3.500.000",
       "25.000.000"

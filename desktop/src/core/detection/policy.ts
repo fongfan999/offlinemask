@@ -39,7 +39,7 @@ export function applyDetectionPolicy(text: string, predictions: readonly Detecti
 
 /** Two organization spans with only spaces between them are one organization: a rule
  * completes "Công ty Cổ phần Dịch vụ Thương mại Tổng" up to a lowercase word and a model
- * finds "hợp Wincommerce" after it (decision 0151). One name, one alias. */
+ * finds "hợp Wincommerce" after it (decision 0155). One name, one alias. */
 export function joinAdjacentOrganizations(text: string, detections: readonly Detection[]) {
   const result: Detection[] = [];
   for (const detection of [...detections].sort((a, b) => a.start - b.start)) {

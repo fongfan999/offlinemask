@@ -12,6 +12,7 @@ import {
 } from "../src/core/doc/mask.ts";
 import {
   countLargeImages,
+  linesToParagraphs,
   looksLikeOldFont,
   openPdf,
   pageList,
@@ -411,4 +412,24 @@ test("a household invoice: one item table, its title inline, its signature on on
   ]);
   assert.equal(new Set(opened.paragraphs.slice(2, 6).map((paragraph) => paragraph.table)).size, 1);
   assert.equal(opened.paragraphs[0].table, undefined);
+});
+
+test("a heading in capitals stays apart from the centred line below it", () => {
+  const line = (text, y, x = 200, end = 400) => ({ y, size: 11, x, end, text, pieces: [] });
+  assert.deepEqual(
+    linesToParagraphs([
+      line("SAO KÊ TÀI KHOẢN", 780),
+      line("Từ ngày 01/10/2026 đến ngày 31/10/2026", 765),
+      line("CÔNG TY TNHH THƯƠNG MẠI DỊCH VỤ", 740),
+      line("VÀ ĐẦU TƯ SAO MAI", 725),
+      line("Hợp đồng này được ký giữa ông Nguyễn Văn", 700),
+      line("An và công ty.", 685),
+    ]).map((p) => p.text),
+    [
+      "SAO KÊ TÀI KHOẢN",
+      "Từ ngày 01/10/2026 đến ngày 31/10/2026",
+      "CÔNG TY TNHH THƯƠNG MẠI DỊCH VỤ VÀ ĐẦU TƯ SAO MAI",
+      "Hợp đồng này được ký giữa ông Nguyễn Văn An và công ty.",
+    ],
+  );
 });

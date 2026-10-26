@@ -17,7 +17,7 @@ export const plain = (word: string) =>
   word.normalize("NFD").replace(/\p{M}/gu, "").replace(/[đĐ]/g, "d").toLowerCase();
 export const isSyllable = (word: string) => syllable.test(plain(word));
 
-/** Two to four capitalised syllables starting with a family name. */
+/** Two to five capitalised syllables starting with a family name. */
 export function looksLikeName(value: string): boolean {
   const words = value.normalize("NFC").trim().split(/\s+/u);
   return (
@@ -26,6 +26,30 @@ export function looksLikeName(value: string): boolean {
     familyNames.has(plain(words[0]!)) &&
     words.every((word) => /^\p{Lu}/u.test(word) && isSyllable(word))
   );
+}
+
+/** Syllables Vietnamese given and middle names are made of, with their tone marks, and
+ * the family names. A heading in capitals shares the shape of a name ("QUAN HỆ GIA
+ * ĐÌNH", "LÝ LỊCH", "TRÌNH CÔNG TÁC" all start with a family name), but "hệ", "lịch" and
+ * "tác" name nobody. The list is broad rather than complete; it decides only where a
+ * line in capitals carries no other evidence (decision 0156). */
+export const nameSyllables = new Set(
+  `nguyễn trần lê phạm hoàng huỳnh phan vũ võ đặng bùi đỗ hồ ngô dương lý trương đinh đào đoàn lâm mai trịnh cao lương quách tạ tô vương hà kiều thái phùng lưu lục tăng khúc nông thạch tiêu lại bành chu châu hứa lỗ tống ung vi diệp giang khổng kim mạc nghiêm quan thân tôn văn viên
+   thị hữu đức minh ngọc thanh thành quốc xuân hồng thu bảo gia anh tuấn đình công huy khánh mạnh quang trung việt nam phương lan hương linh nhi như quỳnh thảo trang vy yến
+   an ân ánh bá bách bằng bích bình bội cảnh cát chấn chánh chí chiến chính chương cường cương cúc dân danh diễm diệu doanh du dũng dung duy duyên đại đan đăng đạt điền điệp định đoan đôn đông đồng đức giáp hạ hải hân hằng hạnh hào hảo hậu hiền hiển hiệp hiếu hoa hòa hoài hoan hoàn học hợp huân huệ hùng hưng hường hữu huyền khải khang khánh khiêm khoa khôi khuê kiên kiệt lạc lâm lệ liên liễu loan lộc long lợi luân luận lực ly mẫn mến mi miên mỹ my nga ngân nghi nghĩa nghị ngôn nguyên nhã nhân nhàn nhất nhật nhung ninh nữ oanh phát phi phú phúc phụng phước quân quế quý quyên quyền quyết sang sâm sĩ sinh sơn sương sử tài tâm tân tấn thạch thái thắm thắng thao thế thiên thiện thịnh thọ thoa thơ thông thu thuận thục thùy thủy thy tiên tiến tín tịnh toàn toản trà trí triết triệu trọng trúc trường tú tuệ tùng tuyền tuyết tường uyên vân vàng vỹ vinh vĩnh vũ xoan xuyến ý yên
+   lập lâm tự thông tin thân tài đại hưng hậu kỳ lam nhiên phong phượng sa sao thục thương trâm trân triều tuyên vĩ`
+    .split(/\s+/u)
+    .map((word) => word.normalize("NFC")),
+);
+/** A name whose every word is a known name syllable: the check for text in capitals,
+ * where a heading can share the shape of a name. */
+export function looksLikeKnownName(value: string): boolean {
+  if (!looksLikeName(value)) return false;
+  return value
+    .normalize("NFC")
+    .trim()
+    .split(/\s+/u)
+    .every((word) => nameSyllables.has(word.toLowerCase()));
 }
 
 const word = "\\p{Lu}[\\p{L}\\p{M}]*";

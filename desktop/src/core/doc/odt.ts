@@ -12,6 +12,7 @@ import {
   type PartModel,
   type Piece,
   type Segment,
+  TableRows,
 } from "./docx.ts";
 
 /** OpenDocument text (.odt, decision 0084), as written by LibreOffice and others.
@@ -25,6 +26,9 @@ const mailto = /xlink:href="mailto:([^"?]+)/g;
 
 const tag = /<(\/?)([A-Za-z_][\w.:-]*)((?:[^>"']|"[^"]*"|'[^']*')*?)(\/?)>/g;
 const paragraphElement = (element: string) => element === "text:p" || element === "text:h";
+/** A covered cell (under a merged one) is empty but still a column of its row. */
+const cellElement = (element: string) =>
+  element === "table:table-cell" || element === "table:covered-table-cell";
 /** Character data in the text namespace (paragraphs, spans, links, fields such as the
  * author's name) is document text. Metadata inside a paragraph, such as a comment's
  * `dc:creator` and `dc:date`, and drawing titles are not. */
@@ -46,7 +50,9 @@ function literal(element: string, attributes: string): string | null {
 export function parseOdtPart(name: string, xml: string): PartModel {
   const segments: Segment[] = [];
   const paragraphs: Piece[][] = [];
+  const tables: (number | undefined)[] = [];
   const open: Piece[][] = [];
+  const rows = new TableRows();
   const elements: string[] = [];
   let previousEnd = 0;
   tag.lastIndex = 0;
@@ -72,19 +78,35 @@ export function parseOdtPart(name: string, xml: string): PartModel {
       if (elements.at(-1) === element) elements.pop();
       if (paragraphElement(element)) {
         const paragraph = open.pop();
-        if (paragraph?.some((piece) => "segment" in piece)) paragraphs.push(paragraph);
-      }
+        if (paragraph?.some((piece) => "segment" in piece) && !rows.paragraph(paragraph))
+          paragraphs.push(paragraph);
+      } else if (element === "table:table") rows.closeTable();
+      else if (element === "table:table-row") {
+        const row = rows.closeRow();
+        if (row && !rows.paragraph(row.pieces)) {
+          tables[paragraphs.length] = row.table;
+          paragraphs.push(row.pieces);
+        }
+      } else if (cellElement(element)) rows.closeCell();
       continue;
     }
     if (selfClosing) {
       const text = open.length ? literal(element, attributes ?? "") : null;
       if (text) open.at(-1)!.push({ literal: text });
+      // An empty cell keeps its column.
+      if (cellElement(element)) {
+        rows.openCell();
+        rows.closeCell();
+      }
       continue;
     }
     elements.push(element);
     if (paragraphElement(element)) open.push([]);
+    else if (element === "table:table") rows.openTable();
+    else if (element === "table:table-row") rows.openRow();
+    else if (cellElement(element)) rows.openCell();
   }
-  return { name, xml, segments, paragraphs };
+  return { name, xml, segments, paragraphs, tables };
 }
 
 export async function openOdt(
@@ -115,7 +137,13 @@ export async function openOdt(
       const text = paragraphText(part, pieces);
       if (!text.trim()) return;
       index.push([partIndex, paragraphIndex]);
-      paragraphs.push({ id: index.length - 1, part: part.name, text });
+      const table = part.tables[paragraphIndex];
+      paragraphs.push({
+        id: index.length - 1,
+        part: part.name,
+        text,
+        ...(table === undefined ? {} : { table: partIndex * 100_000 + table }),
+      });
     }),
   );
   if (!paragraphs.length) throw new DocFileError("empty");

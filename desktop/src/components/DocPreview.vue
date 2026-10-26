@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, h, type FunctionalComponent } from "vue";
-import { toBlocks, type Block, type Marked } from "../core/doc/blocks.ts";
+import { toBlocks, type Marked } from "../core/doc/blocks.ts";
 
 /** The first paragraphs of a document, as a page, with replaced text highlighted:
  * aliases in the masked copy, values in a restored one. A PDF's paragraphs carry their
@@ -19,14 +19,8 @@ const sections = computed(() => {
     if (last && last.page === paragraph.page) last.items.push(paragraph);
     else sections.push({ page: paragraph.page, items: [paragraph] });
   }
-  return sections.map((section) => ({
-    page: section.page,
-    // Word paragraphs keep their tabs as written; only a PDF's rows are cells.
-    blocks:
-      section.page === undefined
-        ? section.items.map((content): Block => ({ kind: "paragraph", content }))
-        : toBlocks(section.items),
-  }));
+  // A table's rows, from a PDF or a Word file, show as a table; a paragraph as it is.
+  return sections.map((section) => ({ page: section.page, blocks: toBlocks(section.items) }));
 });
 
 /** Text with its marks as <mark>. */

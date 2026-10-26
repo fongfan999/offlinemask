@@ -1282,8 +1282,10 @@ th {
   border: 1px solid var(--line);
   text-align: left;
   vertical-align: top;
+  /* A Word cell may hold several paragraphs. */
+  white-space: pre-line;
 }
-.doc-table tr:first-child td {
+.doc-table tr:first-child:not(:only-child) td {
   background: var(--paper-sunk);
   font-weight: 600;
 }

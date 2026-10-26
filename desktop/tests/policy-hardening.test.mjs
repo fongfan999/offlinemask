@@ -131,7 +131,7 @@ test("bounded identifier recognition rejects partial codes and leaves amounts an
     "passport policy requires review",
   ])
     assert.deepEqual(entries(text), [], text);
-  // Since July 2025 a person's tax code is their 12-digit CCCD (decision 0151).
+  // Since July 2025 a person's tax code is their 12-digit CCCD (decision 0155).
   assert.deepEqual(entries("Mã số thuế: 123456789012"), [["GIAY_TO", "123456789012"]]);
 });
 

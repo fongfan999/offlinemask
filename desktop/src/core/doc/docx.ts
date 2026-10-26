@@ -46,6 +46,59 @@ export interface PartModel {
   xml: string;
   segments: Segment[];
   paragraphs: Piece[][];
+  /** The table a paragraph is a row of, by paragraph index (sparse). */
+  tables: (number | undefined)[];
+}
+
+type Cell = Piece[][];
+/** Rows of a table read as one paragraph each, cells apart by a tab and a cell's
+ * paragraphs by a line break, the way the PDF reader writes rows (decision 0149):
+ * detection then sees a row ("Bố\tNguyễn Văn An\t1960\tGiáo viên") the same in Word, ODT
+ * and PDF, and the preview shows it as a table. A nested table's rows read inside their
+ * cell. Each paragraph keeps its own runs, so replacements write back as before. */
+export class TableRows {
+  private count = 0;
+  private readonly tables: number[] = [];
+  private readonly rows: Cell[][] = [];
+  private readonly cells: Cell[] = [];
+  openTable() {
+    this.tables.push(this.count++);
+  }
+  closeTable() {
+    this.tables.pop();
+  }
+  openRow() {
+    this.rows.push([]);
+  }
+  openCell() {
+    this.cells.push([]);
+  }
+  closeCell() {
+    const cell = this.cells.pop();
+    if (cell) this.rows.at(-1)?.push(cell);
+  }
+  /** A paragraph inside an open cell joins that cell; `false` when none is open. */
+  paragraph(pieces: Piece[]): boolean {
+    const cell = this.cells.at(-1);
+    if (!cell) return false;
+    cell.push(pieces);
+    return true;
+  }
+  /** The closed row as one paragraph, or nothing when it has no text. */
+  closeRow(): { pieces: Piece[]; table: number } | undefined {
+    const row = this.rows.pop();
+    const table = this.tables.at(-1);
+    if (!row || table === undefined) return undefined;
+    const pieces: Piece[] = [];
+    row.forEach((cell, index) => {
+      if (index) pieces.push({ literal: "\t" });
+      cell.forEach((paragraph, line) => {
+        if (line) pieces.push({ literal: "\n" });
+        pieces.push(...paragraph);
+      });
+    });
+    return pieces.some((piece) => "segment" in piece) ? { pieces, table } : undefined;
+  }
 }
 export interface DocParagraph {
   id: number;
@@ -54,7 +107,7 @@ export interface DocParagraph {
   /** A field instruction (`w:instrText`, e.g. "PAGE \\* MERGEFORMAT" or a mailto link):
    * Word syntax, not prose, so only its contact values are ever replaced. */
   field?: boolean;
-  /** A PDF table row's table (decision 0149): rows of one table share it. */
+  /** The table a row is part of (decision 0149): rows of one table share it. */
   table?: number;
 }
 /** A replacement in paragraph-text offsets. */
@@ -101,15 +154,40 @@ const tag = /<(\/?)([A-Za-z_][\w.:-]*)((?:[^>"']|"[^"]*"|'[^']*')*?)(\/?)>/g;
 export function parsePart(name: string, xml: string): PartModel {
   const segments: Segment[] = [];
   const paragraphs: Piece[][] = [];
+  const tables: (number | undefined)[] = [];
   const open: Piece[][] = [];
+  const rows = new TableRows();
   tag.lastIndex = 0;
   for (let match = tag.exec(xml); match; match = tag.exec(xml)) {
     const [whole, closing, element, , selfClosing] = match;
     if (element === "w:p" && !selfClosing) {
       if (closing) {
         const paragraph = open.pop();
-        if (paragraph?.some((piece) => "segment" in piece)) paragraphs.push(paragraph);
+        if (paragraph?.some((piece) => "segment" in piece) && !rows.paragraph(paragraph))
+          paragraphs.push(paragraph);
       } else open.push([]);
+      continue;
+    }
+    if (element === "w:tbl" && !selfClosing) {
+      if (closing) rows.closeTable();
+      else rows.openTable();
+      continue;
+    }
+    if (element === "w:tr" && !selfClosing) {
+      if (!closing) {
+        rows.openRow();
+        continue;
+      }
+      const row = rows.closeRow();
+      if (row && !rows.paragraph(row.pieces)) {
+        tables[paragraphs.length] = row.table;
+        paragraphs.push(row.pieces);
+      }
+      continue;
+    }
+    if (element === "w:tc" && !selfClosing) {
+      if (closing) rows.closeCell();
+      else rows.openCell();
       continue;
     }
     if (closing) continue;
@@ -138,7 +216,7 @@ export function parsePart(name: string, xml: string): PartModel {
       tag.lastIndex = textEnd + element.length + 3;
     }
   }
-  return { name, xml, segments, paragraphs };
+  return { name, xml, segments, paragraphs, tables };
 }
 
 export function paragraphText(part: PartModel, pieces: readonly Piece[]): string {
@@ -238,7 +316,14 @@ export async function openDocx(
       const field = pieces.some(
         (piece) => "segment" in piece && part.segments[piece.segment]!.field,
       );
-      paragraphs.push({ id: index.length - 1, part: part.name, text, ...(field ? { field } : {}) });
+      const table = part.tables[paragraphIndex];
+      paragraphs.push({
+        id: index.length - 1,
+        part: part.name,
+        text,
+        ...(field ? { field } : {}),
+        ...(table === undefined ? {} : { table: partIndex * 100_000 + table }),
+      });
     }),
   );
   if (!paragraphs.length) throw new DocFileError("empty");

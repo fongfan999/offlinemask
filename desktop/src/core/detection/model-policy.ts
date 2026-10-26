@@ -1,5 +1,6 @@
 import type { DecodedEntitySpan } from "openmed";
 import type { Detection } from "./types.ts";
+import { looksLikeKnownName, looksLikeName } from "./person-cues.ts";
 
 const labels: Record<string, [string, string]> = {
   PERSON: ["TEN", "Họ và tên"],
@@ -114,7 +115,7 @@ const boilerplatePhrases = [
   "trưởng phòng",
   "chủ tịch(?: hội đồng (?:quản trị|thành viên))?",
   `(?:(?:${numberWords}) )+(?:trăm|nghìn|ngàn|triệu|tỷ|tỉ|đồng|vnd|usd)`,
-  // Invoices and receipts (decision 0151): their title in capitals ("HÓA ĐƠN GIÁ TRỊ GIA
+  // Invoices and receipts (decision 0155): their title in capitals ("HÓA ĐƠN GIÁ TRỊ GIA
   // TĂNG"), column headings and footer, which a model reads as names.
   "hóa đơn",
   "điện tử",
@@ -139,6 +140,17 @@ const boilerplatePhrases = [
   "trang tra cứu",
   "tra cứu",
   "trang \\d+(?:/\\d+)?",
+  // The national header of contracts and forms, and field names of statements and forms
+  // that a model reads as a name on their own (decision 0156).
+  "cộng hòa xã hội chủ nghĩa việt nam",
+  "cộng hoà xã hội chủ nghĩa việt nam",
+  "độc lập [-–] tự do [-–] hạnh phúc",
+  "giới tính",
+  "dân tộc",
+  "ghi nợ",
+  "ghi có",
+  "số dư",
+  "loại tiền",
 ];
 /** Countries and regions: a span that is only one of these is where something comes
  * from ("Thịt bò Úc"), not anyone's address; an address that ends in one is kept whole. */
@@ -209,6 +221,8 @@ export function plausibleContextualSpan(type: string, value: string): boolean {
     .replace(/\s+/gu, " ")
     .trim();
   if (type === "DIA_CHI" && countries.has(words.toLowerCase())) return false;
+  // A currency code on its own ("Loại tiền: VND") is neither a place nor an organization.
+  if (/^(?:vnd|vnđ|usd|eur|jpy|gbp|aud|sgd|krw|cny)$/iu.test(words)) return false;
   return !party.test(words);
 }
 
@@ -281,8 +295,9 @@ export function modelDetections(text: string, spans: readonly DecodedEntitySpan[
     }
     const previous = detections[detections.length - 1];
     // The model labels Vietnamese name/address components separately.
-    // A hyphen/apostrophe joins two predicted name pieces, never arbitrary prose.
-    const joiner = type === "TEN" ? /^(?:[^\S\r\n]*|[-'’])$/u : /^(?:[^\S\r\n]|,)*$/u;
+    // A hyphen/apostrophe joins two predicted name pieces, never arbitrary prose, and
+    // never a tab: the next cell is another value ("Bố\tNguyễn Văn An").
+    const joiner = type === "TEN" ? /^(?:[^\S\r\n\t]*|[-'’])$/u : /^(?:[^\S\r\n\t]|,)*$/u;
     if (
       previous &&
       (type === "TEN" || type === "DIA_CHI") &&
@@ -322,6 +337,9 @@ export function plausibleModelDetections(text: string, detections: readonly Dete
     if (!contextual.has(d.type)) return [d];
     if (phrases.some(([start, end]) => start <= d.start && d.end <= end)) return [];
     if (productCell(text, d.start, d.end)) return [];
+    if (wordingColumn(text, d.start, d.end)) return [];
+    if (transactionCell(text, d.start, d.end, d.type, value)) return [];
+    if (capitalHeading(text, d.start, d.end, d.type, value)) return [];
     // One word on its own (a cell, a short message) is the whole evidence there is.
     const alone = value.trim() === text.trim();
     return alone || /\s/u.test(value.trim()) || (d.score ?? 1) >= singleWordMinScore ? [d] : [];
@@ -355,7 +373,7 @@ function withoutBrands(text: string, detection: Detection): Detection | undefine
  * cell (text with a tab on at least one side, as the PDF reader writes rows) that has
  * one describes goods: a model's name, place or organization there is product wording
  * ("AN ĐÌNH Gạo Japonica BB-3kg", "OLALA Trứng Gà Sạch hộp", "WINECO Cải ngọt 300g"),
- * whatever its score (decision 0151); so is one anywhere in a row whose unit column holds
+ * whatever its score (decision 0155); so is one anywhere in a row whose unit column holds
  * a unit ("3 | Ốc Hương Thiên Nhiên | Kg | 0,64"). A sentence is not a cell: "Gửi 2 hộp
  * bánh cho anh Nguyễn Văn An" keeps its name. */
 const productMeasure =
@@ -379,6 +397,113 @@ function productCell(text: string, start: number, end: number): boolean {
   // A row whose unit column holds a unit ("Kg", "Phần", "Lon") lists goods.
   const row = text.slice(line + 1, nextLine < 0 ? text.length : nextLine);
   return row.split("\t").some((cell) => unitCell.test(cell.trim()));
+}
+
+/** The line a span is on and the tabbed cell it is in; `column` counts the cells before. */
+function rowAround(text: string, start: number, end: number) {
+  const lineStart = text.lastIndexOf("\n", start - 1) + 1;
+  const lineBreak = text.indexOf("\n", end);
+  const lineEnd = lineBreak < 0 ? text.length : lineBreak;
+  const tabBefore = text.lastIndexOf("\t", start - 1);
+  const tabAfter = text.indexOf("\t", end);
+  const cellStart = Math.max(lineStart, tabBefore + 1);
+  const cellEnd = tabAfter < 0 || tabAfter > lineEnd ? lineEnd : tabAfter;
+  const row = text.slice(lineStart, lineEnd);
+  return {
+    row,
+    cells: row.split("\t"),
+    tabbed: row.includes("\t"),
+    cell: text.slice(cellStart, cellEnd),
+    column: text.slice(lineStart, start).split("\t").length - 1,
+    lineStart,
+  };
+}
+
+/** Column headings under which a cell holds wording, never a person, place or
+ * organization: a relation, a job title, goods, a unit, a quantity or a price. */
+const wordingHeading =
+  /^(?:quan hệ|chức vụ|chức danh|nghề nghiệp|vị trí|trình độ|tên hàng|hàng hóa|hàng hoá|tên sản phẩm|sản phẩm|mặt hàng|nội dung hàng|đơn vị tính|đvt|số lượng|đơn giá|thành tiền|loại)(?![\p{L}\p{M}])/iu;
+/** Whether a tabbed cell stands in a column whose heading says it holds wording
+ * (decision 0156): "Bố" under "Quan hệ", "Trưởng nhóm" under "Chức vụ", goods under "Tên
+ * hàng hóa, dịch vụ". The heading is the same cell of the first row of the run of rows
+ * with as many cells above this one; rows read as one paragraph each sit a blank line
+ * apart. A cell of the heading row itself counts too. */
+function wordingColumn(text: string, start: number, end: number): boolean {
+  const { tabbed, cells, column, lineStart } = rowAround(text, start, end);
+  if (!tabbed) return false;
+  let heading = cells[column] ?? "";
+  for (let at = lineStart; at > 0;) {
+    const previousStart = text.lastIndexOf("\n", at - 2) + 1;
+    const line = text.slice(previousStart, at - 1);
+    if (line.trim()) {
+      const above = line.split("\t");
+      if (above.length !== cells.length) break;
+      heading = above[column] ?? "";
+    }
+    at = previousStart;
+  }
+  return wordingHeading.test(heading.trim().normalize("NFC"));
+}
+
+const dateCell =
+  /^\s*(?:\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}|\d{4}-\d{2}-\d{2})(?:\s+\d{1,2}:\d{2}(?::\d{2})?)?\s*$/u;
+const amountCell = /^\s*[+-]?\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{1,2})?\s*(?:đ|vnd|vnđ)?\s*$/iu;
+/** A transaction row of a bank statement is a tabbed row with a date cell and an amount
+ * cell. In a cell of it written without tone marks ("TRA LUONG THANG 9", "Thanh toan QR",
+ * "Rut tien ATM"), the models, trained on accented Vietnamese, read the wording as names,
+ * places and organizations (decision 0156). A name there is kept only in the shape of one
+ * (a family name first, every word a syllable); a company is found by its legal form
+ * (context-fields) and a person by their position (detectTransferNames), not by a model. */
+function transactionCell(
+  text: string,
+  start: number,
+  end: number,
+  type: string,
+  value: string,
+): boolean {
+  const { tabbed, cells, cell } = rowAround(text, start, end);
+  if (!tabbed || cells.length < 3) return false;
+  if (!cells.some((c) => dateCell.test(c)) || !cells.some((c) => amountCell.test(c))) return false;
+  if (/\p{M}|[đĐ]/u.test(cell.normalize("NFD"))) return false;
+  return type !== "TEN" || !looksLikeName(value);
+}
+
+const addressWord =
+  /(?<![\p{L}\p{M}])(?:số|đường|phố|ngõ|ngách|hẻm|thôn|xóm|ấp|khu|tổ|xã|phường|thị trấn|quận|huyện|thị xã|tỉnh|thành phố|tp|q|p|kp|kdc|tòa|toà|lầu|tầng|lô)(?![\p{L}\p{M}])/iu;
+const organizationWord =
+  /(?<![\p{L}\p{M}])(?:công ty|cty|tnhh|cổ phần|cp|tmcp|tập đoàn|tổng công ty|doanh nghiệp|hợp tác xã|htx|hộ kinh doanh|ngân hàng|chi nhánh|phòng giao dịch|trường|học viện|đại học|bệnh viện|phòng khám|ủy ban|uỷ ban|ubnd|trung tâm|văn phòng|cửa hàng|siêu thị|nhà hàng|khách sạn|nhà máy|xí nghiệp|công đoàn|liên đoàn|hiệp hội|jsc|co\.?|ltd|inc|corp|group|bank|company|limited)(?![\p{L}\p{M}])/iu;
+const cellBreak = /\t|\r?\n|[^\S\r\n]·[^\S\r\n]/u;
+/** The cell or line around a span: text between tabs, line breaks or the " · " the PDF
+ * reader puts between two fields of one line. */
+function cellAround(text: string, start: number, end: number): string {
+  let from = 0;
+  for (const match of text.slice(0, start).matchAll(new RegExp(cellBreak, "gu")))
+    from = match.index + match[0].length;
+  const next = cellBreak.exec(text.slice(end));
+  return text.slice(from, next ? end + next.index : text.length);
+}
+/** A model's name, place or organization in a line or cell written in capitals ("SAO KÊ
+ * TÀI KHOẢN", "ĐẠI DIỆN BÊN A", "I. THÔNG TIN BẢN THÂN", "YÊU CẦU TRA SOÁT GIAO DỊCH") is
+ * a heading unless it has the evidence of its type (decision 0156): a name is made of
+ * name syllables and starts with a family name (the span, or the whole cell when a model
+ * cut a name in two); a place has a digit or an address word in the cell; an organization
+ * has its legal form or kind. A parenthesis and a trailing colon are not part of the test
+ * ("NGƯỜI LAO ĐỘNG (Bên B):"); a cell of one word is left to the score rule. */
+function capitalHeading(
+  text: string,
+  start: number,
+  end: number,
+  type: string,
+  value: string,
+): boolean {
+  const head = cellAround(text, start, end)
+    .replace(/\([^)]*\)/gu, " ")
+    .replace(/[:：]\s*$/u, "")
+    .trim();
+  if (/\p{Ll}/u.test(head) || (head.match(/[\p{L}\p{M}]+/gu) ?? []).length < 2) return false;
+  if (type === "TEN") return !looksLikeKnownName(value) && !looksLikeKnownName(head);
+  if (type === "DIA_CHI") return !/\p{N}/u.test(head) && !addressWord.test(head);
+  return !organizationWord.test(head);
 }
 
 /** Combine overlapping evidence across models/windows without dropping exposed tails. */
