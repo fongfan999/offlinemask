@@ -27,6 +27,8 @@ mise exec -- pnpm -C desktop exec node scripts/build-macos-release.mjs
 
 It stops before building when signing prerequisites are missing. The normal local `desktop:build` remains available for ad hoc QA. A valid local signature alone is not a notarization result. Distribute only the exact verified artifact; record SHA-256, build commit, macOS/architecture, notarization outcome and hardware run. Do not publish automatically.
 
+Signing also decides whether the two macOS Services of [decision 0094](../decisions/0094-macos-services.md) appear: Finder and the Services menu list them only for an app with a Developer ID signature ([decision 0158](../decisions/0158-finder-services-need-a-signed-app.md)); an ad hoc build registers them but shows no menu item.
+
 ## Actual 8 GB Apple Silicon qualification
 
 Use a separate test identity or a clean test account. Use synthetic data only. Never clear a user's app data or quit an app holding their private sessions. Do not manufacture memory pressure on the owner's active machine and call it an 8 GB test.
