@@ -2,6 +2,7 @@ import type { DecodedEntitySpan } from "openmed";
 import type { Detection } from "./types.ts";
 import { isSyllable, looksLikeKnownName, looksLikeName } from "./person-cues.ts";
 import { vocabulary } from "./vocabulary.ts";
+import { vetoOn } from "./vetoes.ts";
 
 const labels: Record<string, [string, string]> = {
   PERSON: ["TEN", "Họ và tên"],
@@ -263,28 +264,40 @@ function issuePlaceRanges(text: string): [number, number][] {
  * again on the whole text, where a phrase cut by a window edge is whole. Decomposed
  * text skips the phrase check: ranges are NFC positions, and the window text is NFC. */
 export function plausibleModelDetections(text: string, detections: readonly Detection[]) {
-  const phrases = text === text.normalize("NFC") ? boilerplateRanges(text) : [];
-  const shielded = [...publicBodyRanges(text, detections), ...issuePlaceRanges(text)];
+  // Each mechanism is named in vetoes.ts, so a measurement can switch it off.
+  const phrases =
+    vetoOn("phrases") && text === text.normalize("NFC") ? boilerplateRanges(text) : [];
+  const shielded = [
+    ...(vetoOn("publicBodies") ? publicBodyRanges(text, detections) : []),
+    ...(vetoOn("issuePlaces") ? issuePlaceRanges(text) : []),
+  ];
   return detections.flatMap((detection) => {
-    const trimmed = withoutUnit(text, detection);
-    const d = trimmed && trimmed.type === "TEN" ? withoutBrands(text, trimmed) : trimmed;
+    const trimmed = vetoOn("trims") ? withoutUnit(text, detection) : detection;
+    const d =
+      trimmed && trimmed.type === "TEN" && vetoOn("trims") ? withoutBrands(text, trimmed) : trimmed;
     if (!d) return [];
     const value = text.slice(d.start, d.end);
     if (!plausibleContextualSpan(d.type, value)) return [];
     if (!contextual.has(d.type)) return [d];
     if (phrases.some(([start, end]) => start <= d.start && d.end <= end)) return [];
     if (shielded.some(([start, end]) => start <= d.start && d.end <= end)) return [];
-    if (productCell(text, d.start, d.end)) return [];
-    if (wordingColumn(text, d.start, d.end)) return [];
-    if (transactionCell(text, d.start, d.end, d.type, value)) return [];
-    if (capitalHeading(text, d.start, d.end, d.type, value)) return [];
-    if (departmentCell(text, d.start, d.end) || sexValue(text, d.start, value)) return [];
-    if (wordingField(text, d.start)) return [];
+    if (vetoOn("productCells") && productCell(text, d.start, d.end)) return [];
+    if (vetoOn("wordingColumns") && wordingColumn(text, d.start, d.end)) return [];
+    if (vetoOn("transactionCells") && transactionCell(text, d.start, d.end, d.type, value))
+      return [];
+    if (vetoOn("capitalHeadings") && capitalHeading(text, d.start, d.end, d.type, value)) return [];
+    if (
+      vetoOn("departments") &&
+      (departmentCell(text, d.start, d.end) || sexValue(text, d.start, value))
+    )
+      return [];
+    if (vetoOn("wordingFields") && wordingField(text, d.start)) return [];
     // A role or heading in capitals inside a line of prose ("TL. HIỆU TRƯỞNG TRƯỞNG PHÒNG
     // ĐÀO TẠO" after the date line): a name with tone marks in capitals is made of name
     // syllables, as a span or as its whole cell when a model cut it ("THỊ HỒNG NHUNG").
     // Unaccented capitals (a statement's "LE MINH TUAN") keep the shape test of 0154.
     if (
+      vetoOn("capitalRoles") &&
       d.type === "TEN" &&
       !/\p{Ll}/u.test(value) &&
       /\s/u.test(value.trim()) &&
@@ -299,7 +312,12 @@ export function plausibleModelDetections(text: string, detections: readonly Dete
       return [];
     // One word on its own (a cell, a short message) is the whole evidence there is.
     const alone = value.trim() === text.trim();
-    return alone || /\s/u.test(value.trim()) || (d.score ?? 1) >= singleWordMinScore ? [d] : [];
+    return alone ||
+      /\s/u.test(value.trim()) ||
+      !vetoOn("singleWords") ||
+      (d.score ?? 1) >= singleWordMinScore
+      ? [d]
+      : [];
   });
 }
 

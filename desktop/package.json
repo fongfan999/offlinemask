@@ -23,6 +23,7 @@
     "test": "node --test tests/*.test.mjs",
     "test:models": "node scripts/check-pack.mjs",
     "eval:documents": "node scripts/evaluate-documents.mjs",
+    "compare:packs": "node scripts/compare-packs.mjs",
     "documents:generate": "node scripts/generate-documents.mjs",
     "pack:prepare": "node scripts/prepare-pack.mjs",
     "models:download": "node scripts/prepare-models.mjs --download",
