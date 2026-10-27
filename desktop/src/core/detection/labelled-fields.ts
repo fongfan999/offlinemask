@@ -1,20 +1,19 @@
 import type { Detection } from "./types.ts";
 import { textGraphemes } from "../unicode.ts";
 import { provinceEnd } from "./address-boundaries.ts";
+import { vocabulary } from "./vocabulary.ts";
 
 // Labels identify a bounded field, not an arbitrary person or place in prose.
-const nameLabels =
-  "ho va ten|ho ten nguoi benh|ten nguoi benh|ho ten hoc sinh|ho ten sinh vien|ho ten nhan vien|ten nhan vien|ho ten nguoi nop tien|ho ten|ten khach hang|ten nguoi nhan|ten nguoi gui|ten tren giay to|ten chu tai khoan|chu tai khoan|ten tai khoan|khach hang|nguoi thu huong|nguoi yeu cau|nguoi nhan|nguoi gui";
-const addressLabels =
-  "dia chi lien he|dia chi nhan thu|dia chi thuong tru|dia chi hien tai|dia chi lap dat|dia chi su dung dien|dia chi nhan hang|dia chi giao hang|dia chi nhan|dia chi cu tru|dia chi|dia diem lam viec|dia diem kinh doanh|noi nhan|noi o hien nay|cho o hien nay|noi cu tru hien tai|noi cu tru|noi o|ho khau thuong tru|noi dang ky thuong tru|thuong tru|d/c";
-const otherLabels =
-  "email|dien thoai|sdt|so dien thoai|stk|so tai khoan|tai khoan|cccd|cmnd|ma giao dich|ma khach hang|ngay sinh|ngay tiep nhan|so tien|noi dung|phi";
+const nameLabels = vocabulary.labels.name;
+const addressLabels = vocabulary.labels.address;
+const otherLabels = vocabulary.labels.other;
 const fields = new RegExp(
   `(?<![a-z0-9_])(${nameLabels}|${addressLabels}|${otherLabels})[^\\S\\r\\n]*[:：][^\\S\\r\\n]*`,
   "g",
 );
-const names = new RegExp(`^(?:${nameLabels})$`);
-const addresses = new RegExp(`^(?:${addressLabels})$`);
+const names = new RegExp(`^${nameLabels}$`);
+const addresses = new RegExp(`^${addressLabels}$`);
+const addressStop = new RegExp(`,[^\\S\\r\\n]*${vocabulary.labels.addressStops}\\b`, "u");
 const missing =
   /^(?:chua (?:cung cap|co thong tin|xac dinh)|dang cap nhat|de trong|khong co|n\/a|null|[-–—]+)$/;
 const prose =
@@ -88,10 +87,7 @@ export function detectLabelledFields(text: string): LabelledFields {
       // Exported records also use comma + contact/postcode labels without a colon.
       // These labels describe another field and must not become part of the address.
       const body = searchIndex(text.slice(start, end));
-      const boundary =
-        /,[^\S\r\n]*(?:email|dien thoai|sdt|so dien thoai|stk|so tai khoan|tai khoan|cccd|cmnd|ma buu chinh|ma giao dich|ma khach hang|ngay sinh|so tien|phi)\b/u.exec(
-          body.value,
-        );
+      const boundary = addressStop.exec(body.value);
       if (boundary) end = start + body.starts[boundary.index]!;
     }
     while (end > start && /[\s,]/u.test(text[end - 1]!)) end--;

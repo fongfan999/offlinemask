@@ -1,5 +1,6 @@
 import { familyNames, isSyllable } from "./person-cues.ts";
 import type { Detection } from "./types.ts";
+import { vocabulary } from "./vocabulary.ts";
 
 interface Rule {
   type: string;
@@ -8,38 +9,46 @@ interface Rule {
   reason: string;
 }
 // Domain recognizers supplement the model. No handwritten name/email/phone detector.
+const blank = "[^\\S\\r\\n]+";
+const blanks = "[^\\S\\r\\n]*";
+/** A label from the vocabulary, an optional separator, then the value's pattern. */
+const labelled = (label: string, value: string) =>
+  new RegExp(`(?<![\\p{L}\\p{N}_])${label}\\s*[:：#-]?\\s*${value}`, "giu");
+/** A code: letters, digits, "_" and "-", three to forty characters. */
+const code = "([A-Z0-9][A-Z0-9_-]{2,39})(?![\\p{L}\\p{N}_-])";
 const rules: readonly Rule[] = [
   {
     type: "STK",
     label: "Số tài khoản",
-    pattern:
-      // "TK" is how statements write it ("chuyen tien den TK 0123456789"); a label may
-      // carry up to three words before its colon ("Số tài khoản nhận lương:"). Six digits
-      // at least, so a ledger account ("Nợ TK 331") stays (decision 0154).
-      /(?<![\p{L}\p{N}_])(?:số tài khoản|tài khoản|stk|tk|account(?: number)?)(?:(?:[^\S\r\n]+[\p{L}\p{M}]+){1,3}[^\S\r\n]*[:：]|\s+số)?\s*[:：#-]?\s*(\d(?:[ -]?\d){5,19})(?![\p{L}\p{N}_]|[ -]?\d)/giu,
+    // "TK" is how statements write it ("chuyen tien den TK 0123456789"); a label may carry
+    // up to three words before its colon ("Số tài khoản nhận lương:"). Six digits at
+    // least, so a ledger account ("Nợ TK 331") stays (decision 0154).
+    pattern: labelled(
+      `${vocabulary.labels.account}(?:(?:${blank}[\\p{L}\\p{M}]+){1,3}${blanks}[:：]|\\s+số)?`,
+      "(\\d(?:[ -]?\\d){5,19})(?![\\p{L}\\p{N}_]|[ -]?\\d)",
+    ),
     reason: "Dãy số sau nhãn tài khoản; cần kiểm tra lại theo ngữ cảnh.",
   },
   {
     type: "CCCD",
     label: "Số giấy tờ tùy thân",
-    pattern:
-      // "Số định danh cá nhân" is the official name of the 12-digit number on decisions and
-      // forms (decision 0159).
-      /(?<![\p{L}\p{N}_])(?:cccd|cmnd|căn cước(?: công dân)?|chứng minh nhân dân|(?:số|mã)\s+định danh(?: cá nhân)?|định danh cá nhân)\s*(?:số\s*)?[:：#-]?\s*(\d{12}|\d{9})(?![\p{L}\p{N}_])/giu,
+    // "Số định danh cá nhân" is the official name of the 12-digit number (decision 0159).
+    pattern: labelled(
+      `${vocabulary.labels.identifier}\\s*(?:số\\s*)?`,
+      "(\\d{12}|\\d{9})(?![\\p{L}\\p{N}_])",
+    ),
     reason: "Dãy 9 hoặc 12 chữ số sau nhãn giấy tờ; chưa xác minh tính hợp lệ.",
   },
   {
     type: "GD",
     label: "Mã giao dịch",
-    pattern:
-      /(?<![\p{L}\p{N}_])(?:mã giao dịch|giao dịch có mã|transaction (?:id|reference))\s*[:：#-]?\s*([A-Z0-9][A-Z0-9_-]{2,39})(?![\p{L}\p{N}_-])/giu,
+    pattern: labelled(vocabulary.labels.transaction, code),
     reason: "Mã sau nhãn giao dịch.",
   },
   {
     type: "KH",
     label: "Mã khách hàng",
-    pattern:
-      /(?<![\p{L}\p{N}_])(?:mã khách hàng|mã kh|customer (?:id|code))\s*[:：#-]?\s*([A-Z0-9][A-Z0-9_-]{2,39})(?![\p{L}\p{N}_-])/giu,
+    pattern: labelled(vocabulary.labels.customer, code),
     reason: "Mã sau nhãn khách hàng.",
   },
   {
@@ -47,8 +56,7 @@ const rules: readonly Rule[] = [
     label: "Mã số",
     // The codes an organization gives a person: employee, student, patient, health-insurance
     // card, social-insurance book, subscriber and member numbers (decision 0160).
-    pattern:
-      /(?<![\p{L}\p{N}_])(?:mã nhân viên|mã nv|mã nhân sự|mã sinh viên|mã số sinh viên|mssv|mã học viên|mã học sinh|mã bệnh nhân|mã bn|mã hồ sơ bệnh án|số thẻ bhyt|mã thẻ bhyt|số thẻ bảo hiểm(?: y tế)?|mã số bhxh|số sổ bhxh|mã thuê bao|số thuê bao|mã hội viên|mã thành viên)\s*[:：#-]?\s*([A-Z0-9][A-Z0-9_-]{2,39})(?![\p{L}\p{N}_-])/giu,
+    pattern: labelled(vocabulary.labels.personalCode, code),
     reason: "Mã sau nhãn mã số nhân viên, sinh viên, bệnh nhân, thẻ bảo hiểm hoặc thuê bao.",
   },
 ];

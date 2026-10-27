@@ -1,112 +1,36 @@
 import type { Detection } from "./types.ts";
+import { vocabulary } from "./vocabulary.ts";
 
-const unit =
-  /^(?:(?:can ho|can|phong|tang|toa nha|toa|lo|block|ngo|ngach|hem|duong|thon|ap|xom|phuong|xa|huyen|quan|tinh|thanh pho|thi xa|thi tran)\s+|(?:p|q|tp|tx|tt)\.\s*)/;
-const addressContext =
-  /(?:dia chi|d\/c|cu tru tai|thuong tru|noi o|song tai|nhan thu tai|nhan tai|gui (?:thong bao|thu|ho so|the) (?:ve|den|toi)|chuyen chung tu toi|chuyen thu (?:ve|den|toi)|noi nhan)\b/;
-const factWords =
-  /\b(?:giao dich|ho so|yeu cau|so tien|dien thoai|email|stk|tai khoan|cccd|chi phi|ban lam viec|can sua|cam on)\b/;
+const unit = new RegExp(
+  `^(?:${vocabulary.units.addressUnitAlternation}\\s+|${vocabulary.units.addressAbbreviationAlternation}\\.\\s*)`,
+);
+const addressContext = new RegExp(`${vocabulary.labels.addressContext}\\b`);
+const factWords = new RegExp(`\\b${vocabulary.labels.factWords}\\b`);
 const house = /^\d{1,5}[a-z]?(?:\/\d{1,5}[a-z]?)*\s+/;
 /** The provinces and cities (the 34 since July 2025 and the names before), a closed public
  * list like the countries of 0155: an address ends after one of them (decision 0160). */
-export const provinces = [
-  "hà nội",
-  "hồ chí minh",
-  "hải phòng",
-  "đà nẵng",
-  "cần thơ",
-  "huế",
-  "lai châu",
-  "điện biên",
-  "sơn la",
-  "lào cai",
-  "tuyên quang",
-  "thái nguyên",
-  "cao bằng",
-  "lạng sơn",
-  "quảng ninh",
-  "bắc ninh",
-  "phú thọ",
-  "hưng yên",
-  "ninh bình",
-  "thanh hóa",
-  "thanh hoá",
-  "nghệ an",
-  "hà tĩnh",
-  "quảng trị",
-  "quảng ngãi",
-  "gia lai",
-  "đắk lắk",
-  "khánh hòa",
-  "khánh hoà",
-  "lâm đồng",
-  "đồng nai",
-  "tây ninh",
-  "đồng tháp",
-  "vĩnh long",
-  "an giang",
-  "cà mau",
-  "bình dương",
-  "bà rịa - vũng tàu",
-  "bà rịa – vũng tàu",
-  "vũng tàu",
-  "hải dương",
-  "nam định",
-  "thái bình",
-  "bắc giang",
-  "vĩnh phúc",
-  "hà nam",
-  "hòa bình",
-  "hoà bình",
-  "yên bái",
-  "hà giang",
-  "bắc kạn",
-  "quảng bình",
-  "quảng nam",
-  "bình định",
-  "phú yên",
-  "ninh thuận",
-  "bình thuận",
-  "kon tum",
-  "đắk nông",
-  "bình phước",
-  "long an",
-  "tiền giang",
-  "bến tre",
-  "trà vinh",
-  "hậu giang",
-  "sóc trăng",
-  "bạc liêu",
-  "kiên giang",
-  "thừa thiên huế",
-  "hcm",
-];
+
 /** Where a labelled address ends when the reader joined the next sentence to it
  * ("… TP. Hồ Chí Minh Tổng số tháng …"): after the province or city, when a capitalized
  * word follows without a comma. Returns the end within `value`, or undefined. */
+const provinceAfterKind = new RegExp(
+  `(?:^|[\\s,])${vocabulary.places.kindAlternation}\\.?[^\\S\\r\\n]*${vocabulary.places.provinceAlternation}(?![\\p{L}\\p{M}])(?:,[^\\S\\r\\n]*việt nam)?`,
+  "giu",
+);
 export function provinceEnd(value: string): number | undefined {
-  const names = [...provinces]
-    .sort((a, b) => b.length - a.length)
-    .join("|")
-    .replace(/ /g, "[^\\S\\r\\n]+");
   const text = value.normalize("NFC");
-  const name = new RegExp(
-    // With its kind: a street named after a province ("Điện Biên Phủ", "Cao Bằng") has none.
-    `(?:^|[\\s,])(?:thành phố|tỉnh|tp\\.?|t\\.)[^\\S\\r\\n]*(?:${names})(?![\\p{L}\\p{M}])(?:,[^\\S\\r\\n]*việt nam)?`,
-    "giu",
-  );
-  for (const match of text.matchAll(name)) {
+  for (const match of text.matchAll(provinceAfterKind)) {
     const end = match.index + match[0].length;
     // Case matters here: a new sentence starts with a capital, prose does not.
     if (/^[^\S\r\n]+(?!Việt Nam)\p{Lu}/u.test(text.slice(end))) return end;
   }
   return undefined;
 }
-const road = /^(?:duong|pho|dai lo)\s+/;
+
+const road = new RegExp(`^${vocabulary.units.roadAlternation}\\s+`);
 const properValue =
   /^(?:[\p{Lu}\p{N}][\p{L}\p{M}\p{N}/-]*)(?:\s+[\p{Lu}\p{N}][\p{L}\p{M}\p{N}/-]*){0,9}$/u;
-const splitUnit =
-  /(?:^|\s)(?:thon|ap|xom|phuong|xa|huyen|quan|tinh|thanh pho|thi xa|thi tran|duong|pho|dai lo|can ho|can|toa nha|toa|phong|tang)$/;
+const splitUnit = new RegExp(`(?:^|\\s)${vocabulary.units.addressUnitOrRoadAlternation}$`);
 
 function continuesAddressLine(before: string, after: string) {
   // Join one wrapped component only. Final acceptance still requires a proper

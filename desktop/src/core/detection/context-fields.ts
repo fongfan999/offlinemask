@@ -1,5 +1,6 @@
 import ipaddr from "ipaddr.js";
 import type { Detection } from "./types.ts";
+import { vocabulary } from "./vocabulary.ts";
 import {
   fold,
   searchIndex,
@@ -9,17 +10,34 @@ import {
 
 const horizontal = "[^\\S\\r\\n]";
 const fieldLabels = new RegExp(
-  `(?<![a-z0-9_])(ngay sinh|sinh ngay|ngay, thang, nam sinh|ngay thang nam sinh|date of birth|dob|ngay giao dich|ngay hach toan|ngay hen(?: tra ket qua)?|phien ban(?: phan mem)?|version|ma http|http status|so ho so da xu ly|tong so chung tu)(?![a-z0-9_])`,
+  `(?<![a-z0-9_])(${vocabulary.labels.birthDate}|${vocabulary.labels.operationalDates})(?![a-z0-9_])`,
   "g",
 );
+const birthLabel = new RegExp(`^${vocabulary.labels.birthDate}$`);
 const datePrefix = new RegExp(
   `^(?:ngay${horizontal}+)?(\\d{1,2})${horizontal}+thang${horizontal}+(\\d{1,2})${horizontal}+nam${horizontal}+(\\d{4})(?![a-z0-9_/])`,
 );
 const numericDate = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(?![a-z0-9_/])/;
-const legalPrefix =
-  /(?<![a-z0-9_])(?:cong ty(?: (?:tnhh|co phan|trach nhiem huu han))?|hop tac xa|doanh nghiep tu nhan|ho kinh doanh|benh vien|phong kham(?: da khoa)?|truong (?:dai hoc|cao dang|thpt|thcs|tieu hoc|mam non))(?![a-z0-9_])/g;
+const legalPrefix = new RegExp(
+  `(?<![a-z0-9_])${vocabulary.organizations.legalPrefixAlternation}(?![a-z0-9_])`,
+  "g",
+);
 const bridge = new RegExp(
   `^${horizontal}*(?:[:：=]${horizontal}*|${horizontal}+(?:(?:cua${horizontal}+(?:khach(?:${horizontal}+hang)?|toi)${horizontal}+)?(?:duoc${horizontal}+ghi${horizontal}+)?(?:la${horizontal}+)?)?)`,
+);
+const { tradeSyllables, compounds } = vocabulary.organizations;
+const { provinces } = vocabulary.places;
+const nameStop = new RegExp(
+  `^(?:${vocabulary.organizations.nameStopAlternation}|${vocabulary.organizations.nameStopNumberedAlternation}[^\\S\\r\\n]+\\d+)(?![\\p{L}\\p{M}])`,
+  "iu",
+);
+const unitStop = new RegExp(
+  `^${vocabulary.organizations.nameUnitStopAlternation}(?![\\p{L}\\p{M}])(?![^\\S\\r\\n]+khám)`,
+  "iu",
+);
+const partyLabel = new RegExp(
+  `(?:${vocabulary.organizations.partyLabelAlternation}(?: [a-z]| \\d{1,2}| [a-z]+(?: [a-z]+)?)?)[^\\S\\r\\n]*[:：][^\\S\\r\\n]*$`,
+  "u",
 );
 
 function calendarDate(match: RegExpExecArray) {
@@ -83,10 +101,7 @@ export function detectContextFields(
     const labelStart = match.index,
       labelEnd = labelStart + match[0].length;
     const after = search.value.slice(labelEnd, labelEnd + 140);
-    const birthday =
-      /^(ngay sinh|sinh ngay|ngay, thang, nam sinh|ngay thang nam sinh|date of birth|dob)$/.test(
-        match[1]!,
-      );
+    const birthday = birthLabel.test(match[1]!);
     // A bounded capitalized name followed by an explicit copula. Do not suppress
     // that intervening name when reconciling the field label with model evidence.
     const originalAfter = text.slice(search.ends[labelEnd - 1]!, search.ends[labelEnd - 1]! + 180);
@@ -140,60 +155,41 @@ export function detectContextFields(
           text.slice(cursor, cursor + 160),
         );
       if (!token || cursor + token[0].length - start > 180) break;
-      const word = token[1]!,
-        lower = fold(word);
-      const tail = fold(text.slice(cursor, cursor + 60)).trimStart();
+      const word = token[1]!.normalize("NFC"),
+        lower = word.toLowerCase();
+      // Words are compared with their tone marks: "tại" is not "tải", "Phòng" is not "Phong".
+      const ahead = text
+        .slice(cursor, cursor + 60)
+        .normalize("NFC")
+        .trimStart();
+      const pair = `${last} ${lower}`;
       if (
-        // "đã" ends a name; so do an address ("Số 47 …", "370 Huỳnh …" once the name has
-        // two capitals), an article ("Điều 2"), a page and a department or ward line
-        // ("Phòng Đào tạo", "Khoa Nhi") that the reader joined to the name (decisions
-        // 0159, 0160). "Đa khoa", "Bách khoa" and "Phòng khám" are parts of names.
-        /^(?:da(?! khoa)|dang|se|khong|yeu cau|de nghi|tong so|so tien|so ho so|ngay giao dich|co ma|co tai khoan|so \d+|dieu \d+|trang \d+|toi|chung toi)\b/u.test(
-          tail,
-        ) ||
-        (/^khoa\b/u.test(tail) && !/^(?:da|chuyen|bach)$/u.test(last)) ||
-        (lower === "phong" &&
-          /ò/iu.test(word.normalize("NFC")) &&
-          last !== "hai" &&
-          !/^phong kham/u.test(tail)) ||
-        (capitals >= 2 && /^\d+(?:\/\d+)?\s+[a-z]/u.test(tail))
+        // Prose ("đã", "tôi"), an article ("Điều 2"), a page, an address ("Số 47 …", or a
+        // bare number once the name has two capitals) and a department or ward line the
+        // reader joined to the name ("Phòng Đào tạo", "Khoa Nhi") end a name; a compound
+        // ("Đa khoa", "Bách khoa") and a province ("Hải Phòng") do not (decisions 0159–0161).
+        nameStop.test(ahead) ||
+        (unitStop.test(ahead) && !compounds.has(pair) && !provinces.has(pair)) ||
+        (capitals >= 2 && /^\d+(?:\/\d+)?\s+\p{L}/u.test(ahead))
       )
         break;
-      last = lower;
-      const capital = /^[\p{Lu}\p{N}]/u.test(word.normalize("NFC"));
-      // Lowercase connectors of company names ("Vận tải", "Dịch vụ", "Xây dựng": the second
-      // syllable of a trade written in Title Case), and of institutions ("Đa khoa", "Đại
-      // học", "Trung ương"). A syllable that also folds to a preposition ("tại", "từ",
-      // "vẫn", "đóng") counts only in its trade spelling.
-      const spelled = {
-        tai: /^tải$/iu,
-        tu: /^(?:tư|tử)$/iu,
-        van: /^(?:vận|văn)$/iu,
-        dong: /^(?:động|đồng)$/iu,
-      }[lower];
-      if (
-        !capital &&
-        (!/^(san|vu|mai|xuat|nghiep|va|co|phan|trach|nhiem|huu|han|khoa|hoc|uong|tai|dich|thuong|xay|dung|dau|tu|cong|nghe|ky|thuat|phat|trien|nhap|khau|thuc|pham|nong|dien|may|tinh|quang|cao|van|chuyen|giao|nhan|bat|dong|ly|kinh|doanh|tong|hop|chinh|bao|hiem|duc|te|lich|hang|truong|thiet|ke|noi|that|det|nhua|thep|khi|phap|mem|lieu|lap|tin|lac|tri|trang|suc|khoe|cham|soc|thu|y|hoa)$/u.test(
-          lower,
-        ) ||
-          (spelled && !spelled.test(word.normalize("NFC"))))
-      )
-        break;
+      const capital = /^[\p{Lu}\p{N}]/u.test(word);
+      // A lowercase word continues a name only as a trade syllable ("Vận tải", "Xây dựng")
+      // or a connector ("và", "cổ phần") from the vocabulary.
+      if (!capital && !tradeSyllables.has(lower)) break;
       if (capital) capitals++;
-      acronym ||= /^[\p{Lu}]{2,}[\p{N}]*$/u.test(word.normalize("NFC"));
+      acronym ||= /^[\p{Lu}]{2,}[\p{N}]*$/u.test(word);
       cursor += token[0].length;
       // Never end on a dangling lowercase connector, except the syllable that completes a
-      // compound ("Trung ương", "Đa khoa", "Đại học", "Y tế").
-      if (capital || /^(?:uong|khoa|hoc|te)$/u.test(lower)) end = cursor;
+      // compound ("Trung ương", "Đa khoa", "Đại học").
+      if (capital || compounds.has(pair)) end = cursor;
+      last = lower;
     }
     if (end === prefixEnd || (capitals < 2 && !acronym)) continue;
     // Reject an overlong name rather than quietly complete just its first tokens.
     if (tokens === 12 && /^[^\S\r\n]+[\p{Lu}\p{N}]/u.test(text.slice(cursor))) continue;
     // A contract names its parties with the same legal prefix ("BÊN A: CÔNG TY …").
-    const labelled =
-      /(?:don vi|ten (?:cong ty|doanh nghiep)|to chuc|(?:cac )?ben(?: [a-z]| \d{1,2}| [a-z]+(?: [a-z]+)?)?|dai dien|khach hang|doi tac|nha thau|chu dau tu)[^\S\r\n]*[:：][^\S\r\n]*$/u.test(
-        fold(text.slice(Math.max(0, start - 70), start)),
-      );
+    const labelled = partyLabel.test(fold(text.slice(Math.max(0, start - 70), start)));
     // Model evidence anywhere on the name, the prefix included, seeds the completion;
     // a model may read "Nông sản Suối Mơ" as a place, which is still a name after the prefix.
     const seeded = seeds.some(

@@ -5,6 +5,7 @@ import {
   type LabelledFields,
 } from "./labelled-fields.ts";
 import type { Detection } from "./types.ts";
+import { vocabulary } from "./vocabulary.ts";
 
 const specifications = [
   {
@@ -56,8 +57,7 @@ const specifications = [
     type: "GIAY_TO",
     // Since July 2025 a person's or a household business's tax code is their 12-digit
     // CCCD: "Mã số thuế (CCCD):", "MST/CCCD chủ hộ:" (decision 0155).
-    pattern:
-      "(?:ma so thue|mst)(?:[^\\S\\r\\n]*\\([^\\S\\r\\n]*cccd[^\\S\\r\\n]*\\)|[^\\S\\r\\n]*\\/[^\\S\\r\\n]*cccd)?(?: chu ho| ca nhan| doanh nghiep)?|tax (?:id|number)",
+    pattern: `(?:ma so thue|mst)(?:[^\\S\\r\\n]*\\([^\\S\\r\\n]*cccd[^\\S\\r\\n]*\\)|[^\\S\\r\\n]*\\/[^\\S\\r\\n]*cccd)?(?: ${vocabulary.labels.taxSuffixes})?|tax (?:id|number)`,
     kind: "tax",
   },
   {

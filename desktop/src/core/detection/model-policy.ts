@@ -1,7 +1,7 @@
 import type { DecodedEntitySpan } from "openmed";
 import type { Detection } from "./types.ts";
-import { looksLikeKnownName, looksLikeName } from "./person-cues.ts";
-import { provinces } from "./address-boundaries.ts";
+import { isSyllable, looksLikeKnownName, looksLikeName } from "./person-cues.ts";
+import { vocabulary } from "./vocabulary.ts";
 
 const labels: Record<string, [string, string]> = {
   PERSON: ["TEN", "Họ và tên"],
@@ -48,232 +48,20 @@ const nameSeparators = /[:：\t\r\n]|\.(?=\s|$)/gu;
 /** The parties of a Vietnamese contract ("Bên A", "BÊN B", "Bên thuê", "Các Bên"): a role
  * in the text, never a person, place or organization. A closed list, so "bên chị Lan"
  * still keeps the name. */
-const partyRoles = [
-  "\\p{L}",
-  "\\d{1,2}",
-  "(?:thứ\\s+)?(?:nhất|hai|ba|bốn|năm)",
-  "kia",
-  "còn\\s+lại",
-  "(?:bị\\s+)?vi\\s+phạm",
-  "bị\\s+ảnh\\s+hưởng",
-  "(?:cho\\s+)?(?:mua|bán|thuê|vay|mượn|tặng)(?:\\s+lại)?",
-  "(?:được|nhận)\\s+(?:tặng\\s+cho|bảo\\s+lãnh|ủy\\s+quyền|chuyển\\s+nhượng|thế\\s+chấp|đặt\\s+cọc|nhượng\\s+quyền|bảo\\s+hiểm)",
-  "(?:bảo\\s+lãnh|ủy\\s+quyền|chuyển\\s+nhượng|thế\\s+chấp|đặt\\s+cọc|nhượng\\s+quyền|bảo\\s+hiểm|góp\\s+vốn|gia\\s+công)",
-  "(?:nhận|giao|cung\\s+cấp|sử\\s+dụng|đặt|thi\\s+công|phân\\s+phối|đại\\s+lý)(?:\\s+(?:hàng|dịch\\s+vụ))?",
-];
-const party = new RegExp(
-  `^(?:(?:các|hai|ba|mỗi|một|từng)\\s+)?bên(?:\\s+(?:${partyRoles.join("|")}))?$`,
-  "iu",
-);
+/** A contract party ("Bên A", "Bên thuê", "các bên"), from the vocabulary. */
+const party = vocabulary.wording.party;
 
 /** Contract boilerplate that Title Case makes look like names ("Sự Kiện Bất Khả Kháng",
  * "Phí Dịch Vụ - Thanh Toán", "Bằng chữ: Tám triệu đồng"): a span inside one of these
  * phrases, or inside an amount written in words, is a misreading. Whole phrases only, so
  * "Nguyễn Thanh Toán" or "Công ty Dịch vụ Bình An", which reach past them, are kept. */
-const numberWords =
-  "một|hai|ba|bốn|năm|sáu|bảy|tám|chín|mười|mươi|lăm|linh|lẻ|trăm|nghìn|ngàn|triệu|tỷ|tỉ";
-const boilerplatePhrases = [
-  "hợp đồng cộng tác viên",
-  "sự kiện bất khả kháng",
-  "bất khả kháng",
-  "hợp đồng",
-  "phụ lục",
-  "điều khoản",
-  "điều \\d+",
-  "khoản \\d+",
-  "mục \\d+",
-  "cộng tác viên",
-  "phí dịch vụ",
-  "dịch vụ",
-  "thanh toán",
-  "thù lao",
-  "bằng chữ",
-  "bằng văn bản",
-  "mọi thông tin mật",
-  "thông tin mật",
-  "mọi thông tin",
-  "bảo mật",
-  "án phí",
-  "phạt vi phạm",
-  "phạt",
-  "vi phạm",
-  "bồi thường",
-  "thiệt hại",
-  "các bên",
-  "hai bên",
-  "mỗi bên",
-  "bên kia",
-  "bên thứ ba",
-  "giấy ủy quyền",
-  "giấy phép",
-  "giấy tờ",
-  "giấy chứng nhận",
-  "sản phẩm",
-  "bao bì",
-  "chức vụ",
-  "(?:tổng |phó )?giám đốc(?: (?:tài chính|điều hành|kinh doanh|nhân sự|kỹ thuật|dự án|sản xuất|chi nhánh))?",
-  "kế toán trưởng",
-  "trưởng phòng",
-  "chủ tịch(?: hội đồng (?:quản trị|thành viên))?",
-  `(?:(?:${numberWords}) )+(?:trăm|nghìn|ngàn|triệu|tỷ|tỉ|đồng|vnd|usd)`,
-  // Invoices and receipts (decision 0155): their title in capitals ("HÓA ĐƠN GIÁ TRỊ GIA
-  // TĂNG"), column headings and footer, which a model reads as names.
-  "hóa đơn",
-  "điện tử",
-  "giá trị gia tăng",
-  "gtgt",
-  "thuế suất",
-  "tiền thuế",
-  "thuế",
-  "thành tiền",
-  "đơn giá",
-  "đơn vị tính",
-  "số lượng",
-  "tổng cộng",
-  "tổng hợp",
-  "tổng tiền",
-  "ký hiệu",
-  "mã số thuế",
-  "người mua hàng",
-  "người bán hàng",
-  "bán hàng",
-  "mã tra cứu",
-  "trang tra cứu",
-  "tra cứu",
-  "trang \\d+(?:/\\d+)?",
-  // The national header of contracts and forms, and field names of statements and forms
-  // that a model reads as a name on their own (decision 0156).
-  "cộng hòa xã hội chủ nghĩa việt nam",
-  "cộng hoà xã hội chủ nghĩa việt nam",
-  "độc lập [-–] tự do [-–] hạnh phúc",
-  "giới tính",
-  "dân tộc",
-  "ghi nợ",
-  "ghi có",
-  "số dư",
-  "loại tiền",
-  // Official documents (decision 0159): the kinds of document and the "Nơi nhận" block,
-  // which a model reads as a place or a name ("thi hành Quyết định này", "Như Điều 4",
-  // "Lưu: VT").
-  "quyết định",
-  "nghị định",
-  "thông tư",
-  "công văn",
-  "nơi nhận",
-  "như điều \\d+",
-  "như trên",
-  // "Lưu: VT, TTDVVL": the units that file the document, as initials.
-  "lưu:(?: [\\p{Lu}][\\p{Lu}.]*,?)*",
-  "kt\\.",
-  "tm\\.",
-  "tl\\.",
-  // Titles, field names and roles of payslips, records, bills, letters, minutes, transcripts
-  // and orders (decision 0160).
-  "phiếu lương",
-  "bảng lương",
-  "lương tháng",
-  "phiếu thu",
-  "phiếu chi",
-  "phiếu giao hàng",
-  "phiếu khám bệnh",
-  "phiếu kết quả xét nghiệm",
-  "kết quả xét nghiệm",
-  "xét nghiệm",
-  "biên bản(?: (?:họp|bàn giao|nghiệm thu))?",
-  "bảng điểm",
-  "giấy xác nhận",
-  "thư mời(?: nhận việc)?",
-  "thông báo",
-  "nhắc nợ",
-  "họ và tên",
-  "họ tên",
-  "số serial",
-  "đơn vị",
-  "tên tài sản",
-  "thực lĩnh",
-  "khoản mục",
-  "học phần",
-  "tín chỉ",
-  "điểm chữ",
-  "hiệu trưởng",
-  "trưởng khoa",
-  "chủ trì",
-  "thư ký",
-  "thủ quỹ",
-  "người lập phiếu",
-  "người nộp tiền",
-  "người nhận",
-  "người gửi",
-  "mã số",
-  "mã (?:nhân viên|nv|sinh viên|số sinh viên|bệnh nhân|bn|thuê bao|khách hàng|kh|đơn hàng|vận đơn|công tơ|hồ sơ)",
-  "mssv",
-  "tháng(?: \\d+(?:/\\d+)?)?",
-  "phòng đào tạo",
-  "đào tạo",
-  "công tác sinh viên",
-  // Ranks beside a signature.
-  "(?:thiếu|trung|thượng|đại) (?:úy|uý|tá|tướng)",
-  // Wording of letters, minutes, transcripts and bills.
-  "quý khách(?: hàng)?",
-  "trân trọng(?: cảm ơn| thông báo| kính chào)?",
-  "kính thư",
-  "kính gửi",
-  "quý công ty",
-  "thảo luận",
-  "đánh giá",
-  "kết luận",
-  "nội dung cuộc họp",
-  "các ý kiến khác",
-  "số",
-  "phòng",
-  "điểm hệ \\d+",
-  "sản lượng",
-  "ký(?:,)? (?:ghi rõ họ tên|đóng dấu|tên)",
-];
+
+const phrase = vocabulary.wording.phraseAlternation;
 /** Countries and regions: a span that is only one of these is where something comes
  * from ("Thịt bò Úc"), not anyone's address; an address that ends in one is kept whole. */
-const countries = new Set(
-  [
-    "việt nam",
-    "úc",
-    "mỹ",
-    "hoa kỳ",
-    "anh",
-    "pháp",
-    "đức",
-    "ý",
-    "nga",
-    "nhật",
-    "nhật bản",
-    "hàn quốc",
-    "trung quốc",
-    "đài loan",
-    "hồng kông",
-    "thái lan",
-    "lào",
-    "campuchia",
-    "singapore",
-    "malaysia",
-    "indonesia",
-    "philippines",
-    "ấn độ",
-    "canada",
-    "new zealand",
-    "tây ban nha",
-    "hà lan",
-    "thụy sĩ",
-    "châu âu",
-    "châu á",
-    "châu mỹ",
-    "châu phi",
-    "châu úc",
-  ].map((name) => name.normalize("NFC")),
-);
+const countries = vocabulary.places.countries;
 // Longest phrase first, and consecutive phrases form one run ("HỢP ĐỒNG DỊCH VỤ").
-const phrase = `(?:${[...boilerplatePhrases]
-  .sort((a, b) => b.length - a.length)
-  .join("|")
-  .replace(/ /g, "[^\\S\\r\\n]+")})`;
+
 const boilerplate = new RegExp(
   `(?<![\\p{L}\\p{M}\\p{N}])${phrase}(?:[^\\S\\r\\n]+${phrase})*(?![\\p{L}\\p{M}\\p{N}])`,
   "giu",
@@ -295,14 +83,13 @@ export function isProvince(value: string): boolean {
   const words = value
     .normalize("NFC")
     .toLowerCase()
-    .replace(/^(?:thành phố|tỉnh|tp\.?|t\.)\s+/u, "")
+    .replace(new RegExp(`^${vocabulary.places.kindAlternation}\\.?\\s+`, "iu"), "")
     .replace(/\s+/gu, " ")
     .trim();
   return provinceNames.has(words);
 }
-const provinceNames = new Set(provinces.map((name) => name.normalize("NFC")));
-const organizationKind =
-  /^(?:công ty|cty|tập đoàn|tổng công ty|doanh nghiệp|ngân hàng|chi nhánh|trường|học viện|đại học|bệnh viện|phòng khám|trung tâm|văn phòng|cửa hàng|siêu thị|nhà hàng|khách sạn|nhà máy|xí nghiệp|hợp tác xã)$/iu;
+const provinceNames = vocabulary.places.provinces;
+const organizationKind = vocabulary.organizations.kindAlone;
 export function plausibleContextualSpan(type: string, value: string): boolean {
   if (!contextual.has(type)) return true;
   const content = value.normalize("NFC");
@@ -319,25 +106,19 @@ export function plausibleContextualSpan(type: string, value: string): boolean {
   // "Mỹ", "Đức" and "Nga" are given names, so a name is left to its own evidence.
   if ((type !== "TEN" || /\s/u.test(words)) && countries.has(words.toLowerCase())) return false;
   // A currency code on its own ("Loại tiền: VND") is neither a place nor an organization.
-  if (/^(?:vnd|vnđ|usd|eur|jpy|gbp|aud|sgd|krw|cny)$/iu.test(words)) return false;
+  if (vocabulary.wording.currencies.test(words)) return false;
   return !party.test(words);
 }
 
 /** One Vietnamese syllable, without its tone marks: an onset, one to three vowels and a
  * final. "VISSAN", "PACOW", "FPT", "JEMMIA" are not one. */
-const syllable =
-  /^(?:ngh|ng|nh|ch|gh|gi|kh|ph|qu|th|tr|[bcdghklmnprstvx])?[aeiouy]{1,3}(?:ng|nh|ch|[cmnpt])?$/;
-const fold = (word: string) =>
-  word.normalize("NFD").replace(/\p{M}/gu, "").replace(/đ/giu, "d").toLowerCase();
 /** A single word in capitals that no Vietnamese syllable spells is a brand or an acronym
  * ("VISSAN Xúc xích", "WINECO Cải ngọt"), not a person. A Vietnamese name in capitals ("NGUYỄN", "HÀ")
  * is made of syllables and is kept, as is a foreign name in Title Case. */
 export function brandInCapitals(value: string): boolean {
   const word = value.normalize("NFC").trim();
   return (
-    /^\p{Lu}[\p{Lu}\p{M}]{2,}$/u.test(word) &&
-    word === word.toUpperCase() &&
-    !syllable.test(fold(word))
+    /^\p{Lu}[\p{Lu}\p{M}]{2,}$/u.test(word) && word === word.toUpperCase() && !isSyllable(word)
   );
 }
 
@@ -428,26 +209,7 @@ export function modelDetections(text: string, spans: readonly DecodedEntitySpan[
  * over every place or organization a model found touching it, so the city inside
  * "Sở Nội vụ Thành phố Hồ Chí Minh" goes with the body. */
 const publicBody = new RegExp(
-  `(?<![\\p{L}\\p{M}])(?:${[
-    "ủy ban nhân dân",
-    "uỷ ban nhân dân",
-    "ubnd",
-    "hội đồng nhân dân",
-    "hđnd",
-    "chính phủ",
-    "quốc hội",
-    "bảo hiểm xã hội",
-    "bhxh",
-    "trung tâm dịch vụ việc làm",
-    "công an",
-    "t(?:òa|oà) án(?: nhân dân)?",
-    "viện kiểm sát(?: nhân dân)?",
-    "kho bạc nhà nước",
-    "ngân hàng nhà nước",
-    "bưu điện",
-    "(?:bộ|sở) (?:nội vụ|y tế|tài chính|xây dựng|tư pháp|công thương|ngoại giao|ngoại vụ|du lịch|quốc phòng|giáo dục(?: và đào tạo)?|lao động(?:[,\\s–-]+thương binh và xã hội)?|giao thông(?: vận tải)?|kế hoạch và đầu tư|tài nguyên và môi trường|khoa học và công nghệ|thông tin và truyền thông|văn h(?:óa|oá)(?:, thể thao và du lịch)?|nông nghiệp(?: và (?:phát triển nông thôn|môi trường))?)",
-    "(?:chi |tổng )?cục (?:thuế|hải quan|thống kê|đăng kiểm|việc làm|thi hành án dân sự|quản lý thị trường|cảnh sát giao thông)",
-  ].join("|")})(?![\\p{L}\\p{M}])`,
+  `(?<![\\p{L}\\p{M}])${vocabulary.bodies.termAlternation}(?![\\p{L}\\p{M}])`,
   "giu",
 );
 // Up to two words between a body and the place a model found after it: the unit's kind,
@@ -571,11 +333,12 @@ function withoutBrands(text: string, detection: Detection): Detection | undefine
  * whatever its score (decision 0155); so is one anywhere in a row whose unit column holds
  * a unit ("3 | Ốc Hương Thiên Nhiên | Kg | 0,64"). A sentence is not a cell: "Gửi 2 hộp
  * bánh cho anh Nguyễn Văn An" keeps its name. */
-const productMeasure =
-  /\d+(?:[.,]\d+)?[^\S\r\n]?(?:g|gr|kg|mg|ml|l|lít|cm|mm)(?![\p{L}\p{N}])|(?<![\p{L}\p{M}])(?:gói|goi|hộp|hop|khay|kh|chai|lon|túi|thùng|bịch|hũ|vỉ|lốc|kg|ml|g1|cái|cai|chiếc|bộ|cuộn)(?![\p{L}\p{M}\p{N}])/iu;
+const productMeasure = new RegExp(
+  `\\d+(?:[.,]\\d+)?[^\\S\\r\\n]?${vocabulary.units.measureAlternation}(?![\\p{L}\\p{N}])|(?<![\\p{L}\\p{M}])${vocabulary.units.packAlternation}(?![\\p{L}\\p{M}\\p{N}])`,
+  "iu",
+);
 /** A unit on its own in a cell: the "Đơn vị tính" column of a goods table. */
-const unitCell =
-  /^(?:kg|g|gr|mg|ml|l|lít|lit|hộp|hop|gói|goi|khay|kh|chai|lon|cái|cai|chiếc|chiec|bộ|bo|cuộn|cuon|phần|phan|suất|suat|đĩa|dia|ly|cốc|coc|thùng|thung|túi|tui|bịch|bich|hũ|hu|vỉ|vi|lốc|loc|tờ|to|quyển|quyen|cây|cay|bó|con|g1|lần|lan|chuyến|chuyen|giờ|gio|ngày|ngay|tháng|thang|người|nguoi|m2|m3|km)$/iu;
+const unitCell = vocabulary.units.unitCell;
 function productCell(text: string, start: number, end: number): boolean {
   const tab = text.lastIndexOf("\t", start - 1);
   const line = text.lastIndexOf("\n", start - 1);
@@ -616,8 +379,10 @@ function rowAround(text: string, start: number, end: number) {
 
 /** Column headings under which a cell holds wording, never a person, place or
  * organization: a relation, a job title, goods, a unit, a quantity or a price. */
-const wordingHeading =
-  /^(?:quan hệ|chức vụ|chức danh|nghề nghiệp|vị trí|trình độ|tên hàng|hàng hóa|hàng hoá|tên sản phẩm|sản phẩm|mặt hàng|nội dung hàng|đơn vị tính|đvt|số lượng|đơn giá|thành tiền|loại|học phần|môn học|xét nghiệm|chỉ số|khoản mục|dịch vụ|tên tài sản|tài sản|phòng ban|bộ phận|gói cước|gói dịch vụ|gói)(?![\p{L}\p{M}])/iu;
+const wordingHeading = new RegExp(
+  `^${vocabulary.wording.headingAlternation}(?![\\p{L}\\p{M}])`,
+  "iu",
+);
 /** Whether a tabbed cell stands in a column whose heading says it holds wording
  * (decision 0156): "Bố" under "Quan hệ", "Trưởng nhóm" under "Chức vụ", goods under "Tên
  * hàng hóa, dịch vụ". The heading is the same cell of the first row of the run of rows
@@ -665,10 +430,14 @@ function transactionCell(
   return type !== "TEN" || !looksLikeName(value);
 }
 
-const addressWord =
-  /(?<![\p{L}\p{M}])(?:số|đường|phố|ngõ|ngách|hẻm|thôn|xóm|ấp|khu|tổ|xã|phường|thị trấn|quận|huyện|thị xã|tỉnh|thành phố|tp|q|p|kp|kdc|tòa|toà|lầu|tầng|lô)(?![\p{L}\p{M}])/iu;
-const organizationWord =
-  /(?<![\p{L}\p{M}])(?:công ty|cty|tnhh|cổ phần|cp|tmcp|tập đoàn|tổng công ty|doanh nghiệp|hợp tác xã|htx|hộ kinh doanh|ngân hàng|chi nhánh|phòng giao dịch|trường|học viện|đại học|bệnh viện|phòng khám|ủy ban|uỷ ban|ubnd|trung tâm|văn phòng|cửa hàng|siêu thị|nhà hàng|khách sạn|nhà máy|xí nghiệp|công đoàn|liên đoàn|hiệp hội|jsc|co\.?|ltd|inc|corp|group|bank|company|limited)(?![\p{L}\p{M}])/iu;
+const addressWord = new RegExp(
+  `(?<![\\p{L}\\p{M}])${vocabulary.units.addressWordAlternation}(?![\\p{L}\\p{M}])`,
+  "iu",
+);
+const organizationWord = new RegExp(
+  `(?<![\\p{L}\\p{M}])${vocabulary.organizations.kindAlternation}(?![\\p{L}\\p{M}])`,
+  "iu",
+);
 const cellBreak = /\t|\r?\n|[^\S\r\n]·[^\S\r\n]/u;
 /** The cell or line around a span: text between tabs, line breaks or the " · " the PDF
  * reader puts between two fields of one line. */
@@ -707,39 +476,58 @@ function capitalHeading(
  * Giám đốc", "Bộ phận Kho vận"): a short cell or line that starts with the unit's kind is
  * wording, not an organization or a name (decision 0160). A clinic ("Phòng khám …") is an
  * organization and is left to its legal prefix. */
-const department =
-  /^(?:phòng(?![^\S\r\n]+khám)|khoa|ban|bộ phận|tổ|đội)[^\S\r\n]+[\p{L}\p{M}]+(?:[^\S\r\n]+[\p{L}\p{M}]+){0,4}[.:]?$/iu;
-const afterUnit =
-  /(?:^|[^\p{L}\p{M}])(?:phòng(?![^\S\r\n]+khám)|khoa|ban|bộ phận|tổ|đội)(?:[^\S\r\n]+[\p{L}\p{M}]+){0,2}[^\S\r\n]+$/iu;
+/** The kinds of unit inside an organization ("Phòng", "Khoa", "Ban", "Bộ phận", "Tổ",
+ * "Đội") as a regex source, each excluding the words after which it is not a unit
+ * ("Phòng khám", "Khoa học", "Ban Mê Thuột"), from the vocabulary. */
+function unitKinds(kinds: readonly string[]): string {
+  const { notUnits } = vocabulary.organizations;
+  const blank = "[^\\S\\r\\n]+";
+  return `(?:${kinds
+    .map((kind) => {
+      const exceptions = notUnits[kind] ?? [];
+      const not = exceptions.length
+        ? `(?!${blank}(?:${exceptions.map((e) => e.replace(/ /g, blank)).join("|")}))`
+        : "";
+      return `${kind.replace(/ /g, blank)}${not}`;
+    })
+    .join("|")})`;
+}
+const unitKind = unitKinds(vocabulary.organizations.unitKinds);
+const department = new RegExp(
+  `^${unitKind}[^\\S\\r\\n]+[\\p{L}\\p{M}]+(?:[^\\S\\r\\n]+[\\p{L}\\p{M}]+){0,4}[.:]?$`,
+  "iu",
+);
+
+const unitKindAlone = new RegExp(`^${unitKind}$`, "iu");
+/** The unit's kind and up to two words of its name just before a span, as "Bộ ",
+ * "Phòng Kinh " or "Khoa ": the first word of each kind, since a span may start inside
+ * a two-word kind ("Bộ [phận …]"). */
+const unitLead = new RegExp(
+  `(?:^|[^\\p{L}\\p{M}])((?:${vocabulary.organizations.unitKinds.map((k) => k.split(" ")[0]).join("|")})(?:[^\\S\\r\\n]+[\\p{L}\\p{M}]+){0,2})[^\\S\\r\\n]+$`,
+  "iu",
+);
 function departmentCell(text: string, start: number, end: number): boolean {
   const value = text.slice(start, end).trim().normalize("NFC");
+  // The unit as written: the span, or the span extended back over its kind and the words
+  // between ("Bộ [phận Kho vận]", "Phòng Kinh [doanh]", "Khoa [Nhi]").
+  const lead = unitLead.exec(text.slice(Math.max(0, start - 40), start).normalize("NFC"))?.[1];
   return (
     department.test(cellAround(text, start, end).trim().normalize("NFC")) ||
-    department.test(value) ||
-    // The unit's name after its kind ("Khoa [Nhi]", "Phòng Kinh [doanh]"): a word or two.
-    ((value.match(/[\p{L}\p{M}]+/gu) ?? []).length <= 3 &&
-      afterUnit.test(text.slice(Math.max(0, start - 40), start))) ||
-    // A span that starts inside the unit's kind ("Bộ [phận Kho vận]"), or that is the kind
-    // alone before the unit's name ("[Phòng] Công tác sinh viên").
-    department.test(
-      (/(?:^|[^\p{L}\p{M}])((?:bộ|phòng|khoa|ban|tổ|đội)[^\S\r\n]+)$/iu.exec(
-        text.slice(Math.max(0, start - 12), start).normalize("NFC"),
-      )?.[1] ?? "") + value,
-    ) ||
-    (/^(?:phòng|khoa|ban|bộ phận|tổ|đội)$/iu.test(value) &&
-      /^[^\S\r\n]+[\p{L}\p{M}]/u.test(text.slice(end)))
+    department.test(lead ? `${lead} ${value}` : value) ||
+    (unitKindAlone.test(value) && /^[^\S\r\n]+[\p{L}\p{M}]/u.test(text.slice(end)))
   );
 }
 /** An organization a model read on into the department line the reader joined to it
  * ("Trường Đại học Kinh tế Quốc dân Phòng Đào tạo"): the span ends before the unit's
  * kind, once the name before it has two words (decision 0160). A clinic, a fire-safety
  * company and a bank's transaction office keep their words. */
-const unitStart =
-  /\s(?:phòng(?![^\S\r\n]+(?:khám|cháy|giao dịch))|khoa(?![^\S\r\n]+học)|ban(?![^\S\r\n]+(?:quản lý|giám đốc$))|bộ phận|tổ|đội)[^\S\r\n]+[\p{L}\p{M}]/iu;
+const unitStart = new RegExp(`\\s${unitKind}[^\\S\\r\\n]+[\\p{L}\\p{M}]`, "iu");
 /** In a place, only a room or a ward can follow: "Tổ 5", "Đội Cấn" and "Ban Mê Thuột" are
  * parts of addresses. */
-const unitInPlace =
-  /\s(?:phòng(?![^\S\r\n]+(?:khám|cháy|giao dịch))|khoa(?![^\S\r\n]+học))[^\S\r\n]+[\p{L}\p{M}]/iu;
+const unitInPlace = new RegExp(
+  `\\s${unitKinds(vocabulary.organizations.unitInPlaces)}[^\\S\\r\\n]+[\\p{L}\\p{M}]`,
+  "iu",
+);
 function withoutUnit(text: string, detection: Detection): Detection | undefined {
   if (!contextual.has(detection.type)) return detection;
   const value = text.slice(detection.start, detection.end);
@@ -768,9 +556,14 @@ function withoutUnit(text: string, detection: Detection): Detection | undefined 
 /** The value of a field whose label says it holds wording ("Chức vụ: Kỹ sư phần mềm",
  * "Lý do nộp: Hoàn tạm ứng", "vị trí Chuyên viên nhân sự"): no person, place or
  * organization (decision 0160), like a cell under such a heading (0156). */
-const wordingLabel =
-  /(?:chức vụ|chức danh|vị trí|nghề nghiệp|quan hệ|trình độ|phòng ban|bộ phận|lý do(?: nộp| khám| chi)?|chẩn đoán|gói cước|ngành|lớp|học phần|môn học|khoản mục)[^\S\r\n]*[:：][^\S\r\n]*(?:[\p{L}\p{M}\p{N}]+[^\S\r\n]+){0,4}$/iu;
-const positionWord = /vị trí[^\S\r\n]+(?:[\p{L}\p{M}\p{N}]+[^\S\r\n]+){0,3}$/iu;
+const wordingLabel = new RegExp(
+  `${vocabulary.wording.labelAlternation}[^\\S\\r\\n]*[:：][^\\S\\r\\n]*(?:[\\p{L}\\p{M}\\p{N}]+[^\\S\\r\\n]+){0,4}$`,
+  "iu",
+);
+const positionWord = new RegExp(
+  `${vocabulary.wording.positionAlternation}[^\\S\\r\\n]+(?:[\\p{L}\\p{M}\\p{N}]+[^\\S\\r\\n]+){0,3}$`,
+  "iu",
+);
 function wordingField(text: string, start: number): boolean {
   const before = text.slice(Math.max(0, start - 60), start).normalize("NFC");
   return (
@@ -780,12 +573,14 @@ function wordingField(text: string, start: number): boolean {
   );
 }
 /** "Giới tính: Nam": a sex, not a given name. */
+const sexLabel = new RegExp(
+  `${vocabulary.wording.sexLabelAlternation}[^\\S\\r\\n]*[:：][^\\S\\r\\n]*$`,
+  "iu",
+);
 function sexValue(text: string, start: number, value: string): boolean {
   return (
-    /^(?:nam|nữ)$/iu.test(value.trim()) &&
-    /(?:giới tính|gender)[^\S\r\n]*[:：][^\S\r\n]*$/iu.test(
-      text.slice(Math.max(0, start - 20), start),
-    )
+    vocabulary.wording.sexes.has(value.trim().normalize("NFC").toLowerCase()) &&
+    sexLabel.test(text.slice(Math.max(0, start - 20), start))
   );
 }
 
