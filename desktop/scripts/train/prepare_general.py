@@ -25,7 +25,7 @@ os.environ.setdefault("HF_HUB_DISABLE_TELEMETRY", "1")
 import torch  # noqa: E402
 from transformers import AutoModelForTokenClassification, AutoTokenizer  # noqa: E402
 
-from records import MAX_TOKENS, Record, chunks, decode, write_records  # noqa: E402
+from records import MAX_TOKENS, Record, chunks, decode, pick_device, write_records  # noqa: E402
 
 ARTIFACTS = Path(__file__).resolve().parents[2] / "artifacts" / "train"
 
@@ -63,11 +63,14 @@ def main() -> int:
     parser.add_argument("--base", type=Path, default=ARTIFACTS / "base" / "underthesea")
     parser.add_argument("--batch", type=int, default=8)
     parser.add_argument("--threads", type=int, default=os.cpu_count() or 4)
+    parser.add_argument("--device", default="auto", help="auto (CUDA, then MPS, then CPU), cuda, mps or cpu")
     args = parser.parse_args()
 
     torch.set_num_threads(args.threads)
     tokenizer = AutoTokenizer.from_pretrained(args.base)
-    model = AutoModelForTokenClassification.from_pretrained(args.base).eval()
+    device = pick_device(args.device)
+    model = AutoModelForTokenClassification.from_pretrained(args.base).to(device).eval()
+    print(f"device: {device}", flush=True)
     names = [model.config.id2label[i] for i in range(model.config.num_labels)]
     source_paragraphs = (
         list(paragraphs_from_text(args.text)) if args.text else list(paragraphs_from_wikipedia(args.wikipedia))
@@ -84,7 +87,7 @@ def main() -> int:
                 return_tensors="pt",
             )
             offsets = encoded.pop("offset_mapping").tolist()
-            predicted = model(**encoded).logits.argmax(-1).tolist()
+            predicted = model(**{k: v.to(device) for k, v in encoded.items()}).logits.argmax(-1).cpu().tolist()
             for (origin, text), row_offsets, row_labels, mask in zip(
                 batch, offsets, predicted, encoded["attention_mask"].tolist()
             ):

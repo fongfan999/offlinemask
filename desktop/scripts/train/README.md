@@ -26,6 +26,57 @@ uv run --project desktop/scripts/train download_base.py   # the base checkpoint,
 
 `smoke.sh` runs steps 1–5 on two seeds, 50 documents and one epoch: minutes on a laptop CPU, proving the pipeline, not the model.
 
+## A full run on a cloud GPU
+
+Only steps 2 and 3 need the GPU. Step 1 needs the repository, Node and the app's readers, and steps 4–6 need the installed shipping pack, so they run on the Mac; the GPU machine receives a bundle and returns a checkpoint. `train.py` and `prepare_general.py` pick the device themselves (`--device auto`: a CUDA GPU, then Apple's MPS, then the CPU), so the commands are the same everywhere.
+
+**On the Mac: export and bundle.**
+
+```sh
+cd desktop
+mise exec -- node scripts/export-training-set.mjs artifacts/train/run-1/set --train 100-131 --dev 132-135
+tar -C .. -czf ~/offlinemask-train.tgz \
+  --exclude desktop/scripts/train/.venv \
+  desktop/scripts/train desktop/artifacts/train/base desktop/artifacts/train/run-1/set
+```
+
+The bundle is the pipeline, the base checkpoint (about 440 MB) and the exported set; it holds no real document, only generated ones.
+
+**Google Cloud.** The free trial cannot attach a GPU: upgrade the billing account first (the remaining trial credit stays and is spent first), then under IAM → Quotas request `GPUs (all regions)` ≥ 1 and `NVIDIA L4 GPUs` ≥ 1 in one region (`asia-southeast1`, Singapore, is the nearest). New accounts are often refused or kept at 0 for a while; a refusal is the signal to use another provider, not to retry. With the quota granted, one L4 VM from a Deep Learning VM image with the driver preinstalled (the pinned torch 2.14 ships CUDA 13 libraries, which need driver 580 or newer; check the family still exists with `gcloud compute images describe-from-family`):
+
+```sh
+gcloud compute instances create offlinemask-train --zone=asia-southeast1-b \
+  --machine-type=g2-standard-4 --accelerator=type=nvidia-l4,count=1 \
+  --image-project=deeplearning-platform-release --image-family=common-cu129-ubuntu-2204-nvidia-580 \
+  --boot-disk-size=100GB --maintenance-policy=TERMINATE --metadata=install-nvidia-driver=True
+gcloud compute scp ~/offlinemask-train.tgz offlinemask-train:~ --zone=asia-southeast1-b
+gcloud compute ssh offlinemask-train --zone=asia-southeast1-b
+```
+
+A g2-standard-4 costs under a dollar an hour; the run below is well under an hour, so the trial credit covers it many times over. Delete the VM when the checkpoint is back (`gcloud compute instances delete offlinemask-train --zone=asia-southeast1-b`).
+
+**Oracle Cloud.** GPU shapes (`VM.GPU.A10.1`) have a service limit of 0 on trial accounts and the increase is usually refused until the account is upgraded to pay-as-you-go; if it is granted, the steps on the machine are the same as below with an Ubuntu GPU image.
+
+**On the GPU machine.**
+
+```sh
+nvidia-smi                                            # driver 580 or newer
+curl -LsSf https://astral.sh/uv/install.sh | sh && source ~/.local/bin/env
+tar -xzf ~/offlinemask-train.tgz && cd desktop
+uv sync --project scripts/train --extra general        # CUDA wheels, from uv.lock
+uv run --project scripts/train scripts/train/prepare_general.py artifacts/train/run-1/general.jsonl --wikipedia 20000
+uv run --project scripts/train scripts/train/train.py \
+  --train artifacts/train/run-1/set/train.jsonl --dev artifacts/train/run-1/set/dev.jsonl \
+  --general artifacts/train/run-1/general.jsonl --out artifacts/train/run-1 --epochs 3 --batch 16
+tar -czf ~/run-1.tgz artifacts/train/run-1/checkpoint artifacts/train/run-1/metrics.json
+```
+
+`train.py` prints `device: cuda` first; if it prints `cpu`, stop and fix the driver, since the run would take hours. The three epochs take 10–20 minutes on an L4. `metrics.json` holds the base model's dev table and every epoch's, which the decision for the candidate quotes.
+
+**Back on the Mac: export, pin, measure** (steps 4–6 above with `<out>` = `artifacts/train/run-1` after `gcloud compute scp offlinemask-train:~/run-1.tgz . && tar -xzf run-1.tgz`), then `pnpm eval:documents` on the 0153 set, the wider set and the owner's sets with `--definition`, and the gate. Those numbers decide whether the candidate ships; the dev table only says whether training worked.
+
+**Without any cloud quota.** This Mac's GPU runs the same commands through MPS (`--device auto` picks it): the smoke epoch that took 55–60 s on the CPU takes under 20 s there, so the full run above is about an hour, overnight-safe, with no account at all. A free Google Colab T4 also runs the "on the GPU machine" block as is.
+
 ## Held-out rule
 
 Seeds 1–7 (the 0153 set) and 8–26 (the wider set of 0160) are measured by every decision since; `tests/documents/training-set.mjs` refuses to export them and `tests/training-set.test.mjs` checks that it does. The owner's private sets are never generated and so never exported. A training run uses seeds from 100 up; dev seeds are separate from train seeds within the run.

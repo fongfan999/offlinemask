@@ -31,7 +31,17 @@ import torch  # noqa: E402
 from torch.utils.data import DataLoader  # noqa: E402
 from transformers import AutoModelForTokenClassification, AutoTokenizer, get_linear_schedule_with_warmup  # noqa: E402
 
-from records import IGNORE_INDEX, MAX_TOKENS, Record, Span, decode, encode, pack_documents, read_records  # noqa: E402
+from records import (  # noqa: E402
+    IGNORE_INDEX,
+    MAX_TOKENS,
+    Record,
+    Span,
+    decode,
+    encode,
+    pack_documents,
+    pick_device,
+    read_records,
+)
 
 ARTIFACTS = Path(__file__).resolve().parents[2] / "artifacts" / "train"
 LABELS = ["PERSON", "LOCATION", "ORGANIZATION"]
@@ -66,7 +76,7 @@ def collate(pad_id: int):
     return batch
 
 
-def measure(model, examples: list[dict], names: list[str], batch_size: int, pad_id: int) -> dict:
+def measure(model, examples: list[dict], names: list[str], batch_size: int, pad_id: int, device) -> dict:
     """Exact-span precision, recall and F1 per label on the dev windows, and the share of
     negatives (kept texts) that a predicted span of any label touches."""
     model.eval()
@@ -76,8 +86,8 @@ def measure(model, examples: list[dict], names: list[str], batch_size: int, pad_
     with torch.inference_mode():
         cursor = 0
         for batch in loader:
-            logits = model(**{k: v for k, v in batch.items() if k != "labels"}).logits
-            predicted = logits.argmax(-1).tolist()
+            logits = model(**{k: v.to(device) for k, v in batch.items() if k != "labels"}).logits
+            predicted = logits.argmax(-1).cpu().tolist()
             for row in predicted:
                 example = examples[cursor]
                 cursor += 1
@@ -142,6 +152,7 @@ def main() -> int:
     parser.add_argument("--limit-dev", type=int, help="measure the first N dev documents only")
     parser.add_argument("--seed", type=int, default=20261027)
     parser.add_argument("--threads", type=int, default=os.cpu_count() or 4)
+    parser.add_argument("--device", default="auto", help="auto (CUDA, then MPS, then CPU), cuda, mps or cpu")
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -150,7 +161,9 @@ def main() -> int:
     args.out.mkdir(parents=True, exist_ok=True)
 
     tokenizer = AutoTokenizer.from_pretrained(args.base)
-    model = AutoModelForTokenClassification.from_pretrained(args.base)
+    device = pick_device(args.device)
+    model = AutoModelForTokenClassification.from_pretrained(args.base).to(device)
+    print(f"device: {device}", flush=True)
     label2id = {name: int(i) for i, name in model.config.id2label.items()}
     names = [model.config.id2label[i] for i in range(model.config.num_labels)]
     for short in ("PER", "LOC", "ORG"):
@@ -190,7 +203,7 @@ def main() -> int:
     best_f1 = -1.0
     started = time.time()
     # The base model on the same dev windows, so a run shows what it changed.
-    baseline = measure(model, dev_examples, names, args.batch, pad_id)
+    baseline = measure(model, dev_examples, names, args.batch, pad_id, device)
     baseline["epoch"] = 0
     history.append(baseline)
     print(f"\nbase model on dev:\n{report(baseline)}\n", flush=True)
@@ -201,7 +214,7 @@ def main() -> int:
         loader = DataLoader(epoch_examples, batch_size=args.batch, collate_fn=collate(pad_id))
         total_loss = 0.0
         for step, batch in enumerate(loader, 1):
-            loss = model(**batch).loss
+            loss = model(**{k: v.to(device) for k, v in batch.items()}).loss
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
@@ -214,7 +227,7 @@ def main() -> int:
                     f"epoch {epoch} step {step}/{steps_per_epoch} loss {total_loss / step:.4f} ({elapsed:.0f} s)",
                     flush=True,
                 )
-        metrics = measure(model, dev_examples, names, args.batch, pad_id)
+        metrics = measure(model, dev_examples, names, args.batch, pad_id, device)
         metrics["epoch"] = epoch
         metrics["train_loss"] = total_loss / max(1, steps_per_epoch)
         metrics["seconds"] = time.time() - started
@@ -231,6 +244,7 @@ def main() -> int:
             {
                 "args": {k: str(v) if isinstance(v, Path) else v for k, v in vars(args).items()},
                 "base": str(args.base),
+                "device": str(device),
                 "train_windows": len(train_examples),
                 "dev_windows": len(dev_examples),
                 "general_paragraphs": len(general_examples),

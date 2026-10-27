@@ -33,6 +33,10 @@ Seeds 1–7 (the 0153 set) and 8–26 (the wider set of 0160) are measured by ev
 
 The fixtures pass even with this throwaway model because the policy and the OpenMed model carry most of them; the dev table is the measurement that matters. It says two things: the raw base model reads these documents badly (its spans are fragments of the values, and a third of the kept texts get a span), which is what the vetoes have been compensating for; and fifty documents for one epoch already halve the kept texts touched. One epoch on 50 documents is not a candidate; it proves the pipeline end to end.
 
+## Device
+
+The first version of `train.py` never chose a device, so a cloud GPU would have idled while the CPU trained. `records.pick_device` now takes a CUDA GPU, then Apple's MPS, then the CPU (`--device auto`, overridable), and `metrics.json` records which one ran. On this Mac the smoke epoch (78 synthetic windows and 8 general, 12 steps of 8) takes 17 s on MPS against 55–60 s on the CPU, with the same dev F1 (0.315), so the full run of 2 496 documents is about an hour here without any cloud account. `train/README.md` has the cloud recipe (Google Cloud needs an upgraded billing account and GPU quota; Oracle trial accounts have a GPU limit of 0) and the Mac one.
+
 ## Licence and hosting
 
 The base model is Apache-2.0 (Underthesea, Hugging Face); a fine-tuned graph is a derivative under the same licence, and the pack's `attribution` ("Underthesea + OpenMed · Nguồn: Hugging Face · Giấy phép Apache 2.0.") and the installer's `LICENSE` file stay as they are. A published candidate records in its decision the base repository and revision, the pipeline commit, the seeds and epochs, and the measurements. Wikipedia text (CC BY-SA 4.0) is training input only and is never redistributed.

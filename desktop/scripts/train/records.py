@@ -194,3 +194,17 @@ def decode(offsets: list[tuple[int, int]], label_names: list[str]) -> list[Span]
 def chunks(items: list, size: int) -> Iterator[list]:
     for index in range(0, len(items), size):
         yield items[index : index + size]
+
+
+def pick_device(name: str = "auto") -> "torch.device":
+    """The device a run uses: "auto" takes a CUDA GPU, then Apple's MPS, then the CPU, so the
+    same command runs on a cloud GPU, on a Mac and in CI without edits (decision 0163)."""
+    import torch
+
+    if name != "auto":
+        return torch.device(name)
+    if torch.cuda.is_available():
+        return torch.device("cuda")
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+    return torch.device("cpu")
