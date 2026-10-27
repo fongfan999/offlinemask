@@ -6,12 +6,13 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { existsSync, readdirSync, statSync } from "node:fs";
+import { readFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { join } from "node:path";
 import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
-import { recognitionPack } from "../src/core/detection/pack.ts";
-import { loadRecognition } from "../src/core/detection/recognition.ts";
+import { recognitionPack, validatePackDefinition } from "../src/core/detection/pack.ts";
+import { loadPackRecognition, wasmBackend } from "../src/core/detection/recognition.ts";
 
 const repo = fileURLToPath(new URL("../", import.meta.url));
 
@@ -63,11 +64,18 @@ function nativeEncoder(root, directory) {
   };
 }
 
+/** A candidate pack definition from a file (a copy of packs/<id>.json pinned by
+ * `pnpm pack:prepare` against local files), validated like the shipping one. */
+export async function readPackDefinition(path) {
+  return validatePackDefinition(JSON.parse(await readFile(path, "utf8")));
+}
+
 /** The pack's detector on the CPU, with no network access possible: the same models and
- * policy as the app (the app runs the same ONNX files natively on Apple silicon). */
-export async function loadPack(root) {
+ * policy as the app (the app runs the same ONNX files natively on Apple silicon). A
+ * candidate definition stands in for the shipping pack when given. */
+export async function loadPack(root, pack = recognitionPack) {
   const encoders = new Map(
-    recognitionPack.models
+    pack.models
       .filter((model) => model.offsets === "native")
       .map((model) => [model.directory, nativeEncoder(root, model.directory)]),
   );
@@ -76,7 +84,7 @@ export async function loadPack(root) {
     if (!encoder) throw new Error(`No native tokenizer for ${directory}`);
     return encoder.encode(text);
   };
-  const detector = await loadRecognition(root, encode, "cpu");
+  const detector = await loadPackRecognition(pack, root, encode, wasmBackend("cpu"));
   return {
     detect: (text) => detector.detect(text, () => {}),
     async dispose() {

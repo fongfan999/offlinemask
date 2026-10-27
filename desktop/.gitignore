@@ -9,3 +9,6 @@ public/runtime/
 dist/
 dist-desktop/
 artifacts/
+
+# Fine-tuning environment (scripts/train/README.md); uv.lock is committed, the venv is not.
+scripts/train/.venv/

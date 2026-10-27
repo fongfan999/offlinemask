@@ -3,9 +3,13 @@
 // around the models; this covers the models themselves, on this machine, offline.
 //
 //   mise exec -- node scripts/check-pack.mjs [pack root] [--fixtures <file>] [--strict]
+//                                             [--definition <pack.json>]
 //
 // The pack root holds one subdirectory per pack model with the exact pinned
-// files (see packs/README.md). Nothing is downloaded. Fixtures live in
+// files (see packs/README.md). --definition checks a candidate pack file (a copy
+// pinned by `pnpm pack:prepare`) instead of the shipping one, so a fine-tuned
+// model (decision 0163) is checked before pack.ts points at it. Nothing is
+// downloaded. Fixtures live in
 // tests/fixtures/recognition-pack.json; an entry with `knownMiss` records a
 // documented limitation of the current pack and is reported, not failed,
 // unless --strict is given. Models that declare native offsets need the Rust
@@ -18,8 +22,8 @@ import { createReadStream, existsSync } from "node:fs";
 import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { recognitionPack } from "../src/core/detection/pack.ts";
-import { loadPack } from "./pack-runtime.mjs";
+import { recognitionPack as shippingPack } from "../src/core/detection/pack.ts";
+import { loadPack, readPackDefinition } from "./pack-runtime.mjs";
 import { analyzeText, maskedText } from "../src/core/text.ts";
 
 const repo = fileURLToPath(new URL("../", import.meta.url));
@@ -30,8 +34,12 @@ const fixturePath =
   fixtureIndex >= 0
     ? resolve(args[fixtureIndex + 1])
     : join(repo, "tests/fixtures/recognition-pack.json");
+const definitionIndex = args.indexOf("--definition");
+const recognitionPack =
+  definitionIndex >= 0 ? await readPackDefinition(resolve(args[definitionIndex + 1])) : shippingPack;
 const positional = args.filter(
-  (value, index) => !value.startsWith("--") && args[index - 1] !== "--fixtures",
+  (value, index) =>
+    !value.startsWith("--") && !["--fixtures", "--definition"].includes(args[index - 1]),
 );
 const root = resolve(positional[0] ?? join(repo, "artifacts/packs", recognitionPack.id));
 
@@ -63,7 +71,7 @@ globalThis.fetch = async () => {
 };
 const started = performance.now();
 // Exact offsets for native-offset models come from the same Rust tokenizer the app uses.
-const detector = await loadPack(root);
+const detector = await loadPack(root, recognitionPack);
 console.log(`Loaded in ${Math.round(performance.now() - started)} ms with network fetch disabled.`);
 let failures = 0,
   knownMisses = 0;

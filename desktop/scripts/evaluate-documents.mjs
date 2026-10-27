@@ -3,6 +3,10 @@
 // compared with the owner's expectations beside it.
 //
 //   mise exec -- node scripts/evaluate-documents.mjs <folder> [--pack <root>] [--draft]
+//                                                     [--definition <candidate.json>]
+//
+// --definition measures a candidate pack (a copy of packs/<id>.json pinned by
+// `pnpm pack:prepare` against the files under --pack) instead of the shipping one.
 //
 // For each document (.pdf, .docx, .odt) the folder holds `<document>.expect.json`:
 //
@@ -30,7 +34,7 @@ import { openDocument, writeDocument } from "../src/core/doc/document.ts";
 import { maskParagraphs } from "../src/core/doc/mask.ts";
 import { createDetectionEngine } from "../src/core/detection/engine.ts";
 import { detectionOptions } from "../src/core/detection/options.ts";
-import { installedPackRoot, loadPack } from "./pack-runtime.mjs";
+import { installedPackRoot, loadPack, readPackDefinition } from "./pack-runtime.mjs";
 
 const args = process.argv.slice(2);
 const option = (name) => {
@@ -38,15 +42,20 @@ const option = (name) => {
   return index >= 0 ? args[index + 1] : undefined;
 };
 const folder = resolve(
-  args.find((value, index) => !value.startsWith("--") && args[index - 1] !== "--pack") ?? "",
+  args.find(
+    (value, index) => !value.startsWith("--") && !["--pack", "--definition"].includes(args[index - 1]),
+  ) ?? "",
 );
 const draft = args.includes("--draft");
 const root = option("--pack") ?? installedPackRoot();
 if (!args.length || !existsSync(folder)) {
-  console.error("Usage: node scripts/evaluate-documents.mjs <folder> [--pack <root>] [--draft]");
+  console.error(
+    "Usage: node scripts/evaluate-documents.mjs <folder> [--pack <root>] [--draft] [--definition <candidate.json>]",
+  );
   process.exit(2);
 }
 if (!root) throw new Error("No recognition pack installed; pass --pack <root>.");
+const definition = option("--definition") ? await readPackDefinition(resolve(option("--definition"))) : undefined;
 
 function documents(directory) {
   return readdirSync(directory)
@@ -60,7 +69,7 @@ function documents(directory) {
 
 // The app's detector: the same policy and category filter, the pack loaded once.
 const engine = createDetectionEngine(undefined, async (packRoot) => {
-  const pack = await loadPack(packRoot);
+  const pack = await loadPack(packRoot, definition);
   return { detect: (text) => pack.detect(text), dispose: () => pack.dispose() };
 });
 const detector = {

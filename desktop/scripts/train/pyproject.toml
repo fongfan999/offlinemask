@@ -1,0 +1,25 @@
+# Fine-tuning environment for the pack's Underthesea model (decision 0163). Run with uv:
+#   uv sync --project desktop/scripts/train          # creates .venv from uv.lock, offline after
+#   uv run --project desktop/scripts/train train.py …
+# uv.lock pins every wheel; `uv lock --upgrade` is a deliberate change to record.
+[project]
+name = "offlinemask-train"
+version = "0.1.0"
+description = "Fine-tunes the Underthesea NER model of the OfflineMask recognition pack on the synthetic document set"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "torch>=2.6,<3",
+  "transformers==4.57.6",
+  "huggingface-hub>=0.30",
+  "onnx>=1.17",
+  "onnxruntime>=1.20",
+  "numpy>=1.26",
+  "safetensors>=0.4",
+]
+
+[project.optional-dependencies]
+# Only prepare-general.py --wikipedia needs these; the trainer reads JSONL.
+general = ["datasets>=3.0"]
+
+[tool.uv]
+package = false
