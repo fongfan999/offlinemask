@@ -27,6 +27,8 @@ uv run --project desktop/scripts/train download_base.py   # the base checkpoint,
 
 `smoke.sh` runs steps 1–5 on two seeds, 50 documents and one epoch: minutes on a laptop CPU, proving the pipeline, not the model.
 
+Run 1 (27 October 2026, three epochs on a CPU) went through steps 4–7 on the Mac and did not ship: zero over-masking and far less need for the vetoes, but a rental contract's address leaks in the scanner's first window ([decision 0166](../../../docs/decisions/0166-first-fine-tuned-candidate-measured.md), with what the next run should change).
+
 ## A full run on a cloud GPU
 
 Only steps 2 and 3 need the GPU. Step 1 needs the repository, Node and the app's readers, and steps 4–6 need the installed shipping pack, so they run on the Mac; the GPU machine receives a bundle and returns a checkpoint. `train.py` and `prepare_general.py` pick the device themselves (`--device auto`: a CUDA GPU, then Apple's MPS, then the CPU), so the commands are the same everywhere.
