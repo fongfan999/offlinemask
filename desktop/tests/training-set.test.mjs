@@ -7,7 +7,9 @@ import {
   labelOf,
   labels,
   occurrences,
+  paragraphSpans,
   seedRange,
+  separator,
   trainingRecords,
 } from "./documents/training-set.mjs";
 
@@ -56,6 +58,25 @@ test("occurrences are whole words and survive a line break inside the value", ()
   assert.deepEqual(occurrences("Hoàng Anhx", "Anh"), []);
 });
 
+test("a value the reader wrapped across two paragraphs is labelled in both, clipped", () => {
+  const address = "Số 70 Hai Bà Trưng, Phường Hoàn Kiếm, Thành phố Hà Nội, Việt Nam";
+  const first = `Hôm nay, ngày 18/01/2026, tại ${address.slice(0, -4)}`;
+  const texts = [first, "Nam, chúng tôi gồm:", "BÊN CHO THUÊ (Bên A):", "Ông Lý Đức Trung"];
+  const lists = paragraphSpans(texts, {
+    hide: [address, "Lý Đức Trung"],
+    keep: ["BÊN CHO THUÊ (Bên A):"],
+    ignore: ["18/01/2026"],
+  });
+  assert.deepEqual(lists[0].spans, [
+    { start: 30, end: first.length, label: "LOCATION", clipped: true },
+  ]);
+  assert.deepEqual(lists[0].ignore, [{ start: 14, end: 24 }]);
+  assert.deepEqual(lists[1].spans, [{ start: 0, end: 3, label: "LOCATION", clipped: true }]);
+  assert.deepEqual(lists[2], { spans: [], negatives: [{ start: 0, end: 21 }], ignore: [] });
+  assert.deepEqual(lists[3].spans, [{ start: 4, end: 16, label: "PERSON" }]);
+  assert.equal(separator, "\n\n");
+});
+
 test("the measured seeds are held out and a range refuses them", () => {
   assert.equal(heldOutSeeds.from, 1);
   assert.ok(isHeldOut(7) && isHeldOut(26) && !isHeldOut(27));
@@ -67,7 +88,9 @@ test("the measured seeds are held out and a range refuses them", () => {
 });
 
 test("every labelled hidden value of a seed becomes a span with its label, nothing overlaps", async () => {
-  const documents = await syntheticDocuments(100, { variants: 1 });
+  // Seed 101 with two variants: its rental contract's PDF wraps the premises address
+  // across two paragraphs.
+  const documents = await syntheticDocuments(101, { variants: 2 });
   const { records, tally } = await trainingRecords(documents);
   assert.ok(records.length > documents.length);
   assert.deepEqual(tally.unmatched, []);
@@ -75,7 +98,7 @@ test("every labelled hidden value of a seed becomes a span with its label, nothi
   assert.ok(tally.structured > 0);
   const byDocument = new Map();
   for (const record of records) {
-    assert.match(record.id, /^seed-100\/.+#\d+$/);
+    assert.match(record.id, /^seed-101\/.+#\d+$/);
     assert.ok(["pdf", "docx"].includes(record.format));
     const chars = [...record.text];
     for (const list of [record.spans, record.negatives, record.ignore]) {
@@ -88,26 +111,58 @@ test("every labelled hidden value of a seed becomes a span with its label, nothi
     for (const span of record.spans) {
       assert.ok(labels.includes(span.label));
       const value = chars.slice(span.start, span.end).join("");
-      assert.equal(labelOf(value), span.label, `${record.id}: ${value}`);
+      // A clipped piece touches the paragraph's edge; a whole value reads as its label.
+      if (span.clipped) assert.ok(span.start === 0 || span.end === chars.length, record.id);
+      else assert.equal(labelOf(value), span.label, `${record.id}: ${value}`);
     }
     byDocument.set(record.document, [...(byDocument.get(record.document) ?? []), record]);
   }
-  // Each hidden name, address and organization is covered somewhere in its document.
+  // Every occurrence of a hidden name, address or organization in a document is covered
+  // by spans, including one the reader wrapped across two paragraphs.
+  let wrapped = 0;
   for (const { name, expect } of documents) {
-    const found = byDocument.get(`seed-100/${name}`) ?? [];
-    const covered = found.flatMap((record) =>
-      record.spans.map((span) => [...record.text].slice(span.start, span.end).join("")),
-    );
-    const squeeze = (text) => text.replace(/\s+/gu, " ");
+    const found = byDocument.get(`seed-101/${name}`) ?? [];
+    const starts = [];
+    let joined = "";
+    for (const record of found) {
+      if (joined) joined += separator;
+      starts.push(joined.length);
+      joined += record.text;
+    }
+    assert.doesNotMatch(joined, /[\uD800-\uDFFF]/u, "offsets below are code points");
+    const covered = (from, to) =>
+      found.some((record, index) =>
+        record.spans.some(
+          (span) => starts[index] + span.start <= from && starts[index] + span.end >= to,
+        ),
+      );
     for (const entry of expect.hide) {
       const value = typeof entry === "string" ? entry : entry.value;
       const label = labelOf(value);
       if (!label) continue;
-      assert.ok(
-        covered.some((text) => squeeze(text) === squeeze(value)),
-        `${name}: ${value} (${label})`,
-      );
+      const contexts = typeof entry === "string" ? [undefined] : occurrences(joined, entry.in);
+      const places = contexts.flatMap((within) => occurrences(joined, value, within));
+      assert.ok(places.length, `${name}: ${value} (${label})`);
+      for (const { start, end } of places) {
+        if (joined.slice(start, end).includes(separator)) wrapped++;
+        const pieces = found.flatMap((record, index) =>
+          record.spans
+            .filter((span) => starts[index] + span.start < end && starts[index] + span.end > start)
+            .map((span) => ({ from: starts[index] + span.start, to: starts[index] + span.end })),
+        );
+        const covers =
+          covered(start, end) ||
+          (pieces.length > 1 &&
+            pieces[0].from === start &&
+            pieces.at(-1).to === end &&
+            pieces.every(
+              (piece, index) => !index || piece.from === pieces[index - 1].to + separator.length,
+            ));
+        assert.ok(covers, `${name}: ${value} at ${start} (${label})`);
+      }
     }
+    if (name === documents.at(-1).name) assert.ok(wrapped > 0, "a wrapped value was exercised");
+    const squeeze = (text) => text.replace(/\s+/gu, " ");
     const kept = found.flatMap((record) =>
       record.negatives.map((span) => [...record.text].slice(span.start, span.end).join("")),
     );

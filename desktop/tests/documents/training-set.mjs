@@ -111,6 +111,55 @@ function codePoints(text) {
   return (offset) => map[offset];
 }
 
+/** The scanner's separator between a document's paragraphs (src/core/sheet/mask.ts). */
+export const separator = "\n\n";
+
+/** The paragraphs of one document joined as the scanner joins them, with where each
+ * one starts. */
+function joinParagraphs(texts) {
+  const starts = [];
+  let joined = "";
+  texts.forEach((text, index) => {
+    if (index) joined += separator;
+    starts.push(joined.length);
+    joined += text;
+  });
+  return { joined, starts };
+}
+
+/** Each paragraph's spans, negatives and ignored stretches, matched on the joined text
+ * rather than paragraph by paragraph: a value the PDF reader wrapped across two
+ * paragraphs ("…, Việt" / "Nam, chúng tôi gồm:") is then labelled in both, each piece
+ * marked `clipped`, instead of standing unlabelled as a negative of the very shape the
+ * model must learn (decision 0167). Offsets are UTF-16 units within each paragraph. */
+export function paragraphSpans(texts, expect) {
+  const { joined, starts } = joinParagraphs(texts);
+  const lists = {
+    spans: resolve(spansOf(joined, expect.hide ?? [], labelOf)),
+    negatives: resolve(spansOf(joined, expect.keep ?? [], () => "KEEP")),
+    ignore: resolve(spansOf(joined, expect.ignore ?? [], () => "IGNORE")),
+  };
+  return texts.map((text, index) => {
+    const start = starts[index];
+    const end = start + text.length;
+    const clip = (list, labelled) =>
+      list.flatMap((span) => {
+        const from = Math.max(span.start, start);
+        const to = Math.min(span.end, end);
+        if (to <= from) return [];
+        const piece = { start: from - start, end: to - start };
+        if (labelled) piece.label = span.label;
+        if (from > span.start || to < span.end) piece.clipped = true;
+        return [piece];
+      });
+    return {
+      spans: clip(lists.spans, true),
+      negatives: clip(lists.negatives, false),
+      ignore: clip(lists.ignore, false),
+    };
+  });
+}
+
 /** Training records for the documents of one seed: one per paragraph the reader
  * produced, in document order, with the document's identity so a trainer can pack
  * consecutive paragraphs as the app's scanner joins them. Returns the records and a
@@ -122,28 +171,26 @@ export async function trainingRecords(documents) {
     const { kind, layout, variant, seed } = expect.generated;
     const opened = await openDocument(bytes, name);
     const document = `seed-${seed}/${name}`;
-    const texts = opened.paragraphs.map((paragraph) => paragraph.text);
-    const hidden = expect.hide ?? [];
-    for (const entry of hidden) {
+    // The paragraphs the scanner sends to the models: the ones with letters, in order.
+    const texts = opened.paragraphs
+      .map((paragraph) => paragraph.text)
+      .filter((text) => /\p{L}/u.test(text));
+    const { joined } = joinParagraphs(texts);
+    for (const entry of expect.hide ?? []) {
       const value = typeof entry === "string" ? entry : entry.value;
       const label = labelOf(value);
       if (!label) tally.structured++;
       else tally[label]++;
       const context = typeof entry === "string" ? value : entry.in;
-      if (label && !texts.some((text) => occurrences(text, context).length))
-        tally.unmatched.push({ document, value });
+      if (label && !occurrences(joined, context).length) tally.unmatched.push({ document, value });
     }
+    const lists = paragraphSpans(texts, expect);
     texts.forEach((text, index) => {
-      if (!/\p{L}/u.test(text)) return;
       const at = codePoints(text);
       const convert = (span) => ({ ...span, start: at(span.start), end: at(span.end) });
-      const spans = resolve(spansOf(text, hidden, labelOf)).map(convert);
-      const negatives = resolve(spansOf(text, expect.keep ?? [], () => "KEEP")).map(
-        ({ start, end }) => ({ start, end }),
-      );
-      const ignore = resolve(spansOf(text, expect.ignore ?? [], () => "IGNORE")).map(
-        ({ start, end }) => ({ start, end }),
-      );
+      const spans = lists[index].spans.map(convert);
+      const negatives = lists[index].negatives.map(convert);
+      const ignore = lists[index].ignore.map(convert);
       records.push({
         id: `${document}#${index}`,
         document,

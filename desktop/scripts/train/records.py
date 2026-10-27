@@ -35,6 +35,7 @@ class Span:
     start: int
     end: int
     label: str  # canonical
+    clipped: bool = False  # a piece of a value the reader wrapped across two paragraphs
 
 
 @dataclass
@@ -59,7 +60,7 @@ def read_records(path: Path) -> list[Record]:
                     id=raw["id"],
                     document=raw.get("document", raw["id"]),
                     text=raw["text"],
-                    spans=[Span(s["start"], s["end"], s["label"]) for s in raw.get("spans", [])],
+                    spans=[Span(s["start"], s["end"], s["label"], bool(s.get("clipped"))) for s in raw.get("spans", [])],
                     negatives=[(s["start"], s["end"]) for s in raw.get("negatives", [])],
                     ignore=[(s["start"], s["end"]) for s in raw.get("ignore", [])],
                 )
@@ -76,7 +77,10 @@ def write_records(path: Path, records: Iterable[Record]) -> None:
                         "id": record.id,
                         "document": record.document,
                         "text": record.text,
-                        "spans": [{"start": s.start, "end": s.end, "label": s.label} for s in record.spans],
+                        "spans": [
+                            {"start": s.start, "end": s.end, "label": s.label, **({"clipped": True} if s.clipped else {})}
+                            for s in record.spans
+                        ],
                         "negatives": [{"start": a, "end": b} for a, b in record.negatives],
                         "ignore": [{"start": a, "end": b} for a, b in record.ignore],
                     },
@@ -89,7 +93,8 @@ def write_records(path: Path, records: Iterable[Record]) -> None:
 def pack_documents(records: list[Record], tokenizer, max_tokens: int = MAX_TOKENS) -> list[Record]:
     """Joins consecutive paragraphs of each document with the scanner's separator while
     they fit one model window (special tokens included); a paragraph that does not fit
-    on its own is kept whole and truncated by the tokenizer later."""
+    on its own is kept whole and truncated by the tokenizer later. The two clipped
+    pieces of a value wrapped across a paragraph break become one span again."""
     budget = max_tokens - 2
     packed: list[Record] = []
     by_document: dict[str, list[Record]] = {}
@@ -113,7 +118,23 @@ def pack_documents(records: list[Record], tokenizer, max_tokens: int = MAX_TOKEN
                     text += SEPARATOR
                 offset = len(text)
                 text += part.text
-                spans.extend(Span(s.start + offset, s.end + offset, s.label) for s in part.spans)
+                for s in part.spans:
+                    piece = Span(s.start + offset, s.end + offset, s.label, s.clipped)
+                    # A value the reader wrapped across two paragraphs is one span again,
+                    # with the separator inside it, as the app's models see it (0167).
+                    continues = (
+                        spans
+                        and spans[-1].clipped
+                        and spans[-1].end == offset - len(SEPARATOR)
+                        and s.clipped
+                        and s.start == 0
+                        and spans[-1].label == s.label
+                    )
+                    if continues:
+                        spans[-1].end = piece.end
+                        spans[-1].clipped = s.end == len(part.text)
+                    else:
+                        spans.append(piece)
                 negatives.extend((a + offset, b + offset) for a, b in part.negatives)
                 ignore.extend((a + offset, b + offset) for a, b in part.ignore)
             packed.append(Record(f"{document}#{len(packed)}", document, text, spans, negatives, ignore))
