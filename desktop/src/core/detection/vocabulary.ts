@@ -111,8 +111,6 @@ export const vocabulary = {
       ]),
     ].join("|")})`,
     headingAlternation: alternation(wording.wordingHeadings),
-    labelAlternation: alternation(wording.wordingLabels),
-    positionAlternation: alternation(wording.positionLabels),
     sexLabelAlternation: alternation(wording.sexLabels),
     sexes: lowerSet(wording.sexes),
     currencies: new RegExp(`^${alternation(wording.currencies)}$`, "iu"),

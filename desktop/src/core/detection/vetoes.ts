@@ -1,6 +1,6 @@
 /** The mechanisms that veto or trim a model's name, place or organization, by name, so a
  * measurement can switch one off and see what comes back: which of them a fine-tuned
- * candidate still needs (decision 0164). The app never changes them; `compare-packs.mjs`
+ * candidate still needs (decisions 0164 and 0165). The app never changes them; `compare-packs.mjs`
  * does, in its own process, between runs over the same documents. */
 export const vetoNames = [
   /** A span inside a boilerplate phrase ("HÓA ĐƠN GIÁ TRỊ GIA TĂNG", "Bằng chữ"). */
@@ -19,10 +19,6 @@ export const vetoNames = [
   "capitalHeadings",
   /** A department or unit inside an organization, and a sex after its label. */
   "departments",
-  /** A value after a wording label ("Chức vụ: Giám đốc"). */
-  "wordingFields",
-  /** A role in capitals inside a line of prose ("TL. HIỆU TRƯỞNG TRƯỞNG PHÒNG"). */
-  "capitalRoles",
   /** Brands in capitals trimmed from a name's edges; a unit trimmed from an organization. */
   "trims",
   /** One word on its own needs a confident score. */

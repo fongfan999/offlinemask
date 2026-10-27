@@ -54,3 +54,7 @@ What each mechanism holds back, from the values the ablation printed (synthetic 
 | without wordingFields+departments | 75 | 1 |
 
 Against the single ablations (`capitalHeadings` alone 167, `phrases` alone 192, `departments` alone 73): `capitalRoles` holds back 141 spans across the seven seeds that `capitalHeadings` also holds back, and nothing of its own, so the two cover each other completely; `wordingFields` adds one span beyond `phrases` and two beyond `departments` in 546 documents. Both are candidates for retirement from the shipping pack as it is, before any new model: the decision that removes them quotes these counts.
+
+## After decision 0165
+
+With `capitalRoles` and `wordingFields` removed from the policy, `pnpm -C desktop compare:packs --seeds 1-7` on the same sets (seeds 1–7, 546 documents; the owner's invoices and decision): 0 not read, 0 leaked, 0 over-masked, 0 unlisted everywhere, in 311 s. The harness now lists ten mechanisms.

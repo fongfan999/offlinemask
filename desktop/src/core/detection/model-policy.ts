@@ -291,25 +291,6 @@ export function plausibleModelDetections(text: string, detections: readonly Dete
       (departmentCell(text, d.start, d.end) || sexValue(text, d.start, value))
     )
       return [];
-    if (vetoOn("wordingFields") && wordingField(text, d.start)) return [];
-    // A role or heading in capitals inside a line of prose ("TL. HIỆU TRƯỞNG TRƯỞNG PHÒNG
-    // ĐÀO TẠO" after the date line): a name with tone marks in capitals is made of name
-    // syllables, as a span or as its whole cell when a model cut it ("THỊ HỒNG NHUNG").
-    // Unaccented capitals (a statement's "LE MINH TUAN") keep the shape test of 0154.
-    if (
-      vetoOn("capitalRoles") &&
-      d.type === "TEN" &&
-      !/\p{Ll}/u.test(value) &&
-      /\s/u.test(value.trim()) &&
-      /\p{M}|[đĐ]/u.test(value.normalize("NFD")) &&
-      !looksLikeName(value) &&
-      !looksLikeKnownName(
-        cellAround(text, d.start, d.end)
-          .replace(/\([^)]*\)/gu, " ")
-          .trim(),
-      )
-    )
-      return [];
     // One word on its own (a cell, a short message) is the whole evidence there is.
     const alone = value.trim() === text.trim();
     return alone ||
@@ -570,25 +551,6 @@ function withoutUnit(text: string, detection: Detection): Detection | undefined 
   const before = (value.slice(0, at.index).match(/[\p{L}\p{M}]+/gu) ?? []).length;
   if (before >= 2) return { ...detection, end: detection.start + at.index };
   return detection.type === "TEN" ? undefined : detection;
-}
-/** The value of a field whose label says it holds wording ("Chức vụ: Kỹ sư phần mềm",
- * "Lý do nộp: Hoàn tạm ứng", "vị trí Chuyên viên nhân sự"): no person, place or
- * organization (decision 0160), like a cell under such a heading (0156). */
-const wordingLabel = new RegExp(
-  `${vocabulary.wording.labelAlternation}[^\\S\\r\\n]*[:：][^\\S\\r\\n]*(?:[\\p{L}\\p{M}\\p{N}]+[^\\S\\r\\n]+){0,4}$`,
-  "iu",
-);
-const positionWord = new RegExp(
-  `${vocabulary.wording.positionAlternation}[^\\S\\r\\n]+(?:[\\p{L}\\p{M}\\p{N}]+[^\\S\\r\\n]+){0,3}$`,
-  "iu",
-);
-function wordingField(text: string, start: number): boolean {
-  const before = text.slice(Math.max(0, start - 60), start).normalize("NFC");
-  return (
-    wordingLabel.test(before) ||
-    // "trúng tuyển vị trí Chuyên viên nhân sự": the position, written with a capital.
-    (positionWord.test(before) && /^\p{Lu}/u.test(text.slice(start, start + 2).normalize("NFC")))
-  );
 }
 /** "Giới tính: Nam": a sex, not a given name. */
 const sexLabel = new RegExp(

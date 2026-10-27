@@ -6,9 +6,9 @@ export const counted = ["notRead", "leaked", "over", "unlisted"];
 
 /** The runs of a comparison: the shipping pack, the candidate when given, then the
  * ablations, each the candidate (or the shipping pack without one) with one mechanism
- * switched off. Two mechanisms that cover the same spans (a heading in capitals is both
- * a `capitalHeadings` and a `capitalRoles` case) show nothing when switched off one at a
- * time; "capitalHeadings+capitalRoles" switches them off together in one run. */
+ * switched off. Two mechanisms that cover the same spans (goods under a goods heading are
+ * both a `wordingColumns` and a `productCells` case) show nothing when switched off one
+ * at a time; "wordingColumns+productCells" switches them off together in one run. */
 export function planRuns({ candidate = false, ablate = [] } = {}) {
   const runs = [{ id: "shipping", pack: "shipping", off: [] }];
   if (candidate) runs.push({ id: "candidate", pack: "candidate", off: [] });

@@ -8,7 +8,7 @@ Every word list the masking rules use lives here, as data, in one place (decisio
 | `public-bodies.json` | state bodies, provincial departments (current and former), agencies | public bodies and their jurisdiction | Decree 45/2025/NĐ-CP arts. 8–9, Decree 24/2014/NĐ-CP |
 | `people.json` | family names, name syllables, forms of address, ranks, roles | name shape, name cues, signatures, headings in capitals | family names from Wikipedia "Vietnamese name" (CC BY-SA 4.0); the rest curated |
 | `organizations.json` | legal forms, organization kinds, units inside an organization, trade syllables, name stops | legal-prefix walker, departments, organization kind alone | Law on Enterprises 2020 for forms; the rest curated |
-| `document-wording.json` | boilerplate by document kind, numbered words, column headings and labels that hold wording, amount words, currencies, contract parties | phrase veto, cell under a heading, value after a label, sex field | curated |
+| `document-wording.json` | boilerplate by document kind, numbered words, column headings that hold wording, amount words, currencies, contract parties | phrase veto, cell under a heading, sex field | curated |
 | `field-labels.json` | the labels before a name, address, date, account, identifier, code | labelled fields, identifiers, dates, address completion | curated |
 | `units.json` | measures, packs, units of goods and services, the words of an address | goods cells, unit column, address completion | curated |
 

@@ -26,13 +26,14 @@ test("every mechanism is on by default and comes back on after a measurement", (
   setVetoes(["wordingColumns"]);
   assert.deepEqual(values(heading, org(heading)), []);
   assert.deepEqual(values(row, modelDetections(row, [span(row, "Bố", "PERSON")])), ["Bố"]);
-  // A heading read as a person is covered twice (a heading, a role in capitals), so it
-  // comes back only when both are off: what the "+" groups of an ablation are for.
-  const person = (text) => modelDetections(text, [span(text, text, "PERSON")]);
-  setVetoes(["capitalHeadings"]);
-  assert.deepEqual(values(heading, person(heading)), []);
-  setVetoes(["capitalHeadings", "capitalRoles"]);
-  assert.deepEqual(values(heading, person(heading)), [heading]);
+  // A goods cell under a goods heading is covered twice (the column, the cell's unit), so
+  // it comes back only when both are off: what the "+" groups of an ablation are for.
+  const goods = "Tên hàng hóa\tĐơn vị tính\n\nGhẹ Xanh Bình Thuận\tKg";
+  const place = (text) => modelDetections(text, [span(text, "Bình Thuận", "LOCATION")]);
+  setVetoes(["wordingColumns"]);
+  assert.deepEqual(values(goods, place(goods)), []);
+  setVetoes(["wordingColumns", "productCells"]);
+  assert.deepEqual(values(goods, place(goods)), ["Bình Thuận"]);
   setVetoes([]);
   assert.deepEqual(values(heading, org(heading)), []);
   assert.throws(() => setVetoes(["nonsense"]), /Unknown veto/);
@@ -53,11 +54,11 @@ test("a comparison plans the shipping run, the candidate and one ablation per me
   );
   // Without a candidate the ablations run on the shipping pack; "+" joins mechanisms.
   assert.equal(planRuns({ ablate: ["phrases"] })[1].pack, "shipping");
-  assert.deepEqual(planRuns({ ablate: ["capitalHeadings+capitalRoles"] })[1], {
-    id: "shipping without capitalHeadings+capitalRoles",
+  assert.deepEqual(planRuns({ ablate: ["wordingColumns+productCells"] })[1], {
+    id: "shipping without wordingColumns+productCells",
     pack: "shipping",
-    off: ["capitalHeadings", "capitalRoles"],
-    ablates: "capitalHeadings+capitalRoles",
+    off: ["wordingColumns", "productCells"],
+    ablates: "wordingColumns+productCells",
   });
   assert.throws(() => planRuns({ ablate: ["nonsense"] }), /Unknown veto/);
 });
