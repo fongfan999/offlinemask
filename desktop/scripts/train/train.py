@@ -9,7 +9,9 @@ a sample of the general slice (--general-ratio of the synthetic count), labelled
 base model so what it knew about news text is replayed. The dev split is measured after
 every epoch as exact spans per label, plus the share of kept texts a predicted span
 touches (the over-masking the vetoes exist for); the best epoch by dev F1 is saved to
-<out>/checkpoint with metrics.json beside it. --limit-documents keeps a smoke test short.
+<out>/checkpoint with metrics.json beside it, and --keep-epochs saves every epoch as
+<out>/checkpoint-<n> as well, for the comparison to choose from (decision 0166).
+--limit-documents keeps a smoke test short.
 """
 
 from __future__ import annotations
@@ -36,6 +38,7 @@ from records import (  # noqa: E402
     MAX_TOKENS,
     Record,
     Span,
+    checkpoint_dirs,
     decode,
     encode,
     pack_documents,
@@ -153,6 +156,9 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=20261027)
     parser.add_argument("--threads", type=int, default=os.cpu_count() or 4)
     parser.add_argument("--device", default="auto", help="auto (CUDA, then MPS, then CPU), cuda, mps or cpu")
+    parser.add_argument(
+        "--keep-epochs", action="store_true", help="also save every epoch as <out>/checkpoint-<n>, not only the best"
+    )
     args = parser.parse_args()
 
     random.seed(args.seed)
@@ -201,6 +207,7 @@ def main() -> int:
     pad_id = tokenizer.pad_token_id or 0
     history = []
     best_f1 = -1.0
+    best_epoch = 0
     started = time.time()
     # The base model on the same dev windows, so a run shows what it changed.
     baseline = measure(model, dev_examples, names, args.batch, pad_id, device)
@@ -233,12 +240,14 @@ def main() -> int:
         metrics["seconds"] = time.time() - started
         history.append(metrics)
         print(f"\nepoch {epoch} dev:\n{report(metrics)}\n", flush=True)
+        targets = checkpoint_dirs(args.out, epoch, metrics["all"]["f1"], best_f1, args.keep_epochs)
         if metrics["all"]["f1"] > best_f1:
             best_f1 = metrics["all"]["f1"]
-            checkpoint = args.out / "checkpoint"
+            best_epoch = epoch
+        for checkpoint in targets:
             model.save_pretrained(checkpoint, safe_serialization=True)
             tokenizer.save_pretrained(checkpoint)
-            print(f"saved {checkpoint} (dev F1 {best_f1:.3f})", flush=True)
+            print(f"saved {checkpoint} (dev F1 {metrics['all']['f1']:.3f})", flush=True)
     (args.out / "metrics.json").write_text(
         json.dumps(
             {
@@ -251,6 +260,7 @@ def main() -> int:
                 "general_per_epoch": general_per_epoch,
                 "history": history,
                 "best_dev_f1": best_f1,
+                "best_epoch": best_epoch,
             },
             indent=2,
         )

@@ -19,13 +19,17 @@ uv run --project desktop/scripts/train download_base.py   # the base checkpoint,
 | --- | --- | --- |
 | 1. Export | `mise exec -- node scripts/export-training-set.mjs <set> --train 100-131 --dev 132-135` | Runs the generator for the seeds named, reads every PDF and Word file with the app's own readers and writes `train.jsonl`, `dev.jsonl` and `summary.json`: one record per paragraph with code-point spans labelled `PERSON`, `LOCATION` or `ORGANIZATION` from the hide list, the keep list as `negatives`, the ignore list as `ignore`. Seeds 1–26 are refused (held out, see below). `--keep <folder>` also writes the documents for `pnpm eval:documents`. |
 | 2. General slice | `uv run --project desktop/scripts/train prepare_general.py <general.jsonl> --wikipedia 20000` | Labels ordinary Vietnamese paragraphs with the base model itself (PER, LOC, ORG and MISC), so training replays what the model knew about news text. `--text <file>` takes one paragraph per line instead. |
-| 3. Train | `uv run --project desktop/scripts/train train.py --train <set>/train.jsonl --dev <set>/dev.jsonl --general <general.jsonl> --out desktop/artifacts/train/run-1` | Packs consecutive paragraphs with the scanner's `"\n\n"` into 384-token windows, labels every piece B-/I-/O with the base model's nine labels, skips ignored spans in the loss, mixes `--general-ratio` general windows per synthetic window each epoch, measures the dev split after every epoch (exact spans per label, and the share of kept texts a predicted span touches) and saves the best epoch to `<out>/checkpoint` with `metrics.json`. |
+| 3. Train | `uv run --project desktop/scripts/train train.py --train <set>/train.jsonl --dev <set>/dev.jsonl --general <general.jsonl> --out desktop/artifacts/train/run-1` | Packs consecutive paragraphs with the scanner's `"\n\n"` into 384-token windows, labels every piece B-/I-/O with the base model's nine labels, skips ignored spans in the loss, mixes `--general-ratio` general windows per synthetic window each epoch, measures the dev split after every epoch (exact spans per label, and the share of kept texts a predicted span touches) and saves the best epoch to `<out>/checkpoint` with `metrics.json` (`best_epoch` names it). `--keep-epochs` also saves every epoch as `<out>/checkpoint-<n>`, so step 4 can export the epoch the comparison prefers rather than the best overall F1 (decision 0166). |
 | 4. Export | `uv run --project desktop/scripts/train export_pack.py <out>/checkpoint <root>/underthesea --tokenizer-from <installed pack>/underthesea` | ONNX at opset 18 (TorchScript exporter, checked against PyTorch), dynamic INT8 of the MatMul weights as `scripts/export-underthesea.py` did for the base model, `config.json` with `id2label`, and the unchanged tokenizer files. |
 | 5. Pin and check | `cp packs/vietnamese-pii-v1.json <root>/candidate.json && mise exec -- pnpm pack:prepare <root>/candidate.json <root> underthesea && mise exec -- node scripts/check-pack.mjs <root> --definition <root>/candidate.json` | The candidate pack keeps the OpenMed model (link or copy its directory into `<root>`) and pins the new files; `check-pack.mjs --definition` loads it through the pack contract, offline, against the gate fixtures. |
 | 6. Measure | `mise exec -- pnpm eval:documents <folder> --pack <root> --definition <root>/candidate.json` | The same report as the shipping pack on the 0153 set, the wider set and the owner's private sets. |
 | 7. Compare | `mise exec -- pnpm compare:packs --candidate <root>/candidate.json --candidate-root <root> --seeds 1-7 --ablate` | One table: the shipping pack, the candidate, and the candidate with each structural mechanism switched off in turn, on the held-out seeds and the owner's sets; the mechanisms that bring nothing back when off are the ones the candidate no longer needs (decision 0164). About ten minutes per run on seeds 1–7. |
 
-`smoke.sh` runs steps 1–5 on two seeds, 50 documents and one epoch: minutes on a laptop CPU, proving the pipeline, not the model.
+`smoke.sh` runs steps 1–5 on two seeds, 50 documents and one epoch with `--keep-epochs`: minutes on a laptop CPU, proving the pipeline, not the model. It starts with the unit tests of `records.py` (`tests/`, standard-library `unittest`, no test dependency in `uv.lock`):
+
+```sh
+uv run --project desktop/scripts/train python -m unittest discover -s desktop/scripts/train/tests
+```
 
 Run 1 (27 October 2026, three epochs on a CPU) went through steps 4–7 on the Mac and did not ship: zero over-masking and far less need for the vetoes, but a rental contract's address leaks in the scanner's first window ([decision 0166](../../../docs/decisions/0166-first-fine-tuned-candidate-measured.md), with what the next run should change).
 
@@ -70,11 +74,11 @@ uv sync --project scripts/train --extra general        # CUDA wheels, from uv.lo
 uv run --project scripts/train scripts/train/prepare_general.py artifacts/train/run-1/general.jsonl --wikipedia 20000
 uv run --project scripts/train scripts/train/train.py \
   --train artifacts/train/run-1/set/train.jsonl --dev artifacts/train/run-1/set/dev.jsonl \
-  --general artifacts/train/run-1/general.jsonl --out artifacts/train/run-1 --epochs 3 --batch 16
-tar -czf ~/run-1.tgz artifacts/train/run-1/checkpoint artifacts/train/run-1/metrics.json
+  --general artifacts/train/run-1/general.jsonl --out artifacts/train/run-1 --epochs 3 --batch 16 --keep-epochs
+tar -czf ~/run-1.tgz artifacts/train/run-1/checkpoint* artifacts/train/run-1/metrics.json
 ```
 
-`train.py` prints `device: cuda` first; if it prints `cpu`, stop and fix the driver, since the run would take hours. The three epochs take 10–20 minutes on an L4. `metrics.json` holds the base model's dev table and every epoch's, which the decision for the candidate quotes.
+`train.py` prints `device: cuda` first; if it prints `cpu`, stop and fix the driver, since the run would take hours. The three epochs take 10–20 minutes on an L4. `metrics.json` holds the base model's dev table and every epoch's, which the decision for the candidate quotes; with `--keep-epochs` the archive holds every epoch (about 460 MB each), and steps 4–7 can be run on `checkpoint-<n>` as well as on `checkpoint`.
 
 **Back on the Mac: export, pin, measure** (steps 4–6 above with `<out>` = `artifacts/train/run-1` after `gcloud compute scp offlinemask-train:~/run-1.tgz . && tar -xzf run-1.tgz`), then `pnpm eval:documents` on the 0153 set, the wider set and the owner's sets with `--definition`, and the gate. Those numbers decide whether the candidate ships; the dev table only says whether training worked.
 

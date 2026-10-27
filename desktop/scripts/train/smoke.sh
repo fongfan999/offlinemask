@@ -17,12 +17,14 @@ installed="${INSTALLED_PACK:-$(ls -d "$HOME/Library/Application Support/dev.offl
 run() { echo; echo "+ $*"; "$@"; }
 
 cd "$desktop"
+run uv run --project "$here" python -m unittest discover -s "$here/tests"
 rm -rf "$work"
 mkdir -p "$work"
 run mise exec -- node scripts/export-training-set.mjs "$work/set" --train 100 --dev 101 --variants 1
 run uv run --project "$here" "$here/prepare_general.py" "$work/general.jsonl" --text "$here/smoke-general.txt"
 run uv run --project "$here" "$here/train.py" --train "$work/set/train.jsonl" --dev "$work/set/dev.jsonl" \
-  --general "$work/general.jsonl" --out "$work/run" --epochs 1 --limit-documents 50 --limit-dev 10 --batch 8
+  --general "$work/general.jsonl" --out "$work/run" --epochs 1 --limit-documents 50 --limit-dev 10 --batch 8 --keep-epochs
+test -d "$work/run/checkpoint-1" || { echo "--keep-epochs left no checkpoint-1"; exit 1; }
 run uv run --project "$here" "$here/export_pack.py" "$work/run/checkpoint" "$work/pack/underthesea" \
   --tokenizer-from "$installed/underthesea"
 ln -s "$installed/vietnamese-pii-multilingual" "$work/pack/vietnamese-pii-multilingual"

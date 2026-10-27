@@ -208,3 +208,17 @@ def pick_device(name: str = "auto") -> "torch.device":
     if torch.backends.mps.is_available():
         return torch.device("mps")
     return torch.device("cpu")
+
+
+def checkpoint_dirs(out: Path, epoch: int, f1: float, best_f1: float, keep_epochs: bool) -> list[Path]:
+    """Where an epoch's model is saved. `<out>/checkpoint` holds the best epoch by overall dev
+    F1, as every run has saved it; with --keep-epochs each epoch is also saved as
+    `<out>/checkpoint-<epoch>`, so the export and comparison steps can try another epoch
+    than the best one: run 1 kept an epoch whose organization precision decided the overall
+    F1 and discarded the epoch with the best location recall (decision 0166)."""
+    targets = []
+    if keep_epochs:
+        targets.append(out / f"checkpoint-{epoch}")
+    if f1 > best_f1:
+        targets.append(out / "checkpoint")
+    return targets
