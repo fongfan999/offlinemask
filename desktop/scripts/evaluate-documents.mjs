@@ -3,10 +3,15 @@
 // compared with the owner's expectations beside it.
 //
 //   mise exec -- node scripts/evaluate-documents.mjs <folder> [--pack <root>] [--draft]
-//                                                     [--definition <candidate.json>]
+//                                                     [--definition <candidate.json>] [--misread]
 //
 // --definition measures a candidate pack (a copy of packs/<id>.json pinned by
 // `pnpm pack:prepare` against the files under --pack) instead of the shipping one.
+// --misread, for a folder of scans (scripts/rasterise-documents.mjs, decision 0171),
+// looks again at every value not read: text recognition may have read it with a wrong
+// letter or tone mark. Letters and digits without their marks are searched for, and the
+// value is reported as "misread, masked" when what was read is fully masked all the
+// same, or "misread, readable" when it would reach the AI: the count that matters.
 //
 // For each document (.pdf, .docx, .odt) the folder holds `<document>.expect.json`:
 //
@@ -39,10 +44,12 @@ const option = (name) => {
 };
 const folder = resolve(
   args.find(
-    (value, index) => !value.startsWith("--") && !["--pack", "--definition"].includes(args[index - 1]),
+    (value, index) =>
+      !value.startsWith("--") && !["--pack", "--definition"].includes(args[index - 1]),
   ) ?? "",
 );
 const draft = args.includes("--draft");
+const misread = args.includes("--misread");
 const root = option("--pack") ?? installedPackRoot();
 if (!args.length || !existsSync(folder)) {
   console.error(
@@ -51,12 +58,72 @@ if (!args.length || !existsSync(folder)) {
   process.exit(2);
 }
 if (!root) throw new Error("No recognition pack installed; pass --pack <root>.");
-const definition = option("--definition") ? await readPackDefinition(resolve(option("--definition"))) : undefined;
+const definition = option("--definition")
+  ? await readPackDefinition(resolve(option("--definition")))
+  : undefined;
 
 const detector = createDetector(root, definition);
 const started = performance.now();
-const measured = await measureFolder(folder, detector, { draft, log: console.log });
+/** Letters and digits alone, lower case, without tone marks: what a misread leaves. */
+const bare = (text) =>
+  text
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/đ/gi, "d")
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}]/gu, "");
+const misreads = { masked: [], readable: [], lost: [] };
+const onDocument = (name, run, result) => {
+  if (!misread) return;
+  for (const value of result.notRead) {
+    const wanted = bare(value);
+    let found = false;
+    let covered = false;
+    for (const paragraph of run.opened.paragraphs) {
+      // Map each bare character back to its position in the paragraph.
+      const positions = [];
+      let stripped = "";
+      for (let at = 0; at < paragraph.text.length; at++) {
+        const piece = bare(paragraph.text[at]);
+        for (const char of piece) {
+          stripped += char;
+          positions.push(at);
+        }
+      }
+      for (let at = stripped.indexOf(wanted); at >= 0; at = stripped.indexOf(wanted, at + 1)) {
+        found = true;
+        const start = positions[at];
+        const end = positions[at + wanted.length - 1] + 1;
+        const ranges = run.edits.paragraphs.get(paragraph.id) ?? [];
+        const masked = [...Array(end - start).keys()].every((offset) => {
+          const index = start + offset;
+          return (
+            /[^\p{L}\p{N}]/u.test(paragraph.text[index]) ||
+            ranges.some((range) => range.start <= index && range.end > index)
+          );
+        });
+        covered = masked;
+        if (!masked) break;
+      }
+      if (found && !covered) break;
+    }
+    const bucket = !found ? "lost" : covered ? "masked" : "readable";
+    misreads[bucket].push(`${name}: ${JSON.stringify(value)}`);
+  }
+};
+const measured = await measureFolder(folder, detector, { draft, log: console.log, onDocument });
 await detector.dispose();
+if (misread) {
+  console.log(
+    `\nNot read, looked at again: ${misreads.masked.length} misread but masked, ${misreads.readable.length} misread and readable, ${misreads.lost.length} not found even without marks`,
+  );
+  for (const [bucket, label] of [
+    ["readable", "misread, readable"],
+    ["lost", "not found"],
+    ["masked", "misread, masked"],
+  ])
+    for (const entry of misreads[bucket]) console.log(`  ${label}: ${entry}`);
+}
 const report = { at: new Date().toISOString(), pack: basename(root), ...measured };
 const totals = report.totals;
 console.log(`\n${totalsLine(totals, Math.round((performance.now() - started) / 1000))}`);
@@ -70,11 +137,18 @@ if (existsSync(previousPath)) {
     const before = previous.documents?.[name];
     if (!before || entry.error || before.error) continue;
     for (const key of buckets) {
-      for (const value of entry[key]) if (!before[key]?.includes(value)) changes.push(`+ ${key} ${name}: ${JSON.stringify(value)}`);
-      for (const value of before[key] ?? []) if (!entry[key].includes(value)) changes.push(`- ${key} ${name}: ${JSON.stringify(value)}`);
+      for (const value of entry[key])
+        if (!before[key]?.includes(value))
+          changes.push(`+ ${key} ${name}: ${JSON.stringify(value)}`);
+      for (const value of before[key] ?? [])
+        if (!entry[key].includes(value)) changes.push(`- ${key} ${name}: ${JSON.stringify(value)}`);
     }
   }
-  console.log(changes.length ? `\nSince ${previous.at}:\n${changes.join("\n")}` : `\nNo change since ${previous.at}.`);
+  console.log(
+    changes.length
+      ? `\nSince ${previous.at}:\n${changes.join("\n")}`
+      : `\nNo change since ${previous.at}.`,
+  );
 }
 writeFileSync(previousPath, JSON.stringify(report, null, 2) + "\n");
 if (totals.notRead || totals.leaked) process.exitCode = 1;

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from "vue";
+import { computed, ref, useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
 import ComingSoonBadge from "./ComingSoonBadge.vue";
@@ -9,7 +9,7 @@ import type { Page } from "../composables/context.ts";
 import { sessionPreview } from "../core/session-preview.ts";
 import { isPrivate, sessionTitle, type Session } from "../core/sessions.ts";
 
-defineProps<{
+const props = defineProps<{
   sessions: readonly Session[];
   activeId: string | null;
   page: Page;
@@ -17,17 +17,30 @@ defineProps<{
   preparing: boolean;
   /** History is a passcode feature: the list stays hidden until one is set. */
   history: boolean;
+  /** This machine reads text in pictures, so images open on Tài liệu (decision 0171). */
+  images: boolean;
   version: string;
 }>();
 const emit = defineEmits<{ navigate: [destination: Page, id?: string | null]; close: [] }>();
 
 /** Each content type with the files it opens (decision 0088). */
-const formats = [
-  { page: "text", icon: "text", label: "Văn bản", types: "TXT, MD" },
-  { page: "excel", icon: "table", label: "Bảng tính", types: "XLSX, XLS, ODS, CSV" },
-  { page: "word", icon: "file", label: "Tài liệu", types: "DOCX, ODT, PDF" },
-] as const;
-const upcomingFormats = [{ label: "Hình ảnh", icon: "image", types: "JPG, PNG" }];
+const formats = computed(
+  () =>
+    [
+      { page: "text", icon: "text", label: "Văn bản", types: "TXT, MD" },
+      { page: "excel", icon: "table", label: "Bảng tính", types: "XLSX, XLS, ODS, CSV" },
+      {
+        page: "word",
+        icon: "file",
+        label: "Tài liệu",
+        types: props.images ? "DOCX, ODT, PDF, PNG, JPG" : "DOCX, ODT, PDF",
+      },
+    ] as const,
+);
+/** Planned but not built on this machine: pictures where no text recognition runs. */
+const upcomingFormats = computed(() =>
+  props.images ? [] : [{ label: "Hình ảnh", icon: "image", types: "JPG, PNG" }],
+);
 /** What the report says the user was looking at. */
 const screens: Record<Page, string> = {
   home: "Trang chủ",

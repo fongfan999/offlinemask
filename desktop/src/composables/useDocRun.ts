@@ -40,25 +40,32 @@ export const docErrorMessages: Record<DocError, string> = {
   password:
     "PDF này cần mật khẩu để mở. Hãy mở bằng trình đọc PDF, lưu lại bản không mật khẩu rồi thử lại.",
   "too-many-pages": "PDF dài hơn 300 trang. Hãy tách thành các tệp nhỏ hơn rồi thử lại.",
-  scanned: "PDF này là ảnh scan nên OfflineMask chưa đọc được chữ. Hỗ trợ ảnh scan sắp có.",
+  scanned:
+    "PDF này là ảnh scan. Máy này chưa đọc được chữ trong ảnh scan: cần macOS 14 trở lên; trên Windows sắp có.",
   "old-font":
     "Chữ trong PDF này dùng phông chữ cũ (như TCVN3, VNI) nên chưa đọc được. Hãy mở tệp gốc, chuyển sang Unicode rồi xuất lại PDF.",
   cancelled: "",
+  "no-ocr": "Máy này chưa đọc được chữ trong hình ảnh: cần macOS 14 trở lên; trên Windows sắp có.",
 };
 export const docFailure =
   "Chưa xử lý được tài liệu trên thiết bị. Tệp gốc không bị thay đổi. Hãy thử lại.";
 const documentName = /\.(docx|odt|pdf)$/i;
+/** Pictures open on machines with text recognition (decision 0171). */
+export const imageName = /\.(png|jpe?g)$/i;
 /** What the AI may return for each kind of document: a document like the one sent, or,
- * for a PDF, whose masked copy is Markdown (decision 0149), text or a document. */
+ * for a PDF or a picture, whose masked copy is Markdown (decisions 0149, 0171), text or
+ * a document. */
 const returnedName = /\.(docx|odt)$/i;
 const returnedForPdf = /\.(md|txt|docx|odt)$/i;
 export const unsupportedReturn = "Chỉ khôi phục được tệp .md, .txt, .docx hoặc .odt.";
-/** A PDF session is told apart by its file name; its session data is a Word one's. */
-export const isPdfSession = (session: { fileName: string }) => /\.pdf$/i.test(session.fileName);
-/** "Hợp đồng.pdf" → "Hợp đồng (OfflineMasked).md". */
+/** A PDF or picture session is told apart by its file name; its session data is a Word
+ * one's. Its masked copy is text. */
+export const isPdfSession = (session: { fileName: string }) =>
+  /\.pdf$/i.test(session.fileName) || imageName.test(session.fileName);
+/** "Hợp đồng.pdf" → "Hợp đồng (OfflineMasked).md"; a picture likewise. */
 export function maskedName(fileName: string): string {
   const name = exportName(fileName, maskedSuffix);
-  return /\.pdf$/i.test(fileName) ? name.replace(/\.pdf$/i, ".md") : name;
+  return isPdfSession({ fileName }) ? name.replace(/\.(pdf|png|jpe?g)$/i, ".md") : name;
 }
 
 export interface DocDraft {
@@ -93,6 +100,8 @@ export interface DocRunDependencies {
   detector: TextDetector;
   files: SheetFiles;
   pack: { ready: Ref<boolean>; readyRoot: Ref<string | null> };
+  /** Whether this machine reads text in pictures (decision 0171). */
+  ocr: Ref<boolean>;
   sessions: Ref<readonly Session[]>;
   onSession: (session: Session) => void;
 }
@@ -106,7 +115,7 @@ function errorMessage(error: unknown) {
 /** The document flow (decisions 0078, 0084, 0149): open a .docx, .odt or .pdf, preview the first paragraphs with the
  * aliases they will get, mask every paragraph in the background, save a masked copy,
  * and later restore the AI's returned document. Documents stay in the worker, in RAM. */
-export function useDocRun({ detector, files, pack, sessions, onSession }: DocRunDependencies) {
+export function useDocRun({ detector, files, pack, ocr, sessions, onSession }: DocRunDependencies) {
   const draft = shallowRef<DocDraft | null>(null);
   const opening = ref(false);
   /** Pages read while a PDF opens. */
@@ -179,7 +188,11 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
   }
   async function openFile(file: File) {
     fileError.value = "";
-    if (!documentName.test(file.name)) {
+    if (imageName.test(file.name) && !ocr.value) {
+      fileError.value = docErrorMessages["no-ocr"];
+      return;
+    }
+    if (!documentName.test(file.name) && !imageName.test(file.name)) {
       fileError.value = docErrorMessages.unsupported;
       return;
     }
@@ -194,6 +207,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
       const opened = await files.openDoc(file, {
         progress: (done, total) => (openingProgress.value = { done, total }),
         signal: abort.signal,
+        ocr: ocr.value,
       });
       discardDraft();
       previewDetections.value = new Map();
@@ -379,6 +393,8 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
   }
 
   return {
+    /** Pictures and scanned pages can be read on this machine. */
+    ocr,
     draft,
     opening,
     openingProgress,

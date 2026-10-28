@@ -92,6 +92,26 @@ test("links from the app open only OfflineMask.com and its report page (privacy 
   assert.match(page, /OfflineMask chỉ dùng mạng trong bốn trường hợp/, UPDATE);
 });
 
+test("text in pictures is read by the system's own engine, on the machine, only once the page says so (privacy §2)", () => {
+  // Decision 0171: scanned pages and images go to Apple's Vision framework through the
+  // native `ocr` module, which neither downloads a model, writes a file nor opens a
+  // connection; the picture is held for the call and only lines of text come back.
+  // The feature is built but gated off until its measurement is clean; the page
+  // describes it only while it is on.
+  const ocr = read("../src-tauri/src/ocr.rs");
+  assert.match(ocr, /objc2_vision::\{[\s\S]*VNRecognizeTextRequest/, UPDATE);
+  assert.doesNotMatch(ocr, /reqwest|std::fs|File::|Command::/, UPDATE);
+  assert.equal(JSON.parse(read("../package.json")).dependencies["tesseract.js"], undefined, UPDATE);
+  const shipped = /export const ocrShipped = (true|false);/.exec(read("../src/adapters/ocr.ts"));
+  assert.ok(shipped, UPDATE);
+  // Prettier wraps the page's prose; the sentences are matched with their spaces squeezed.
+  const page = read("../../landing/privacy.html").replace(/\s+/g, " ");
+  if (shipped[1] === "true") {
+    assert.match(page, /bộ nhận dạng ký tự có sẵn của hệ điều hành \(Vision của Apple/, UPDATE);
+    assert.match(page, /ảnh không được lưu lại và không có trong bản đã ẩn/, UPDATE);
+  } else assert.doesNotMatch(page, /nhận dạng ký tự|Vision/, UPDATE);
+});
+
 test("the app's system permissions are the ones the page explains (privacy §5)", () => {
   const ids = (name) =>
     JSON.parse(read(`../src-tauri/capabilities/${name}.json`))

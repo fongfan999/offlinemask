@@ -39,6 +39,8 @@
 				<string>org.openxmlformats.wordprocessingml.document</string>
 				<string>org.oasis-open.opendocument.text</string>
 				<string>com.adobe.pdf</string>
+				<string>public.png</string>
+				<string>public.jpeg</string>
 				<string>public.plain-text</string>
 			</array>
 		</dict>

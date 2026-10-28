@@ -4,6 +4,7 @@ import type { FileError } from "../core/sheet/files.ts";
 import type { DocumentFormat } from "../core/doc/document.ts";
 import type { DocEdits, DocParagraph } from "../core/doc/docx.ts";
 import type { FilesRequest, FilesResponse } from "../workers/files.worker.ts";
+import { recognizeImage } from "./ocr.ts";
 
 export const fileErrorMessages: Record<FileError, string> = {
   unsupported: "Chỉ hỗ trợ tệp Excel (.xlsx, .xls), .ods và .csv.",
@@ -35,6 +36,15 @@ export function createSheetFiles() {
     worker.onmessage = (event: MessageEvent<FilesResponse>) => {
       if (event.data.type === "progress") {
         waiting.get(event.data.id)?.progress?.(event.data.done, event.data.total);
+        return;
+      }
+      if (event.data.type === "ocr") {
+        // A page or picture to read with the system's text recognition (decision 0171).
+        const { id, image } = event.data;
+        void recognizeImage(new Uint8Array(image)).then(
+          (page) => worker?.postMessage({ type: "ocr-result", id, page } satisfies FilesRequest),
+          () => worker?.postMessage({ type: "ocr-result", id, error: true } satisfies FilesRequest),
+        );
         return;
       }
       waiting.get(event.data.id)?.resolve(event.data);
@@ -71,13 +81,19 @@ export function createSheetFiles() {
       return new Uint8Array(reply.bytes);
     },
     /** Open a document; a PDF reports its pages through `progress` and stops when
-     * `signal` aborts (the promise then rejects with code "cancelled"). */
+     * `signal` aborts (the promise then rejects with code "cancelled"). With `ocr`,
+     * pages without text and pictures are read by the system's text recognition. */
     async openDoc(
       file: File,
       {
         progress,
         signal,
-      }: { progress?: (done: number, total: number) => void; signal?: AbortSignal } = {},
+        ocr = false,
+      }: {
+        progress?: (done: number, total: number) => void;
+        signal?: AbortSignal;
+        ocr?: boolean;
+      } = {},
     ): Promise<{
       handle: string;
       format: DocumentFormat;
@@ -91,7 +107,7 @@ export function createSheetFiles() {
       const cancel = () => void send({ type: "cancel", id });
       signal?.addEventListener("abort", cancel, { once: true });
       const reply = await send(
-        { type: "open-doc", id, handle, name: file.name, bytes },
+        { type: "open-doc", id, handle, name: file.name, bytes, ocr },
         [bytes],
         progress,
       ).finally(() => signal?.removeEventListener("abort", cancel));

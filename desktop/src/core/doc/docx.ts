@@ -17,7 +17,9 @@ export type DocError =
   | "too-many-pages"
   | "scanned"
   | "old-font"
-  | "cancelled";
+  | "cancelled"
+  // A picture on a machine without text recognition (decision 0171).
+  | "no-ocr";
 export class DocFileError extends Error {
   readonly code: DocError;
   constructor(code: DocError) {

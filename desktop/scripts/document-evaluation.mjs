@@ -8,6 +8,7 @@ import { openDocument, writeDocument } from "../src/core/doc/document.ts";
 import { maskParagraphs } from "../src/core/doc/mask.ts";
 import { createDetectionEngine } from "../src/core/detection/engine.ts";
 import { detectionOptions } from "../src/core/detection/options.ts";
+import { createOcrEngine } from "./ocr-runtime.mjs";
 import { loadPack } from "./pack-runtime.mjs";
 
 export const buckets = ["notRead", "leaked", "over", "unlisted"];
@@ -18,36 +19,47 @@ export const bucketLabels = {
   unlisted: "unlisted",
 };
 
-/** Every .pdf, .docx and .odt under a folder, in a fixed order. */
+/** Every .pdf, .docx, .odt, .png and .jpg under a folder, in a fixed order. */
 export function listDocuments(directory) {
   return readdirSync(directory)
     .flatMap((name) => {
       const path = join(directory, name);
       if (statSync(path).isDirectory()) return listDocuments(path);
-      return [".pdf", ".docx", ".odt"].includes(extname(name).toLowerCase()) ? [path] : [];
+      return [".pdf", ".docx", ".odt", ".png", ".jpg", ".jpeg"].includes(extname(name).toLowerCase())
+        ? [path]
+        : [];
     })
     .sort();
 }
 
 /** The app's detector over a pack at `root`: the same policy and category filter, the
- * pack loaded once on first use. A candidate definition stands in for the shipping pack. */
+ * pack loaded once on first use. A candidate definition stands in for the shipping pack.
+ * Pages without text and pictures go to the app's own text recognition (decision 0171),
+ * started the first time one is met. */
 export function createDetector(root, definition) {
   const engine = createDetectionEngine(undefined, async (packRoot) => {
     const pack = await loadPack(packRoot, definition);
     return { detect: (text) => pack.detect(text), dispose: () => pack.dispose() };
   });
+  const ocr = createOcrEngine();
   return {
     root,
     options: detectionOptions.map((entry) => entry.id),
+    ocr,
     detect: (text, progress, modelRoot, options) =>
       engine({ text, options, modelRoot }, progress),
-    dispose: () => engine.dispose(),
+    dispose: async () => {
+      ocr.dispose();
+      await engine.dispose();
+    },
   };
 }
 
 /** Masked character ranges per paragraph, and the written copy. */
 export async function maskDocument(path, detector) {
-  const opened = await openDocument(new Uint8Array(readFileSync(path)), basename(path));
+  const opened = await openDocument(new Uint8Array(readFileSync(path)), basename(path), {
+    ocr: detector.ocr,
+  });
   const detections = await scanTexts(
     detector,
     opened.paragraphs.map((paragraph) => ({ key: paragraph.id, text: paragraph.text })),
@@ -122,10 +134,11 @@ export function evaluateDocument({ opened, edits }, expected) {
 
 /** Every document of a folder measured against the lists beside it. `draft` writes a
  * draft list for documents that have none (hide = what is masked today, keep empty);
- * `log` receives one line per document and the values in each bucket. Returns the
+ * `log` receives one line per document and the values in each bucket, and `onDocument`
+ * the masked document and its result, for further analysis. Returns the
  * report: { documents: { name: { draft, hide, keep, notRead, leaked, over, unlisted,
  * masked } | { error } }, totals }. */
-export async function measureFolder(folder, detector, { draft = false, log } = {}) {
+export async function measureFolder(folder, detector, { draft = false, log, onDocument } = {}) {
   const report = { documents: {} };
   for (const path of listDocuments(folder)) {
     const name = relative(folder, path);
@@ -149,6 +162,7 @@ export async function measureFolder(folder, detector, { draft = false, log } = {
     }
     const expected = JSON.parse(readFileSync(expectPath, "utf8"));
     const result = evaluateDocument(run, expected);
+    onDocument?.(name, run, result);
     report.documents[name] = {
       draft: !!expected.draft,
       hide: expected.hide?.length ?? 0,

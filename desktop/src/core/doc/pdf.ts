@@ -6,19 +6,31 @@ import {
   type DocEdits,
   type DocParagraph,
 } from "./docx.ts";
+import { ocrTextItems, type OcrEngine, type OcrTextItem } from "./ocr.ts";
 
 /** PDF support, phase 1 (decision 0149): only PDFs that contain text. The text is read
  * with pdf.js, masked like a Word paragraph, and written out as Markdown built from
  * the masked text alone, so nothing else in the file (hidden text under a box,
  * metadata, attachments, images, earlier revisions) can reach the output. pdf.js is
  * asked for text only: nothing is drawn and no image is decoded, which is most of a
- * viewer's cost and memory. */
+ * viewer's cost and memory.
+ *
+ * Phase 2 (decision 0171): when the machine can read text in pictures (`ocr.ts`), a
+ * page without text is drawn once, at 200 dpi, and read by the system's own text
+ * recognition; its lines then take the same path as a text page's items. */
 export const maxPdfPages = 300;
 /** Images at least this many pixels count for the "has images" note; logos and icons
  * are usually smaller. */
 const largeImagePixels = 200_000;
+/** Pages without text are drawn at this resolution for recognition (decision 0171):
+ * what office scanners use, and enough for 8-point print. */
+const ocrDpi = 200;
+/** The longest side a drawn page may have; a poster-sized page is scaled down. */
+const maxRenderSide = 4000;
 
-export type PdfPageKind = "text" | "no-text" | "old-font";
+/** `scanned`: no text, read by recognition. `blank`: no text, and recognition found
+ * none either. `no-text`: no text, and no recognition on this machine. */
+export type PdfPageKind = "text" | "scanned" | "blank" | "no-text" | "old-font";
 export interface PdfPage {
   number: number;
   kind: PdfPageKind;
@@ -474,6 +486,67 @@ export interface PdfReading {
   onPage?: (read: number, total: number) => void;
   /** Checked between pages; reading stops with "cancelled" once it returns true. */
   stopped?: () => boolean;
+  /** Reads the text in a drawn page; without it, pages without text stay unread. */
+  ocr?: OcrEngine;
+}
+
+/** A page's items read by their place: lines, tables and forms, then paragraphs. Tables
+ * are numbered from `table`. Shared with pictures (`ocr.ts`). */
+export function readByPlace(
+  items: readonly OcrTextItem[],
+  table: number,
+): { text: string; table?: number }[] {
+  return linesToParagraphs(alignTables(itemsToLines(items), table));
+}
+
+/** pdf.js draws into canvases it asks a factory for; in a worker there is no document,
+ * so the factory makes OffscreenCanvases. */
+type Canvas = { width: number; height: number; getContext(kind: "2d"): unknown };
+const offscreenCanvasFactory = {
+  create(width: number, height: number) {
+    const canvas = new OffscreenCanvas(width, height) as unknown as Canvas;
+    return { canvas, context: canvas.getContext("2d") };
+  },
+  reset(target: { canvas: Canvas | null }, width: number, height: number) {
+    if (!target.canvas) throw new Error("Canvas is not specified");
+    target.canvas.width = width;
+    target.canvas.height = height;
+  },
+  destroy(target: { canvas: Canvas | null; context: unknown }) {
+    if (!target.canvas) throw new Error("Canvas is not specified");
+    target.canvas.width = target.canvas.height = 0;
+    target.canvas = null;
+    target.context = null;
+  },
+};
+const hasOffscreenCanvas = () => typeof OffscreenCanvas !== "undefined";
+
+/** The page drawn as a PNG picture at `ocrDpi`, in a worker (OffscreenCanvas) or in Node
+ * (`@napi-rs/canvas`, a development dependency for the measurements). */
+async function drawPage(
+  page: PdfPageProxy,
+): Promise<{ image: Uint8Array; width: number; height: number }> {
+  const base = page.getViewport({ scale: 1 });
+  const scale = Math.min(ocrDpi / 72, maxRenderSide / Math.max(base.width, base.height));
+  const viewport = page.getViewport({ scale });
+  const width = Math.ceil(viewport.width);
+  const height = Math.ceil(viewport.height);
+  // pdf.js takes the canvas itself; an OffscreenCanvas or a Node canvas passes as one.
+  if (hasOffscreenCanvas()) {
+    const canvas = new OffscreenCanvas(width, height);
+    const target = canvas as unknown as HTMLCanvasElement;
+    await page.render({ canvas: target, viewport, background: "#ffffff" }).promise;
+    const blob = await canvas.convertToBlob({ type: "image/png" });
+    return { image: new Uint8Array(await blob.arrayBuffer()), width, height };
+  }
+  const module = "@napi-rs/canvas";
+  const { createCanvas } = (await import(/* @vite-ignore */ module)) as {
+    createCanvas(width: number, height: number): { toBuffer(mime: "image/png"): Uint8Array };
+  };
+  const canvas = createCanvas(width, height);
+  const target = canvas as unknown as HTMLCanvasElement;
+  await page.render({ canvas: target, viewport, background: "#ffffff" }).promise;
+  return { image: new Uint8Array(canvas.toBuffer("image/png")), width, height };
 }
 /** pdf.js works through promises, which never let a waiting message (such as Hủy) in;
  * a timer every so often does. */
@@ -482,24 +555,26 @@ const nextTask = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 export async function openPdf(
   bytes: Uint8Array,
-  { onPage, stopped }: PdfReading = {},
+  { onPage, stopped, ocr }: PdfReading = {},
 ): Promise<{ source: PdfSource; paragraphs: DocParagraph[]; notes: string[] }> {
   if (bytes.byteLength > maxDocBytes) throw new DocFileError("too-large");
   const largeImages = countLargeImages(bytes);
   const { getDocument } = await loadPdfJs();
   // No URL is given for CMaps, standard fonts, ICC profiles or WebAssembly, and system
-  // fonts are off, so pdf.js never fetches anything; text needs none of them.
+  // fonts are off, so pdf.js never fetches anything; text needs none of them. With
+  // recognition at hand, pictures may be decoded, but only a drawn page decodes them.
   const task = getDocument({
     data: bytes,
     disableFontFace: true,
     useSystemFonts: false,
     useWorkerFetch: false,
     useWasm: false,
-    isOffscreenCanvasSupported: false,
+    isOffscreenCanvasSupported: !!ocr && hasOffscreenCanvas(),
     isImageDecoderSupported: false,
     enableXfa: false,
-    maxImageSize: 0,
+    maxImageSize: ocr ? -1 : 0,
     verbosity: 0,
+    ...(ocr && hasOffscreenCanvas() ? { CanvasFactory: offscreenCanvasFactory } : {}),
   });
   try {
     let document: Awaited<typeof task.promise>;
@@ -523,15 +598,26 @@ export async function openPdf(
       const page = await document.getPage(number);
       const items = await pageText(page);
       const text = clean(items.map((item) => item.str).join(""));
-      const kind: PdfPageKind =
+      let kind: PdfPageKind =
         text.replace(/\s/g, "").length < 5
           ? "no-text"
           : looksLikeOldFont(text)
             ? "old-font"
             : "text";
       // Tables are numbered per page from page × 1000, unique in the document.
-      const texts =
-        kind === "text" ? linesToParagraphs(alignTables(itemsToLines(items), number * 1000)) : [];
+      let texts = kind === "text" ? readByPlace(items, number * 1000) : [];
+      if (kind === "no-text" && ocr) {
+        // A page without text is a picture: drawn once and read by recognition. A
+        // failure here is the engine's, not the file's; the page is reported unread.
+        try {
+          const drawn = await drawPage(page);
+          const read = await ocr(drawn.image);
+          texts = readByPlace(ocrTextItems(read, drawn.width, drawn.height), number * 1000);
+          kind = texts.length ? "scanned" : "blank";
+        } catch {
+          kind = "no-text";
+        }
+      }
       texts.push(
         ...annotationTexts((await page.getAnnotations()) as Annotation[]).map((text) => ({ text })),
       );
@@ -549,14 +635,26 @@ export async function openPdf(
       page.cleanup();
       onPage?.(number, document.numPages);
     }
-    if (!pages.some((page) => page.kind === "text")) {
+    if (!pages.some((page) => page.kind === "text" || page.kind === "scanned")) {
       if (pages.some((page) => page.kind === "old-font")) throw new DocFileError("old-font");
-      throw new DocFileError("scanned");
+      throw new DocFileError(ocr ? "empty" : "scanned");
     }
     if (!paragraphs.length) throw new DocFileError("empty");
     const notes: string[] = [];
     const missing = (kind: PdfPageKind) =>
       pages.filter((page) => page.kind === kind).map((page) => page.number);
+    const scanned = missing("scanned");
+    if (scanned.length)
+      notes.push(
+        scanned.length === pages.length
+          ? "Chữ được đọc từ ảnh scan bằng nhận dạng ký tự nên có thể sai sót. Hãy xem lại bản đã ẩn trước khi gửi."
+          : `Trang ${pageList(scanned)} là ảnh scan: chữ được đọc bằng nhận dạng ký tự nên có thể sai sót. Hãy xem lại bản đã ẩn trước khi gửi.`,
+      );
+    const blank = missing("blank");
+    if (blank.length)
+      notes.push(
+        `Trang ${pageList(blank)} không có chữ đọc được (trang trống hoặc ảnh quá mờ). Bản đã ẩn sẽ không có nội dung ${blank.length > 1 ? "các trang" : "trang"} này.`,
+      );
     const noText = missing("no-text");
     if (noText.length)
       notes.push(
@@ -567,9 +665,11 @@ export async function openPdf(
       notes.push(
         `Trang ${pageList(oldFont)} dùng phông chữ cũ nên chưa đọc được. Bản đã ẩn sẽ không có nội dung ${oldFont.length > 1 ? "các trang" : "trang"} này.`,
       );
-    if (largeImages)
+    // A scanned page is a picture that was read; only the others are worth a note.
+    const unread = largeImages - scanned.length;
+    if (unread > 0)
       notes.push(
-        `Tệp có ${largeImages} hình ảnh. Hình ảnh không có trong bản đã ẩn; nếu trong ảnh có chữ cần gửi, hãy gõ lại.`,
+        `Tệp có ${unread} hình ảnh. Hình ảnh không có trong bản đã ẩn; nếu trong ảnh có chữ cần gửi, hãy gõ lại.`,
       );
     return { source: { format: "pdf", pages, paragraphs }, paragraphs, notes };
   } finally {
@@ -577,8 +677,9 @@ export async function openPdf(
   }
 }
 
-const placeholders: Record<Exclude<PdfPageKind, "text">, string> = {
+const placeholders: Partial<Record<PdfPageKind, string>> = {
   "no-text": "(Trang không có chữ đọc được, thường là ảnh scan — không có trong bản đã ẩn)",
+  blank: "(Trang không có chữ đọc được, trang trống hoặc ảnh quá mờ — không có trong bản đã ẩn)",
   "old-font": "(Trang dùng phông chữ cũ, chưa đọc được — không có trong bản đã ẩn)",
 };
 /** The masked document as Markdown: each page under its own heading, its paragraphs
@@ -588,7 +689,8 @@ export function writePdfText(source: PdfSource, edits: DocEdits): Uint8Array {
   const blocks: string[] = [];
   for (const page of source.pages) {
     blocks.push(`## Trang ${page.number}`);
-    if (page.kind !== "text") blocks.push(placeholders[page.kind]);
+    const placeholder = placeholders[page.kind];
+    if (placeholder) blocks.push(placeholder);
     blocks.push(
       ...blocksToMarkdown(
         toBlocks(

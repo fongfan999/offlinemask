@@ -86,7 +86,9 @@ const subtitle = computed(() => {
       : `Tài liệu #${props.session.number} · ${props.session.paragraphs.toLocaleString("vi-VN")} đoạn · Đọc lại bản đã ẩn, rồi tải về để gửi AI.`;
   return draft.value
     ? `${draft.value.paragraphs.length.toLocaleString("vi-VN")} đoạn · Xem trước rồi ẩn toàn bộ.`
-    : "Mở tệp Word, LibreOffice hoặc PDF. Thông tin riêng tư được thay bằng mã như [TEN_1_…], ngay trên máy bạn. Word giữ nguyên định dạng; PDF cho ra bản chữ để gửi AI.";
+    : doc.ocr.value
+      ? "Mở tệp Word, LibreOffice, PDF, kể cả ảnh scan, hoặc hình ảnh. Thông tin riêng tư được thay bằng mã như [TEN_1_…], ngay trên máy bạn. Word giữ nguyên định dạng; PDF và hình ảnh cho ra bản chữ để gửi AI."
+      : "Mở tệp Word, LibreOffice hoặc PDF. Thông tin riêng tư được thay bằng mã như [TEN_1_…], ngay trên máy bạn. Word giữ nguyên định dạng; PDF cho ra bản chữ để gửi AI.";
 });
 const draftView = computed(() => {
   const current = draft.value;
@@ -270,8 +272,14 @@ defineExpose({
         <FileDropZone
           icon="file"
           title="Kéo thả tài liệu vào đây"
-          hint=".docx, .odt, .pdf · tối đa 20 MB"
-          accept=".docx,.odt,.pdf,.txt,.md"
+          :hint="
+            doc.ocr.value
+              ? '.docx, .odt, .pdf, .png, .jpg · tối đa 20 MB'
+              : '.docx, .odt, .pdf · tối đa 20 MB'
+          "
+          :accept="
+            doc.ocr.value ? '.docx,.odt,.pdf,.png,.jpg,.jpeg,.txt,.md' : '.docx,.odt,.pdf,.txt,.md'
+          "
           :busy="doc.opening.value"
           @file="openFile"
         />

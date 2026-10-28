@@ -107,6 +107,8 @@ pub fn run() {
         models::download_models,
         models::cancel_model_download,
         models::uninstall_models,
+        ocr::ocr_available,
+        ocr::ocr_page,
         vault::vault_status,
         vault::vault_create,
         vault::vault_unlock,
@@ -139,6 +141,8 @@ pub fn run() {
         models::download_models,
         models::cancel_model_download,
         models::uninstall_models,
+        ocr::ocr_available,
+        ocr::ocr_page,
         vault::vault_status,
         vault::vault_create,
         vault::vault_unlock,
@@ -174,6 +178,8 @@ pub fn run() {
         models::download_models,
         models::cancel_model_download,
         models::uninstall_models,
+        ocr::ocr_available,
+        ocr::ocr_page,
         vault::vault_status,
         vault::vault_create,
         vault::vault_unlock,
@@ -213,6 +219,8 @@ pub fn run() {
         models::download_models,
         models::cancel_model_download,
         models::uninstall_models,
+        ocr::ocr_available,
+        ocr::ocr_page,
         vault::vault_status,
         vault::vault_create,
         vault::vault_unlock,
@@ -275,6 +283,7 @@ mod minilm_native_graph;
 mod minilm_prototype;
 mod model_pack;
 mod models;
+pub mod ocr;
 #[cfg(target_os = "macos")]
 mod panel_macos;
 mod quick_input;

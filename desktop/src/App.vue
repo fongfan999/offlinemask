@@ -34,6 +34,7 @@ import { useSessions } from "./composables/useSessions.ts";
 import { useDocRun } from "./composables/useDocRun.ts";
 import { useSheetRun } from "./composables/useSheetRun.ts";
 import { useVault } from "./composables/useVault.ts";
+import { ocrAvailable } from "./adapters/ocr.ts";
 import { fileKind, fileKindErrors } from "./core/file-kind.ts";
 import type { Format, Session } from "./core/sessions.ts";
 import HomePage from "./pages/HomePage.vue";
@@ -51,7 +52,17 @@ const detector = queueDetections(createTextDetector());
 const run = useMaskingRun({ detector, pack, sessions, onSession: adoptSession });
 const sheetFiles = createSheetFiles();
 const sheet = useSheetRun({ detector, files: sheetFiles, pack, sessions, onSession: adoptSession });
-const doc = useDocRun({ detector, files: sheetFiles, pack, sessions, onSession: adoptSession });
+// Text in pictures (decision 0171): the system's own recognition, where the machine has it.
+const ocr = ref(false);
+void ocrAvailable().then((available) => (ocr.value = available));
+const doc = useDocRun({
+  detector,
+  files: sheetFiles,
+  pack,
+  ocr,
+  sessions,
+  onSession: adoptSession,
+});
 const vault = useVault();
 // Clipboard quick actions (decision 0090) reuse the text run and every alias table.
 const quick = useQuickActions({
@@ -74,7 +85,7 @@ const quick = useQuickActions({
   },
   // A file from the Finder service (decision 0094) opens like one dropped on the home page.
   openFile: async (file) => {
-    const kind = fileKind(file.name);
+    const kind = fileKind(file.name, { images: ocr.value });
     if (kind === "text") {
       const error = await run.openTextFile(file);
       if (!error) void navigate("text");
@@ -259,6 +270,7 @@ async function closeSidebar() {
       :open="sidebarOpen"
       :preparing="pack.preparing.value"
       :history="historyOn"
+      :images="ocr"
       :version="version"
       @navigate="openFormat"
       @close="closeSidebar"
