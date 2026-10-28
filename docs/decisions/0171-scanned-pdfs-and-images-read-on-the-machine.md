@@ -1,6 +1,6 @@
 # 0171 — Scanned PDFs and images read on the machine (phase 2 of 0149)
 
-Date: 28 October 2026. Status: designed, built and measured on this date; gated off (see "What ships"). Follows [0149](0149-text-pdf-documents.md), which parked scanned PDFs and images because both need text recognition (OCR).
+Date: 28 October 2026. Status: designed, built, measured and run in the app on this date; on for macOS 14 and later by the owner's decision the same day (see "What ships"). Follows [0149](0149-text-pdf-documents.md), which parked scanned PDFs and images because both need text recognition (OCR).
 
 ## Problem
 
@@ -60,7 +60,7 @@ Why not a cross-platform engine now: the only one that could run everywhere and 
 
 ### Privacy page
 
-While the gate is off nothing changes for users and `landing/privacy.html` stays as it is. When it ships, §2 says that for scanned PDFs and images the text is read by the operating system's own text recognition (Apple's Vision on macOS 14 and later), on the machine and not over the network, that the picture is not kept and is not in the masked copy, and that Windows has none yet, with the page's date. `tests/privacy-contract.test.mjs` pins both states: the native module uses Vision and nothing that reads files, runs programs or connects, no OCR library is a dependency, and the page carries those sentences exactly when `ocrShipped` is true and not before.
+With the gate on, `landing/privacy.html` §2 says that for scanned PDFs and images the text is read by the operating system's own text recognition (Apple's Vision on macOS 14 and later), on the machine and not over the network, that the picture is not kept and is not in the masked copy, and that Windows has none yet, with the page's date. `tests/privacy-contract.test.mjs` pins both states: the native module uses Vision and nothing that reads files, runs programs or connects, no OCR library is a dependency, and the page carries those sentences exactly when `ocrShipped` is true and not before.
 
 ## Measurement
 
@@ -125,10 +125,11 @@ The over-masked that remain are the engine's misreads of a heading or a label, e
 
 ## What ships
 
-Still nothing, by the gate: `ocrShipped` in `src/adapters/ocr.ts` stays `false`, pictures and scanned PDFs are refused with the messages above, the sidebar keeps "Hình ảnh · Sắp có", and `landing/privacy.html` is unchanged (`tests/privacy-contract.test.mjs` checks the page against the gate in both states). The owner asked for this to stay off until both the measurement and the app check were done; both are, and the decision is theirs:
+**On macOS 14 and later, scanned PDFs and PNG/JPEG pictures open on Tài liệu and are masked**: the owner opened the gate on 28 October 2026, once the 703 scans and pictures of seeds 1–7 leaked nothing where the text PDFs leak none, every misread value the reader finds was masked, the over-masked were the engine's misreads of headings and labels (listed above), and the feature had run end to end in the app on this Mac. `ocrShipped` in `src/adapters/ocr.ts` is `true`; `landing/privacy.html` §2 says the picture is read on the machine by the system's own recognition and never kept, dated 28 October 2026, and `tests/privacy-contract.test.mjs` checks the page against the gate in both states. The sidebar's "Hình ảnh · Sắp có" goes on those Macs. What the user should know, the note above the preview says: the engine reads about one private value in twenty wrongly on these scans, so the masked copy is to be reviewed before it is sent.
 
-- **The gate can open on macOS.** On the 703 scans and pictures of seeds 1–7 nothing leaks where the text PDFs leak none, every misread value that the reader finds is masked, the over-masked are the engine's misreads of headings and labels (listed above), and the feature works end to end in the app on this Mac. To open it: set `ocrShipped` to `true`, add the §2 sentences to the privacy page (the test names them) with its date, and remove the "Sắp có" item where the machine reads pictures (the code already does). What the user should know, the note above the preview says: the engine reads about one private value in twenty wrongly on these scans, so the masked copy is to be reviewed before it is sent.
-- **Windows is a decision for the owner, not a change here.** Nothing reads Vietnamese on Windows yet. Either Windows.Media.Ocr (the system's engine, which reads Vietnamese only once the user installs the Vietnamese language pack in Windows) measured on the owner's Windows PC with the scripts of this decision, or Mac-only for now with the sidebar saying so, which the code already does. Tesseract, the engine that would run everywhere, misreads one private value in ten on clean renders and is not a floor to ship on; VietOCR as a downloaded pack is the candidate if an OS engine is not good enough.
+**Windows and macOS before 14 keep "Sắp có"** with a message naming the reason. Nothing reads Vietnamese on Windows yet; the decision is the owner's: Windows.Media.Ocr (the system's engine, which reads Vietnamese only once the user installs the Vietnamese language pack in Windows) measured on the owner's Windows PC with the scripts of this decision, or Mac-only for now. Tesseract, the engine that would run everywhere, misreads one private value in ten on clean renders and is not a floor to ship on; VietOCR as a downloaded pack is the candidate if an OS engine is not good enough.
+
+**Not changed:** `landing/product.html` still says "Hình ảnh thì chưa"; as 0149 did, it changes with the release that carries the feature, since pushing to main deploys the site before the app can do it.
 
 ## Dependencies
 

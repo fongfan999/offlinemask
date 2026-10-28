@@ -4,12 +4,12 @@ import type { OcrPage } from "../core/doc/ocr.ts";
 /** Text recognition for pictures (decision 0171) lives in the native `ocr` module: the
  * operating system's own engine, on this machine. Browser previews have none.
  *
- * Built and measured, not shipped: on scans of the synthetic set the reader still
- * leaks values the text PDFs do not (12 in 703 documents, decision 0171), so the
- * machine reports no recognition until that measurement is clean. Turning this on
- * changes what the app does with pictures: `landing/privacy.html` must say so in the
- * same change (`tests/privacy-contract.test.mjs` checks both states). */
-export const ocrShipped = false;
+ * On by the owner's decision of 28 October 2026 (decision 0171), once the scans of the
+ * synthetic set leaked nothing the text PDFs did not and the feature ran end to end in
+ * the app. Off, the machine reports no recognition and pictures keep "Sắp có". The
+ * state changes what the app does with pictures, so `landing/privacy.html` says so
+ * while it is on (`tests/privacy-contract.test.mjs` checks both states). */
+export const ocrShipped = true;
 
 export async function ocrAvailable(): Promise<boolean> {
   if (!ocrShipped || !isTauri()) return false;
