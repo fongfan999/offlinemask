@@ -5,7 +5,7 @@ Real questions people search, in the order they will be written. `[ ]` to write,
 - [x] Có nên dán thông tin khách hàng vào ChatGPT không? — `co-nen-dan-thong-tin-khach-hang-vao-chatgpt`
 - [x] Cách ẩn thông tin cá nhân trong file Excel trước khi gửi cho AI phân tích — `an-thong-tin-ca-nhan-trong-file-excel-gui-ai`
 - [x] ChatGPT có dùng dữ liệu của tôi để huấn luyện không, và tắt ở đâu? — `chatgpt-co-dung-du-lieu-de-huan-luyen-khong`
-- [ ] Nhờ AI soạn hợp đồng mà không lộ tên, CCCD của các bên
+- [x] Nhờ AI soạn hợp đồng mà không lộ tên, CCCD của các bên — `nho-ai-soan-hop-dong-khong-lo-ten-cccd`
 - [ ] Kế toán dùng ChatGPT thế nào cho an toàn với số tài khoản, mã số thuế?
 - [ ] Nhân sự dùng AI để viết đánh giá, tính lương: thông tin nào không được đưa vào?
 - [ ] Luật bảo vệ dữ liệu cá nhân ở Việt Nam nói gì về việc dùng AI ở công ty?
