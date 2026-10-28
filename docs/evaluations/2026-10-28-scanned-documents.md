@@ -83,3 +83,19 @@ The text PDFs of seeds 1–7 re-measured with the same code: 546 documents, 0 / 
 ### In the app
 
 `tauri dev` of this worktree, driven through accessibility: a photographed form (tilted 1.4°, noised, JPEG) and a scanned contract (picture-only PDF) opened on Tài liệu, were masked (10 places, 9 aliases; 17 places, 14 aliases), saved as Markdown and restored from that copy (10 and 17 aliases). One defect found and fixed: pdf.js constructs the worker's canvas factory with `new`, and a plain object threw before any scanned page was drawn.
+
+## Windows
+
+On the owner's Windows PC (Windows 11 Pro 10.0.26200, x64 CPU, no GPU used).
+
+**Windows.Media.Ocr** has no Vietnamese recogniser: installing Tiếng Việt offers no text recognition feature, `OcrEngine.AvailableRecognizerLanguages` lists `en-US` alone, and the English recogniser on the picture of seed 1's `contract-labour-1` writes no Vietnamese letter in 1 280 characters. Not measured further.
+
+**VietOCR**, screened like the engines above on seed 1's 54 pages (drawn at 200 dpi and passed through JPEG quality 80, as the scans are) with `scripts/ocr-screening-v1/screen.mjs`: PP-OCRv4's mobile text detector (RapidOCR's ONNX export, `ch_PP-OCRv4_det_infer.onnx`, sha256 `d2a7720d…`, Apache-2.0) finds the segments with PaddleOCR's post-processing (threshold 0.3, box score 0.6, unclip 1.5); VietOCR's `vgg_transformer` (`vemines/vietocr-onnx` at 049d43e7, encoder `37528399…` with data `395df00d…`, decoder `a77eb696…`, MIT) reads each segment at height 32 with greedy decoding, a segment wider than 384 being cut at its widest word gap (wider, the decoder stops early: "Số 285 Nguyên Thị Minh" for a whole address); ONNX Runtime 1.24.3 (`onnxruntime-node`, already installed under `@huggingface/transformers`).
+
+| Engine | Hide values read verbatim (440) | ignoring case | Keep values read verbatim (650) | ignoring case | time a page |
+| --- | --- | --- | --- | --- | --- |
+| PP-OCRv4 detector + VietOCR `vgg_transformer` | 336 | 385 | 536 | 571 | 11 s |
+| for reference, from the Mac: Apple Vision | 430 | | 622 | | 0.7 s |
+| for reference, from the Mac: Tesseract `vie` fast | 385 | | 556 | | |
+
+Of the 104 hide values not read verbatim, 49 are read but in the wrong case ("công ty TNHH", "trần hưng đạo"), 15 are read without or with wrong tone marks, and 40 are not found even so: every e-mail address with "@" read as "0" ("ngoc.do40000utlook.com"), names of statement rows that wrap onto two lines and come apart in the screen's simple reading order, a stray segment inside an address ("Hồ Xã Chí Minh"), spaces dropped inside phone numbers. The reading-order losses are the screen's, which the app's reader by place would partly recover; the case and "@" errors are the model's, and an e-mail address read with "0" for "@" is one the policy no longer recognises. Below Tesseract verbatim and fifteen times slower than Vision: not a candidate as it stands.
