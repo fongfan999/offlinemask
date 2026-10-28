@@ -25,7 +25,9 @@ export function listDocuments(directory) {
     .flatMap((name) => {
       const path = join(directory, name);
       if (statSync(path).isDirectory()) return listDocuments(path);
-      return [".pdf", ".docx", ".odt", ".png", ".jpg", ".jpeg"].includes(extname(name).toLowerCase())
+      return [".pdf", ".docx", ".odt", ".png", ".jpg", ".jpeg"].includes(
+        extname(name).toLowerCase(),
+      )
         ? [path]
         : [];
     })
@@ -46,8 +48,7 @@ export function createDetector(root, definition) {
     root,
     options: detectionOptions.map((entry) => entry.id),
     ocr,
-    detect: (text, progress, modelRoot, options) =>
-      engine({ text, options, modelRoot }, progress),
+    detect: (text, progress, modelRoot, options) => engine({ text, options, modelRoot }, progress),
     dispose: async () => {
       ocr.dispose();
       await engine.dispose();
@@ -72,6 +73,18 @@ export async function maskDocument(path, detector) {
 }
 
 const squeeze = (text) => text.replace(/\s+/gu, " ").trim();
+const alphanumeric = /[\p{L}\p{N}]/u;
+/** A value that starts or ends with a letter or digit must not be found glued to
+ * another: "0932732371" inside "093273237136" or "0887172791trú" (text recognition
+ * running a value into its neighbour, decision 0171) is not the value read; it is
+ * reported as not read, not as leaked. */
+const whole = (text, at, value) =>
+  !(
+    (alphanumeric.test(value[0]) && at > 0 && alphanumeric.test(text[at - 1])) ||
+    (alphanumeric.test(value.at(-1)) &&
+      at + value.length < text.length &&
+      alphanumeric.test(text[at + value.length]))
+  );
 /** Each expectation in its bucket: not read, leaked, over (a kept text partly masked) or
  * unlisted (masked, in no list); `masked` is every value replaced. */
 export function evaluateDocument({ opened, edits }, expected) {
@@ -90,6 +103,7 @@ export function evaluateDocument({ opened, edits }, expected) {
         near >= 0;
         near = paragraph.text.indexOf(context, near + 1)
       ) {
+        if (!whole(paragraph.text, near, context)) continue;
         found = true;
         const at = near + offset;
         for (let i = at; i < at + value.length; i++)
@@ -170,13 +184,15 @@ export async function measureFolder(folder, detector, { draft = false, log, onDo
       ...result,
     };
     const counts = buckets.map((key) => result[key].length);
-    const status = counts[0] || counts[1] ? "LEAK" : counts[2] ? "OVER" : counts[3] ? "REVIEW" : "OK";
+    const status =
+      counts[0] || counts[1] ? "LEAK" : counts[2] ? "OVER" : counts[3] ? "REVIEW" : "OK";
     log?.(
       `${status.padEnd(8)} ${name}${expected.draft ? " (draft)" : ""}: ` +
         `not read ${counts[0]}, leaked ${counts[1]}, over ${counts[2]}, unlisted ${counts[3]}`,
     );
     for (const key of buckets)
-      for (const value of result[key]) log?.(`           ${bucketLabels[key]}: ${JSON.stringify(value)}`);
+      for (const value of result[key])
+        log?.(`           ${bucketLabels[key]}: ${JSON.stringify(value)}`);
   }
   report.totals = totalsOf(report.documents);
   return report;

@@ -168,6 +168,48 @@ function columnSpans(pieces: readonly Piece[]): { x: number; end: number }[] {
   }
   return spans;
 }
+/** One word read across a gutter must not merge two columns for the whole table: text
+ * recognition glues a reference to the description beside it in one row of a
+ * statement ("T26327506902: Rut tien ATM tai VPBank 9592", decision 0171), and the
+ * text of a PDF can do the same with a cell that overflows. A span is split at a
+ * stretch at least `gutter` wide (four fifths of the rows' typical font size) that the
+ * words of at most one row cover, when at least two rows have words on each side of
+ * it: a gutter the rows keep, bridged once. The tail of a column that only its longest
+ * rows reach has no words to its right. */
+function splitBridged(
+  spans: { x: number; end: number }[],
+  rows: readonly (readonly Piece[])[],
+  gutter: number,
+): { x: number; end: number }[] {
+  const out: { x: number; end: number }[] = [];
+  for (const span of spans) {
+    const inside = rows
+      .map((row) => row.filter((piece) => piece.x < span.end && piece.end > span.x))
+      .filter((row) => row.length);
+    // Edges where coverage changes, walked left to right with a count of covering rows.
+    const edges = inside
+      .flatMap((row) => row.flatMap((piece) => [[piece.x, 1] as const, [piece.end, -1] as const]))
+      .sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+    let covering = 0;
+    let at = span.x;
+    let start = span.x;
+    for (const [x, step] of edges) {
+      if (covering <= 1 && x - at >= gutter) {
+        const left = inside.filter((row) => row.some((piece) => piece.end <= at)).length;
+        const right = inside.filter((row) => row.some((piece) => piece.x >= x)).length;
+        if (left >= 2 && right >= 2 && at > start) {
+          out.push({ x: start, end: at });
+          start = x;
+        }
+      }
+      covering += step;
+      at = x;
+    }
+    out.push({ x: start, end: span.end });
+  }
+  return out;
+}
+
 /** A row of three or more cells with a piece covering parts of two columns belongs to a
  * different table, unless it has as many cells as the table's rows: a longer product
  * name reaching under a centred heading is still a row of the same table. A row of
@@ -190,16 +232,23 @@ const bridges = (spans: readonly { x: number; end: number }[], line: Line, regio
 function tableRows(region: readonly Line[], table: number): Line[] {
   // Columns come from rows of three or more cells; a total or a wrapped line may cross them.
   const structural = region.filter((line) => line.text.split("\t").length >= 3);
-  const spans = columnSpans(
-    (structural.length ? structural : region).flatMap((line) => words(line.pieces)),
-  );
   const lineWords = new Map(region.map((line) => [line, words(line.pieces)]));
+  const size = Math.max(...region.map((line) => line.size));
+  // The gutter test uses the rows' typical size, not the largest: a recognised line's
+  // size is an estimate, and one tall estimate would hide a gutter.
+  const sizes = (structural.length ? structural : region)
+    .map((line) => line.size)
+    .sort((a, b) => a - b);
+  const spans = splitBridged(
+    columnSpans((structural.length ? structural : region).flatMap((line) => lineWords.get(line)!)),
+    (structural.length ? structural : region).map((line) => lineWords.get(line)!),
+    sizes[Math.floor(sizes.length / 2)]! * 0.8,
+  );
   const column = (piece: Piece) => {
     const centre = (piece.x + piece.end) / 2;
     const index = spans.findIndex((span) => centre >= span.x && centre <= span.end);
     return index < 0 ? spans.findIndex((span) => piece.x < span.end) : index;
   };
-  const size = Math.max(...region.map((line) => line.size));
   for (let index = 0; index + 1 < spans.length;) {
     const together = region.some(
       (line) =>
@@ -499,26 +548,27 @@ export function readByPlace(
   return linesToParagraphs(alignTables(itemsToLines(items), table));
 }
 
-/** pdf.js draws into canvases it asks a factory for; in a worker there is no document,
- * so the factory makes OffscreenCanvases. */
+/** pdf.js draws into canvases it asks a factory for, which it constructs itself with
+ * `new`; in a worker there is no document, so this one makes OffscreenCanvases. */
 type Canvas = { width: number; height: number; getContext(kind: "2d"): unknown };
-const offscreenCanvasFactory = {
+export class OffscreenCanvasFactory {
+  constructor(_options?: object) {}
   create(width: number, height: number) {
     const canvas = new OffscreenCanvas(width, height) as unknown as Canvas;
     return { canvas, context: canvas.getContext("2d") };
-  },
+  }
   reset(target: { canvas: Canvas | null }, width: number, height: number) {
     if (!target.canvas) throw new Error("Canvas is not specified");
     target.canvas.width = width;
     target.canvas.height = height;
-  },
+  }
   destroy(target: { canvas: Canvas | null; context: unknown }) {
     if (!target.canvas) throw new Error("Canvas is not specified");
     target.canvas.width = target.canvas.height = 0;
     target.canvas = null;
     target.context = null;
-  },
-};
+  }
+}
 const hasOffscreenCanvas = () => typeof OffscreenCanvas !== "undefined";
 
 /** The page drawn as a PNG picture at `ocrDpi`, in a worker (OffscreenCanvas) or in Node
@@ -574,7 +624,7 @@ export async function openPdf(
     enableXfa: false,
     maxImageSize: ocr ? -1 : 0,
     verbosity: 0,
-    ...(ocr && hasOffscreenCanvas() ? { CanvasFactory: offscreenCanvasFactory } : {}),
+    ...(ocr && hasOffscreenCanvas() ? { CanvasFactory: OffscreenCanvasFactory } : {}),
   });
   try {
     let document: Awaited<typeof task.promise>;
@@ -611,7 +661,7 @@ export async function openPdf(
         // failure here is the engine's, not the file's; the page is reported unread.
         try {
           const drawn = await drawPage(page);
-          const read = await ocr(drawn.image);
+          const read = await ocr(drawn.image, drawn.width, drawn.height);
           texts = readByPlace(ocrTextItems(read, drawn.width, drawn.height), number * 1000);
           kind = texts.length ? "scanned" : "blank";
         } catch {

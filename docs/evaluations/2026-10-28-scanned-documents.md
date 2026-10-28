@@ -60,3 +60,26 @@ Last reading, `--misread`: of the 21 values not read verbatim, 16 are misread an
 - Seeds 3 and 6, `contract-labour-1`, a phone number: the engine read the two-column form row ("Điện thoại: … · Email: …" beside "Địa chỉ: …") as one line with the words of both columns interleaved ("Địa Điện chỉ thoại: thư n932 093273237136 …"), gluing the phone number to the e-mail's digits. The engine's.
 
 Against the bar, the scans leak where the text PDFs do not, in both kinds: a layout precision defect that another iteration can remove, and the engine's misreads, which no layout work removes and which also account for the seven misread values that would reach the AI readable.
+
+### Seeds 1–7 after the fixes (the twelve leaks diagnosed)
+
+The owner asked for each leak diagnosed and fixed where it belongs (decision 0171, "The 12 leaks, one by one"): the cell-gap threshold, the transfer-account rule, repeated values (names and numbers only), columns bridged by one glued word, a bar inside a word, the classification of a value glued to its neighbour, and page de-skew. Same scripts, same pack.
+
+| Seed | Scanned PDFs | Pictures (one-page documents) |
+| --- | --- | --- |
+| 1 | 52: 12 / 0 / 1 / 15 | 50: 9 / 0 / 1 / 13 |
+| 2 | 52: 22 / 0 / 1 / 21 | 49: 15 / 0 / 0 / 16 |
+| 3 | 52: 18 / 0 / 0 / 17 | 48: 14 / 0 / 0 / 17 |
+| 4 | 52: 22 / 0 / 0 / 26 | 48: 14 / 0 / 0 / 15 |
+| 5 | 52: 20 / 0 / 1 / 24 | 48: 17 / 0 / 1 / 21 |
+| 6 | 52: 14 / 0 / 1 / 21 | 48: 13 / 0 / 3 / 15 |
+| 7 | 52: 16 / 0 / 1 / 22 | 48: 15 / 0 / 1 / 20 |
+| All | 364: 124 / 0 / 5 / 146 | 339: 97 / 0 / 6 / 117 |
+
+703 documents in 744 s: **not read 221, leaked 0, over-masked 11, unlisted 263**. With `--misread`: 138 misread and masked all the same, 7 misread and readable, 76 not found even without their marks. Before the fixes: 223 / 12 / 9 / 260.
+
+The text PDFs of seeds 1–7 re-measured with the same code: 546 documents, 0 / 0 / 0 / 0 in 241 s; the owner's decision 0 / 0 / 0 / 0; the owner's invoices 0 / 1 / 0 / 0 (the bank name in a draft expectation): the shipped baseline does not move. The eleven over-masked are the engine's misreads of headings and labels, listed in the decision.
+
+### In the app
+
+`tauri dev` of this worktree, driven through accessibility: a photographed form (tilted 1.4°, noised, JPEG) and a scanned contract (picture-only PDF) opened on Tài liệu, were masked (10 places, 9 aliases; 17 places, 14 aliases), saved as Markdown and restored from that copy (10 and 17 aliases). One defect found and fixed: pdf.js constructs the worker's canvas factory with `new`, and a plain object threw before any scanned page was drawn.

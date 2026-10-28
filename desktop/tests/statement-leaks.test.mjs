@@ -19,6 +19,15 @@ test("account numbers after a bank's TK and after a longer account label", () =>
     assert.deepEqual(values(text, detectBankingIdentifiers(text)), [["STK", account]], text);
   // A ledger account has fewer than six digits.
   assert.deepEqual(detectBankingIdentifiers("Nợ TK 331, Có TK 1111"), []);
+  // Transfer wording puts the account after "den"; text recognition may lose the "TK"
+  // (decision 0171), and the number is still the account, once.
+  for (const text of [
+    "NGUYEN QUOC PHUC chuyen tien den T 96873162835 LY HUU KHANG",
+    "NGUYEN QUOC PHUC chuyen tien den 96873162835 LY HUU KHANG",
+    "NGUYEN QUOC PHUC chuyen tien den TK 96873162835 LY HUU KHANG",
+  ])
+    assert.deepEqual(values(text, detectBankingIdentifiers(text)), [["STK", "96873162835"]], text);
+  assert.deepEqual(detectBankingIdentifiers("chuyen tien den ngay 10/10"), []);
 });
 
 test("names in transfer text: the sender before chuyen tien or CK, the recipient after TK", () => {

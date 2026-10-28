@@ -29,10 +29,11 @@ mod vision {
     use super::{OcrLine, OcrPage};
     use objc2::rc::Retained;
     use objc2::AnyThread;
+    use objc2_core_foundation::CGPoint;
     use objc2_foundation::{NSArray, NSData, NSDictionary, NSRange, NSString};
     use objc2_vision::{
         VNDetectTextRectanglesRequest, VNImageRequestHandler, VNRecognizeTextRequest,
-        VNRecognizedText, VNRequest, VNRequestTextRecognitionLevel,
+        VNRecognizedText, VNRectangleObservation, VNRequest, VNRequestTextRecognitionLevel,
     };
 
     /// A box in fractions of the image, origin top left.
@@ -48,13 +49,78 @@ mod vision {
             self.x + self.width
         }
     }
-    /// Vision's boxes have their origin at the bottom left.
-    fn frame(rect: objc2_core_foundation::CGRect) -> Frame {
-        Frame {
-            x: rect.origin.x,
-            y: 1.0 - rect.origin.y - rect.size.height,
-            width: rect.size.width,
-            height: rect.size.height,
+    /// A photographed or badly scanned page is tilted, and a line's words then slope
+    /// across rows. Vision reports each observation's four corners, so the page's skew
+    /// is the median angle of its longer lines, and every box is turned back by it
+    /// about the picture's centre before any layout. Vision's corners are in fractions
+    /// of the picture with the origin at the bottom left; the picture's size in pixels
+    /// makes the angle right whatever its shape.
+    struct Deskew {
+        width: f64,
+        height: f64,
+        cos: f64,
+        sin: f64,
+    }
+    /// Below this the page is straight (0.15 degrees).
+    const STRAIGHT: f64 = 0.0026;
+    impl Deskew {
+        fn new(width: f64, height: f64, lines: &[&VNRectangleObservation]) -> Self {
+            let mut angles: Vec<f64> = lines
+                .iter()
+                .filter_map(|line| {
+                    let (left, right) = unsafe { (line.topLeft(), line.topRight()) };
+                    let run = (right.x - left.x) * width;
+                    // Only lines a tenth of the page or longer say anything about its tilt.
+                    (run >= width / 10.0).then(|| ((left.y - right.y) * height).atan2(run))
+                })
+                .collect();
+            angles.sort_by(f64::total_cmp);
+            let angle = angles.get(angles.len() / 2).copied().unwrap_or(0.0);
+            let angle = if angle.abs() < STRAIGHT { 0.0 } else { angle };
+            Self {
+                width,
+                height,
+                cos: angle.cos(),
+                sin: angle.sin(),
+            }
+        }
+        /// A corner as pixels from the top left, turned back about the centre.
+        fn pixel(&self, point: CGPoint) -> (f64, f64) {
+            let dx = point.x * self.width - self.width / 2.0;
+            let dy = (1.0 - point.y) * self.height - self.height / 2.0;
+            (
+                dx * self.cos + dy * self.sin + self.width / 2.0,
+                -dx * self.sin + dy * self.cos + self.height / 2.0,
+            )
+        }
+        /// An observation's box, straightened.
+        fn frame(&self, observation: &VNRectangleObservation) -> Frame {
+            let (tl, tr, bl, br) = unsafe {
+                (
+                    observation.topLeft(),
+                    observation.topRight(),
+                    observation.bottomLeft(),
+                    observation.bottomRight(),
+                )
+            };
+            let corners = [
+                self.pixel(tl),
+                self.pixel(tr),
+                self.pixel(bl),
+                self.pixel(br),
+            ];
+            let cx = corners.iter().map(|c| c.0).sum::<f64>() / 4.0;
+            let cy = corners.iter().map(|c| c.1).sum::<f64>() / 4.0;
+            let width =
+                ((corners[1].0 - corners[0].0).abs() + (corners[3].0 - corners[2].0).abs()) / 2.0;
+            let height =
+                ((corners[2].1 - corners[0].1).abs() + (corners[3].1 - corners[1].1).abs()) / 2.0;
+            Frame {
+                x: (cx - width / 2.0) / self.width,
+                y: (cy - height / 2.0) / self.height,
+                width: width / self.width,
+                height: height / self.height,
+            }
         }
     }
 
@@ -71,6 +137,7 @@ mod vision {
         text: &str,
         line: Frame,
         glyphs: &[Frame],
+        deskew: &Deskew,
     ) -> Option<Vec<(String, Frame)>> {
         let mut words: Vec<(String, Frame)> = Vec::new();
         let mut current: Option<(String, Frame)> = None;
@@ -89,7 +156,7 @@ mod vision {
                 continue;
             }
             let observation = unsafe { candidate.boundingBoxForRange_error(range) }.ok()?;
-            let letter = frame(unsafe { observation.boundingBox() });
+            let letter = deskew.frame(&observation);
             match &mut current {
                 Some((word, box_)) if letter.x - box_.end() <= line.height / 3.0 => {
                     word.push(char);
@@ -119,9 +186,12 @@ mod vision {
     /// Moves the words of a line onto the glyphs the detector found: the recogniser's
     /// line box is padded (a lone short word gets a box twice its width), the glyph
     /// boxes are tight. The glyphs on the line, left to right, fall into cells at the
-    /// wide gaps: wider than half the line's box height or one and a half glyph
-    /// heights, whichever is more (a word space is a third of the font size, a
-    /// table's cell gap two thirds or more). The line's letters are shared out over
+    /// wide gaps: wider than a third of the line's box height or 1.2 glyph heights,
+    /// whichever is more (a word space is a third of the font size, a table's gutter
+    /// two thirds or more; the box is 1.3 to 2 font sizes tall, a glyph about 0.55 to
+    /// 0.7, so the gap is 0.45 to 0.85 of the font size; at the earlier half and one and
+    /// a half, a statement's reference and description cells, 1.2 apart, stayed one
+    /// word, which merged the two columns for the whole table). The letters are shared out over
     /// the cells in the glyphs' proportion, at word boundaries, and each cell's words
     /// are spread over the cell's true extent.
     fn place_by_glyphs(words: &mut [(String, Frame)], line: Frame, glyphs: &[Frame]) {
@@ -142,7 +212,7 @@ mod vision {
         }
         let mut heights: Vec<f64> = on_line.iter().map(|glyph| glyph.height).collect();
         heights.sort_by(f64::total_cmp);
-        let gap = (line.height / 2.0).max(1.5 * heights[heights.len() / 2]);
+        let gap = (line.height / 3.0).max(1.2 * heights[heights.len() / 2]);
         // Cells as runs of glyph indices.
         let mut cells: Vec<(usize, usize)> = vec![(0, 0)];
         for index in 1..on_line.len() {
@@ -236,7 +306,10 @@ mod vision {
     pub fn available() -> bool {
         vietnamese().is_some()
     }
-    pub fn recognize(image: &[u8]) -> Result<OcrPage, String> {
+    pub fn recognize(image: &[u8], width: u32, height: u32) -> Result<OcrPage, String> {
+        if width == 0 || height == 0 {
+            return Err("unreadable".into());
+        }
         let vietnamese = vietnamese().ok_or("unavailable")?;
         let request = VNRecognizeTextRequest::new();
         request.setRecognitionLevel(VNRequestTextRecognitionLevel::Accurate);
@@ -261,6 +334,18 @@ mod vision {
         handler
             .performRequests_error(&requests)
             .map_err(|_| "unreadable")?;
+        let observations = request
+            .results()
+            .map(|list| list.to_vec())
+            .unwrap_or_default();
+        let deskew = Deskew::new(
+            f64::from(width),
+            f64::from(height),
+            &observations
+                .iter()
+                .map(|observation| &**observation as &VNRectangleObservation)
+                .collect::<Vec<_>>(),
+        );
         let glyphs: Vec<Frame> = unsafe { detector.results() }
             .map(|list| list.to_vec())
             .unwrap_or_default()
@@ -270,14 +355,10 @@ mod vision {
                     .map(|boxes| boxes.to_vec())
                     .unwrap_or_default()
             })
-            .map(|glyph| frame(unsafe { glyph.boundingBox() }))
+            .map(|glyph| deskew.frame(&glyph))
             .collect();
         let mut page = OcrPage::default();
-        for observation in request
-            .results()
-            .map(|list| list.to_vec())
-            .unwrap_or_default()
-        {
+        for observation in observations {
             let Some(candidate) = observation.topCandidates(1).firstObject() else {
                 continue;
             };
@@ -285,9 +366,9 @@ mod vision {
             if text.trim().is_empty() {
                 continue;
             }
-            let line = frame(unsafe { observation.boundingBox() });
+            let line = deskew.frame(&observation);
             let confidence = candidate.confidence();
-            let parts = words(&candidate, &text, line, &glyphs)
+            let parts = words(&candidate, &text, line, &glyphs, &deskew)
                 .filter(|parts| !parts.is_empty())
                 .unwrap_or_else(|| vec![(text.clone(), line)]);
             page.lines
@@ -386,15 +467,16 @@ pub fn available() -> bool {
     }
 }
 
-/// The lines of text in a PNG or JPEG picture.
-pub fn recognize(image: &[u8]) -> Result<OcrPage, String> {
+/// The lines of text in a PNG or JPEG picture of `width` × `height` pixels (the
+/// caller knows the size from the picture's header or the canvas it drew).
+pub fn recognize(image: &[u8], width: u32, height: u32) -> Result<OcrPage, String> {
     #[cfg(target_os = "macos")]
     {
-        vision::recognize(image)
+        vision::recognize(image, width, height)
     }
     #[cfg(not(target_os = "macos"))]
     {
-        let _ = image;
+        let _ = (image, width, height);
         Err("unavailable".into())
     }
 }
@@ -406,8 +488,8 @@ pub fn ocr_available() -> bool {
 
 /// Reads one picture off the web view's thread. The bytes are held only for the call.
 #[tauri::command]
-pub async fn ocr_page(image: Vec<u8>) -> Result<OcrPage, String> {
-    tauri::async_runtime::spawn_blocking(move || recognize(&image))
+pub async fn ocr_page(image: Vec<u8>, width: u32, height: u32) -> Result<OcrPage, String> {
+    tauri::async_runtime::spawn_blocking(move || recognize(&image, width, height))
         .await
         .map_err(|_| "unavailable".to_string())?
 }

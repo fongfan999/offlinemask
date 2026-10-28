@@ -13,6 +13,59 @@ const emailShape = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** Field instructions carry Word syntax ("PAGE", "MERGEFORMAT", "HYPERLINK"), never prose. */
 const prose = new Set(["TEN", "DIA_CHI", "TO_CHUC"]);
 
+const alphanumeric = /[\p{L}\p{N}]/u;
+/** A value hidden once is hidden wherever else it appears whole in the document, with
+ * the same alias (decision 0171): the detector reads each paragraph on its own, and
+ * a value's second occurrence may sit where its cue is missing, a transfer line whose
+ * account number text recognition garbled before the name, or a form whose label a
+ * line break split. Only values that mean the same wherever they stand: a person's
+ * name of two words or more, or six characters with a digit (an account, a phone, an
+ * identity number). Not places or organizations: "Thành phố Hồ Chí Minh" hidden as a
+ * residence is kept inside "Ủy ban nhân dân Thành phố Hồ Chí Minh" (decision 0159), and
+ * repeating it there masked 28 such phrases on the scanned set. These lose to any
+ * detection at the same place. */
+export function repeatedValues(
+  paragraphs: readonly DocParagraph[],
+  detections: ReadonlyMap<number, readonly Detection[]>,
+): Map<number, Detection[]> {
+  const values = new Map<string, Detection>();
+  for (const paragraph of paragraphs)
+    for (const detection of detections.get(paragraph.id) ?? []) {
+      const value = paragraph.text.slice(detection.start, detection.end);
+      const qualifies =
+        (detection.type === "TEN" && /\S\s+\S/u.test(value.trim())) ||
+        (!prose.has(detection.type) && value.length >= 6 && /\p{N}/u.test(value));
+      if (qualifies && !values.has(value)) values.set(value, detection);
+    }
+  const repeats = new Map<number, Detection[]>();
+  for (const paragraph of paragraphs) {
+    const own = detections.get(paragraph.id) ?? [];
+    const extra: Detection[] = [];
+    for (const [value, detection] of values)
+      for (
+        let at = paragraph.text.indexOf(value);
+        at >= 0;
+        at = paragraph.text.indexOf(value, at + 1)
+      ) {
+        const end = at + value.length;
+        const whole =
+          !(at > 0 && alphanumeric.test(paragraph.text[at - 1]!)) &&
+          !(end < paragraph.text.length && alphanumeric.test(paragraph.text[end]!));
+        if (!whole || own.some((other) => other.start < end && other.end > at)) continue;
+        extra.push({
+          ...detection,
+          start: at,
+          end,
+          source: "Giá trị đã ẩn ở chỗ khác trong tài liệu",
+          reason: "Cùng giá trị đã được ẩn ở đoạn khác của tài liệu.",
+          priority: 1,
+        });
+      }
+    if (extra.length) repeats.set(paragraph.id, extra);
+  }
+  return repeats;
+}
+
 /** Mask every paragraph with its detections; one alias per type and value across the
  * document, and `mailto:` link targets get the same email alias as the text. */
 export function maskParagraphs(
@@ -26,9 +79,10 @@ export function maskParagraphs(
     .filter((text) => text.includes("["));
   const book = new AliasBook(scope, (alias) => existing.some((text) => text.includes(alias)));
   const edits: DocEdits = { paragraphs: new Map(), links: new Map() };
+  const repeats = repeatedValues(paragraphs, detections);
   let masked = 0;
   for (const paragraph of paragraphs) {
-    const found = detections.get(paragraph.id) ?? [];
+    const found = [...(detections.get(paragraph.id) ?? []), ...(repeats.get(paragraph.id) ?? [])];
     const replacements = detectionReplacements(
       paragraph.text,
       paragraph.field ? found.filter((d) => !prose.has(d.type)) : found,

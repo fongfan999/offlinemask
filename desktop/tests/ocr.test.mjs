@@ -4,7 +4,7 @@ import { PDFDocument } from "pdf-lib";
 import { openDocument, writeDocument } from "../src/core/doc/document.ts";
 import { maskParagraphs } from "../src/core/doc/mask.ts";
 import { imageSize, ocrNote, ocrTextItems, openImage } from "../src/core/doc/ocr.ts";
-import { openPdf, readByPlace } from "../src/core/doc/pdf.ts";
+import { OffscreenCanvasFactory, openPdf, readByPlace } from "../src/core/doc/pdf.ts";
 import { fileKind } from "../src/core/file-kind.ts";
 import { fixtures, noisePng } from "./pdf-fixtures.mjs";
 
@@ -59,6 +59,28 @@ test("recognised words become text items placed like pdf.js's, with y upwards", 
     { str: "Họ ", transform: [size, 0, 0, size, 100, 1470], width: 50 },
     { str: "tên:", transform: [size, 0, 0, size, 160, 1470], width: 100 },
   ]);
+});
+
+test("a bar inside a word parts two glued cells; bars at the edges are dropped", () => {
+  const items = ocrTextItems(
+    {
+      lines: [
+        line("21/10/2026|FT26203861639", 0.1, 0.2, 0.24, 0.03),
+        line("|Nap", 0.5, 0.2, 0.04, 0.03),
+      ],
+    },
+    1000,
+    2000,
+  );
+  assert.deepEqual(
+    items.map((item) => [item.str, Math.round(item.transform[4]), Math.round(item.width)]),
+    // 240 pixels for 23 letters and a rule worth a letter and a half.
+    [
+      ["21/10/2026 ", 100, 98],
+      ["FT26203861639", 213, 127],
+      ["Nap", 500, 40],
+    ],
+  );
 });
 
 test("a picture reads by place: a form row, a table and a wrapped paragraph", async () => {
@@ -218,4 +240,78 @@ test("pictures open on Tài liệu only where the machine reads them", () => {
   assert.equal(fileKind("ảnh.JPG", { images: true }), "word");
   assert.equal(fileKind("ảnh.heic", { images: true }), "upcoming");
   assert.equal(fileKind("hồ sơ.pdf", { images: true }), "word");
+});
+
+test("a value hidden once is hidden wherever else it appears whole, with the same alias", async () => {
+  const { maskParagraphs, repeatedValues } = await import("../src/core/doc/mask.ts");
+  const paragraphs = [
+    { id: 0, part: "p", text: "VU HUU VIET chuyen tien den TK 766227950 NGUYEN MINH HUNG" },
+    { id: 1, part: "p", text: "41786 FT NGUYEN MINH HUNG(" },
+    {
+      id: 2,
+      part: "p",
+      text: "Số CCCD: 048077893214 · HUNG không phải tên; 766227950x cũng không",
+    },
+    { id: 3, part: "p", text: "Nam" },
+    { id: 4, part: "p", text: "Địa chỉ: 12 Lê Lợi, Thành phố Hồ Chí Minh" },
+    { id: 5, part: "p", text: "Ủy ban nhân dân Thành phố Hồ Chí Minh" },
+  ];
+  const detection = (start, end, type) => ({
+    start,
+    end,
+    type,
+    label: type,
+    source: "test",
+    reason: "test",
+    priority: 100,
+  });
+  const detections = new Map([
+    [0, [detection(31, 40, "STK"), detection(41, 57, "TEN")]],
+    [2, [detection(9, 21, "CCCD")]],
+    [3, [detection(0, 3, "TEN")]],
+    [4, [detection(9, 41, "DIA_CHI"), detection(20, 41, "DIA_CHI")]],
+  ]);
+  const repeats = repeatedValues(paragraphs, detections);
+  assert.deepEqual([...repeats.keys()], [1]);
+  assert.deepEqual(
+    repeats.get(1).map((d) => [d.type, paragraphs[1].text.slice(d.start, d.end), d.priority]),
+    [["TEN", "NGUYEN MINH HUNG", 1]],
+  );
+  const { edits } = maskParagraphs(paragraphs, detections, "4aae");
+  const alias = (id) => edits.paragraphs.get(id).map((r) => r.text);
+  assert.deepEqual(alias(1), alias(0).slice(1));
+  // A one-word name and a number glued to a letter are not repeated, nor a place
+  // (its words recur inside names of state bodies that stay readable).
+  assert.equal(edits.paragraphs.get(2).length, 1);
+  assert.equal(edits.paragraphs.get(5), undefined);
+});
+
+test("the worker's canvas factory is a class pdf.js can construct, making OffscreenCanvases", () => {
+  // pdf.js does `new CanvasFactory({ ownerDocument, enableHWA })`; a plain object threw
+  // before any page was read in the desktop app (decision 0171).
+  const made = [];
+  globalThis.OffscreenCanvas = class {
+    constructor(width, height) {
+      this.width = width;
+      this.height = height;
+      made.push(this);
+    }
+    getContext(kind) {
+      return { kind };
+    }
+  };
+  try {
+    const factory = new OffscreenCanvasFactory({ ownerDocument: undefined, enableHWA: false });
+    const target = factory.create(4, 3);
+    assert.deepEqual(
+      [target.canvas.width, target.canvas.height, target.context],
+      [4, 3, { kind: "2d" }],
+    );
+    factory.reset(target, 8, 6);
+    assert.deepEqual([made[0].width, made[0].height], [8, 6]);
+    factory.destroy(target);
+    assert.deepEqual([made[0].width, target.canvas, target.context], [0, null, null]);
+  } finally {
+    delete globalThis.OffscreenCanvas;
+  }
 });

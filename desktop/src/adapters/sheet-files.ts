@@ -40,8 +40,8 @@ export function createSheetFiles() {
       }
       if (event.data.type === "ocr") {
         // A page or picture to read with the system's text recognition (decision 0171).
-        const { id, image } = event.data;
-        void recognizeImage(new Uint8Array(image)).then(
+        const { id, image, width, height } = event.data;
+        void recognizeImage(new Uint8Array(image), width, height).then(
           (page) => worker?.postMessage({ type: "ocr-result", id, page } satisfies FilesRequest),
           () => worker?.postMessage({ type: "ocr-result", id, error: true } satisfies FilesRequest),
         );

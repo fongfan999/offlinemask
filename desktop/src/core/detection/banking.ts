@@ -30,6 +30,20 @@ const rules: readonly Rule[] = [
     reason: "Dãy số sau nhãn tài khoản; cần kiểm tra lại theo ngữ cảnh.",
   },
   {
+    type: "STK",
+    label: "Số tài khoản",
+    // Transfer wording puts the account right after "den" ("chuyen tien den TK
+    // 0123456789"). The "TK" may come out of text recognition as a letter or nothing
+    // (decision 0171: "chuyen tien den T 96873162835"), so after "chuyen tien den" or
+    // "chuyen khoan den" a number six digits or longer is an account whatever one short
+    // token sits between; with "TK" there, the rule above already has it.
+    pattern: new RegExp(
+      `(?<=(?:chuyen tien|chuyen khoan|ck) den(?:${blank}(?!tk${blank})[A-Za-z]{1,2})?${blank})(\\d{6,20})(?![\\p{L}\\p{N}_]|[ -]?\\d)`,
+      "giu",
+    ),
+    reason: "Dãy số sau 'chuyen tien den' trong nội dung chuyển khoản.",
+  },
+  {
     type: "CCCD",
     label: "Số giấy tờ tùy thân",
     // "Số định danh cá nhân" is the official name of the 12-digit number (decision 0159).

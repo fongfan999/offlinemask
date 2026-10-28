@@ -2,6 +2,12 @@
   "version": "0.0.1",
   "configurations": [
     {
+      "name": "app",
+      "runtimeExecutable": "mise",
+      "runtimeArgs": ["exec", "--", "pnpm", "-C", "desktop", "desktop:dev"],
+      "port": 1420
+    },
+    {
       "name": "web",
       "runtimeExecutable": "mise",
       "runtimeArgs": ["exec", "--", "pnpm", "-C", "desktop", "dev"],

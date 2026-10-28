@@ -20,7 +20,12 @@ export async function ocrAvailable(): Promise<boolean> {
   }
 }
 
-/** The lines of text in a PNG or JPEG picture. The bytes are held only for the call. */
-export async function recognizeImage(image: Uint8Array): Promise<OcrPage> {
-  return invoke<OcrPage>("ocr_page", { image: Array.from(image) });
+/** The lines of text in a PNG or JPEG picture of `width` × `height` pixels. The bytes
+ * are held only for the call. */
+export async function recognizeImage(
+  image: Uint8Array,
+  width: number,
+  height: number,
+): Promise<OcrPage> {
+  return invoke<OcrPage>("ocr_page", { image: Array.from(image), width, height });
 }

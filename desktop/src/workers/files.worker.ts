@@ -38,7 +38,7 @@ export type FilesRequest =
   | { type: "ocr-result"; id: number; page?: OcrPage; error?: boolean };
 export type FilesResponse =
   | { type: "opened"; id: number; tables: SheetTable[]; notes: string[] }
-  | { type: "ocr"; id: number; image: ArrayBuffer }
+  | { type: "ocr"; id: number; image: ArrayBuffer; width: number; height: number }
   | {
       type: "opened-doc";
       id: number;
@@ -57,7 +57,7 @@ const cancelled = new Set<number>();
 /** Pictures sent to the main thread for recognition, awaiting their lines. */
 const recognising = new Map<number, { resolve: (page: OcrPage) => void; reject: () => void }>();
 let recognition = 0;
-const recognise = (image: Uint8Array): Promise<OcrPage> =>
+const recognise = (image: Uint8Array, width: number, height: number): Promise<OcrPage> =>
   new Promise((resolve, reject) => {
     const id = ++recognition;
     recognising.set(id, { resolve, reject });
@@ -65,7 +65,7 @@ const recognise = (image: Uint8Array): Promise<OcrPage> =>
       image.byteOffset,
       image.byteOffset + image.byteLength,
     ) as ArrayBuffer;
-    send({ type: "ocr", id, image: buffer }, [buffer]);
+    send({ type: "ocr", id, image: buffer, width, height }, [buffer]);
   });
 
 function send(message: FilesResponse, transfer: Transferable[] = []) {

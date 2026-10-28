@@ -27,8 +27,9 @@ export interface OcrLine {
 export interface OcrPage {
   lines: OcrLine[];
 }
-/** Reads a PNG or JPEG picture. Rejects when no engine is available. */
-export type OcrEngine = (image: Uint8Array) => Promise<OcrPage>;
+/** Reads a PNG or JPEG picture of the given size in pixels. Rejects when no engine is
+ * available. */
+export type OcrEngine = (image: Uint8Array, width: number, height: number) => Promise<OcrPage>;
 
 /** A pdf.js text item built from a recognised word: in the picture's pixels, with y
  * upwards as on a PDF page. The engine's boxes are too loose to stand for the font
@@ -37,7 +38,7 @@ export type OcrEngine = (image: Uint8Array) => Promise<OcrPage>;
  * the document fonts measured (`advances`, in font sizes: a least-squares fit over
  * 2 628 pieces of the text PDFs, which puts 90 % of lines within ±8 % of their size).
  * The words of one line share its box's y and height, which tells them apart. A word
- * that is only a bar is a table rule the engine read as text. */
+ * that is only a bar is a table rule the engine read as text (`unbar`). */
 export interface OcrTextItem {
   str: string;
   transform: number[];
@@ -60,8 +61,31 @@ function advance(text: string): number {
   }
   return sum;
 }
+/** A bar inside a word is a table rule the engine read as text between two cells it
+ * glued ("21/10/2026|FT26203861639"): the word is parted there, each part keeping its
+ * share of the box and the rule its own, a letter and a half wide, so the parts stand
+ * apart as two cells do. A word that is only bars is dropped. */
+const ruleLetters = 1.5;
+function unbar(word: OcrLine): OcrLine[] {
+  const text = word.text.replace(/^\|+|\|+$/g, "");
+  const parts = text.split("|").map((part, index, all) => ({
+    text: index + 1 < all.length ? `${part} ` : part,
+    letters: part.replace(/\s/g, "").length,
+  }));
+  const letters = parts.reduce((sum, part) => sum + part.letters, 0);
+  if (!letters) return [];
+  if (parts.length === 1) return [{ ...word, text }];
+  const unit = word.width / (letters + ruleLetters * (parts.length - 1));
+  let x = word.x;
+  const out: OcrLine[] = [];
+  for (const part of parts) {
+    if (part.letters) out.push({ ...word, text: part.text, x, width: unit * part.letters });
+    x += unit * (part.letters + ruleLetters);
+  }
+  return out;
+}
 export function ocrTextItems(page: OcrPage, width: number, height: number): OcrTextItem[] {
-  const words = page.lines.filter((line) => line.text.trim() && line.text.trim() !== "|");
+  const words = page.lines.flatMap(unbar).filter((line) => line.text.trim());
   const sizes = new Map<string, number>();
   const lineKey = (word: OcrLine) => `${word.y}:${word.height}`;
   for (const key of new Set(words.map(lineKey))) {
@@ -136,7 +160,7 @@ export async function openImage(
   if (size.width * size.height > maxImagePixels) throw new DocFileError("too-large");
   let page: OcrPage;
   try {
-    page = await engine(bytes);
+    page = await engine(bytes, size.width, size.height);
   } catch {
     throw new DocFileError("unreadable");
   }
