@@ -137,9 +137,20 @@ The over-masked that remain are the engine's misreads of a heading or a label, e
 - `@napi-rs/canvas` 1.0.13 (MIT) as a development dependency: pdf.js draws pages in Node through it, for the rasteriser and the measurement. It was ignored as pdf.js's optional dependency since 0149, when nothing drew; the app's worker draws with `OffscreenCanvas` and never loads it.
 - Context7 was not available in this session; the Vision API was checked against the crate's documentation and a Swift probe, and pdf.js's drawing options against the package's type declarations.
 
+## Windows
+
+Checked on the owner's Windows PC (Windows 11 Pro 10.0.26200, 28 October 2026). **Windows.Media.Ocr does not read Vietnamese**, so the premise above, that it does once the language pack is installed, does not hold:
+
+- Settings › Time & language › Language & region › Tiếng Việt offers the language pack, text-to-speech, handwriting and basic typing, and no optical character recognition feature; after installing Tiếng Việt, `OcrEngine.AvailableRecognizerLanguages` lists `en-US` alone and `C:\Windows\OCR` holds `en-us` alone.
+- The English recogniser on the picture of seed 1's `contract-labour-1` writes 0 of the 45 tone-marked vowels, nor ă â đ ê ô ơ ư, in 1 280 characters: "CONG HÖA xÄ HÖI CHÜ NGHiA VIET NAM", "Büi Thanh Nhung", "Nguyén Thi Minh Khai". Like PaddleOCR's Latin models it cannot write the language, so it is not measured on the 703 scans: no value with a Vietnamese letter could be read verbatim, and a name read "Büi" is a name the policy may not mask.
+
+What is built: the native module's Windows side (`media_ocr` in `src-tauri/src/ocr.rs`, the `windows` crate's `Media_Ocr`, `Graphics_Imaging`, `Storage_Streams`, `Globalization` and `Foundation_Collections` features, no other dependency): the picture decoded in memory by `BitmapDecoder`, read by `OcrEngine.TryCreateFromLanguage` with the Vietnamese recogniser, each word with the engine's own box (no second pass as on macOS, the boxes are the glyphs'), the page's reported `TextAngle` turned back as the Mac turns back Vision's corners. `available()` is true only where Windows lists a recogniser whose tag starts with `vi`, which today is nowhere; and `ocr_available` also requires `WINDOWS_SHIPPED`, off, so a future Windows that lists Vietnamese changes nothing until it is measured with `ocr-check` (renamed from `ocr-vision-check`) and the scripts above, and the privacy page says so (`tests/privacy-contract.test.mjs`). On Windows the app keeps "Hình ảnh · Sắp có" and its messages.
+
+So Windows needs an engine of its own: VietOCR as a downloaded pack (MIT, 150 MB, see the candidates), measured against Tesseract's floor and the bar of this decision, or Mac-only for now. The owner's decision.
+
 ## Not decided here
 
-- **Windows.** Windows.Media.Ocr, measured on a Windows machine with the scripts above, or a downloaded pack with a licensed Vietnamese model (VietOCR) if the OS engine is not good enough. Tesseract's numbers above are the floor a candidate must beat.
+- **Windows.** Windows.Media.Ocr has no Vietnamese recogniser (see "Windows"); a downloaded pack with a licensed Vietnamese model (VietOCR) or Mac-only. Tesseract's numbers above are the floor a candidate must beat.
 - **Pages in old fonts** (0149's `old-font`) could be drawn and read like scans, which may read them better than their text layer; unmeasured.
 - **Skewed or photographed pages:** Vision reads them, but the layout step assumes lines run across the page; a photo at an angle reads line by line without its tables.
 - **HEIC and WebP** pictures stay "upcoming": Vision reads both, but the picture's size would need decoding in the worker.
