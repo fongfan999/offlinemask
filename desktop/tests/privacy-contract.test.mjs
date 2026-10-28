@@ -110,6 +110,15 @@ test("text in pictures is read by the system's own engine, on the machine, only 
     assert.match(page, /bộ nhận dạng ký tự có sẵn của hệ điều hành \(Vision của Apple/, UPDATE);
     assert.match(page, /ảnh không được lưu lại và không có trong bản đã ẩn/, UPDATE);
   } else assert.doesNotMatch(page, /nhận dạng ký tự|Vision/, UPDATE);
+  // On Windows the system's engine is Windows.Media.Ocr, offered by the app only once
+  // `WINDOWS_SHIPPED` is on; until then the page says Windows has none.
+  assert.match(ocr, /use windows::Media::Ocr::OcrEngine;/, UPDATE);
+  const windows = /pub const WINDOWS_SHIPPED: bool = (true|false);/.exec(ocr);
+  assert.ok(windows, UPDATE);
+  if (windows[1] === "true" && shipped[1] === "true") {
+    assert.match(page, /Windows\.Media\.Ocr/, UPDATE);
+    assert.doesNotMatch(page, /Trên Windows, phần này chưa có/, UPDATE);
+  } else assert.doesNotMatch(page, /Windows\.Media\.Ocr/, UPDATE);
 });
 
 test("the app's system permissions are the ones the page explains (privacy §5)", () => {

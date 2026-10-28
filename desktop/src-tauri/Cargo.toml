@@ -40,8 +40,8 @@ required-features = ["native-inference-prototype"]
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
-name = "ocr-vision-check"
-path = "src/bin/ocr_vision_check.rs"
+name = "ocr-check"
+path = "src/bin/ocr_check.rs"
 required-features = ["recognition-evaluation"]
 
 [[bin]]
@@ -105,6 +105,12 @@ windows = { version = "=0.62.2", features = [
   "ApplicationModel",
   "ApplicationModel_Activation",
   "Foundation",
+  "Foundation_Collections",
+  # Text in scanned pages and images is read by Windows.Media.Ocr (decision 0171).
+  "Globalization",
+  "Graphics_Imaging",
+  "Media_Ocr",
+  "Storage_Streams",
   "Win32_Foundation",
   "Win32_Graphics_Gdi",
   "Win32_System_Com",

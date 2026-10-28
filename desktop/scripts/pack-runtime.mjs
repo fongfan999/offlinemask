@@ -33,7 +33,10 @@ export function installedPackRoot() {
 }
 
 function nativeEncoder(root, directory) {
-  const binary = join(repo, "src-tauri/target/release/recognition-tokenizer-check");
+  const binary = join(
+    repo,
+    `src-tauri/target/release/recognition-tokenizer-check${process.platform === "win32" ? ".exe" : ""}`,
+  );
   if (!existsSync(binary))
     throw new Error("Build the tokenizer harness first (see the header of scripts/pack-runtime.mjs).");
   const child = spawn(binary, [root, directory], { stdio: ["pipe", "pipe", "inherit"] });

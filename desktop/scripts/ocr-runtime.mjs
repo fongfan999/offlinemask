@@ -1,7 +1,7 @@
 // The app's own text recognition for the measurements (decision 0171): the native
 // `ocr` module, through the evaluation binary built with
 //   cargo build --manifest-path src-tauri/Cargo.toml --release \
-//     --features recognition-evaluation --bin ocr-vision-check
+//     --features recognition-evaluation --bin ocr-check
 // Each picture is written to a temporary file the binary reads, with its size in pixels;
 // nothing is kept.
 import assert from "node:assert/strict";
@@ -13,7 +13,10 @@ import { createInterface } from "node:readline";
 import { fileURLToPath } from "node:url";
 
 const binary = fileURLToPath(
-  new URL("../src-tauri/target/release/ocr-vision-check", import.meta.url),
+  new URL(
+    `../src-tauri/target/release/ocr-check${process.platform === "win32" ? ".exe" : ""}`,
+    import.meta.url,
+  ),
 );
 
 /** An `OcrEngine` for `openDocument`, started on first use. `dispose` stops it. */

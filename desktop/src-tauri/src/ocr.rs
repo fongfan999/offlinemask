@@ -1,8 +1,9 @@
 //! Text in pictures (decision 0171): a scanned PDF page or an image is read by the
-//! operating system's own text recognition, Apple's Vision framework on macOS, on this
-//! machine. No model is downloaded, no file is written and nothing leaves the computer:
-//! the picture comes from the web view as PNG or JPEG bytes and goes back as lines of
-//! text with their places on the page. Other systems have no engine yet and report so.
+//! operating system's own text recognition, Apple's Vision framework on macOS and
+//! Windows.Media.Ocr on Windows, on this machine. No model is downloaded, no file is
+//! written and nothing leaves the computer: the picture comes from the web view as PNG
+//! or JPEG bytes and goes back as lines of text with their places on the page. Other
+//! systems have no engine yet and report so.
 use serde::Serialize;
 
 /// One recognised word and its box, in fractions of the image (origin top left). The
@@ -455,13 +456,142 @@ mod vision {
     }
 }
 
+#[cfg(windows)]
+mod media_ocr {
+    use super::{OcrLine, OcrPage};
+    use windows::Globalization::Language;
+    use windows::Graphics::Imaging::BitmapDecoder;
+    use windows::Media::Ocr::OcrEngine;
+    use windows::Storage::Streams::{DataWriter, InMemoryRandomAccessStream};
+
+    /// The Vietnamese recogniser Windows lists, if any: Windows.Media.Ocr reads a
+    /// language only once its language pack, with the pack's text recognition, is
+    /// installed in Windows (Settings › Time & language › Language & region).
+    fn vietnamese() -> Option<Language> {
+        let languages = OcrEngine::AvailableRecognizerLanguages().ok()?;
+        (0..languages.Size().ok()?)
+            .filter_map(|index| languages.GetAt(index).ok())
+            .find(|language| {
+                language
+                    .LanguageTag()
+                    .is_ok_and(|tag| tag.to_string().to_lowercase().starts_with("vi"))
+            })
+    }
+    pub fn available() -> bool {
+        vietnamese().is_some()
+    }
+
+    /// Below this the page is straight (0.15 degrees), as on macOS.
+    const STRAIGHT: f64 = 0.0026;
+
+    pub fn recognize(image: &[u8], width: u32, height: u32) -> Result<OcrPage, String> {
+        if width == 0 || height == 0 {
+            return Err("unreadable".into());
+        }
+        let language = vietnamese().ok_or("unavailable")?;
+        let engine = OcrEngine::TryCreateFromLanguage(&language).map_err(|_| "unavailable")?;
+        let unreadable = |_| "unreadable".to_string();
+        // The picture's bytes go into a stream in memory for the system's decoder; nothing
+        // is written to disk.
+        let stream = InMemoryRandomAccessStream::new().map_err(unreadable)?;
+        let writer = DataWriter::CreateDataWriter(&stream).map_err(unreadable)?;
+        writer.WriteBytes(image).map_err(unreadable)?;
+        writer
+            .StoreAsync()
+            .and_then(|store| store.join())
+            .map_err(unreadable)?;
+        writer.DetachStream().map_err(unreadable)?;
+        stream.Seek(0).map_err(unreadable)?;
+        let decoder = BitmapDecoder::CreateAsync(&stream)
+            .and_then(|decode| decode.join())
+            .map_err(unreadable)?;
+        let (pixels_x, pixels_y) = (
+            f64::from(decoder.PixelWidth().map_err(unreadable)?),
+            f64::from(decoder.PixelHeight().map_err(unreadable)?),
+        );
+        let max = OcrEngine::MaxImageDimension().unwrap_or(u32::MAX);
+        if pixels_x > f64::from(max) || pixels_y > f64::from(max) {
+            return Err("unreadable".into());
+        }
+        let bitmap = decoder
+            .GetSoftwareBitmapAsync()
+            .and_then(|decode| decode.join())
+            .map_err(unreadable)?;
+        let result = engine
+            .RecognizeAsync(&bitmap)
+            .and_then(|recognise| recognise.join())
+            .map_err(unreadable)?;
+        // Windows reports the page's skew itself, clockwise in degrees: every word's box
+        // is turned back by it about the picture's centre, as the Mac does from Vision's
+        // corners.
+        let angle = result
+            .TextAngle()
+            .and_then(|angle| angle.Value())
+            .map(f64::to_radians)
+            .unwrap_or(0.0);
+        let angle = if angle.abs() < STRAIGHT { 0.0 } else { angle };
+        let (cos, sin) = (angle.cos(), angle.sin());
+        let straighten = |x: f64, y: f64| {
+            let (dx, dy) = (x - pixels_x / 2.0, y - pixels_y / 2.0);
+            (
+                dx * cos + dy * sin + pixels_x / 2.0,
+                -dx * sin + dy * cos + pixels_y / 2.0,
+            )
+        };
+        let mut page = OcrPage::default();
+        let lines = result.Lines().map_err(unreadable)?;
+        for line in (0..lines.Size().unwrap_or(0)).filter_map(|index| lines.GetAt(index).ok()) {
+            let Ok(list) = line.Words() else { continue };
+            // The recogniser's word boxes are the glyphs' own, so no second pass places
+            // them: each word keeps its box across, the line's up and down, and the space
+            // between words on the word before it.
+            let words: Vec<(String, f64, f64, f64, f64)> = (0..list.Size().unwrap_or(0))
+                .filter_map(|index| list.GetAt(index).ok())
+                .filter_map(|word| {
+                    let text = word.Text().ok()?.to_string();
+                    let rect = word.BoundingRect().ok()?;
+                    let (w, h) = (f64::from(rect.Width), f64::from(rect.Height));
+                    let (cx, cy) =
+                        straighten(f64::from(rect.X) + w / 2.0, f64::from(rect.Y) + h / 2.0);
+                    (!text.trim().is_empty()).then_some((text, cx - w / 2.0, cy - h / 2.0, w, h))
+                })
+                .collect();
+            let Some(top) = words.iter().map(|word| word.2).min_by(f64::total_cmp) else {
+                continue;
+            };
+            let bottom = words.iter().map(|word| word.2 + word.4).fold(top, f64::max);
+            let count = words.len();
+            page.lines.extend(words.into_iter().enumerate().map(
+                |(index, (text, x, _, width, _))| OcrLine {
+                    text: if index + 1 < count {
+                        format!("{text} ")
+                    } else {
+                        text
+                    },
+                    // Windows gives no confidence.
+                    confidence: 1.0,
+                    x: x / pixels_x,
+                    y: top / pixels_y,
+                    width: width / pixels_x,
+                    height: (bottom - top) / pixels_y,
+                },
+            ));
+        }
+        Ok(page)
+    }
+}
+
 /// Whether this machine can read text in pictures.
 pub fn available() -> bool {
     #[cfg(target_os = "macos")]
     {
         vision::available()
     }
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(windows)]
+    {
+        media_ocr::available()
+    }
+    #[cfg(not(any(target_os = "macos", windows)))]
     {
         false
     }
@@ -474,16 +604,26 @@ pub fn recognize(image: &[u8], width: u32, height: u32) -> Result<OcrPage, Strin
     {
         vision::recognize(image, width, height)
     }
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(windows)]
+    {
+        media_ocr::recognize(image, width, height)
+    }
+    #[cfg(not(any(target_os = "macos", windows)))]
     {
         let _ = (image, width, height);
         Err("unavailable".into())
     }
 }
 
+/// Whether the app reads pictures on Windows. The engine above is built and measured
+/// on its own (decision 0171, "Windows"); the app offers it only once the owner turns
+/// this on, and `landing/privacy.html` names Windows exactly then
+/// (`tests/privacy-contract.test.mjs`). The evaluation harness reads `available()`.
+pub const WINDOWS_SHIPPED: bool = false;
+
 #[tauri::command]
 pub fn ocr_available() -> bool {
-    available()
+    available() && (WINDOWS_SHIPPED || !cfg!(windows))
 }
 
 /// Reads one picture off the web view's thread. The bytes are held only for the call.

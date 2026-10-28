@@ -135,7 +135,6 @@ mod imp {
 
 #[cfg(windows)]
 mod imp {
-    use std::ffi::c_void;
     use std::thread::sleep;
     use std::time::Duration;
 
@@ -185,7 +184,7 @@ mod imp {
     /// `EmptyClipboard`.
     fn owner<R: Runtime>(app: &AppHandle<R>) -> Option<HWND> {
         let window = app.get_webview_window("main")?;
-        Some(HWND(window.hwnd().ok()?.0 as *mut c_void))
+        Some(HWND(window.hwnd().ok()?.0))
     }
     /// Another application may hold the clipboard open for a moment.
     struct Open;
@@ -299,8 +298,10 @@ mod imp {
         // SAFETY: the clipboard is open; the handle is read, not kept.
         let bytes = unsafe { bytes_of(GetClipboardData(CF_UNICODETEXT.0 as u32).ok()?)? };
         let units: Vec<u16> = bytes
-            .chunks_exact(2)
-            .map(|pair| u16::from_le_bytes([pair[0], pair[1]]))
+            .as_chunks::<2>()
+            .0
+            .iter()
+            .map(|pair| u16::from_le_bytes(*pair))
             .take_while(|unit| *unit != 0)
             .collect();
         String::from_utf16(&units).ok()
