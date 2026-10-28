@@ -37,7 +37,7 @@ test("every mechanism is on by default and comes back on after a measurement", (
   setVetoes([]);
   assert.deepEqual(values(heading, org(heading)), []);
   assert.throws(() => setVetoes(["nonsense"]), /Unknown veto/);
-  assert.ok(vetoNames.length >= 10);
+  assert.ok(vetoNames.length >= 8);
 });
 
 test("a comparison plans the shipping run, the candidate and one ablation per mechanism", () => {
@@ -71,13 +71,13 @@ test("an ablation that brings nothing back marks a mechanism the pack no longer 
     over,
     unlisted,
   });
-  const runs = planRuns({ candidate: true, ablate: ["phrases", "capitalHeadings", "trims"] });
+  const runs = planRuns({ candidate: true, ablate: ["phrases", "capitalHeadings", "singleWords"] });
   const results = {
     shipping: { "seed 1": totals(0), invoices: totals(0) },
     candidate: { "seed 1": totals(1), invoices: totals(0) },
     "candidate without phrases": { "seed 1": totals(1), invoices: totals(0) },
     "candidate without capitalHeadings": { "seed 1": totals(4), invoices: totals(0, 0, 1) },
-    "candidate without trims": { "seed 1": totals(0), invoices: totals(0, 2) },
+    "candidate without singleWords": { "seed 1": totals(0), invoices: totals(0, 2) },
   };
   const verdicts = judgeAblations(runs, results);
   assert.deepEqual(verdicts, [
@@ -87,7 +87,7 @@ test("an ablation that brings nothing back marks a mechanism the pack no longer 
       needed: true,
       returned: { "seed 1": { over: 3 }, invoices: { unlisted: 1 } },
     },
-    { veto: "trims", needed: true, returned: { invoices: { leaked: 2 } } },
+    { veto: "singleWords", needed: true, returned: { invoices: { leaked: 2 } } },
   ]);
   const markdown = comparisonMarkdown({
     at: "2026-10-27T10:00:00.000Z",

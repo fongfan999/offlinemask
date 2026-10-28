@@ -93,8 +93,7 @@
       "khoa": ["học"],
       "ban": ["quản lý", "giám đốc", "mê"],
       "đội": ["cấn"]
-    },
-    "inPlaces": ["phòng", "khoa"]
+    }
   },
   "tradeSyllables": [
     "sản",

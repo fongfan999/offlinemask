@@ -85,7 +85,6 @@ export const vocabulary = {
     kindAlternation: alternation(organizations.kinds),
     kindAlone: new RegExp(`^${alternation(organizations.kindAlone)}$`, "iu"),
     unitKinds: organizations.units.kinds,
-    unitInPlaces: organizations.units.inPlaces,
     notUnits: organizations.units.notUnits as Record<string, readonly string[]>,
     tradeSyllables: accentedOrFolded(organizations.tradeSyllables),
     compounds: accentedOrFolded(organizations.compounds),

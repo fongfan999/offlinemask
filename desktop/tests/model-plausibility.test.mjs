@@ -1,7 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
-  brandInCapitals,
   modelDetections,
   plausibleContextualSpan,
   plausibleModelDetections,
@@ -297,13 +296,6 @@ test("invoice wording, a country alone and a brand in capitals are not names or 
     assert.equal(plausibleContextualSpan("DIA_CHI", place), true, place);
 });
 
-test("a brand in capitals is no Vietnamese syllable; Vietnamese names in capitals are", () => {
-  for (const brand of ["VISSAN", "PACOW", "WINECO", "JEMMIA", "FPT", "KIMSAN"])
-    assert.equal(brandInCapitals(brand), true, brand);
-  for (const name of ["NGUYỄN", "HÀ", "TRANG", "QUỲNH", "NGHIÊM", "Vissan", "An"])
-    assert.equal(brandInCapitals(name), false, name);
-});
-
 test("an organization a rule completes and a model continues is one organization", () => {
   const text = "Tên đơn vị: Công ty Cổ phần Thương mại Tổng hợp Bình Minh";
   const { complete } = applyDetectionPolicy(text, [
@@ -335,7 +327,9 @@ test("an organization a rule completes and a model continues is one organization
   assert.equal(separate.length, 2);
 });
 
-test("brands are trimmed from names, and a brand in a product cell is not an organization", () => {
+test("a brand in a product cell is not a name or an organization; a foreign name in capitals is whole", () => {
+  // Brands at a name's edges are no longer trimmed (decision 0170): a product cell is
+  // vetoed whole by its unit, and a foreign given name in capitals stays with the family name.
   const text =
     "4\tVISSAN Xúc xích bò gói 280g\tG1\n5\tWINECO Cải ngọt L1 300g\tG1\nKhách hàng JOHN NGUYỄN làm việc tại JEMMIA";
   const detections = plausibleModelDetections(text, [
@@ -345,7 +339,7 @@ test("brands are trimmed from names, and a brand in a product cell is not an org
     { ...span(text, "JEMMIA", "ORGANIZATION"), type: "TO_CHUC", score: 0.95 },
   ]);
   assert.deepEqual(values(text, detections), [
-    ["TEN", "NGUYỄN"],
+    ["TEN", "JOHN NGUYỄN"],
     ["TO_CHUC", "JEMMIA"],
   ]);
 });
@@ -464,32 +458,15 @@ test("a heading in capitals is not a name, place or organization; a name in capi
   );
 });
 
-test("in a transaction row, unaccented wording is not a name, place or organization; a name in its shape is", () => {
-  const rows = [
-    "05/10/2026\tFT26001234567\tCT DEN:FT26001234567 LE MINH TUAN chuyen tien thue nha T10\t\t3.500.000\t12.500.000",
-    "09/10/2026\tFT26009999999\tTRA LUONG THANG 9 CONG TY TNHH THUONG MAI DICH VU SAO MAI\t\t25.000.000\t36.300.000",
-    "11/10/2026\tThanh toan QR WINMART 641810\t-120.000\t36.169.000",
-    "12/10/2026\tRut tien ATM tai VCB 1234\t-2.000.000\t34.169.000",
-    "13/10/2026\tLai nhap von\t+3.000\t34.172.000",
-  ];
-  const wording = [
-    ["CT DEN", "PERSON"],
-    ["DEN", "LOCATION"],
-    ["TRA LUONG THANG 9", "PERSON"],
-    ["Thanh toan QR", "PERSON"],
-    ["QR WINMART", "ORGANIZATION"],
-    ["ATM", "LOCATION"],
-    ["Lai", "PERSON"],
-  ];
-  for (const [value, label] of wording) {
-    const row = rows.find((r) => r.includes(value));
-    assert.deepEqual(values(row, modelDetections(row, [span(row, value, label)])), [], value);
-  }
-  const named = rows[0];
+test("in a transaction row, a name in the shape of one stands; the wording is the models' to read", () => {
+  // The unaccented wording of a statement's rows ("TRA LUONG THANG 9", "Thanh toan QR")
+  // is no longer vetoed by a rule (decision 0170): the fine-tuned model does not read it as
+  // a name, place or organization, measured on the held-out sets.
+  const named =
+    "05/10/2026\tFT26001234567\tCT DEN:FT26001234567 LE MINH TUAN chuyen tien thue nha T10\t\t3.500.000\t12.500.000";
   assert.deepEqual(values(named, modelDetections(named, [span(named, "LE MINH TUAN", "PERSON")])), [
     ["TEN", "LE MINH TUAN"],
   ]);
-  // Outside a transaction row (no date and amount cells), the models' word stands.
   const prose = "Gửi cho Thanh Toan QR\tghi chú";
   assert.deepEqual(values(prose, modelDetections(prose, [span(prose, "Thanh Toan", "PERSON")])), [
     ["TEN", "Thanh Toan"],
@@ -602,24 +579,20 @@ test("an official decision: public bodies and the place of issue stay, the ident
 
 test("the wider set (decision 0160): departments, roles, package names, countries and a letterhead", () => {
   // A department or ward is wording, as a cell, a span or the word after the unit's kind.
+  // A span that runs from a hospital's last word into its ward ("Rẫy Khoa Nhi") and an
+  // organization that runs on into its department line are the models' to get right
+  // since decision 0170 retired the unit trim; the fine-tuned model does.
   const dept = "Bệnh viện Chợ Rẫy Khoa Nhi\nPhòng ban: Phòng Kỹ thuật · Chức vụ: Kỹ sư phần mềm";
   assert.deepEqual(
     values(
       dept,
       modelDetections(dept, [
-        span(dept, "Rẫy Khoa Nhi", "PERSON"),
         span(dept, "Nhi", "ORGANIZATION"),
         span(dept, "Phòng Kỹ thuật", "ORGANIZATION"),
         span(dept, "thuật", "ORGANIZATION"),
       ]),
     ),
     [],
-  );
-  // A model's organization that runs into the department line ends before it.
-  const school = "Trường Đại học Kinh tế Quốc dân Phòng Đào tạo";
-  assert.deepEqual(
-    values(school, modelDetections(school, [span(school, school, "ORGANIZATION")])),
-    [["TO_CHUC", "Trường Đại học Kinh tế Quốc dân"]],
   );
   // "Khoa" as a middle name is a name.
   const poet = "Nhà thơ Nguyễn Khoa Điềm";

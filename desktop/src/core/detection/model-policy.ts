@@ -1,6 +1,6 @@
 import type { DecodedEntitySpan } from "openmed";
 import type { Detection } from "./types.ts";
-import { isSyllable, looksLikeKnownName, looksLikeName } from "./person-cues.ts";
+import { looksLikeKnownName } from "./person-cues.ts";
 import { vocabulary } from "./vocabulary.ts";
 import { vetoOn } from "./vetoes.ts";
 
@@ -109,18 +109,6 @@ export function plausibleContextualSpan(type: string, value: string): boolean {
   // A currency code on its own ("Loại tiền: VND") is neither a place nor an organization.
   if (vocabulary.wording.currencies.test(words)) return false;
   return !party.test(words);
-}
-
-/** One Vietnamese syllable, without its tone marks: an onset, one to three vowels and a
- * final. "VISSAN", "PACOW", "FPT", "JEMMIA" are not one. */
-/** A single word in capitals that no Vietnamese syllable spells is a brand or an acronym
- * ("VISSAN Xúc xích", "WINECO Cải ngọt"), not a person. A Vietnamese name in capitals ("NGUYỄN", "HÀ")
- * is made of syllables and is kept, as is a foreign name in Title Case. */
-export function brandInCapitals(value: string): boolean {
-  const word = value.normalize("NFC").trim();
-  return (
-    /^\p{Lu}[\p{Lu}\p{M}]{2,}$/u.test(word) && word === word.toUpperCase() && !isSyllable(word)
-  );
 }
 
 /** A predicted span cut at the separators its type never contains, trimmed. */
@@ -271,11 +259,7 @@ export function plausibleModelDetections(text: string, detections: readonly Dete
     ...(vetoOn("publicBodies") ? publicBodyRanges(text, detections) : []),
     ...(vetoOn("issuePlaces") ? issuePlaceRanges(text) : []),
   ];
-  return detections.flatMap((detection) => {
-    const trimmed = vetoOn("trims") ? withoutUnit(text, detection) : detection;
-    const d =
-      trimmed && trimmed.type === "TEN" && vetoOn("trims") ? withoutBrands(text, trimmed) : trimmed;
-    if (!d) return [];
+  return detections.flatMap((d) => {
     const value = text.slice(d.start, d.end);
     if (!plausibleContextualSpan(d.type, value)) return [];
     if (!contextual.has(d.type)) return [d];
@@ -283,8 +267,6 @@ export function plausibleModelDetections(text: string, detections: readonly Dete
     if (shielded.some(([start, end]) => start <= d.start && d.end <= end)) return [];
     if (vetoOn("productCells") && productCell(text, d.start, d.end)) return [];
     if (vetoOn("wordingColumns") && wordingColumn(text, d.start, d.end)) return [];
-    if (vetoOn("transactionCells") && transactionCell(text, d.start, d.end, d.type, value))
-      return [];
     if (vetoOn("capitalHeadings") && capitalHeading(text, d.start, d.end, d.type, value)) return [];
     if (
       vetoOn("departments") &&
@@ -300,28 +282,6 @@ export function plausibleModelDetections(text: string, detections: readonly Dete
       ? [d]
       : [];
   });
-}
-
-/** A name span without the brands in capitals at its edges ("VISSAN Xúc" → "Xúc"),
- * or nothing when only brands are left. */
-function withoutBrands(text: string, detection: Detection): Detection | undefined {
-  let { start, end } = detection;
-  for (;;) {
-    const first = /^[\p{L}\p{M}]+/u.exec(text.slice(start, end))?.[0];
-    if (!first || !brandInCapitals(first)) break;
-    start += first.length;
-    while (start < end && /\s/u.test(text[start]!)) start++;
-  }
-  for (;;) {
-    const last = /[\p{L}\p{M}]+$/u.exec(text.slice(start, end))?.[0];
-    if (!last || !brandInCapitals(last)) break;
-    end -= last.length;
-    while (end > start && /\s/u.test(text[end - 1]!)) end--;
-  }
-  if (end <= start) return undefined;
-  return start === detection.start && end === detection.end
-    ? detection
-    : { ...detection, start, end };
 }
 
 /** A product's measure, pack or unit ("300g", "3kg", "1,5 l", "gói", "hộp", "khay", and
@@ -402,31 +362,6 @@ function wordingColumn(text: string, start: number, end: number): boolean {
     at = previousStart;
   }
   return wordingHeading.test(heading.trim().normalize("NFC"));
-}
-
-const dateCell =
-  /^\s*(?:\d{1,2}[/.-]\d{1,2}[/.-]\d{2,4}|\d{4}-\d{2}-\d{2})(?:\s+\d{1,2}:\d{2}(?::\d{2})?)?\s*$/u;
-// Two amounts may share a cell when the reader merged a row's last columns.
-const amountCell =
-  /^\s*[+-]?\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{1,2})?(?:\s+[+-]?\d{1,3}(?:[.,]\d{3})+(?:[.,]\d{1,2})?)*\s*(?:đ|vnd|vnđ)?\s*$/iu;
-/** A transaction row of a bank statement is a tabbed row with a date cell and an amount
- * cell. In a cell of it written without tone marks ("TRA LUONG THANG 9", "Thanh toan QR",
- * "Rut tien ATM"), the models, trained on accented Vietnamese, read the wording as names,
- * places and organizations (decision 0156). A name there is kept only in the shape of one
- * (a family name first, every word a syllable); a company is found by its legal form
- * (context-fields) and a person by their position (detectTransferNames), not by a model. */
-function transactionCell(
-  text: string,
-  start: number,
-  end: number,
-  type: string,
-  value: string,
-): boolean {
-  const { tabbed, cells, cell } = rowAround(text, start, end);
-  if (!tabbed || cells.length < 3) return false;
-  if (!cells.some((c) => dateCell.test(c)) || !cells.some((c) => amountCell.test(c))) return false;
-  if (/\p{M}|[đĐ]/u.test(cell.normalize("NFD"))) return false;
-  return type !== "TEN" || !looksLikeName(value);
 }
 
 const addressWord = new RegExp(
@@ -515,42 +450,6 @@ function departmentCell(text: string, start: number, end: number): boolean {
     department.test(lead ? `${lead} ${value}` : value) ||
     (unitKindAlone.test(value) && /^[^\S\r\n]+[\p{L}\p{M}]/u.test(text.slice(end)))
   );
-}
-/** An organization a model read on into the department line the reader joined to it
- * ("Trường Đại học Kinh tế Quốc dân Phòng Đào tạo"): the span ends before the unit's
- * kind, once the name before it has two words (decision 0160). A clinic, a fire-safety
- * company and a bank's transaction office keep their words. */
-const unitStart = new RegExp(`\\s${unitKind}[^\\S\\r\\n]+[\\p{L}\\p{M}]`, "iu");
-/** In a place, only a room or a ward can follow: "Tổ 5", "Đội Cấn" and "Ban Mê Thuột" are
- * parts of addresses. */
-const unitInPlace = new RegExp(
-  `\\s${unitKinds(vocabulary.organizations.unitInPlaces)}[^\\S\\r\\n]+[\\p{L}\\p{M}]`,
-  "iu",
-);
-function withoutUnit(text: string, detection: Detection): Detection | undefined {
-  if (!contextual.has(detection.type)) return detection;
-  const value = text.slice(detection.start, detection.end);
-  // A name with "Khoa" as a middle name ("Nguyễn Khoa Điềm") is whole; a "name" that runs
-  // from a hospital's last word into its ward ("Rẫy Khoa Nhi") is not one.
-  if (detection.type === "TEN" && looksLikeName(value)) return detection;
-  // An organization a model read on into the address after it ("… Đông Á [Số] 337 …",
-  // "… Thành Công [95] Lê Lợi"): "Số", or a house number before a capitalized street.
-  if (detection.type === "TO_CHUC") {
-    const tail =
-      /[^\S\r\n]+số$/iu.exec(value) ??
-      (/^[^\S\r\n]+(?:\p{Lu}|(?:đường|phố|ngõ|ngách|hẻm|số)[^\S\r\n])/u.test(
-        text.slice(detection.end),
-      )
-        ? /[^\S\r\n]+\d{1,5}[a-z]?(?:\/\d{1,5}[a-z]?)*$/iu.exec(value)
-        : null);
-    if (tail && (value.slice(0, tail.index).match(/[\p{L}\p{M}]+/gu) ?? []).length >= 2)
-      return { ...detection, end: detection.start + tail.index };
-  }
-  const at = (detection.type === "DIA_CHI" ? unitInPlace : unitStart).exec(value);
-  if (!at) return detection;
-  const before = (value.slice(0, at.index).match(/[\p{L}\p{M}]+/gu) ?? []).length;
-  if (before >= 2) return { ...detection, end: detection.start + at.index };
-  return detection.type === "TEN" ? undefined : detection;
 }
 /** "Giới tính: Nam": a sex, not a given name. */
 const sexLabel = new RegExp(
