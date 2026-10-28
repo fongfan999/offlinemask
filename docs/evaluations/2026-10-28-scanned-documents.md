@@ -99,3 +99,21 @@ On the owner's Windows PC (Windows 11 Pro 10.0.26200, x64 CPU, no GPU used).
 | for reference, from the Mac: Tesseract `vie` fast | 385 | | 556 | | |
 
 Of the 104 hide values not read verbatim, 49 are read but in the wrong case ("công ty TNHH", "trần hưng đạo"), 15 are read without or with wrong tone marks, and 40 are not found even so: every e-mail address with "@" read as "0" ("ngoc.do40000utlook.com"), names of statement rows that wrap onto two lines and come apart in the screen's simple reading order, a stray segment inside an address ("Hồ Xã Chí Minh"), spaces dropped inside phone numbers. The reading-order losses are the screen's, which the app's reader by place would partly recover; the case and "@" errors are the model's, and an e-mail address read with "0" for "@" is one the policy no longer recognises. Below Tesseract verbatim and fifteen times slower than Vision: not a candidate as it stands.
+
+### OfflineMask's own recogniser (decision 0172)
+
+A CTC line recogniser trained for three hours on this machine's CPU from lines of the generator's seeds 100–399, drawn in 27 open fonts that exclude the documents' own (`recogniser.onnx` sha256 `70c31d9f…`; validation character error 0.28 %). Screened with `scripts/ocr-screening-v2/screen.mjs`: the same detector, pages and scoring as VietOCR's screen, each box widened by `--grow` of its height before it is read.
+
+| Reading, seed 1's 54 pages | Hide values read verbatim (440) | ignoring case | Keep values read verbatim (650) | ignoring case | time a page |
+| --- | --- | --- | --- | --- | --- |
+| the detector's box as it is | 244 | 255 | 308 | 327 | 1.6 s |
+| widened by 0.1 of its height | 410 | 411 | 539 | 545 | 1.6 s |
+| widened by 0.25 | 429 | 429 | 554 | 554 | 1.6 s |
+| widened by 0.35 | 419 | 420 | 520 | 521 | 1.6 s |
+| widened by 0.5 (neighbouring lines come in) | 349 | 352 | 341 | 347 | 1.6 s |
+
+Without a margin the first and last letters and the marks above capitals are lost ("CỘNC HÒA … NGHẨA VIỆT NA"); the detector's boxes touch the ink and every training line had room around it.
+
+At 0.25, on all 703 scans and pictures of seeds 1–7 (`artifacts/seeds-scanned`, 728 pages in 1 180 s): **5 513 of 5 604 hide values read verbatim, 7 343 of 8 515 keep values**. By seed, hide values not read in scanned PDFs / pictures: 10 / 7, 7 / 4, 9 / 3, 8 / 3, 6 / 4, 12 / 5, 10 / 3. By layout: statement-classic 21, statement-compact 21, payslip-table 13, payslip-compact 12, minutes-meeting 7, order-receipt 6, invoice-winmart 3, contract-rental 2, minutes-handover 2, and one each in form-application, invoice-household, medical-exam and utility-electric.
+
+The 91 are mostly long values that wrap: statement rows' names and companies ("CONG TY TNHH MTV VAN TAI DONG A"), company names over two heading lines, payslip addresses in a narrow cell, each joined by the screen's top-to-bottom order with the other column's words between its halves. About ten are the model's: "Châu" read "Chậu", "Đà" read ")à", "Sài" read "ài", "BN67551980" read "BN67651980", "NV24259", "PE52514527", one phone number and one e-mail address (in a scan and its picture). Not comparable with Vision's 223 "not read" above, which goes through the app's reader by place; that measurement needs the recogniser in the app.

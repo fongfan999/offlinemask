@@ -1,0 +1,20 @@
+# Training environment for OfflineMask's own Vietnamese line recogniser (decision 0172). Run with uv:
+#   uv sync --project desktop/scripts/ocr-train          # creates .venv from uv.lock, offline after
+#   uv run --project desktop/scripts/ocr-train train.py …
+# uv.lock pins every wheel; `uv lock --upgrade` is a deliberate change to record.
+[project]
+name = "offlinemask-ocr-train"
+version = "0.1.0"
+description = "Trains a CTC line recogniser for Vietnamese print on lines rendered from the synthetic document set"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "torch==2.14.1",
+  "pillow>=11",
+  "fonttools>=4.50",
+  "numpy>=1.26",
+  "onnx>=1.17",
+  "onnxruntime>=1.20",
+]
+
+[tool.uv]
+package = false

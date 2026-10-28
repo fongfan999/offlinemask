@@ -12,3 +12,5 @@ artifacts/
 
 # Fine-tuning environment (scripts/train/README.md); uv.lock is committed, the venv is not.
 scripts/train/.venv/
+scripts/ocr-train/.venv/
+scripts/ocr-train/__pycache__/
