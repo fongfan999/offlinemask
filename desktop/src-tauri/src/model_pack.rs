@@ -795,10 +795,11 @@ mod tests {
         let pack = shipping_pack();
         pack.validate().unwrap();
         assert_eq!(pack.id, "vietnamese-pii-v1");
-        // Installed before model metadata joined the manifest; must stay discoverable.
+        // The version decision 0169 ships (the fine-tuned Underthesea graph of run 2);
+        // the previous fingerprint, 65245d3f…, stays installed beside it where it exists.
         assert_eq!(
             pack.fingerprint(),
-            "65245d3fd3cb14042784f0b6b1da08f4551a2aa32ccd972a3830103af457f390"
+            "e562a9b38c4bc14f14a2187f78fe5fd0a213d36ad0012c8d7144c0cac5af9a10"
         );
         assert!(pack.native_model("underthesea").is_some());
         assert!(pack.native_model("vietnamese-pii-multilingual").is_none());
@@ -896,7 +897,7 @@ mod tests {
             .install(&f.0, &Client::new(), &AtomicBool::new(false), |_| {})
             .unwrap();
         assert!(pack.installed(&root, &AtomicBool::new(false)));
-        assert_eq!(pack.download_bytes(), 712_190_910);
-        assert_eq!(pack.installed_bytes(), 1_137_855_937);
+        assert_eq!(pack.download_bytes(), 712_270_650);
+        assert_eq!(pack.installed_bytes(), 1_137_855_829);
     }
 }

@@ -1,7 +1,10 @@
 // Explicit developer verification only. Never imported by the application or build.
 import { readFile, writeFile } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
-const inventory = JSON.parse(await readFile('artifacts/r2-v1-objects.json', 'utf8'));
+// node scripts/verify-r2-pack.mjs [inventory] [receipt]: defaults to the v1 release objects;
+// a later model file passes its own inventory (artifacts/r2-v2-objects.json) and receipt path.
+const [inventoryPath = 'artifacts/r2-v1-objects.json', receiptPath = '../docs/evaluations/pack-compression-v1/r2-public-verification.json'] = process.argv.slice(2);
+const inventory = JSON.parse(await readFile(inventoryPath, 'utf8'));
 const rows = [];
 for (const object of inventory.objects) {
   const url = `${inventory.base}/${object.key}`;
@@ -20,4 +23,4 @@ for (const object of inventory.objects) {
   console.log(`Verified ${rows.length}/${inventory.objects.length}: ${object.key}`);
 }
 const receipt = { verifiedAt: new Date().toISOString(), base: inventory.base, method: 'Full public HTTPS downloads: exact byte lengths and SHA-256; nonzero-offset Range requests.', totalBytes: rows.reduce((n, r) => n + r.bytes, 0), objects: rows };
-await writeFile('../docs/evaluations/pack-compression-v1/r2-public-verification.json', JSON.stringify(receipt, null, 2) + '\n');
+await writeFile(receiptPath, JSON.stringify(receipt, null, 2) + '\n');

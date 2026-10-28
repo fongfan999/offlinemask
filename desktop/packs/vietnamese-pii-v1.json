@@ -27,12 +27,12 @@
     {
       "directory": "underthesea",
       "name": "model_int8.onnx",
-      "bytes": 204645861,
-      "sha256": "9e95f354972d52ddf5400957e68d5619bf6c35b534baff6bae6c551329a1d134",
+      "bytes": 204645753,
+      "sha256": "6c4feff939e2bd3ef276c321a5a49344c38cb053ce6bbb06f81d099838f0214d",
       "transport": {
-        "url": "https://pub-5b0280497d774b8f99417b3438d8bce8.r2.dev/bbe0438a69eaac999e4027aa2ec791492e538b0ec171efe6a8918de8d18bbb3e.zst",
-        "bytes": 158225764,
-        "sha256": "bbe0438a69eaac999e4027aa2ec791492e538b0ec171efe6a8918de8d18bbb3e",
+        "url": "https://pub-5b0280497d774b8f99417b3438d8bce8.r2.dev/d17970b2cec0b9e12b6f31631c1c6731646777e98ac307660a4a3cc1c3ceab85.zst",
+        "bytes": 158305504,
+        "sha256": "d17970b2cec0b9e12b6f31631c1c6731646777e98ac307660a4a3cc1c3ceab85",
         "encoding": "zstd",
         "parts": []
       }

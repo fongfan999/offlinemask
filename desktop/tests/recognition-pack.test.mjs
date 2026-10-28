@@ -58,8 +58,8 @@ test("the shipping pack definition is valid and self-consistent", async () => {
   assert.ok(recognitionPack.models.length >= 1);
   assert.ok(recognitionPack.models.some((model) => model.offsets === "native"));
   // Settings shows these two figures; they come from the same pinned catalog the installer uses.
-  assert.equal(packTransportBytes(), 712_190_910);
-  assert.equal(packInstalledBytes(), 1_137_855_937);
+  assert.equal(packTransportBytes(), 712_270_650);
+  assert.equal(packInstalledBytes(), 1_137_855_829);
 });
 
 test("pack validation rejects what a contributor is most likely to get wrong", () => {
