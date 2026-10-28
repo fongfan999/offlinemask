@@ -43,12 +43,12 @@ OfflineMask thay họ tên, số tài khoản, số điện thoại, CCCD, email
 Không tài khoản, không máy chủ, không thống kê sử dụng. Ứng dụng chỉ dùng mạng khi bạn bấm tải gói nhận diện. Hãy luôn xem lại kết quả trước khi chia sẻ.
 ```
 
-**What's new in this version** (2.3.0; 2.2.0 listed Báo lỗi, history that deletes itself and the circle acting only on the selection; the first submission said "Bản đầu tiên trên Microsoft Store.")
+**What's new in this version** (2.4.0; 2.3.0 listed PDFs on Tài liệu, the (OfflineMasked) names and better masking of invoices, statements and contracts; 2.2.0 listed Báo lỗi, history that deletes itself and the circle acting only on the selection; the first submission said "Bản đầu tiên trên Microsoft Store.")
 
 ```
-• Mở được PDF có chữ trong mục Tài liệu: bảng vẫn là bảng, bản đã ẩn là tệp Markdown chỉ chứa chữ đọc được từ PDF nên không mang theo gì ẩn trong tệp gốc. PDF scan và hình ảnh sẽ có sau.
-• Tệp lưu ra có tên "(OfflineMasked)", tệp khôi phục là "(OfflineUnmasked)", dễ nhận ra ở mọi định dạng.
-• Hóa đơn, sao kê và hợp đồng được ẩn đúng hơn: tiêu đề in hoa, tên hàng hóa, thương hiệu và nội dung chuyển khoản không còn bị ẩn nhầm; số tài khoản sau "TK", chủ tài khoản và tên trong nội dung chuyển khoản không còn bị bỏ sót.
+• Gói nhận diện có mô hình mới, được huấn luyện thêm trên các loại giấy tờ thường gặp (hóa đơn, sao kê, hợp đồng, biểu mẫu, quyết định, phiếu lương…): ẩn đúng hơn và ít ẩn nhầm hơn.
+• Nếu đã cài gói, chỉ cần tải thêm một tệp khoảng 158 MB; phần còn lại giữ nguyên.
+• Mô hình chỉ học từ tài liệu tự tạo, không dùng tài liệu của bất kỳ ai.
 ```
 
 **Product features** (one per line in Partner Center)
