@@ -1,6 +1,6 @@
 # 0169 — The fine-tuned Underthesea graph of run 2 ships as the pack's new version
 
-Date: 28 October 2026. Status: the pack definition is re-pinned, the gates pass on the newly installed version, and the compressed object is prepared; the public upload, its verification and the release follow (see "Publication" below). Owner: "Yes, ship it" (after decision 0168).
+Date: 28 October 2026. Status: published and verified; the pack definition pins the new version and the gates pass on it. A release carries it to users. Owner: "Yes, ship it" (after decision 0168).
 
 ## What ships
 
@@ -37,6 +37,8 @@ The bucket is the owner's; this Mac holds no credentials for it, as in 0041, so 
 2. `desktop/artifacts/r2-v2-upload/NOTICE-vietnamese-pii-v1.txt` over the existing `NOTICE-vietnamese-pii-v1.txt`.
 
 Then, on this Mac: `node scripts/verify-r2-pack.mjs artifacts/r2-v2-objects.json ../docs/evaluations/pack-compression-v1/r2-public-verification-v2.json` (full public download, exact length and digest, a nonzero-offset range request, the receipt beside 0041's) and the ignored Rust test `public_release_pack_installs_from_r2` in release mode (the installer downloads the whole pack from the bucket into a temporary directory and installs it). The previous object stays in the bucket: an older app build still pins it.
+
+**Done on 28 October.** The owner uploaded both files through the dashboard. `verify-r2-pack.mjs` downloaded the object in full from the public base: 158 305 504 bytes, digest `d17970b2…`, status 200, a nonzero-offset range request answered 206 ([receipt](../evaluations/pack-compression-v1/r2-public-verification-v2.json)); the published notice has the prepared file's digest. `public_release_pack_installs_from_r2` (release build) downloaded the whole pack from the bucket into a temporary directory, installed it and left no cache: passed in 146 s on this Mac and network, one observed run.
 
 Users receive the new version with the next release (the `release` skill); the app embeds the pack definition, so a release is what changes what an installation downloads.
 
