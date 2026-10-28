@@ -4,6 +4,15 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.4.0] — 2026-10-28
+
+The recognition pack's model has learned the documents OfflineMask masks: a new pack version, one 158 MB download for installations that already have the pack, with nothing leaked and fewer words wrongly masked on 2 050 invented documents.
+
+### Changed
+
+- Gói nhận diện: its Vietnamese model (Underthesea) is fine-tuned on the invented document set (invoices, bank statements, contracts, forms, official decisions, payslips, medical records, utility bills, letters, minutes, transcripts and orders) and ships as a new version of the pack. The model learned only from generated documents, never from anyone's files. An installation that has the pack downloads only the new model file (158 MB); the other files are unchanged. On 2 050 held-out invented documents and the owner's own files it leaks nothing and wrongly masks fewer words than the previous model (three job titles where the previous one masked five and six stray single words), and it no longer needs two of the structural rules that held back over-masking ([0163](docs/decisions/0163-fine-tune-the-pack-model.md), [0167](docs/decisions/0167-wrapped-values-labelled-across-paragraphs.md), [0168](docs/decisions/0168-second-candidate-measured-clean.md), [0169](docs/decisions/0169-ship-the-fine-tuned-underthesea-graph.md)).
+- Two structural rules that held back over-masking, a role in capitals in prose and a value after a wording label, were retired because other rules cover them; the measured sets did not change ([0164](docs/decisions/0164-pack-comparison-and-ablation.md), [0165](docs/decisions/0165-two-mechanisms-retired.md)).
+
 ## [2.3.0] — 2026-10-26
 
 PDFs that contain text open on Tài liệu, saved copies are named (OfflineMasked), and masking is measured on whole sets of documents: 0 leaked and 0 over-masked on 189 invented invoices, statements, contracts and forms.
