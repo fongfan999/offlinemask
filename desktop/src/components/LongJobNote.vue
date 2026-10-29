@@ -19,9 +19,8 @@ const shown = computed(() => props.seconds > longJobSeconds);
       ><AppIcon class="folder-chevron" name="chevron" :size="14" />
     </summary>
     <p>
-      <strong>Gợi ý</strong><br />Nếu thường xuyên cần ẩn nhiều tài liệu, hãy dành riêng một máy
-      chạy OfflineMask cho công việc hoặc cho cả công ty, để máy làm việc của bạn không bị ảnh
-      hưởng.
+      <strong>Gợi ý:</strong> nếu thường xuyên cần ẩn nhiều tài liệu, hãy dành riêng một máy chạy
+      OfflineMask cho công việc hoặc cho cả công ty, để máy làm việc của bạn không bị ảnh hưởng.
     </p>
   </details>
 </template>
