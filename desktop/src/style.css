@@ -391,61 +391,49 @@ h1 {
   font-size: 13px;
 }
 .start-private {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin: 10px 0 0;
+  margin-left: auto;
   color: var(--muted);
   font-size: 12px;
 }
 .start-private svg {
   color: var(--accent);
 }
-/* The three steps under the start box, as the website lists them: a mono number, the step,
-   a line of plain words, separated by a rule instead of boxed (decision 0172). */
-.home-steps {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 22px;
-  margin: 30px 0 0;
-  padding: 0;
-  list-style: none;
+/* Home's two halves of the job (decision 0172): a large segmented switch. */
+.home-tabs {
+  display: flex;
+  width: fit-content;
+  margin: 0 auto 18px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper-sunk);
 }
-.home-steps li {
-  display: grid;
-  align-content: start;
-  gap: 6px;
-  padding-top: 14px;
-  border-top: 1px solid var(--line);
-}
-.home-step-number {
-  color: var(--accent);
-  font: 500 12px var(--mono);
-}
-.home-steps strong {
-  font-size: 15px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-}
-.home-steps p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 13px;
-  line-height: 1.6;
-  text-wrap: pretty;
-}
-.home-steps .link-button {
+.home-tabs button {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  justify-self: start;
-  margin-top: 2px;
+  gap: 8px;
+  padding: 10px 20px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
 }
-@media (max-width: 640px) {
-  .home-steps {
-    grid-template-columns: 1fr;
-    gap: 14px;
-  }
+.home-tabs button:hover {
+  color: var(--ink);
+}
+.home-tabs button[aria-selected="true"] {
+  border-color: var(--line);
+  background: var(--paper-raised);
+  color: var(--ink);
+  box-shadow: 0 1px 3px var(--shadow);
+}
+.home-tabs button[aria-selected="true"] svg {
+  color: var(--accent);
 }
 /* Ẩn nhanh, offered quietly under the start box until it works (decision 0099). */
 .start-quick {
@@ -1192,32 +1180,24 @@ th {
   color: var(--muted);
   font-size: 13px;
 }
-/* The home page's start box: one row, the first thing to act on (decision 0089). */
-.drop-zone.is-compact {
-  grid-template-columns: auto 1fr;
-  align-items: center;
-  justify-items: start;
-  gap: 18px;
+/* Home's start box is the page's one action (decision 0172): a large target to drop on. */
+.start-box .drop-zone {
   width: 100%;
+  min-height: 280px;
   margin: 0;
-  padding: 22px 26px;
-  text-align: left;
+  align-content: center;
+  gap: 14px;
+  border-width: 2px;
+  border-radius: 18px;
 }
-.drop-zone.is-compact .drop-icon {
-  margin: 0;
+.start-box .drop-zone strong {
+  font-size: 20px;
+  letter-spacing: -0.01em;
 }
-.drop-zone.is-compact .drop-words {
-  justify-items: start;
-  gap: 4px;
-}
-/* With the format cards gone it is the page's one action: a little more room. */
-.start-box .drop-zone.is-compact {
-  min-height: 120px;
-  padding: 28px 32px;
-  gap: 20px;
-}
-.start-box .drop-zone.is-compact strong {
-  font-size: 17px;
+.start-box .drop-zone .drop-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
 }
 .drop-zone u {
   text-underline-offset: 3px;

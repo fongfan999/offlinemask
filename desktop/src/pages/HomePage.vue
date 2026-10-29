@@ -1,11 +1,12 @@
 <script setup lang="ts">
 import type { PickedFolder } from "../adapters/folder.ts";
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from "vue";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from "vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
 import FolderPicker from "../components/FolderPicker.vue";
+import RestoreBox from "../components/RestoreBox.vue";
 import {
   docKey,
   folderKey,
@@ -17,11 +18,12 @@ import {
   type Page,
 } from "../composables/context.ts";
 import { fileKind, fileKindErrors } from "../core/file-kind.ts";
+import { quickDirection } from "../core/quick-actions.ts";
 import { sampleText } from "../core/review.ts";
 import { packProgress } from "../composables/useRecognitionPack.ts";
 
 const emit = defineEmits<{
-  /** A link: Cài đặt, Nhận lại bản đầy đủ, or a format's page as last left. */
+  /** A link: Cài đặt, or a format's page as last left. */
   navigate: [destination: Page];
   /** The start box: the format's first step, where the file or text just went. */
   start: [destination: Page];
@@ -76,12 +78,26 @@ function typeText() {
   run.processingError.value = "";
   emit("start", "text");
 }
+/** Which half of the job the box is for; a pasted AI reply switches it (decision 0172). */
+const mode = ref<"hide" | "restore">("hide");
+const restoreBox = useTemplateRef<InstanceType<typeof RestoreBox>>("restoreBox");
+const known = computed(() => [...quick.knownFindings.value, ...folder.findings.value]);
+async function openRestore(text: string) {
+  mode.value = "restore";
+  await nextTick();
+  restoreBox.value?.fill(text);
+}
 function paste(event: ClipboardEvent) {
+  // Typing into the restore box (or any field) is the field's own business.
+  const target = event.target as HTMLElement | null;
+  if (target?.closest("input, textarea, [contenteditable]")) return;
   const file = event.clipboardData?.files[0];
   const text = event.clipboardData?.getData("text/plain") ?? "";
   if (!file && !text.trim()) return;
   event.preventDefault();
   if (file) void startWith(file);
+  else if (mode.value === "restore" || quickDirection(text, [known.value]) === "restore")
+    void openRestore(text);
   else startWithText(text);
 }
 onMounted(() => window.addEventListener("paste", paste));
@@ -168,14 +184,40 @@ const packNotice = computed<PackNotice | null>(() => {
       <span class="home-swap"><s>0901234567</s><b>[SDT_1_4e8c]</b></span>
     </div>
   </div>
-  <!-- One place to start (decision 0172): a file, a folder or text, the app sorts it. -->
-  <section class="start-box" aria-label="Bắt đầu">
+  <!-- Home holds both ends of the job (decision 0172): hide before asking the AI, and put
+       the real information back into its reply. -->
+  <div class="home-tabs" role="tablist" aria-label="Việc cần làm">
+    <button
+      id="tab-hide"
+      role="tab"
+      :aria-selected="mode === 'hide'"
+      aria-controls="panel-hide"
+      @click="mode = 'hide'"
+    >
+      <AppIcon name="mask" :size="17" />Ẩn thông tin riêng
+    </button>
+    <button
+      id="tab-restore"
+      role="tab"
+      :aria-selected="mode === 'restore'"
+      aria-controls="panel-restore"
+      @click="mode = 'restore'"
+    >
+      <AppIcon name="undo" :size="17" />Nhận lại bản đầy đủ
+    </button>
+  </div>
+  <section
+    v-if="mode === 'hide'"
+    id="panel-hide"
+    class="start-box"
+    role="tabpanel"
+    aria-labelledby="tab-hide"
+  >
     <FileDropZone
       icon="upload"
       title="Kéo tệp hoặc cả thư mục vào đây"
       :hint="`Word, Excel, PDF · dán chữ bằng ${pasteKey}`"
       :accept="accept"
-      compact
       folders
       @file="startWith"
       @folder="startFolder"
@@ -187,10 +229,10 @@ const packNotice = computed<PackNotice | null>(() => {
       <button type="button" class="sample-link" @click="startWithText(sampleText)">
         Xem thử với ví dụ
       </button>
+      <span class="start-private"
+        ><AppIcon name="lock" :size="13" />Tệp và chữ không rời khỏi máy bạn.</span
+      >
     </div>
-    <p class="start-private">
-      <AppIcon name="lock" :size="13" />Tệp và chữ không rời khỏi máy bạn.
-    </p>
     <!-- The other way in, until it works (decision 0099). -->
     <p v-if="quickOffer" class="start-quick">
       <BrandMark :size="14" />Hoặc bôi đen chữ ngay trong ChatGPT, Claude hay Gemini để ẩn tại chỗ.
@@ -199,25 +241,9 @@ const packNotice = computed<PackNotice | null>(() => {
       </button>
     </p>
   </section>
-  <!-- How it goes, in the website's three steps and words; the third has its own page
-       (decision 0172). -->
-  <ol class="home-steps" aria-label="Cách dùng">
-    <li>
-      <span class="home-step-number">01</span><strong>Ẩn thông tin riêng</strong>
-      <p>Kéo tệp hoặc dán chữ ở trên. Họ tên, số điện thoại, số tài khoản… thành mã.</p>
-    </li>
-    <li>
-      <span class="home-step-number">02</span><strong>Hỏi AI như mọi khi</strong>
-      <p>Dán bản đã ẩn vào ChatGPT, Gemini hay AI bạn hay dùng.</p>
-    </li>
-    <li>
-      <span class="home-step-number">03</span><strong>Nhận lại bản đầy đủ</strong>
-      <p>Dán câu trả lời của AI vào OfflineMask, mã tự đổi về thông tin thật.</p>
-      <button type="button" class="link-button" @click="emit('navigate', 'restore')">
-        Nhận lại bản đầy đủ<AppIcon name="arrow" :size="13" />
-      </button>
-    </li>
-  </ol>
+  <div v-else id="panel-restore" role="tabpanel" aria-labelledby="tab-restore">
+    <RestoreBox ref="restoreBox" @hide="mode = 'hide'" />
+  </div>
   <div v-if="packNotice" class="pack-notice" role="status">
     <AppIcon :name="packNotice.icon" :size="16" />
     <p>

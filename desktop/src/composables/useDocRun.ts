@@ -356,7 +356,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
   async function openReturned(session: DocSession, file: File): Promise<DocRestore | string> {
     return openReply(session.findings, file, isPdfSession(session));
   }
-  /** A returned document restored with any aliases: the restore page passes every table
+  /** A returned document restored with any aliases: home's restore tab passes every table
    * it knows, and takes the Markdown and text a PDF's copy comes back as (decision 0172). */
   async function openReply(
     findings: readonly Finding[],

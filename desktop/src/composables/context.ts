@@ -11,7 +11,7 @@ import type { useVault } from "./useVault.ts";
 
 /** Top-level destinations. Session pages reuse their format as the page name; the
  * folder page is reached by dropping or picking a folder (decision 0171). */
-export type Page = "home" | "settings" | "folder" | "restore" | Format;
+export type Page = "home" | "settings" | "folder" | Format;
 
 /** Focus handles pages expose to the shell after navigation or a completed run. */
 export interface PageHandle {

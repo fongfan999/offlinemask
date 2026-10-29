@@ -418,7 +418,7 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     detector.cancel(true);
   }
 
-  /** The folder's aliases once masked, so the restore page can read replies about it. */
+  /** The folder's aliases once masked, so home's restore tab can read replies about it. */
   // `book` is not reactive: read `totals` first so both computeds follow every run.
   const findings = computed<readonly Finding[]>(() =>
     totals.value.size && book ? book.findings : [],

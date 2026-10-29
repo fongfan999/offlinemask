@@ -41,7 +41,6 @@ import type { Format, Session } from "./core/sessions.ts";
 import HomePage from "./pages/HomePage.vue";
 import DocPage from "./pages/DocPage.vue";
 import FolderPage from "./pages/FolderPage.vue";
-import RestorePage from "./pages/RestorePage.vue";
 import SettingsPage from "./pages/SettingsPage.vue";
 import SheetPage from "./pages/SheetPage.vue";
 import WorkspacePage from "./pages/WorkspacePage.vue";
@@ -141,7 +140,7 @@ const format = computed<Format>(
 );
 // Settings has no crumb: its heading already says "Cài đặt".
 const topbarLabel = computed(() =>
-  page.value === "home" || page.value === "settings" || page.value === "restore"
+  page.value === "home" || page.value === "settings"
     ? ""
     : page.value === "folder"
       ? "Thư mục"
@@ -246,8 +245,7 @@ function openFormat(destination: Page, id: string | null = null) {
     historyOn.value ||
     destination === "home" ||
     destination === "settings" ||
-    destination === "folder" ||
-    destination === "restore"
+    destination === "folder"
   )
     return navigate(destination, id);
   const last = lastOpened[destination];
@@ -320,11 +318,10 @@ async function closeSidebar() {
       >
         <!-- The text and spreadsheet pages stay alive across navigation, so the step,
              view and pasted reply are still there on return. All of it is RAM only. -->
-        <KeepAlive include="WorkspacePage,SheetPage,DocPage,FolderPage,RestorePage">
+        <KeepAlive include="WorkspacePage,SheetPage,DocPage,FolderPage">
           <HomePage v-if="page === 'home'" ref="pageRef" @navigate="openFormat" @start="navigate" />
           <SettingsPage v-else-if="page === 'settings'" ref="pageRef" />
           <FolderPage v-else-if="page === 'folder'" ref="pageRef" />
-          <RestorePage v-else-if="page === 'restore'" ref="pageRef" @navigate="navigate" />
           <SheetPage
             v-else-if="page === 'excel'"
             ref="pageRef"

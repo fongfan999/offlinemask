@@ -22,8 +22,8 @@ const props = defineProps<{
 }>();
 const emit = defineEmits<{ navigate: [destination: Page, id?: string | null]; close: [] }>();
 
-/** The two jobs (decision 0172): hide something, and later put the real values back
- * into the AI's reply. Which page a file opens on is the app's business, not a choice. */
+/** One way in (decision 0172): home holds both halves of the job, hiding and getting the
+ * full reply back. Which page a file opens on is the app's business, not a choice. */
 const hiding = computed(
   () =>
     props.page === "home" ||
@@ -36,7 +36,6 @@ const screens: Record<Page, string> = {
   home: "Trang chủ",
   settings: "Cài đặt",
   folder: "Thư mục",
-  restore: "Nhận lại bản đầy đủ",
   text: "Văn bản",
   excel: "Bảng tính",
   word: "Tài liệu",
@@ -84,19 +83,9 @@ defineExpose({
       <span class="brand-mark"><BrandMark :size="28" /></span
       ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
     </button>
-    <nav aria-label="Việc cần làm">
+    <nav aria-label="Trang chủ">
       <button :aria-current="hiding ? 'page' : undefined" @click="emit('navigate', 'home')">
-        <AppIcon name="mask" /><span class="nav-text"
-          >Ẩn thông tin riêng<small>Tệp, thư mục, chữ</small></span
-        >
-      </button>
-      <button
-        :aria-current="page === 'restore' ? 'page' : undefined"
-        @click="emit('navigate', 'restore')"
-      >
-        <AppIcon name="undo" /><span class="nav-text"
-          >Nhận lại bản đầy đủ<small>Từ câu trả lời của AI</small></span
-        >
+        <AppIcon name="home" />Trang chủ
       </button>
     </nav>
     <template v-if="history || sessions.length || folder">

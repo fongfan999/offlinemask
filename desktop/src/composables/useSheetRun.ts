@@ -351,7 +351,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
   async function openReturned(session: SheetSession, file: File): Promise<SheetRestore | string> {
     return openReply(session.findings, file);
   }
-  /** A returned workbook restored with any aliases, for the restore page (decision 0172). */
+  /** A returned workbook restored with any aliases, for home's restore tab (decision 0172). */
   async function openReply(
     findings: readonly Finding[],
     file: File,

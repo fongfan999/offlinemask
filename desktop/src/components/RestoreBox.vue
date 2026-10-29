@@ -1,30 +1,23 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, ref, shallowRef, useTemplateRef } from "vue";
-import AppIcon from "../components/AppIcon.vue";
-import FileDropZone from "../components/FileDropZone.vue";
-import RestoreIntro from "../components/RestoreIntro.vue";
-import RestorePanel from "../components/RestorePanel.vue";
-import {
-  docKey,
-  folderKey,
-  quickKey,
-  sheetKey,
-  useProvided,
-  type Page,
-} from "../composables/context.ts";
+import { computed, nextTick, onBeforeUnmount, ref, shallowRef, useTemplateRef } from "vue";
+import AppIcon from "./AppIcon.vue";
+import FileDropZone from "./FileDropZone.vue";
+import RestoreIntro from "./RestoreIntro.vue";
+import RestorePanel from "./RestorePanel.vue";
+import { docKey, folderKey, quickKey, sheetKey, useProvided } from "../composables/context.ts";
 import type { DocRestore } from "../composables/useDocRun.ts";
 import type { SheetRestore } from "../composables/useSheetRun.ts";
 import { fileKind } from "../core/file-kind.ts";
 
-/** "Nhận lại bản đầy đủ" (decision 0172): the third step as a place of its own. A
- * pasted reply or a returned file is restored with every alias this launch knows, so
- * nobody has to remember which text, file or folder the reply came from. */
-const emit = defineEmits<{ navigate: [destination: Page] }>();
+/** "Nhận lại bản đầy đủ", home's second tab (decision 0172). A pasted reply or a returned
+ * file is restored with every alias this launch knows, so nobody has to remember which
+ * text, file or folder the reply came from. */
+const emit = defineEmits<{ hide: [] }>();
 const quick = useProvided(quickKey);
 const folder = useProvided(folderKey);
 const doc = useProvided(docKey);
 const sheet = useProvided(sheetKey);
-const heading = useTemplateRef<HTMLHeadingElement>("heading");
+const panel = useTemplateRef<InstanceType<typeof RestorePanel>>("panel");
 
 const findings = computed(() => [...quick.knownFindings.value, ...folder.findings.value]);
 const analysis = computed(() => ({ findings: findings.value, spans: [] }));
@@ -86,22 +79,16 @@ async function download() {
 }
 
 defineExpose({
-  focusHeading() {
-    heading.value?.focus({ preventScroll: true });
+  /** A reply pasted anywhere on home lands in the box. */
+  fill(text: string) {
+    kind.value = "text";
+    void nextTick(() => panel.value?.fill(text));
   },
 });
 </script>
 
 <template>
-  <div class="editor-heading">
-    <div>
-      <h1 ref="heading" tabindex="-1">Nhận lại bản đầy đủ</h1>
-      <p>
-        Dán câu trả lời của AI, hoặc kéo vào tệp AI trả về. Tên thật hiện lại, chỉ trên máy bạn.
-      </p>
-    </div>
-  </div>
-  <section class="glass-card glass" aria-label="Nhận lại bản đầy đủ">
+  <section class="glass-card glass restore-box">
     <!-- Nothing masked in this launch yet: there is nothing to put back. -->
     <div v-if="!findings.length" class="step-panel">
       <div class="restore-body">
@@ -111,7 +98,7 @@ defineExpose({
         </p>
       </div>
       <footer class="card-footer">
-        <button class="primary-action" @click="emit('navigate', 'home')">
+        <button class="primary-action" @click="emit('hide')">
           <AppIcon name="mask" :size="17" />Ẩn thông tin riêng<AppIcon name="arrow" :size="16" />
         </button>
       </footer>
@@ -119,7 +106,7 @@ defineExpose({
 
     <div v-else class="step-panel">
       <header class="card-header">
-        <div class="view-switch" aria-label="Lấy lại từ">
+        <div class="view-switch" aria-label="Nhận lại từ">
           <button :aria-pressed="kind === 'text'" @click="kind = 'text'">
             Câu trả lời dạng chữ</button
           ><button :aria-pressed="kind === 'file'" @click="kind = 'file'">Tệp AI trả về</button>
@@ -127,11 +114,12 @@ defineExpose({
       </header>
       <RestorePanel
         v-if="kind === 'text'"
+        ref="panel"
         session-id="all"
         :analysis="analysis"
         subject=""
         new-label="Ẩn nội dung mới"
-        @new-text="emit('navigate', 'home')"
+        @new-text="emit('hide')"
       />
       <template v-else>
         <div class="restore-body"><RestoreIntro /></div>

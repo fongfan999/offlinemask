@@ -294,7 +294,7 @@ export function useQuickActions({
   // replaced on the one-screen flow without a passcode (decision 0072) stays
   // restorable until the app closes; an explicitly deleted one is forgotten.
   const tables = new Map<string, readonly Finding[]>();
-  // The map itself is not reactive; the restore page follows this count (decision 0172).
+  // The map itself is not reactive; home's restore tab follows this count (decision 0172).
   const tablesChanged = ref(0);
   watch(
     sessions,

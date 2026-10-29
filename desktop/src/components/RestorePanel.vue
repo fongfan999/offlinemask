@@ -10,8 +10,8 @@ const props = withDefaults(
   defineProps<{
     sessionId: string;
     analysis: TextAnalysis;
-    /** What was masked, as the page names it: văn bản, bảng tính, tài liệu. Empty on the
-     * restore page, which reads replies about anything masked (decision 0172). */
+    /** What was masked, as the page names it: văn bản, bảng tính, tài liệu. Empty in
+     * home's restore tab, which reads replies about anything masked (decision 0172). */
     subject?: string;
     newLabel?: string;
   }>(),
@@ -31,6 +31,10 @@ const input = useTemplateRef<HTMLTextAreaElement>("input");
 defineExpose({
   focusInput() {
     input.value?.focus({ preventScroll: true });
+  },
+  /** A reply pasted elsewhere on the page (home's restore tab, decision 0172). */
+  fill(text: string) {
+    reply.value = text;
   },
 });
 

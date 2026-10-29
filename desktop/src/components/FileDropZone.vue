@@ -12,8 +12,6 @@ const props = defineProps<{
   hint: string;
   accept: string;
   busy?: boolean;
-  /** One row (icon beside the words), for the home page's start box. */
-  compact?: boolean;
   /** A dropped folder, or several files, opens the folder page (decision 0171). */
   folders?: boolean;
   /** Clicking picks a folder rather than one file (the folder page). */
@@ -47,7 +45,7 @@ function drop(transfer: DataTransfer | null) {
   <button
     type="button"
     class="drop-zone"
-    :class="{ 'is-dragging': dragging, 'is-busy': busy, 'is-compact': compact }"
+    :class="{ 'is-dragging': dragging, 'is-busy': busy }"
     :disabled="busy"
     @click="picker?.click()"
     @dragover.prevent="dragging = true"
