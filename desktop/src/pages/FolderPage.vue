@@ -35,6 +35,10 @@ const subtitle = computed(() => {
 const surveyed = computed(
   () => folder.files.value.filter((file) => !["waiting", "reading"].includes(file.status)).length,
 );
+/** The file being read now, so a slow one does not look like a stall. */
+const currentFile = computed(
+  () => folder.files.value.find((file) => file.status === "reading")?.path ?? "",
+);
 const duration = computed(() => roughDuration(folder.estimate.value));
 const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 const hidden = computed(() => folder.masked.value.reduce((sum, file) => sum + file.masked, 0));
@@ -120,13 +124,24 @@ defineExpose({
       />
     </div>
 
-    <!-- Read each file once to size the work. -->
+    <!-- Read each file once to size the work: a count, a bar and the file in hand. -->
     <div v-else-if="phase === 'surveying'" class="step-panel">
-      <p class="sheet-caption-line opening-progress" role="status">
-        <span class="spinner" aria-hidden="true"></span>Đang đọc thư mục {{ count(surveyed) }} /
-        {{ count(folder.files.value.length) }} tệp
+      <div class="sheet-progress folder-survey" role="status" aria-live="polite">
+        <p class="sheet-progress-title">
+          <span class="spinner" aria-hidden="true"></span>Đang xem trong thư mục…
+          <span class="folder-survey-count"
+            >{{ count(surveyed) }} / {{ count(folder.files.value.length) }} tệp</span
+          >
+        </p>
+        <progress
+          class="pack-progress"
+          :value="surveyed"
+          :max="Math.max(1, folder.files.value.length)"
+          aria-label="Đang xem trong thư mục"
+        ></progress>
+        <p class="sheet-progress-detail folder-survey-file">{{ currentFile }}</p>
         <button type="button" class="quiet-button" @click="folder.cancel()">Hủy</button>
-      </p>
+      </div>
     </div>
 
     <template v-else>

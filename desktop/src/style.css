@@ -1569,6 +1569,25 @@ th {
   color: var(--muted);
   font: 12px var(--mono);
 }
+/* The folder read before it is sized (decision 0171): count on the right, the file in
+ * hand under the bar, Hủy below. */
+.folder-survey-count {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+}
+.folder-survey-file {
+  min-height: 1.6em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.folder-survey .quiet-button {
+  justify-self: start;
+  margin-top: 4px;
+}
 /* Lines above a sheet's header: a title, the account holder, balances. */
 .sheet-preamble {
   margin: 0 24px 10px;
