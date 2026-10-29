@@ -1,5 +1,5 @@
 import ExcelJS from "exceljs";
-import { maxDataRows, SheetFileError, workbookFile, type OpenedFile } from "./files.ts";
+import { SheetFileError, workbookFile, type OpenedFile } from "./files.ts";
 
 /** Old Excel files (.xls, decision 0086): binary BIFF workbooks, and the HTML or XML
  * spreadsheets many banks export under that name. SheetJS reads them, in the file
@@ -20,8 +20,6 @@ export async function readXls(bytes: Uint8Array): Promise<OpenedFile> {
       cellDates: true,
       cellNF: true,
       UTC: true,
-      // Enough to tell the user the file is too long, without reading it all.
-      sheetRows: maxDataRows + 200,
     });
   } catch {
     // Damaged, unknown, or password-protected.

@@ -4,6 +4,8 @@ import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
+import JobTime from "../components/JobTime.vue";
+import LongJobNote from "../components/LongJobNote.vue";
 import KeepOffer from "../components/KeepOffer.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import RestoreIntro from "../components/RestoreIntro.vue";
@@ -282,7 +284,7 @@ defineExpose({
         <FileDropZone
           icon="table"
           title="Kéo thả bảng tính vào đây"
-          hint=".xlsx, .xls, .ods, .csv · tối đa 20 MB"
+          hint=".xlsx, .xls, .ods, .csv"
           accept=".xlsx,.xls,.ods,.csv"
           :busy="sheet.opening.value"
           folders
@@ -299,6 +301,7 @@ defineExpose({
       <template v-else>
         <!-- While masking runs, only the progress, Hủy and the busy button remain. -->
         <template v-if="!sheet.progress.value">
+          <LongJobNote :seconds="sheet.estimate.value" subject="Bảng tính này" />
           <header class="card-header sheet-toolbar">
             <p class="sheet-hint">Chọn cách xử lý từng cột. Gợi ý dựa trên tên cột và dữ liệu.</p>
             <div class="view-switch" aria-label="Chọn bản xem">
@@ -350,6 +353,7 @@ defineExpose({
         </p>
         <footer class="card-footer sheet-footer">
           <span v-if="!hidden" class="action-hint">Chưa chọn cột nào để ẩn hoặc quét.</span>
+          <JobTime v-else-if="!sheet.processing.value" :seconds="sheet.estimate.value" />
           <button v-if="sheet.processing.value" class="quiet-button" @click="sheet.cancelMask()">
             Hủy
           </button>

@@ -13,19 +13,16 @@ import type { DocEdits, DocError } from "../core/doc/docx.ts";
 import { editedAliases, keepReplacements, maskParagraphs } from "../core/doc/mask.ts";
 import { countAliases, reviewGroups } from "../core/file-review.ts";
 import {
-  dedicatedMachineSeconds,
-  estimateSeconds,
-  modelLoadSeconds,
   fileWorkers,
   folderKind,
   layoutKey,
   mapPool,
-  maxFolderFiles,
   scannedChars,
   skipReason,
   sortEntries,
   type FolderKind,
 } from "../core/folder.ts";
+import { jobSeconds, recordPace } from "./jobTime.ts";
 import { aliasScope, newSessionId, type Session } from "../core/sessions.ts";
 import { suggestColumn, type ColumnPlan } from "../core/sheet/columns.ts";
 import {
@@ -102,15 +99,11 @@ export function outputPath(file: FolderFile): string {
  * write a mirrored folder of masked copies. Files are opened, used and closed again at
  * each step, by a pool of file workers sized to the machine; the model reads one batch
  * at a time. Nothing is stored: results live in memory until another folder opens. */
-/** Characters a second a finished run kept in this launch: the estimate's pace after it. */
-const measuredPace = ref<number | null>(null);
-
 export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies) {
   const phase = ref<FolderPhase>("empty");
   const name = ref("");
   const files = ref<FolderFile[]>([]);
   const skipped = ref<{ path: string; reason: string }[]>([]);
-  const overflow = ref(0);
   const layouts = ref<FolderLayout[]>([]);
   const workers = ref(1);
   const progress = ref<SheetProgress | null>(null);
@@ -139,12 +132,8 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     );
   }
   const readChars = computed(() => files.value.reduce((sum, file) => sum + weight(file), 0));
-  /** Without the recognition pack only the fast rules run, far quicker than the model.
-   * Once a run in this launch has measured the pace on this machine, that pace is used. */
-  const seconds = (chars: number) =>
-    estimateSeconds(chars, measuredPace.value ?? undefined) / (pack.ready.value ? 1 : 20);
+  const seconds = (chars: number) => jobSeconds(chars, pack.ready.value);
   const estimate = computed(() => seconds(readChars.value));
-  const dedicated = computed(() => estimate.value > dedicatedMachineSeconds);
   const readable = computed(() => files.value.filter((file) => file.status !== "failed"));
   const failed = computed(() => files.value.filter((file) => file.status === "failed"));
   const busy = computed(() => ["surveying", "masking", "saving"].includes(phase.value));
@@ -158,7 +147,6 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     name.value = "";
     files.value = [];
     skipped.value = [];
-    overflow.value = 0;
     layouts.value = [];
     progress.value = null;
     saveTarget.value = "";
@@ -218,8 +206,7 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
       if (reason) skipped.value.push({ path: entry.path, reason });
       else taken.push(entry);
     }
-    overflow.value = Math.max(0, taken.length - maxFolderFiles);
-    files.value = taken.slice(0, maxFolderFiles).map((entry) => ({
+    files.value = taken.map((entry) => ({
       path: entry.path,
       file: entry.file,
       kind: folderKind(entry.file.name)!,
@@ -394,10 +381,7 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
       phase.value = "ready";
       return;
     }
-    // The pace this machine kept, load included, for the next estimate (RAM only).
-    const elapsed = (Date.now() - startedAt) / 1000;
-    if (pack.ready.value && total > 20_000 && elapsed > 0)
-      measuredPace.value = total / Math.max(1, elapsed - modelLoadSeconds);
+    recordPace(total, (Date.now() - startedAt) / 1000, pack.ready.value);
     tally();
     phase.value = "review";
   }
@@ -515,7 +499,6 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     name,
     files,
     skipped,
-    overflow,
     layouts,
     workers,
     readable,
@@ -523,7 +506,6 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     masked,
     busy,
     estimate,
-    dedicated,
     progress,
     review,
     findings,

@@ -4,12 +4,13 @@ import type { PickedFolder } from "../adapters/folder.ts";
 import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
+import JobTime from "../components/JobTime.vue";
+import LongJobNote from "../components/LongJobNote.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import RestoreBox from "../components/RestoreBox.vue";
 import ReviewList from "../components/ReviewList.vue";
 import SheetPreview from "../components/SheetPreview.vue";
 import { folderKey, packKey, useProvided } from "../composables/context.ts";
-import { roughDuration, maxFolderFiles } from "../core/folder.ts";
 
 /** A whole folder (decision 0171): what it holds and how long it will take, column
  * choices per spreadsheet layout, one run, one review of the folder's values, and a
@@ -62,7 +63,6 @@ const surveyed = computed(
 const currentFile = computed(
   () => folder.files.value.find((file) => file.status === "reading")?.path ?? "",
 );
-const duration = computed(() => roughDuration(folder.estimate.value));
 const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 const hidden = computed(() => folder.masked.value.reduce((sum, file) => sum + file.masked, 0));
 const statusLabel: Record<string, string> = {
@@ -247,17 +247,7 @@ defineExpose({
           </button>
         </div>
         <template v-else-if="phase === 'ready'">
-          <div v-if="folder.dedicated.value" class="folder-warning" role="note">
-            <strong>Thư mục này khá lớn</strong>
-            <p>
-              {{ count(folder.readable.value.length) }} tệp, cần {{ duration }} trên máy này. Bạn
-              vẫn có thể bắt đầu, máy sẽ chậm hơn trong lúc xử lý.
-            </p>
-            <p>
-              Nếu thường xuyên cần ẩn nhiều tài liệu, bạn có thể dành riêng một máy chạy OfflineMask
-              cho công việc hoặc cho cả công ty, để máy làm việc của bạn không bị ảnh hưởng.
-            </p>
-          </div>
+          <LongJobNote :seconds="folder.estimate.value" subject="Thư mục này" />
           <p class="folder-ready" role="note">
             <AppIcon name="eye" :size="16" /><span
               ><strong>Xem lại trước khi ẩn.</strong>
@@ -268,10 +258,6 @@ defineExpose({
               }}
               “Ẩn {{ count(folder.readable.value.length) }} tệp”.</span
             >
-          </p>
-          <p v-if="folder.overflow.value" class="sheet-note">
-            <AppIcon name="info" :size="14" />Thư mục có hơn {{ count(maxFolderFiles) }} tệp; lần
-            này chỉ ẩn {{ count(maxFolderFiles) }} tệp đầu. Hãy chia nhỏ thư mục cho phần còn lại.
           </p>
           <p v-if="!pack.ready.value" class="sheet-note">
             <AppIcon name="info" :size="14" />Đang tìm email, số điện thoại, số tài khoản. Tải gói
@@ -419,9 +405,8 @@ defineExpose({
           v-if="phase !== 'ready' || folder.readable.value.length"
           class="card-footer sheet-footer"
         >
-          <span v-if="phase === 'ready'" class="action-hint"
-            ><AppIcon name="clock" :size="14" />{{ capital(duration) }} trên máy này · thư mục gốc
-            giữ nguyên</span
+          <JobTime v-if="phase === 'ready'" :seconds="folder.estimate.value">
+            · thư mục gốc giữ nguyên</JobTime
           >
           <span v-else class="action-hint">Thư mục gốc không bị thay đổi.</span>
           <button v-if="phase === 'masking'" class="quiet-button" @click="folder.cancel()">

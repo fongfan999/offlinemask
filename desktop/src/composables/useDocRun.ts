@@ -1,4 +1,5 @@
 import { computed, ref, shallowRef, watch, type Ref } from "vue";
+import { jobSeconds, recordPace } from "./jobTime.ts";
 import {
   exportName,
   maskedSuffix,
@@ -9,7 +10,7 @@ import {
   withoutMaskedSuffix,
 } from "../adapters/sheet-files.ts";
 import type { DocumentFormat } from "../core/doc/document.ts";
-import { maxDocBytes, type DocEdits, type DocParagraph, type DocError } from "../core/doc/docx.ts";
+import { type DocEdits, type DocParagraph, type DocError } from "../core/doc/docx.ts";
 import {
   editedAliases,
   editedPlaces,
@@ -33,13 +34,11 @@ export const docPreviewParagraphs = 20;
 export const docErrorMessages: Record<DocError, string> = {
   unsupported:
     "Chỉ hỗ trợ tệp .docx, .odt và .pdf. Tệp .doc cũ hãy mở bằng Word và lưu lại thành .docx trước.",
-  "too-large": "Tệp lớn hơn 20 MB. Hãy chia nhỏ tài liệu rồi thử lại.",
   unreadable:
     "Chưa đọc được tệp này. Hãy kiểm tra tệp mở được trong Word hoặc LibreOffice và không có mật khẩu.",
   empty: "Tài liệu không có chữ để ẩn.",
   password:
     "PDF này cần mật khẩu để mở. Hãy mở bằng trình đọc PDF, lưu lại bản không mật khẩu rồi thử lại.",
-  "too-many-pages": "PDF dài hơn 300 trang. Hãy tách thành các tệp nhỏ hơn rồi thử lại.",
   scanned: "PDF này là ảnh scan nên OfflineMask chưa đọc được chữ. Hỗ trợ ảnh scan sắp có.",
   "old-font":
     "Chữ trong PDF này dùng phông chữ cũ (như TCVN3, VNI) nên chưa đọc được. Hãy mở tệp gốc, chuyển sang Unicode rồi xuất lại PDF.",
@@ -108,6 +107,13 @@ function errorMessage(error: unknown) {
  * and later restore the AI's returned document. Documents stay in the worker, in RAM. */
 export function useDocRun({ detector, files, pack, sessions, onSession }: DocRunDependencies) {
   const draft = shallowRef<DocDraft | null>(null);
+  /** Seconds on this machine for the document's text (decision 0173). */
+  const estimate = computed(() =>
+    jobSeconds(
+      (draft.value?.paragraphs ?? []).reduce((sum, paragraph) => sum + paragraph.text.length, 0),
+      pack.ready.value,
+    ),
+  );
   const opening = ref(false);
   /** Pages read while a PDF opens. */
   const openingProgress = ref<{ done: number; total: number } | null>(null);
@@ -183,10 +189,6 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
       fileError.value = docErrorMessages.unsupported;
       return;
     }
-    if (file.size > maxDocBytes) {
-      fileError.value = docErrorMessages["too-large"];
-      return;
-    }
     opening.value = true;
     openingProgress.value = null;
     const abort = (openingAbort = new AbortController());
@@ -247,6 +249,12 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
         new Map(),
         () => cancelled,
       );
+      if (!cancelled)
+        recordPace(
+          current.paragraphs.reduce((sum, paragraph) => sum + paragraph.text.length, 0),
+          (Date.now() - startedAt) / 1000,
+          pack.ready.value,
+        );
       progress.value = { stage: "masking", done: 0, total: 0, startedAt };
       const id = sessions.value.some((s) => aliasScope(s.id) === aliasScope(current.sessionId))
         ? newSessionId(sessions.value)
@@ -365,7 +373,6 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
   ): Promise<DocRestore | string> {
     if (!(fromPdf ? returnedForPdf : returnedName).test(file.name))
       return fromPdf ? unsupportedReturn : docErrorMessages.unsupported;
-    if (file.size > maxDocBytes) return docErrorMessages["too-large"];
     try {
       const opened = await files.openDoc(file);
       const result = restoreParagraphs(opened.paragraphs, findings, opened.mailto);
@@ -389,6 +396,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
 
   return {
     draft,
+    estimate,
     opening,
     openingProgress,
     cancelOpen,

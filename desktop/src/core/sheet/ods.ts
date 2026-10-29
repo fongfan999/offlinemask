@@ -169,22 +169,27 @@ export function parseOds(xml: string): OdsSource["sheets"] {
   return sheets;
 }
 
-/** The grid of display strings for one sheet, as the spreadsheet flow expects. */
-export function odsGrid(rows: readonly OdsRow[], maxRows: number): string[][] {
+/** The grid of display strings for one sheet, as the spreadsheet flow expects. Empty
+ * rows are kept only between rows with text: ODS files often end with one empty row
+ * repeated a million times, which would otherwise become a million-row grid. */
+export function odsGrid(rows: readonly OdsRow[]): string[][] {
   const width = Math.max(
     0,
     ...rows.flatMap((r) => r.cells.filter((c) => c.text).map((c) => c.column + c.repeat)),
   );
   const grid: string[][] = [];
+  let blank = 0;
   for (const r of rows) {
+    if (!r.cells.some((c) => c.text)) {
+      blank += r.repeat;
+      continue;
+    }
+    for (; blank > 0; blank--) grid.push(Array.from({ length: width }, () => ""));
     const values = Array.from({ length: width }, () => "");
     for (const c of r.cells)
       if (c.text)
         for (let k = 0; k < c.repeat && c.column + k < width; k++) values[c.column + k] = c.text;
-    for (let k = 0; k < r.repeat; k++) {
-      if (grid.length > maxRows + 100) return grid;
-      grid.push(k ? [...values] : values);
-    }
+    for (let k = 0; k < r.repeat; k++) grid.push(k ? [...values] : values);
   }
   return grid;
 }

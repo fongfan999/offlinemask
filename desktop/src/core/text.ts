@@ -1,7 +1,6 @@
 import type { Decisions, Finding, TextPart } from "./review.ts";
 import type { Detection } from "./detection/types.ts";
 
-export const maxTextLength = 50_000;
 export interface TextSpan {
   start: number;
   end: number;
@@ -18,8 +17,6 @@ function isWord(character: string | undefined): boolean {
 
 export function validateText(text: string): string {
   if (!text.trim()) return "Nhập hoặc dán văn bản để bắt đầu.";
-  if (text.length > maxTextLength)
-    return "Văn bản quá dài. Hãy chia thành các phần tối đa 50.000 ký tự.";
   return "";
 }
 

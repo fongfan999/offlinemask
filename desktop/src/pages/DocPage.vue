@@ -5,6 +5,8 @@ import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import DocPreview from "../components/DocPreview.vue";
 import FileDropZone from "../components/FileDropZone.vue";
+import JobTime from "../components/JobTime.vue";
+import LongJobNote from "../components/LongJobNote.vue";
 import KeepOffer from "../components/KeepOffer.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import RestoreIntro from "../components/RestoreIntro.vue";
@@ -279,7 +281,7 @@ defineExpose({
         <FileDropZone
           icon="file"
           title="Kéo thả tài liệu vào đây"
-          hint=".docx, .odt, .pdf · tối đa 20 MB"
+          hint=".docx, .odt, .pdf"
           accept=".docx,.odt,.pdf,.txt,.md"
           :busy="doc.opening.value"
           folders
@@ -305,6 +307,7 @@ defineExpose({
       </template>
       <template v-else>
         <template v-if="!doc.progress.value">
+          <LongJobNote :seconds="doc.estimate.value" subject="Tài liệu này" />
           <header class="card-header sheet-toolbar">
             <p class="sheet-hint">Họ tên, số điện thoại, email, số tài khoản… được thay bằng mã.</p>
             <div class="view-switch" aria-label="Chọn bản xem">
@@ -335,6 +338,7 @@ defineExpose({
           {{ doc.processingError.value }}
         </p>
         <footer class="card-footer sheet-footer">
+          <JobTime v-if="!doc.processing.value" :seconds="doc.estimate.value" />
           <button v-if="doc.processing.value" class="quiet-button" @click="doc.cancelMask()">
             Hủy
           </button>

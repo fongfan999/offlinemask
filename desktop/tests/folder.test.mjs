@@ -27,7 +27,8 @@ test("a folder takes documents and spreadsheets and says why it leaves the rest"
   assert.equal(skipReason(entry("a/Hợp đồng.pdf")), null);
   assert.match(skipReason(entry("a/cũ.doc")), /\.doc cũ/);
   assert.match(skipReason(entry("a/ảnh.png")), /Chưa hỗ trợ/);
-  assert.match(skipReason(entry("a/lớn.xlsx", 21 * 1024 * 1024)), /20 MB/);
+  // No size limit (decision 0173): a big file is taken and counted in the estimate.
+  assert.equal(skipReason(entry("a/lớn.xlsx", 21 * 1024 * 1024)), null);
   for (const name of [".DS_Store", "~$Hợp đồng.docx", "Thumbs.db", "desktop.ini"])
     assert.ok(isLitter(name), name);
   assert.ok(!isLitter("Hợp đồng.docx"));

@@ -1,4 +1,5 @@
-import { computed, ref, shallowRef, watch, type Ref } from "vue";
+import { computed, ref, shallowRef, toRaw, watch, type Ref } from "vue";
+import { jobSeconds, recordPace } from "./jobTime.ts";
 import {
   exportName,
   maskedSuffix,
@@ -25,7 +26,7 @@ import {
   type CellEdits,
   type SheetTable,
 } from "../core/sheet/mask.ts";
-import { maxFileBytes, sheetFormat } from "../core/sheet/files.ts";
+import { sheetFormat } from "../core/sheet/files.ts";
 import {
   aliasScope,
   newSessionId,
@@ -115,6 +116,17 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
   );
   // "Quét nội dung" on a column covers scanning; there is no separate all-cells mode.
   const plans = computed(() => draft.value?.plans ?? []);
+  /** Seconds on this machine for the cells the model will read under the current choices
+   * (decision 0173). The rows are read raw: only the choices need watching. */
+  const estimate = computed(() => {
+    const current = draft.value;
+    if (!current) return 0;
+    const cells = scanCells(toRaw(current.tables), plans.value);
+    return jobSeconds(
+      cells.reduce((sum, cell) => sum + cell.text.length, 0),
+      pack.ready.value,
+    );
+  });
   const previewTables = computed(() =>
     (draft.value?.tables ?? []).map((table) => ({
       ...table,
@@ -175,10 +187,6 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     fileError.value = "";
     if (!sheetFormat(file.name)) {
       fileError.value = fileErrorMessages.unsupported;
-      return;
-    }
-    if (file.size > maxFileBytes) {
-      fileError.value = fileErrorMessages["too-large"];
       return;
     }
     opening.value = true;
@@ -264,6 +272,12 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
         new Map(),
         () => cancelled,
       );
+      if (!cancelled)
+        recordPace(
+          cells.reduce((sum, cell) => sum + cell.text.length, 0),
+          (Date.now() - startedAt) / 1000,
+          pack.ready.value,
+        );
       progress.value = { stage: "masking", done: 0, total: 0, startedAt };
       const id = sessions.value.some((s) => aliasScope(s.id) === aliasScope(current.sessionId))
         ? newSessionId(sessions.value)
@@ -357,7 +371,6 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     file: File,
   ): Promise<SheetRestore | string> {
     if (!sheetFormat(file.name)) return fileErrorMessages.unsupported;
-    if (file.size > maxFileBytes) return fileErrorMessages["too-large"];
     try {
       const opened = await files.open(file);
       const result = restoreTables(opened.tables, findings);
@@ -379,6 +392,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
 
   return {
     draft,
+    estimate,
     opening,
     fileError,
     processing,

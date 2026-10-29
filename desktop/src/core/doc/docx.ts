@@ -6,15 +6,12 @@ import type { Finding } from "../review.ts";
  * paragraphs and replacements are written back into the runs they cover, so the
  * formatting of every run is kept. A small tag scanner is enough for Word's
  * well-formed XML and works inside a worker, where DOMParser does not exist. */
-export const maxDocBytes = 20 * 1024 * 1024;
 export type DocError =
   | "unsupported"
-  | "too-large"
   | "unreadable"
   | "empty"
   // PDF only (decision 0149).
   | "password"
-  | "too-many-pages"
   | "scanned"
   | "old-font"
   | "cancelled";
@@ -289,7 +286,6 @@ export function applyReplacements(text: string, replacements: readonly Replaceme
 export async function openDocx(
   bytes: Uint8Array,
 ): Promise<{ source: DocSource; paragraphs: DocParagraph[]; notes: string[] }> {
-  if (bytes.byteLength > maxDocBytes) throw new DocFileError("too-large");
   let zip: JSZip;
   try {
     zip = await JSZip.loadAsync(bytes);

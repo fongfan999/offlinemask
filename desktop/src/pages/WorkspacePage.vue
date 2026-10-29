@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
+import JobTime from "../components/JobTime.vue";
+import LongJobNote from "../components/LongJobNote.vue";
 import BrandMark from "../components/BrandMark.vue";
 import HighlightedText from "../components/HighlightedText.vue";
 import MaskProgress from "../components/MaskProgress.vue";
@@ -31,7 +33,7 @@ import {
   type SampleSession,
   type TextSession,
 } from "../core/sessions.ts";
-import { maxTextLength } from "../core/text.ts";
+import { jobSeconds } from "../composables/jobTime.ts";
 import { vTip } from "../directives/tip.ts";
 
 const props = defineProps<{ format: Format; session?: SampleSession | TextSession }>();
@@ -248,9 +250,9 @@ function openStep(target: number) {
   restoreStep.value = target === 3;
   pendingFocus.value = target === 3 ? "restore" : "step2";
 }
-const characterLimit = maxTextLength.toLocaleString("vi-VN");
 /** The counter only matters near the limit. */
-const showCounter = computed(() => draft.value.length >= maxTextLength * 0.9);
+/** How long the text takes on this machine (decision 0173); said once it is a minute. */
+const textSeconds = computed(() => jobSeconds(draft.value.length, pack.ready.value));
 /** Categories fold into one line under the text; the checkboxes open on request. */
 const optionsOpen = ref(false);
 const optionsSummary = computed(() => {
@@ -559,37 +561,18 @@ defineExpose({
             autocomplete="off"
             autocorrect="off"
             autocapitalize="off"
-            aria-describedby="text-input-hint"
-            :aria-invalid="draft.length > maxTextLength"
             @input="processingError = ''"
             @dragover="dragOver"
             @drop="dropFile"
             @keydown.meta.enter.prevent="submitShortcut"
             @keydown.ctrl.enter.prevent="submitShortcut"
           ></textarea>
-          <div v-if="(!draft && !processing) || showCounter" class="input-hint-row">
-            <button
-              v-if="!draft && !processing"
-              type="button"
-              class="sample-link"
-              @click="draft = sampleText"
-            >
+          <div v-if="!draft && !processing" class="input-hint-row">
+            <button type="button" class="sample-link" @click="draft = sampleText">
               Thử với văn bản mẫu
             </button>
-            <p
-              v-if="showCounter"
-              id="text-input-hint"
-              class="input-hint"
-              :class="{ 'input-error': draft.length > maxTextLength }"
-              aria-live="polite"
-            >
-              {{
-                draft.length > maxTextLength
-                  ? draftError
-                  : `${draft.length.toLocaleString("vi-VN")} / ${characterLimit} ký tự`
-              }}
-            </p>
           </div>
+          <LongJobNote v-if="format === 'text'" :seconds="textSeconds" subject="Văn bản này" />
           <!-- What to hide folds into one line; the checkboxes open on request. -->
           <fieldset class="detection-options" :disabled="processing">
             <legend class="sr-only">Bạn muốn ẩn thông tin nào?</legend>
@@ -782,6 +765,10 @@ defineExpose({
         </div>
         <MaskProgress v-if="textProcessing && progressShown && progress" :progress="progress" />
         <footer class="card-footer">
+          <JobTime
+            v-if="!session && format === 'text' && !textProcessing && textSeconds >= 60"
+            :seconds="textSeconds"
+          />
           <span v-if="session" class="action-hint"
             ><AppIcon v-if="privateSession && savedNote" name="lock" :size="13" />{{
               privateSession ? savedNote : "Bản mẫu"

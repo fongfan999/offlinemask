@@ -7,8 +7,6 @@ import type { FilesRequest, FilesResponse } from "../workers/files.worker.ts";
 
 export const fileErrorMessages: Record<FileError, string> = {
   unsupported: "Chỉ hỗ trợ tệp Excel (.xlsx, .xls), .ods và .csv.",
-  "too-large": "Tệp lớn hơn 20 MB. Hãy chia nhỏ tệp rồi thử lại.",
-  "too-many-rows": "Tệp có hơn 100.000 dòng. Hãy chia nhỏ tệp rồi thử lại.",
   unreadable:
     "Chưa đọc được tệp này. Hãy kiểm tra tệp mở được trong Excel hoặc LibreOffice và không có mật khẩu.",
   empty: "Tệp không có dữ liệu.",

@@ -1,11 +1,5 @@
 import { blocksToMarkdown, toBlocks } from "./blocks.ts";
-import {
-  applyReplacements,
-  DocFileError,
-  maxDocBytes,
-  type DocEdits,
-  type DocParagraph,
-} from "./docx.ts";
+import { applyReplacements, DocFileError, type DocEdits, type DocParagraph } from "./docx.ts";
 
 /** PDF support, phase 1 (decision 0149): only PDFs that contain text. The text is read
  * with pdf.js, masked like a Word paragraph, and written out as Markdown built from
@@ -13,7 +7,6 @@ import {
  * metadata, attachments, images, earlier revisions) can reach the output. pdf.js is
  * asked for text only: nothing is drawn and no image is decoded, which is most of a
  * viewer's cost and memory. */
-export const maxPdfPages = 300;
 /** Images at least this many pixels count for the "has images" note; logos and icons
  * are usually smaller. */
 const largeImagePixels = 200_000;
@@ -484,7 +477,6 @@ export async function openPdf(
   bytes: Uint8Array,
   { onPage, stopped }: PdfReading = {},
 ): Promise<{ source: PdfSource; paragraphs: DocParagraph[]; notes: string[] }> {
-  if (bytes.byteLength > maxDocBytes) throw new DocFileError("too-large");
   const largeImages = countLargeImages(bytes);
   const { getDocument } = await loadPdfJs();
   // No URL is given for CMaps, standard fonts, ICC profiles or WebAssembly, and system
@@ -510,7 +502,6 @@ export async function openPdf(
         (error as { name?: string })?.name === "PasswordException" ? "password" : "unreadable",
       );
     }
-    if (document.numPages > maxPdfPages) throw new DocFileError("too-many-pages");
     const pages: PdfPage[] = [];
     const paragraphs: DocParagraph[] = [];
     let yielded = performance.now();

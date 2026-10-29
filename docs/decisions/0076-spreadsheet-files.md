@@ -21,7 +21,7 @@ The same value of the same type gets one alias across columns, cells and sheets 
 
 - **.xlsx:** every sheet except "very hidden" ones; the first row of each sheet is its header. Cells are read as displayed text (dates as dd/mm/yyyy, formula results, rich text). In the exported copy, edited cells become plain text; every other cell keeps its value, formula, number format and style, and sheets keep column widths. Charts, pivot tables and macros are not carried over, and the screen says so before download. .xls and .xlsm are refused with a hint to save as .xlsx.
 - **.csv:** UTF-8 with or without BOM, else Windows-1258. The separator is the one used most in the header line outside quotes, because Vietnamese-locale Excel writes ";" and amounts contain commas. The export keeps the separator and line breaks and is written as UTF-8 with a BOM so Excel shows Vietnamese correctly.
-- **Limits:** 20 MB and 100 000 data rows across sheets; larger files are refused with a reason. Restored cells come back as text even where the original was a number.
+- **Limits:** 20 MB and 100 000 data rows across sheets; larger files were refused with a reason, until [0173](0173-no-limits-only-estimates.md) removed the limits for an estimate and a warning over an hour. Restored cells come back as text even where the original was a number.
 
 ## Privacy and architecture
 

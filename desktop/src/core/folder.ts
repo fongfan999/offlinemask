@@ -15,8 +15,6 @@ export interface FolderEntry {
 /** System litter that is never listed: hidden files, Office lock files, Windows thumbnails. */
 const litter = /^(\.|~\$)|^(thumbs\.db|desktop\.ini)$/i;
 export const isLitter = (name: string) => litter.test(name);
-export const maxFolderFiles = 5_000;
-export const maxFolderFileBytes = 20 * 1024 * 1024;
 
 export function folderKind(name: string): FolderKind | null {
   const kind = fileKind(name);
@@ -27,7 +25,6 @@ export function skipReason(entry: FolderEntry): string | null {
   const kind = fileKind(entry.file.name);
   if (kind === "legacy-doc") return "Tệp .doc cũ: mở bằng Word và lưu lại thành .docx.";
   if (!folderKind(entry.file.name)) return "Chưa hỗ trợ loại tệp này.";
-  if (entry.file.size > maxFolderFileBytes) return "Tệp lớn hơn 20 MB.";
   return null;
 }
 

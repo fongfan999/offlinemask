@@ -45,3 +45,5 @@ Saving, fixed (29 Oct 2026). Saving a folder failed every time in the Mac app wi
 Nothing to hide. A folder that is empty, holds only formats the app does not read, or whose files all failed to open showed "Ẩn 0 tệp" and asked for a review. It now says "Không có tệp nào để ẩn", why in one line ("Thư mục này trống.", "…chỉ có những loại tệp OfflineMask chưa đọc được.", or "Không mở được tệp nào…; lý do ở bên dưới."), which formats it reads, and one button, "Chọn thư mục khác"; the skipped or failed list stays below it, and the footer and the header's own button are hidden.
 
 Another folder starts at home. "Chọn thư mục khác" (the header, the empty folder, and step 3's new-folder button) used to clear the page back to its own drop zone, a half-page of its own with a "Ẩn cả thư mục" title and a stepper over nothing. It now clears the folder and goes home, whose drop zone already takes folders, files and text.
+
+Since [0173](0173-no-limits-only-estimates.md) a folder has no 5 000-file or 20 MB-per-file cap; its estimate and over-an-hour note are the shared `JobTime` and `LongJobNote`, the same as on every page.

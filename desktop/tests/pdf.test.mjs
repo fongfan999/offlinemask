@@ -193,12 +193,8 @@ test("a PDF that needs a password is refused; one that only restricts printing o
   assert.deepEqual(texts(opened), ["Hop dong thue nha cua Tran Thi Mai, so dien thoai 0912345678"]);
 });
 
-test("files that are not PDFs, too large or too long are refused", async () => {
+test("files that are not PDFs are refused", async () => {
   await assert.rejects(openPdf(new TextEncoder().encode("not a pdf")), failure("unreadable"));
-  await assert.rejects(openPdf(new Uint8Array(20 * 1024 * 1024 + 1)), failure("too-large"));
-  const long = await PDFDocument.create();
-  for (let index = 0; index < 301; index++) long.addPage();
-  await assert.rejects(openPdf(await long.save()), failure("too-many-pages"));
 });
 
 test("reading a PDF fetches nothing", async () => {
