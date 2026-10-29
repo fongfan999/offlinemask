@@ -266,25 +266,82 @@ function removeSession(id: string) {
   quick.forget(id);
   if (target) void navigate(target);
 }
-/** Wide windows can fold the sidebar away (decision 0172). The logo glides between the
- * sidebar and the top bar's centre: both carry one view-transition name, so the web
- * view morphs one into the other. Without the API, or with reduced motion, it just
- * switches. Kept in memory only: a launch starts with the sidebar open. */
+/** Wide windows can fold the sidebar away (decision 0172). The sidebar's column shrinks
+ * while the sidebar slides by the same amount on the same curve (CSS), and the logo flies
+ * between the sidebar and the top bar's centre, turning once on the way: a copy of it
+ * travels above the page from where it is to where it will be, measured before the
+ * layout starts moving, and both real logos stay hidden until it lands. With reduced
+ * motion it simply switches. Kept in memory only: a launch starts with the sidebar open. */
 const collapsed = ref(false);
+const measuring = ref(false);
+const flying = ref(false);
+const shell = useTemplateRef<HTMLDivElement>("shell");
 const sidebarExpand = useTemplateRef<HTMLButtonElement>("sidebarExpand");
-function toggleCollapsed() {
-  const flip = async () => {
-    collapsed.value = !collapsed.value;
-    await nextTick();
-  };
+const foldMs = 560;
+const foldEase = "cubic-bezier(0.65, 0, 0.35, 1)";
+const brandOf = (root: HTMLElement, folded: boolean) =>
+  root.querySelector<HTMLElement>(folded ? ".topbar-brand" : ".sidebar .brand");
+async function toggleCollapsed() {
+  // One fold at a time: a second click mid-flight would launch a second logo.
+  if (measuring.value || flying.value) return;
+  const target = !collapsed.value;
+  const root = shell.value;
+  const from = root && brandOf(root, !target);
   const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const done =
-    "startViewTransition" in document && !still
-      ? document.startViewTransition(flip).updateCallbackDone
-      : flip();
-  void done.then(() =>
-    collapsed.value ? sidebarExpand.value?.focus() : sidebar.value?.focusStart(),
-  );
+  if (!root || !from || still) {
+    collapsed.value = target;
+    await nextTick();
+  } else {
+    const first = from.getBoundingClientRect();
+    // Where the logo lands: the end state laid out once with transitions off, then undone.
+    measuring.value = true;
+    collapsed.value = target;
+    await nextTick();
+    const last = brandOf(root, target)!.getBoundingClientRect();
+    collapsed.value = !target;
+    await nextTick();
+    void root.offsetWidth;
+    measuring.value = false;
+    await nextTick();
+    void root.offsetWidth;
+    // Now the real move: the layout transitions, the copy flies.
+    const copy = from.cloneNode(true) as HTMLElement;
+    copy.className = "brand brand-flight";
+    copy.setAttribute("aria-hidden", "true");
+    copy.tabIndex = -1;
+    Object.assign(copy.style, {
+      left: `${last.left}px`,
+      top: `${last.top}px`,
+      width: `${last.width}px`,
+      height: `${last.height}px`,
+    });
+    document.body.append(copy);
+    flying.value = true;
+    collapsed.value = target;
+    const dx = first.left - last.left;
+    const dy = first.top - last.top;
+    const flight = copy.animate(
+      [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "translate(0, 0)" }],
+      { duration: foldMs, easing: foldEase },
+    );
+    copy.querySelector(".brand-mark")?.animate(
+      [
+        { rotate: "0deg", scale: "1" },
+        { scale: "1.14", offset: 0.5 },
+        { rotate: target ? "360deg" : "-360deg", scale: "1" },
+      ],
+      { duration: foldMs, easing: foldEase },
+    );
+    // A window hidden mid-fold may never paint the end: land the logo on time anyway.
+    await Promise.race([
+      flight.finished.catch(() => undefined),
+      new Promise((resolve) => setTimeout(resolve, foldMs + 150)),
+    ]);
+    copy.remove();
+    flying.value = false;
+  }
+  if (collapsed.value) sidebarExpand.value?.focus();
+  else sidebar.value?.focusStart();
 }
 async function openSidebar() {
   sidebarOpen.value = true;
@@ -301,7 +358,12 @@ async function closeSidebar() {
 <template>
   <div class="ambient" aria-hidden="true"></div>
   <LockPage v-if="vault.state.value === 'locked'" />
-  <div v-else-if="vault.checked.value" class="app-shell" :class="{ 'is-collapsed': collapsed }">
+  <div
+    v-else-if="vault.checked.value"
+    ref="shell"
+    class="app-shell"
+    :class="{ 'is-collapsed': collapsed, 'is-measuring': measuring, 'is-flying': flying }"
+  >
     <button
       v-if="sidebarOpen"
       class="sidebar-scrim"
@@ -335,7 +397,6 @@ async function closeSidebar() {
           >
             <AppIcon name="list" /></button
           ><button
-            v-if="collapsed"
             ref="sidebarExpand"
             class="sidebar-expand"
             aria-label="Mở thanh bên"
@@ -345,9 +406,9 @@ async function closeSidebar() {
             <AppIcon name="sidebar" :size="18" /></button
           ><span v-if="topbarLabel">{{ topbarLabel }}</span>
         </div>
-        <!-- Folded sidebar: its logo sits here, centred (decision 0172). -->
+        <!-- Folded sidebar: its logo sits here, centred (decision 0172). Always rendered,
+             shown only while folded, so its place can be measured before the move. -->
         <button
-          v-if="collapsed"
           class="brand topbar-brand"
           aria-label="OfflineMask — Trang chủ"
           @click="openFormat('home')"
