@@ -14,24 +14,26 @@ const touchdown = 0.86;
 type Box = Pick<DOMRect, "left" | "top" | "width" | "height">;
 const centre = (box: Box) => ({ x: box.left + box.width / 2, y: box.top + box.height / 2 });
 
-/** The mark's own path: crouch, leap with a full turn, land, settle. `turn` is +1 or -1,
- * the way it travels. */
+/** The mark's own path, a ninja's flip seen side-on: it crouches leaning back against the
+ * way it will go (the wind-up), springs into one full turn at the top of the arc, lands
+ * tipped a little past upright with a squash, and settles. `turn` is +1 or -1, the way it
+ * travels. */
 function markFrames(turn: number): Keyframe[] {
   const r = (deg: number) => `${deg * turn}deg`;
   return [
-    { offset: 0, transform: `translateY(0) rotate(0deg) scale(1, 1)` },
+    { offset: 0, transform: `translateY(0) rotate(0deg) scale(1, 1)`, easing: "ease-out" },
     {
-      offset: 0.12,
-      transform: `translateY(2px) rotate(0deg) scale(1.1, 0.86)`,
-      easing: "ease-out",
+      offset: 0.14,
+      transform: `translateY(2px) rotate(${r(-16)}) scale(1.1, 0.86)`,
+      easing: "cubic-bezier(0.25, 1, 0.5, 1)",
     },
     {
       offset: 0.5,
-      transform: `translateY(${-leap}px) rotate(${r(180)}) scale(1, 1)`,
-      easing: "ease-in",
+      transform: `translateY(${-leap}px) rotate(${r(180)}) scale(0.94, 1.06)`,
+      easing: "cubic-bezier(0.5, 0, 0.75, 0)",
     },
-    { offset: touchdown, transform: `translateY(0) rotate(${r(360)}) scale(1, 1)` },
-    { offset: 0.93, transform: `translateY(1px) rotate(${r(360)}) scale(1.12, 0.86)` },
+    { offset: touchdown, transform: `translateY(0) rotate(${r(372)}) scale(1, 1)` },
+    { offset: 0.93, transform: `translateY(1px) rotate(${r(366)}) scale(1.12, 0.86)` },
     { offset: 1, transform: `translateY(0) rotate(${r(360)}) scale(1, 1)` },
   ];
 }
