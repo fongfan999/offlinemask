@@ -120,7 +120,7 @@ export function itemsToLines(items: readonly TextItem[]): Line[] {
       row.push(piece);
     else rows.push([piece]);
   }
-  return rows.map((row) => {
+  const lines = rows.map((row) => {
     row.sort((a, b) => a.x - b.x);
     return {
       y: row[0]!.y,
@@ -131,6 +131,62 @@ export function itemsToLines(items: readonly TextItem[]): Line[] {
       pieces: row,
     };
   });
+  return lines.map((line, index) => {
+    const at = secondCell(line);
+    const column =
+      at !== undefined &&
+      [lines[index - 1], lines[index + 1]].some(
+        (other) =>
+          other &&
+          Math.abs(other.y - line.y) < Math.max(other.size, line.size) * 2 &&
+          // Another "Label:" line: a table's header beside a total is not ("Tổng hợp   Thuế
+          // suất" over "Tổng tiền chịu thuế suất:   5%").
+          /^\p{Lu}[^\t:]{0,39}:$/u.test(other.text.split("\t")[0]!.trim()) &&
+          Math.abs((secondCell(other) ?? -Infinity) - at) < line.size,
+      );
+    return { ...line, text: labelled(line.text, column) };
+  });
+}
+/** Where a line's second cell starts (`joinPieces`'s first tab), if it has one. */
+function secondCell(line: Line): number | undefined {
+  let end = -Infinity;
+  for (const piece of line.pieces) {
+    if (end > -Infinity && piece.x - end > piece.size) return piece.x;
+    end = Math.max(end, piece.end);
+  }
+  return undefined;
+}
+
+/** A label on its own in a cell: a capital, then up to 39 characters and no colon. */
+const labelCell = /^\p{Lu}[^\t:]{0,39}$/u;
+/** A form typed with its labels in a column and the values in the next ("Ngày sinh   :
+ * 08/11/1998", "Ngày sinh:   08/11/1998", decision 0174) reads as "Label: value", as the
+ * same form typed without the column does: a line of its own that the masker reads with
+ * its label. Left as two cells, such lines made a table of two columns, and lines closer
+ * than a row's height (a typed contract's) were one row: every label of a party in one
+ * cell and every value in the other. The colon may start the value's cell or stand alone
+ * between the two. A colon that ends the label's cell is a form only in a `column`, where
+ * the line above or below has its second cell at the same place: alone, "Label:" and a
+ * cell far to its right are a total in a table's last column ("Cộng tiền hàng:   5.640.698")
+ * or the "Nơi nhận:" list beside a signature. */
+function labelled(text: string, column: boolean): string {
+  const cells: string[] = [];
+  for (const cell of text.split("\t")) {
+    const last = cells.at(-1)?.trim();
+    // Text recognition often reads the colon onto the value (":3/3 đường …").
+    if (last !== undefined && /^\s*:/.test(cell) && labelCell.test(last))
+      cells[cells.length - 1] = `${last}: ${cell.replace(/^\s*:\s*/, "")}`.trimEnd();
+    else if (
+      column &&
+      last?.endsWith(":") &&
+      labelCell.test(last.slice(0, -1)) &&
+      // An empty field before the next one ("Họ và tên:   Giới tính: Nam") stays apart.
+      !labelStart.test(cell.trim())
+    )
+      cells[cells.length - 1] = `${last} ${cell.trim()}`;
+    else cells.push(cell);
+  }
+  return cells.join("\t");
 }
 
 const isRow = (line: Line) => line.text.includes("\t");

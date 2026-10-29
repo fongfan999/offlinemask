@@ -47,6 +47,13 @@ const addressed = new RegExp(
   `(?<![\\p{L}\\p{M}])(${vocabulary.people.formOfAddressAlternation})[^\\S\\r\\n]+(${word}(?:[^\\S\\r\\n]+${word}){0,4})`,
   "giu",
 );
+/** A contract's party, labelled ("BÊN B: LÝ THU THẢO", "Bên cho thuê: Lê Phi Long"),
+ * decision 0174: the party may be a company, which is a name only to the organization
+ * rules, so the value must look like a person's name. */
+const party = new RegExp(
+  `(?<![\\p{L}\\p{M}])bên(?:[^\\S\\r\\n]+[\\p{L}\\p{M}]+){1,2}[^\\S\\r\\n]*[:：][^\\S\\r\\n]*(${word}(?:[^\\S\\r\\n]+${word}){1,4})`,
+  "giu",
+);
 /** A signature note; the names are on one of the next two non-empty lines. */
 const signature = /\((?:ký|Ký|KÝ)[^)\r\n]*\)[^\r\n]*/gu;
 
@@ -84,6 +91,18 @@ export function detectPersonCues(text: string): Detection[] {
     if (count < 2 && !(/^(?:ông|bà|anh|chị)$/u.test(match[1]!) && isSyllable(words[0]!))) continue;
     const value = words.slice(0, Math.max(count, 1)).join(" ");
     found.push(finding(start, start + value.length, "Cách xưng hô · person-cues-v1"));
+  }
+  for (const match of text.matchAll(party)) {
+    const words = match[1]!.split(/[^\S\r\n]+/u);
+    // "BÊN B: Ông LÊ PHI LONG" is the form of address's to read.
+    if (/^(?:ông|bà|anh|chị)$/u.test(words[0]!.toLowerCase())) continue;
+    let count = words.length;
+    while (count >= 2 && !looksLikeName(words.slice(0, count).join(" "))) count--;
+    const value = words.slice(0, count).join(" ");
+    // In capitals, a heading can share a name's shape: its syllables must be names'.
+    if (count < 2 || !(/\p{Ll}/u.test(value) || looksLikeKnownName(value))) continue;
+    const start = match.index! + match[0].length - match[1]!.length;
+    found.push(finding(start, start + value.length, "Bên của hợp đồng · person-cues-v1"));
   }
   for (const match of text.matchAll(signature)) {
     let lineStart = match.index! + match[0].length;

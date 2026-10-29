@@ -56,6 +56,15 @@ export async function renderDocx(model) {
         );
       if (block.text !== undefined)
         return paragraph(run(block.text, { bold: block.bold }), block.align);
+      // Labels in a column: one paragraph a field, the value after a tab stop.
+      if (block.fields && block.aligned)
+        return block.fields
+          .map(([label, value]) =>
+            block.aligned === "colon"
+              ? paragraph(run(label) + tab + run(`: ${value}`))
+              : paragraph(run(`${label}:`) + tab + run(value)),
+          )
+          .join("");
       if (block.fields)
         return paragraph(
           block.fields

@@ -72,6 +72,21 @@ test("names after a form of address and under a signature; headings stay", () =>
   );
 });
 
+test("a contract's party is a person when its value looks like a name (decision 0174)", () => {
+  const found = (text) => values(text, detectPersonCues(text)).map(([, value]) => value);
+  assert.deepEqual(found("BÊN B: LÝ THU THẢO"), ["LÝ THU THẢO"]);
+  assert.deepEqual(found("Bên cho thuê: Lê Phi Long, sinh năm 1988"), ["Lê Phi Long"]);
+  // A company, a heading in capitals and a clause are not; a form of address reads its own.
+  assert.deepEqual(found("BÊN A: CÔNG TY CỔ PHẦN VIỆT TIẾN"), []);
+  assert.deepEqual(found("Bên B: QUAN HỆ GIA ĐÌNH"), []);
+  assert.deepEqual(found("Bên B đồng ý: Trần Văn An"), []);
+  assert.deepEqual(found("BÊN B: Ông LÊ PHI LONG"), ["LÊ PHI LONG"]);
+  // The party's birth date may follow "Sinh năm"; a year alone stays.
+  const born = (text) => values(text, reconcileContextFields(text, []));
+  assert.deepEqual(born("Sinh năm: 11/04/1988"), [["NGAY_SINH", "11/04/1988"]]);
+  assert.deepEqual(born("Sinh năm: 1988"), []);
+});
+
 test("a company in capitals needs no label, and never runs into the next cell", () => {
   const text = "TRA LUONG THANG 9 CONG TY TNHH THUONG MAI TONG HOP THANH CONG\t6.000.000";
   assert.deepEqual(values(text, reconcileContextFields(text, [])), [

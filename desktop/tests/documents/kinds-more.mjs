@@ -24,6 +24,7 @@ import {
   studentId,
   subjects,
   taxCode,
+  unaccented,
   utilities,
   violations,
 } from "./data.mjs";
@@ -1031,6 +1032,74 @@ function order(rng, layout) {
   return { blocks, font: "sans", size: 10, ...r.lists() };
 }
 
+/** A service contract's appendix whose parties are set out as a form with the labels in
+ * a column of their own and the values in the next after a colon ("Ngày sinh   : …"),
+ * its lines closer than a paragraph's, as office contracts are typed (decision 0174). In
+ * "colon" the colon starts the values' column; in "label" it ends each label. */
+function appendix(rng, layout) {
+  const r = recorder();
+  const client = company(rng);
+  const director = person(rng);
+  const me = person(rng);
+  const fee = rng.int(10, 90) * 1_000_000;
+  return {
+    blocks: [
+      ...nationalHeader(r),
+      { title: r.keep("PHỤ LỤC HỢP ĐỒNG DỊCH VỤ"), size: 3 },
+      { text: `Số: ${r.ignore(`${rng.int(1, 99)}/2026/PLHĐ`)}`, align: "center" },
+      {
+        text: `Hôm nay, ngày ${date(rng)}, tại ${r.ignore("Thành phố Hồ Chí Minh")}, chúng tôi gồm:`,
+      },
+      {
+        aligned: layout,
+        fields: [
+          ["BÊN A", r.hide(client.name.toUpperCase())],
+          ["Mã số thuế", r.hide(client.tax)],
+          ["Địa chỉ trụ sở", r.hide(client.address)],
+          ["Điện thoại", r.hide(client.phone)],
+          ["Đại diện bởi", `${director.title} ${r.hide(director.name.toUpperCase())}`],
+          ["Chức vụ", r.keep(rng.pick(["Giám đốc", "Tổng Giám đốc", "Giám đốc Tài chính"]))],
+        ],
+      },
+      { space: 4 },
+      {
+        aligned: layout,
+        fields: [
+          ["BÊN B", r.hide(me.name.toUpperCase())],
+          ["Ngày sinh", r.hide(me.birth)],
+          ["Số CCCD", r.hide(me.cccd)],
+          ["Ngày cấp", r.ignore(date(rng, rng.int(2021, 2024)))],
+          ["Nơi cấp", r.ignore("Cục Cảnh sát quản lý hành chính về trật tự xã hội")],
+          ["Địa chỉ thường trú", r.hide(me.address)],
+          ["Mã số thuế cá nhân", r.hide(taxCode(rng))],
+          ["Điện thoại", r.hide(me.phone)],
+          ["Email", r.hide(me.email)],
+          ["Tên tài khoản", r.hide(unaccented(me.name).toUpperCase())],
+          ["Số tài khoản", r.hide(account(rng))],
+          ["Ngân hàng", r.ignore(rng.pick(bankShort))],
+        ],
+      },
+      { space: 4 },
+      { text: r.keep("Điều 1. Nội dung phụ lục"), bold: true },
+      {
+        text: `Hai bên thống nhất bổ sung hạng mục thiết kế với tổng giá trị ${r.keep(money(fee))} đồng (Bằng chữ: ${r.keep(inWords(fee))}), thanh toán bằng chuyển khoản vào tài khoản của Bên B nêu trên.`,
+      },
+      { text: r.keep("Điều 2. Hiệu lực"), bold: true },
+      { text: "Phụ lục là một phần không tách rời của hợp đồng và có hiệu lực kể từ ngày ký." },
+      { space: 8 },
+      {
+        signatures: [
+          { role: r.keep("ĐẠI DIỆN BÊN A"), note: "(Ký, đóng dấu)", name: r.hide(director.name) },
+          { role: r.keep("ĐẠI DIỆN BÊN B"), note: "(Ký, ghi rõ họ tên)", name: r.hide(me.name) },
+        ],
+      },
+    ],
+    font: rng.pick(["sans", "serif"]),
+    size: 11,
+    ...r.lists(),
+  };
+}
+
 export const moreKinds = {
   decision: { layouts: ["benefit", "penalty", "notice"], build: decision },
   payslip: { layouts: ["table", "compact"], build: payslip },
@@ -1040,4 +1109,6 @@ export const moreKinds = {
   minutes: { layouts: ["meeting", "handover"], build: minutes },
   transcript: { layouts: ["grades", "confirmation"], build: transcript },
   order: { layouts: ["delivery", "receipt"], build: order },
+  // Last, so that every document before it keeps its seed.
+  appendix: { layouts: ["colon", "label"], build: appendix },
 };

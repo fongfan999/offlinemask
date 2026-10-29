@@ -3,6 +3,7 @@
  *   { title, size? }                       centred, bold
  *   { text, align?, bold? }                a paragraph that wraps
  *   { fields: [[label, value]...], columns? }  "Label: value" lines, one or two a line
+ *   { fields, aligned: "colon" | "label" }  labels in a column, values at a tab stop
  *   { table: { columns: [{ title, width, align? }], rows, blank?, total? } }
  *   { signatures: [{ role, note?, name }] }
  *   { space } / { pageBreak: true }

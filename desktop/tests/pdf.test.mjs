@@ -16,6 +16,7 @@ import {
   looksLikeOldFont,
   openPdf,
   pageList,
+  readByPlace,
   writePdfText,
 } from "../src/core/doc/pdf.ts";
 import { fixtures } from "./pdf-fixtures.mjs";
@@ -432,4 +433,40 @@ test("a heading in capitals stays apart from the centred line below it", () => {
       "Hợp đồng này được ký giữa ông Nguyễn Văn An và công ty.",
     ],
   );
+});
+
+test("a form with its labels in a column reads one field a line (decision 0174)", () => {
+  const item = (str, x, y) => ({ str, transform: [11, 0, 0, 11, x, y], width: str.length * 6 });
+  // Lines 1.2 font sizes apart, as a typed contract's: closer than a table's rows.
+  const form = (rows) =>
+    rows.flatMap(([label, value], index) => [
+      item(label, 46, 700 - index * 13),
+      item(value, 180, 700 - index * 13),
+    ]);
+  const read = (items) => readByPlace(items, 0).map((paragraph) => paragraph.text);
+  // The colon starts the value, stands alone (text recognition reads it onto the value) …
+  assert.deepEqual(
+    read(
+      form([
+        ["BÊN B", ": LÝ THU THẢO"],
+        ["Ngày sinh", ":18/12/1975"],
+        ["Số CCCD", ": 026075699073"],
+      ]),
+    ),
+    ["BÊN B: LÝ THU THẢO", "Ngày sinh: 18/12/1975", "Số CCCD: 026075699073"],
+  );
+  // … or ends the label, when the lines keep the values in one column.
+  assert.deepEqual(
+    read(
+      form([
+        ["Ngày sinh:", "18/12/1975"],
+        ["Số CCCD:", "026075699073"],
+      ]),
+    ),
+    ["Ngày sinh: 18/12/1975", "Số CCCD: 026075699073"],
+  );
+  // Alone, "Label:" and a cell far right stay apart: the list beside a signature.
+  assert.deepEqual(read([item("Nơi nhận:", 46, 700), item("KT. GIÁM ĐỐC", 380, 700)]), [
+    "Nơi nhận: · KT. GIÁM ĐỐC",
+  ]);
 });

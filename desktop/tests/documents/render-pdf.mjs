@@ -102,6 +102,25 @@ export async function renderPdf(model) {
     }
     y -= height + size * 0.2;
   };
+  /** Labels in a column of their own and values at a tab stop past the longest, the colon
+   * starting the value ("colon") or ending the label ("label"), lines 1.2 font sizes apart
+   * as a typed contract's are; a value wraps under itself. */
+  const alignedFields = (items, aligned) => {
+    const lineHeight = size * 1.2;
+    const labels = items.map(([label]) => (aligned === "label" ? `${label}:` : label));
+    const stop = Math.max(...labels.map((label) => textWidth(label, regular, size))) + size * 2;
+    for (const [index, [, value]] of items.entries()) {
+      const prefix = aligned === "colon" ? ": " : "";
+      const x = page.margin + stop + textWidth(prefix, regular, size);
+      const lines = wrap(value, regular, size, width - (x - page.margin));
+      room(lines.length * lineHeight);
+      draw(labels[index], page.margin, y - size, regular, size);
+      draw(prefix, page.margin + stop, y - size, regular, size);
+      lines.forEach((line, at) => draw(line, x, y - size - at * lineHeight, regular, size));
+      y -= lines.length * lineHeight;
+    }
+    y -= size * 0.4;
+  };
   const table = ({ columns, rows, blank = 0, total, repeatHeader }) => {
     const fontSize = size;
     const lineHeight = fontSize * 1.25;
@@ -215,6 +234,7 @@ export async function renderPdf(model) {
       paragraph(block.title, { align: "center", font: bold, fontSize: size + (block.size ?? 2) });
     else if (block.text !== undefined)
       paragraph(block.text, { align: block.align, font: block.bold ? bold : regular });
+    else if (block.fields && block.aligned) alignedFields(block.fields, block.aligned);
     else if (block.fields) fields(block.fields, block.columns ?? 1);
     else if (block.table) table(block.table);
     else if (block.signatures) signatures(block.signatures);
