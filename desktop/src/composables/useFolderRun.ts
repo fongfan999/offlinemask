@@ -419,6 +419,22 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     totals.value = all;
     fileCounts.value = inFiles;
   }
+  /** Back to the column choices before anything is saved: the masked copies and their
+   * codes are dropped, and hiding again makes new ones. */
+  function edit() {
+    if (phase.value !== "review") return;
+    book = null;
+    results = new Map();
+    totals.value = new Map();
+    fileCounts.value = new Map();
+    kept.value = new Set();
+    for (const file of files.value)
+      if (file.status === "masked") {
+        file.status = "ready";
+        file.masked = 0;
+      }
+    phase.value = "ready";
+  }
   function cancel() {
     if (phase.value === "surveying") {
       reset();
@@ -517,6 +533,7 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     setPlan,
     maskAll,
     cancel,
+    edit,
     setKept,
     save,
     reset,

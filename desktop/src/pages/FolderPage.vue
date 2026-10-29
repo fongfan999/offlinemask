@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from "vue";
+import { computed, ref, useTemplateRef, watch } from "vue";
 import type { PickedFolder } from "../adapters/folder.ts";
 import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
 import MaskProgress from "../components/MaskProgress.vue";
+import RestoreBox from "../components/RestoreBox.vue";
 import ReviewList from "../components/ReviewList.vue";
 import SheetPreview from "../components/SheetPreview.vue";
 import { folderKey, packKey, useProvided } from "../composables/context.ts";
@@ -21,6 +22,27 @@ const saveError = ref("");
 const shownFiles = 200;
 
 const phase = folder.phase;
+/** The same three steps as one file (decision 0171): hide, save and send to AI, restore.
+ * Step 3 opens once the masked copies are saved, since that is what goes to the AI. */
+const stepLabels = ["Ẩn thông tin", "Tải về và gửi AI", "Khôi phục"];
+const restoreStep = ref(false);
+const step = computed(() =>
+  ["review", "saving", "saved"].includes(phase.value) ? (restoreStep.value ? 3 : 2) : 1,
+);
+watch(phase, (value) => {
+  if (value !== "saved") restoreStep.value = false;
+});
+/** Back to step 1 only before saving: hiding again makes new codes. */
+function canOpenStep(target: number) {
+  if (target === 1) return phase.value === "review";
+  if (target === 2) return step.value === 3;
+  return step.value === 2 && phase.value === "saved";
+}
+function openStep(target: number) {
+  if (!canOpenStep(target)) return;
+  if (target === 1) folder.edit();
+  restoreStep.value = target === 3;
+}
 const count = (n: number) => n.toLocaleString("vi-VN");
 const docs = computed(() => folder.readable.value.filter((file) => file.kind === "word").length);
 const sheets = computed(() => folder.readable.value.length - docs.value);
@@ -116,8 +138,49 @@ defineExpose({
     </div>
   </div>
   <section class="glass-card glass" aria-label="Ẩn thông tin trong thư mục">
-    <!-- Pick a folder. -->
-    <div v-if="phase === 'empty'" class="step-panel">
+    <nav class="stepper" aria-label="Các bước">
+      <template v-for="(label, index) in stepLabels" :key="label">
+        <span
+          v-if="index"
+          class="step-line"
+          :class="{ 'is-done': index < step }"
+          aria-hidden="true"
+        ></span>
+        <button
+          type="button"
+          class="step"
+          :class="{
+            'is-current': index + 1 === step,
+            'is-done': index + 1 < step,
+            'is-upcoming': index + 1 > step,
+          }"
+          :aria-label="`Bước ${index + 1}: ${label}`"
+          :aria-current="index + 1 === step ? 'step' : undefined"
+          :disabled="!canOpenStep(index + 1)"
+          @click="openStep(index + 1)"
+        >
+          <span class="step-number" aria-hidden="true"
+            ><AppIcon v-if="index + 1 < step" name="check" :size="12" /><span
+              v-else-if="index + 1 === step && folder.busy.value"
+              class="spinner"
+            ></span
+            ><template v-else>{{ index + 1 }}</template></span
+          ><span class="step-label">{{ label }}</span>
+        </button>
+      </template>
+    </nav>
+
+    <!-- Step 3: a reply or a returned file, restored with this folder's codes. -->
+    <RestoreBox
+      v-if="step === 3"
+      :scope="folder.findings.value"
+      subject="thư mục"
+      new-label="Ẩn thư mục khác"
+      @hide="folder.reset()"
+    />
+
+    <!-- Step 1: pick a folder. -->
+    <div v-else-if="phase === 'empty'" class="step-panel">
       <FileDropZone
         icon="upload"
         title="Kéo thả thư mục vào đây"
@@ -261,11 +324,12 @@ defineExpose({
               ẩn”.</span
             >
           </p>
-          <p v-if="phase === 'saved'" class="sheet-summary" role="status">
-            <AppIcon name="check" :size="15" />Đã ẩn {{ count(hidden) }} chỗ trong
-            {{ count(folder.masked.value.length) }} tệp và lưu vào thư mục “{{
-              folder.saveTarget.value
-            }}”. Tệp gốc không bị thay đổi.
+          <p v-if="phase === 'saved'" class="folder-ready" role="status">
+            <AppIcon name="check" :size="16" /><span
+              ><strong>Đã lưu vào thư mục “{{ folder.saveTarget.value }}”.</strong> Gửi các tệp cần
+              thiết trong thư mục đó cho AI. Khi AI trả lời, sang bước 3 để đổi các mã lại thành
+              thông tin thật.</span
+            >
           </p>
           <ReviewList
             v-if="folder.review.value.length && phase === 'review'"
@@ -341,6 +405,17 @@ defineExpose({
               phase === "masking" ? "Đang ẩn…" : `Ẩn ${count(folder.readable.value.length)} tệp`
             }}<AppIcon name="arrow" :size="16" />
           </button>
+          <template v-else-if="phase === 'saved'">
+            <button class="quiet-button" @click="save">
+              <AppIcon name="download" :size="15" />Lưu thêm một bản
+            </button>
+            <button ref="primary" class="primary-action" @click="openStep(3)">
+              <AppIcon name="undo" :size="17" />Sang bước 3: Khôi phục<AppIcon
+                name="arrow"
+                :size="16"
+              />
+            </button>
+          </template>
           <button
             v-else-if="folder.masked.value.length"
             ref="primary"
@@ -349,9 +424,10 @@ defineExpose({
             @click="save"
           >
             <span v-if="phase === 'saving'" class="spinner" aria-hidden="true"></span
-            ><AppIcon v-else name="download" :size="17" />{{
-              phase === "saved" ? "Lưu thêm một bản" : "Lưu thư mục đã ẩn"
-            }}<AppIcon name="arrow" :size="16" />
+            ><AppIcon v-else name="download" :size="17" />Lưu thư mục đã ẩn<AppIcon
+              name="arrow"
+              :size="16"
+            />
           </button>
         </footer>
       </div>

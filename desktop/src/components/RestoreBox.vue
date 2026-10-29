@@ -8,10 +8,18 @@ import { docKey, folderKey, quickKey, sheetKey, useProvided } from "../composabl
 import type { DocRestore } from "../composables/useDocRun.ts";
 import type { SheetRestore } from "../composables/useSheetRun.ts";
 import { fileKind } from "../core/file-kind.ts";
+import type { Finding } from "../core/review.ts";
 
 /** "Nhận lại bản đầy đủ", home's second tab (decision 0172). A pasted reply or a returned
  * file is restored with every alias this launch knows, so nobody has to remember which
  * text, file or folder the reply came from. */
+const props = defineProps<{
+  /** A page's own codes, such as a folder's at its step 3 (decision 0171); home leaves it
+   * out and reads every code this launch knows. Inside the page's card, without its own. */
+  scope?: readonly Finding[];
+  subject?: string;
+  newLabel?: string;
+}>();
 const emit = defineEmits<{ hide: [] }>();
 const quick = useProvided(quickKey);
 const folder = useProvided(folderKey);
@@ -19,7 +27,9 @@ const doc = useProvided(docKey);
 const sheet = useProvided(sheetKey);
 const panel = useTemplateRef<InstanceType<typeof RestorePanel>>("panel");
 
-const findings = computed(() => [...quick.knownFindings.value, ...folder.findings.value]);
+const findings = computed(() =>
+  props.scope ? [...props.scope] : [...quick.knownFindings.value, ...folder.findings.value],
+);
 const analysis = computed(() => ({ findings: findings.value, spans: [] }));
 const kind = ref<"text" | "file">("text");
 
@@ -88,10 +98,10 @@ defineExpose({
 </script>
 
 <template>
-  <section class="glass-card glass restore-box">
+  <section :class="scope ? 'restore-box' : 'glass-card glass restore-box'">
     <!-- Nothing masked in this launch yet: show what the tab will do with a reply, the
          hero's swap read backwards, and lead to the first tab. -->
-    <div v-if="!findings.length" class="restore-empty">
+    <div v-if="!findings.length && !scope" class="restore-empty">
       <p class="restore-demo" aria-hidden="true">
         <span class="restore-demo-from">AI trả lời</span>Chào
         <span class="restore-pair"><s>[TEN_1_4e8c]</s><b>Phong Phan</b></span
@@ -121,12 +131,12 @@ defineExpose({
         ref="panel"
         session-id="all"
         :analysis="analysis"
-        subject=""
-        new-label="Ẩn nội dung mới"
+        :subject="subject ?? ''"
+        :new-label="newLabel ?? 'Ẩn nội dung mới'"
         @new-text="emit('hide')"
       />
       <template v-else>
-        <div class="restore-body"><RestoreIntro /></div>
+        <div class="restore-body"><RestoreIntro :subject="subject" /></div>
         <FileDropZone
           v-if="!returned"
           icon="undo"
