@@ -14,6 +14,7 @@ import { nativeQuickActions } from "./adapters/quick-actions.ts";
 import { createSheetFiles } from "./adapters/sheet-files.ts";
 import { createTextDetector, queueDetections } from "./adapters/text-detection.ts";
 import AppIcon from "./components/AppIcon.vue";
+import AppFooter from "./components/AppFooter.vue";
 import AppSidebar from "./components/AppSidebar.vue";
 import BrandMark from "./components/BrandMark.vue";
 import LockPage from "./components/LockPage.vue";
@@ -464,6 +465,7 @@ async function closeSidebar() {
           {{ storageError }}
         </p>
       </main>
+      <AppFooter :version="version" />
     </div>
   </div>
 </template>

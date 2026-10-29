@@ -79,6 +79,7 @@ p {
 .app-shell {
   display: grid;
   --sidebar-width: 242px;
+  --app-footer-height: 42px;
   grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
   min-height: 100vh;
 }
@@ -1045,7 +1046,8 @@ a.quiet-button {
    instead of pushing it below the window (decision 0134). */
 .step-panel > .card-footer {
   position: sticky;
-  bottom: 0;
+  /* Above the app's footer, which is pinned there too. */
+  bottom: var(--app-footer-height);
   z-index: 2;
   /* The same space above the action row as below a panel without one; it merges with
      the margin of whatever sits above. */
@@ -1903,25 +1905,27 @@ td.alias {
     display: none;
   }
 }
-.home-footer {
+/* The foot of every page (decision 0172): always at the window's bottom, the page
+   scrolling under it. A hairline, the website, the version. */
+.app-footer {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  flex-shrink: 0;
+  background: var(--paper);
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
   align-items: center;
-  gap: 4px 8px;
-  margin-top: 40px;
-  padding-bottom: 8px;
+  gap: 6px 18px;
+  box-sizing: border-box;
+  min-height: var(--app-footer-height);
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
   color: var(--muted);
-  font: 12px var(--sans);
+  font: 11px var(--mono);
+  letter-spacing: 0.02em;
 }
-.home-footer .app-version {
-  font-variant-numeric: tabular-nums;
-}
-.home-footer .website-error {
-  flex-basis: 100%;
-  text-align: center;
-}
-.home-footer a {
+.app-footer a {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -1929,9 +1933,19 @@ td.alias {
   text-decoration: none;
   border-radius: 3px;
 }
-.home-footer a:hover {
+.app-footer a:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+.app-footer .app-version {
+  margin-left: auto;
+  padding: 2px 8px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  font-variant-numeric: tabular-nums;
+}
+.app-footer .website-error {
+  flex-basis: 100%;
 }
 .website-error {
   font: 12px var(--sans);
