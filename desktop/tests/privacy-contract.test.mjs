@@ -121,6 +121,31 @@ test("text in pictures is read by the system's own engine, on the machine, only 
   } else assert.doesNotMatch(page, /Windows\.Media\.Ocr/, UPDATE);
 });
 
+test("where the system cannot read Vietnamese, models carried in the app do, only once the page says so (privacy §2)", () => {
+  // Decision 0172: two ONNX graphs built into the app (`public/reading/`, copied at build
+  // time by scripts/prepare-reading.mjs) are read by a worker from the app itself; the
+  // picture never leaves the worker and nothing is written. Gated off until the owner
+  // opens it; the page describes it only while it is on.
+  const worker = read("../src/workers/reading.worker.ts");
+  const fetches = [...worker.matchAll(/fetch\(([^)]*)\)/g)].map((match) => match[1]);
+  assert.deepEqual(fetches, ["`/reading/${file.name}`"], UPDATE);
+  assert.doesNotMatch(worker, /indexedDB|localStorage|caches\.|invoke\(/, UPDATE);
+  const adapter = read("../src/adapters/ocr.ts");
+  assert.deepEqual(
+    [...adapter.matchAll(/fetch\(([^)]*)\)/g)].map((match) => match[1]),
+    ['"/reading/reading-v1.json"'],
+    UPDATE,
+  );
+  const shipped = /export const ocrShipped = (true|false);/.exec(adapter);
+  const reading = /export const readingShipped = (true|false);/.exec(adapter);
+  assert.ok(shipped && reading, UPDATE);
+  const page = read("../../landing/privacy.html").replace(/\s+/g, " ");
+  if (shipped[1] === "true" && reading[1] === "true") {
+    assert.match(page, /mô hình đọc chữ đi kèm ứng dụng/, UPDATE);
+    assert.doesNotMatch(page, /Trên Windows, phần này chưa có/, UPDATE);
+  } else assert.doesNotMatch(page, /mô hình đọc chữ đi kèm ứng dụng/, UPDATE);
+});
+
 test("the app's system permissions are the ones the page explains (privacy §5)", () => {
   const ids = (name) =>
     JSON.parse(read(`../src-tauri/capabilities/${name}.json`))

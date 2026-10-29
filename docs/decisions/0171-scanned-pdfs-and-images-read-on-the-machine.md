@@ -148,9 +148,11 @@ What is built: the native module's Windows side (`media_ocr` in `src-tauri/src/o
 
 So Windows needs an engine of its own: VietOCR as a downloaded pack (MIT, 150 MB, see the candidates), measured against Tesseract's floor and the bar of this decision, or Mac-only for now. The owner's decision.
 
+VietOCR read below Tesseract (see the evaluation), and OfflineMask's own recogniser took its place: [0172](0172-own-line-recogniser-for-windows.md), built into the app behind its own gate and measured to this decision's bar on all 703 scans (0 leaked).
+
 ## Not decided here
 
-- **Windows.** Windows.Media.Ocr has no Vietnamese recogniser (see "Windows"); a downloaded pack with a licensed Vietnamese model (VietOCR) or Mac-only. Tesseract's numbers above are the floor a candidate must beat.
+- **Windows.** Windows.Media.Ocr has no Vietnamese recogniser (see "Windows"); [0172](0172-own-line-recogniser-for-windows.md) reads pictures with OfflineMask's own models instead, off until the owner opens it.
 - **Pages in old fonts** (0149's `old-font`) could be drawn and read like scans, which may read them better than their text layer; unmeasured.
 - **Skewed or photographed pages:** Vision reads them, but the layout step assumes lines run across the page; a photo at an angle reads line by line without its tables.
 - **HEIC and WebP** pictures stay "upcoming": Vision reads both, but the picture's size would need decoding in the worker.

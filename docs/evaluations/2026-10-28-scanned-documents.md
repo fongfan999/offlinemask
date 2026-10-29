@@ -117,3 +117,29 @@ Without a margin the first and last letters and the marks above capitals are los
 At 0.25, on all 703 scans and pictures of seeds 1–7 (`artifacts/seeds-scanned`, 728 pages in 1 180 s): **5 513 of 5 604 hide values read verbatim, 7 343 of 8 515 keep values**. By seed, hide values not read in scanned PDFs / pictures: 10 / 7, 7 / 4, 9 / 3, 8 / 3, 6 / 4, 12 / 5, 10 / 3. By layout: statement-classic 21, statement-compact 21, payslip-table 13, payslip-compact 12, minutes-meeting 7, order-receipt 6, invoice-winmart 3, contract-rental 2, minutes-handover 2, and one each in form-application, invoice-household, medical-exam and utility-electric.
 
 The 91 are mostly long values that wrap: statement rows' names and companies ("CONG TY TNHH MTV VAN TAI DONG A"), company names over two heading lines, payslip addresses in a narrow cell, each joined by the screen's top-to-bottom order with the other column's words between its halves. About ten are the model's: "Châu" read "Chậu", "Đà" read ")à", "Sài" read "ài", "BN67551980" read "BN67651980", "NV24259", "PE52514527", one phone number and one e-mail address (in a scan and its picture). Not comparable with Vision's 223 "not read" above, which goes through the app's reader by place; that measurement needs the recogniser in the app.
+
+### OfflineMask's own recogniser through the app (decision 0172)
+
+`pnpm -C desktop eval:documents artifacts/seeds-scanned --pack <shipping pack e562a9b3…> --reading --misread` on the owner's Windows PC: the recogniser and detector of `desktop/reading/reading-v1.json` read every page without text and every picture through `src/core/doc/reading.ts`, then the app's reader by place, detection and masking. Cells not read / leaked / over-masked / unlisted.
+
+| Seed | Scanned PDFs | Pictures (one-page documents) |
+| --- | --- | --- |
+| 1 | 52: 4 / 0 / 0 / 6 | 50: 4 / 0 / 0 / 4 |
+| 2 | 52: 4 / 0 / 0 / 7 | 49: 5 / 0 / 1 / 6 |
+| 3 | 52: 3 / 0 / 0 / 4 | 48: 3 / 0 / 0 / 4 |
+| 4 | 52: 3 / 0 / 2 / 10 | 48: 2 / 0 / 2 / 4 |
+| 5 | 52: 3 / 0 / 0 / 7 | 48: 3 / 0 / 0 / 6 |
+| 6 | 52: 2 / 0 / 0 / 6 | 48: 2 / 0 / 0 / 2 |
+| 7 | 52: 2 / 0 / 0 / 4 | 48: 2 / 0 / 0 / 2 |
+| All | 364: 21 / 0 / 2 / 44 | 339: 21 / 0 / 3 / 28 |
+
+703 documents in 2 375 s: **not read 42, leaked 0, over-masked 5, unlisted 72**; Vision after its fixes, above, 221 / 0 / 11 / 263. With `--misread`: 21 misread and masked all the same, 0 misread and readable, 21 not found even without their marks (addresses and company names misread in a letter or two, "BN67551980", "NV24259", one phone number, one e-mail address, two statement names, one account number; most in a scan and its picture).
+
+Reading by reading:
+
+| Reading | not read | leaked | over-masked | unlisted |
+| --- | --- | --- | --- | --- |
+| words drawn in to all the ink of the widened box, sizes from widths | 43 | 21 | 13 | 65 |
+| plus ink only within the detector's own text, sizes also from the height of the print, lines numbered, sizes near the page's median taken as it | 42 | 0 | 5 | 72 |
+
+The 21 leaks of the first reading: ten account numbers in `statement-classic` (a word reaching across the gutter merged the reference and description columns for the whole table, and "TK FT… 4762…" no longer reads as a transfer to an account), and eleven first signature names in `payslip-table` (the names row, 5.2–5.4 font sizes below the table, joined it as cells where a bold name's size was overestimated). The five over-masked of the second, and the text PDFs of the same seeds re-measured after the change to `ocr.ts` (546 documents, 0 / 0 / 0 / 0 in 1 013 s), are in decision 0172.

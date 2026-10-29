@@ -61,6 +61,44 @@ test("recognised words become text items placed like pdf.js's, with y upwards", 
   ]);
 });
 
+test("an engine that measures its print gets the mean of that and the widths, snapped to the body size", () => {
+  // Decision 0172. Two boxes at the same height are two lines when the engine numbers them;
+  // each word is a 0.1-wide "aaaaa" (2.855 font sizes of room, 35 pixels by width).
+  const word = (x, y, number, measured) => ({
+    ...line("aaaaa", x, y, 0.1, 0.03),
+    line: number,
+    size: measured / 2000,
+  });
+  const items = ocrTextItems(
+    {
+      lines: [
+        word(0.1, 0.2, 1, 37),
+        word(0.6, 0.2, 2, 29),
+        word(0.1, 0.3, 3, 35),
+        word(0.1, 0.4, 4, 50),
+      ],
+    },
+    1000,
+    2000,
+  );
+  const widths = 100 / (5 * 0.571);
+  const sizes = items.map((item) => Math.round(item.transform[0] * 10) / 10);
+  const body = Math.round(((widths + 37) / 2) * 10) / 10;
+  // Means of 36, 32, 35 and 42.5: the first three are within 15 % of the median (36) and
+  // take it; 42.5 is a heading.
+  assert.deepEqual(sizes, [body, body, body, Math.round(((widths + 50) / 2) * 10) / 10]);
+  // Without measured sizes (Vision) the widths alone count and nothing is snapped.
+  const plain = ocrTextItems(
+    { lines: [line("aaaaa", 0.1, 0.2, 0.1, 0.03), line("aaaaa", 0.1, 0.3, 0.12, 0.03)] },
+    1000,
+    2000,
+  );
+  assert.deepEqual(
+    plain.map((item) => Math.round(item.transform[0] * 10) / 10),
+    [Math.round(widths * 10) / 10, Math.round((120 / 100) * widths * 10) / 10],
+  );
+});
+
 test("a bar inside a word parts two glued cells; bars at the edges are dropped", () => {
   const items = ocrTextItems(
     {

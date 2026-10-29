@@ -16,7 +16,11 @@ const write = (dir, files) => {
 };
 
 test("the worker entries are the files under src/workers", () => {
-  assert.deepEqual(workerEntryNames().sort(), ["detection.worker", "files.worker"]);
+  assert.deepEqual(workerEntryNames().sort(), [
+    "detection.worker",
+    "files.worker",
+    "reading.worker",
+  ]);
 });
 
 test("a chunk importing a worker entry fails the check, with the pair named", () => {

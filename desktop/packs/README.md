@@ -103,6 +103,10 @@ Optional, per model. A decoded span whose mean token probability is below `minSc
 7. **Publish.** Compress each file with Zstandard, upload the objects, and fill in `transport` (see [Decision 0041](../../docs/decisions/0041-compressed-pack-installer-and-r2.md) and `scripts/build-r2-pack.mjs` for the shipping pack's procedure; [Decision 0169](../../docs/decisions/0169-ship-the-fine-tuned-underthesea-graph.md) for replacing one file: only the changed file gets a new object, the other entries stay). Re-run `pnpm test`, repin the two totals in `tests/recognition-pack.test.mjs` and the fingerprint and totals in `src-tauri/src/model_pack.rs`, and verify the published objects with `scripts/verify-r2-pack.mjs <inventory> <receipt>`.
 8. **Record the evidence.** Add a decision under `docs/decisions/` and an evaluation under `docs/evaluations/` stating what was measured on which fixtures. A green fixture run is a regression check, not an accuracy claim.
 
+## Text recognition models
+
+The models that read text in pictures where the system cannot (Windows, [decision 0172](../../docs/decisions/0172-own-line-recogniser-for-windows.md)) are not a pack: they ship inside the app, described by [`reading/reading-v1.json`](../reading/reading-v1.json) (each file's size, SHA-256 and source, the detector's post-processing, the recogniser's classes). `scripts/prepare-reading.mjs` puts them in the build; `pnpm eval:documents <scans> --reading` measures them; `scripts/ocr-train/` trains the recogniser.
+
 ## What a pack cannot change
 
 The six user-facing categories, the structured-value rules, the plausibility rules for model spans (field separators, contract parties, boilerplate phrases, a 0.6 score bar on one-word spans; decisions 0080 and 0081), the alias format and the review flow are shared code with their own tests. A pack changes which contextual evidence feeds that policy, nothing else. The historical OpenMed development models under `scripts/model-manifest.json` are kept for reproducing earlier evaluations and are not a pack.

@@ -4,9 +4,12 @@
 //
 //   mise exec -- node scripts/evaluate-documents.mjs <folder> [--pack <root>] [--draft]
 //                                                     [--definition <candidate.json>] [--misread]
+//                                                     [--reading]
 //
 // --definition measures a candidate pack (a copy of packs/<id>.json pinned by
 // `pnpm pack:prepare` against the files under --pack) instead of the shipping one.
+// --reading reads pictures with OfflineMask's own models (decision 0172,
+// scripts/reading-runtime.mjs) instead of the system's text recognition.
 // --misread, for a folder of scans (scripts/rasterise-documents.mjs, decision 0171),
 // looks again at every value not read: text recognition may have read it with a wrong
 // letter or tone mark. Letters and digits without their marks are searched for, and the
@@ -62,7 +65,7 @@ const definition = option("--definition")
   ? await readPackDefinition(resolve(option("--definition")))
   : undefined;
 
-const detector = createDetector(root, definition);
+const detector = createDetector(root, definition, { reading: args.includes("--reading") });
 const started = performance.now();
 /** Letters and digits alone, lower case, without tone marks: what a misread leaves. */
 const bare = (text) =>

@@ -9,6 +9,7 @@ import { maskParagraphs } from "../src/core/doc/mask.ts";
 import { createDetectionEngine } from "../src/core/detection/engine.ts";
 import { detectionOptions } from "../src/core/detection/options.ts";
 import { createOcrEngine } from "./ocr-runtime.mjs";
+import { createReadingEngine } from "./reading-runtime.mjs";
 import { loadPack } from "./pack-runtime.mjs";
 
 export const buckets = ["notRead", "leaked", "over", "unlisted"];
@@ -37,13 +38,14 @@ export function listDocuments(directory) {
 /** The app's detector over a pack at `root`: the same policy and category filter, the
  * pack loaded once on first use. A candidate definition stands in for the shipping pack.
  * Pages without text and pictures go to the app's own text recognition (decision 0171),
- * started the first time one is met. */
-export function createDetector(root, definition) {
+ * started the first time one is met: the system's engine, or with `reading` OfflineMask's own
+ * (decision 0172). */
+export function createDetector(root, definition, { reading = false } = {}) {
   const engine = createDetectionEngine(undefined, async (packRoot) => {
     const pack = await loadPack(packRoot, definition);
     return { detect: (text) => pack.detect(text), dispose: () => pack.dispose() };
   });
-  const ocr = createOcrEngine();
+  const ocr = reading ? createReadingEngine() : createOcrEngine();
   return {
     root,
     options: detectionOptions.map((entry) => entry.id),

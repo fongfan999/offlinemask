@@ -23,6 +23,13 @@ export interface OcrLine {
   y: number;
   width: number;
   height: number;
+  /** The font size, in fractions of the picture's height, where the engine can tell it
+   * from the print (OfflineMask's own reader, decision 0172); the same for every word of a
+   * line. */
+  size?: number;
+  /** Which line the word is on, where the engine numbers its lines; otherwise the words
+   * of a line are the ones that share its y and height. */
+  line?: number;
 }
 export interface OcrPage {
   lines: OcrLine[];
@@ -46,6 +53,7 @@ export interface OcrTextItem {
 }
 const advances = { lower: 0.571, upper: 0.731, digit: 0.611, other: 0.366 };
 const boxToFontSize = 1.3;
+const bodyShare = 0.15;
 /** The room a word's letters take, in font sizes. */
 function advance(text: string): number {
   let sum = 0;
@@ -86,16 +94,30 @@ function unbar(word: OcrLine): OcrLine[] {
 }
 export function ocrTextItems(page: OcrPage, width: number, height: number): OcrTextItem[] {
   const words = page.lines.flatMap(unbar).filter((line) => line.text.trim());
-  const sizes = new Map<string, number>();
-  const lineKey = (word: OcrLine) => `${word.y}:${word.height}`;
+  const sizes = new Map<string | number, number>();
+  const lineKey = (word: OcrLine) => word.line ?? `${word.y}:${word.height}`;
   for (const key of new Set(words.map(lineKey))) {
     const line = words.filter((word) => lineKey(word) === key);
     const letters = line.reduce((sum, word) => sum + word.text.trim().length, 0);
     const room = line.reduce((sum, word) => sum + advance(word.text), 0);
     const across = line.reduce((sum, word) => sum + word.width * width, 0);
     const box = line[0]!.height * height;
-    const estimate = letters >= 3 && room > 0 ? across / room : box / boxToFontSize;
+    const widths = letters >= 3 && room > 0 ? across / room : box / boxToFontSize;
+    // Widths grow with bold print and the print's height does not: an engine that measures
+    // the height gets the mean of the two (decision 0172).
+    const measured = line[0]!.size;
+    const estimate = measured ? (widths + measured * height) / 2 : widths;
     sizes.set(key, Math.max(1, Math.min(box, estimate)));
+  }
+  // An estimate is good to about a tenth, and most lines of a page share its body size: a
+  // measured line that close to the page's median takes the median, so a gap the reader
+  // weighs in font sizes (the end of a table, five lines) is weighed the same on every line.
+  // Headings and small print stay apart. Only for engines that measure (decision 0172).
+  if (words.some((word) => word.size)) {
+    const all = [...sizes.values()].sort((a, b) => a - b);
+    const median = all[Math.floor(all.length / 2)]!;
+    for (const [key, size] of sizes)
+      if (Math.abs(size / median - 1) <= bodyShare) sizes.set(key, median);
   }
   return words.map((word) => {
     const size = sizes.get(lineKey(word))!;

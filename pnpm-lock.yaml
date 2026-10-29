@@ -74,9 +74,12 @@ importers:
       linkify-it:
         specifier: 6.1.0
         version: 6.1.0
+      onnxruntime-web:
+        specifier: 1.26.0-dev.20260416-b7804b056c
+        version: 1.26.0-dev.20260416-b7804b056c
       openmed:
         specifier: 2.3.0
-        version: 2.3.0(@huggingface/transformers@4.2.0)
+        version: 2.3.0(@huggingface/transformers@4.2.0)(onnxruntime-web@1.26.0-dev.20260416-b7804b056c)
       papaparse:
         specifier: 5.7.0
         version: 5.7.0
@@ -4572,9 +4575,10 @@ snapshots:
       platform: 1.3.6
       protobufjs: 7.6.6
 
-  openmed@2.3.0(@huggingface/transformers@4.2.0):
+  openmed@2.3.0(@huggingface/transformers@4.2.0)(onnxruntime-web@1.26.0-dev.20260416-b7804b056c):
     optionalDependencies:
       '@huggingface/transformers': 4.2.0
+      onnxruntime-web: 1.26.0-dev.20260416-b7804b056c
 
   optionator@0.9.4:
     dependencies:
