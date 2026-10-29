@@ -34,12 +34,12 @@ Category **Utility / Productivity**. Answer **No** to violence, sexual content, 
 
 OfflineMask thay họ tên, số tài khoản, số điện thoại, CCCD, email và các thông tin riêng tư khác bằng mã ngay trên máy, trước khi bạn dán vào ChatGPT, Claude, Gemini hay công cụ AI nào khác. Khi AI trả lời, dán câu trả lời vào lại: thông tin thật trở về đúng chỗ.
 
-• Văn bản, bảng tính (Excel, CSV, ODS) và tài liệu Word giữ nguyên định dạng. PDF có chữ cho ra bản Markdown đã ẩn.
-• Ẩn cả thư mục một lần, kể cả tệp CSV và văn bản rất lớn.
-• Xem lại từng thông tin được ẩn, giữ hoặc ẩn thêm chỉ với một lần bấm.
-• Gói nhận diện tiếng Việt (tùy chọn) nhận ra họ tên, địa chỉ, tổ chức và ngày sinh.
-• Ẩn nhanh: chọn văn bản trong ứng dụng bất kỳ và ẩn ngay tại chỗ.
-• Đặt mật mã để lưu lịch sử trong kho mã hóa trên máy.
+- Văn bản, bảng tính (Excel, CSV, ODS) và tài liệu Word giữ nguyên định dạng. PDF có chữ cho ra bản Markdown đã ẩn.
+- Ẩn cả thư mục một lần, kể cả tệp CSV và văn bản rất lớn.
+- Xem lại từng thông tin được ẩn, giữ hoặc ẩn thêm chỉ với một lần bấm.
+- Gói nhận diện tiếng Việt (tùy chọn) nhận ra họ tên, địa chỉ, tổ chức và ngày sinh.
+- Ẩn nhanh: chọn văn bản trong ứng dụng bất kỳ và ẩn ngay tại chỗ.
+- Đặt mật mã để lưu lịch sử trong kho mã hóa trên máy.
 
 Không tài khoản, không máy chủ, không thống kê sử dụng. Ứng dụng chỉ dùng mạng khi bạn bấm tải gói nhận diện. Hãy luôn xem lại kết quả trước khi chia sẻ.
 ```
@@ -47,9 +47,9 @@ Không tài khoản, không máy chủ, không thống kê sử dụng. Ứng d�
 **What's new in this version** (2.5.0; 2.4.0 listed the pack's new model, a 158 MB update trained only on invented documents; 2.3.0 listed PDFs on Tài liệu, the (OfflineMasked) names and better masking of invoices, statements and contracts; 2.2.0 listed Báo lỗi, history that deletes itself and the circle acting only on the selection; the first submission said "Bản đầu tiên trên Microsoft Store.")
 
 ```
-• Ẩn cả thư mục một lần: Word, PDF, Excel, CSV và văn bản bên trong dùng chung một bộ mã, lưu thành thư mục mới, thư mục gốc giữ nguyên.
-• Bắt đầu mọi việc từ một chỗ: "Ẩn thông tin mới" và hai thẻ "Ẩn thông tin riêng", "Nhận lại bản đầy đủ".
-• Không còn giới hạn kích thước: ứng dụng cho biết khoảng bao lâu trên máy bạn, và đọc tệp CSV, văn bản rất lớn từng phần một.
+- Ẩn cả thư mục một lần: Word, PDF, Excel, CSV và văn bản bên trong dùng chung một bộ mã, lưu thành thư mục mới, thư mục gốc giữ nguyên.
+- Bắt đầu mọi việc từ một chỗ: "Ẩn thông tin mới" và hai thẻ "Ẩn thông tin riêng", "Nhận lại bản đầy đủ".
+- Không còn giới hạn kích thước: ứng dụng cho biết khoảng bao lâu trên máy bạn, và đọc tệp CSV, văn bản rất lớn từng phần một.
 ```
 
 **Product features** (one per line in Partner Center)
