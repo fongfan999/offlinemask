@@ -1201,6 +1201,11 @@ a.quiet-button {
   border-top: 1px solid var(--line);
   background: var(--paper-raised);
 }
+/* The action row has the button's own paper; a firmer edge keeps "Hủy" a button. */
+.card-footer .quiet-button {
+  border-color: var(--line-strong);
+  background: var(--paper);
+}
 .action-hint {
   margin-right: auto;
   display: flex;
