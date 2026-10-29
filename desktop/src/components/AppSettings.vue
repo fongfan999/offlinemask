@@ -13,6 +13,7 @@ import { memoryBudget, memoryChoices, memorySize } from "../core/memory.ts";
  * Under "Nâng cao", folded: how much memory the app may use (decision 0173). */
 const { theme, setTheme } = useTheme();
 const memory = ref<number | null>(null);
+const advancedOpen = memoryChoice.value !== "normal";
 onMounted(async () => (memory.value = await machineMemory()));
 const memoryFigure = (id: (typeof memoryChoices)[number]["id"]) =>
   memorySize(memoryBudget(memory.value, id));
@@ -69,32 +70,26 @@ async function visitWebsite(event: MouseEvent) {
         Mở OfflineMask.com<AppIcon name="external" :size="13" />
       </a>
     </div>
-    <details class="settings-advanced" :open="memoryChoice !== 'normal'">
+    <!-- Opens by itself only when a choice other than the default is set; after that,
+         only the person opens or closes it. -->
+    <details class="settings-advanced" :open="advancedOpen">
       <summary>Nâng cao<AppIcon class="folder-chevron" name="chevron" :size="13" /></summary>
-      <div class="settings-tool-row">
-        <div>
-          <h3 id="memory-title">Bộ nhớ cho OfflineMask</h3>
-          <p id="memory-hint">
-            Tệp cần nhiều hơn mức này sẽ không mở, để máy không bị chậm. Chọn nhiều hơn nếu máy chỉ
-            dùng để chạy OfflineMask.
-          </p>
-        </div>
-        <fieldset
-          class="memory-choices"
-          aria-labelledby="memory-title"
-          aria-describedby="memory-hint"
-        >
-          <label v-for="choice in memoryChoices" :key="choice.id">
-            <input
-              type="radio"
-              name="memory"
-              :value="choice.id"
-              :checked="memoryChoice === choice.id"
-              @change="setMemoryChoice(choice.id)"
-            />{{ choice.label }} <span>{{ memoryFigure(choice.id) }}</span>
-          </label>
-        </fieldset>
-      </div>
+      <fieldset class="memory-setting" aria-describedby="memory-hint">
+        <legend>Bộ nhớ cho OfflineMask</legend>
+        <p id="memory-hint">
+          Tệp cần nhiều hơn mức này sẽ không mở, để máy không bị chậm. Chọn nhiều hơn nếu máy chỉ
+          dùng để chạy OfflineMask.
+        </p>
+        <label v-for="choice in memoryChoices" :key="choice.id">
+          <input
+            type="radio"
+            name="memory"
+            :value="choice.id"
+            :checked="memoryChoice === choice.id"
+            @change="setMemoryChoice(choice.id)"
+          />{{ choice.label }}<span>{{ memoryFigure(choice.id) }}</span>
+        </label>
+      </fieldset>
     </details>
   </section>
 </template>
