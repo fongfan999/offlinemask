@@ -171,7 +171,7 @@ test("a scanned page among text pages is named and left out of the output", asyn
   const output = maskValues(opened, [["Trịnh Văn Long", "TEN"]]);
   assert.equal(
     output,
-    `## Trang 1\n\nTrang một: hợp đồng của [TEN_1_${scope}].\n\n## Trang 2\n\n(Trang không có chữ đọc được, thường là ảnh scan — không có trong bản đã ẩn)\n\n## Trang 3\n\nTrang ba: chữ ký các bên.\n`,
+    `## Trang 1\n\nTrang một: hợp đồng của [TEN_1_${scope}].\n\n## Trang 2\n\n(Trang không có chữ đọc được, thường là ảnh scan - không có trong bản đã ẩn)\n\n## Trang 3\n\nTrang ba: chữ ký các bên.\n`,
   );
 });
 
@@ -231,7 +231,7 @@ test("old-font text is told apart from Vietnamese and other languages", () => {
 
 test("page lists collapse runs", () => {
   assert.equal(pageList([2]), "2");
-  assert.equal(pageList([3, 5, 6, 7, 9]), "3, 5–7, 9");
+  assert.equal(pageList([3, 5, 6, 7, 9]), "3, 5-7, 9");
 });
 
 test("documents route a PDF by its header and write it as Markdown", async () => {

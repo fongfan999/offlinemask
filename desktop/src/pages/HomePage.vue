@@ -155,7 +155,7 @@ const packNotice = computed<PackNotice | null>(() => {
     case "downloading":
       return {
         icon: "download",
-        title: `Đang tải về… ${packProgress(status)} %`,
+        title: `Đang tải về... ${packProgress(status)} %`,
         detail: "Chỉ cần tải một lần.",
         action: progress(),
       };
@@ -163,7 +163,7 @@ const packNotice = computed<PackNotice | null>(() => {
     case "cancelling":
       return {
         icon: "download",
-        title: `Đang cài đặt… ${packProgress(status)} %`,
+        title: `Đang cài đặt... ${packProgress(status)} %`,
         detail: "Chỉ cần tải một lần.",
         action: progress(),
       };
@@ -201,6 +201,11 @@ const packNotice = computed<PackNotice | null>(() => {
     <!-- People open the app to work, not to be sold to: a greeting and the question. -->
     <h1 ref="heading" tabindex="-1">{{ greeting }}</h1>
     <p>Hôm nay bạn cần ẩn thông tin gì?</p>
+    <!-- What masking does, at a glance: a value struck out, its code beside it. -->
+    <div class="home-swaps" aria-hidden="true">
+      <span class="home-swap"><s>Phong Phan</s><b>[TEN_1_5102]</b></span>
+      <span class="home-swap"><s>0901234567</s><b>[SDT_1_5102]</b></span>
+    </div>
   </div>
   <!-- Home holds both ends of the job (decision 0172): hide before asking the AI, and put
        the real information back into its reply. -->
@@ -251,7 +256,7 @@ const packNotice = computed<PackNotice | null>(() => {
     <p v-if="startError" class="input-error start-error" role="alert">{{ startError }}</p>
     <!-- Looks like the text box it opens, so typing is as obvious as dropping. -->
     <button type="button" class="home-type" @click="emit('type')">
-      <AppIcon name="compose" :size="17" /><span>Hoặc gõ, dán văn bản vào đây…</span
+      <AppIcon name="compose" :size="17" /><span>Hoặc gõ, dán văn bản vào đây...</span
       ><kbd>{{ pasteKey }}</kbd>
     </button>
     <div class="start-actions">

@@ -97,7 +97,7 @@ defineExpose({
 <template>
   <section ref="card" class="vault-settings glass glass-card" aria-labelledby="vault-title">
     <div class="model-card-heading">
-      <h2 id="vault-title">Mật mã · Lưu lịch sử</h2>
+      <h2 id="vault-title">Mật mã - Lưu lịch sử</h2>
       <span
         v-if="vault.state.value !== 'unavailable'"
         class="model-badge"

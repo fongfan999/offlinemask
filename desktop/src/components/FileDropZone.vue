@@ -57,10 +57,10 @@ function drop(transfer: DataTransfer | null) {
   >
     <span class="drop-icon"><AppIcon :name="icon" :size="26" /></span>
     <span class="drop-words"
-      ><strong>{{ busy ? "Đang mở tệp…" : title }}</strong>
+      ><strong>{{ busy ? "Đang mở tệp..." : title }}</strong>
       <span v-if="!chooseInTitle"
         >hoặc <u>{{ directory ? "chọn thư mục" : "chọn tệp" }}</u
-        ><template v-if="hint"> · {{ hint }}</template></span
+        ><template v-if="hint"> - {{ hint }}</template></span
       ></span
     >
     <slot />

@@ -78,7 +78,7 @@ function toggleType(group: ReviewGroup, all: boolean) {
       v-model="query"
       type="search"
       class="review-search"
-      placeholder="Tìm giá trị…"
+      placeholder="Tìm giá trị..."
       aria-label="Tìm giá trị"
     />
     <ul class="review-values" :class="{ 'is-steady': items.length > 12 }">
@@ -90,8 +90,8 @@ function toggleType(group: ReviewGroup, all: boolean) {
             @change="emit('change', [item.alias], !item.kept)"
           /><span class="review-text">{{ item.value }}</span
           ><span class="review-meta"
-            >{{ item.label }} · {{ item.count.toLocaleString("vi-VN") }} chỗ<template v-if="files">
-              · {{ (files.get(item.alias) ?? 1).toLocaleString("vi-VN") }} tệp</template
+            >{{ item.label }} - {{ item.count.toLocaleString("vi-VN") }} chỗ<template v-if="files">
+              - {{ (files.get(item.alias) ?? 1).toLocaleString("vi-VN") }} tệp</template
             ></span
           >
         </label>

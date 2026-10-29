@@ -100,12 +100,12 @@ const subtitle = computed(() => {
     const rows = props.session.sheets.reduce((sum, item) => sum + item.rows, 0);
     return step.value === 3
       ? `Bảng tính #${props.session.number}`
-      : `Bảng tính #${props.session.number} · ${rows.toLocaleString("vi-VN")} dòng · Đọc lại bản đã ẩn, rồi tải về để gửi AI.`;
+      : `Bảng tính #${props.session.number} - ${rows.toLocaleString("vi-VN")} dòng - Đọc lại bản đã ẩn, rồi tải về để gửi AI.`;
   }
   return draft.value
     ? // The card says what to do with the columns; the subtitle only sizes the file.
-      `${totalRows.value.toLocaleString("vi-VN")} dòng${draft.value.tables.length > 1 ? ` · ${draft.value.tables.length} trang tính` : ""}`
-    : "Mở tệp Excel, LibreOffice hoặc CSV. Thông tin bạn chọn được thay bằng mã như [SDT_1_…], ngay trên máy bạn.";
+      `${totalRows.value.toLocaleString("vi-VN")} dòng${draft.value.tables.length > 1 ? ` - ${draft.value.tables.length} trang tính` : ""}`
+    : "Mở tệp Excel, LibreOffice hoặc CSV. Thông tin bạn chọn được thay bằng mã như [SDT_1_...], ngay trên máy bạn.";
 });
 const totalRows = computed(
   () => draft.value?.tables.reduce((sum, table) => sum + table.rows.length, 0) ?? 0,
@@ -160,7 +160,7 @@ async function download() {
   try {
     if (await sheet.download(props.session)) {
       status.value =
-        "Đã lưu tệp đã ẩn. Gửi tệp này cho công cụ AI bạn dùng (ChatGPT, Claude, Gemini…), rồi đưa tệp hoặc câu trả lời AI trả về vào bước Khôi phục.";
+        "Đã lưu tệp đã ẩn. Gửi tệp này cho công cụ AI bạn dùng (ChatGPT, Claude, Gemini...), rồi đưa tệp hoặc câu trả lời AI trả về vào bước Khôi phục.";
       restoreStep.value = true;
     }
   } catch {
@@ -347,7 +347,7 @@ defineExpose({
           Xem trước {{ Math.min(sheetPreviewRows, draft.tables[sheetIndex]?.rows.length ?? 0) }} /
           {{ (draft.tables[sheetIndex]?.rows.length ?? 0).toLocaleString("vi-VN") }} dòng
           đầu<template v-if="sheet.previewScanning.value">
-            · <span class="spinner" aria-hidden="true"></span> Đang đọc các ô được quét…</template
+            - <span class="spinner" aria-hidden="true"></span> Đang đọc các ô được quét...</template
           >
         </p>
         <p v-if="scanNeedsPack && !sheet.progress.value" class="sheet-note">
@@ -375,7 +375,7 @@ defineExpose({
             <span v-if="sheet.processing.value" class="spinner" aria-hidden="true"></span
             ><BrandMark v-else :size="17" />{{
               sheet.processing.value
-                ? "Đang ẩn…"
+                ? "Đang ẩn..."
                 : `Ẩn toàn bộ ${totalRows.toLocaleString("vi-VN")} dòng`
             }}<AppIcon name="arrow" :size="16" />
           </button>
@@ -386,7 +386,7 @@ defineExpose({
     <!-- Step 2: read the masked result and save the masked copy. -->
     <div v-else-if="step === 2" class="step-panel">
       <p class="sheet-summary">
-        <AppIcon name="check" :size="15" />Đã ẩn {{ session.masked.toLocaleString("vi-VN") }} ô ·
+        <AppIcon name="check" :size="15" />Đã ẩn {{ session.masked.toLocaleString("vi-VN") }} ô -
         {{ session.findings.length.toLocaleString("vi-VN") }} mã thay thế
       </p>
       <div v-if="sheetNames.length > 1" class="sheet-tabs" role="tablist">
@@ -465,7 +465,8 @@ defineExpose({
           </p>
           <p v-if="restore.unknown.length" class="sheet-note restore-unknown">
             {{ restore.unknown.length }} mã thay thế không thuộc bảng tính này được giữ nguyên:
-            {{ restore.unknown.slice(0, 5).join(", ") }}{{ restore.unknown.length > 5 ? "…" : "" }}
+            {{ restore.unknown.slice(0, 5).join(", ")
+            }}{{ restore.unknown.length > 5 ? "..." : "" }}
           </p>
           <SheetPreview
             v-if="restoreView"

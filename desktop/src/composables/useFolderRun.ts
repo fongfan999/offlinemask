@@ -303,7 +303,7 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
               });
             notePresent([...table.preamble, ...table.rows].flat());
             return {
-              layout: addLayout(table.header, table.rows, `${item.path} · ${table.name}`, index),
+              layout: addLayout(table.header, table.rows, `${item.path} - ${table.name}`, index),
               preambleChars: table.preamble.flat().reduce((sum, text) => sum + text.length, 0),
               columnChars,
             };

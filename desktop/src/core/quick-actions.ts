@@ -51,14 +51,14 @@ export const quickMessages = {
   failed: "Chưa thực hiện được thao tác. Nội dung được giữ nguyên, hãy thử lại.",
   // Short on purpose: in place the change is visible, otherwise one line says where it is.
   masked: (n: number, replaced = false) =>
-    replaced ? `Đã ẩn ${count(n)} thông tin` : `Đã ẩn ${count(n)} thông tin · dán để dùng`,
+    replaced ? `Đã ẩn ${count(n)} thông tin` : `Đã ẩn ${count(n)} thông tin - dán để dùng`,
   /** The preview's title when the selection changed while masking ran (decision 0127). */
   maskedMoved: "Vùng chọn đã đổi",
   restored: (n: number, unknown: number, replaced = false) =>
     (replaced
       ? `Đã khôi phục ${count(n)} thông tin`
-      : `Đã khôi phục ${count(n)} thông tin · dán để dùng`) +
-    (unknown ? ` · ${count(unknown)} mã lạ giữ nguyên` : ""),
+      : `Đã khôi phục ${count(n)} thông tin - dán để dùng`) +
+    (unknown ? ` - ${count(unknown)} mã lạ giữ nguyên` : ""),
   /** What a click on the circle will do, shown while it is hovered (decision 0096). */
   hintMask: "Ẩn thông tin",
   hintRestore: "Khôi phục thông tin",
@@ -85,9 +85,9 @@ export const quickMessages = {
   selectMask: "Ẩn thông tin trong phần vừa chọn? Kết quả thay ngay tại chỗ.",
   selectRestore: "Khôi phục mã thay thế trong phần vừa chọn? Kết quả thay ngay tại chỗ.",
   /** A Finder service handed over more than one file (decision 0094). */
-  oneFile: (name: string) => `Mỗi lần một tệp: đã mở “${name}”.`,
+  oneFile: (name: string) => `Mỗi lần một tệp: đã mở "${name}".`,
   /** Shown once per launch when the selection could not be taken for lack of permission. */
-  permissionHint: "Muốn thay ngay tại chỗ? Cấp quyền Trợ năng trong Cài đặt › Thao tác nhanh.",
+  permissionHint: "Muốn thay ngay tại chỗ? Cấp quyền Trợ năng trong Cài đặt > Thao tác nhanh.",
 } as const;
 
 /** Where each alias sits in masked text, for highlighting in the preview. */

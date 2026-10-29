@@ -47,11 +47,11 @@ export const serviceFileError = "Chưa đọc được tệp từ Finder. Hãy k
 export const shortcutError =
   "Chưa đăng ký được phím tắt. Có thể một ứng dụng khác đang dùng tổ hợp này.";
 export const lockedMessage = "Mở khóa OfflineMask trước khi dùng thao tác nhanh.";
-export const workingMessage = "Đang ẩn thông tin…";
+export const workingMessage = "Đang ẩn thông tin...";
 export const launchError = "Chưa đổi được cài đặt khởi động cùng máy. Vui lòng thử lại.";
 /** The Store build's startup task, turned off by the user in Windows (decision 0117). */
 export const launchBlocked =
-  "Windows đang chặn OfflineMask khởi động cùng máy. Bật lại trong Cài đặt › Ứng dụng › Khởi động.";
+  "Windows đang chặn OfflineMask khởi động cùng máy. Bật lại trong Cài đặt > Ứng dụng > Khởi động.";
 
 type PreferenceStorage = Pick<Storage, "getItem" | "setItem" | "removeItem">;
 function defaultStorage(): PreferenceStorage | null {

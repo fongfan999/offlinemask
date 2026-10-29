@@ -94,10 +94,10 @@ const subtitle = computed(() => {
   if (props.session)
     return step.value === 3
       ? `Tài liệu #${props.session.number}`
-      : `Tài liệu #${props.session.number} · ${props.session.paragraphs.toLocaleString("vi-VN")} đoạn · Đọc lại bản đã ẩn, rồi tải về để gửi AI.`;
+      : `Tài liệu #${props.session.number} - ${props.session.paragraphs.toLocaleString("vi-VN")} đoạn - Đọc lại bản đã ẩn, rồi tải về để gửi AI.`;
   return draft.value
-    ? `${draft.value.paragraphs.length.toLocaleString("vi-VN")} đoạn · Xem trước rồi ẩn toàn bộ.`
-    : "Mở tệp Word, LibreOffice hoặc PDF. Thông tin riêng tư được thay bằng mã như [TEN_1_…], ngay trên máy bạn. Word giữ nguyên định dạng; PDF cho ra bản chữ để gửi AI.";
+    ? `${draft.value.paragraphs.length.toLocaleString("vi-VN")} đoạn - Xem trước rồi ẩn toàn bộ.`
+    : "Mở tệp Word, LibreOffice hoặc PDF. Thông tin riêng tư được thay bằng mã như [TEN_1_...], ngay trên máy bạn. Word giữ nguyên định dạng; PDF cho ra bản chữ để gửi AI.";
 });
 const draftView = computed(() => {
   const current = draft.value;
@@ -152,7 +152,7 @@ async function download() {
   try {
     if (await doc.download(props.session)) {
       status.value =
-        "Đã lưu tệp đã ẩn. Gửi tệp này cho công cụ AI bạn dùng (ChatGPT, Claude, Gemini…), rồi đưa tệp hoặc câu trả lời AI trả về vào bước Khôi phục.";
+        "Đã lưu tệp đã ẩn. Gửi tệp này cho công cụ AI bạn dùng (ChatGPT, Claude, Gemini...), rồi đưa tệp hoặc câu trả lời AI trả về vào bước Khôi phục.";
       restoreStep.value = true;
     }
   } catch {
@@ -166,7 +166,7 @@ async function copyMasked() {
   try {
     if (await doc.copyMasked(props.session)) {
       status.value =
-        "Đã sao chép bản đã ẩn. Dán vào công cụ AI bạn dùng (ChatGPT, Claude, Gemini…), rồi đưa câu trả lời của AI vào bước Khôi phục.";
+        "Đã sao chép bản đã ẩn. Dán vào công cụ AI bạn dùng (ChatGPT, Claude, Gemini...), rồi đưa câu trả lời của AI vào bước Khôi phục.";
       restoreKind.value = "text";
       restoreStep.value = true;
     }
@@ -314,7 +314,9 @@ defineExpose({
         <template v-if="!doc.progress.value">
           <LongJobNote :seconds="doc.estimate.value" subject="Tài liệu này" />
           <header class="card-header sheet-toolbar">
-            <p class="sheet-hint">Họ tên, số điện thoại, email, số tài khoản… được thay bằng mã.</p>
+            <p class="sheet-hint">
+              Họ tên, số điện thoại, email, số tài khoản... được thay bằng mã.
+            </p>
             <div class="view-switch" aria-label="Chọn bản xem">
               <button :aria-pressed="!showOriginal" @click="showOriginal = false">
                 Xem trước bản đã ẩn</button
@@ -329,7 +331,7 @@ defineExpose({
           {{ draft.paragraphs.length.toLocaleString("vi-VN") }} đoạn đầu<template
             v-if="doc.previewScanning.value"
           >
-            · <span class="spinner" aria-hidden="true"></span> Đang đọc…</template
+            - <span class="spinner" aria-hidden="true"></span> Đang đọc...</template
           >
         </p>
         <p v-if="!pack.ready.value && !doc.progress.value" class="sheet-note">
@@ -355,7 +357,7 @@ defineExpose({
           >
             <span v-if="doc.processing.value" class="spinner" aria-hidden="true"></span
             ><BrandMark v-else :size="17" />{{
-              doc.processing.value ? "Đang ẩn…" : "Ẩn toàn bộ tài liệu"
+              doc.processing.value ? "Đang ẩn..." : "Ẩn toàn bộ tài liệu"
             }}<AppIcon name="arrow" :size="16" />
           </button>
         </footer>
@@ -365,7 +367,7 @@ defineExpose({
     <!-- Step 2: read the masked result and save the masked copy. -->
     <div v-else-if="step === 2" class="step-panel">
       <p class="sheet-summary">
-        <AppIcon name="check" :size="15" />Đã ẩn {{ session.masked.toLocaleString("vi-VN") }} chỗ ·
+        <AppIcon name="check" :size="15" />Đã ẩn {{ session.masked.toLocaleString("vi-VN") }} chỗ -
         {{ session.findings.length.toLocaleString("vi-VN") }} mã thay thế
       </p>
       <DocPreview :paragraphs="session.preview" :label="`Bản đã ẩn, ${session.fileName}`" />
@@ -432,7 +434,8 @@ defineExpose({
           </p>
           <p v-if="restore.unknown.length" class="sheet-note restore-unknown">
             {{ restore.unknown.length }} mã thay thế không thuộc tài liệu này được giữ nguyên:
-            {{ restore.unknown.slice(0, 5).join(", ") }}{{ restore.unknown.length > 5 ? "…" : "" }}
+            {{ restore.unknown.slice(0, 5).join(", ")
+            }}{{ restore.unknown.length > 5 ? "..." : "" }}
           </p>
           <DocPreview
             :paragraphs="restoreView"

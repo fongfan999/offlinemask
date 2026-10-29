@@ -23,16 +23,16 @@ export const findings: readonly Finding[] = [
     value: "Nguyễn Minh Anh",
     alias: "[TEN_DEMO_01]",
     reason:
-      "Tên xuất hiện sau “Tôi là” và trong phần chữ ký. Hai vị trí dùng chung một mã thay thế.",
-    source: "Ngữ cảnh và chữ ký · mẫu minh họa",
+      'Tên xuất hiện sau "Tôi là" và trong phần chữ ký. Hai vị trí dùng chung một mã thay thế.',
+    source: "Ngữ cảnh và chữ ký - mẫu minh họa",
   },
   {
     id: "account",
     label: "Số tài khoản",
     value: "001234567890",
     alias: "[STK_DEMO_01]",
-    reason: "Dãy số xuất hiện sau “chủ tài khoản”. Giữ nguyên các số 0 đầu khi đối chiếu bản gốc.",
-    source: "Nhãn “chủ tài khoản” · mẫu minh họa",
+    reason: 'Dãy số xuất hiện sau "chủ tài khoản". Giữ nguyên các số 0 đầu khi đối chiếu bản gốc.',
+    source: 'Nhãn "chủ tài khoản" - mẫu minh họa',
   },
   {
     id: "reference",
@@ -49,8 +49,8 @@ export const findings: readonly Finding[] = [
     value: "0901234567",
     alias: "[SDT_DEMO_01]",
     reason:
-      "Thông tin liên hệ xuất hiện sau “qua số”. Ẩn số điện thoại khi không cần liên hệ trực tiếp.",
-    source: "Thông tin liên hệ · mẫu minh họa",
+      'Thông tin liên hệ xuất hiện sau "qua số". Ẩn số điện thoại khi không cần liên hệ trực tiếp.',
+    source: "Thông tin liên hệ - mẫu minh họa",
   },
   {
     id: "email",
@@ -58,7 +58,7 @@ export const findings: readonly Finding[] = [
     value: "minh.anh@example.com",
     alias: "[EMAIL_DEMO_01]",
     reason: "Địa chỉ email trong phần thông tin liên hệ. Mã thay thế thay thế toàn bộ địa chỉ.",
-    source: "Địa chỉ email · mẫu minh họa",
+    source: "Địa chỉ email - mẫu minh họa",
   },
 ];
 

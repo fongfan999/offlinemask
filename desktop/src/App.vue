@@ -151,7 +151,7 @@ const format = computed<Format>(
 const folderStatus: Record<string, string> = {
   surveying: "Đang đọc thư mục",
   ready: "Chờ bắt đầu",
-  review: "Đã ẩn · chờ lưu",
+  review: "Đã ẩn - chờ lưu",
   saving: "Đang lưu",
   saved: "Đã lưu",
 };
@@ -161,7 +161,7 @@ const folderItem = computed(() => {
   const progress = folder.progress.value;
   const status =
     phase === "masking"
-      ? `Đang ẩn · ${progress?.total ? Math.floor((progress.done / progress.total) * 100) : 0}%`
+      ? `Đang ẩn - ${progress?.total ? Math.floor((progress.done / progress.total) * 100) : 0}%`
       : folderStatus[phase]!;
   return { name: folder.name.value, status };
 });
@@ -394,7 +394,7 @@ async function closeSidebar() {
              shown only while folded, so its place can be measured before the move. -->
         <button
           class="brand topbar-brand"
-          aria-label="OfflineMask — Trang chủ"
+          aria-label="OfflineMask - Trang chủ"
           @click="openFormat('home')"
         >
           <span class="brand-mark"><BrandMark :size="28" /></span

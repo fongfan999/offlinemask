@@ -65,7 +65,7 @@ const subtitle = computed(() => {
   const parts = [`${count(folder.files.value.length)} tệp`];
   if (docs.value) parts.push(`${count(docs.value)} tài liệu`);
   if (sheets.value) parts.push(`${count(sheets.value)} bảng tính`);
-  return parts.join(" · ");
+  return parts.join(" - ");
 });
 const surveyed = computed(
   () => folder.files.value.filter((file) => !["waiting", "reading"].includes(file.status)).length,
@@ -110,7 +110,7 @@ const layoutSummary = (layout: { header: string[]; plans: readonly { mode: strin
   if (hide.length) parts.push(`Ẩn cả cột ${someNames(hide, "cột")}`);
   if (scan.length) parts.push(`tìm và ẩn trong cột ${someNames(scan, "cột")}`);
   if (keep) parts.push(`giữ nguyên ${count(keep)} cột`);
-  return capital(parts.join(" · ")) || "Không có cột nào";
+  return capital(parts.join(" - ")) || "Không có cột nào";
 };
 
 /** Another folder starts where every job does: home, whose drop zone takes folders. */
@@ -220,7 +220,7 @@ defineExpose({
     <div v-else-if="phase === 'surveying'" class="step-panel">
       <div class="sheet-progress folder-survey" role="status" aria-live="polite">
         <p class="sheet-progress-title">
-          <span class="spinner" aria-hidden="true"></span>Đang xem trong thư mục…
+          <span class="spinner" aria-hidden="true"></span>Đang xem trong thư mục...
           <span class="folder-survey-count"
             >{{ count(surveyed) }} / {{ count(folder.files.value.length) }} tệp</span
           >
@@ -273,7 +273,7 @@ defineExpose({
                   ? "Mở từng bảng tính để xem cột nào sẽ được ẩn, rồi bấm"
                   : "Kiểm tra các tệp bên dưới, rồi bấm"
               }}
-              “Ẩn {{ count(folder.readable.value.length) }} tệp”.</span
+              "Ẩn {{ count(folder.readable.value.length) }} tệp".</span
             >
           </p>
           <p v-if="!pack.ready.value" class="sheet-note">
@@ -282,7 +282,7 @@ defineExpose({
           </p>
 
           <section v-if="folder.layouts.value.length" class="folder-layouts">
-            <h2 class="folder-section-title">Bảng tính · {{ count(sheetFiles.length) }} tệp</h2>
+            <h2 class="folder-section-title">Bảng tính - {{ count(sheetFiles.length) }} tệp</h2>
             <p v-if="folder.layouts.value.length < sheetFiles.length" class="sheet-hint">
               Các bảng tính có cùng các cột được gom lại: chọn một lần cho cả nhóm.
             </p>
@@ -311,14 +311,14 @@ defineExpose({
               <p class="sheet-caption-line">
                 Xem trước: {{ layout.example
                 }}<template v-if="layout.sheets > 1">
-                  · áp dụng cho {{ count(layout.sheets) }} trang tính</template
+                  - áp dụng cho {{ count(layout.sheets) }} trang tính</template
                 >
               </p>
             </details>
           </section>
 
           <section v-if="docFiles.length" class="folder-layouts">
-            <h2 class="folder-section-title">Tài liệu · {{ count(docFiles.length) }} tệp</h2>
+            <h2 class="folder-section-title">Tài liệu - {{ count(docFiles.length) }} tệp</h2>
             <div class="folder-docs">
               <AppIcon name="file" :size="16" /><span class="folder-summary-text"
                 ><strong>{{
@@ -354,13 +354,13 @@ defineExpose({
                 >Đã ẩn {{ count(hidden) }} chỗ trong
                 {{ count(folder.masked.value.length) }} tệp.</strong
               >
-              Xem lại danh sách bên dưới, bỏ chọn những gì không cần ẩn, rồi bấm “Lưu thư mục đã
-              ẩn”.</span
+              Xem lại danh sách bên dưới, bỏ chọn những gì không cần ẩn, rồi bấm "Lưu thư mục đã
+              ẩn".</span
             >
           </p>
           <p v-if="phase === 'saved'" class="folder-ready" role="status">
             <AppIcon name="check" :size="16" /><span
-              ><strong>Đã lưu vào thư mục “{{ folder.saveTarget.value }}”.</strong> Gửi các tệp cần
+              ><strong>Đã lưu vào thư mục "{{ folder.saveTarget.value }}".</strong> Gửi các tệp cần
               thiết trong thư mục đó cho AI. Khi AI trả lời, sang bước 3 để đổi các mã lại thành
               thông tin thật.</span
             >
@@ -427,7 +427,7 @@ defineExpose({
           class="card-footer sheet-footer"
         >
           <JobTime v-if="phase === 'ready'" :seconds="folder.estimate.value">
-            · thư mục gốc giữ nguyên</JobTime
+            - thư mục gốc giữ nguyên</JobTime
           >
           <span v-else class="action-hint">Thư mục gốc không bị thay đổi.</span>
           <button v-if="phase === 'masking'" class="quiet-button" @click="folder.cancel()">
@@ -442,7 +442,7 @@ defineExpose({
           >
             <span v-if="phase === 'masking'" class="spinner" aria-hidden="true"></span
             ><BrandMark v-else :size="17" />{{
-              phase === "masking" ? "Đang ẩn…" : `Ẩn ${count(folder.readable.value.length)} tệp`
+              phase === "masking" ? "Đang ẩn..." : `Ẩn ${count(folder.readable.value.length)} tệp`
             }}<AppIcon name="arrow" :size="16" />
           </button>
           <template v-else-if="phase === 'saved'">

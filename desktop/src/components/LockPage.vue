@@ -69,7 +69,7 @@ async function reset() {
       />
       <p class="lock-status" :class="{ 'is-error': vault.error.value }" aria-live="polite">
         <template v-if="vault.busy.value"
-          ><span class="spinner" aria-hidden="true"></span>Đang mở…</template
+          ><span class="spinner" aria-hidden="true"></span>Đang mở...</template
         ><template v-else-if="vault.error.value">{{ vault.error.value }}</template
         ><template v-else-if="digitsOnly">Chỉ nhập số.</template>
       </p>

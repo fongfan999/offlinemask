@@ -73,7 +73,7 @@ const status = computed(() => {
   if (!current) return "";
   if (!current.restored)
     return "Không tìm thấy mã thay thế nào bạn đã ẩn trong tệp này. Hãy kiểm tra đúng tệp AI trả về.";
-  return `Đã đổi lại ${current.restored.toLocaleString("vi-VN")} mã thay thế trong “${current.fileName}”.`;
+  return `Đã đổi lại ${current.restored.toLocaleString("vi-VN")} mã thay thế trong "${current.fileName}".`;
 });
 async function download() {
   const current = returned.value;

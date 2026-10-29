@@ -108,7 +108,7 @@ async function copy() {
       ref="input"
       v-model="reply"
       class="text-content restore-input"
-      placeholder="Dán câu trả lời của AI vào đây…"
+      placeholder="Dán câu trả lời của AI vào đây..."
       spellcheck="false"
       autocomplete="off"
       autocorrect="off"

@@ -65,10 +65,10 @@ test("sidebar preview shows the first masked line, truncated by grapheme", () =>
   const preview = sessionPreview(session);
   assert.ok(preview.startsWith("Email [EMAIL_1_"));
   assert.ok(!preview.includes("minh.anh"));
-  assert.ok(preview.endsWith("…"));
+  assert.ok(preview.endsWith("..."));
   assert.ok([...preview].length <= 46);
   const short = createTextSession("Xin chào", [], []);
   assert.equal(sessionPreview(short), "Xin chào");
   const emoji = createTextSession("👩‍👩‍👧‍👦".repeat(50), [], []);
-  assert.ok(sessionPreview(emoji).endsWith("👩‍👩‍👧‍👦…"));
+  assert.ok(sessionPreview(emoji).endsWith("👩‍👩‍👧‍👦..."));
 });

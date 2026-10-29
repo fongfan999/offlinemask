@@ -356,7 +356,7 @@ export function pageList(pages: readonly number[]): string {
   for (let index = 0; index < pages.length;) {
     let end = index;
     while (pages[end + 1] === pages[end]! + 1) end++;
-    ranges.push(end > index ? `${pages[index]}–${pages[end]}` : `${pages[index]}`);
+    ranges.push(end > index ? `${pages[index]}-${pages[end]}` : `${pages[index]}`);
     index = end + 1;
   }
   return ranges.join(", ");
@@ -575,8 +575,8 @@ export async function openPdf(
 }
 
 const placeholders: Record<Exclude<PdfPageKind, "text">, string> = {
-  "no-text": "(Trang không có chữ đọc được, thường là ảnh scan — không có trong bản đã ẩn)",
-  "old-font": "(Trang dùng phông chữ cũ, chưa đọc được — không có trong bản đã ẩn)",
+  "no-text": "(Trang không có chữ đọc được, thường là ảnh scan - không có trong bản đã ẩn)",
+  "old-font": "(Trang dùng phông chữ cũ, chưa đọc được - không có trong bản đã ẩn)",
 };
 /** The masked document as Markdown: each page under its own heading, its paragraphs
  * with the replacements applied, rows of cells as tables (`blocks.ts`), and a line in

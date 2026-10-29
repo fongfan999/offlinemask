@@ -197,9 +197,9 @@ const subtitle = computed(() =>
     ? privateSession.value
       ? step.value === 3
         ? sessionTitle(session.value)
-        : `${sessionTitle(session.value)} · Đọc lại bản đã ẩn, rồi sao chép để gửi AI.`
+        : `${sessionTitle(session.value)} - Đọc lại bản đã ẩn, rồi sao chép để gửi AI.`
       : "Đọc lại kết quả, rồi sao chép khi bạn thấy phù hợp."
-    : "Thông tin bạn chọn được thay bằng mã như [SDT_1_…], ngay trên máy bạn.",
+    : "Thông tin bạn chọn được thay bằng mã như [SDT_1_...], ngay trên máy bạn.",
 );
 /** A text run keeps going in the background while the user navigates. */
 /** A .txt or .md file dropped on the text box becomes the draft (decision 0088); other
@@ -335,9 +335,9 @@ const packWait = computed(() => {
       return {
         busy: true,
         percent,
-        title: `Đang tải gói nhận diện… ${percent} %`,
-        detail: `${formatModelBytes(status.downloaded)} / ${formatModelBytes(status.total)} · Tải xong sẽ tự cài đặt, rồi nút Ẩn thông tin bật lại.`,
-        button: `Đang tải… ${percent} %`,
+        title: `Đang tải gói nhận diện... ${percent} %`,
+        detail: `${formatModelBytes(status.downloaded)} / ${formatModelBytes(status.total)} - Tải xong sẽ tự cài đặt, rồi nút Ẩn thông tin bật lại.`,
+        button: `Đang tải... ${percent} %`,
         action: "pause" as const,
       };
     case "installing":
@@ -346,29 +346,29 @@ const packWait = computed(() => {
         percent,
         title:
           status.installed >= status.installedBytes
-            ? "Đang kiểm tra gói nhận diện lần cuối…"
-            : `Đang cài đặt gói nhận diện… ${percent} %`,
+            ? "Đang kiểm tra gói nhận diện lần cuối..."
+            : `Đang cài đặt gói nhận diện... ${percent} %`,
         detail: "Bước này không cần Internet. Xong là nút Ẩn thông tin bật lại.",
         button:
           status.installed >= status.installedBytes
-            ? "Đang kiểm tra…"
-            : `Đang cài đặt… ${percent} %`,
+            ? "Đang kiểm tra..."
+            : `Đang cài đặt... ${percent} %`,
         action: "pause" as const,
       };
     case "cancelling":
       return {
         busy: true,
         percent,
-        title: "Đang tạm dừng…",
+        title: "Đang tạm dừng...",
         detail: "Phần đã tải được giữ lại.",
-        button: "Đang tạm dừng…",
+        button: "Đang tạm dừng...",
         action: null,
       };
     case "paused":
       return {
         busy: false,
         percent,
-        title: `Đã tạm dừng tải · ${percent} %`,
+        title: `Đã tạm dừng tải - ${percent} %`,
         detail: "Phần đã tải được giữ lại.",
         button: "Tiếp tục tải",
         action: "resume" as const,
@@ -387,7 +387,7 @@ const packWait = computed(() => {
         busy: false,
         percent: null,
         title: "Tải gói nhận diện để dùng các mục đã chọn.",
-        detail: `${formatModelBytes(status.total)} · Chỉ cần tải một lần`,
+        detail: `${formatModelBytes(status.total)} - Chỉ cần tải một lần`,
         button: "Tải thêm để tiếp tục",
         action: "details" as const,
       };
@@ -439,7 +439,7 @@ async function copy(restore = false) {
     copied.value = true;
     copyStatus.value =
       restore && privateSession.value
-        ? "Đã sao chép bản đã ẩn. Dán vào công cụ AI bạn dùng (ChatGPT, Claude, Gemini…), rồi đưa câu trả lời của AI vào bước Khôi phục."
+        ? "Đã sao chép bản đã ẩn. Dán vào công cụ AI bạn dùng (ChatGPT, Claude, Gemini...), rồi đưa câu trả lời của AI vào bước Khôi phục."
         : "Đã sao chép. Bạn có thể dán vào nơi mình chọn.";
     if (restore && privateSession.value) openStep(3);
     // The trip Ẩn nhanh saves: offer it once (decision 0098).
@@ -567,7 +567,7 @@ defineExpose({
             v-model="draft"
             :disabled="processing"
             class="text-content draft-input"
-            placeholder="Nhập, dán văn bản hoặc kéo thả tệp .txt vào đây…"
+            placeholder="Nhập, dán văn bản hoặc kéo thả tệp .txt vào đây..."
             spellcheck="false"
             autocomplete="off"
             autocorrect="off"
@@ -589,7 +589,7 @@ defineExpose({
             <div class="options-summary">
               <p>
                 Sẽ ẩn: <strong>{{ optionsSummary }}</strong
-                ><small v-if="optionsNeedPack && !optionsOpen"> · Một số mục cần tải thêm</small>
+                ><small v-if="optionsNeedPack && !optionsOpen"> - Một số mục cần tải thêm</small>
               </p>
               <button
                 type="button"
@@ -614,7 +614,7 @@ defineExpose({
                   type="checkbox"
                   :aria-label="
                     option.model && !modelsReady
-                      ? `${option.label} · ${packWait.busy ? 'Đang tải' : 'Cần tải thêm'}`
+                      ? `${option.label} - ${packWait.busy ? 'Đang tải' : 'Cần tải thêm'}`
                       : option.label
                   "
                   :value="option.id"
@@ -623,7 +623,7 @@ defineExpose({
                 <span
                   >{{ option.label
                   }}<small v-if="option.model && !modelsReady">{{
-                    packWait.busy ? "Đang tải…" : "Cần tải thêm"
+                    packWait.busy ? "Đang tải..." : "Cần tải thêm"
                   }}</small></span
                 >
               </label>
@@ -722,7 +722,7 @@ defineExpose({
                 class="quiet-button"
                 @click="hideName(name)"
               >
-                Ẩn “{{ name }}”
+                Ẩn "{{ name }}"
               </button>
             </div>
           </div>
@@ -749,7 +749,7 @@ defineExpose({
           >
             <span
               ><AppIcon name="check" :size="15" />Đã ẩn {{ maskCount }} mục{{
-                unchecked ? ` · ${unchecked.count} loại chưa kiểm tra` : " thông tin"
+                unchecked ? ` - ${unchecked.count} loại chưa kiểm tra` : " thông tin"
               }}</span
             ><span
               >{{ changesOpen ? "Thu gọn" : "Xem thay đổi" }}<AppIcon name="chevron" :size="12"
@@ -801,7 +801,7 @@ defineExpose({
             ></span
             ><BrandMark v-else :size="17" />{{
               textProcessing
-                ? "Đang xử lý…"
+                ? "Đang xử lý..."
                 : format === "text" && missingSelectedModels
                   ? packWait.button
                   : "Ẩn thông tin"

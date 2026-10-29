@@ -572,6 +572,37 @@ h1 {
   margin: 10px 0 14px;
   text-wrap: balance;
 }
+/* What masking does, shown the way the website's chips show it: a value struck out, its
+   code beside it. */
+.home-swaps {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px 18px;
+  margin-top: 18px;
+}
+.home-swap {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--paper-raised);
+  color: var(--accent);
+  font: 600 13px var(--mono);
+  white-space: nowrap;
+  rotate: -2deg;
+}
+.home-swap + .home-swap {
+  rotate: 1.5deg;
+}
+.home-swap s {
+  color: var(--muted);
+  font: 400 13px var(--sans);
+  text-decoration-color: var(--warm);
+  text-decoration-thickness: 2px;
+}
 .introduction p,
 .editor-heading p {
   font-size: 15px;

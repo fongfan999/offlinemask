@@ -7,9 +7,8 @@ import AppIcon from "./AppIcon.vue";
 const props = defineProps<{ icon: string; title: string; detail: string; button: string }>();
 const emit = defineEmits<{ again: [] }>();
 
-/** What the eye should catch in the reason: sizes ("2,8 GB") and where to change the
- * setting ("Cài đặt › Nâng cao"). Odd parts are the highlighted ones. */
-const highlight = /(\d+(?:,\d+)? [GM]B|Cài đặt › Nâng cao)/;
+/** What the eye should catch in the reason: sizes ("2,8 GB"). Odd parts are highlighted. */
+const highlight = /(\d+(?:,\d+)? [GM]B)/;
 const parts = computed(() => props.detail.split(highlight));
 </script>
 

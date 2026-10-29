@@ -77,7 +77,7 @@ defineExpose({
       <button
         ref="start"
         class="brand"
-        aria-label="OfflineMask — Trang chủ"
+        aria-label="OfflineMask - Trang chủ"
         @click="emit('navigate', 'home')"
       >
         <span class="brand-mark"><BrandMark :size="28" /></span
@@ -162,8 +162,8 @@ defineExpose({
         /><span
           ><strong>{{ sessionPreview(session) }}</strong
           ><small
-            >{{ isPrivate(session) ? `${sessionTitle(session)} · ` : ""
-            }}{{ dateLabel(session.createdAt) }}{{ isPrivate(session) ? "" : " · Mẫu" }}</small
+            >{{ isPrivate(session) ? `${sessionTitle(session)} - ` : ""
+            }}{{ dateLabel(session.createdAt) }}{{ isPrivate(session) ? "" : " - Mẫu" }}</small
           ></span
         >
       </button>
