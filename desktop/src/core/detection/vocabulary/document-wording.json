@@ -232,5 +232,30 @@
     "(?:bảo\\s+lãnh|ủy\\s+quyền|chuyển\\s+nhượng|thế\\s+chấp|đặt\\s+cọc|nhượng\\s+quyền|bảo\\s+hiểm|góp\\s+vốn|gia\\s+công)",
     "(?:nhận|giao|cung\\s+cấp|sử\\s+dụng|đặt|thi\\s+công|phân\\s+phối|đại\\s+lý)(?:\\s+(?:hàng|dịch\\s+vụ))?"
   ],
-  "partyWords": ["các", "hai", "ba", "mỗi", "một", "từng"]
+  "partyWords": ["các", "hai", "ba", "mỗi", "một", "từng"],
+  "identityCard": {
+    "$comment": "A citizen identity card copied into a document (decision 0176): the titles that start its front and its back, and the printed wording on it that stays readable; everything else on the card is the holder's.",
+    "fronts": [
+      "căn cước công dân",
+      "căn cước",
+      "chứng minh nhân dân",
+      "citizen identity card",
+      "identity card"
+    ],
+    "backs": ["đặc điểm nhân dạng", "đặc điểm nhận dạng", "personal identification"],
+    "wording": [
+      "cộng hòa xã hội chủ nghĩa việt nam",
+      "độc lập - tự do - hạnh phúc",
+      "socialist republic of viet nam",
+      "independence - freedom - happiness",
+      "căn cước công dân",
+      "citizen identity card",
+      "cục trưởng cục cảnh sát quản lý hành chính về trật tự xã hội",
+      "director general of the police department for administrative management of social order",
+      "ngón trỏ trái",
+      "ngón trỏ phải",
+      "left index finger",
+      "right index finger"
+    ]
+  }
 }

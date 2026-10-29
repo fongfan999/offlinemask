@@ -113,6 +113,12 @@ export const vocabulary = {
     sexLabelAlternation: alternation(wording.sexLabels),
     sexes: lowerSet(wording.sexes),
     currencies: new RegExp(`^${alternation(wording.currencies)}$`, "iu"),
+    /** A copied identity card's titles and printed wording, folded (decision 0176). */
+    identityCard: {
+      fronts: alternation(wording.identityCard.fronts, { folded: true }),
+      backs: alternation(wording.identityCard.backs, { folded: true }),
+      wording: alternation(wording.identityCard.wording, { folded: true }),
+    },
     party: new RegExp(
       `^(?:${alternation(wording.partyWords)}\\s+)?bên(?:\\s+(?:${wording.partyRoles.join("|")}))?$`,
       "iu",

@@ -1,6 +1,7 @@
 import { fold, searchIndex } from "../detection/labelled-fields.ts";
 import type { Detection } from "../detection/types.ts";
 import type { Finding } from "../review.ts";
+import { cardValues } from "./id-card.ts";
 import { AliasBook, detectionReplacements } from "../sheet/mask.ts";
 import {
   applyReplacements,
@@ -103,9 +104,18 @@ export function maskParagraphs(
   const book = new AliasBook(scope, (alias) => existing.some((text) => text.includes(alias)));
   const edits: DocEdits = { paragraphs: new Map(), links: new Map() };
   const repeats = repeatedValues(paragraphs, detections);
+  const own = (id: number) => [...(detections.get(id) ?? []), ...(repeats.get(id) ?? [])];
+  const cards = cardValues(paragraphs, own);
   let masked = 0;
   for (const paragraph of paragraphs) {
-    const found = [...(detections.get(paragraph.id) ?? []), ...(repeats.get(paragraph.id) ?? [])];
+    const card = cards.get(paragraph.id);
+    // On a copied card its printed wording stays whole (decision 0176).
+    const found = [
+      ...own(paragraph.id).filter(
+        (d) => !card?.wording.some(([start, end]) => d.start >= start && d.end <= end),
+      ),
+      ...(card?.values ?? []),
+    ];
     const replacements = detectionReplacements(
       paragraph.text,
       paragraph.field ? found.filter((d) => !prose.has(d.type)) : found,

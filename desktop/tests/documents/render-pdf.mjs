@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import fontkit from "@pdf-lib/fontkit";
-import { PDFDocument, rgb } from "pdf-lib";
+import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 
 /** A document model (kinds.mjs) laid out on A4 pages with pdf-lib, the way invoice and
  * report software does: wrapped paragraphs, "Label: value" fields with the value's wrap
@@ -35,6 +35,7 @@ export async function renderPdf(model) {
   const subset = model.font !== "serif";
   const regular = await doc.embedFont(fontFile(model.font, "400Regular"), { subset });
   const bold = await doc.embedFont(fontFile(model.font, "700Bold"), { subset });
+  const mono = await doc.embedFont(StandardFonts.CourierBold);
   const size = model.size;
   const leading = size * 1.35;
   const width = page.width - 2 * page.margin;
@@ -214,6 +215,58 @@ export async function renderPdf(model) {
     }
     y -= size * 0.6;
   };
+  /** A copy of a citizen identity card, front over back, at its real size (85.6 × 54 mm)
+   * on a grey ground: the national header and title, a photo, bilingual labels in small
+   * print with the values after them or on the next line, and on the back the issuer and
+   * the three machine-readable lines in a monospaced font (decision 0176). */
+  const card = ({ front, back, machine }) => {
+    const cardWidth = 243;
+    const cardHeight = 153;
+    const x = page.margin + 20;
+    const ground = (top) =>
+      current.drawRectangle({
+        x,
+        y: top - cardHeight,
+        width: cardWidth,
+        height: cardHeight,
+        color: rgb(0.83, 0.84, 0.82),
+      });
+    const label = 4.6;
+    const value = 7;
+    const rows = (items, left, top) => {
+      let at = top;
+      for (const [name, text] of items) {
+        const width = name ? textWidth(name, regular, label) + 3 : 0;
+        if (name) draw(name, left, at - value, regular, label);
+        if (text) draw(text, left + width, at - value, bold, value);
+        at -= value * 1.45;
+      }
+      return at;
+    };
+    room(cardHeight * 2 + 30);
+    let top = y - 10;
+    ground(top);
+    draw("CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM", x + 60, top - 12, bold, 5.5, "center", 140);
+    draw("Độc lập - Tự do - Hạnh phúc", x + 60, top - 19, regular, 4.5, "center", 140);
+    draw("CĂN CƯỚC CÔNG DÂN", x + 62, top - 34, bold, 9.5);
+    draw("Citizen Identity Card", x + 62, top - 41, regular, 4.5);
+    current.drawRectangle({
+      x: x + 8,
+      y: top - 118,
+      width: 50,
+      height: 66,
+      color: rgb(0.45, 0.45, 0.47),
+    });
+    rows(front, x + 62, top - 44);
+    top -= cardHeight + 12;
+    ground(top);
+    const end = rows(back, x + 8, top - 6);
+    const machineFont = mono;
+    machine.forEach((line, index) =>
+      draw(line, x + 10, Math.min(end, top - 98) - 8 - index * 11, machineFont, 9.2),
+    );
+    y = top - cardHeight - 12;
+  };
   const signatures = (parties) => {
     const box = width / parties.length;
     room(leading * 6);
@@ -238,6 +291,7 @@ export async function renderPdf(model) {
     else if (block.fields) fields(block.fields, block.columns ?? 1);
     else if (block.table) table(block.table);
     else if (block.signatures) signatures(block.signatures);
+    else if (block.card) card(block.card);
   }
   const pages = doc.getPages();
   pages.forEach((each, index) =>

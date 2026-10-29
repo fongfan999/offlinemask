@@ -73,6 +73,19 @@ export async function renderDocx(model) {
         );
       if (block.table) return table(block.table);
       if (block.signatures) return signatures(block.signatures);
+      // A card copied into Word: its lines as paragraphs, the machine lines last.
+      if (block.card)
+        return [
+          paragraph(run("CĂN CƯỚC CÔNG DÂN", { bold: true })),
+          ...[...block.card.front, ...block.card.back].map(([label, value]) =>
+            paragraph(
+              [label, value].filter(Boolean).join(" ")
+                ? run([label, value].filter(Boolean).join(" "))
+                : "",
+            ),
+          ),
+          ...block.card.machine.map((line) => paragraph(run(line))),
+        ].join("");
       return "";
     })
     .join("");

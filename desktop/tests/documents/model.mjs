@@ -6,6 +6,7 @@
  *   { fields, aligned: "colon" | "label" }  labels in a column, values at a tab stop
  *   { table: { columns: [{ title, width, align? }], rows, blank?, total? } }
  *   { signatures: [{ role, note?, name }] }
+ *   { card: { front, back, machine } }  a copied identity card ([label, value] rows)
  *   { space } / { pageBreak: true }
  * A document has { font: "sans" | "serif", size, blocks }. */
 export function recorder() {

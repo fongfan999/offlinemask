@@ -1100,6 +1100,102 @@ function appendix(rng, layout) {
   };
 }
 
+/** ICAO 9303's check digit: weights 7, 3, 1 over digits, letters (A = 10) and fillers. */
+function checkDigit(text) {
+  const value = (char) =>
+    /\d/.test(char) ? Number(char) : char === "<" ? 0 : char.charCodeAt(0) - 55;
+  return String(
+    [...text].reduce((sum, char, index) => sum + value(char) * [7, 3, 1][index % 3], 0) % 10,
+  );
+}
+/** A citizen identity card's three machine-readable lines (TD1, 30 characters each). */
+function machineLines(card) {
+  const pad = (text) => text.padEnd(30, "<").slice(0, 30);
+  const document = card.cccd.slice(3);
+  const first = `IDVNM${document}${checkDigit(document)}${card.cccd}<`;
+  const born = card.birth.split("/").reverse().join("").slice(2);
+  const ends = card.expiry.split("/").reverse().join("").slice(2);
+  const second = `${born}${checkDigit(born)}${card.sex === "Nam" ? "M" : "F"}${ends}${checkDigit(ends)}VNM`;
+  const [family, ...given] = unaccented(card.name).toUpperCase().split(" ");
+  return [
+    pad(`${first}<`).slice(0, 29) + checkDigit(first),
+    pad(second).slice(0, 29) + checkDigit(second),
+    pad(`${family}<<${given.join("<")}`),
+  ];
+}
+
+/** A contract with a copy of a party's citizen identity card on its last page, front and
+ * back, as contracts are filed (decision 0176). Everything on the card is the holder's:
+ * the number, name, dates, home town, residence and the machine-readable lines; the card's
+ * printed wording stays. The issuing officer's name is either way. */
+function idcard(rng) {
+  const r = recorder();
+  const me = person(rng);
+  const client = company(rng);
+  const born = Number(me.birth.slice(-4));
+  const card = {
+    ...me,
+    expiry: `${me.birth.slice(0, 6)}${born + (born >= 1986 ? 40 : 60)}`,
+    issued: date(rng, rng.int(2021, 2024)),
+    origin: address(rng).split(", ").slice(1).join(", "),
+  };
+  const lines = machineLines(card);
+  return {
+    blocks: [
+      ...nationalHeader(r),
+      { title: r.keep("HỢP ĐỒNG CỘNG TÁC VIÊN"), size: 3 },
+      {
+        text: `Bên A: ${r.hide(client.name)}, mã số thuế ${r.hide(client.tax)}. Bên B: ${me.title} ${r.hide(me.name)}, căn cước công dân số ${r.hide(me.cccd)}, cấp ngày ${r.ignore(card.issued)}, bản sao căn cước đính kèm hợp đồng này.`,
+      },
+      {
+        text: "Hai bên thống nhất ký hợp đồng cộng tác với các điều khoản đã thỏa thuận. Hợp đồng có hiệu lực kể từ ngày ký.",
+      },
+      {
+        signatures: [
+          {
+            role: r.keep("ĐẠI DIỆN BÊN A"),
+            note: "(Ký, đóng dấu)",
+            name: r.hide(person(rng).name),
+          },
+          { role: r.keep("BÊN B"), note: "(Ký, ghi rõ họ tên)", name: r.hide(me.name) },
+        ],
+      },
+      { pageBreak: true },
+      {
+        card: {
+          front: [
+            ["Số / No.:", r.hide(me.cccd)],
+            ["Họ và tên / Full name:", null],
+            [null, r.hide(me.name.toUpperCase())],
+            ["Ngày sinh / Date of birth:", r.hide(me.birth)],
+            ["Giới tính / Sex:", `${me.sex}     Quốc tịch / Nationality: Việt Nam`],
+            ["Quê quán / Place of origin:", null],
+            [null, r.hide(card.origin)],
+            ["Nơi thường trú / Place of residence:", null],
+            [null, r.hide(me.address)],
+            ["Có giá trị đến / Date of expiry:", r.hide(card.expiry)],
+          ],
+          back: [
+            [
+              "Đặc điểm nhân dạng / Personal identification:",
+              r.hide(
+                `Nốt ruồi c: ${rng.int(1, 4)},${rng.int(0, 9)}cm ${rng.pick(["trên", "dưới"])} đuôi mắt ${rng.pick(["trái", "phải"])}`,
+              ),
+            ],
+            ["Ngày, tháng, năm / Date, month, year:", r.ignore(card.issued)],
+            [r.keep("CỤC TRƯỞNG CỤC CẢNH SÁT QUẢN LÝ HÀNH CHÍNH VỀ TRẬT TỰ XÃ HỘI"), null],
+            [null, r.ignore(person(rng).name)],
+          ],
+          machine: lines.map((line) => r.hide(line)),
+        },
+      },
+    ],
+    font: "sans",
+    size: 11,
+    ...r.lists(),
+  };
+}
+
 export const moreKinds = {
   decision: { layouts: ["benefit", "penalty", "notice"], build: decision },
   payslip: { layouts: ["table", "compact"], build: payslip },
@@ -1111,4 +1207,5 @@ export const moreKinds = {
   order: { layouts: ["delivery", "receipt"], build: order },
   // Last, so that every document before it keeps its seed.
   appendix: { layouts: ["colon", "label"], build: appendix },
+  idcard: { layouts: ["attached"], build: idcard },
 };
