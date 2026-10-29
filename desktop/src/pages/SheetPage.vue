@@ -185,7 +185,7 @@ function anotherFile() {
   restore.value = null;
   restoreSaved.value = false;
 }
-/** "Tạo mới", "Ẩn bảng tính mới" and "Chọn tệp khác" start a new job where every job
+/** "Tạo mới" and "Ẩn bảng tính mới" start a new job where every job
  * does: home (decision 0172). */
 function newSheet() {
   sheet.discardDraft();
@@ -237,11 +237,8 @@ defineExpose({
       <button v-if="session && historyOn" class="quiet-button" @click="emit('remove', session.id)">
         <AppIcon name="close" :size="15" />Xóa khỏi lịch sử
       </button>
-      <button v-if="session" class="quiet-button" @click="newSheet">
+      <button v-if="session || !sheet.processing.value" class="quiet-button" @click="newSheet">
         <AppIcon name="plus" :size="15" />Tạo mới
-      </button>
-      <button v-else-if="!sheet.processing.value" class="quiet-button" @click="newSheet">
-        <AppIcon name="upload" :size="15" />Chọn tệp khác
       </button>
     </div>
   </div>

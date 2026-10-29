@@ -31,3 +31,5 @@ Every new job starts at home (29 Oct 2026). "Tạo mới", "Ẩn văn bản mớ
 No crumb in the top bar (29 Oct 2026). The "• VĂN BẢN", "• BẢNG TÍNH", "• TÀI LIỆU", "• THƯ MỤC" label above each page was left from the sidebar with one entry per format; the page heading and the stepper now say where you are. The top bar keeps the sidebar buttons and the folded logo and is as short on every page as on home, taller only while the logo sits in it.
 
 "Tạo mới" on a text draft (29 Oct 2026). The text page shows "Tạo mới" as soon as something is typed, not only once it is masked; it lets the draft go and opens home, like the other pages' buttons.
+
+One label for starting over (29 Oct 2026). The button at the top right of every page is "Tạo mới" with the plus icon, before and after masking, on text, spreadsheet, document and folder pages alike; it used to read "Chọn tệp khác" or "Chọn thư mục khác" before masking. Those words stay only where they pick another file in place: the empty folder's own button, and choosing another reply file in step 3.

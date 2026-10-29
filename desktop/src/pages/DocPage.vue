@@ -234,11 +234,8 @@ defineExpose({
       <button v-if="session && historyOn" class="quiet-button" @click="emit('remove', session.id)">
         <AppIcon name="close" :size="15" />Xóa khỏi lịch sử
       </button>
-      <button v-if="session" class="quiet-button" @click="newDoc">
+      <button v-if="session || !doc.processing.value" class="quiet-button" @click="newDoc">
         <AppIcon name="plus" :size="15" />Tạo mới
-      </button>
-      <button v-else-if="!doc.processing.value" class="quiet-button" @click="newDoc">
-        <AppIcon name="upload" :size="15" />Chọn tệp khác
       </button>
     </div>
   </div>

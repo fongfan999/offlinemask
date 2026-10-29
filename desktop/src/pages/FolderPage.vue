@@ -146,7 +146,7 @@ defineExpose({
       class="editor-actions"
     >
       <button class="quiet-button" @click="another">
-        <AppIcon name="upload" :size="15" />Chọn thư mục khác
+        <AppIcon name="plus" :size="15" />Tạo mới
       </button>
     </div>
   </div>
