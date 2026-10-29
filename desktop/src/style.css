@@ -4133,9 +4133,27 @@ td.alias {
   color: inherit;
   opacity: 0.7;
 }
-.long-job-note p {
+.long-job-time {
+  display: inline-block;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: var(--paper-raised);
+  color: var(--accent-strong);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.long-job-note dl {
+  display: grid;
+  gap: 8px;
   margin: 0;
   padding: 0 14px 12px 40px;
+}
+.long-job-note dt {
+  font-weight: 600;
+}
+.long-job-note dd {
+  margin: 0;
 }
 .folder-layouts,
 .folder-files {
