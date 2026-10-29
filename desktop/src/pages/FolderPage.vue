@@ -42,9 +42,6 @@ const currentFile = computed(
 const duration = computed(() => roughDuration(folder.estimate.value));
 const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 const hidden = computed(() => folder.masked.value.reduce((sum, file) => sum + file.masked, 0));
-const aliases = computed(() =>
-  folder.review.value.reduce((sum, group) => sum + group.items.length, 0),
-);
 const statusLabel: Record<string, string> = {
   waiting: "Chờ",
   reading: "Đang đọc",
@@ -254,14 +251,21 @@ defineExpose({
 
         <!-- The folder's values, once. -->
         <template v-if="phase === 'review' || phase === 'saved'">
-          <p class="sheet-summary">
-            <AppIcon name="check" :size="15" />Đã ẩn {{ count(hidden) }} chỗ trong
-            {{ count(folder.masked.value.length) }} tệp · {{ count(aliases) }} mã thay thế, dùng
-            chung cho cả thư mục
+          <p v-if="phase === 'review'" class="folder-ready" role="note">
+            <AppIcon name="eye" :size="16" /><span
+              ><strong
+                >Đã ẩn {{ count(hidden) }} chỗ trong
+                {{ count(folder.masked.value.length) }} tệp.</strong
+              >
+              Xem lại danh sách bên dưới, bỏ chọn những gì không cần ẩn, rồi bấm “Lưu thư mục đã
+              ẩn”.</span
+            >
           </p>
           <p v-if="phase === 'saved'" class="sheet-summary" role="status">
-            <AppIcon name="check" :size="15" />Đã lưu vào thư mục “{{ folder.saveTarget.value }}”.
-            Tệp gốc không bị thay đổi.
+            <AppIcon name="check" :size="15" />Đã ẩn {{ count(hidden) }} chỗ trong
+            {{ count(folder.masked.value.length) }} tệp và lưu vào thư mục “{{
+              folder.saveTarget.value
+            }}”. Tệp gốc không bị thay đổi.
           </p>
           <ReviewList
             v-if="folder.review.value.length && phase === 'review'"

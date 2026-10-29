@@ -46,10 +46,16 @@ function toggleType(group: ReviewGroup, all: boolean) {
 <template>
   <section class="review-list" aria-labelledby="review-list-title">
     <header class="review-head">
-      <strong id="review-list-title">Kiểm tra trước khi tải</strong>
-      <span
+      <strong id="review-list-title">{{
+        files ? "Những gì đã ẩn" : "Kiểm tra trước khi tải"
+      }}</strong>
+      <span v-if="files"
+        >Giá trị bỏ chọn, như tên nhân vật lịch sử hay địa danh, được giữ nguyên ở mọi chỗ trong mọi
+        tệp.</span
+      >
+      <span v-else
         >Bỏ chọn những gì không cần ẩn, như tên nhân vật lịch sử hay địa danh. Giá trị bỏ chọn được
-        giữ nguyên ở mọi chỗ trong {{ files ? "mọi tệp" : "tệp" }}.</span
+        giữ nguyên ở mọi chỗ trong tệp.</span
       >
     </header>
     <div class="review-types" role="group" aria-label="Loại thông tin">
