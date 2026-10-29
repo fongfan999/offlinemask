@@ -51,6 +51,16 @@ const quickOffer = computed(
  * text anywhere on the page; the app opens the right page with it. */
 const accept = ".xlsx,.xls,.ods,.csv,.docx,.odt,.pdf,.txt,.md";
 const pasteKey = /Mac|iPhone|iPad/.test(navigator.userAgent) ? "⌘V" : "Ctrl+V";
+/** By the hour on this machine: sáng until 11, trưa until 13, chiều until 18, then tối. */
+const hour = new Date().getHours();
+const greeting =
+  hour >= 5 && hour < 11
+    ? "Chào buổi sáng."
+    : hour >= 11 && hour < 13
+      ? "Chào buổi trưa."
+      : hour >= 13 && hour < 18
+        ? "Chào buổi chiều."
+        : "Chào buổi tối.";
 const startError = ref("");
 async function startWith(file: File) {
   startError.value = "";
@@ -188,13 +198,9 @@ const packNotice = computed<PackNotice | null>(() => {
     <span class="hero-logo brand-mark" aria-hidden="true">
       <BrandMark :size="38" />
     </span>
-    <!-- The website's line and swaps, so the app opens on what the visitor already read. -->
-    <h1 ref="heading" tabindex="-1"><em>AI</em> không nên biết bạn đang nói về <em>ai</em>.</h1>
-    <p>Ẩn thông tin riêng trước khi hỏi AI, nhận lại bản đầy đủ khi AI trả lời.</p>
-    <div class="home-swaps" aria-hidden="true">
-      <span class="home-swap"><s>Phong Phan</s><b>[TEN_1_4e8c]</b></span>
-      <span class="home-swap"><s>0901234567</s><b>[SDT_1_4e8c]</b></span>
-    </div>
+    <!-- People open the app to work, not to be sold to: a greeting and the question. -->
+    <h1 ref="heading" tabindex="-1">{{ greeting }}</h1>
+    <p>Hôm nay bạn cần ẩn thông tin gì?</p>
   </div>
   <!-- Home holds both ends of the job (decision 0172): hide before asking the AI, and put
        the real information back into its reply. -->

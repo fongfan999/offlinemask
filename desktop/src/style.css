@@ -572,49 +572,6 @@ h1 {
   margin: 10px 0 14px;
   text-wrap: balance;
 }
-/* The website's tagline (decision 0172): "AI" and "ai" in cobalt italic serif over the
-   same hand-drawn swash as offlinemask.com. */
-.introduction h1 em {
-  padding: 0 0.04em 0.08em 0;
-  color: var(--accent);
-  font-family: var(--serif);
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: -0.03em;
-  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 14' preserveAspectRatio='none'%3E%3Cpath d='M3 9c28-6 58-7 92-5s68 4 102-3' fill='none' stroke='%233453b6' stroke-width='4' stroke-linecap='round' opacity='.5'/%3E%3C/svg%3E")
-    left bottom / 100% 0.16em no-repeat;
-}
-/* What masking does, shown the way the website's chips show it: a value struck out, its
-   code beside it. */
-.home-swaps {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 12px 18px;
-  margin-top: 18px;
-}
-.home-swap {
-  display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  padding: 7px 13px;
-  border: 1px solid var(--line-strong);
-  border-radius: 10px;
-  background: var(--paper-raised);
-  color: var(--accent);
-  font: 600 13px var(--mono);
-  white-space: nowrap;
-  rotate: -2deg;
-}
-.home-swap + .home-swap {
-  rotate: 1.5deg;
-}
-.home-swap s {
-  color: var(--muted);
-  font: 400 13px var(--sans);
-  text-decoration-color: var(--warm);
-  text-decoration-thickness: 2px;
-}
 .introduction p,
 .editor-heading p {
   font-size: 15px;
