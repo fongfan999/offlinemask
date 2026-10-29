@@ -1,14 +1,21 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import { version } from "../../package.json";
 import { openProductWebsite, productWebsite } from "../adapters/desktop.ts";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
 import { themeChoices, useTheme } from "../composables/useTheme.ts";
+import { machineMemory, memoryChoice, setMemoryChoice } from "../composables/memoryBudget.ts";
+import { memoryBudget, memoryChoices, memorySize } from "../core/memory.ts";
 
 /** App-wide preferences: appearance, and the version with where to look for a newer
- * one. The app never checks by itself; the user opens the homepage (decision 0137). */
+ * one. The app never checks by itself; the user opens the homepage (decision 0137).
+ * Under "Nâng cao", folded: how much memory the app may use (decision 0173). */
 const { theme, setTheme } = useTheme();
+const memory = ref<number | null>(null);
+onMounted(async () => (memory.value = await machineMemory()));
+const memoryFigure = (id: (typeof memoryChoices)[number]["id"]) =>
+  memorySize(memoryBudget(memory.value, id));
 const websiteError = ref("");
 async function visitWebsite(event: MouseEvent) {
   websiteError.value = "";
@@ -62,5 +69,32 @@ async function visitWebsite(event: MouseEvent) {
         Mở OfflineMask.com<AppIcon name="external" :size="13" />
       </a>
     </div>
+    <details class="settings-advanced" :open="memoryChoice !== 'normal'">
+      <summary>Nâng cao<AppIcon class="folder-chevron" name="chevron" :size="13" /></summary>
+      <div class="settings-tool-row">
+        <div>
+          <h3 id="memory-title">Bộ nhớ cho OfflineMask</h3>
+          <p id="memory-hint">
+            Tệp cần nhiều hơn mức này sẽ không mở, để máy không bị chậm. Chọn nhiều hơn nếu máy chỉ
+            dùng để chạy OfflineMask.
+          </p>
+        </div>
+        <fieldset
+          class="memory-choices"
+          aria-labelledby="memory-title"
+          aria-describedby="memory-hint"
+        >
+          <label v-for="choice in memoryChoices" :key="choice.id">
+            <input
+              type="radio"
+              name="memory"
+              :value="choice.id"
+              :checked="memoryChoice === choice.id"
+              @change="setMemoryChoice(choice.id)"
+            />{{ choice.label }} <span>{{ memoryFigure(choice.id) }}</span>
+          </label>
+        </fieldset>
+      </div>
+    </details>
   </section>
 </template>

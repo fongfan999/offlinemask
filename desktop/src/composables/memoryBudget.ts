@@ -1,10 +1,43 @@
+import { ref } from "vue";
 import { machineResources } from "../adapters/folder.ts";
-import { memoryBudget, memoryMessage, memoryNeed, pdfCharBytes } from "../core/memory.ts";
+import {
+  memoryBudget,
+  memoryChoices,
+  memoryMessage,
+  memoryNeed,
+  pdfCharBytes,
+  type MemoryChoice,
+} from "../core/memory.ts";
 
-/** This machine's budget, asked once per launch (decision 0173). */
-let budget: Promise<number> | undefined;
-export function appMemoryBudget(): Promise<number> {
-  return (budget ??= machineResources().then((resources) => memoryBudget(resources.memory)));
+/** How much memory OfflineMask may use (decision 0173), chosen in Cài đặt › Nâng cao.
+ * One app-wide preference with no user content, kept beside the theme's. */
+export const memoryKey = "offlinemask.memory.v1";
+function read(): MemoryChoice {
+  try {
+    const value = localStorage.getItem(memoryKey);
+    return memoryChoices.some((entry) => entry.id === value) ? (value as MemoryChoice) : "normal";
+  } catch {
+    return "normal";
+  }
+}
+export const memoryChoice = ref<MemoryChoice>(read());
+export function setMemoryChoice(choice: MemoryChoice) {
+  memoryChoice.value = choice;
+  try {
+    if (choice === "normal") localStorage.removeItem(memoryKey);
+    else localStorage.setItem(memoryKey, choice);
+  } catch {
+    // Unwritable storage: the choice still holds until the app closes.
+  }
+}
+
+/** The machine's memory, asked once per launch. */
+let machine: Promise<number | null> | undefined;
+export function machineMemory(): Promise<number | null> {
+  return (machine ??= machineResources().then((resources) => resources.memory));
+}
+export async function appMemoryBudget(choice = memoryChoice.value): Promise<number> {
+  return memoryBudget(await machineMemory(), choice);
 }
 
 /** "" when the file fits in `share` of the budget (a folder's files open side by side,

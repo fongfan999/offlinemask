@@ -1,12 +1,23 @@
-/** The memory OfflineMask allows itself (decision 0173): a quarter of the machine's,
- * between 1 and 4 GB, so a large file never takes the whole machine. A file whose
- * opening would need more is refused with the figures, before it is read. */
+/** The memory OfflineMask allows itself (decision 0173): by default a quarter of the
+ * machine's, between 1 and 4 GB, so a large file never takes the whole machine. A file
+ * whose opening would need more is refused with the figures, before it is read. Cài đặt ›
+ * Nâng cao offers other shares, for a machine kept for OfflineMask above all. */
 const gib = 1024 ** 3;
-export const memoryShare = 0.25;
+export type MemoryChoice = "low" | "normal" | "high" | "dedicated";
+export const memoryChoices: readonly { id: MemoryChoice; label: string; share: number }[] = [
+  { id: "low", label: "Ít", share: 1 / 8 },
+  { id: "normal", label: "Vừa (mặc định)", share: 1 / 4 },
+  { id: "high", label: "Nhiều", share: 1 / 2 },
+  { id: "dedicated", label: "Máy chỉ dùng cho OfflineMask", share: 3 / 4 },
+];
 /** Assumed when the system does not say how much memory it has. */
 const assumedMemory = 8 * gib;
-export function memoryBudget(memory: number | null): number {
-  return Math.min(4 * gib, Math.max(1 * gib, (memory ?? assumedMemory) * memoryShare));
+/** Never under 1 GB; the default also stays under 4 GB, while a share someone chose
+ * on purpose is theirs. */
+export function memoryBudget(memory: number | null, choice: MemoryChoice = "normal"): number {
+  const share = memoryChoices.find((entry) => entry.id === choice)?.share ?? 1 / 4;
+  const budget = Math.max(1 * gib, (memory ?? assumedMemory) * share);
+  return choice === "normal" ? Math.min(4 * gib, budget) : budget;
 }
 
 /** Peak memory per byte, measured by opening generated files the way the app does
@@ -79,8 +90,8 @@ export function memorySize(bytes: number): string {
   return `${Math.max(1, Math.round(bytes / 1024 ** 2)).toLocaleString("vi-VN")} MB`;
 }
 export function memoryMessage(need: number, allowed: number): string {
-  return `Tệp này cần khoảng ${memorySize(need)} bộ nhớ để mở, quá mức OfflineMask tự giới hạn trên máy này (${memorySize(allowed)}). Hãy chia nhỏ tệp rồi thử lại.`;
+  return `Tệp này cần khoảng ${memorySize(need)} bộ nhớ để mở, quá mức OfflineMask tự giới hạn trên máy này (${memorySize(allowed)}). Hãy chia nhỏ tệp, hoặc cho phép dùng nhiều hơn trong Cài đặt › Nâng cao.`;
 }
 export function pdfMemoryMessage(allowed: number): string {
-  return `PDF này cần nhiều bộ nhớ hơn mức OfflineMask tự giới hạn trên máy này (${memorySize(allowed)}). Hãy tách thành các tệp nhỏ hơn rồi thử lại.`;
+  return `PDF này cần nhiều bộ nhớ hơn mức OfflineMask tự giới hạn trên máy này (${memorySize(allowed)}). Hãy tách thành các tệp nhỏ hơn, hoặc cho phép dùng nhiều hơn trong Cài đặt › Nâng cao.`;
 }
