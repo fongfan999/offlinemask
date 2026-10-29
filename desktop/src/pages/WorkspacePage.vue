@@ -32,6 +32,7 @@ import {
   type TextSession,
 } from "../core/sessions.ts";
 import { maxTextLength } from "../core/text.ts";
+import { vTip } from "../directives/tip.ts";
 
 const props = defineProps<{ format: Format; session?: SampleSession | TextSession }>();
 const emit = defineEmits<{
@@ -60,6 +61,8 @@ const quick = useProvided(quickKey);
 /** History is a passcode feature (decision 0071). Without one nothing talks about
  * saving: the user chose not to keep anything, and the review screen offers it once. */
 const historyOn = computed(() => vault.state.value === "unlocked");
+/** The hide button's shortcut, named in its tip. */
+const submitKey = /Mac|iPhone|iPad/.test(navigator.userAgent) ? "⌘ Enter" : "Ctrl Enter";
 const savedNote = vault.savedNote;
 
 const view = ref<ReviewView>("masked");
@@ -495,13 +498,6 @@ defineExpose({
             'is-upcoming': index + 1 > step,
           }"
           :aria-label="`Bước ${index + 1}: ${label}`"
-          :title="
-            index === 0 && session
-              ? historyOn
-                ? 'Sửa văn bản rồi ẩn lại. Bản này vẫn được giữ trong lịch sử.'
-                : 'Sửa văn bản rồi ẩn lại.'
-              : undefined
-          "
           :aria-current="index + 1 === step ? 'step' : undefined"
           :disabled="!canOpenStep(index + 1)"
           @click="openStep(index + 1)"
@@ -547,12 +543,7 @@ defineExpose({
             </button>
           </div>
           <span v-if="!privateSession" class="sample-tag">Dữ liệu mẫu</span>
-          <button
-            v-else-if="privateSession"
-            class="quiet-button edit-text"
-            :title="historyOn ? 'Bản này vẫn được giữ trong lịch sử.' : undefined"
-            @click="openStep(1)"
-          >
+          <button v-else-if="privateSession" class="quiet-button edit-text" @click="openStep(1)">
             <AppIcon name="compose" :size="14" />Sửa văn bản
           </button>
         </header>
@@ -621,9 +612,9 @@ defineExpose({
               <label
                 v-for="option in detectionOptions"
                 :key="option.id"
+                v-tip="{ title: option.label, text: option.detail }"
                 class="detection-option"
                 :class="{ selected: selectedOptions.includes(option.id) }"
-                :title="option.detail"
               >
                 <input
                   v-model="selectedOptions"
@@ -801,9 +792,9 @@ defineExpose({
           </button>
           <button
             v-if="!session"
+            v-tip="format === 'text' ? `Phím tắt: ${submitKey}` : undefined"
             class="primary-action"
             :disabled="primaryDisabled"
-            :title="format === 'text' ? '⌘/Ctrl + Enter' : undefined"
             @click="primaryAction"
           >
             <span

@@ -3,6 +3,7 @@ import { ref, useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
 import ReportDialog from "./ReportDialog.vue";
+import { vTip } from "../directives/tip.ts";
 import type { Page } from "../composables/context.ts";
 import { sessionPreview } from "../core/session-preview.ts";
 import { isPrivate, sessionTitle, type Session } from "../core/sessions.ts";
@@ -83,9 +84,9 @@ defineExpose({
         ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
       </button>
       <button
+        v-tip="'Thu gọn thanh bên'"
         class="sidebar-collapse"
         aria-label="Thu gọn thanh bên"
-        title="Thu gọn thanh bên"
         @click="emit('collapse')"
       >
         <AppIcon name="sidebar" :size="18" />

@@ -148,11 +148,7 @@ const placeGroups = computed(() =>
           <template v-for="group in placeGroups" :key="group.label">
             <p class="quick-places-label">{{ group.label }}</p>
             <ul class="quick-places" :aria-label="`${group.label} có nút OfflineMask`">
-              <li
-                v-for="place in group.places"
-                :key="`${place.kind}:${place.id}`"
-                :title="place.kind === 'host' ? place.name : undefined"
-              >
+              <li v-for="place in group.places" :key="`${place.kind}:${place.id}`">
                 {{ place.kind === "host" ? place.id : place.name }}
                 <button
                   class="quick-place-remove"

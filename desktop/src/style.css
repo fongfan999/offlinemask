@@ -322,6 +322,42 @@ nav button:hover,
   align-items: center;
   gap: 6px;
 }
+/* The app's tooltip (decision 0172, src/directives/tip.ts): the note beside "Đã ẩn" without
+   its button, placed by script under or above its target. */
+.app-tip {
+  position: fixed;
+  z-index: 60;
+  top: 0;
+  left: 0;
+  max-width: 260px;
+  display: grid;
+  gap: 4px;
+  padding: 9px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--paper-raised);
+  box-shadow: 0 10px 28px var(--shadow);
+  color: var(--muted);
+  font: 400 12.5px/1.5 var(--sans);
+  letter-spacing: normal;
+  text-transform: none;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.12s,
+    visibility 0s 0.12s;
+}
+.app-tip.is-shown {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 0.12s;
+}
+.app-tip strong {
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+}
 /* Without a passcode, an "i" beside "Đã ẩn" (decision 0172): its note shows on hover or
    focus, or stays open after a click, and leads to the passcode. */
 .history-info-button,

@@ -15,6 +15,7 @@ import { createSheetFiles } from "./adapters/sheet-files.ts";
 import { createTextDetector, queueDetections } from "./adapters/text-detection.ts";
 import AppIcon from "./components/AppIcon.vue";
 import AppFooter from "./components/AppFooter.vue";
+import { vTip } from "./directives/tip.ts";
 import AppSidebar from "./components/AppSidebar.vue";
 import BrandMark from "./components/BrandMark.vue";
 import LockPage from "./components/LockPage.vue";
@@ -411,9 +412,9 @@ async function closeSidebar() {
             <AppIcon name="list" /></button
           ><button
             ref="sidebarExpand"
+            v-tip="'Mở thanh bên'"
             class="sidebar-expand"
             aria-label="Mở thanh bên"
-            title="Mở thanh bên"
             @click="toggleCollapsed"
           >
             <AppIcon name="sidebar" :size="18" /></button
