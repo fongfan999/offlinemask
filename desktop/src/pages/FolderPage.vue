@@ -248,6 +248,21 @@ defineExpose({
         </div>
         <template v-else-if="phase === 'ready'">
           <LongJobNote :seconds="folder.estimate.value" subject="Thư mục này" />
+          <!-- Files it cannot open come first, folded to one line like the long-job note. -->
+          <details v-if="folder.failed.value.length" class="long-job-note is-warning">
+            <summary>
+              <AppIcon name="info" :size="16" /><span
+                ><strong>{{ count(folder.failed.value.length) }} tệp không mở được</strong>, sẽ
+                không được ẩn</span
+              ><AppIcon class="folder-chevron" name="chevron" :size="14" />
+            </summary>
+            <ul>
+              <li v-for="file in folder.failed.value" :key="file.path">
+                <strong>{{ file.path }}</strong
+                >: {{ file.error }}
+              </li>
+            </ul>
+          </details>
           <p class="folder-ready" role="note">
             <AppIcon name="eye" :size="16" /><span
               ><strong>Xem lại trước khi ẩn.</strong>
@@ -356,7 +371,11 @@ defineExpose({
           />
         </template>
 
-        <details v-if="folder.failed.value.length" class="folder-files" open>
+        <details
+          v-if="folder.failed.value.length && !(phase === 'ready' && folder.readable.value.length)"
+          class="folder-files"
+          open
+        >
           <summary>
             <AppIcon name="info" :size="16" /><span class="folder-summary-text"
               ><strong>{{ count(folder.failed.value.length) }} tệp chưa xử lý được</strong></span

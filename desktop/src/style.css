@@ -4136,6 +4136,24 @@ td.alias {
   color: inherit;
   opacity: 0.7;
 }
+.long-job-note.is-warning {
+  background: var(--error-soft);
+  color: var(--error);
+}
+.long-job-note + .long-job-note {
+  margin-top: 10px;
+}
+.long-job-note ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0 14px 12px 40px;
+  list-style: none;
+  overflow-wrap: anywhere;
+}
+.long-job-note li strong {
+  font-weight: 600;
+}
 .long-job-time {
   display: inline-block;
   padding: 0 8px;
