@@ -143,3 +143,17 @@ Reading by reading:
 | plus ink only within the detector's own text, sizes also from the height of the print, lines numbered, sizes near the page's median taken as it | 42 | 0 | 5 | 72 |
 
 The 21 leaks of the first reading: ten account numbers in `statement-classic` (a word reaching across the gutter merged the reference and description columns for the whole table, and "TK FT… 4762…" no longer reads as a transfer to an account), and eleven first signature names in `payslip-table` (the names row, 5.2–5.4 font sizes below the table, joined it as cells where a bold name's size was overestimated). The five over-masked of the second, and the text PDFs of the same seeds re-measured after the change to `ocr.ts` (546 documents, 0 / 0 / 0 / 0 in 1 013 s), are in decision 0172.
+
+### Tilted and photographed pages (decision 0172)
+
+`node scripts/rasterise-documents.mjs <seeds> <out> --tilt <degrees> [--photo --jpeg 70]` made crooked and photographed copies of the same documents (the photographed: paper `#ebe6dc`, 0.8 px blur, one corner shadowed to about grey 170, grain ±12, tilted 1.5°). With the page turned upright, the print height measured against each line's own paper and shadowed lines lifted (decision 0172), through the app with `--reading --misread`:
+
+| Pages | Documents | not read | leaked | over-masked | unlisted |
+| --- | --- | --- | --- | --- | --- |
+| Upright, seeds 1–7 | 703 | 42 | 0 | 6 | 71 |
+| Photographed, seeds 1–7 | 703 | 42 | 0 | 6 | 65 |
+| Tilted 0.5°, seed 1 | 102 | 4 | 0 | 1 | 9 |
+| Tilted 1°, seed 1 | 102 | 9 | 0 | 2 | 12 |
+| Tilted 2°, seed 1 | 102 | 3 | 0 | 1 | 6 |
+
+Before those changes, seed 1: 172 / 4 / 0 at 0.5°, 310 / 25 / 6 at 1°, 648 / 14 / 5 at 2°, 517 / 33 / 7 photographed; all seven seeds photographed, with the page turned upright but the print measured against a fixed grey: 49 / 6 / 5 / 91.

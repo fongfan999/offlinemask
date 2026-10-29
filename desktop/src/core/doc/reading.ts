@@ -134,12 +134,14 @@ function taps(start: number, span: number, count: number, limit: number) {
 
 /** The lines on the page, as boxes in its pixels: the detector's probability map read
  * the way PaddleOCR does (regions above `threshold`, kept when their mean reaches
- * `boxScore`, pushed out by `unclip`), each as an upright box. */
+ * `boxScore`, pushed out by `unclip`), each as an upright box. And the page's tilt, in
+ * radians, clockwise: the weighted median of the long regions' own directions (from the
+ * second moments of their pixels). */
 async function detectLines(
   picture: Picture,
   models: ReadingModels,
   definition: ReadingDefinition["detector"],
-): Promise<Box[]> {
+): Promise<{ boxes: Box[]; tilt: number }> {
   const scale = Math.min(1, definition.maxSide / Math.max(picture.width, picture.height));
   const drawn = {
     width: Math.max(1, Math.round(picture.width * scale)),
@@ -182,6 +184,7 @@ async function detectLines(
   const seen = new Uint8Array(plane);
   const stack = new Int32Array(plane);
   const boxes: Box[] = [];
+  const directions: { angle: number; weight: number }[] = [];
   for (let start = 0; start < plane; start++) {
     if (seen[start] || map[start]! <= definition.threshold) continue;
     let top = 0;
@@ -192,13 +195,23 @@ async function detectLines(
       x1 = 0,
       y1 = 0,
       count = 0,
-      sum = 0;
+      sum = 0,
+      sx = 0,
+      sy = 0,
+      sxx = 0,
+      syy = 0,
+      sxy = 0;
     while (top) {
       const at = stack[--top]!;
       const x = at % width;
       const y = (at - x) / width;
       count++;
       sum += map[at]!;
+      sx += x;
+      sy += y;
+      sxx += x * x;
+      syy += y * y;
+      sxy += x * y;
       if (x < x0) x0 = x;
       if (x > x1) x1 = x;
       if (y < y0) y0 = y;
@@ -217,6 +230,14 @@ async function detectLines(
     const w = x1 - x0 + 1;
     const h = y1 - y0 + 1;
     if (Math.min(w, h) < 3 || sum / count < definition.boxScore) continue;
+    if (w >= h * 5 && count >= 50) {
+      const mx = sx / count;
+      const my = sy / count;
+      const xx = sxx / count - mx * mx;
+      const yy = syy / count - my * my;
+      const xy = sxy / count - mx * my;
+      directions.push({ angle: Math.atan2(2 * xy, xx - yy) / 2, weight: count });
+    }
     const distance = (w * h * definition.unclip) / (2 * (w + h));
     const left = Math.max(0, (x0 - distance) / scale);
     const upper = Math.max(0, (y0 - distance) / scale);
@@ -233,7 +254,53 @@ async function detectLines(
       },
     });
   }
-  return boxes;
+  directions.sort((a, b) => a.angle - b.angle);
+  const half = directions.reduce((total, direction) => total + direction.weight, 0) / 2;
+  let tilt = 0;
+  for (let seen = 0, index = 0; index < directions.length; index++) {
+    seen += directions[index]!.weight;
+    if (seen >= half) {
+      tilt = directions[index]!.angle;
+      break;
+    }
+  }
+  return { boxes, tilt: directions.length >= 3 ? tilt : 0 };
+}
+
+/** A page is turned upright when it leans more than this, and not past `maxTilt`: beyond
+ * it the long regions are no longer lines. */
+const minTilt = (0.25 * Math.PI) / 180;
+const maxTilt = (15 * Math.PI) / 180;
+/** The picture turned by `tilt` about its centre, so that lines leaning by it lie level:
+ * same size, sampled bilinearly, white where the turned page does not reach. */
+function straighten(picture: Picture, tilt: number): Picture {
+  const { width, height, data } = picture;
+  const out = new Uint8ClampedArray(data.length).fill(255);
+  const cos = Math.cos(tilt);
+  const sin = Math.sin(tilt);
+  const cx = width / 2;
+  const cy = height / 2;
+  for (let y = 0; y < height; y++)
+    for (let x = 0; x < width; x++) {
+      const dx = x + 0.5 - cx;
+      const dy = y + 0.5 - cy;
+      const sx = cx + dx * cos - dy * sin - 0.5;
+      const sy = cy + dx * sin + dy * cos - 0.5;
+      const x0 = Math.floor(sx);
+      const y0 = Math.floor(sy);
+      if (x0 < 0 || y0 < 0 || x0 + 1 >= width || y0 + 1 >= height) continue;
+      const fx = sx - x0;
+      const fy = sy - y0;
+      const at = (y * width + x) * 4;
+      for (let channel = 0; channel < 3; channel++) {
+        const a = data[(y0 * width + x0) * 4 + channel]!;
+        const b = data[(y0 * width + x0 + 1) * 4 + channel]!;
+        const c = data[((y0 + 1) * width + x0) * 4 + channel]!;
+        const d = data[((y0 + 1) * width + x0 + 1) * 4 + channel]!;
+        out[at + channel] = (a * (1 - fx) + b * fx) * (1 - fy) + (c * (1 - fx) + d * fx) * fy;
+      }
+    }
+  return { data: out, width, height };
 }
 
 /** A column with a pixel this dark holds ink. Only the detector's own text counts: its
@@ -290,6 +357,8 @@ function cuts(ink: boolean[], piece: number): number[] {
  * dropped), and every letter keeps the step it was read at. Two words part at the step
  * the space between them was read at, and each word's span is then drawn in to its own
  * ink. */
+const paperFrom = 205;
+const paperTo = 230;
 async function readPiece(
   grey: Uint8Array,
   picture: Picture,
@@ -300,8 +369,13 @@ async function readPiece(
   const height = definition.height;
   const width = Math.max(32, Math.round((height * box.width) / box.height));
   const line = resample(grey, picture.width, picture.height, 1, 0, box, width, height);
+  // The recogniser learnt on paper from grey 205 to white; a photograph's shadowed corner
+  // is darker, and is brought up to it, the print with it.
+  const paper = [...line].sort((a, b) => a - b)[Math.floor(line.length * 0.75)]!;
+  const lift = paper && paper < paperFrom ? paperTo / paper : 1;
   const input = new Float32Array(line.length);
-  for (let at = 0; at < line.length; at++) input[at] = (line[at]! / 255 - 0.5) / 0.5;
+  for (let at = 0; at < line.length; at++)
+    input[at] = (Math.min(255, line[at]! * lift) / 255 - 0.5) / 0.5;
   const { data, steps, classes } = await models.recognise(input, width);
   const letters: { char: string; step: number; probability: number }[] = [];
   let previous = 0;
@@ -355,20 +429,38 @@ async function readPiece(
  * in capitals and digits (a least-squares fit over 1 882 lines of seed 1's scans against
  * their text PDFs, decision 0172). Unlike the letters' widths it does not grow with bold
  * print; `ocr.ts` takes the mean of the two. */
-const band = { dense: 0.5, lower: 0.529, capitals: 0.206 };
+const band = { dense: 0.5, lower: 0.529, capitals: 0.206, ink: 0.02, paper: 0.5, rule: 0.9 };
 function bandSize(grey: Uint8Array, picture: Picture, found: Box, words: OcrLine[]): number {
   const left = Math.max(0, Math.floor(Math.min(...words.map((word) => word.x)) * picture.width));
   const right = Math.min(
     picture.width,
     Math.ceil(Math.max(...words.map((word) => word.x + word.width)) * picture.width),
   );
+  // Ink is what is darker than halfway between the line's paper and its print, which
+  // stays at the letters' edges when a photograph blurs them or lights the page unevenly.
+  const top = Math.floor(found.y);
+  const bottom = Math.min(picture.height, found.y + found.height);
+  const levels = new Uint32Array(256);
+  for (let y = top; y < bottom; y++)
+    for (let x = left; x < right; x++) levels[grey[y * picture.width + x]!]!++;
+  const level = (share: number) => {
+    const wanted = share * (bottom - top) * (right - left);
+    for (let value = 0, seen = 0; value < 256; value++)
+      if ((seen += levels[value]!) >= wanted) return value;
+    return 255;
+  };
+  const threshold = (level(band.ink) + level(band.paper)) / 2;
   const counts: number[] = [];
-  for (let y = Math.floor(found.y); y < Math.min(picture.height, found.y + found.height); y++) {
+  for (let y = top; y < bottom; y++) {
     let dark = 0;
-    for (let x = left; x < right; x++) if (grey[y * picture.width + x]! < inkBelow) dark++;
-    counts.push(dark);
+    for (let x = left; x < right; x++) if (grey[y * picture.width + x]! < threshold) dark++;
+    // A row inked all the way across is a table's rule, not print.
+    counts.push(dark >= (right - left) * band.rule ? 0 : dark);
   }
-  const densest = Math.max(0, ...counts);
+  // The densest row is taken no denser than twice the middle inked row: a few strokes
+  // across (the bars of capital Ts) would otherwise stand for the whole band.
+  const inked = counts.filter(Boolean).sort((a, b) => a - b);
+  const densest = Math.min(Math.max(0, ...counts), 2 * (inked[inked.length >> 1] ?? 0));
   const rows = counts.flatMap((count, index) => (count >= densest * band.dense ? [index] : []));
   const letters = [
     ...words
@@ -385,10 +477,21 @@ function bandSize(grey: Uint8Array, picture: Picture, found: Box, words: OcrLine
  * left; the words of one line share its y, height, number and measured size, and all but
  * its last keep the space after them, as `ocr.ts` expects of an engine. */
 export async function readPicture(
-  picture: Picture,
+  original: Picture,
   models: ReadingModels,
   definition: ReadingDefinition,
 ): Promise<OcrPage> {
+  // A crooked page is turned upright and its lines found again: an upright box around a
+  // leaning line takes in the next one. The words' places are then the upright page's,
+  // as the reader by place wants them.
+  let picture = original;
+  const first = await detectLines(picture, models, definition.detector);
+  const { tilt } = first;
+  let detected = first.boxes;
+  if (Math.abs(tilt) > minTilt && Math.abs(tilt) < maxTilt) {
+    picture = straighten(original, tilt);
+    detected = (await detectLines(picture, models, definition.detector)).boxes;
+  }
   const grey = new Uint8Array(picture.width * picture.height);
   for (let at = 0; at < grey.length; at++)
     grey[at] =
@@ -399,7 +502,7 @@ export async function readPicture(
   const { recogniser } = definition;
   const lines: OcrLine[] = [];
   let number = 0;
-  for (const found of await detectLines(picture, models, definition.detector)) {
+  for (const found of detected) {
     number++;
     const by = recogniser.grow * found.height;
     const x = Math.max(0, found.x - by);

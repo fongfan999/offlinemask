@@ -1,6 +1,6 @@
 # 0172 — OfflineMask's own Vietnamese line recogniser, for Windows
 
-Date: 29 October 2026. Status: trained, screened, built into the app behind `readingShipped` (off), measured through the app on all 703 scans (0 leaked) and run end to end in the Windows app; opening it is the owner's decision (see "Not decided here"). Follows [0171](0171-scanned-pdfs-and-images-read-on-the-machine.md), whose "Windows" section found that Windows.Media.Ocr has no Vietnamese recogniser and that VietOCR reads fewer values than Tesseract at fifteen times Vision's time.
+Date: 29 October 2026. Status: trained, screened, built into the app behind `readingShipped` (off), measured through the app on all 703 scans (0 leaked) and run end to end in the Windows app; tilted and photographed copies measured too (0 leaked); opening it is the owner's decision (see "Not decided here"). Follows [0171](0171-scanned-pdfs-and-images-read-on-the-machine.md), whose "Windows" section found that Windows.Media.Ocr has no Vietnamese recogniser and that VietOCR reads fewer values than Tesseract at fifteen times Vision's time.
 
 ## Problem
 
@@ -34,7 +34,7 @@ On all 703 scans and pictures of seeds 1–7 it reads 5 513 of the 5 604 private
 ## Limits
 
 - The texts come from the same generator as the test documents (other seeds, the same templates and name lists), so these figures overstate what the model will do on real scans. The fonts are held out; the wording is not.
-- The 703 scans are renders of the synthetic PDFs at 200 dpi through JPEG, upright and clean; a photographed or tilted page is not measured. The detector's boxes are upright, so a page tilted by more than a degree or so would give boxes that take in two lines.
+- The 703 scans are renders of the synthetic PDFs at 200 dpi through JPEG, upright and clean. Tilted and photographed copies of them are measured below ("Tilted and photographed pages"); a real copier's or phone's output is not.
 
 ## In the app
 
@@ -69,6 +69,28 @@ The five over-masked, one by one:
 - `4/form/form-application-2`, scan and picture: the motto "Độc lập - Tự do - Hạnh phúc" and the title "ĐƠN XIN VIỆC" under it are read as one paragraph, and the pack takes "phúc ĐƠN" for a name (two values over-masked in each).
 
 **In the app.** `tauri dev` on the same PC with the gate opened locally (not committed), driven over WebView2's DevTools port: the sidebar lists PNG and JPG without "Sắp có"; seed 1's `contract-labour-1.png` opened on Tài liệu and was masked (organisation, tax code, phones, addresses, both names, birth date, ID card, e-mail, account); `payslip-table-1.pdf`, a picture-only PDF, was read in 10.6 s while the measurement above ran beside it, and masked to 9 places and 8 aliases, the company the model misread as "Cộng ty" included. In Chromium's WASM, with nothing else running, a page takes 3.4 s once the graphs are loaded; the first page also loads them (22 s from the dev server).
+
+## Tilted and photographed pages
+
+`scripts/rasterise-documents.mjs` gained `--tilt <degrees>` (each document turned by that much, alternately left and right) and `--photo` (paper `#ebe6dc` instead of white, the print blurred by 0.8 px, a shadow darkening one corner to about grey 170, grain of ±12), so the same documents and expectations can be measured as crooked scans and phone pictures.
+
+Before any change, seed 1 (102 documents) through the app, not read / leaked / over-masked: 172 / 4 / 0 at 0.5°, 310 / 25 / 6 at 1°, 648 / 14 / 5 at 2°, and 517 / 33 / 7 photographed at 1.5°. The detector's boxes are upright, so a box around a leaning line takes in the next one. Three changes to `src/core/doc/reading.ts`:
+
+- **The page is turned upright.** The detector's long regions (at least five times as wide as tall) each give a direction from the second moments of their pixels; their median, weighted by size, is the page's lean. A page leaning by more than 0.25° and less than 15° is turned back about its centre (bilinear, white where the turned page does not reach) and its lines found again; the words' places are the upright page's. At 0.1° the clean scans' payslip tables, which measure a false lean of 0.12° to 0.15°, were turned too, and the blur of turning them cost seven addresses (49 not read instead of 42).
+- **A line's print height is measured against its own paper.** Ink is what is darker than halfway between the line's median grey and its darkest 2 %, rather than below a fixed grey, so blur and shadow do not thicken the band; a row inked all the way across is a rule; and the densest row counts as no denser than twice the middle inked row, so the bars of capital Ts ("STT" in a grey header cell measured at a fifth of its size) do not stand for the band. With the fixed grey, the photographed payslips' signature names joined the table and the first one leaked, as on the scans before the change above.
+- **A line on shadowed paper is lifted.** The recogniser learnt on paper from grey 205 to white (`scripts/ocr-train/train.py`); a line whose paper (its 75th-percentile grey) is darker is scaled so that the paper reaches 230. In the shadowed corner of two photographed invoices "Mã số thuế" read as "Mã số thuố", so the tax code beside it was left without its label and leaked. A clean scan's paper is white and is not touched.
+
+Then, the same measurement:
+
+| Pages | Documents | not read | leaked | over-masked | unlisted |
+| --- | --- | --- | --- | --- | --- |
+| Upright, seeds 1–7 | 703 | 42 | 0 | 6 | 71 |
+| Photographed and tilted 1.5°, seeds 1–7 | 703 | 42 | 0 | 6 | 65 |
+| Tilted 0.5°, seed 1 | 102 | 4 | 0 | 1 | 9 |
+| Tilted 1°, seed 1 | 102 | 9 | 0 | 2 | 12 |
+| Tilted 2°, seed 1 | 102 | 3 | 0 | 1 | 6 |
+
+The photographed 703 took 3 257 s; before the last two changes they were 49 / 6 / 5 / 91. The upright 703 are as before but for one more over-masked: in `5/order/order-receipt-1`, the scan, "Lý do nộp: Đặt cọc thuê văn phòng" is read letter for letter and the pack masks part of it, as with "Giao giờ" above. The six over-masked of the photographed pages are of the same two kinds: headings read verbatim that the pack takes for a value ("BIÊN BẢN BÀN GIAO TÀI SẢN", "Điều 2. Tiền lương", "Nhân viên" in a CV, scan and picture), and the motto joined to the title under it in `3/form/form-application-1`, the picture. On the tilted pages it is the motto again, joined to "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM" in `1/decision/decision-benefit-2`. None is a misreading the reading could avoid; each is the pack's call on a heading.
 
 ## Dependencies
 

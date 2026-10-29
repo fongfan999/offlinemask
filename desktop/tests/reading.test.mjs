@@ -109,6 +109,53 @@ test("a picture with no line found reads as no words", async () => {
   assert.deepEqual(await readPicture(picture([]), models, definition), { lines: [] });
 });
 
+test("a leaning page is turned upright and its lines found again; an upright one is not", async () => {
+  // Three lines leaning by 2°, then whatever the detector sees on the turned page.
+  const lean = Math.tan((2 * Math.PI) / 180);
+  const detects = async (tilted) => {
+    let calls = 0;
+    const models = {
+      ...fakes(),
+      async detect(input, w, h) {
+        calls++;
+        const map = new Float32Array(w * h);
+        for (const base of [4, 24, 44])
+          for (let x = 15; x < 185; x++)
+            for (let y = 0; y < 6; y++)
+              map[(base + y + Math.round(tilted ? x * lean : 0)) * w + x] = 1;
+        return map;
+      },
+    };
+    await readPicture(picture([[20, 60]]), models, {
+      ...definition,
+      recogniser: { ...definition.recogniser, alphabet },
+    });
+    return calls;
+  };
+  assert.equal(await detects(true), 2);
+  assert.equal(await detects(false), 1);
+});
+
+test("a line on shadowed paper reaches the recogniser on paper as light as it learnt on", async () => {
+  const shadowed = picture([[20, 60]]);
+  for (let at = 0; at < shadowed.data.length; at += 4)
+    if (shadowed.data[at] === 255) shadowed.data.fill(170, at, at + 3);
+  const papers = [];
+  const models = {
+    ...fakes(),
+    async recognise(input, lineWidth) {
+      papers.push([...input].sort((a, b) => a - b)[Math.floor(input.length * 0.75)]);
+      return fakes().recognise(input, lineWidth);
+    },
+  };
+  await readPicture(shadowed, models, {
+    ...definition,
+    recogniser: { ...definition.recogniser, alphabet },
+  });
+  assert.ok(papers.length);
+  for (const paper of papers) assert.ok(paper > (205 / 255 - 0.5) / 0.5, `paper ${paper}`);
+});
+
 test("the committed recogniser is the one the definition pins", async () => {
   const { createHash } = await import("node:crypto");
   const { readFileSync } = await import("node:fs");
