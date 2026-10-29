@@ -168,9 +168,14 @@ defineExpose({
             </p>
           </div>
           <p class="folder-ready" role="note">
-            <AppIcon name="check" :size="16" /><span
-              ><strong>Đã sẵn sàng.</strong> Bấm “Ẩn {{ count(folder.readable.value.length) }} tệp”
-              để bắt đầu.</span
+            <AppIcon name="eye" :size="16" /><span
+              ><strong>Xem lại trước khi ẩn.</strong>
+              {{
+                folder.layouts.value.length
+                  ? "Mở từng bảng tính để xem cột nào sẽ được ẩn, rồi bấm"
+                  : "Kiểm tra các tệp bên dưới, rồi bấm"
+              }}
+              “Ẩn {{ count(folder.readable.value.length) }} tệp”.</span
             >
           </p>
           <p v-if="folder.overflow.value" class="sheet-note">
