@@ -47,6 +47,14 @@ function openStep(target: number) {
   restoreStep.value = target === 3;
 }
 const count = (n: number) => n.toLocaleString("vi-VN");
+const emptyReason = computed(
+  () =>
+    (folder.failed.value.length
+      ? "Không mở được tệp nào trong thư mục này; lý do ở bên dưới."
+      : folder.skipped.value.length
+        ? "Thư mục này chỉ có những loại tệp OfflineMask chưa đọc được."
+        : "Thư mục này trống.") + "\nHãy chọn một thư mục có tệp Word, PDF, Excel, CSV hoặc TXT.",
+);
 const docs = computed(() => folder.readable.value.filter((file) => file.kind === "word").length);
 const sheets = computed(() => folder.readable.value.length - docs.value);
 const subtitle = computed(() => {
@@ -234,18 +242,10 @@ defineExpose({
           v-if="phase === 'ready' && !folder.readable.value.length"
           icon="folder"
           title="Không có tệp nào để ẩn"
+          :detail="emptyReason"
           button="Chọn thư mục khác"
           @again="another"
-        >
-          {{
-            folder.failed.value.length
-              ? "Không mở được tệp nào trong thư mục này; lý do ở bên dưới."
-              : folder.skipped.value.length
-                ? "Thư mục này chỉ có những loại tệp OfflineMask chưa đọc được."
-                : "Thư mục này trống."
-          }}
-          Hãy chọn một thư mục có tệp Word, PDF, Excel, CSV hoặc TXT.
-        </CannotOpen>
+        />
         <template v-else-if="phase === 'ready'">
           <LongJobNote :seconds="folder.estimate.value" subject="Thư mục này" />
           <!-- Files it cannot open come first, folded to one line like the long-job note. -->

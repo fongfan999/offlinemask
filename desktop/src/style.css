@@ -4222,6 +4222,10 @@ td.alias {
   color: var(--muted);
   text-wrap: pretty;
 }
+.cannot-open p strong {
+  color: var(--ink);
+  font-weight: 600;
+}
 .folder-open-label {
   flex-shrink: 0;
   color: var(--accent);

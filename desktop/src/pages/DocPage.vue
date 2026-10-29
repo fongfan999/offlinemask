@@ -279,11 +279,10 @@ defineExpose({
         v-if="!draft && doc.fileError.value"
         icon="file"
         title="Không mở được tệp này"
+        :detail="doc.fileError.value"
         button="Chọn tệp khác"
         @again="newDoc"
-      >
-        {{ doc.fileError.value }}
-      </CannotOpen>
+      />
       <template v-else-if="!draft">
         <FileDropZone
           icon="file"
