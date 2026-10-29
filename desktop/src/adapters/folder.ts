@@ -92,10 +92,9 @@ export async function pickFolderTarget(root: string): Promise<FolderTarget | nul
         await saveFile(bytes, path.split("/").pop()!);
       },
     };
-  const [{ open }, { mkdir, writeFile }, { join }] = await Promise.all([
+  const [{ open }, { mkdir, writeFile }] = await Promise.all([
     import("@tauri-apps/plugin-dialog"),
     import("@tauri-apps/plugin-fs"),
-    import("@tauri-apps/api/path"),
   ]);
   const parent = await open({
     directory: true,
@@ -103,17 +102,20 @@ export async function pickFolderTarget(root: string): Promise<FolderTarget | nul
     title: "Chọn nơi lưu thư mục đã ẩn",
   });
   if (typeof parent !== "string") return null;
-  let base = "";
+  // Joined here: the path API is a command the app is not granted, and needs none.
+  const separator = parent.includes("\\") && !parent.includes("/") ? "\\" : "/";
+  const join = (...parts: string[]) => [parent.replace(/[\\/]+$/, ""), ...parts].join(separator);
   let name = "";
   for (const candidate of outputFolderNames(root)) {
-    base = await join(parent, candidate);
     try {
-      // Without `recursive` an existing folder is an error: try the next name.
-      await mkdir(base);
+      // Without `recursive` an existing folder is an error: try the next name. Any
+      // other error (no permission, a full disk) is the answer, not a reason to go on.
+      await mkdir(join(candidate));
       name = candidate;
       break;
-    } catch {
-      if (candidate.endsWith(" 99)")) throw new Error("No free folder name");
+    } catch (error) {
+      if (!/exist/i.test(String(error))) throw error;
+      if (candidate.endsWith(" 99)")) throw new Error("No free folder name", { cause: error });
     }
   }
   const made = new Set<string>();
@@ -121,12 +123,12 @@ export async function pickFolderTarget(root: string): Promise<FolderTarget | nul
     name,
     async write(path, bytes) {
       const parts = path.split("/");
-      const folder = parts.slice(0, -1).join("/");
-      if (folder && !made.has(folder)) {
-        await mkdir(await join(base, ...folder.split("/")), { recursive: true });
-        made.add(folder);
+      const folder = parts.slice(0, -1);
+      if (folder.length && !made.has(folder.join("/"))) {
+        await mkdir(join(name, ...folder), { recursive: true });
+        made.add(folder.join("/"));
       }
-      await writeFile(await join(base, ...parts), bytes);
+      await writeFile(join(name, ...parts), bytes);
     },
   };
 }
