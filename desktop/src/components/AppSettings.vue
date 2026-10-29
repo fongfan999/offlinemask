@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { version } from "../../package.json";
 import { openProductWebsite, productWebsite } from "../adapters/desktop.ts";
 import AppIcon from "./AppIcon.vue";
@@ -14,6 +14,9 @@ import { memoryBudget, memoryChoices, memorySize } from "../core/memory.ts";
 const { theme, setTheme } = useTheme();
 const memory = ref<number | null>(null);
 const advancedOpen = memoryChoice.value !== "normal";
+const chosenMemory = computed(
+  () => memoryChoices.find((choice) => choice.id === memoryChoice.value) ?? memoryChoices[1]!,
+);
 onMounted(async () => (memory.value = await machineMemory()));
 const memoryFigure = (id: (typeof memoryChoices)[number]["id"]) =>
   memorySize(memoryBudget(memory.value, id));
@@ -74,22 +77,30 @@ async function visitWebsite(event: MouseEvent) {
          only the person opens or closes it. -->
     <details class="settings-advanced" :open="advancedOpen">
       <summary>Nâng cao<AppIcon class="folder-chevron" name="chevron" :size="13" /></summary>
-      <fieldset class="memory-setting" aria-describedby="memory-hint">
-        <legend>Bộ nhớ cho OfflineMask</legend>
-        <p id="memory-hint">
-          Tệp cần nhiều hơn mức này sẽ không mở, để máy không bị chậm. Chọn nhiều hơn nếu máy chỉ
-          dùng để chạy OfflineMask.
-        </p>
-        <label v-for="choice in memoryChoices" :key="choice.id">
-          <input
-            type="radio"
-            name="memory"
-            :value="choice.id"
-            :checked="memoryChoice === choice.id"
-            @change="setMemoryChoice(choice.id)"
-          />{{ choice.label }}<span>{{ memoryFigure(choice.id) }}</span>
-        </label>
-      </fieldset>
+      <div class="settings-tool-row memory-setting">
+        <div>
+          <h3 id="memory-title">Bộ nhớ cho OfflineMask</h3>
+          <p id="memory-hint">
+            Tệp cần nhiều hơn mức này sẽ không mở, để máy không bị chậm.
+            {{ chosenMemory.detail }}
+          </p>
+        </div>
+        <fieldset
+          class="theme-switch"
+          aria-labelledby="memory-title"
+          aria-describedby="memory-hint"
+        >
+          <label v-for="choice in memoryChoices" :key="choice.id">
+            <input
+              type="radio"
+              name="memory"
+              :value="choice.id"
+              :checked="memoryChoice === choice.id"
+              @change="setMemoryChoice(choice.id)"
+            />{{ choice.label }} <span>{{ memoryFigure(choice.id) }}</span>
+          </label>
+        </fieldset>
+      </div>
     </details>
   </section>
 </template>

@@ -2552,48 +2552,27 @@ td.alias {
 .settings-advanced > summary:hover {
   color: var(--ink);
 }
+/* The same segmented switch as the appearance, each choice with this machine's figure. */
 .memory-setting {
-  display: grid;
-  gap: 4px;
-  max-width: 460px;
-  margin: 14px 0 0;
-  padding: 0;
-  border: 0;
+  padding-top: 14px;
 }
-.memory-setting legend {
-  padding: 0;
-  font-size: 14px;
-  font-weight: 600;
-}
-.memory-setting p {
-  margin: 6px 0 10px;
+.memory-setting .theme-switch span {
+  margin-left: 4px;
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.7;
-}
-/* One row per choice: the circle, the name, and this machine's figure at the end. */
-.memory-setting label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 8px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  font-size: 13px;
-  cursor: pointer;
-}
-.memory-setting label:has(input:checked) {
-  border-color: color-mix(in srgb, var(--accent) 45%, var(--line));
-  background: color-mix(in srgb, var(--accent) 6%, var(--paper-raised));
-}
-.memory-setting input {
-  margin: 0;
-  accent-color: var(--accent);
-}
-.memory-setting span {
-  margin-left: auto;
-  color: var(--muted);
+  font-weight: 400;
   font-variant-numeric: tabular-nums;
+}
+/* Four choices do not fit a phone's width in one line: two by two. */
+@media (max-width: 560px) {
+  .memory-setting .theme-switch {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    align-self: stretch;
+    border-radius: 16px;
+  }
+  .memory-setting .theme-switch label {
+    text-align: center;
+  }
 }
 /* Appearance: a segmented radio group in the view-switch style. */
 .theme-switch {

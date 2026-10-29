@@ -4,11 +4,31 @@
  * Nâng cao offers other shares, for a machine kept for OfflineMask above all. */
 const gib = 1024 ** 3;
 export type MemoryChoice = "low" | "normal" | "high" | "dedicated";
-export const memoryChoices: readonly { id: MemoryChoice; label: string; share: number }[] = [
-  { id: "low", label: "Ít", share: 1 / 8 },
-  { id: "normal", label: "Vừa (mặc định)", share: 1 / 4 },
-  { id: "high", label: "Nhiều", share: 1 / 2 },
-  { id: "dedicated", label: "Máy chỉ dùng cho OfflineMask", share: 3 / 4 },
+export const memoryChoices: readonly {
+  id: MemoryChoice;
+  label: string;
+  share: number;
+  detail: string;
+}[] = [
+  {
+    id: "low",
+    label: "Ít",
+    share: 1 / 8,
+    detail: "1/8 bộ nhớ của máy, khi máy còn chạy nhiều việc khác.",
+  },
+  {
+    id: "normal",
+    label: "Vừa",
+    share: 1 / 4,
+    detail: "1/4 bộ nhớ của máy. Mặc định, hợp với đa số máy.",
+  },
+  { id: "high", label: "Nhiều", share: 1 / 2, detail: "1/2 bộ nhớ của máy, cho tệp lớn." },
+  {
+    id: "dedicated",
+    label: "Tối đa",
+    share: 3 / 4,
+    detail: "3/4 bộ nhớ của máy, khi máy chỉ dùng để chạy OfflineMask.",
+  },
 ];
 /** Assumed when the system does not say how much memory it has. */
 const assumedMemory = 8 * gib;
