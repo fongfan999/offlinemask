@@ -421,7 +421,7 @@ async function closeSidebar() {
             @type="startTyping"
           />
           <SettingsPage v-else-if="page === 'settings'" ref="pageRef" />
-          <FolderPage v-else-if="page === 'folder'" ref="pageRef" />
+          <FolderPage v-else-if="page === 'folder'" ref="pageRef" @navigate="navigate" />
           <SheetPage
             v-else-if="page === 'excel'"
             ref="pageRef"

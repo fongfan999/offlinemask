@@ -14,6 +14,7 @@ import { roughDuration, maxFolderFiles } from "../core/folder.ts";
 /** A whole folder (decision 0171): what it holds and how long it will take, column
  * choices per spreadsheet layout, one run, one review of the folder's values, and a
  * mirrored folder of masked copies. */
+const emit = defineEmits<{ navigate: ["home"] }>();
 const folder = useProvided(folderKey);
 const pack = useProvided(packKey);
 const heading = useTemplateRef<HTMLHeadingElement>("heading");
@@ -101,6 +102,11 @@ const layoutSummary = (layout: { header: string[]; plans: readonly { mode: strin
   return capital(parts.join(" · ")) || "Không có cột nào";
 };
 
+/** Another folder starts where every job does: home, whose drop zone takes folders. */
+function another() {
+  folder.reset();
+  emit("navigate", "home");
+}
 async function open(picked: PickedFolder) {
   saveError.value = "";
   await folder.load(picked);
@@ -139,7 +145,7 @@ defineExpose({
       "
       class="editor-actions"
     >
-      <button class="quiet-button" @click="folder.reset()">
+      <button class="quiet-button" @click="another">
         <AppIcon name="upload" :size="15" />Chọn thư mục khác
       </button>
     </div>
@@ -183,7 +189,7 @@ defineExpose({
       :scope="folder.findings.value"
       subject="thư mục"
       new-label="Ẩn thư mục khác"
-      @hide="folder.reset()"
+      @hide="another"
     />
 
     <!-- Step 1: pick a folder. -->
@@ -236,7 +242,7 @@ defineExpose({
             }}
             Hãy chọn một thư mục có tệp Word, PDF, Excel, CSV hoặc TXT.
           </p>
-          <button class="primary-action" @click="folder.reset()">
+          <button class="primary-action" @click="another">
             <AppIcon name="upload" :size="17" />Chọn thư mục khác
           </button>
         </div>
