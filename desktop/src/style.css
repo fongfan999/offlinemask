@@ -1903,29 +1903,25 @@ td.alias {
     display: none;
   }
 }
-.sidebar-footer {
-  flex-shrink: 0;
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: start;
-  gap: 10px;
-  padding: 16px 8px 0;
-  margin-top: 12px;
-  border-top: 1px solid var(--line);
+.home-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 4px 8px;
+  margin-top: 40px;
+  padding-bottom: 8px;
   color: var(--muted);
-  font: 11px var(--mono);
-  letter-spacing: 0.02em;
-  line-height: 1.5;
+  font: 12px var(--sans);
 }
-.sidebar-footer .app-version {
+.home-footer .app-version {
   font-variant-numeric: tabular-nums;
-  grid-column: 2;
-  grid-row: 1;
 }
-.sidebar-footer .website-error {
-  grid-column: 1 / -1;
+.home-footer .website-error {
+  flex-basis: 100%;
+  text-align: center;
 }
-.sidebar-footer a {
+.home-footer a {
   display: inline-flex;
   align-items: center;
   gap: 5px;
@@ -1933,7 +1929,7 @@ td.alias {
   text-decoration: none;
   border-radius: 3px;
 }
-.sidebar-footer a:hover {
+.home-footer a:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
 }

@@ -1,9 +1,8 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from "vue";
+import { computed, useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
 import ReportDialog from "./ReportDialog.vue";
-import { openProductWebsite, productWebsite } from "../adapters/desktop.ts";
 import type { Page } from "../composables/context.ts";
 import { sessionPreview } from "../core/session-preview.ts";
 import { isPrivate, sessionTitle, type Session } from "../core/sessions.ts";
@@ -18,6 +17,7 @@ const props = defineProps<{
   history: boolean;
   /** A folder being masked or reviewed, which is no session (decision 0171). */
   folder: { name: string; status: string } | null;
+  /** For the report only; home shows it (decision 0172). */
   version: string;
 }>();
 const emit = defineEmits<{
@@ -47,15 +47,6 @@ const screens: Record<Page, string> = {
 };
 const start = useTemplateRef<HTMLButtonElement>("start");
 const report = useTemplateRef<InstanceType<typeof ReportDialog>>("report");
-const websiteError = ref("");
-async function visitWebsite(event: MouseEvent) {
-  websiteError.value = "";
-  try {
-    await openProductWebsite(event);
-  } catch {
-    websiteError.value = "Chưa mở được trình duyệt. Bạn có thể truy cập OfflineMask.com.";
-  }
-}
 function dateLabel(value: string) {
   return new Date(value).toLocaleString("vi-VN", {
     day: "2-digit",
@@ -158,12 +149,5 @@ defineExpose({
       <button @click="report?.open()"><AppIcon name="help" />Báo lỗi hoặc góp ý</button>
     </nav>
     <ReportDialog ref="report" :version="version" :screen="screens[page]" />
-    <footer class="sidebar-footer">
-      <a :href="productWebsite" target="_blank" rel="noopener noreferrer" @click="visitWebsite">
-        OfflineMask.com<AppIcon name="external" :size="12" />
-      </a>
-      <span class="app-version" :aria-label="`Phiên bản ${version}`">{{ version }}</span>
-      <p v-if="websiteError" class="website-error" role="alert">{{ websiteError }}</p>
-    </footer>
   </aside>
 </template>

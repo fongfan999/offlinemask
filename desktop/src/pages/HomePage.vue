@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { PickedFolder } from "../adapters/folder.ts";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from "vue";
+import { openProductWebsite, productWebsite } from "../adapters/desktop.ts";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
@@ -21,6 +22,7 @@ import { fileKind, fileKindErrors } from "../core/file-kind.ts";
 import { quickDirection } from "../core/quick-actions.ts";
 import { sampleText } from "../core/review.ts";
 import { packProgress } from "../composables/useRecognitionPack.ts";
+import { version } from "../../package.json";
 
 const emit = defineEmits<{
   /** A link: Cài đặt, or a format's page as last left. */
@@ -41,6 +43,17 @@ const folder = useProvided(folderKey);
 function startFolder(picked: PickedFolder) {
   void folder.load(picked);
   emit("start", "folder");
+}
+/** The version and the website sit under the page, not in the sidebar, which is often
+ * folded away (decision 0172). */
+const websiteError = ref("");
+async function visitWebsite(event: MouseEvent) {
+  websiteError.value = "";
+  try {
+    await openProductWebsite(event);
+  } catch {
+    websiteError.value = "Chưa mở được trình duyệt. Bạn có thể truy cập OfflineMask.com.";
+  }
 }
 /** Ẩn nhanh, the way in from other apps (decision 0099): offered while it does not work. */
 const quickOffer = computed(
@@ -276,4 +289,10 @@ const packNotice = computed<PackNotice | null>(() => {
       {{ packNotice.action.label }}<AppIcon name="chevron" :size="12" />
     </button>
   </div>
+  <footer class="home-footer">
+    <a :href="productWebsite" target="_blank" rel="noopener noreferrer" @click="visitWebsite">
+      OfflineMask.com<AppIcon name="external" :size="12" /></a
+    ><span aria-hidden="true">·</span><span class="app-version">Phiên bản {{ version }}</span>
+    <p v-if="websiteError" class="website-error" role="alert">{{ websiteError }}</p>
+  </footer>
 </template>
