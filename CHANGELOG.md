@@ -25,6 +25,8 @@ Mask a whole folder at once, start every job from one place, and no more size li
   - **Estimate:** step 1 says roughly how long the job will take on this machine.
   - **Long jobs:** past ten minutes, one line says so; opened, it suggests a machine kept for OfflineMask.
   - **Memory:** the app keeps to a quarter of the machine's memory, at most 3 GB. A Word, PDF or Excel file that would need more is refused with the figures and a suggestion to split it ([0173](docs/decisions/0173-no-limits-only-estimates.md)).
+- Home greets you by the time of day and asks what you need to mask, instead of repeating the website's tagline ([0172](docs/decisions/0172-sidebar-by-task.md)).
+- The app's text uses only characters found on a keyboard: "..." for loading, "-" between details, ">" for a settings path.
 - A file that cannot be opened shows one card with the reason and a way back home, instead of an error under the drop zone ([0172](docs/decisions/0172-sidebar-by-task.md)).
 - Two more rules that held back over-masking were retired, because the fine-tuned model no longer needs them; the measured sets did not change ([0170](docs/decisions/0170-two-more-mechanisms-retired.md)).
 
