@@ -89,19 +89,23 @@ defineExpose({
 
 <template>
   <section class="glass-card glass restore-box">
-    <!-- Nothing masked in this launch yet: there is nothing to put back. -->
-    <div v-if="!findings.length" class="step-panel">
-      <div class="restore-body">
-        <p class="restore-intro">
-          Chưa có gì để lấy lại. Hãy ẩn một văn bản, tệp hoặc thư mục trước, gửi bản đã ẩn cho AI,
-          rồi quay lại đây với câu trả lời.
-        </p>
-      </div>
-      <footer class="card-footer">
-        <button class="primary-action" @click="emit('hide')">
-          <AppIcon name="mask" :size="17" />Ẩn thông tin riêng<AppIcon name="arrow" :size="16" />
-        </button>
-      </footer>
+    <!-- Nothing masked in this launch yet: show what the tab will do with a reply, the
+         hero's swap read backwards, and lead to the first tab. -->
+    <div v-if="!findings.length" class="restore-empty">
+      <p class="restore-demo" aria-hidden="true">
+        <span class="restore-demo-from">AI trả lời</span>Chào
+        <span class="restore-pair"><s>[TEN_1_4e8c]</s><b>Phong Phan</b></span
+        >, mình đã ghi nhận số
+        <span class="restore-pair"><s>[SDT_1_4e8c]</s><b>0901234567</b></span> của bạn.
+      </p>
+      <h2>Chưa có gì để nhận lại</h2>
+      <p class="restore-empty-text">
+        Hãy ẩn thông tin trước, rồi gửi bản đã ẩn cho AI. Khi AI trả lời, dán câu trả lời vào đây:
+        các mã sẽ đổi lại thành thông tin thật.
+      </p>
+      <button class="primary-action" @click="emit('hide')">
+        <AppIcon name="mask" :size="17" />Ẩn thông tin riêng<AppIcon name="arrow" :size="16" />
+      </button>
     </div>
 
     <div v-else class="step-panel">

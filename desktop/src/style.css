@@ -1647,6 +1647,64 @@ td.alias {
 }
 
 /* Restoration: paste an AI reply, get the original values back, on this machine only. */
+/* Home's restore tab before anything is masked (decision 0172): a reply in which the
+   codes turn back into what they stand for, the hero's swap read backwards. */
+.restore-empty {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 36px 28px 32px;
+  text-align: center;
+}
+.restore-empty h2 {
+  margin: 14px 0 0;
+  font: 500 22px var(--serif);
+  color: var(--ink);
+}
+.restore-empty-text {
+  max-width: 440px;
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.restore-demo {
+  max-width: 460px;
+  margin: 0;
+  padding: 12px 16px 14px;
+  border: 1px solid var(--line);
+  border-radius: 16px 16px 16px 4px;
+  background: var(--paper-sunk);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 2;
+  text-align: left;
+}
+.restore-demo-from {
+  display: block;
+  font: 11px var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  line-height: 1.6;
+}
+.restore-pair {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+}
+.restore-pair s {
+  color: var(--muted);
+  font: 12px var(--mono);
+  text-decoration-color: var(--warm);
+  text-decoration-thickness: 2px;
+}
+.restore-pair b {
+  color: var(--accent);
+  font-weight: 600;
+}
 .restore-body {
   display: grid;
   gap: 12px;
