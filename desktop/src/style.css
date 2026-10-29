@@ -4117,6 +4117,30 @@ td.alias {
 .folder-ready strong {
   font-weight: 600;
 }
+/* A folder with nothing to hide says so and offers another (decision 0171). */
+.folder-empty {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 40px 28px 36px;
+  text-align: center;
+}
+.folder-empty > svg {
+  color: var(--accent);
+}
+.folder-empty h2 {
+  margin: 4px 0 0;
+  font: 500 22px var(--serif);
+  color: var(--ink);
+}
+.folder-empty p {
+  max-width: 440px;
+  margin: 0 0 10px;
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--muted);
+  text-wrap: pretty;
+}
 .folder-open-label {
   flex-shrink: 0;
   color: var(--accent);

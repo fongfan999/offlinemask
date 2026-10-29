@@ -131,7 +131,14 @@ defineExpose({
       <h1 ref="heading" tabindex="-1">{{ folder.name.value || "Ẩn cả thư mục" }}</h1>
       <p>{{ subtitle }}</p>
     </div>
-    <div v-if="phase !== 'empty' && !folder.busy.value" class="editor-actions">
+    <div
+      v-if="
+        phase !== 'empty' &&
+        !folder.busy.value &&
+        !(phase === 'ready' && !folder.readable.value.length)
+      "
+      class="editor-actions"
+    >
       <button class="quiet-button" @click="folder.reset()">
         <AppIcon name="upload" :size="15" />Chọn thư mục khác
       </button>
@@ -215,7 +222,25 @@ defineExpose({
     <template v-else>
       <div class="step-panel">
         <!-- What the folder holds, how long it takes, and column choices. -->
-        <template v-if="phase === 'ready'">
+        <!-- Nothing to hide: an empty folder, or only files it cannot read. -->
+        <div v-if="phase === 'ready' && !folder.readable.value.length" class="folder-empty">
+          <AppIcon name="folder" :size="28" />
+          <h2>Không có tệp nào để ẩn</h2>
+          <p>
+            {{
+              folder.failed.value.length
+                ? "Không mở được tệp nào trong thư mục này; lý do ở bên dưới."
+                : folder.skipped.value.length
+                  ? "Thư mục này chỉ có những loại tệp OfflineMask chưa đọc được."
+                  : "Thư mục này trống."
+            }}
+            Hãy chọn một thư mục có tệp Word, PDF, Excel, CSV hoặc TXT.
+          </p>
+          <button class="primary-action" @click="folder.reset()">
+            <AppIcon name="upload" :size="17" />Chọn thư mục khác
+          </button>
+        </div>
+        <template v-else-if="phase === 'ready'">
           <div v-if="folder.dedicated.value" class="folder-warning" role="note">
             <strong>Thư mục này khá lớn</strong>
             <p>
@@ -384,8 +409,11 @@ defineExpose({
         </details>
         <p v-if="saveError" class="input-error drop-error" role="alert">{{ saveError }}</p>
 
-        <footer class="card-footer sheet-footer">
-          <span v-if="phase === 'ready' && folder.readable.value.length" class="action-hint"
+        <footer
+          v-if="phase !== 'ready' || folder.readable.value.length"
+          class="card-footer sheet-footer"
+        >
+          <span v-if="phase === 'ready'" class="action-hint"
             ><AppIcon name="clock" :size="14" />{{ capital(duration) }} trên máy này · thư mục gốc
             giữ nguyên</span
           >
