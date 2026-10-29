@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import {
+  estimateSeconds,
   fileWorkers,
   folderKind,
   isLitter,
@@ -59,6 +60,14 @@ test("durations read as people say them", () => {
   assert.equal(roughDuration(25 * 60), "khoảng 25 phút");
   assert.equal(roughDuration(3 * 3600 + 100), "khoảng 3 giờ");
   assert.equal(roughDuration(90 * 60), "khoảng 1 giờ 30 phút");
+});
+
+test("the estimate counts the model's load and its measured pace", () => {
+  assert.equal(estimateSeconds(0), 0);
+  // Two bank statements' scanned columns and two letters, about 1 minute natively.
+  assert.equal(roughDuration(estimateSeconds(110_000)), "khoảng 1 phút");
+  // A pace a finished run measured replaces the assumed one.
+  assert.equal(estimateSeconds(10_000, 500), 25);
 });
 
 test("sheets with the same headers share a layout, and only scanned columns are read", () => {

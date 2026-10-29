@@ -50,13 +50,16 @@ export function fileWorkers({ cores, memory }: MachineResources): number {
   return Math.max(1, Math.min(4, byCores, byMemory));
 }
 
-/** Assumed reading pace before a run has measured one (decision 0171: not yet measured
- * on the shipped graph). */
-export const assumedCharsPerSecond = 5_000;
+/** Reading pace before a run has measured one (decision 0171): the shipped model on the
+ * native runtime read 1 800–2 200 characters a second of real statements and letters on
+ * an Apple-silicon Mac (29 Oct 2026). */
+export const assumedCharsPerSecond = 2_000;
+/** Loading the model before the first text. */
+export const modelLoadSeconds = 5;
 /** Above this, the page suggests a machine dedicated to OfflineMask. */
 export const dedicatedMachineSeconds = 60 * 60;
 export const estimateSeconds = (chars: number, perSecond = assumedCharsPerSecond) =>
-  chars / perSecond;
+  chars ? modelLoadSeconds + chars / perSecond : 0;
 /** "dưới 1 phút", "khoảng 25 phút", "khoảng 3 giờ", "khoảng 1 giờ 30 phút". */
 export function roughDuration(seconds: number): string {
   if (seconds < 60) return "dưới 1 phút";
