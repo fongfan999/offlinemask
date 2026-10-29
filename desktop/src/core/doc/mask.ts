@@ -1,3 +1,4 @@
+import { fold, searchIndex } from "../detection/labelled-fields.ts";
 import type { Detection } from "../detection/types.ts";
 import type { Finding } from "../review.ts";
 import { AliasBook, detectionReplacements } from "../sheet/mask.ts";
@@ -23,7 +24,11 @@ const alphanumeric = /[\p{L}\p{N}]/u;
  * identity number). Not places or organizations: "Thành phố Hồ Chí Minh" hidden as a
  * residence is kept inside "Ủy ban nhân dân Thành phố Hồ Chí Minh" (decision 0159), and
  * repeating it there masked 28 such phrases on the scanned set. These lose to any
- * detection at the same place. */
+ * detection at the same place.
+ *
+ * A name is also found with other tone marks, or none, where every word of it is
+ * capitalised (decision 0175): text recognition reads a copier's "NGÔ" under a signature
+ * as "NGÕ", and a transfer writes the name without marks. */
 export function repeatedValues(
   paragraphs: readonly DocParagraph[],
   detections: ReadonlyMap<number, readonly Detection[]>,
@@ -37,30 +42,48 @@ export function repeatedValues(
         (!prose.has(detection.type) && value.length >= 6 && /\p{N}/u.test(value));
       if (qualifies && !values.has(value)) values.set(value, detection);
     }
+  const names = new Map<string, Detection>();
+  for (const [value, detection] of values) {
+    const folded = fold(value).replace(/\s+/gu, " ").trim();
+    if (detection.type === "TEN" && !names.has(folded)) names.set(folded, detection);
+  }
   const repeats = new Map<number, Detection[]>();
   for (const paragraph of paragraphs) {
     const own = detections.get(paragraph.id) ?? [];
     const extra: Detection[] = [];
+    const add = (at: number, end: number, detection: Detection, taken: readonly Detection[]) => {
+      const whole =
+        !(at > 0 && alphanumeric.test(paragraph.text[at - 1]!)) &&
+        !(end < paragraph.text.length && alphanumeric.test(paragraph.text[end]!));
+      if (!whole || taken.some((other) => other.start < end && other.end > at)) return;
+      extra.push({
+        ...detection,
+        start: at,
+        end,
+        source: "Giá trị đã ẩn ở chỗ khác trong tài liệu",
+        reason: "Cùng giá trị đã được ẩn ở đoạn khác của tài liệu.",
+        priority: 1,
+      });
+    };
     for (const [value, detection] of values)
       for (
         let at = paragraph.text.indexOf(value);
         at >= 0;
         at = paragraph.text.indexOf(value, at + 1)
-      ) {
-        const end = at + value.length;
-        const whole =
-          !(at > 0 && alphanumeric.test(paragraph.text[at - 1]!)) &&
-          !(end < paragraph.text.length && alphanumeric.test(paragraph.text[end]!));
-        if (!whole || own.some((other) => other.start < end && other.end > at)) continue;
-        extra.push({
-          ...detection,
-          start: at,
-          end,
-          source: "Giá trị đã ẩn ở chỗ khác trong tài liệu",
-          reason: "Cùng giá trị đã được ẩn ở đoạn khác của tài liệu.",
-          priority: 1,
-        });
-      }
+      )
+        add(at, at + value.length, detection, own);
+    if (names.size) {
+      const search = searchIndex(paragraph.text);
+      const spaced = search.value.replace(/\s/gu, " ");
+      for (const [value, detection] of names)
+        for (let at = spaced.indexOf(value); at >= 0; at = spaced.indexOf(value, at + 1)) {
+          const start = search.starts[at]!;
+          const end = search.ends[at + value.length - 1]!;
+          const words = paragraph.text.slice(start, end).split(/\s+/u);
+          if (words.every((word) => /^\p{Lu}/u.test(word)))
+            add(start, end, detection, [...own, ...extra]);
+        }
+    }
     if (extra.length) repeats.set(paragraph.id, extra);
   }
   return repeats;

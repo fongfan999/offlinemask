@@ -87,6 +87,14 @@ test("a contract's party is a person when its value looks like a name (decision 
   assert.deepEqual(born("Sinh năm: 1988"), []);
 });
 
+test("a four-word name ending in the older spelling Quí is read whole (decision 0175)", () => {
+  const text = "Đại diện bởi: Ông NGUYỄN TÙNG THANH QUÍ";
+  assert.deepEqual(
+    values(text, detectPersonCues(text)).map(([, value]) => value),
+    ["NGUYỄN TÙNG THANH QUÍ"],
+  );
+});
+
 test("a company in capitals needs no label, and never runs into the next cell", () => {
   const text = "TRA LUONG THANG 9 CONG TY TNHH THUONG MAI TONG HOP THANH CONG\t6.000.000";
   assert.deepEqual(values(text, reconcileContextFields(text, [])), [

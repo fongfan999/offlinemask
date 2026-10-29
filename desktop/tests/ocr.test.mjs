@@ -395,6 +395,42 @@ test("a value hidden once is hidden wherever else it appears whole, with the sam
   assert.equal(edits.paragraphs.get(5), undefined);
 });
 
+test("a name hidden once is found again with other tone marks, in capitals (decision 0175)", async () => {
+  const { repeatedValues } = await import("../src/core/doc/mask.ts");
+  const paragraphs = [
+    "Đại diện: Ông NGÔ HOÀNG GIA MINH",
+    // A copier's signature row read "NGÔ" as "NGÕ"; a transfer writes the name without marks.
+    "NGÕ HOÀNG GIA MINH · LÊ PHI LONG",
+    "chuyen tien NGO HOANG GIA MINH",
+    // The same words in lower case are not a name.
+    "ngô hoàng gia minh",
+  ].map((text, id) => ({ id, part: "p", text }));
+  const start = paragraphs[0].text.indexOf("NGÔ");
+  const detections = new Map([
+    [
+      0,
+      [
+        {
+          start,
+          end: start + 18,
+          type: "TEN",
+          label: "TEN",
+          source: "test",
+          reason: "test",
+          priority: 100,
+        },
+      ],
+    ],
+  ]);
+  const repeats = repeatedValues(paragraphs, detections);
+  const found = (id) =>
+    (repeats.get(id) ?? []).map((d) => paragraphs[id].text.slice(d.start, d.end));
+  assert.deepEqual(
+    [found(1), found(2), found(3)],
+    [["NGÕ HOÀNG GIA MINH"], ["NGO HOANG GIA MINH"], []],
+  );
+});
+
 test("the worker's canvas factory is a class pdf.js can construct, making OffscreenCanvases", () => {
   // pdf.js does `new CanvasFactory({ ownerDocument, enableHWA })`; a plain object threw
   // before any page was read in the desktop app (decision 0171).
