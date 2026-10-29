@@ -4123,6 +4123,10 @@ td.alias {
   font-size: 12.5px;
   font-weight: 500;
 }
+details:not([open]) .folder-open-label .when-open,
+details[open] .folder-open-label .when-closed {
+  display: none;
+}
 .folder-docs {
   display: flex;
   align-items: center;
@@ -4211,8 +4215,30 @@ details[open] > summary > .folder-chevron {
   border-bottom: 1px solid var(--line);
   border-radius: 12px 12px 0 0;
 }
+/* An open group's columns sit flush in its box, not in a second box, and scroll in place
+ * under their choices and names so the rows below stay in reach. */
+.folder-layout .sheet-scroll {
+  max-height: 340px;
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+  overflow: auto;
+}
+.folder-layout thead th {
+  position: sticky;
+  z-index: 1;
+  background: var(--paper-sunk);
+}
+.folder-layout thead .plan-row th {
+  top: 0;
+}
+.folder-layout thead tr:not(.plan-row) th {
+  top: var(--plan-row-height, 45px);
+}
 .folder-layout .sheet-caption-line {
-  margin: 8px 14px 12px;
+  margin: 0;
+  padding: 8px 14px 12px;
+  border-top: 1px solid var(--line);
   overflow-wrap: anywhere;
 }
 .folder-files ul {

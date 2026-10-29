@@ -202,7 +202,9 @@ defineExpose({
                 <AppIcon name="table" :size="16" /><span class="folder-summary-text"
                   ><strong>{{ someNames(layoutFiles(layout.key), "tệp") }}</strong
                   ><span>{{ layoutSummary(layout) }}</span></span
-                ><span class="folder-open-label">Xem cột</span
+                ><span class="folder-open-label"
+                  ><span class="when-closed">Xem cột</span
+                  ><span class="when-open">Thu gọn</span></span
                 ><AppIcon class="folder-chevron" name="chevron" :size="14" />
               </summary>
               <SheetPreview
