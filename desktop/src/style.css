@@ -4101,9 +4101,9 @@ td.alias {
 }
 
 /* Masking a whole folder (decision 0171). */
-.folder-warning {
-  margin-top: 4px;
-  padding: 14px 16px;
+/* A long job (decision 0173): one line with the time; the rest opens on a click. */
+.long-job-note {
+  margin: 18px 24px 0;
   border: 1px solid var(--line);
   border-radius: 12px;
   background: var(--note);
@@ -4111,12 +4111,34 @@ td.alias {
   font-size: 13px;
   line-height: 1.6;
 }
-.folder-warning p {
-  margin: 6px 0 0;
+.long-job-note > summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  list-style: none;
+  cursor: pointer;
+}
+.long-job-note > summary::-webkit-details-marker {
+  display: none;
+}
+.long-job-note > summary > span {
+  flex: 1;
+  min-width: 0;
+}
+.long-job-note strong {
+  font-weight: 600;
+}
+.long-job-note .folder-chevron {
+  color: inherit;
+  opacity: 0.7;
+}
+.long-job-note p {
+  margin: 0;
+  padding: 0 14px 12px 40px;
 }
 .folder-layouts,
-.folder-files,
-.folder-warning {
+.folder-files {
   margin-left: 24px;
   margin-right: 24px;
 }

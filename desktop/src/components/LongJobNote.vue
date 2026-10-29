@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import AppIcon from "./AppIcon.vue";
 import { longJobSeconds, roughDuration } from "../core/folder.ts";
 
 /** Over ten minutes on this machine (decision 0173), the same note for a text, a file and a
@@ -9,15 +10,17 @@ const shown = computed(() => props.seconds > longJobSeconds);
 </script>
 
 <template>
-  <div v-if="shown" class="folder-warning" role="note">
-    <strong>{{ subject }} khá lớn</strong>
+  <!-- One line, the time in it; why and what to do open on a click. -->
+  <details v-if="shown" class="long-job-note">
+    <summary>
+      <AppIcon name="clock" :size="16" /><span
+        ><strong>{{ subject }} khá lớn</strong>: cần {{ roughDuration(seconds) }} trên máy này</span
+      ><AppIcon class="folder-chevron" name="chevron" :size="14" />
+    </summary>
     <p>
-      Cần {{ roughDuration(seconds) }} trên máy này. Bạn vẫn có thể bắt đầu, máy sẽ chậm hơn trong
-      lúc xử lý.
+      Bạn vẫn có thể bắt đầu, máy sẽ chậm hơn trong lúc xử lý. Nếu thường xuyên cần ẩn nhiều tài
+      liệu, bạn có thể dành riêng một máy chạy OfflineMask cho công việc hoặc cho cả công ty, để máy
+      làm việc của bạn không bị ảnh hưởng.
     </p>
-    <p>
-      Nếu thường xuyên cần ẩn nhiều tài liệu, bạn có thể dành riêng một máy chạy OfflineMask cho
-      công việc hoặc cho cả công ty, để máy làm việc của bạn không bị ảnh hưởng.
-    </p>
-  </div>
+  </details>
 </template>
