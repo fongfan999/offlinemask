@@ -258,6 +258,11 @@ async function startNew() {
   await navigate("home");
   pageRef.value?.startOver?.();
 }
+/** The sidebar's note without a passcode: set one to keep the list (decision 0172). */
+async function keepHistory() {
+  await navigate("settings");
+  pageRef.value?.setUpPasscode?.();
+}
 /** Home's text field: an empty text page with the cursor in the box (decision 0172). */
 async function startTyping() {
   await navigate("text");
@@ -390,6 +395,7 @@ async function closeSidebar() {
       @close="closeSidebar"
       @collapse="toggleCollapsed"
       @start="startNew"
+      @keep="keepHistory"
     />
     <div class="workspace" :inert="sidebarOpen">
       <header class="topbar" :class="{ 'home-topbar': page === 'home' }">

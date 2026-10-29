@@ -20,6 +20,8 @@ export interface PageHandle {
   focusInput?(): void;
   /** Home: back to the first tab. */
   startOver?(): void;
+  /** Cài đặt: the passcode form, open and in view. */
+  setUpPasscode?(): void;
 }
 
 export type RecognitionPack = ReturnType<typeof useRecognitionPack>;

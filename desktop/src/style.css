@@ -317,6 +317,92 @@ nav button:hover,
   font-weight: 600;
   color: var(--muted);
   padding: 28px 14px 10px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Without a passcode, an "i" beside "Đã ẩn" (decision 0172): its note shows on hover or
+   focus, or stays open after a click, and leads to the passcode. */
+.history-info-button,
+.history-tip-action {
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  cursor: pointer;
+}
+.history-info-button {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  color: var(--muted);
+}
+.history-info-button:hover,
+.history-info.is-open .history-info-button {
+  color: var(--accent);
+  background: var(--paper-raised);
+}
+.history-tip {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% - 4px);
+  left: 4px;
+  right: -4px;
+  display: grid;
+  gap: 6px;
+  padding: 12px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--paper-raised);
+  box-shadow: 0 10px 28px var(--shadow);
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 12.5px;
+  line-height: 1.55;
+  opacity: 0;
+  visibility: hidden;
+  translate: 0 -4px;
+  transition:
+    opacity 0.15s,
+    translate 0.15s,
+    visibility 0s 0.15s;
+}
+/* Bridges the gap from the icon, so the pointer can reach the button in the note. */
+.history-tip::before {
+  content: "";
+  position: absolute;
+  inset: -12px 0 100%;
+}
+.history-info:hover .history-tip,
+.history-info:focus-within .history-tip,
+.history-info.is-open .history-tip {
+  opacity: 1;
+  visibility: visible;
+  translate: 0;
+  transition:
+    opacity 0.15s,
+    translate 0.15s;
+}
+.history-tip strong {
+  color: var(--ink);
+  font-size: 13px;
+}
+.history-tip-action {
+  justify-self: start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+.history-tip-action:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .history-list {
   min-height: 0;

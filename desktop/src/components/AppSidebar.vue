@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useTemplateRef } from "vue";
+import { ref, useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
 import ReportDialog from "./ReportDialog.vue";
@@ -27,6 +27,8 @@ const emit = defineEmits<{
   collapse: [];
   /** "+ Ẩn thông tin mới": home, on its first tab, from anywhere (home included). */
   start: [];
+  /** "Đặt mật mã" in the list's note: Cài đặt with the passcode form open. */
+  keep: [];
 }>();
 
 /** What the report says the user was looking at. */
@@ -39,6 +41,13 @@ const screens: Record<Page, string> = {
   word: "Tài liệu",
 };
 const start = useTemplateRef<HTMLButtonElement>("start");
+/** Without a passcode the list is RAM only; the "i" beside its heading says so and offers
+ * the passcode (decision 0172). Shown on hover or focus, or held open by a click. */
+const infoOpen = ref(false);
+function leaveInfo(event: FocusEvent) {
+  const box = event.currentTarget as HTMLElement;
+  if (!box.contains(event.relatedTarget as Node | null)) infoOpen.value = false;
+}
 const report = useTemplateRef<InstanceType<typeof ReportDialog>>("report");
 function dateLabel(value: string) {
   return new Date(value).toLocaleString("vi-VN", {
@@ -90,6 +99,39 @@ defineExpose({
     </button>
     <div class="history-heading">
       {{ history ? "Lịch sử" : "Đã ẩn" }}
+      <span
+        v-if="!history"
+        class="history-info"
+        :class="{ 'is-open': infoOpen }"
+        @keydown.esc.stop="infoOpen = false"
+        @focusout="leaveInfo"
+      >
+        <button
+          class="history-info-button"
+          aria-label="Các mục này được giữ đến khi nào?"
+          :aria-expanded="infoOpen"
+          aria-controls="history-tip"
+          @click="infoOpen = !infoOpen"
+        >
+          <AppIcon name="info" :size="14" />
+        </button>
+        <span id="history-tip" class="history-tip" role="note">
+          <strong>Chỉ giữ đến khi bạn đóng ứng dụng</strong>
+          <span
+            >Mỗi loại chỉ giữ bản mới nhất. Đặt mật mã để lưu tất cả trên máy này, mở lại khi
+            cần.</span
+          >
+          <button
+            class="history-tip-action"
+            @click="
+              infoOpen = false;
+              emit('keep');
+            "
+          >
+            Đặt mật mã<AppIcon name="arrow" :size="13" />
+          </button>
+        </span>
+      </span>
     </div>
     <div class="history-list">
       <button
