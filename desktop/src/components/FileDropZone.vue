@@ -9,7 +9,8 @@ import AppIcon from "./AppIcon.vue";
 const props = defineProps<{
   icon: "table" | "file" | "undo" | "upload";
   title: string;
-  hint: string;
+  /** Accepted types in a few words; home shows them as badges in the slot instead. */
+  hint?: string;
   accept: string;
   busy?: boolean;
   /** A dropped folder, or several files, opens the folder page (decision 0171). */
@@ -56,9 +57,11 @@ function drop(transfer: DataTransfer | null) {
     <span class="drop-words"
       ><strong>{{ busy ? "Đang mở tệp…" : title }}</strong>
       <span
-        >hoặc <u>{{ directory ? "chọn thư mục" : "chọn tệp" }}</u> · {{ hint }}</span
+        >hoặc <u>{{ directory ? "chọn thư mục" : "chọn tệp" }}</u
+        ><template v-if="hint"> · {{ hint }}</template></span
       ></span
     >
+    <slot />
   </button>
   <input
     ref="picker"

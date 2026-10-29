@@ -443,6 +443,10 @@ defineExpose({
   focusHeading() {
     heading.value?.focus({ preventScroll: true });
   },
+  /** Home's text field leads here, ready to type (decision 0172). */
+  focusInput() {
+    document.getElementById("text-input")?.focus({ preventScroll: true });
+  },
   /** After masking, focus the copy button but keep the heading and text in view. */
   focusResult() {
     window.scrollTo({ top: 0 });

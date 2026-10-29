@@ -83,51 +83,52 @@ defineExpose({
       <span class="brand-mark"><BrandMark :size="28" /></span
       ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
     </button>
-    <nav aria-label="Trang chủ">
-      <button :aria-current="hiding ? 'page' : undefined" @click="emit('navigate', 'home')">
-        <AppIcon name="home" />Trang chủ
+    <!-- The pattern AI users know from their chat apps (decision 0172): start something new
+         at the top, what is open or kept below. -->
+    <button
+      class="sidebar-new"
+      :aria-current="hiding ? 'page' : undefined"
+      @click="emit('navigate', 'home')"
+    >
+      <AppIcon name="plus" :size="16" />Ẩn thông tin mới
+    </button>
+    <div class="history-heading">
+      {{ history ? "Lịch sử" : "Đang mở" }}
+    </div>
+    <div class="history-list">
+      <button
+        v-if="folder"
+        class="history-item"
+        :aria-current="page === 'folder' ? 'page' : undefined"
+        @click="emit('navigate', 'folder')"
+      >
+        <AppIcon name="folder" :size="16" /><span
+          ><strong>{{ folder.name }}</strong
+          ><small>{{ folder.status }}</small></span
+        >
       </button>
-    </nav>
-    <template v-if="history || sessions.length || folder">
-      <div class="history-heading">
-        {{ history ? "Lịch sử" : "Đang mở" }}
-      </div>
-      <div class="history-list">
-        <button
-          v-if="folder"
-          class="history-item"
-          :aria-current="page === 'folder' ? 'page' : undefined"
-          @click="emit('navigate', 'folder')"
+      <p v-if="!sessions.length && !folder" class="empty-history">
+        {{ history ? "Chưa có mục nào." : "Việc bạn đang làm sẽ hiện ở đây." }}
+      </p>
+      <button
+        v-for="session in sessions"
+        :key="session.id"
+        class="history-item"
+        :aria-current="activeId === session.id ? 'page' : undefined"
+        @click="emit('navigate', session.format, session.id)"
+      >
+        <AppIcon
+          :name="session.format === 'text' ? 'text' : session.format === 'word' ? 'file' : 'table'"
+          :size="16"
+        /><span
+          ><strong>{{ sessionPreview(session) }}</strong
+          ><small
+            >{{ isPrivate(session) ? `${sessionTitle(session)} · ` : ""
+            }}{{ dateLabel(session.createdAt) }}{{ isPrivate(session) ? "" : " · Mẫu" }}</small
+          ></span
         >
-          <AppIcon name="folder" :size="16" /><span
-            ><strong>{{ folder.name }}</strong
-            ><small>{{ folder.status }}</small></span
-          >
-        </button>
-        <p v-if="!sessions.length && !folder" class="empty-history">Chưa có mục nào.</p>
-        <button
-          v-for="session in sessions"
-          :key="session.id"
-          class="history-item"
-          :aria-current="activeId === session.id ? 'page' : undefined"
-          @click="emit('navigate', session.format, session.id)"
-        >
-          <AppIcon
-            :name="
-              session.format === 'text' ? 'text' : session.format === 'word' ? 'file' : 'table'
-            "
-            :size="16"
-          /><span
-            ><strong>{{ sessionPreview(session) }}</strong
-            ><small
-              >{{ isPrivate(session) ? `${sessionTitle(session)} · ` : ""
-              }}{{ dateLabel(session.createdAt) }}{{ isPrivate(session) ? "" : " · Mẫu" }}</small
-            ></span
-          >
-        </button>
-      </div>
-    </template>
-    <div v-else class="sidebar-spacer"></div>
+      </button>
+    </div>
     <nav class="settings-nav" aria-label="Cài đặt ứng dụng">
       <button
         :aria-current="page === 'settings' ? 'page' : undefined"

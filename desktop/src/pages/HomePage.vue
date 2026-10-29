@@ -27,6 +27,8 @@ const emit = defineEmits<{
   navigate: [destination: Page];
   /** The start box: the format's first step, where the file or text just went. */
   start: [destination: Page];
+  /** The text field: an empty text page with the cursor in it. */
+  type: [];
 }>();
 const pack = useProvided(packKey);
 const run = useProvided(runKey);
@@ -73,11 +75,16 @@ function startWithText(text: string) {
   run.processingError.value = "";
   emit("start", "text");
 }
-/** "Gõ hoặc dán chữ": an empty text page, for people who do not know about ⌘V. */
-function typeText() {
-  run.processingError.value = "";
-  emit("start", "text");
-}
+/** What the drop zone opens, in the words people use for them (decision 0172). */
+const formats = [
+  { label: "Word", ext: ".docx", icon: "file" },
+  { label: "PDF", ext: ".pdf", icon: "file" },
+  { label: "Excel", ext: ".xlsx .xls", icon: "table" },
+  { label: "CSV", ext: ".csv", icon: "table" },
+  { label: "OpenDocument", ext: ".odt .ods", icon: "file" },
+  { label: "Văn bản", ext: ".txt .md", icon: "text" },
+  { label: "Cả thư mục", ext: "", icon: "folder" },
+] as const;
 /** Which half of the job the box is for; a pasted AI reply switches it (decision 0172). */
 const mode = ref<"hide" | "restore">("hide");
 const restoreBox = useTemplateRef<InstanceType<typeof RestoreBox>>("restoreBox");
@@ -216,21 +223,32 @@ const packNotice = computed<PackNotice | null>(() => {
     <FileDropZone
       icon="upload"
       title="Kéo tệp hoặc cả thư mục vào đây"
-      :hint="`Word, Excel, PDF · dán chữ bằng ${pasteKey}`"
       :accept="accept"
       folders
       @file="startWith"
       @folder="startFolder"
-    />
+    >
+      <!-- Every kind the app opens, named the way people know them. -->
+      <span class="home-formats" aria-label="Mở được">
+        <span v-for="format in formats" :key="format.label" class="home-format"
+          ><AppIcon :name="format.icon" :size="14" />{{ format.label
+          }}<small v-if="format.ext">{{ format.ext }}</small></span
+        >
+      </span>
+    </FileDropZone>
     <p v-if="startError" class="input-error start-error" role="alert">{{ startError }}</p>
+    <!-- Looks like the text box it opens, so typing is as obvious as dropping. -->
+    <button type="button" class="home-type" @click="emit('type')">
+      <AppIcon name="compose" :size="17" /><span>Hoặc gõ, dán văn bản vào đây…</span
+      ><kbd>{{ pasteKey }}</kbd>
+    </button>
     <div class="start-actions">
       <FolderPicker @folder="startFolder" />
-      <button type="button" class="sample-link" @click="typeText">Gõ hoặc dán chữ</button>
       <button type="button" class="sample-link" @click="startWithText(sampleText)">
         Xem thử với ví dụ
       </button>
       <span class="start-private"
-        ><AppIcon name="lock" :size="13" />Tệp và chữ không rời khỏi máy bạn.</span
+        ><AppIcon name="lock" :size="13" />Thông tin của bạn không rời khỏi máy này.</span
       >
     </div>
     <!-- The other way in, until it works (decision 0099). -->

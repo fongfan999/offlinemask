@@ -17,6 +17,7 @@ export type Page = "home" | "settings" | "folder" | Format;
 export interface PageHandle {
   focusHeading(): void;
   focusResult?(): void;
+  focusInput?(): void;
 }
 
 export type RecognitionPack = ReturnType<typeof useRecognitionPack>;

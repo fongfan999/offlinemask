@@ -193,6 +193,28 @@ nav button:hover,
   font-size: 11.5px;
   font-weight: 400;
 }
+/* Start something new, as chat apps do (decision 0172). */
+.sidebar-new {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 11px 14px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-size: 13.5px;
+  font-weight: 600;
+  text-align: left;
+}
+.sidebar-new svg {
+  color: var(--accent);
+}
+.sidebar-new:hover,
+.sidebar-new[aria-current] {
+  border-color: var(--accent);
+}
 .history-heading {
   font-size: 12px;
   font-weight: 600;
@@ -204,10 +226,6 @@ nav button:hover,
   overflow-y: auto;
   flex: 1;
   scrollbar-width: thin;
-}
-/* Without history (no passcode) the settings link still sits at the bottom. */
-.sidebar-spacer {
-  flex: 1;
 }
 .empty-history {
   font-size: 12px;
@@ -1183,7 +1201,7 @@ th {
 /* Home's start box is the page's one action (decision 0172): a large target to drop on. */
 .start-box .drop-zone {
   width: 100%;
-  min-height: 280px;
+  min-height: 260px;
   margin: 0;
   align-content: center;
   gap: 14px;
@@ -1198,6 +1216,67 @@ th {
   width: 64px;
   height: 64px;
   border-radius: 16px;
+}
+/* Every kind the drop zone opens, as small labels people recognise (decision 0172). */
+.home-formats {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  max-width: 560px;
+  margin-top: 4px;
+}
+.home-format {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--paper-raised);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 500;
+}
+.home-format svg {
+  color: var(--accent);
+}
+.home-format small {
+  color: var(--muted);
+  font: 400 11px var(--mono);
+}
+/* Typing has a box of its own that looks like the text field it opens. */
+.home-type {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  margin-top: 12px;
+  padding: 15px 18px;
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  background: var(--paper-raised);
+  color: var(--muted);
+  font-size: 14.5px;
+  text-align: left;
+  cursor: text;
+}
+.home-type:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+.home-type span {
+  flex: 1;
+}
+.home-type svg {
+  color: var(--accent);
+}
+.home-type kbd {
+  padding: 2px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--muted);
+  font: 500 11px var(--mono);
 }
 .drop-zone u {
   text-underline-offset: 3px;
