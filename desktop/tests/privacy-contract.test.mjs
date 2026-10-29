@@ -146,6 +146,25 @@ test("where the system cannot read Vietnamese, models carried in the app do, onl
   } else assert.doesNotMatch(page, /mô hình đọc chữ đi kèm ứng dụng/, UPDATE);
 });
 
+test("pdf.js loads nothing but its picture decoders, from the app itself (privacy §4)", () => {
+  // Decision 0173: with recognition at hand, a scanned page's fax, JBIG2 and JPEG 2000
+  // pictures are decoded by the JavaScript builds pdf.js ships, served by the app at
+  // `/pdfjs/`; no other URL (CMaps, fonts, ICC, WebAssembly) is given.
+  const pdf = read("../src/core/doc/pdf.ts");
+  assert.match(
+    pdf,
+    /useWasm: false,\n\s*\.\.\.\(ocr && decoders \? \{ wasmUrl: decoders \} : \{\}\),/,
+    UPDATE,
+  );
+  assert.doesNotMatch(pdf, /cMapUrl|standardFontDataUrl|iccUrl|useWorkerFetch: true/, UPDATE);
+  const worker = read("../src/workers/files.worker.ts");
+  assert.deepEqual(
+    [...worker.matchAll(/decoders: (.+?) \}/g)].map((match) => match[1]),
+    ['new URL("/pdfjs/", location.href).href'],
+    UPDATE,
+  );
+});
+
 test("the app's system permissions are the ones the page explains (privacy §5)", () => {
   const ids = (name) =>
     JSON.parse(read(`../src-tauri/capabilities/${name}.json`))

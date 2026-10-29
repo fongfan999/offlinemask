@@ -3,6 +3,8 @@
 // page does it, and compared with the expectations beside them.
 import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { basename, extname, join, relative } from "node:path";
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
 import { scanTexts } from "../src/composables/scanTexts.ts";
 import { openDocument, writeDocument } from "../src/core/doc/document.ts";
 import { maskParagraphs } from "../src/core/doc/mask.ts";
@@ -11,6 +13,10 @@ import { detectionOptions } from "../src/core/detection/options.ts";
 import { createOcrEngine } from "./ocr-runtime.mjs";
 import { createReadingEngine } from "./reading-runtime.mjs";
 import { loadPack } from "./pack-runtime.mjs";
+
+// pdf.js's picture decoders straight from the package, as the app serves them at `/pdfjs/`
+// (decision 0173).
+const decoders = new URL("wasm/", pathToFileURL(createRequire(import.meta.url).resolve("pdfjs-dist/package.json"))).href;
 
 export const buckets = ["notRead", "leaked", "over", "unlisted"];
 export const bucketLabels = {
@@ -62,6 +68,7 @@ export function createDetector(root, definition, { reading = false } = {}) {
 export async function maskDocument(path, detector) {
   const opened = await openDocument(new Uint8Array(readFileSync(path)), basename(path), {
     ocr: detector.ocr,
+    decoders,
   });
   const detections = await scanTexts(
     detector,

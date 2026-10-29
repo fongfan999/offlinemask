@@ -1,6 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { PDFDocument } from "pdf-lib";
+import { createRequire } from "node:module";
+import { pathToFileURL } from "node:url";
+import {
+  PDFDocument,
+  concatTransformationMatrix,
+  drawObject,
+  popGraphicsState,
+  pushGraphicsState,
+  setFillingGrayscaleColor,
+} from "pdf-lib";
 import { openDocument, writeDocument } from "../src/core/doc/document.ts";
 import { maskParagraphs } from "../src/core/doc/mask.ts";
 import { imageSize, ocrNote, ocrTextItems, openImage } from "../src/core/doc/ocr.ts";
@@ -270,6 +279,68 @@ test("a scanned page of a real picture is drawn from the file's image", async ()
   });
   assert.ok(drawn && drawn.length > 1000);
   assert.deepEqual(imageSize(drawn), { width: 1653, height: 2339 });
+});
+
+test("a copier's fax-coded text picture is drawn with pdf.js's own decoders, and lost without them", async () => {
+  // A 64 × 16 mask in CCITT Group 3 (one-dimensional) coding, as a copier's compact scan
+  // keeps its text: four white rows, eight rows of 16 white, 32 black and 16 white, four
+  // white (decision 0173).
+  const white = "11011" + "00110101";
+  const bar = "101010" + "000001101010" + "101010";
+  const bits = white.repeat(4) + bar.repeat(8) + white.repeat(4);
+  const coded = Uint8Array.from(
+    bits.padEnd(Math.ceil(bits.length / 8) * 8, "0").match(/.{8}/g),
+    (byte) => parseInt(byte, 2),
+  );
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([595, 842]);
+  const mask = doc.context.register(
+    doc.context.stream(coded, {
+      Type: "XObject",
+      Subtype: "Image",
+      Width: 64,
+      Height: 16,
+      ImageMask: true,
+      Filter: "CCITTFaxDecode",
+      DecodeParms: { K: 0, Columns: 64, Rows: 16 },
+    }),
+  );
+  page.node.setXObject(doc.context.obj("Mask"), mask);
+  page.pushOperators(
+    pushGraphicsState(),
+    setFillingGrayscaleColor(0),
+    concatTransformationMatrix(400, 0, 0, 100, 100, 600),
+    drawObject("Mask"),
+    popGraphicsState(),
+  );
+  const bytes = await doc.save();
+  const { createCanvas, loadImage } = createRequire(import.meta.url)("@napi-rs/canvas");
+  const ink = async (decoders) => {
+    let drawn;
+    await openPdf(bytes.slice(), {
+      decoders,
+      ocr: async (image) => {
+        drawn = image;
+        return { lines: [line("x", 0, 0, 0.1)] };
+      },
+    });
+    const picture = await loadImage(Buffer.from(drawn));
+    const canvas = createCanvas(picture.width, picture.height);
+    canvas.getContext("2d").drawImage(picture, 0, 0);
+    const { data } = canvas.getContext("2d").getImageData(0, 0, picture.width, picture.height);
+    let dark = 0;
+    for (let at = 0; at < data.length; at += 4) if (data[at] < 128) dark++;
+    return dark;
+  };
+  const decoders = new URL(
+    "wasm/",
+    pathToFileURL(createRequire(import.meta.url).resolve("pdfjs-dist/package.json")),
+  ).href;
+  // The bar is half the mask's width and half its height: 200 × 50 pt, at 200 dpi.
+  const expected = ((200 * 200) / 72) * ((50 * 200) / 72);
+  const read = await ink(decoders);
+  assert.ok(Math.abs(read / expected - 1) < 0.1, `${read} dark pixels, ${expected} expected`);
+  assert.equal(await ink(undefined), 0);
 });
 
 test("pictures open on Tài liệu only where the machine reads them", () => {

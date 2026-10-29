@@ -7,6 +7,7 @@ public/models/
 public/runtime/
 # OfflineMask's text recognition models, copied by scripts/prepare-reading.mjs (decision 0172).
 public/reading/
+public/pdfjs/
 
 dist/
 dist-desktop/

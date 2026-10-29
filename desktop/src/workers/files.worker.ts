@@ -111,7 +111,9 @@ self.onmessage = async (event: MessageEvent<FilesRequest>) => {
       const file = await openDocument(new Uint8Array(request.bytes), request.name, {
         onPage: (done, total) => send({ type: "progress", id, done, total }),
         stopped: () => cancelled.has(id),
-        ...(request.ocr ? { ocr: recognise } : {}),
+        ...(request.ocr
+          ? { ocr: recognise, decoders: new URL("/pdfjs/", location.href).href }
+          : {}),
       });
       docs.set(request.handle, file.source);
       send({

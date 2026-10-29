@@ -537,6 +537,12 @@ export interface PdfReading {
   stopped?: () => boolean;
   /** Reads the text in a drawn page; without it, pages without text stay unread. */
   ocr?: OcrEngine;
+  /** Where pdf.js's own decoders for fax (CCITT), JBIG2 and JPEG 2000 pictures are, with
+   * a trailing slash: the app's `/pdfjs/`, or the package's `wasm/` folder in Node. A
+   * copier's compact scan keeps its text as such a picture, which pdf.js otherwise skips
+   * without a word. Only used with `ocr`, since only a drawn page decodes pictures
+   * (decision 0173). */
+  decoders?: string;
 }
 
 /** A page's items read by their place: lines, tables and forms, then paragraphs. Tables
@@ -605,20 +611,23 @@ const nextTask = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 export async function openPdf(
   bytes: Uint8Array,
-  { onPage, stopped, ocr }: PdfReading = {},
+  { onPage, stopped, ocr, decoders }: PdfReading = {},
 ): Promise<{ source: PdfSource; paragraphs: DocParagraph[]; notes: string[] }> {
   if (bytes.byteLength > maxDocBytes) throw new DocFileError("too-large");
   const largeImages = countLargeImages(bytes);
   const { getDocument } = await loadPdfJs();
-  // No URL is given for CMaps, standard fonts, ICC profiles or WebAssembly, and system
-  // fonts are off, so pdf.js never fetches anything; text needs none of them. With
-  // recognition at hand, pictures may be decoded, but only a drawn page decodes them.
+  // No URL is given for CMaps, standard fonts or ICC profiles, and system fonts are off;
+  // text needs none of them. With recognition at hand, pictures may be decoded, but only
+  // a drawn page decodes them, and the JavaScript builds of pdf.js's picture decoders
+  // are then imported from `decoders`, the app's own files (WebAssembly stays off, so
+  // nothing else is loaded); without recognition pdf.js loads nothing at all.
   const task = getDocument({
     data: bytes,
     disableFontFace: true,
     useSystemFonts: false,
     useWorkerFetch: false,
     useWasm: false,
+    ...(ocr && decoders ? { wasmUrl: decoders } : {}),
     isOffscreenCanvasSupported: !!ocr && hasOffscreenCanvas(),
     isImageDecoderSupported: false,
     enableXfa: false,

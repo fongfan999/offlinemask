@@ -92,6 +92,21 @@ Then, the same measurement:
 
 The photographed 703 took 3 257 s; before the last two changes they were 49 / 6 / 5 / 91. The upright 703 are as before but for one more over-masked: in `5/order/order-receipt-1`, the scan, "Lý do nộp: Đặt cọc thuê văn phòng" is read letter for letter and the pack masks part of it, as with "Giao giờ" above. The six over-masked of the photographed pages are of the same two kinds: headings read verbatim that the pack takes for a value ("BIÊN BẢN BÀN GIAO TÀI SẢN", "Điều 2. Tiền lương", "Nhân viên" in a CV, scan and picture), and the motto joined to the title under it in `3/form/form-application-1`, the picture. On the tilted pages it is the motto again, joined to "CỘNG HÒA XÃ HỘI CHỦ NGHĨA VIỆT NAM" in `1/decision/decision-benefit-2`. None is a misreading the reading could avoid; each is the pack's call on a heading.
 
+## The owner's own scans
+
+On 29 October 2026 the owner put four of their own documents on the PC, outside the repository; they were read there with the app's reading, detection and masking, and nothing of them is recorded here but what kind of thing was missed. One is a text PDF (masked in full, not a test of the reading). One is a colour JPEG scan of a business registration. Two are copier scans whose text is a fax-coded mask, which pdf.js was not decoding at all: [0173](0173-pdf-picture-decoders-inside-the-app.md) fixed that, and the findings below are after it.
+
+They do not meet 0171's bar. Left unmasked, in kinds rather than counts, since they have no reviewed lists:
+
+- **Form blocks with the labels in one column and the values, each after a colon, in the next** ("CCCD số / Ngày sinh / Số tài khoản" stacked beside ": … / : …"): two ID card numbers, two birth dates, an account number and a party's name where it first appears. The reader by place keeps the column of labels apart from the column of values, so no value follows its label. The synthetic documents never lay a form out so; it is a matter of the reader by place and detection, not of the recogniser, and Vision would give the same.
+- **Signature names**: the two names under the signatures of one contract, masked above but read here with one letter different or in a line the pack did not take as names.
+- **Misreadings of a real copier's print**: a phone number and an e-mail address on the registration, read with slashes and wrong letters, so no longer a phone or an address; the end of a representative's name. A contract's price tables read poorly as a whole.
+- **A photographed ID card** pasted on a contract's last page: its number and the machine-readable lines are not masked.
+
+Over-masked: "Sự Kiện Bát Khả Kháng" taken for an organisation about ten times, "Nam" (sex) for a name, and some misread words.
+
+So the next work on pictures is the layout of label and value columns and a check of signature rows, measured on synthetic documents laid out that way; then a recogniser trained also on the fonts and print of copiers; and ID cards, which need a reading of their own. Opening `readingShipped` waits for it.
+
 ## Dependencies
 
 In the app: `onnxruntime-web` 1.26.0-dev.20260416-b7804b056c (MIT, Microsoft) is now a direct dependency, pinned to the version `@huggingface/transformers` 4.2.0 already resolves, so the lockfile gains no package; the worker imports its `webgpu` entry as Transformers.js does and uses the same `ort-wasm-simd-threaded.asyncify.wasm`. The two graphs ship in the app: the detector `ch_PP-OCRv4_det_infer.onnx` (Apache-2.0, PaddleOCR, as exported by RapidOCR; Hugging Face `SWHL/RapidOCR` at `1cfba2e90fc938db55889873735088de210cc173`, 4 745 517 bytes, sha256 `d2a7720d…`) and this decision's recogniser (7 258 670 bytes, `70c31d9f…`), the project's own work under the project's licence.
@@ -106,5 +121,5 @@ Training only; nothing below ships with the app. Locked in `scripts/ocr-train/uv
 
 - **Opening it.** `readingShipped` stays off; the owner opens it. `landing/privacy.html` must then say so in the same change, with its "Cập nhật ngày …" line, and `tests/privacy-contract.test.mjs` checks for it. The sentence in §2 would become, for example: "… chữ trong ảnh được đọc ngay trên máy, không qua mạng: trên macOS 14 trở lên bằng bộ nhận dạng ký tự có sẵn của hệ điều hành (Vision của Apple), trên Windows bằng mô hình đọc chữ đi kèm ứng dụng (cài sẵn cùng OfflineMask, không tải thêm); ảnh không được lưu lại và không có trong bản đã ẩn, chỉ có chữ đọc được."
 - **Macs before macOS 14** would also get this reading once the gate is on; it was measured on Windows only.
-- **A check on real scans.** Synthetic scans cannot show how the model does on a real copier's output or a phone photograph; a few of the owner's own scans, read on the machine and never committed, would.
+- **Real scans.** Four of the owner's own documents were read on 29 October 2026 ("The owner's own scans" above) and miss values; what they show is the next work, not decided here.
 - **What happens to `media_ocr`**, the Windows.Media.Ocr engine of 0171, which no Windows machine can reach today.
