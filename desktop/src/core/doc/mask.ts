@@ -20,11 +20,14 @@ export function maskParagraphs(
   detections: ReadonlyMap<number, readonly Detection[]>,
   scope: string,
   mailto: readonly string[] = [],
+  /** A folder's shared book (decision 0171); its findings then cover every file. */
+  shared?: AliasBook,
 ): { edits: DocEdits; findings: Finding[]; masked: number } {
   const existing = paragraphs
     .map((paragraph) => paragraph.text)
     .filter((text) => text.includes("["));
-  const book = new AliasBook(scope, (alias) => existing.some((text) => text.includes(alias)));
+  const book =
+    shared ?? new AliasBook(scope, (alias) => existing.some((text) => text.includes(alias)));
   const edits: DocEdits = { paragraphs: new Map(), links: new Map() };
   let masked = 0;
   for (const paragraph of paragraphs) {

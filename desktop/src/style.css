@@ -3612,3 +3612,77 @@ td.alias {
   gap: 10px;
   margin-top: 6px;
 }
+
+/* Masking a whole folder (decision 0171). */
+.folder-warning {
+  margin-top: 4px;
+  padding: 14px 16px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--note);
+  color: var(--note-ink);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.folder-warning p {
+  margin: 6px 0 0;
+}
+.folder-layouts {
+  margin-top: 16px;
+}
+.folder-layouts .sheet-hint {
+  margin: 0 0 8px;
+}
+.folder-layout,
+.folder-files {
+  margin-top: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--paper-raised);
+}
+.folder-layout > summary,
+.folder-files > summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  padding: 10px 14px;
+  cursor: pointer;
+  font-size: 13px;
+}
+.folder-layout > summary span {
+  color: var(--muted);
+  font: 11px var(--mono);
+}
+.folder-layout[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+.folder-layout .sheet-caption-line {
+  margin: 8px 14px 12px;
+  overflow-wrap: anywhere;
+}
+.folder-files ul {
+  max-height: 260px;
+  margin: 0;
+  padding: 0 14px 10px;
+  overflow-y: auto;
+  list-style: none;
+}
+.folder-files li {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px 0;
+  border-top: 1px solid var(--line);
+  font-size: 12px;
+}
+.folder-path {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.folder-reason {
+  flex-shrink: 0;
+  max-width: 50%;
+  color: var(--muted);
+  text-align: right;
+}

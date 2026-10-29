@@ -19,6 +19,7 @@ import LockPage from "./components/LockPage.vue";
 import {
   packKey,
   docKey,
+  folderKey,
   quickKey,
   runKey,
   sessionsKey,
@@ -32,12 +33,14 @@ import { useQuickActions } from "./composables/useQuickActions.ts";
 import { useRecognitionPack } from "./composables/useRecognitionPack.ts";
 import { useSessions } from "./composables/useSessions.ts";
 import { useDocRun } from "./composables/useDocRun.ts";
+import { useFolderRun } from "./composables/useFolderRun.ts";
 import { useSheetRun } from "./composables/useSheetRun.ts";
 import { useVault } from "./composables/useVault.ts";
 import { fileKind, fileKindErrors } from "./core/file-kind.ts";
 import type { Format, Session } from "./core/sessions.ts";
 import HomePage from "./pages/HomePage.vue";
 import DocPage from "./pages/DocPage.vue";
+import FolderPage from "./pages/FolderPage.vue";
 import SettingsPage from "./pages/SettingsPage.vue";
 import SheetPage from "./pages/SheetPage.vue";
 import WorkspacePage from "./pages/WorkspacePage.vue";
@@ -52,6 +55,7 @@ const run = useMaskingRun({ detector, pack, sessions, onSession: adoptSession })
 const sheetFiles = createSheetFiles();
 const sheet = useSheetRun({ detector, files: sheetFiles, pack, sessions, onSession: adoptSession });
 const doc = useDocRun({ detector, files: sheetFiles, pack, sessions, onSession: adoptSession });
+const folder = useFolderRun({ detector, pack, sessions });
 const vault = useVault();
 // Clipboard quick actions (decision 0090) reuse the text run and every alias table.
 const quick = useQuickActions({
@@ -100,6 +104,7 @@ provide(runKey, run);
 provide(vaultKey, vault);
 provide(sheetKey, sheet);
 provide(docKey, doc);
+provide(folderKey, folder);
 
 // The app passcode is optional (decision 0064). When one exists the lock page
 // comes first; private sessions mirror into the vault while it is open.
@@ -137,7 +142,9 @@ const format = computed<Format>(
 const topbarLabel = computed(() =>
   page.value === "home" || page.value === "settings"
     ? ""
-    : { text: "Văn bản", excel: "Bảng tính", word: "Tài liệu" }[format.value],
+    : page.value === "folder"
+      ? "Thư mục"
+      : { text: "Văn bản", excel: "Bảng tính", word: "Tài liệu" }[format.value],
 );
 
 /** History is a passcode feature (decision 0071). Without it each format has one
@@ -215,7 +222,13 @@ async function navigate(destination: Page, id: string | null = null) {
 /** The sidebar and home cards open a format; without history that means its last screen.
  * "Tạo mới" and "Sửa văn bản" inside the page go through `navigate` and start a draft. */
 function openFormat(destination: Page, id: string | null = null) {
-  if (id || historyOn.value || destination === "home" || destination === "settings")
+  if (
+    id ||
+    historyOn.value ||
+    destination === "home" ||
+    destination === "settings" ||
+    destination === "folder"
+  )
     return navigate(destination, id);
   const last = lastOpened[destination];
   return navigate(destination, last && store.find(last) ? last : null);
@@ -278,12 +291,18 @@ async function closeSidebar() {
           ><span v-if="topbarLabel">{{ topbarLabel }}</span>
         </div>
       </header>
-      <main :class="{ 'home-page': page === 'home', 'wide-page': page === 'excel' }">
+      <main
+        :class="{
+          'home-page': page === 'home',
+          'wide-page': page === 'excel' || page === 'folder',
+        }"
+      >
         <!-- The text and spreadsheet pages stay alive across navigation, so the step,
              view and pasted reply are still there on return. All of it is RAM only. -->
-        <KeepAlive include="WorkspacePage,SheetPage,DocPage">
+        <KeepAlive include="WorkspacePage,SheetPage,DocPage,FolderPage">
           <HomePage v-if="page === 'home'" ref="pageRef" @navigate="openFormat" @start="navigate" />
           <SettingsPage v-else-if="page === 'settings'" ref="pageRef" />
+          <FolderPage v-else-if="page === 'folder'" ref="pageRef" />
           <SheetPage
             v-else-if="page === 'excel'"
             ref="pageRef"

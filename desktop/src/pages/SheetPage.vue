@@ -1,15 +1,24 @@
 <script setup lang="ts">
+import type { PickedFolder } from "../adapters/folder.ts";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
+import FolderPicker from "../components/FolderPicker.vue";
 import KeepOffer from "../components/KeepOffer.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import RestoreIntro from "../components/RestoreIntro.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import ReviewList from "../components/ReviewList.vue";
 import SheetPreview from "../components/SheetPreview.vue";
-import { packKey, sheetKey, useProvided, vaultKey, type Page } from "../composables/context.ts";
+import {
+  folderKey,
+  packKey,
+  sheetKey,
+  useProvided,
+  vaultKey,
+  type Page,
+} from "../composables/context.ts";
 import type { SheetRestore } from "../composables/useSheetRun.ts";
 import { applyEdits } from "../core/sheet/mask.ts";
 import { sampleSheetCsv, sampleSheetName } from "../core/sheet/sample.ts";
@@ -20,6 +29,12 @@ const emit = defineEmits<{
   navigate: [destination: Page, id?: string | null];
   remove: [id: string];
 }>();
+const folder = useProvided(folderKey);
+/** A dropped or picked folder opens the folder page (decision 0171). */
+function openFolder(picked: PickedFolder) {
+  void folder.load(picked);
+  emit("navigate", "folder");
+}
 
 const sheet = useProvided(sheetKey);
 const pack = useProvided(packKey);
@@ -274,10 +289,13 @@ defineExpose({
           hint=".xlsx, .xls, .ods, .csv · tối đa 20 MB"
           accept=".xlsx,.xls,.ods,.csv"
           :busy="sheet.opening.value"
+          folders
           @file="sheet.openFile"
+          @folder="openFolder"
         />
         <div class="input-hint-row">
           <button type="button" class="sample-link" @click="trySample">Thử với tệp mẫu</button>
+          <FolderPicker @folder="openFolder" />
         </div>
         <p v-if="sheet.fileError.value" class="input-error drop-error" role="alert">
           {{ sheet.fileError.value }}

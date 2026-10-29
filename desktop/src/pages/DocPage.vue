@@ -1,15 +1,18 @@
 <script setup lang="ts">
+import type { PickedFolder } from "../adapters/folder.ts";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import DocPreview from "../components/DocPreview.vue";
 import FileDropZone from "../components/FileDropZone.vue";
+import FolderPicker from "../components/FolderPicker.vue";
 import KeepOffer from "../components/KeepOffer.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import RestoreIntro from "../components/RestoreIntro.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import ReviewList from "../components/ReviewList.vue";
 import {
+  folderKey,
   docKey,
   packKey,
   runKey,
@@ -30,6 +33,12 @@ const emit = defineEmits<{
   navigate: [destination: Page, id?: string | null];
   remove: [id: string];
 }>();
+const folder = useProvided(folderKey);
+/** A dropped or picked folder opens the folder page (decision 0171). */
+function openFolder(picked: PickedFolder) {
+  void folder.load(picked);
+  emit("navigate", "folder");
+}
 
 const doc = useProvided(docKey);
 const pack = useProvided(packKey);
@@ -273,7 +282,9 @@ defineExpose({
           hint=".docx, .odt, .pdf · tối đa 20 MB"
           accept=".docx,.odt,.pdf,.txt,.md"
           :busy="doc.opening.value"
+          folders
           @file="openFile"
+          @folder="openFolder"
         />
         <p
           v-if="doc.openingProgress.value"
@@ -287,6 +298,7 @@ defineExpose({
         </p>
         <div class="input-hint-row">
           <button type="button" class="sample-link" @click="trySample">Thử với tệp mẫu</button>
+          <FolderPicker @folder="openFolder" />
         </div>
         <p v-if="doc.fileError.value" class="input-error drop-error" role="alert">
           {{ doc.fileError.value }}

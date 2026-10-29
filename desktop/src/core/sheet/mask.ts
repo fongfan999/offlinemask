@@ -143,11 +143,14 @@ export function maskTables(
   tables: readonly SheetTable[],
   plan: MaskPlan,
   scope: string,
+  /** A folder's shared book (decision 0171); its findings then cover every file. */
+  shared?: AliasBook,
 ): { edits: CellEdits; findings: Finding[]; masked: number } {
   const existing = tables
     .flatMap((table) => [...table.preamble, ...table.rows].flat())
     .filter((text) => text.includes("["));
-  const book = new AliasBook(scope, (alias) => existing.some((text) => text.includes(alias)));
+  const book =
+    shared ?? new AliasBook(scope, (alias) => existing.some((text) => text.includes(alias)));
   let masked = 0;
   const edits: CellEdits = tables.map((table, sheet) => {
     const changes = new Map<number, Map<number, string>>();

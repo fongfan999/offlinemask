@@ -32,6 +32,7 @@ const upcomingFormats = [{ label: "Hình ảnh", icon: "image", types: "JPG, PNG
 const screens: Record<Page, string> = {
   home: "Trang chủ",
   settings: "Cài đặt",
+  folder: "Thư mục",
   text: "Văn bản",
   excel: "Bảng tính",
   word: "Tài liệu",

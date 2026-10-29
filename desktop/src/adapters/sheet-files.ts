@@ -113,6 +113,14 @@ export function createSheetFiles() {
     close(handle: string) {
       void send({ type: "close", handle });
     },
+    /** Stop the worker and drop every file it holds; it starts again when next used. */
+    dispose() {
+      worker?.terminate();
+      worker = undefined;
+      for (const { resolve } of waiting.values())
+        resolve({ type: "failed", id: -1, code: "unreadable" });
+      waiting.clear();
+    },
   };
 }
 export type SheetFiles = ReturnType<typeof createSheetFiles>;

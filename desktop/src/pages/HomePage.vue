@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PickedFolder } from "../adapters/folder.ts";
 import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from "vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import AppIcon from "../components/AppIcon.vue";
@@ -7,6 +8,7 @@ import FileDropZone from "../components/FileDropZone.vue";
 import MaskingPreview from "../components/MaskingPreview.vue";
 import {
   docKey,
+  folderKey,
   packKey,
   quickKey,
   runKey,
@@ -29,6 +31,12 @@ const run = useProvided(runKey);
 const sheet = useProvided(sheetKey);
 const doc = useProvided(docKey);
 const quick = useProvided(quickKey);
+const folder = useProvided(folderKey);
+/** A dropped folder, or several files, goes to the folder page (decision 0171). */
+function startFolder(picked: PickedFolder) {
+  void folder.load(picked);
+  emit("start", "folder");
+}
 /** Ẩn nhanh, the way in from other apps (decision 0099): offered while it does not work. */
 const quickOffer = computed(
   () => quick.desktop && quick.popoverSupported.value && !quick.quickReady.value,
@@ -157,7 +165,9 @@ const packNotice = computed<PackNotice | null>(() => {
       :hint="`Excel, CSV, Word, PDF, TXT · dán bằng ${pasteKey}`"
       :accept="accept"
       compact
+      folders
       @file="startWith"
+      @folder="startFolder"
     />
     <p v-if="startError" class="input-error start-error" role="alert">{{ startError }}</p>
     <div class="start-notes">

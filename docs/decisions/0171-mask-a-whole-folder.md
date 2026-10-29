@@ -1,0 +1,27 @@
+# 0171 — Mask a whole folder: survey, mask, review once, save a mirrored folder
+
+Date: 28 October 2026. Status: prototype. The owner asked whether a whole folder could be masked, then set the shape: review spreadsheets sensibly across many files, process in parallel within what the machine can take, warn when a folder is large, accept a dropped folder like a dropped file, and, for a folder too big for one computer, suggest a dedicated OfflineMask machine for the person's work or company instead of a "contact us".
+
+## Why
+
+People keep documents in folders: a year of bank statements, a client's contracts, a team's exports. One file at a time asks them to repeat the same three steps dozens of times and gives every file its own aliases, so the AI cannot tell that `[TEN_1_ab12]` in one contract and `[TEN_3_9f0c]` in the next are the same person.
+
+## What the prototype does
+
+- **Entry.** A folder (or several files) dropped on the home start box or the Word and spreadsheet pages, or picked with "Chọn thư mục", opens the folder page. The sidebar is unchanged; the folder page is reached only this way. Word, OpenDocument, PDF, text and spreadsheet files are taken; everything else is listed as skipped with the reason; system litter (`.DS_Store`, `~$` lock files, hidden files) is not listed at all.
+- **Survey.** Every file is opened once, counted and closed again: how much text it holds and, for each sheet, its header layout and how much text each column holds. Files that cannot be read (a password, a scanned PDF) are listed with the page's usual message. Nothing is kept open, so memory does not grow with the folder.
+- **Spreadsheets by layout.** Sheets whose headers are the same (normalized like column suggestions) share one layout: twelve monthly statements are one card. Each card shows the first rows of one of its files with the same per-column hide / scan / keep choice as the spreadsheet page, suggested the same way; a choice applies to every sheet of that layout. Documents need no choice before masking.
+- **Estimate and warnings.** The time is estimated from the text the model will read (documents' paragraphs, spreadsheet columns set to scan) at an assumed 5 000 characters a second; it updates as layout choices change, and the progress line during the run uses the measured pace. Above an hour, the page says so and adds: "Nếu thường xuyên cần ẩn nhiều tài liệu, bạn có thể dành riêng một máy chạy OfflineMask cho công việc hoặc cho cả công ty, để máy làm việc của bạn không bị ảnh hưởng." No contact link and no price wording (owner, 28 Oct).
+- **Parallel within the machine.** A new command reports the processor count and installed memory (`machine.rs`: `available_parallelism`, and `hw.memsize`, `GlobalMemoryStatusEx` or `/proc/meminfo`; no new dependency, nothing stored). Files are opened and written by a pool of file workers: one per four processors, at most one per 4 GB of memory, between one and four. The model itself runs one batch at a time, as it does today (one locked session, or one helper process in release builds), using its four threads; the pool keeps it fed, so it never waits for a file to be read or written. Running several model batches at once is left for a measured change of its own: it multiplies memory and touches the masking engine.
+- **One alias table for the folder.** Every file is masked with the same alias book, so one value has one alias in every file. A text the model already read in another file (a repeated heading, a name in a cell) is not read again.
+- **Review once.** After masking, the hidden values of the whole folder are listed once, with how many files each appears in. Unticking a value keeps it in every file.
+- **Save.** The user picks where to put the result; the app creates `<folder> (OfflineMasked)` there (numbered if it exists) and writes each masked file at the same relative path, named as the single-file pages name them. Each file is opened again, given its edits and the kept values, written and closed. Originals are never touched. In the browser preview each file downloads.
+- **Permissions.** Reading a folder uses the web view's own folder input and drop, which hand the page the chosen files and nothing else. Saving needs two new permissions: the folder dialog (`dialog:allow-open`), which adds only the chosen folder to the app's file scope, and creating folders (`fs:allow-mkdir`) inside it. The privacy page says so.
+
+## Known limits
+
+- No history and no restore yet. A folder's alias table lives in memory until another folder is opened or the app quits; the AI's returned files cannot be restored from the folder page. History for a folder should be one entry, not one per file (decision 0071), and restoring a returned folder is its own change.
+- The speed of 5 000 characters a second is an assumption from decision 0025's profile of an older graph, not a measurement of the shipped one. It should be measured on `~/OfflineMask-eval` before a release relies on it.
+- Text files in a folder go through the document flow, which skips name spans without a capital letter (decision 0079); the text page keeps them.
+- PDFs are read three times (survey, mask, save). Opening is cheap next to the model, but a long PDF is not free.
+- Concurrency is sized once, when the folder opens; it does not back off if memory runs short during the run.

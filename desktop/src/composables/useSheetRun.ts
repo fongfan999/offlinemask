@@ -69,7 +69,7 @@ export interface SheetProgress {
   startedAt: number;
 }
 /** An .xls is read into the .xlsx workbook model, so its copies are .xlsx (decision 0086). */
-const savedName = (name: string) => name.replace(/\.xls$/i, ".xlsx");
+export const savedName = (name: string) => name.replace(/\.xls$/i, ".xlsx");
 export const sheetFailure =
   "Chưa xử lý được bảng tính trên thiết bị. Tệp gốc không bị thay đổi. Hãy thử lại.";
 

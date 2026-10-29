@@ -127,7 +127,8 @@ pub fn run() {
         selection::quick_selection_supported,
         selection::quick_selection_watch,
         selection::quick_read_selection,
-        selection::quick_set_places
+        selection::quick_set_places,
+        machine::machine_resources
     ]);
     #[cfg(all(
         feature = "minilm-desktop-prototype",
@@ -160,6 +161,7 @@ pub fn run() {
         selection::quick_selection_watch,
         selection::quick_read_selection,
         selection::quick_set_places,
+        machine::machine_resources,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -195,6 +197,7 @@ pub fn run() {
         selection::quick_selection_watch,
         selection::quick_read_selection,
         selection::quick_set_places,
+        machine::machine_resources,
         minilm_prototype::minilm_encode,
         minilm_prototype::minilm_cancel,
         minilm_prototype::minilm_idle,
@@ -234,6 +237,7 @@ pub fn run() {
         selection::quick_selection_watch,
         selection::quick_read_selection,
         selection::quick_set_places,
+        machine::machine_resources,
         recognition_native::recognition_native_load,
         recognition_native::recognition_native_run,
         recognition_native::recognition_native_release
@@ -269,6 +273,7 @@ pub fn run() {
 }
 mod background;
 mod clipboard_guard;
+mod machine;
 #[cfg(feature = "minilm-native-desktop-prototype")]
 mod minilm_native_graph;
 #[cfg(feature = "minilm-desktop-prototype")]

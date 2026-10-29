@@ -103,7 +103,9 @@ test("the app's system permissions are the ones the page explains (privacy §5)"
     [
       "clipboard-manager:allow-read-text",
       "clipboard-manager:allow-write-text",
+      "dialog:allow-open",
       "dialog:allow-save",
+      "fs:allow-mkdir",
       "fs:allow-write-file",
       "global-shortcut:allow-is-registered",
       "global-shortcut:allow-register",
@@ -113,6 +115,23 @@ test("the app's system permissions are the ones the page explains (privacy §5)"
     UPDATE,
   );
   assert.deepEqual(ids("pill"), [], UPDATE);
+  // Decision 0171: a masked folder is written as a new folder where the user chooses.
+  assert.match(
+    read("../../landing/privacy.html"),
+    /khi ẩn cả thư mục,\s+một\s+thư\s+mục\s+mới/,
+    UPDATE,
+  );
+});
+
+test("the machine check reads processor count and memory only (privacy §5)", () => {
+  const machine = read("../src-tauri/src/machine.rs");
+  assert.match(machine, /struct Resources \{\s*cores: usize,\s*memory: Option<u64>,\s*\}/, UPDATE);
+  assert.doesNotMatch(machine, /reqwest|write|create_dir/, UPDATE);
+  assert.match(
+    read("../../landing/privacy.html"),
+    /bao nhiêu nhân xử lý\s+và bao nhiêu bộ nhớ; các con số này không được lưu hay gửi đi/,
+    UPDATE,
+  );
 });
 
 test("selection watching observes mouse buttons only, never keys (privacy §5)", () => {
