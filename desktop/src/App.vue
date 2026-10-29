@@ -41,6 +41,7 @@ import type { Format, Session } from "./core/sessions.ts";
 import HomePage from "./pages/HomePage.vue";
 import DocPage from "./pages/DocPage.vue";
 import FolderPage from "./pages/FolderPage.vue";
+import RestorePage from "./pages/RestorePage.vue";
 import SettingsPage from "./pages/SettingsPage.vue";
 import SheetPage from "./pages/SheetPage.vue";
 import WorkspacePage from "./pages/WorkspacePage.vue";
@@ -140,12 +141,30 @@ const format = computed<Format>(
 );
 // Settings has no crumb: its heading already says "Cài đặt".
 const topbarLabel = computed(() =>
-  page.value === "home" || page.value === "settings"
+  page.value === "home" || page.value === "settings" || page.value === "restore"
     ? ""
     : page.value === "folder"
       ? "Thư mục"
       : { text: "Văn bản", excel: "Bảng tính", word: "Tài liệu" }[format.value],
 );
+/** A folder in progress has no session, so the sidebar lists it from here (decision 0172). */
+const folderStatus: Record<string, string> = {
+  surveying: "Đang đọc thư mục",
+  ready: "Chờ bắt đầu",
+  review: "Đã ẩn · chờ lưu",
+  saving: "Đang lưu",
+  saved: "Đã lưu",
+};
+const folderItem = computed(() => {
+  const phase = folder.phase.value;
+  if (phase === "empty") return null;
+  const progress = folder.progress.value;
+  const status =
+    phase === "masking"
+      ? `Đang ẩn · ${progress?.total ? Math.floor((progress.done / progress.total) * 100) : 0}%`
+      : folderStatus[phase]!;
+  return { name: folder.name.value, status };
+});
 
 /** History is a passcode feature (decision 0071). Without it each format has one
  * screen: a new result replaces the previous one, and coming back to the format
@@ -227,7 +246,8 @@ function openFormat(destination: Page, id: string | null = null) {
     historyOn.value ||
     destination === "home" ||
     destination === "settings" ||
-    destination === "folder"
+    destination === "folder" ||
+    destination === "restore"
   )
     return navigate(destination, id);
   const last = lastOpened[destination];
@@ -272,6 +292,7 @@ async function closeSidebar() {
       :open="sidebarOpen"
       :preparing="pack.preparing.value"
       :history="historyOn"
+      :folder="folderItem"
       :version="version"
       @navigate="openFormat"
       @close="closeSidebar"
@@ -299,10 +320,11 @@ async function closeSidebar() {
       >
         <!-- The text and spreadsheet pages stay alive across navigation, so the step,
              view and pasted reply are still there on return. All of it is RAM only. -->
-        <KeepAlive include="WorkspacePage,SheetPage,DocPage,FolderPage">
+        <KeepAlive include="WorkspacePage,SheetPage,DocPage,FolderPage,RestorePage">
           <HomePage v-if="page === 'home'" ref="pageRef" @navigate="openFormat" @start="navigate" />
           <SettingsPage v-else-if="page === 'settings'" ref="pageRef" />
           <FolderPage v-else-if="page === 'folder'" ref="pageRef" />
+          <RestorePage v-else-if="page === 'restore'" ref="pageRef" @navigate="navigate" />
           <SheetPage
             v-else-if="page === 'excel'"
             ref="pageRef"

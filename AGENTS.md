@@ -4,7 +4,7 @@ Read [docs/product-direction.md](docs/product-direction.md) before product or UI
 
 - Keep the experience straightforward, with secondary controls revealed only when needed.
 - Use the owner's personal brand theme (warm paper, ink, cobalt accent; light and dark via shared tokens in `brand/theme.css`, imported by `desktop/src/style.css` and the landing page); do not reintroduce purple/lavender or a dark-green primary palette.
-- Preserve the Text, Spreadsheet and Word entry points in the left sidebar. Reopenable conversion history appears there once a passcode is set; without one the list is hidden and nothing talks about saving (decision 0071).
+- The left sidebar is organised by task, not file format (decision 0172): "Ẩn thông tin" (one start for files, folders and text) and "Lấy lại thông tin thật". Below them, reopenable history once a passcode is set; without one, only what is open in this launch (RAM), and nothing talks about saving (decision 0071).
 - Use mise-managed versions and `mise exec --` when running project tools. Keep both dependency lockfiles.
 - Follow standard Vue/TypeScript patterns and shared CSS tokens. The project is open source; document substantial choices and dependency provenance in `docs/decisions/`.
 - The recognition models are data: everything about them is in `desktop/packs/<id>.json`. Change the pack file rather than hard-coding model names, directories or labels in code, and keep `pnpm test` and `pnpm test:models` green.

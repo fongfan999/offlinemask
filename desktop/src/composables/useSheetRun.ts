@@ -349,11 +349,18 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
 
   /** Open the file that came back from the AI and swap this session's aliases back. */
   async function openReturned(session: SheetSession, file: File): Promise<SheetRestore | string> {
+    return openReply(session.findings, file);
+  }
+  /** A returned workbook restored with any aliases, for the restore page (decision 0172). */
+  async function openReply(
+    findings: readonly Finding[],
+    file: File,
+  ): Promise<SheetRestore | string> {
     if (!sheetFormat(file.name)) return fileErrorMessages.unsupported;
     if (file.size > maxFileBytes) return fileErrorMessages["too-large"];
     try {
       const opened = await files.open(file);
-      const result = restoreTables(opened.tables, session.findings);
+      const result = restoreTables(opened.tables, findings);
       return { fileName: file.name, handle: opened.handle, tables: opened.tables, ...result };
     } catch (error) {
       return error instanceof SheetAdapterError ? error.message : fileErrorMessages.unreadable;
@@ -393,6 +400,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     setKept,
     download,
     openReturned,
+    openReply,
     downloadRestored,
     closeReturned,
   };

@@ -294,11 +294,14 @@ export function useQuickActions({
   // replaced on the one-screen flow without a passcode (decision 0072) stays
   // restorable until the app closes; an explicitly deleted one is forgotten.
   const tables = new Map<string, readonly Finding[]>();
+  // The map itself is not reactive; the restore page follows this count (decision 0172).
+  const tablesChanged = ref(0);
   watch(
     sessions,
     (list) => {
       for (const session of list)
         if (isPrivate(session)) tables.set(session.id, sessionFindings(session));
+      tablesChanged.value++;
     },
     { deep: true, immediate: true },
   );
@@ -306,7 +309,13 @@ export function useQuickActions({
   const tables_entries = () => tables.entries();
   function forget(id: string) {
     tables.delete(id);
+    tablesChanged.value++;
   }
+  /** Every alias this launch knows, for "Lấy lại thông tin thật" (decision 0172). */
+  const knownFindings = computed(() => {
+    void tablesChanged.value;
+    return knownTables().flat();
+  });
 
   async function show(status: QuickStatus) {
     lastStatus.value = status;
@@ -920,6 +929,7 @@ export function useQuickActions({
     shortcut,
     setShortcut,
     forget,
+    knownFindings,
     start,
     stop,
   };

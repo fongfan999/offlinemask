@@ -354,12 +354,21 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
     return true;
   }
   async function openReturned(session: DocSession, file: File): Promise<DocRestore | string> {
-    if (!(isPdfSession(session) ? returnedForPdf : returnedName).test(file.name))
-      return isPdfSession(session) ? unsupportedReturn : docErrorMessages.unsupported;
+    return openReply(session.findings, file, isPdfSession(session));
+  }
+  /** A returned document restored with any aliases: the restore page passes every table
+   * it knows, and takes the Markdown and text a PDF's copy comes back as (decision 0172). */
+  async function openReply(
+    findings: readonly Finding[],
+    file: File,
+    fromPdf = true,
+  ): Promise<DocRestore | string> {
+    if (!(fromPdf ? returnedForPdf : returnedName).test(file.name))
+      return fromPdf ? unsupportedReturn : docErrorMessages.unsupported;
     if (file.size > maxDocBytes) return docErrorMessages["too-large"];
     try {
       const opened = await files.openDoc(file);
-      const result = restoreParagraphs(opened.paragraphs, session.findings, opened.mailto);
+      const result = restoreParagraphs(opened.paragraphs, findings, opened.mailto);
       return {
         fileName: file.name,
         handle: opened.handle,
@@ -400,6 +409,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
     download,
     copyMasked,
     openReturned,
+    openReply,
     downloadRestored,
     closeReturned,
   };

@@ -6,7 +6,6 @@ import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
 import FolderPicker from "../components/FolderPicker.vue";
-import MaskingPreview from "../components/MaskingPreview.vue";
 import {
   docKey,
   folderKey,
@@ -22,7 +21,7 @@ import { sampleText } from "../core/review.ts";
 import { packProgress } from "../composables/useRecognitionPack.ts";
 
 const emit = defineEmits<{
-  /** A link: Cài đặt, or a format's page as the user last left it. */
+  /** A link: Cài đặt, Lấy lại thông tin thật, or a format's page as last left. */
   navigate: [destination: Page];
   /** The start box: the format's first step, where the file or text just went. */
   start: [destination: Page];
@@ -69,6 +68,11 @@ function startWithText(text: string) {
     return;
   }
   run.draft.value = text;
+  run.processingError.value = "";
+  emit("start", "text");
+}
+/** "Gõ hoặc dán chữ": an empty text page, for people who do not know about ⌘V. */
+function typeText() {
   run.processingError.value = "";
   emit("start", "text");
 }
@@ -156,15 +160,15 @@ const packNotice = computed<PackNotice | null>(() => {
     <span class="hero-logo brand-mark" aria-hidden="true">
       <BrandMark :size="38" />
     </span>
-    <h1 ref="heading" tabindex="-1">Ẩn thông tin riêng<span>trước khi chia sẻ với AI.</span></h1>
-    <p>Số tài khoản, số điện thoại, họ tên… được đổi thành mã thay thế ngay trên máy bạn.</p>
-    <MaskingPreview />
+    <h1 ref="heading" tabindex="-1">Ẩn thông tin riêng<span>trước khi gửi cho AI.</span></h1>
+    <p>Họ tên, số điện thoại, số tài khoản… được thay bằng mã, ngay trên máy bạn.</p>
   </div>
+  <!-- One place to start (decision 0172): a file, a folder or text, the app sorts it. -->
   <section class="start-box" aria-label="Bắt đầu">
     <FileDropZone
       icon="upload"
-      title="Kéo thả tệp, thư mục hoặc dán văn bản"
-      :hint="`Excel, CSV, Word, PDF, TXT · dán bằng ${pasteKey}`"
+      title="Kéo tệp hoặc cả thư mục vào đây"
+      :hint="`Word, Excel, PDF · dán chữ bằng ${pasteKey}`"
       :accept="accept"
       compact
       folders
@@ -172,15 +176,16 @@ const packNotice = computed<PackNotice | null>(() => {
       @folder="startFolder"
     />
     <p v-if="startError" class="input-error start-error" role="alert">{{ startError }}</p>
-    <div class="start-notes">
-      <span><AppIcon name="lock" :size="13" />Tệp và văn bản không rời khỏi máy bạn.</span>
-      <span class="start-links">
-        <FolderPicker @folder="startFolder" />
-        <button type="button" class="sample-link" @click="startWithText(sampleText)">
-          Xem thử với ví dụ
-        </button>
-      </span>
+    <div class="start-actions">
+      <FolderPicker @folder="startFolder" />
+      <button type="button" class="sample-link" @click="typeText">Gõ hoặc dán chữ</button>
+      <button type="button" class="sample-link" @click="startWithText(sampleText)">
+        Xem thử với ví dụ
+      </button>
     </div>
+    <p class="start-private">
+      <AppIcon name="lock" :size="13" />Tệp và chữ không rời khỏi máy bạn.
+    </p>
     <!-- The other way in, until it works (decision 0099). -->
     <p v-if="quickOffer" class="start-quick">
       <BrandMark :size="14" />Hoặc bôi đen chữ ngay trong ChatGPT, Claude hay Gemini để ẩn tại chỗ.
@@ -189,6 +194,17 @@ const packNotice = computed<PackNotice | null>(() => {
       </button>
     </p>
   </section>
+  <!-- How it goes, in three plain steps; the third has its own page (decision 0172). -->
+  <ol class="home-steps" aria-label="Cách dùng">
+    <li><strong>Ẩn</strong>Thông tin riêng được thay bằng mã như [TEN_1].</li>
+    <li><strong>Gửi cho AI</strong>Dán bản đã ẩn vào ChatGPT, Gemini… như bình thường.</li>
+    <li>
+      <strong>Lấy lại</strong>Dán câu trả lời của AI vào OfflineMask, tên thật hiện lại.
+      <button type="button" class="link-button" @click="emit('navigate', 'restore')">
+        Lấy lại thông tin thật
+      </button>
+    </li>
+  </ol>
   <div v-if="packNotice" class="pack-notice" role="status">
     <AppIcon :name="packNotice.icon" :size="16" />
     <p>

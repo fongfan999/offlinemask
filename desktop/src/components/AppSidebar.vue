@@ -1,40 +1,42 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from "vue";
+import { computed, ref, useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
-import ComingSoonBadge from "./ComingSoonBadge.vue";
 import ReportDialog from "./ReportDialog.vue";
 import { openProductWebsite, productWebsite } from "../adapters/desktop.ts";
 import type { Page } from "../composables/context.ts";
 import { sessionPreview } from "../core/session-preview.ts";
 import { isPrivate, sessionTitle, type Session } from "../core/sessions.ts";
 
-defineProps<{
+const props = defineProps<{
   sessions: readonly Session[];
   activeId: string | null;
   page: Page;
   open: boolean;
   preparing: boolean;
-  /** History is a passcode feature: the list stays hidden until one is set. */
+  /** With a passcode the list is history; without one it is what is open now, in RAM. */
   history: boolean;
+  /** A folder being masked or reviewed, which is no session (decision 0171). */
+  folder: { name: string; status: string } | null;
   version: string;
 }>();
 const emit = defineEmits<{ navigate: [destination: Page, id?: string | null]; close: [] }>();
 
-/** Each content type with the files it opens (decision 0088). */
-const formats = [
-  { page: "text", icon: "text", label: "Văn bản", types: "TXT, MD" },
-  { page: "excel", icon: "table", label: "Bảng tính", types: "XLSX, XLS, ODS, CSV" },
-  { page: "word", icon: "file", label: "Tài liệu", types: "DOCX, ODT, PDF" },
-  // A folder mixes the formats above (decision 0171).
-  { page: "folder", icon: "folder", label: "Thư mục", types: "Nhiều tệp cùng lúc" },
-] as const;
-const upcomingFormats = [{ label: "Hình ảnh", icon: "image", types: "JPG, PNG" }];
+/** The two jobs (decision 0172): hide something, and later put the real values back
+ * into the AI's reply. Which page a file opens on is the app's business, not a choice. */
+const hiding = computed(
+  () =>
+    props.page === "home" ||
+    ((props.page === "text" || props.page === "excel" || props.page === "word") &&
+      !props.activeId) ||
+    (props.page === "folder" && !props.folder),
+);
 /** What the report says the user was looking at. */
 const screens: Record<Page, string> = {
   home: "Trang chủ",
   settings: "Cài đặt",
   folder: "Thư mục",
+  restore: "Lấy lại thông tin thật",
   text: "Văn bản",
   excel: "Bảng tính",
   word: "Tài liệu",
@@ -82,42 +84,38 @@ defineExpose({
       <span class="brand-mark"><BrandMark :size="28" /></span
       ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
     </button>
-    <nav aria-label="Định dạng">
-      <button
-        :aria-current="page === 'home' ? 'page' : undefined"
-        @click="emit('navigate', 'home')"
-      >
-        <AppIcon name="home" />Trang chủ
-      </button>
-      <button
-        v-for="format in formats"
-        :key="format.page"
-        :aria-current="page === format.page && (!activeId || !history) ? 'page' : undefined"
-        @click="emit('navigate', format.page)"
-      >
-        <AppIcon :name="format.icon" /><span class="nav-text"
-          >{{ format.label }}<small>{{ format.types }}</small></span
+    <nav aria-label="Việc cần làm">
+      <button :aria-current="hiding ? 'page' : undefined" @click="emit('navigate', 'home')">
+        <AppIcon name="mask" /><span class="nav-text"
+          >Ẩn thông tin<small>Tệp, thư mục, chữ</small></span
         >
       </button>
-      <!-- Formats that are planned but not built: visible, not clickable. -->
       <button
-        v-for="upcoming in upcomingFormats"
-        :key="upcoming.label"
-        class="nav-upcoming"
-        :aria-label="`${upcoming.label}, sắp có`"
-        disabled
+        :aria-current="page === 'restore' ? 'page' : undefined"
+        @click="emit('navigate', 'restore')"
       >
-        <AppIcon :name="upcoming.icon" /><span class="nav-text nav-label"
-          >{{ upcoming.label }}<small v-if="upcoming.types">{{ upcoming.types }}</small></span
-        ><ComingSoonBadge />
+        <AppIcon name="undo" /><span class="nav-text"
+          >Lấy lại thông tin<small>Từ câu trả lời của AI</small></span
+        >
       </button>
     </nav>
-    <template v-if="history">
+    <template v-if="history || sessions.length || folder">
       <div class="history-heading">
-        LỊCH SỬ <span>{{ sessions.length || "" }}</span>
+        {{ history ? "Lịch sử" : "Đang mở" }}
       </div>
       <div class="history-list">
-        <p v-if="!sessions.length" class="empty-history">Chưa có mục nào.</p>
+        <button
+          v-if="folder"
+          class="history-item"
+          :aria-current="page === 'folder' ? 'page' : undefined"
+          @click="emit('navigate', 'folder')"
+        >
+          <AppIcon name="folder" :size="16" /><span
+            ><strong>{{ folder.name }}</strong
+            ><small>{{ folder.status }}</small></span
+          >
+        </button>
+        <p v-if="!sessions.length && !folder" class="empty-history">Chưa có mục nào.</p>
         <button
           v-for="session in sessions"
           :key="session.id"
@@ -152,7 +150,7 @@ defineExpose({
           aria-label="Đang chuẩn bị gói nhận diện"
         ></span>
       </button>
-      <button @click="report?.open()"><AppIcon name="help" />Báo lỗi</button>
+      <button @click="report?.open()"><AppIcon name="help" />Báo lỗi hoặc góp ý</button>
     </nav>
     <ReportDialog ref="report" :version="version" :screen="screens[page]" />
     <footer class="sidebar-footer">

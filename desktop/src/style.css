@@ -182,44 +182,21 @@ nav button:hover,
   background: var(--paper-raised);
   color: var(--ink);
 }
-/* Planned formats (decision 0087): readable in the list, not clickable. */
-nav button.nav-upcoming,
-nav button.nav-upcoming:hover {
-  background: transparent;
-  color: var(--muted);
-}
-.nav-upcoming > svg,
-.nav-upcoming > .nav-label {
-  opacity: 0.6;
-}
-/* A format's name with the file types it opens beneath. */
+/* A task's name with a plain line beneath on what it takes (decision 0172). */
 .nav-text {
   display: grid;
   line-height: 1.35;
 }
-/* As large as the narrow (210px) sidebar allows without wrapping "XLSX, XLS, ODS, CSV"
-   or the upcoming formats' names (decision 0134). */
 .nav-text small {
   color: var(--muted);
-  font: 10.5px var(--mono);
-  letter-spacing: 0;
+  font-size: 11.5px;
   font-weight: 400;
 }
-.nav-upcoming .coming-soon-badge {
-  margin-left: auto;
-  padding: 5px calc(6px - 0.08em) 5px 6px;
-  font-size: 10px;
-}
 .history-heading {
-  display: flex;
-  justify-content: space-between;
-  font: 11px var(--mono);
-  letter-spacing: 0.12em;
+  font-size: 12px;
+  font-weight: 600;
   color: var(--muted);
-  padding: 30px 14px 12px;
-}
-.history-heading span {
-  letter-spacing: 0;
+  padding: 28px 14px 10px;
 }
 .history-list {
   min-height: 0;
@@ -372,26 +349,63 @@ h1 {
   font-size: 13px;
   line-height: 1.6;
 }
-.start-notes {
+.start-actions {
   display: flex;
   flex-wrap: wrap;
-  justify-content: space-between;
+  gap: 8px 18px;
+  margin-top: 12px;
+  font-size: 13px;
+}
+.start-private {
+  display: flex;
   align-items: center;
-  gap: 8px 16px;
-  margin-top: 10px;
+  gap: 6px;
+  margin: 10px 0 0;
   color: var(--muted);
   font-size: 12px;
 }
-.start-notes > span {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-.start-notes > .start-links {
-  gap: 16px;
-}
-.start-notes svg {
+.start-private svg {
   color: var(--accent);
+}
+/* The three steps under the start box (decision 0172). */
+.home-steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+.home-steps li {
+  counter-increment: step;
+  display: grid;
+  align-content: start;
+  gap: 4px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--paper-raised);
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.5;
+}
+.home-steps strong {
+  color: var(--ink);
+  font-size: 13.5px;
+}
+.home-steps strong::before {
+  content: counter(step) ". ";
+  color: var(--accent);
+}
+.home-steps .link-button {
+  justify-self: start;
+  margin-top: 2px;
+}
+@media (max-width: 640px) {
+  .home-steps {
+    grid-template-columns: 1fr;
+  }
 }
 /* Ẩn nhanh, offered quietly under the start box until it works (decision 0099). */
 .start-quick {
@@ -414,6 +428,7 @@ h1 {
   padding: 12px 16px;
   border: 1px solid var(--line);
   border-radius: 10px;
+  margin-top: 14px;
   /* An optional upgrade, not a step: quieter than the start box. */
   color: var(--ink);
 }

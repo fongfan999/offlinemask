@@ -35,6 +35,7 @@ import {
   scanCells,
   type CellEdits,
 } from "../core/sheet/mask.ts";
+import type { Finding } from "../core/review.ts";
 import { scanTexts } from "./scanTexts.ts";
 import { docErrorMessages, maskedName } from "./useDocRun.ts";
 import type { TextDetector } from "./useMaskingRun.ts";
@@ -417,8 +418,13 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     detector.cancel(true);
   }
 
+  /** The folder's aliases once masked, so the restore page can read replies about it. */
+  // `book` is not reactive: read `totals` first so both computeds follow every run.
+  const findings = computed<readonly Finding[]>(() =>
+    totals.value.size && book ? book.findings : [],
+  );
   const review = computed(() =>
-    book && totals.value.size ? reviewGroups(book.findings, totals.value, kept.value) : [],
+    totals.value.size && book ? reviewGroups(book.findings, totals.value, kept.value) : [],
   );
   const masked = computed(() =>
     files.value.filter((file) => file.status === "masked" || file.status === "saved"),
@@ -493,6 +499,7 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     dedicated,
     progress,
     review,
+    findings,
     fileCounts,
     saveTarget,
     load,
