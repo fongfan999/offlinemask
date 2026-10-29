@@ -114,6 +114,9 @@ defineExpose({
   focusHeading() {
     heading.value?.focus({ preventScroll: true });
   },
+  startOver() {
+    mode.value = "hide";
+  },
 });
 
 interface PackNotice {

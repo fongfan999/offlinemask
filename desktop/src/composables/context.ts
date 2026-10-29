@@ -18,6 +18,8 @@ export interface PageHandle {
   focusHeading(): void;
   focusResult?(): void;
   focusInput?(): void;
+  /** Home: back to the first tab. */
+  startOver?(): void;
 }
 
 export type RecognitionPack = ReturnType<typeof useRecognitionPack>;

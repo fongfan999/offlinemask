@@ -288,17 +288,29 @@ nav button:hover,
   border: 1px solid var(--line-strong);
   border-radius: 12px;
   background: var(--paper-raised);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ink) 8%, transparent);
   color: var(--ink);
   font-size: 13.5px;
   font-weight: 600;
   text-align: left;
+  cursor: pointer;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s,
+    translate 0.15s;
 }
 .sidebar-new svg {
   color: var(--accent);
 }
-.sidebar-new:hover,
-.sidebar-new[aria-current] {
+/* An action, not a place: it lifts under the pointer and is never shown as selected. */
+.sidebar-new:hover {
   border-color: var(--accent);
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--ink) 10%, transparent);
+  translate: 0 -1px;
+}
+.sidebar-new:active {
+  translate: 0;
+  box-shadow: none;
 }
 .history-heading {
   font-size: 12px;

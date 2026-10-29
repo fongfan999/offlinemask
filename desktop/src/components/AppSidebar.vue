@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, useTemplateRef } from "vue";
+import { useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
 import ReportDialog from "./ReportDialog.vue";
@@ -7,7 +7,7 @@ import type { Page } from "../composables/context.ts";
 import { sessionPreview } from "../core/session-preview.ts";
 import { isPrivate, sessionTitle, type Session } from "../core/sessions.ts";
 
-const props = defineProps<{
+defineProps<{
   sessions: readonly Session[];
   activeId: string | null;
   page: Page;
@@ -25,17 +25,10 @@ const emit = defineEmits<{
   close: [];
   /** Wide windows: fold the sidebar away; the logo moves to the top bar (decision 0172). */
   collapse: [];
+  /** "+ Ẩn thông tin mới": home, on its first tab, from anywhere (home included). */
+  start: [];
 }>();
 
-/** One way in (decision 0172): home holds both halves of the job, hiding and getting the
- * full reply back. Which page a file opens on is the app's business, not a choice. */
-const hiding = computed(
-  () =>
-    props.page === "home" ||
-    ((props.page === "text" || props.page === "excel" || props.page === "word") &&
-      !props.activeId) ||
-    (props.page === "folder" && !props.folder),
-);
 /** What the report says the user was looking at. */
 const screens: Record<Page, string> = {
   home: "Trang chủ",
@@ -91,15 +84,12 @@ defineExpose({
     </div>
     <!-- The pattern AI users know from their chat apps (decision 0172): start something new
          at the top, what is open or kept below. -->
-    <button
-      class="sidebar-new"
-      :aria-current="hiding ? 'page' : undefined"
-      @click="emit('navigate', 'home')"
-    >
+    <!-- An action, never "current": it looked selected, and so not clickable. -->
+    <button class="sidebar-new" @click="emit('start')">
       <AppIcon name="plus" :size="16" />Ẩn thông tin mới
     </button>
     <div class="history-heading">
-      {{ history ? "Lịch sử" : "Đang mở" }}
+      {{ history ? "Lịch sử" : "Đã ẩn" }}
     </div>
     <div class="history-list">
       <button
@@ -114,7 +104,7 @@ defineExpose({
         >
       </button>
       <p v-if="!sessions.length && !folder" class="empty-history">
-        {{ history ? "Chưa có mục nào." : "Việc bạn đang làm sẽ hiện ở đây." }}
+        {{ history ? "Chưa có mục nào." : "Văn bản và tệp bạn ẩn sẽ nằm ở đây." }}
       </p>
       <button
         v-for="session in sessions"

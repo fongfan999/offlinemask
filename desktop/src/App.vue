@@ -253,6 +253,11 @@ function openFormat(destination: Page, id: string | null = null) {
   const last = lastOpened[destination];
   return navigate(destination, last && store.find(last) ? last : null);
 }
+/** "+ Ẩn thông tin mới": home on its first tab, even when home is already open. */
+async function startNew() {
+  await navigate("home");
+  pageRef.value?.startOver?.();
+}
 /** Home's text field: an empty text page with the cursor in the box (decision 0172). */
 async function startTyping() {
   await navigate("text");
@@ -384,6 +389,7 @@ async function closeSidebar() {
       @navigate="openFormat"
       @close="closeSidebar"
       @collapse="toggleCollapsed"
+      @start="startNew"
     />
     <div class="workspace" :inert="sidebarOpen">
       <header class="topbar" :class="{ 'home-topbar': page === 'home' }">
