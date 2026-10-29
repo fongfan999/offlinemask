@@ -503,6 +503,100 @@ function setupRoles(root) {
   };
 }
 
+/**
+ * The top logo leaves like the ninja its mark is, as the app's logo does when the sidebar folds
+ * (decision 0172): past the first 90 px it crouches leaning back, springs up into a flip and is
+ * gone in a puff of smoke; back at the top it drops in through a puff, turning, and lands tipped
+ * a little past upright before it settles. Transform and opacity only, played once per crossing
+ * rather than scrubbed. With reduced motion the logo keeps scrolling away with the hero.
+ */
+function setupNinjaLogo(root, motion) {
+  if (!motion) return () => {};
+  const top = root.querySelector(".om-top");
+  const logo = top.querySelector(".om-logo");
+  const mark = logo.querySelector("svg");
+  root.classList.add("om-ninja");
+  let move;
+  const puff = (delay) => {
+    const box = logo.getBoundingClientRect();
+    const cloud = document.createElement("div");
+    cloud.className = "om-puff";
+    cloud.setAttribute("aria-hidden", "true");
+    cloud.style.translate = `${Math.round(box.left + box.width / 2)}px ${Math.round(box.top + box.height / 2)}px`;
+    // Around the chip's outline, in front of it, so the logo goes behind the smoke.
+    const dots = Array.from({ length: 10 }, (_, i) => {
+      const dot = cloud.appendChild(document.createElement("span"));
+      const angle = (i / 10) * Math.PI * 2 + 0.3;
+      const spread = 1 + (i % 3) * 0.12;
+      const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
+      return {
+        dot,
+        from: { x: cos * box.width * 0.32, y: sin * box.height * 0.25 },
+        to: { x: cos * (box.width / 2 + 14) * spread, y: sin * (box.height / 2 + 12) * spread },
+      };
+    });
+    root.append(cloud);
+    const tl = gsap.timeline({ delay, onComplete: () => cloud.remove() });
+    dots.forEach(({ dot, from, to }) =>
+      tl.fromTo(
+        dot,
+        { ...from, scale: 0.5, autoAlpha: 0.85 },
+        { ...to, scale: 1.4, autoAlpha: 0, duration: 0.5, ease: "power2.out" },
+        0,
+      ),
+    );
+    return tl;
+  };
+  const vanish = () => {
+    move?.kill();
+    top.classList.add("om-ninja-moving");
+    move = gsap
+      .timeline({ onComplete: () => top.classList.remove("om-ninja-moving") })
+      .to(logo, { y: 3, scaleX: 1.06, scaleY: 0.9, duration: 0.1, ease: "power1.out" })
+      .to(mark, { rotation: -16, duration: 0.1, ease: "power1.out" }, 0)
+      .add(puff(0), 0.14)
+      .to(logo, { y: -30, scale: 0.7, autoAlpha: 0, duration: 0.3, ease: "power2.in" }, 0.1)
+      .to(mark, { rotation: 200, duration: 0.3, ease: "power2.in" }, 0.1);
+  };
+  const appear = () => {
+    move?.kill();
+    top.classList.add("om-ninja-moving");
+    move = gsap
+      .timeline({
+        onComplete: () => {
+          top.classList.remove("om-ninja-moving");
+          gsap.set([logo, mark], { clearProps: "transform" });
+        },
+      })
+      .add(puff(0), 0)
+      .fromTo(
+        logo,
+        { y: -30, scale: 0.7, autoAlpha: 0 },
+        { y: 0, scale: 1, autoAlpha: 1, duration: 0.34, ease: "power2.out" },
+        0.06,
+      )
+      .fromTo(mark, { rotation: -348 }, { rotation: 12, duration: 0.34, ease: "power2.out" }, 0.06)
+      .to(logo, { scaleX: 1.07, scaleY: 0.9, duration: 0.08, ease: "power1.out" })
+      .to(mark, { rotation: 0, duration: 0.2, ease: "back.out(2)" }, "<")
+      .to(logo, { scaleX: 1, scaleY: 1, duration: 0.18, ease: "back.out(2)" }, "<0.06");
+  };
+  const trigger = ScrollTrigger.create({
+    start: 0,
+    end: 90,
+    onLeave: vanish,
+    onEnterBack: appear,
+  });
+  // Opened part-way down the page: no logo, and no show of leaving.
+  if (trigger.progress === 1) gsap.set(logo, { y: -30, scale: 0.7, autoAlpha: 0 });
+  return () => {
+    trigger.kill();
+    move?.kill();
+    gsap.set([logo, mark], { clearProps: "all" });
+    top.classList.remove("om-ninja-moving");
+    root.classList.remove("om-ninja");
+  };
+}
+
 /** Mount on one page root; dispose before replacing that root (including Astro navigation). */
 export function initOfflineMask(root) {
   if (!root) return () => {};
@@ -600,6 +694,7 @@ export function initOfflineMask(root) {
       const undoQuick = setupQuick(root, context.conditions.motion, context.conditions.phone);
       const undoSheet = setupSheet(root, context.conditions.motion);
       const undoLoops = setupSceneLoops(root, context.conditions.motion);
+      const undoNinja = setupNinjaLogo(root, context.conditions.motion);
       return () => {
         undoScan();
         undoHow();
@@ -608,6 +703,7 @@ export function initOfflineMask(root) {
         undoQuick();
         undoSheet();
         undoLoops();
+        undoNinja();
       };
     },
   );

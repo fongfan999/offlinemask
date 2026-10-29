@@ -133,7 +133,8 @@
    It belongs to the top of the page: as the visitor scrolls, it lifts, shrinks and fades out
    over the first 200 px, so it never sits over the headings below, and it comes back on the
    way up (decision 0141). Where scroll-driven animations are missing, or motion is reduced, it
-   simply scrolls away with the hero. */
+   simply scrolls away with the hero. With the script and motion it leaves like a ninja instead
+   (below). */
 .om-top {
   position: absolute;
   top: 16px;
@@ -158,6 +159,33 @@
     translate: -50% -40px;
     scale: 0.82;
   }
+}
+/* With the script and motion, the logo stays at the top and leaves like a ninja instead
+   (decision 0172, setupNinjaLogo in product.js): played once per crossing, not scrubbed. */
+.om-page.om-ninja .om-top {
+  position: fixed;
+  animation: none;
+}
+.om-ninja-moving .om-logo svg {
+  transition: none;
+}
+.om-puff {
+  position: fixed;
+  z-index: 41;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+.om-puff span {
+  position: absolute;
+  left: -13px;
+  top: -13px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  /* Over the hero's cobalt wash: pale smoke. */
+  background: color-mix(in srgb, var(--paper-raised) 60%, transparent);
+  opacity: 0;
 }
 .om-logo {
   gap: 12px;
