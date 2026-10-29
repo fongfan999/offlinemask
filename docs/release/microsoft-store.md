@@ -35,6 +35,7 @@ Category **Utility / Productivity**. Answer **No** to violence, sexual content, 
 OfflineMask thay họ tên, số tài khoản, số điện thoại, CCCD, email và các thông tin riêng tư khác bằng mã ngay trên máy, trước khi bạn dán vào ChatGPT, Claude, Gemini hay công cụ AI nào khác. Khi AI trả lời, dán câu trả lời vào lại: thông tin thật trở về đúng chỗ.
 
 • Văn bản, bảng tính (Excel, CSV, ODS) và tài liệu Word giữ nguyên định dạng. PDF có chữ cho ra bản Markdown đã ẩn.
+• Ẩn cả thư mục một lần, kể cả tệp CSV và văn bản rất lớn.
 • Xem lại từng thông tin được ẩn, giữ hoặc ẩn thêm chỉ với một lần bấm.
 • Gói nhận diện tiếng Việt (tùy chọn) nhận ra họ tên, địa chỉ, tổ chức và ngày sinh.
 • Ẩn nhanh: chọn văn bản trong ứng dụng bất kỳ và ẩn ngay tại chỗ.
@@ -43,12 +44,12 @@ OfflineMask thay họ tên, số tài khoản, số điện thoại, CCCD, email
 Không tài khoản, không máy chủ, không thống kê sử dụng. Ứng dụng chỉ dùng mạng khi bạn bấm tải gói nhận diện. Hãy luôn xem lại kết quả trước khi chia sẻ.
 ```
 
-**What's new in this version** (2.4.0; 2.3.0 listed PDFs on Tài liệu, the (OfflineMasked) names and better masking of invoices, statements and contracts; 2.2.0 listed Báo lỗi, history that deletes itself and the circle acting only on the selection; the first submission said "Bản đầu tiên trên Microsoft Store.")
+**What's new in this version** (2.5.0; 2.4.0 listed the pack's new model, a 158 MB update trained only on invented documents; 2.3.0 listed PDFs on Tài liệu, the (OfflineMasked) names and better masking of invoices, statements and contracts; 2.2.0 listed Báo lỗi, history that deletes itself and the circle acting only on the selection; the first submission said "Bản đầu tiên trên Microsoft Store.")
 
 ```
-• Gói nhận diện có mô hình mới, được huấn luyện thêm trên các loại giấy tờ thường gặp (hóa đơn, sao kê, hợp đồng, biểu mẫu, quyết định, phiếu lương…): ẩn đúng hơn và ít ẩn nhầm hơn.
-• Nếu đã cài gói, chỉ cần tải thêm một tệp khoảng 158 MB; phần còn lại giữ nguyên.
-• Mô hình chỉ học từ tài liệu tự tạo, không dùng tài liệu của bất kỳ ai.
+• Ẩn cả thư mục một lần: Word, PDF, Excel, CSV và văn bản bên trong dùng chung một bộ mã, lưu thành thư mục mới, thư mục gốc giữ nguyên.
+• Bắt đầu mọi việc từ một chỗ: "Ẩn thông tin mới" và hai thẻ "Ẩn thông tin riêng", "Nhận lại bản đầy đủ".
+• Không còn giới hạn kích thước: ứng dụng cho biết khoảng bao lâu trên máy bạn, và đọc tệp CSV, văn bản rất lớn từng phần một.
 ```
 
 **Product features** (one per line in Partner Center)
@@ -58,6 +59,7 @@ Không tài khoản, không máy chủ, không thống kê sử dụng. Ứng d�
 Khôi phục thông tin thật trong câu trả lời của AI
 Bảng tính và tài liệu Word giữ nguyên định dạng
 PDF có chữ cho ra bản Markdown đã ẩn
+Ẩn cả thư mục một lần, thư mục gốc giữ nguyên
 Gói nhận diện tiếng Việt tùy chọn, chạy offline
 Ẩn nhanh văn bản đang chọn trong ứng dụng bất kỳ
 Lịch sử được mã hóa khi bạn đặt mật mã
