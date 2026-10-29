@@ -2538,50 +2538,6 @@ td.alias {
   font-size: 12px;
   line-height: 1.7;
 }
-/* "Nâng cao" (decision 0173): folded at the foot of the app card, a quiet line until
-   someone opens it. */
-.settings-advanced {
-  margin-top: 18px;
-  border-top: 1px solid var(--line);
-}
-.settings-advanced > summary {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding-top: 14px;
-  font-size: 12.5px;
-  color: var(--muted);
-  cursor: pointer;
-  list-style: none;
-}
-.settings-advanced > summary::-webkit-details-marker {
-  display: none;
-}
-.settings-advanced > summary:hover {
-  color: var(--ink);
-}
-/* The same segmented switch as the appearance, each choice with this machine's figure. */
-.memory-setting {
-  padding-top: 14px;
-}
-.memory-setting .theme-switch span {
-  margin-left: 4px;
-  color: var(--muted);
-  font-weight: 400;
-  font-variant-numeric: tabular-nums;
-}
-/* Four choices do not fit a phone's width in one line: two by two. */
-@media (max-width: 560px) {
-  .memory-setting .theme-switch {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    align-self: stretch;
-    border-radius: 16px;
-  }
-  .memory-setting .theme-switch label {
-    text-align: center;
-  }
-}
 /* Appearance: a segmented radio group in the view-switch style. */
 .theme-switch {
   display: flex;
