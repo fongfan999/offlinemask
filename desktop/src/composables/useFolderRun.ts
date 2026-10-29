@@ -138,25 +138,6 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
   /** Without the recognition pack only the fast rules run, far quicker than the model. */
   const seconds = (chars: number) => estimateSeconds(chars) / (pack.ready.value ? 1 : 20);
   const estimate = computed(() => seconds(readChars.value));
-  /** Where the time goes: the documents' text, and each layout's columns set to scan.
-   * Hidden and kept columns are not read, so they cost next to nothing. */
-  const estimateParts = computed(() => {
-    let docs = 0;
-    const byLayout: Record<string, number> = {};
-    for (const file of files.value) {
-      if (file.status === "failed") continue;
-      if (file.kind === "word") docs += file.chars;
-      else
-        for (const sheet of file.sheets)
-          byLayout[sheet.layout] =
-            (byLayout[sheet.layout] ?? 0) +
-            scannedChars(sheet, layoutOf(sheet.layout)?.plans ?? []);
-    }
-    const layoutSeconds = Object.fromEntries(
-      Object.entries(byLayout).map(([key, chars]) => [key, seconds(chars)]),
-    );
-    return { docs: seconds(docs), layouts: layoutSeconds };
-  });
   const dedicated = computed(() => estimate.value > dedicatedMachineSeconds);
   const readable = computed(() => files.value.filter((file) => file.status !== "failed"));
   const failed = computed(() => files.value.filter((file) => file.status === "failed"));
@@ -516,7 +497,6 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     masked,
     busy,
     estimate,
-    estimateParts,
     dedicated,
     progress,
     review,
