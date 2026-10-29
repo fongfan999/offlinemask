@@ -15,6 +15,7 @@ import { createSheetFiles } from "./adapters/sheet-files.ts";
 import { createTextDetector, queueDetections } from "./adapters/text-detection.ts";
 import AppIcon from "./components/AppIcon.vue";
 import AppFooter from "./components/AppFooter.vue";
+import { flyBrand } from "./composables/brandFlight.ts";
 import { vTip } from "./directives/tip.ts";
 import AppSidebar from "./components/AppSidebar.vue";
 import BrandMark from "./components/BrandMark.vue";
@@ -309,47 +310,19 @@ async function toggleCollapsed() {
     measuring.value = true;
     collapsed.value = target;
     await nextTick();
-    const last = brandOf(root, target)!.getBoundingClientRect();
+    const landing = brandOf(root, target)!;
+    const last = landing.getBoundingClientRect();
+    const lastMark = landing.querySelector(".brand-mark")?.getBoundingClientRect() ?? last;
     collapsed.value = !target;
     await nextTick();
     void root.offsetWidth;
     measuring.value = false;
     await nextTick();
     void root.offsetWidth;
-    // Now the real move: the layout transitions, the copy flies.
-    const copy = from.cloneNode(true) as HTMLElement;
-    copy.className = "brand brand-flight";
-    copy.setAttribute("aria-hidden", "true");
-    copy.tabIndex = -1;
-    Object.assign(copy.style, {
-      left: `${last.left}px`,
-      top: `${last.top}px`,
-      width: `${last.width}px`,
-      height: `${last.height}px`,
-    });
-    document.body.append(copy);
+    // Now the real move: the layout transitions while the logo leaps (brandFlight.ts).
     flying.value = true;
     collapsed.value = target;
-    const dx = first.left - last.left;
-    const dy = first.top - last.top;
-    const flight = copy.animate(
-      [{ transform: `translate(${dx}px, ${dy}px)` }, { transform: "translate(0, 0)" }],
-      { duration: foldMs, easing: foldEase },
-    );
-    copy.querySelector(".brand-mark")?.animate(
-      [
-        { rotate: "0deg", scale: "1" },
-        { scale: "1.14", offset: 0.5 },
-        { rotate: target ? "360deg" : "-360deg", scale: "1" },
-      ],
-      { duration: foldMs, easing: foldEase },
-    );
-    // A window hidden mid-fold may never paint the end: land the logo on time anyway.
-    await Promise.race([
-      flight.finished.catch(() => undefined),
-      new Promise((resolve) => setTimeout(resolve, foldMs + 150)),
-    ]);
-    copy.remove();
+    await flyBrand(from, first, last, lastMark, foldMs, foldEase);
     flying.value = false;
   }
   if (collapsed.value) sidebarExpand.value?.focus();

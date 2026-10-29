@@ -189,6 +189,32 @@ p {
 .app-shell.is-flying .brand {
   opacity: 0;
 }
+/* The ninja's leap (decision 0172, brandFlight.ts): the tile turns about its centre, the
+   afterimages are the tile alone, and the smoke is a ring of soft dots. */
+.brand-flight .brand-mark {
+  transform-origin: 50% 50%;
+  transition: none;
+}
+.brand-ghost .brand-name {
+  visibility: hidden;
+}
+.brand-puff {
+  position: fixed;
+  z-index: 49;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+.brand-puff span {
+  position: absolute;
+  left: -8px;
+  top: -8px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--muted) 55%, transparent);
+  opacity: 0;
+}
 .brand-mark {
   width: 34px;
   height: 34px;
