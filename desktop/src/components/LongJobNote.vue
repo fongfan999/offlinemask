@@ -10,7 +10,7 @@ const shown = computed(() => props.seconds > longJobSeconds);
 </script>
 
 <template>
-  <!-- One line with the time set apart; the two things to know open on a click. -->
+  <!-- One line with the time set apart; the suggestion opens on a click. -->
   <details v-if="shown" class="long-job-note">
     <summary>
       <AppIcon name="clock" :size="16" /><span
@@ -18,18 +18,10 @@ const shown = computed(() => props.seconds > longJobSeconds);
         <b class="long-job-time">{{ roughDuration(seconds) }}</b> trên máy này</span
       ><AppIcon class="folder-chevron" name="chevron" :size="14" />
     </summary>
-    <dl>
-      <div>
-        <dt>Vẫn có thể bắt đầu</dt>
-        <dd>Máy sẽ chậm hơn trong lúc xử lý.</dd>
-      </div>
-      <div>
-        <dt>Gợi ý</dt>
-        <dd>
-          Nếu thường xuyên cần ẩn nhiều tài liệu, hãy dành riêng một máy chạy OfflineMask cho công
-          việc hoặc cho cả công ty, để máy làm việc của bạn không bị ảnh hưởng.
-        </dd>
-      </div>
-    </dl>
+    <p>
+      <strong>Gợi ý</strong><br />Nếu thường xuyên cần ẩn nhiều tài liệu, hãy dành riêng một máy
+      chạy OfflineMask cho công việc hoặc cho cả công ty, để máy làm việc của bạn không bị ảnh
+      hưởng.
+    </p>
   </details>
 </template>
