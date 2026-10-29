@@ -39,7 +39,8 @@ interface ModelFile {
   name: string;
   bytes: number;
   sha256: string;
-  /** Where the build fetches the file when it is not in `artifacts/reading/`. */
+  /** Where the build fetches the file when it is neither committed in `reading/` nor in
+   * `artifacts/reading/`. */
   source: string | null;
 }
 

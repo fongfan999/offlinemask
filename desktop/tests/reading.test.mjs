@@ -108,3 +108,11 @@ test("a picture with no line found reads as no words", async () => {
   };
   assert.deepEqual(await readPicture(picture([]), models, definition), { lines: [] });
 });
+
+test("the committed recogniser is the one the definition pins", async () => {
+  const { createHash } = await import("node:crypto");
+  const { readFileSync } = await import("node:fs");
+  const bytes = readFileSync(new URL(`../reading/${definition.recogniser.name}`, import.meta.url));
+  assert.equal(bytes.length, definition.recogniser.bytes);
+  assert.equal(createHash("sha256").update(bytes).digest("hex"), definition.recogniser.sha256);
+});

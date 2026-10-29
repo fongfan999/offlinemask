@@ -77,7 +77,7 @@ Optional, per model. A decoded span whose mean token probability is below `minSc
 
 ## Replacing the models, step by step
 
-1. **Put the files in place.** Create `artifacts/packs/<id>/<directory>/` for each model with its ONNX graph, `config.json`, `tokenizer.json` and `tokenizer_config.json`. `artifacts/` is ignored by git; model weights are never committed.
+1. **Put the files in place.** Create `artifacts/packs/<id>/<directory>/` for each model with its ONNX graph, `config.json`, `tokenizer.json` and `tokenizer_config.json`. `artifacts/` is ignored by git; pack weights are never committed (the one committed graph is the small text recogniser built into the app, decision 0172).
 2. **Describe the models.** Copy or edit a file in `packs/`, set `id`, `name`, `attribution` and the `models` list. Point `src/core/detection/pack.ts`, `src-tauri/src/models.rs`, `src-tauri/src/bin/*.rs` and `src-tauri/src/model_pack.rs`'s test helper at the new file name if you created one.
 3. **Pin the files.**
 
