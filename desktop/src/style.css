@@ -4096,6 +4096,47 @@ td.alias {
 .folder-layouts {
   margin-top: 22px;
 }
+/* The ready screen opens with what to do (decision 0171): it is all chosen, press the button. */
+.folder-ready {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin: 22px 24px 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--paper-raised));
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.folder-ready svg {
+  flex-shrink: 0;
+  margin-top: 3px;
+  color: var(--accent);
+}
+.folder-ready strong {
+  font-weight: 600;
+}
+.folder-open-label {
+  flex-shrink: 0;
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 500;
+}
+.folder-docs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--paper-raised);
+}
+.folder-docs > svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
 .folder-section-title {
   margin: 0 0 4px;
   font: 600 14px var(--sans);

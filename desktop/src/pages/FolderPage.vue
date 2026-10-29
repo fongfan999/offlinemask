@@ -54,24 +54,32 @@ const statusLabel: Record<string, string> = {
   saved: "Đã lưu",
   failed: "Lỗi",
 };
-/** A group of sheets in words: how many, and what happens to their columns, without the
- * zero counts. */
-const layoutSummary = (sheets: number, plans: readonly { mode: string }[]) => {
-  const hide = plans.filter((plan) => plan.mode === "hide").length;
-  const scan = plans.filter((plan) => plan.mode === "scan").length;
-  const keep = plans.length - hide - scan;
-  const parts = [sheets > 1 ? `${count(sheets)} trang tính cùng cột` : "1 trang tính"];
-  if (hide) parts.push(`ẩn hẳn ${count(hide)} cột`);
-  if (scan) parts.push(`tìm thông tin trong ${count(scan)} cột`);
+const baseName = (path: string) => path.split("/").pop() ?? path;
+/** A few names, then how many more: "A, B và 3 cột khác". */
+const someNames = (names: string[], noun: string, shown = 2) =>
+  names.length <= shown + 1
+    ? names.join(", ")
+    : `${names.slice(0, shown).join(", ")} và ${count(names.length - shown)} ${noun} khác`;
+/** The spreadsheets that share a layout: a group is named by its files, not by the sheet
+ * that happened to be read first, so every spreadsheet in the folder can be found. */
+const layoutFiles = (key: string) =>
+  folder.readable.value
+    .filter((file) => file.kind === "excel" && file.sheets.some((sheet) => sheet.layout === key))
+    .map((file) => baseName(file.path));
+const sheetFiles = computed(() => folder.readable.value.filter((file) => file.kind === "excel"));
+const docFiles = computed(() => folder.readable.value.filter((file) => file.kind === "word"));
+/** What happens to a group's columns, naming them: people choose by column, not by count. */
+const layoutSummary = (layout: { header: string[]; plans: readonly { mode: string }[] }) => {
+  const named = (mode: string) =>
+    layout.header.filter((_, i) => layout.plans[i]?.mode === mode).map((name) => name || "(trống)");
+  const hide = named("hide");
+  const scan = named("scan");
+  const keep = layout.plans.length - hide.length - scan.length;
+  const parts: string[] = [];
+  if (hide.length) parts.push(`Ẩn cả cột ${someNames(hide, "cột")}`);
+  if (scan.length) parts.push(`tìm và ẩn trong cột ${someNames(scan, "cột")}`);
   if (keep) parts.push(`giữ nguyên ${count(keep)} cột`);
-  return parts.join(" · ");
-};
-/** The example sheet's file name (and its sheet's), the group's title. */
-const layoutTitle = (example: string) => {
-  const [path = example, sheet] = example.split(" · ");
-  const name = path.split("/").pop() ?? path;
-  // A CSV's one sheet is named after the file: say it once.
-  return sheet && sheet !== name.replace(/\.[^.]+$/, "") ? `${name} · ${sheet}` : name;
+  return capital(parts.join(" · ")) || "Không có cột nào";
 };
 
 async function open(picked: PickedFolder) {
@@ -159,6 +167,16 @@ defineExpose({
               cho công việc hoặc cho cả công ty, để máy làm việc của bạn không bị ảnh hưởng.
             </p>
           </div>
+          <p class="folder-ready" role="note">
+            <AppIcon name="check" :size="16" /><span
+              ><strong>Đã chọn sẵn cách ẩn cho từng tệp.</strong> Bấm “Ẩn
+              {{ count(folder.readable.value.length) }} tệp” để bắt đầu.<template
+                v-if="folder.layouts.value.length"
+              >
+                Muốn đổi cột nào được ẩn trong bảng tính thì mở bảng tính đó bên dưới.</template
+              ></span
+            >
+          </p>
           <p v-if="folder.overflow.value" class="sheet-note">
             <AppIcon name="info" :size="14" />Thư mục có hơn {{ count(maxFolderFiles) }} tệp; lần
             này chỉ ẩn {{ count(maxFolderFiles) }} tệp đầu. Hãy chia nhỏ thư mục cho phần còn lại.
@@ -169,10 +187,9 @@ defineExpose({
           </p>
 
           <section v-if="folder.layouts.value.length" class="folder-layouts">
-            <h2 class="folder-section-title">Cột trong bảng tính</h2>
-            <p class="sheet-hint">
-              Các trang tính có cùng tên cột được gom thành một nhóm. Cách xử lý đã được chọn sẵn;
-              mở một nhóm nếu muốn đổi cho từng cột.
+            <h2 class="folder-section-title">Bảng tính · {{ count(sheetFiles.length) }} tệp</h2>
+            <p v-if="folder.layouts.value.length < sheetFiles.length" class="sheet-hint">
+              Các bảng tính có cùng các cột được gom lại: chọn một lần cho cả nhóm.
             </p>
             <details
               v-for="layout in folder.layouts.value"
@@ -182,8 +199,9 @@ defineExpose({
             >
               <summary>
                 <AppIcon name="table" :size="16" /><span class="folder-summary-text"
-                  ><strong>{{ layoutTitle(layout.example) }}</strong
-                  ><span>{{ layoutSummary(layout.sheets, layout.plans) }}</span></span
+                  ><strong>{{ someNames(layoutFiles(layout.key), "tệp") }}</strong
+                  ><span>{{ layoutSummary(layout) }}</span></span
+                ><span class="folder-open-label">Xem cột</span
                 ><AppIcon class="folder-chevron" name="chevron" :size="14" />
               </summary>
               <SheetPreview
@@ -193,8 +211,28 @@ defineExpose({
                 :label="`Các cột của ${layout.example}`"
                 @plan="(column, plan) => folder.setPlan(layout.key, column, plan)"
               />
-              <p class="sheet-caption-line">Xem trước: {{ layout.example }}</p>
+              <p class="sheet-caption-line">
+                Xem trước: {{ layout.example
+                }}<template v-if="layout.sheets > 1">
+                  · áp dụng cho {{ count(layout.sheets) }} trang tính</template
+                >
+              </p>
             </details>
+          </section>
+
+          <section v-if="docFiles.length" class="folder-layouts">
+            <h2 class="folder-section-title">Tài liệu · {{ count(docFiles.length) }} tệp</h2>
+            <div class="folder-docs">
+              <AppIcon name="file" :size="16" /><span class="folder-summary-text"
+                ><strong>{{
+                  someNames(
+                    docFiles.map((file) => baseName(file.path)),
+                    "tệp",
+                  )
+                }}</strong
+                ><span>Tìm và ẩn thông tin trong toàn bộ nội dung</span></span
+              >
+            </div>
           </section>
         </template>
 
@@ -257,7 +295,7 @@ defineExpose({
             </li>
           </ul>
         </details>
-        <details v-if="folder.files.value.length" class="folder-files">
+        <details v-if="folder.files.value.length && phase !== 'ready'" class="folder-files">
           <summary>
             <AppIcon name="folder" :size="16" /><span class="folder-summary-text"
               ><strong>Các tệp trong thư mục</strong><span>{{ subtitle }}</span></span
