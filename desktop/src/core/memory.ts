@@ -18,9 +18,9 @@ export const memoryChoices: readonly {
   },
   {
     id: "normal",
-    label: "Vừa",
+    label: "Mặc định",
     share: 1 / 4,
-    detail: "1/4 bộ nhớ của máy. Mặc định, hợp với đa số máy.",
+    detail: "1/4 bộ nhớ của máy, hợp với đa số máy.",
   },
   { id: "high", label: "Nhiều", share: 1 / 2, detail: "1/2 bộ nhớ của máy, cho tệp lớn." },
   {
