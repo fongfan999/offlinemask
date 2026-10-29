@@ -4,6 +4,34 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.5.0] — 2026-10-29
+
+Mask a whole folder at once, start every job from one place, and no more size limits: OfflineMask says how long a job will take instead, and reads very large CSV and text files a piece at a time.
+
+### Added
+
+- Ẩn cả thư mục: drop or pick a folder (or several files) and every Word, PDF, OpenDocument, Excel, CSV and text file in it is masked with one set of codes. It works in three steps like a single file.
+  - **Step 1:** spreadsheets with the same columns are grouped, so you choose columns once per group.
+  - **Step 2:** you review the folder's values once and save a new folder, "<tên> (OfflineMasked)", next to the original, which is never changed.
+  - **Step 3:** restores the AI's reply with the folder's codes.
+
+  An empty folder, or files that cannot be opened, are named up front with the reason ([0171](docs/decisions/0171-mask-a-whole-folder.md)).
+- Large CSV and text files are read, masked and written a piece at a time, so a bank's export of several hundred MB or more no longer needs to fit in memory. In a folder this is always how they are handled. A single file too large to open on its own page is masked on the folder page instead of being refused ([0174](docs/decisions/0174-stream-large-csv-and-text.md)).
+
+### Changed
+
+- The sidebar starts with "+ Ẩn thông tin mới" instead of one entry per file format. Home holds both halves of the job as two tabs, "Ẩn thông tin riêng" and "Nhận lại bản đầy đủ". Below them is "Gần đây", what you opened or hid in this session, or your saved history once a passcode is set. "Tạo mới" at the top right of every page goes back home ([0172](docs/decisions/0172-sidebar-by-task.md)).
+- No size, row, page or length limits.
+  - **Estimate:** step 1 says roughly how long the job will take on this machine.
+  - **Long jobs:** past ten minutes, one line says so; opened, it suggests a machine kept for OfflineMask.
+  - **Memory:** the app keeps to a quarter of the machine's memory, at most 3 GB. A Word, PDF or Excel file that would need more is refused with the figures and a suggestion to split it ([0173](docs/decisions/0173-no-limits-only-estimates.md)).
+- A file that cannot be opened shows one card with the reason and a way back home, instead of an error under the drop zone ([0172](docs/decisions/0172-sidebar-by-task.md)).
+- Two more rules that held back over-masking were retired, because the fine-tuned model no longer needs them; the measured sets did not change ([0170](docs/decisions/0170-two-more-mechanisms-retired.md)).
+
+### Fixed
+
+- On Windows in Vietnamese, saving a masked folder a second time no longer fails when the first copy's folder already exists ([0173](docs/decisions/0173-no-limits-only-estimates.md)).
+
 ## [2.4.0] — 2026-10-28
 
 The recognition pack's model has learned the documents OfflineMask masks: a new pack version, one 158 MB download for installations that already have the pack, with nothing leaked and fewer words wrongly masked on 2 050 invented documents.
