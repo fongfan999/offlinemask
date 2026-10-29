@@ -474,7 +474,7 @@ defineExpose({
       <button v-if="historyOn" class="quiet-button" @click="emit('remove', session.id)">
         <AppIcon name="close" :size="15" />Xóa khỏi lịch sử
       </button>
-      <button class="quiet-button" @click="emit('navigate', format)">
+      <button class="quiet-button" @click="emit('navigate', 'home')">
         <AppIcon name="plus" :size="15" />Tạo mới
       </button>
     </div>
@@ -522,7 +522,7 @@ defineExpose({
           ref="restorePanel"
           :session-id="session.id"
           :analysis="session.analysis"
-          @new-text="emit('navigate', 'text')"
+          @new-text="emit('navigate', 'home')"
           @pasted="(pasted) => (replyPasted = pasted)"
         >
           <template v-if="savedNote" #hint

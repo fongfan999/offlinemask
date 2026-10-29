@@ -25,3 +25,5 @@ The folder run's `review` and new `findings` computeds tested the non-reactive a
 - A sample session's aliases are not in the restore tab's tables, as they are not in Ẩn nhanh's: "Xem thử với ví dụ" restores on its own page's step 3.
 - The restore tab shows a returned file's counts but no preview of it.
 - "mã thay thế" stays the app's word for an alias throughout; renaming it is a copy pass of its own.
+
+Every new job starts at home (29 Oct 2026). "Tạo mới", "Ẩn văn bản mới", "Ẩn tài liệu mới", "Ẩn bảng tính mới", "Ẩn thư mục khác" and, before a file is hidden, "Chọn tệp khác" / "Chọn thư mục khác" used to clear the page back to its own empty state: a text box or a drop zone for one kind only, under a stepper over nothing. They now clear what is open and go home, whose drop zone and text box take every kind, as "+ Ẩn thông tin mới" does. "Khôi phục tệp khác" stays on its page: it is another returned file for the same job.

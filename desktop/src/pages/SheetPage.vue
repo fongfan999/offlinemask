@@ -183,10 +183,11 @@ function anotherFile() {
   restore.value = null;
   restoreSaved.value = false;
 }
-/** "Tạo mới" and "Ẩn bảng tính mới" start from an empty drop zone. */
+/** "Tạo mới", "Ẩn bảng tính mới" and "Chọn tệp khác" start a new job where every job
+ * does: home (decision 0172). */
 function newSheet() {
   sheet.discardDraft();
-  emit("navigate", "excel");
+  emit("navigate", "home");
 }
 function openStep(target: number) {
   if (!props.session) return;
@@ -237,11 +238,7 @@ defineExpose({
       <button v-if="session" class="quiet-button" @click="newSheet">
         <AppIcon name="plus" :size="15" />Tạo mới
       </button>
-      <button
-        v-else-if="!sheet.processing.value"
-        class="quiet-button"
-        @click="sheet.discardDraft()"
-      >
+      <button v-else-if="!sheet.processing.value" class="quiet-button" @click="newSheet">
         <AppIcon name="upload" :size="15" />Chọn tệp khác
       </button>
     </div>

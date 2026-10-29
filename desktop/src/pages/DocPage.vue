@@ -136,9 +136,10 @@ async function trySample() {
   const bytes = await sampleDocx();
   await doc.openFile(new File([new Uint8Array(bytes)], sampleDocName));
 }
+/** A new job starts where every job does: home (decision 0172). */
 function newDoc() {
   doc.discardDraft();
-  emit("navigate", "word");
+  emit("navigate", "home");
 }
 async function download() {
   if (!props.session) return;
@@ -234,7 +235,7 @@ defineExpose({
       <button v-if="session" class="quiet-button" @click="newDoc">
         <AppIcon name="plus" :size="15" />Tạo mới
       </button>
-      <button v-else-if="!doc.processing.value" class="quiet-button" @click="doc.discardDraft()">
+      <button v-else-if="!doc.processing.value" class="quiet-button" @click="newDoc">
         <AppIcon name="upload" :size="15" />Chọn tệp khác
       </button>
     </div>
