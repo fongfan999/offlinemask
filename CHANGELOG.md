@@ -4,7 +4,7 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
-## [2.5.0] — 2026-10-29
+## [2.5.0] - 2026-10-29
 
 Mask a whole folder at once, start every job from one place, and no more size limits: OfflineMask says how long a job will take instead, and reads very large CSV and text files a piece at a time.
 
@@ -32,7 +32,7 @@ Mask a whole folder at once, start every job from one place, and no more size li
 
 - On Windows in Vietnamese, saving a masked folder a second time no longer fails when the first copy's folder already exists ([0173](docs/decisions/0173-no-limits-only-estimates.md)).
 
-## [2.4.0] — 2026-10-28
+## [2.4.0] - 2026-10-28
 
 The recognition pack's model has learned the documents OfflineMask masks: a new pack version, one 158 MB download for installations that already have the pack, with nothing leaked and fewer words wrongly masked on 2 050 invented documents.
 
@@ -41,7 +41,7 @@ The recognition pack's model has learned the documents OfflineMask masks: a new 
 - Gói nhận diện: its Vietnamese model (Underthesea) is fine-tuned on the invented document set (invoices, bank statements, contracts, forms, official decisions, payslips, medical records, utility bills, letters, minutes, transcripts and orders) and ships as a new version of the pack. The model learned only from generated documents, never from anyone's files. An installation that has the pack downloads only the new model file (158 MB); the other files are unchanged. On 2 050 held-out invented documents and the owner's own files it leaks nothing and wrongly masks fewer words than the previous model (three job titles where the previous one masked five and six stray single words), and it no longer needs two of the structural rules that held back over-masking ([0163](docs/decisions/0163-fine-tune-the-pack-model.md), [0167](docs/decisions/0167-wrapped-values-labelled-across-paragraphs.md), [0168](docs/decisions/0168-second-candidate-measured-clean.md), [0169](docs/decisions/0169-ship-the-fine-tuned-underthesea-graph.md)).
 - Two structural rules that held back over-masking, a role in capitals in prose and a value after a wording label, were retired because other rules cover them; the measured sets did not change ([0164](docs/decisions/0164-pack-comparison-and-ablation.md), [0165](docs/decisions/0165-two-mechanisms-retired.md)).
 
-## [2.3.0] — 2026-10-26
+## [2.3.0] - 2026-10-26
 
 PDFs that contain text open on Tài liệu, saved copies are named (OfflineMasked), and masking is measured on whole sets of documents: 0 leaked and 0 over-masked on 189 invented invoices, statements, contracts and forms.
 
@@ -56,21 +56,21 @@ PDFs that contain text open on Tài liệu, saved copies are named (OfflineMaske
 
 ### Fixed
 
-- Invoices: "HÓA ĐƠN GIÁ TRỊ GIA TĂNG", column headings, "Trang 1/1", a country on its own ("Thịt bò Úc") and brands in capitals (VISSAN, WINECO) are no longer masked as names, places or organizations, goods in a table row keep their names, and one company gets one alias. A tax code that is a 12-digit CCCD ("Mã số thuế (CCCD)", "MST/CCCD chủ hộ") is masked, "Hộ kinh doanh …" is one organization, and an address stops at a table cell ([0155](docs/decisions/0155-invoice-false-detections.md)).
+- Invoices: "HÓA ĐƠN GIÁ TRỊ GIA TĂNG", column headings, "Trang 1/1", a country on its own ("Thịt bò Úc") and brands in capitals (VISSAN, WINECO) are no longer masked as names, places or organizations, goods in a table row keep their names, and one company gets one alias. A tax code that is a 12-digit CCCD ("Mã số thuế (CCCD)", "MST/CCCD chủ hộ") is masked, "Hộ kinh doanh ..." is one organization, and an address stops at a table cell ([0155](docs/decisions/0155-invoice-false-detections.md)).
 - Bank statements and contracts no longer leak: account numbers after "TK", longer labels ("Tài khoản thụ hưởng:"), a field that ends at the next one on the same line, account holders, names by their position in transfer text, names after a form of address ("Bà Võ Minh Yến") and under a signature note, and a company in capitals in transfer text. 0 leaks on the 189 generated documents ([0154](docs/decisions/0154-statement-and-contract-leaks.md)).
 - Over-masking closed by structure: Word and ODT tables are read by row like PDF tables, and show as tables in the preview; a heading in capitals ("SAO KÊ TÀI KHOẢN", "HỢP ĐỒNG THUÊ NHÀ"), unaccented transaction wording ("TRA LUONG THANG 9") and a cell under a wording column ("Quan hệ", "Chức vụ", "Tên hàng hóa") are not names, places or organizations; an amount with thousands separators is not a phone number; a currency code is not a place. 0 over-masked and 0 leaked on the 189 generated documents and the owner's invoices, and the pack gate's known miss is gone (21/21) ([0156](docs/decisions/0156-over-masking-by-structure.md)).
-- Official decisions and notices: the 12-digit personal number after "Số định danh cá nhân" is masked (it was left readable); the city after a state body ("Ủy ban nhân dân Thành phố Hồ Chí Minh", "Sở Nội vụ …", "Bảo hiểm xã hội …") and the place of issue before the date are no longer masked as addresses, and the bodies are no longer organizations to hide; "Như Điều 4", "Lưu: VT" and "Quyết định" are not names or places; a hospital named after "Bệnh viện" is one organization; "Nơi ở hiện nay:" is an address label and an apartment number like "A34.07" stays whole in it ([0159](docs/decisions/0159-official-decisions.md)).
+- Official decisions and notices: the 12-digit personal number after "Số định danh cá nhân" is masked (it was left readable); the city after a state body ("Ủy ban nhân dân Thành phố Hồ Chí Minh", "Sở Nội vụ ...", "Bảo hiểm xã hội ...") and the place of issue before the date are no longer masked as addresses, and the bodies are no longer organizations to hide; "Như Điều 4", "Lưu: VT" and "Quyết định" are not names or places; a hospital named after "Bệnh viện" is one organization; "Nơi ở hiện nay:" is an address label and an apartment number like "A34.07" stays whole in it ([0159](docs/decisions/0159-official-decisions.md)).
 - Payslips, medical records, utility bills, letters, minutes, transcripts and orders, measured on two thousand invented documents of twelve kinds: the codes an organization gives a person are masked after their labels (employee, student and patient codes, health-insurance card and social-insurance numbers, subscriber numbers), a personal tax code, a residence after "Địa chỉ lắp đặt" or "Nơi cư trú hiện tại", a name after "Họ tên người bệnh", a birth date after "Ngày, tháng, năm sinh", and a numbered street on a letterhead; a department or ward ("Phòng Kỹ thuật", "Khoa Nhi"), a role or rank beside a signature, a document's title, a package name, a subject or a test name, "Giới tính: Nam" and "Quốc tịch: Việt Nam" are no longer masked; a company in Title Case ("Công ty TNHH Vận tải Đông Á") and a hospital or school are one organization ([0160](docs/decisions/0160-wider-synthetic-set.md)).
 - Each step's action row has the same space above it as below a panel.
 
-## [2.2.0] — 2026-10-25
+## [2.2.0] - 2026-10-25
 
 Report a problem from the app in two clicks, and history that deletes itself.
 
 ### Added
 
 - *Báo lỗi* in the sidebar: pick what went wrong and write a line or two, and OfflineMask opens a report page on OfflineMask.com with it filled in. The app itself still has no internet access; nothing is sent until you press *Gửi* on the website, and the report carries only what the page shows (the app version, the system family and the screen you were on) ([0147](docs/decisions/0147-bug-reports-through-the-website.md)).
-- History deletes itself: Cài đặt › Mật mã · Lưu lịch sử offers *Tự xóa lịch sử sau* 1, 7, 30 or 90 days, 30 by default, counted from when each entry was made. Choosing a shorter period asks before it deletes older entries ([0143](docs/decisions/0143-history-deletes-itself.md)).
+- History deletes itself: Cài đặt > Mật mã - Lưu lịch sử offers *Tự xóa lịch sử sau* 1, 7, 30 or 90 days, 30 by default, counted from when each entry was made. Choosing a shorter period asks before it deletes older entries ([0143](docs/decisions/0143-history-deletes-itself.md)).
 
 ### Fixed
 
@@ -82,24 +82,24 @@ Report a problem from the app in two clicks, and history that deletes itself.
 
 - The privacy page now names the connections the system's web view makes by itself: on Windows, WebView2 checks for its own updates at edge.microsoft.com and looks up names through the machine's DNS. They carry nothing you put into OfflineMask; the app itself still uses the network only when you click ([0138](docs/decisions/0138-system-web-view-connections.md)).
 
-## [2.1.1] — 2026-10-24
+## [2.1.1] - 2026-10-24
 
 Tidies the tray menu and Settings, and makes the circle's place list easy to see.
 
 ### Changed
 
 - The tray menu no longer acts on the clipboard: it opens OfflineMask or its settings, switches Ẩn nhanh on and off with a check mark, and quits. Cài đặt drops the unfinished "Cài từ tệp", and "Cập nhật" now opens OfflineMask.com to compare versions. "Sắp có" badges are centred ([0137](docs/decisions/0137-tray-and-settings-cleanup.md)).
-- Cài đặt › Thao tác nhanh shows where the OfflineMask circle appears by itself, always in view, as apps and sites you can remove one by one. Beside the circle, "Tắt ở …" and "Luôn hiện nút ở …" now look like the buttons they are ([0136](docs/decisions/0136-place-list-in-view.md)).
+- Cài đặt > Thao tác nhanh shows where the OfflineMask circle appears by itself, always in view, as apps and sites you can remove one by one. Beside the circle, "Tắt ở ..." and "Luôn hiện nút ở ..." now look like the buttons they are ([0136](docs/decisions/0136-place-list-in-view.md)).
 
-## [2.1.0] — 2026-10-24
+## [2.1.0] - 2026-10-24
 
 The OfflineMask circle now shows only where an AI is.
 
 ### Changed
 
-- The circle shows by itself only in AI apps (ChatGPT, Claude, Perplexity, Cursor, Windsurf) and on AI sites in a browser (chatgpt.com, claude.ai, gemini.google.com and others), on macOS and Windows. In other apps, such as Zalo, Mail or Word, the selected text is not read, and ⌘⇧M (Ctrl+Shift+M) still works everywhere. It never shows in a browser's address bar or in open and save dialogs. Hover the circle for "Tắt ở …" to turn it off in a place; after the shortcut in a place not on the list, "Luôn hiện nút ở …" adds it; Cài đặt › Thao tác nhanh shows the list. Firefox is not on it yet ([0135](docs/decisions/0135-circle-only-where-ai-is.md)).
+- The circle shows by itself only in AI apps (ChatGPT, Claude, Perplexity, Cursor, Windsurf) and on AI sites in a browser (chatgpt.com, claude.ai, gemini.google.com and others), on macOS and Windows. In other apps, such as Zalo, Mail or Word, the selected text is not read, and ⌘⇧M (Ctrl+Shift+M) still works everywhere. It never shows in a browser's address bar or in open and save dialogs. Hover the circle for "Tắt ở ..." to turn it off in a place; after the shortcut in a place not on the list, "Luôn hiện nút ở ..." adds it; Cài đặt > Thao tác nhanh shows the list. Firefox is not on it yet ([0135](docs/decisions/0135-circle-only-where-ai-is.md)).
 
-## [2.0.5] — 2026-10-24
+## [2.0.5] - 2026-10-24
 
 The first Microsoft Store build: masking works on first launch, start at login works in the package, and each step's main button stays in view.
 
@@ -111,7 +111,7 @@ The first Microsoft Store build: masking works on first launch, start at login w
 
 - In the Microsoft Store build, masking works right after the recognition pack downloads; it used to fail until the app was restarted. Start at login works there too: it now uses the package's startup task, and the switch says where to turn it back on if you turned OfflineMask off in Windows' Startup apps ([0117](docs/decisions/0117-microsoft-store-msix.md)).
 
-## [2.0.4] — 2026-10-23
+## [2.0.4] - 2026-10-23
 
 Makes Ẩn nhanh fast, keeps it off your clipboard and fixes it in Chrome, Dia and Zalo.
 
@@ -126,7 +126,7 @@ Makes Ẩn nhanh fast, keeps it off your clipboard and fixes it in Chrome, Dia a
 - A masked result no longer replaces text you selected elsewhere while masking was still running. Right before pasting, OfflineMask checks that the selection is still the text it masked; if not, the result opens in a card to copy from, and your clipboard is left as it was ([0127](docs/decisions/0127-paste-only-over-the-masked-selection.md)).
 - On macOS, selecting text in Chromium and Electron apps (Chrome, Dia, Arc, Slack, Zalo) shows the OfflineMask circle again. Those apps expose the selection only after an assistive tool asks them to, and OfflineMask never asked ([0126](docs/decisions/0126-chromium-accessibility-tree.md)).
 
-## [2.0.3] — 2026-10-22
+## [2.0.3] - 2026-10-22
 
 Fixes the saved history after unlocking and the Ẩn nhanh circle on Windows.
 
@@ -135,7 +135,7 @@ Fixes the saved history after unlocking and the Ẩn nhanh circle on Windows.
 - Unlocking with the passcode shows the saved history again. The lock page closed before it could hand the decrypted items over, so the list stayed empty, and the next masked text would have replaced the stored history ([0123](docs/decisions/0123-unlock-loads-history.md)).
 - On Windows, clicking the OfflineMask circle after selecting text in another app replaces the selection again. The click was taken for a click elsewhere, because the circle is drawn by WebView2's own process, so the selection was dropped and only the clipboard was used; Ctrl+Shift+M was not affected. Selecting text inside OfflineMask no longer shows the circle there ([0122](docs/decisions/0122-windows-popover-own-window.md)).
 
-## [2.0.2] — 2026-10-22
+## [2.0.2] - 2026-10-22
 
 Fixes masking with the Vietnamese pack and the passcode settings on Windows.
 
@@ -148,7 +148,7 @@ Fixes masking with the Vietnamese pack and the passcode settings on Windows.
 
 - The recognition pack warms up in the background once it is ready, and again when the window comes back after a while, so the first mask does not wait for the first inference.
 
-## [2.0.1] — 2026-10-20
+## [2.0.1] - 2026-10-20
 
 Fixes the Windows app crashing on launch.
 
@@ -163,10 +163,10 @@ Fixes the Windows app crashing on launch.
 ### Changed
 
 - The native recognition helper is its own Cargo package in the `src-tauri` workspace, so a release build compiles the app library once; the three macOS Services items no longer warn as dead code on Windows and Linux ([0107](docs/decisions/0107-helper-crate.md)).
-- The repository is a pnpm workspace: the desktop app lives in `desktop/`, the product website in `landing/`, and the shared colour and type tokens in `brand/theme.css` ([0106](docs/decisions/0106-workspace-layout.md)). Package scripts run as `pnpm -C desktop …` and `pnpm -C landing …`.
+- The repository is a pnpm workspace: the desktop app lives in `desktop/`, the product website in `landing/`, and the shared colour and type tokens in `brand/theme.css` ([0106](docs/decisions/0106-workspace-layout.md)). Package scripts run as `pnpm -C desktop ...` and `pnpm -C landing ...`.
 - Release binaries are built with thin LTO instead of fat LTO, which roughly halves the build time; Linux releases ship `.deb` and `.rpm` only, the AppImage is withdrawn until the app has been tried on Linux ([0104](docs/decisions/0104-faster-release-builds.md)).
 
-## [2.0.0] — 2026-10-19
+## [2.0.0] - 2026-10-19
 
 The first public release. The number starts at 2.0.0 by the owner's choice; there was no 1.0.0.
 

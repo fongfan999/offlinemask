@@ -71,7 +71,7 @@ AI trả lời bằng chính các mã đó, chị chỉ cần đổi lại thàn
 
 Thay tay từng tên, từng số với một đoạn ngắn thì được, với email dài hay bảng tính thì dễ sót. [OfflineMask](../) là ứng dụng miễn phí làm việc đó ngay trên máy bạn, không cần mạng:
 
-1. Dán văn bản hoặc mở tệp Excel, Word. Ứng dụng tự tìm số điện thoại, số tài khoản, email, CCCD, mã số thuế…, cả họ tên và địa chỉ nếu bạn cài gói tiếng Việt. Bạn xem lại rồi ẩn.
+1. Dán văn bản hoặc mở tệp Excel, Word. Ứng dụng tự tìm số điện thoại, số tài khoản, email, CCCD, mã số thuế..., cả họ tên và địa chỉ nếu bạn cài gói tiếng Việt. Bạn xem lại rồi ẩn.
 2. Dán bản đã ẩn vào ChatGPT như mọi khi.
 3. Dán câu trả lời vào lại OfflineMask, các mã tự đổi về thông tin thật. Bảng đối chiếu không rời khỏi máy bạn.
 

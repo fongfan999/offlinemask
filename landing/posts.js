@@ -59,7 +59,7 @@ export function parse(source, file) {
     if (!["title", "description", "date", "updated"].includes(key)) fail(`unknown field "${key}"`);
   if (!title || title.length > 70) fail("title is missing or longer than 70 characters");
   if (!description || description.length < 70 || description.length > 170)
-    fail("description must be 70–170 characters (the search-result snippet)");
+    fail("description must be 70-170 characters (the search-result snippet)");
   if (!isDate(date)) fail("date must be YYYY-MM-DD");
   if (updated !== undefined && (!isDate(updated) || updated < date))
     fail("updated must be YYYY-MM-DD, on or after date");
@@ -188,13 +188,13 @@ export function postPage(post, entries) {
     ],
   };
   return {
-    head: `<title>${escape(post.title)} — OfflineMask</title>${shareTags({ title: post.title, description: post.description, url, type: "article", image: `${url}.png` })}
+    head: `<title>${escape(post.title)} - OfflineMask</title>${shareTags({ title: post.title, description: post.description, url, type: "article", image: `${url}.png` })}
     <meta property="article:published_time" content="${post.date}" />
     <meta property="article:modified_time" content="${post.updated}" />
     ${json({ "@graph": [article, trail] })}`,
-    main: `<p class="om-maker-label"><a href="./">Blog</a> · <time datetime="${post.date}">${day(post.date)}</time>${
+    main: `<p class="om-maker-label"><a href="./">Blog</a> - <time datetime="${post.date}">${day(post.date)}</time>${
       post.updated !== post.date
-        ? ` · cập nhật <time datetime="${post.updated}">${day(post.updated)}</time>`
+        ? ` - cập nhật <time datetime="${post.updated}">${day(post.updated)}</time>`
         : ""
     }</p>
         <h1>${escape(post.title)}</h1>
@@ -203,7 +203,7 @@ export function postPage(post, entries) {
 ${post.html}
         </article>
         <aside class="om-blog-cta" aria-label="OfflineMask">
-          <p><strong>OfflineMask</strong> thay tên, số điện thoại, số tài khoản… bằng mã ngay trên máy bạn trước khi bạn hỏi AI, rồi đổi lại trong câu trả lời. Miễn phí, không cần tài khoản, chạy cả khi không có mạng.</p>
+          <p><strong>OfflineMask</strong> thay tên, số điện thoại, số tài khoản... bằng mã ngay trên máy bạn trước khi bạn hỏi AI, rồi đổi lại trong câu trả lời. Miễn phí, không cần tài khoản, chạy cả khi không có mạng.</p>
           <a class="om-button" href="../#om-download">Tải OfflineMask miễn phí</a>
         </aside>
         ${others.length ? `<section class="om-blog-more" aria-labelledby="om-more"><p class="om-maker-label" id="om-more">Đọc thêm</p>${list(others)}</section>` : ""}`,

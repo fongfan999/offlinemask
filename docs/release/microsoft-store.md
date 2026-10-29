@@ -71,9 +71,9 @@ Lịch sử được mã hóa khi bạn đặt mật mã
 ẩn thông tin, bảo mật, AI, ChatGPT, dữ liệu cá nhân, offline, PII
 ```
 
-**Store logos:** upload [`logo-300.png`](../../desktop/store/listing/logo-300.png) as the 1:1 app tile icon and [`logo-2160.png`](../../desktop/store/listing/logo-2160.png) (or `logo-1080.png`) as the 1:1 box art. Without them the listing falls back to the package's 50×50 `StoreLogo.png`, stretched and blurry (seen 25 October 2026). They are `brand/tile-cobalt.svg` cropped to the tile: `sed 's/viewBox="0 0 1024 1024" width="1024" height="1024"/viewBox="100 100 824 824" width="824" height="824"/' brand/tile-cobalt.svg > /tmp/tile.svg`, then `rsvg-convert -w N -h N /tmp/tile.svg -o desktop/store/listing/logo-N.png`.
+**Store logos:** upload [`logo-300.png`](../../desktop/store/listing/logo-300.png) as the 1:1 app tile icon and [`logo-2160.png`](../../desktop/store/listing/logo-2160.png) (or `logo-1080.png`) as the 1:1 box art. Without them the listing falls back to the package's 50x50 `StoreLogo.png`, stretched and blurry (seen 25 October 2026). They are `brand/tile-cobalt.svg` cropped to the tile: `sed 's/viewBox="0 0 1024 1024" width="1024" height="1024"/viewBox="100 100 824 824" width="824" height="824"/' brand/tile-cobalt.svg > /tmp/tile.svg`, then `rsvg-convert -w N -h N /tmp/tile.svg -o desktop/store/listing/logo-N.png`.
 
-**Screenshots:** at least one, 1366×768 or larger, from the Windows app with the synthetic sample (no real data). The landing page shots in `landing/shots/` are a starting point but come from macOS.
+**Screenshots:** at least one, 1366x768 or larger, from the Windows app with the synthetic sample (no real data). The landing page shots in `landing/shots/` are a starting point but come from macOS.
 
 **Copyright:** `© 2026 Phong Phan`
 

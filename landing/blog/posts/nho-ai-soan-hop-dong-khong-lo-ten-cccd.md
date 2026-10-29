@@ -12,7 +12,7 @@ Một hợp đồng thông thường gom rất nhiều thông tin cá nhân vào
 
 - **Phần các bên** ("Bên A", "Bên B"): họ tên, ngày sinh, số CCCD, ngày cấp, nơi cấp, địa chỉ thường trú, số điện thoại, email. Với công ty là tên công ty, mã số thuế, người đại diện.
 - **Điều khoản thanh toán**: số tài khoản, tên chủ tài khoản, ngân hàng.
-- **Đối tượng hợp đồng**: địa chỉ căn nhà cho thuê, số giấy chứng nhận quyền sử dụng đất, biển số xe…
+- **Đối tượng hợp đồng**: địa chỉ căn nhà cho thuê, số giấy chứng nhận quyền sử dụng đất, biển số xe...
 - **Phần cuối và ngoài nội dung**: tên người ký, người làm chứng, tên file ("HD_thue_nha_Le_Thi_Thu.docx"), ghi chú trong file Word.
 
 Chỉ riêng phần các bên đã đủ để nhận ra chính xác một người.
@@ -53,11 +53,11 @@ Ba điều cần giữ:
 2. **Mã nói rõ loại thông tin.** `[CCCD_1]`, `[STK_1]` cho AI biết đó là số gì để đặt đúng chỗ.
 3. **Giữ nguyên phần nội dung.** Số tiền, thời hạn, tên ngân hàng không nhận ra được ai, và AI cần chúng để soạn đúng.
 
-Ghi bảng đối chiếu (`[TEN_1]` = Phạm Quốc Huy…) ra một file riêng trên máy bạn, và không bao giờ dán bảng này vào AI.
+Ghi bảng đối chiếu (`[TEN_1]` = Phạm Quốc Huy...) ra một file riêng trên máy bạn, và không bao giờ dán bảng này vào AI.
 
 ### Bước 2: Soát những chỗ hay sót
 
-Thông tin của các bên thường lặp lại ngoài phần đầu: trong điều khoản bàn giao ("căn nhà tại 27 Nguyễn Trãi…"), phụ lục, danh sách người ở cùng, đầu trang, tên file, và nhất là phần chữ ký, nơi tên được viết lại bằng chữ in hoa: "PHẠM QUỐC HUY". Chữ in hoa rất dễ lọt qua khi dò bằng mắt.
+Thông tin của các bên thường lặp lại ngoài phần đầu: trong điều khoản bàn giao ("căn nhà tại 27 Nguyễn Trãi..."), phụ lục, danh sách người ở cùng, đầu trang, tên file, và nhất là phần chữ ký, nơi tên được viết lại bằng chữ in hoa: "PHẠM QUỐC HUY". Chữ in hoa rất dễ lọt qua khi dò bằng mắt.
 
 Nếu gửi cả file Word, hãy dọn ghi chú, Track Changes và thông tin tác giả bằng **File > Info > Check for Issues > Inspect Document**, cách dùng như trong bài [ẩn thông tin cá nhân trong file Excel](./an-thong-tin-ca-nhan-trong-file-excel-gui-ai).
 
@@ -81,7 +81,7 @@ Giữ kín thông tin các bên cũng không chỉ là thói quen tốt: [Luật
 
 Với hợp đồng nhiều trang có phụ lục, dò tay từng số CCCD, từng lần tên xuất hiện rất dễ sót. [OfflineMask](../) là ứng dụng miễn phí làm việc này ngay trên máy bạn, không cần mạng:
 
-1. **Ẩn.** Mở file hợp đồng DOCX hoặc ODT. Ứng dụng tự tìm số CCCD, số điện thoại, số tài khoản, email, mã số thuế…, và cả họ tên, địa chỉ, tên tổ chức khi bạn cài gói tiếng Việt. Bạn xem lại, ẩn thêm chỗ còn sót, rồi xuất bản đã ẩn; định dạng của file được giữ nguyên. File PDF có chữ bên trong cũng mở được, khi đó bản đã ẩn là văn bản thuần; bản scan và hình ảnh thì chưa hỗ trợ.
+1. **Ẩn.** Mở file hợp đồng DOCX hoặc ODT. Ứng dụng tự tìm số CCCD, số điện thoại, số tài khoản, email, mã số thuế..., và cả họ tên, địa chỉ, tên tổ chức khi bạn cài gói tiếng Việt. Bạn xem lại, ẩn thêm chỗ còn sót, rồi xuất bản đã ẩn; định dạng của file được giữ nguyên. File PDF có chữ bên trong cũng mở được, khi đó bản đã ẩn là văn bản thuần; bản scan và hình ảnh thì chưa hỗ trợ.
 2. **Hỏi AI.** Gửi bản đã ẩn cho AI bạn hay dùng. Cùng một người luôn mang cùng một mã, kiểu `[TEN_1_4e8c]`.
 3. **Khôi phục.** Dán câu trả lời của AI vào lại OfflineMask, các mã tự đổi về thông tin thật. Bảng đối chiếu không rời khỏi máy bạn.
 

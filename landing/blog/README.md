@@ -12,6 +12,7 @@ Google penalises scaled, generic AI content. Every post must be one a careful hu
 
 - **Vietnamese only**, natural and friendly, as the product page speaks: "bạn", short sentences, everyday words. Explain any English term once (e.g. "dữ liệu cá nhân (personal data)") only if readers would search for it.
 - Answer in the first paragraph. Then explain why, then show how, step by step, with a realistic example (fictional names and numbers only, like Nguyễn Minh Anh, 0901 234 567).
+- Only characters on a normal keyboard: "..." not an ellipsis character, "-" not an em or en dash, straight quotes, ">" for a menu path (Cài đặt > Thao tác nhanh), no arrows or middle dots. Vietnamese letters are of course fine.
 - No hype, no fear-mongering, no "?!", no emoji, no clickbait. Never claim OfflineMask is perfect: it finds most private information and the user always reviews before sending.
 
 ## Facts you may state about OfflineMask
@@ -21,7 +22,7 @@ Only these, or what `landing/product.html`, `landing/privacy.html` and `PRD.md` 
 - Free, no ads, no account, no paid tier. macOS (Apple Silicon and Intel), Windows (also via Microsoft Store), Linux.
 - Masks on the user's computer; works with no internet. Flow: mask → paste into any AI → paste the answer back → codes turn back into the real information. The mapping never leaves the computer.
 - Detects email, phone, bank account, card number, CCCD, passport, tax code, passwords; names, addresses and organisations with the optional Vietnamese pack (about 1.2 GB, downloaded once).
-- Text, plus spreadsheets and documents: XLSX, XLS, ODS, CSV, DOCX, ODT, keeping the formatting. **No PDF or images yet.**
+- Text, plus spreadsheets and documents: XLSX, XLS, ODS, CSV, DOCX, ODT, keeping the formatting, and PDFs that contain text (the masked copy is Markdown). A whole folder can be masked at once, very large CSV and text files included. **No scanned PDFs or images yet.**
 - Ẩn nhanh (quick mask): select text in any app and press a button or ⌘⇧M to mask/restore in place. macOS and Windows only.
 - History is kept, encrypted, only if the user sets a passcode, and deletes itself after the chosen period.
 - OfflineMask does not connect to any AI. If the AI edits a code, that code is left as is for the user to check.

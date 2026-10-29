@@ -25,7 +25,7 @@ const details = [
   app.screen && `màn hình ${app.screen}`,
 ];
 if (details.some(Boolean)) {
-  about.textContent = `Gửi kèm: ${details.filter(Boolean).join(" · ")}`;
+  about.textContent = `Gửi kèm: ${details.filter(Boolean).join(" - ")}`;
   about.hidden = false;
 }
 if (location.hash) history.replaceState(null, "", location.pathname + location.search);
@@ -40,7 +40,7 @@ form.addEventListener("submit", async (event) => {
   }
   const button = form.querySelector("button");
   button.disabled = true;
-  status.textContent = "Đang gửi…";
+  status.textContent = "Đang gửi...";
   try {
     const reply = await fetch("/report", {
       method: "POST",

@@ -52,7 +52,7 @@ test("posts that would publish badly are rejected", () => {
 test("pages carry the post's metadata and escape it", () => {
   const parsed = parse(post({ ...good, title: 'Dấu "ngoặc" & <thẻ>' }), "mot-bai.md");
   const page = fill("<!-- blog-head --><!-- blog-main -->", postPage(parsed, [parsed]));
-  assert.match(page, /<title>Dấu &quot;ngoặc&quot; &amp; &lt;thẻ&gt; — OfflineMask<\/title>/);
+  assert.match(page, /<title>Dấu &quot;ngoặc&quot; &amp; &lt;thẻ&gt; - OfflineMask<\/title>/);
   assert.match(page, /<link rel="canonical" href="https:\/\/offlinemask\.com\/blog\/mot-bai" \/>/);
   const json = JSON.parse(/<script type="application\/ld\+json">(.*?)<\/script>/.exec(page)[1]);
   assert.equal(json["@graph"][0]["@type"], "BlogPosting");
