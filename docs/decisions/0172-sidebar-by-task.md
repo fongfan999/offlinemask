@@ -27,3 +27,5 @@ The folder run's `review` and new `findings` computeds tested the non-reactive a
 - "mã thay thế" stays the app's word for an alias throughout; renaming it is a copy pass of its own.
 
 Every new job starts at home (29 Oct 2026). "Tạo mới", "Ẩn văn bản mới", "Ẩn tài liệu mới", "Ẩn bảng tính mới", "Ẩn thư mục khác" and, before a file is hidden, "Chọn tệp khác" / "Chọn thư mục khác" used to clear the page back to its own empty state: a text box or a drop zone for one kind only, under a stepper over nothing. They now clear what is open and go home, whose drop zone and text box take every kind, as "+ Ẩn thông tin mới" does. "Khôi phục tệp khác" stays on its page: it is another returned file for the same job.
+
+No crumb in the top bar (29 Oct 2026). The "• VĂN BẢN", "• BẢNG TÍNH", "• TÀI LIỆU", "• THƯ MỤC" label above each page was left from the sidebar with one entry per format; the page heading and the stepper now say where you are. The top bar keeps the sidebar buttons and the folded logo and is as short on every page as on home, taller only while the logo sits in it.

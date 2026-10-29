@@ -142,14 +142,6 @@ const format = computed<Format>(
   () =>
     active.value?.format ?? (page.value === "excel" || page.value === "word" ? page.value : "text"),
 );
-// Settings has no crumb: its heading already says "Cài đặt".
-const topbarLabel = computed(() =>
-  page.value === "home" || page.value === "settings"
-    ? ""
-    : page.value === "folder"
-      ? "Thư mục"
-      : { text: "Văn bản", excel: "Bảng tính", word: "Tài liệu" }[format.value],
-);
 /** A folder in progress has no session, so the sidebar lists it from here (decision 0172). */
 const folderStatus: Record<string, string> = {
   surveying: "Đang đọc thư mục",
@@ -372,7 +364,7 @@ async function closeSidebar() {
       @keep="keepHistory"
     />
     <div class="workspace" :inert="sidebarOpen">
-      <header class="topbar" :class="{ 'home-topbar': page === 'home' }">
+      <header class="topbar">
         <div>
           <button
             ref="sidebarToggle"
@@ -390,8 +382,8 @@ async function closeSidebar() {
             aria-label="Mở thanh bên"
             @click="toggleCollapsed"
           >
-            <AppIcon name="sidebar" :size="18" /></button
-          ><span v-if="topbarLabel">{{ topbarLabel }}</span>
+            <AppIcon name="sidebar" :size="18" />
+          </button>
         </div>
         <!-- Folded sidebar: its logo sits here, centred (decision 0172). Always rendered,
              shown only while folded, so its place can be measured before the move. -->

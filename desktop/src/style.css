@@ -160,8 +160,8 @@ p {
   position: relative;
   transition: min-height var(--fold);
 }
-/* The home top bar is short; with the logo in it, it needs a logo's room. */
-.app-shell.is-collapsed .home-topbar {
+/* The top bar is short; with the logo in it, it needs a logo's room. */
+.app-shell.is-collapsed .topbar {
   min-height: 84px;
 }
 .topbar-brand {
@@ -521,34 +521,19 @@ nav button:hover,
   min-width: 0;
   padding: 0 42px;
 }
+/* Room for the sidebar buttons and the folded logo; pages name themselves in their
+   headings, so there is no crumb here. */
 .topbar {
-  min-height: 84px;
+  min-height: 48px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  font: 11px var(--mono);
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
 }
 .topbar > div {
   display: flex;
   gap: 10px;
   align-items: center;
-}
-.topbar > div > span::before {
-  content: "";
-  display: inline-block;
-  width: 7px;
-  height: 7px;
-  margin-right: 10px;
-  border-radius: 50%;
-  background: var(--accent);
-  vertical-align: 1px;
-}
-.home-topbar {
-  min-height: 48px;
 }
 .sidebar-toggle {
   display: none;
@@ -2109,9 +2094,6 @@ td.alias {
     margin-bottom: 28px;
   }
   .topbar {
-    min-height: 72px;
-  }
-  .home-topbar {
     min-height: 40px;
   }
 }
@@ -2191,7 +2173,7 @@ td.alias {
   color: var(--muted);
 }
 @media (max-height: 780px) and (min-width: 761px) {
-  .home-topbar {
+  .topbar {
     min-height: 16px;
   }
   .introduction h1 {
