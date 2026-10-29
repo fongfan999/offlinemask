@@ -1837,7 +1837,8 @@ td.alias {
 }
 .restore-empty h2 {
   margin: 14px 0 0;
-  font: 500 22px var(--serif);
+  font: 500 22px var(--sans);
+  letter-spacing: -0.02em;
   color: var(--ink);
 }
 .restore-empty-text {
@@ -4130,7 +4131,8 @@ td.alias {
 }
 .folder-empty h2 {
   margin: 4px 0 0;
-  font: 500 22px var(--serif);
+  font: 500 22px var(--sans);
+  letter-spacing: -0.02em;
   color: var(--ink);
 }
 .folder-empty p {
