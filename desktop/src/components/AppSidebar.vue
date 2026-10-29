@@ -36,7 +36,7 @@ const screens: Record<Page, string> = {
   home: "Trang chủ",
   settings: "Cài đặt",
   folder: "Thư mục",
-  restore: "Lấy lại thông tin thật",
+  restore: "Nhận lại bản đầy đủ",
   text: "Văn bản",
   excel: "Bảng tính",
   word: "Tài liệu",
@@ -87,7 +87,7 @@ defineExpose({
     <nav aria-label="Việc cần làm">
       <button :aria-current="hiding ? 'page' : undefined" @click="emit('navigate', 'home')">
         <AppIcon name="mask" /><span class="nav-text"
-          >Ẩn thông tin<small>Tệp, thư mục, chữ</small></span
+          >Ẩn thông tin riêng<small>Tệp, thư mục, chữ</small></span
         >
       </button>
       <button
@@ -95,7 +95,7 @@ defineExpose({
         @click="emit('navigate', 'restore')"
       >
         <AppIcon name="undo" /><span class="nav-text"
-          >Lấy lại thông tin<small>Từ câu trả lời của AI</small></span
+          >Nhận lại bản đầy đủ<small>Từ câu trả lời của AI</small></span
         >
       </button>
     </nav>

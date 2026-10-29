@@ -20,7 +20,7 @@ People keep documents in folders: a year of bank statements, a client's contract
 
 ## Known limits
 
-- No history yet. A folder's alias table lives in memory until another folder is opened or the app quits. Since decision 0172 a reply or a returned file about the folder is restored on "Lấy lại thông tin thật", one file at a time; history for a folder should be one entry, not one per file (decision 0071), and restoring a whole returned folder is its own change.
+- No history yet. A folder's alias table lives in memory until another folder is opened or the app quits. Since decision 0172 a reply or a returned file about the folder is restored on "Nhận lại bản đầy đủ", one file at a time; history for a folder should be one entry, not one per file (decision 0071), and restoring a whole returned folder is its own change.
 - The speed of 5 000 characters a second is an assumption from decision 0025's profile of an older graph, not a measurement of the shipped one. It should be measured on `~/OfflineMask-eval` before a release relies on it.
 - Text files in a folder go through the document flow, which skips name spans without a capital letter (decision 0079); the text page keeps them.
 - PDFs are read three times (survey, mask, save). Opening is cheap next to the model, but a long PDF is not free.

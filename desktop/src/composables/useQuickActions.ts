@@ -311,7 +311,7 @@ export function useQuickActions({
     tables.delete(id);
     tablesChanged.value++;
   }
-  /** Every alias this launch knows, for "Lấy lại thông tin thật" (decision 0172). */
+  /** Every alias this launch knows, for "Nhận lại bản đầy đủ" (decision 0172). */
   const knownFindings = computed(() => {
     void tablesChanged.value;
     return knownTables().flat();

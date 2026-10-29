@@ -16,7 +16,7 @@ import type { DocRestore } from "../composables/useDocRun.ts";
 import type { SheetRestore } from "../composables/useSheetRun.ts";
 import { fileKind } from "../core/file-kind.ts";
 
-/** "Lấy lại thông tin thật" (decision 0172): the third step as a place of its own. A
+/** "Nhận lại bản đầy đủ" (decision 0172): the third step as a place of its own. A
  * pasted reply or a returned file is restored with every alias this launch knows, so
  * nobody has to remember which text, file or folder the reply came from. */
 const emit = defineEmits<{ navigate: [destination: Page] }>();
@@ -95,13 +95,13 @@ defineExpose({
 <template>
   <div class="editor-heading">
     <div>
-      <h1 ref="heading" tabindex="-1">Lấy lại thông tin thật</h1>
+      <h1 ref="heading" tabindex="-1">Nhận lại bản đầy đủ</h1>
       <p>
         Dán câu trả lời của AI, hoặc kéo vào tệp AI trả về. Tên thật hiện lại, chỉ trên máy bạn.
       </p>
     </div>
   </div>
-  <section class="glass-card glass" aria-label="Lấy lại thông tin thật">
+  <section class="glass-card glass" aria-label="Nhận lại bản đầy đủ">
     <!-- Nothing masked in this launch yet: there is nothing to put back. -->
     <div v-if="!findings.length" class="step-panel">
       <div class="restore-body">
@@ -112,7 +112,7 @@ defineExpose({
       </div>
       <footer class="card-footer">
         <button class="primary-action" @click="emit('navigate', 'home')">
-          <AppIcon name="mask" :size="17" />Ẩn thông tin<AppIcon name="arrow" :size="16" />
+          <AppIcon name="mask" :size="17" />Ẩn thông tin riêng<AppIcon name="arrow" :size="16" />
         </button>
       </footer>
     </div>

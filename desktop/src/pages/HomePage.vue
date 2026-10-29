@@ -21,7 +21,7 @@ import { sampleText } from "../core/review.ts";
 import { packProgress } from "../composables/useRecognitionPack.ts";
 
 const emit = defineEmits<{
-  /** A link: Cài đặt, Lấy lại thông tin thật, or a format's page as last left. */
+  /** A link: Cài đặt, Nhận lại bản đầy đủ, or a format's page as last left. */
   navigate: [destination: Page];
   /** The start box: the format's first step, where the file or text just went. */
   start: [destination: Page];
@@ -160,8 +160,13 @@ const packNotice = computed<PackNotice | null>(() => {
     <span class="hero-logo brand-mark" aria-hidden="true">
       <BrandMark :size="38" />
     </span>
-    <h1 ref="heading" tabindex="-1">Ẩn thông tin riêng<span>trước khi gửi cho AI.</span></h1>
-    <p>Họ tên, số điện thoại, số tài khoản… được thay bằng mã, ngay trên máy bạn.</p>
+    <!-- The website's line and swaps, so the app opens on what the visitor already read. -->
+    <h1 ref="heading" tabindex="-1"><em>AI</em> không nên biết bạn đang nói về <em>ai</em>.</h1>
+    <p>Ẩn thông tin riêng trước khi hỏi AI, nhận lại bản đầy đủ khi AI trả lời.</p>
+    <div class="home-swaps" aria-hidden="true">
+      <span class="home-swap"><s>Phong Phan</s><b>[TEN_1_4e8c]</b></span>
+      <span class="home-swap"><s>0901234567</s><b>[SDT_1_4e8c]</b></span>
+    </div>
   </div>
   <!-- One place to start (decision 0172): a file, a folder or text, the app sorts it. -->
   <section class="start-box" aria-label="Bắt đầu">
@@ -194,14 +199,22 @@ const packNotice = computed<PackNotice | null>(() => {
       </button>
     </p>
   </section>
-  <!-- How it goes, in three plain steps; the third has its own page (decision 0172). -->
+  <!-- How it goes, in the website's three steps and words; the third has its own page
+       (decision 0172). -->
   <ol class="home-steps" aria-label="Cách dùng">
-    <li><strong>Ẩn</strong>Thông tin riêng được thay bằng mã như [TEN_1].</li>
-    <li><strong>Gửi cho AI</strong>Dán bản đã ẩn vào ChatGPT, Gemini… như bình thường.</li>
     <li>
-      <strong>Lấy lại</strong>Dán câu trả lời của AI vào OfflineMask, tên thật hiện lại.
+      <span class="home-step-number">01</span><strong>Ẩn thông tin riêng</strong>
+      <p>Kéo tệp hoặc dán chữ ở trên. Họ tên, số điện thoại, số tài khoản… thành mã.</p>
+    </li>
+    <li>
+      <span class="home-step-number">02</span><strong>Hỏi AI như mọi khi</strong>
+      <p>Dán bản đã ẩn vào ChatGPT, Gemini hay AI bạn hay dùng.</p>
+    </li>
+    <li>
+      <span class="home-step-number">03</span><strong>Nhận lại bản đầy đủ</strong>
+      <p>Dán câu trả lời của AI vào OfflineMask, mã tự đổi về thông tin thật.</p>
       <button type="button" class="link-button" @click="emit('navigate', 'restore')">
-        Lấy lại thông tin thật
+        Nhận lại bản đầy đủ<AppIcon name="arrow" :size="13" />
       </button>
     </li>
   </ol>
