@@ -15,6 +15,7 @@ import { createSheetFiles } from "./adapters/sheet-files.ts";
 import { createTextDetector, queueDetections } from "./adapters/text-detection.ts";
 import AppIcon from "./components/AppIcon.vue";
 import AppSidebar from "./components/AppSidebar.vue";
+import BrandMark from "./components/BrandMark.vue";
 import LockPage from "./components/LockPage.vue";
 import {
   packKey,
@@ -265,6 +266,26 @@ function removeSession(id: string) {
   quick.forget(id);
   if (target) void navigate(target);
 }
+/** Wide windows can fold the sidebar away (decision 0172). The logo glides between the
+ * sidebar and the top bar's centre: both carry one view-transition name, so the web
+ * view morphs one into the other. Without the API, or with reduced motion, it just
+ * switches. Kept in memory only: a launch starts with the sidebar open. */
+const collapsed = ref(false);
+const sidebarExpand = useTemplateRef<HTMLButtonElement>("sidebarExpand");
+function toggleCollapsed() {
+  const flip = async () => {
+    collapsed.value = !collapsed.value;
+    await nextTick();
+  };
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const done =
+    "startViewTransition" in document && !still
+      ? document.startViewTransition(flip).updateCallbackDone
+      : flip();
+  void done.then(() =>
+    collapsed.value ? sidebarExpand.value?.focus() : sidebar.value?.focusStart(),
+  );
+}
 async function openSidebar() {
   sidebarOpen.value = true;
   await nextTick();
@@ -280,7 +301,7 @@ async function closeSidebar() {
 <template>
   <div class="ambient" aria-hidden="true"></div>
   <LockPage v-if="vault.state.value === 'locked'" />
-  <div v-else-if="vault.checked.value" class="app-shell">
+  <div v-else-if="vault.checked.value" class="app-shell" :class="{ 'is-collapsed': collapsed }">
     <button
       v-if="sidebarOpen"
       class="sidebar-scrim"
@@ -299,6 +320,7 @@ async function closeSidebar() {
       :version="version"
       @navigate="openFormat"
       @close="closeSidebar"
+      @collapse="toggleCollapsed"
     />
     <div class="workspace" :inert="sidebarOpen">
       <header class="topbar" :class="{ 'home-topbar': page === 'home' }">
@@ -312,8 +334,27 @@ async function closeSidebar() {
             @click="openSidebar"
           >
             <AppIcon name="list" /></button
+          ><button
+            v-if="collapsed"
+            ref="sidebarExpand"
+            class="sidebar-expand"
+            aria-label="Mở thanh bên"
+            title="Mở thanh bên"
+            @click="toggleCollapsed"
+          >
+            <AppIcon name="sidebar" :size="18" /></button
           ><span v-if="topbarLabel">{{ topbarLabel }}</span>
         </div>
+        <!-- Folded sidebar: its logo sits here, centred (decision 0172). -->
+        <button
+          v-if="collapsed"
+          class="brand topbar-brand"
+          aria-label="OfflineMask — Trang chủ"
+          @click="openFormat('home')"
+        >
+          <span class="brand-mark"><BrandMark :size="28" /></span
+          ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
+        </button>
       </header>
       <main
         :class="{

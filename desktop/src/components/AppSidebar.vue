@@ -20,7 +20,12 @@ const props = defineProps<{
   folder: { name: string; status: string } | null;
   version: string;
 }>();
-const emit = defineEmits<{ navigate: [destination: Page, id?: string | null]; close: [] }>();
+const emit = defineEmits<{
+  navigate: [destination: Page, id?: string | null];
+  close: [];
+  /** Wide windows: fold the sidebar away; the logo moves to the top bar (decision 0172). */
+  collapse: [];
+}>();
 
 /** One way in (decision 0172): home holds both halves of the job, hiding and getting the
  * full reply back. Which page a file opens on is the app's business, not a choice. */
@@ -74,15 +79,25 @@ defineExpose({
     aria-label="Điều hướng và lịch sử"
     @keydown.esc="emit('close')"
   >
-    <button
-      ref="start"
-      class="brand"
-      aria-label="OfflineMask — Trang chủ"
-      @click="emit('navigate', 'home')"
-    >
-      <span class="brand-mark"><BrandMark :size="28" /></span
-      ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
-    </button>
+    <div class="sidebar-head">
+      <button
+        ref="start"
+        class="brand"
+        aria-label="OfflineMask — Trang chủ"
+        @click="emit('navigate', 'home')"
+      >
+        <span class="brand-mark"><BrandMark :size="28" /></span
+        ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
+      </button>
+      <button
+        class="sidebar-collapse"
+        aria-label="Thu gọn thanh bên"
+        title="Thu gọn thanh bên"
+        @click="emit('collapse')"
+      >
+        <AppIcon name="sidebar" :size="18" />
+      </button>
+    </div>
     <!-- The pattern AI users know from their chat apps (decision 0172): start something new
          at the top, what is open or kept below. -->
     <button
