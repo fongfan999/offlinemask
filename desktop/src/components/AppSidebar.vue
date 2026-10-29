@@ -99,7 +99,7 @@ defineExpose({
       <AppIcon name="plus" :size="16" />Ẩn thông tin mới
     </button>
     <div class="history-heading">
-      {{ history ? "Lịch sử" : "Đã ẩn" }}
+      {{ history ? "Lịch sử" : "Gần đây" }}
       <span
         v-if="!history"
         class="history-info"

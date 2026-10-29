@@ -1,7 +1,7 @@
 import type { Directive } from "vue";
 
 /** The app's tooltip (decision 0172), in place of the browser's `title`: the same card as
- * the note beside "Đã ẩn", shown after a short pause under the pointer or at once on
+ * the note beside "Gần đây", shown after a short pause under the pointer or at once on
  * keyboard focus. One element in the page serves every tip, so no scrolling box or card
  * edge clips it; it sits under its target, above when there is no room, inside the
  * window. Only for things that need saying: an icon without words, a shortcut, what a

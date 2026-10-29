@@ -348,7 +348,7 @@ nav button:hover,
   align-items: center;
   gap: 6px;
 }
-/* The app's tooltip (decision 0172, src/directives/tip.ts): the note beside "Đã ẩn" without
+/* The app's tooltip (decision 0172, src/directives/tip.ts): the note beside "Gần đây" without
    its button, placed by script under or above its target. */
 .app-tip {
   position: fixed;
@@ -384,7 +384,7 @@ nav button:hover,
   font-size: 13px;
   font-weight: 600;
 }
-/* Without a passcode, an "i" beside "Đã ẩn" (decision 0172): its note shows on hover or
+/* Without a passcode, an "i" beside "Gần đây" (decision 0172): its note shows on hover or
    focus, or stays open after a click, and leads to the passcode. */
 .history-info-button,
 .history-tip-action {
