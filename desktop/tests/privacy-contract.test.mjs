@@ -106,6 +106,8 @@ test("the app's system permissions are the ones the page explains (privacy §5)"
       "dialog:allow-open",
       "dialog:allow-save",
       "fs:allow-mkdir",
+      "fs:allow-open",
+      "fs:allow-write",
       "fs:allow-write-file",
       "global-shortcut:allow-is-registered",
       "global-shortcut:allow-register",
@@ -115,6 +117,8 @@ test("the app's system permissions are the ones the page explains (privacy §5)"
     UPDATE,
   );
   assert.deepEqual(ids("pill"), [], UPDATE);
+  // Decision 0174: large CSV and text files are written a piece at a time.
+  assert.match(read("../../landing/privacy.html"), /đọc\s+và\s+ghi\s+từng\s+phần\s+một/, UPDATE);
   // Decision 0171: a masked folder is written as a new folder where the user chooses.
   assert.match(
     read("../../landing/privacy.html"),
@@ -129,7 +133,7 @@ test("the machine check reads processor count and memory only (privacy §5)", ()
   assert.doesNotMatch(machine, /reqwest|write|create_dir/, UPDATE);
   assert.match(
     read("../../landing/privacy.html"),
-    /bao nhiêu nhân xử lý\s+và bao nhiêu bộ nhớ; các con số này không được lưu hay gửi đi/,
+    /bao\s+nhiêu\s+nhân\s+xử\s+lý\s+và\s+bao\s+nhiêu\s+bộ\s+nhớ;\s+các\s+con\s+số\s+này\s+không\s+được\s+lưu\s+hay\s+gửi\s+đi/,
     UPDATE,
   );
 });

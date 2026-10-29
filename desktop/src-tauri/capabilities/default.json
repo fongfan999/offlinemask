@@ -1,7 +1,7 @@
 {
   "$schema": "../gen/schemas/desktop-schema.json",
   "identifier": "default",
-  "description": "Receive recognition-pack status events, open the product homepage and the bug report page (decision 0147: the report travels in the address's fragment and the user sends it from the website), set the window theme chosen in Settings, save a masked copy to the one path picked in the save dialog (the dialog adds only that file to the fs scope), and, for a masked folder (decision 0171), pick a folder with the folder dialog (which adds only that folder to the fs scope) and create the output folder and its subfolders inside it. Model downloads accept no URLs; the local tokenizer receives transient text and never persists or transmits it. Quick actions (decision 0090): register one global shortcut, read the clipboard only on that shortcut or a panel button, write the result back, and send the outcome to the floating panel window. Background mode (decision 0092): the window hides itself on close and the login item can be turned on or off.",
+  "description": "Receive recognition-pack status events, open the product homepage and the bug report page (decision 0147: the report travels in the address's fragment and the user sends it from the website), set the window theme chosen in Settings, save a masked copy to the one path picked in the save dialog (the dialog adds only that file to the fs scope), and, for a masked folder (decision 0171), pick a folder with the folder dialog (which adds only that folder to the fs scope) and create the output folder and its subfolders inside it; a large CSV or text file is written into it a piece at a time (decision 0174: open, write, close). Model downloads accept no URLs; the local tokenizer receives transient text and never persists or transmits it. Quick actions (decision 0090): register one global shortcut, read the clipboard only on that shortcut or a panel button, write the result back, and send the outcome to the floating panel window. Background mode (decision 0092): the window hides itself on close and the login item can be turned on or off.",
   "windows": [
     "main"
   ],
@@ -14,6 +14,9 @@
     "dialog:allow-save",
     "fs:allow-mkdir",
     "fs:allow-write-file",
+    "fs:allow-open",
+    "fs:allow-write",
+    "core:resources:allow-close",
     "global-shortcut:allow-register",
     "global-shortcut:allow-unregister",
     "global-shortcut:allow-is-registered",

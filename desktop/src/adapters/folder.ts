@@ -83,6 +83,8 @@ export async function machineResources(): Promise<MachineResources> {
 export interface FolderTarget {
   name: string;
   write(path: string, bytes: Uint8Array): Promise<void>;
+  /** The same, a piece at a time, for a streamed file (decision 0174). */
+  writeStream(path: string, pieces: ReadableStream<Uint8Array>): Promise<void>;
 }
 /** Whether making a folder failed because the name is taken. The system's words are in
  * the user's language (Vietnamese Windows says "đã tồn tại"), so the code decides:
@@ -94,6 +96,10 @@ export async function pickFolderTarget(root: string): Promise<FolderTarget | nul
     return {
       name: `${root} (OfflineMasked)`,
       async write(path, bytes) {
+        await saveFile(bytes, path.split("/").pop()!);
+      },
+      async writeStream(path, pieces) {
+        const bytes = new Uint8Array(await new Response(pieces).arrayBuffer());
         await saveFile(bytes, path.split("/").pop()!);
       },
     };
@@ -124,16 +130,24 @@ export async function pickFolderTarget(root: string): Promise<FolderTarget | nul
     }
   }
   const made = new Set<string>();
+  /** The file's full path, its folders made first. */
+  async function place(path: string) {
+    const parts = path.split("/");
+    const folder = parts.slice(0, -1);
+    if (folder.length && !made.has(folder.join("/"))) {
+      await mkdir(join(name, ...folder), { recursive: true });
+      made.add(folder.join("/"));
+    }
+    return join(name, ...parts);
+  }
   return {
     name,
     async write(path, bytes) {
-      const parts = path.split("/");
-      const folder = parts.slice(0, -1);
-      if (folder.length && !made.has(folder.join("/"))) {
-        await mkdir(join(name, ...folder), { recursive: true });
-        made.add(folder.join("/"));
-      }
-      await writeFile(join(name, ...parts), bytes);
+      await writeFile(await place(path), bytes);
+    },
+    async writeStream(path, pieces) {
+      // The plugin opens the file and writes each piece as it comes.
+      await writeFile(await place(path), pieces);
     },
   };
 }

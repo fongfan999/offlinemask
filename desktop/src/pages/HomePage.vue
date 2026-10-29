@@ -54,6 +54,8 @@ const pasteKey = /Mac|iPhone|iPad/.test(navigator.userAgent) ? "⌘V" : "Ctrl+V"
 const startError = ref("");
 async function startWith(file: File) {
   startError.value = "";
+  // A CSV or text file too large to open whole: a piece at a time (decision 0174).
+  if (await folder.takeLarge(file)) return emit("start", "folder");
   const kind = fileKind(file.name);
   if (kind === "text") {
     startError.value = await run.openTextFile(file);

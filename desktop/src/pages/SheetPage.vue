@@ -37,6 +37,12 @@ function openFolder(picked: PickedFolder) {
   void folder.load(picked);
   emit("navigate", "folder");
 }
+/** A CSV too large to open whole is masked a piece at a time on the folder page
+ * (decision 0174). */
+async function openFile(file: File) {
+  if (await folder.takeLarge(file)) emit("navigate", "folder");
+  else await sheet.openFile(file);
+}
 
 const sheet = useProvided(sheetKey);
 const pack = useProvided(packKey);
@@ -294,7 +300,7 @@ defineExpose({
           accept=".xlsx,.xls,.ods,.csv"
           :busy="sheet.opening.value"
           folders
-          @file="sheet.openFile"
+          @file="openFile"
           @folder="openFolder"
         />
         <div class="input-hint-row">

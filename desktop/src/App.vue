@@ -82,6 +82,11 @@ const quick = useQuickActions({
   },
   // A file from the Finder service (decision 0094) opens like one dropped on the home page.
   openFile: async (file) => {
+    // A CSV or text file too large to open whole: a piece at a time (decision 0174).
+    if (await folder.takeLarge(file)) {
+      void navigate("folder");
+      return "";
+    }
     const kind = fileKind(file.name);
     if (kind === "text") {
       const error = await run.openTextFile(file);

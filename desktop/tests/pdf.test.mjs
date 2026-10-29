@@ -435,14 +435,12 @@ test("a PDF stops with code memory once its text passes the allowance (decision 
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   for (let page = 0; page < 3; page++)
     for (let line = 0; line < 40; line++)
-      pdf
-        .addPage()
-        .drawText(`Trang ${page} dong ${line} Nguyen Van An 0912345678`, {
-          x: 50,
-          y: 780,
-          size: 10,
-          font,
-        });
+      pdf.addPage().drawText(`Trang ${page} dong ${line} Nguyen Van An 0912345678`, {
+        x: 50,
+        y: 780,
+        size: 10,
+        font,
+      });
   const bytes = await pdf.save();
   const all = await openPdf(bytes.slice());
   const chars = all.paragraphs.reduce((sum, paragraph) => sum + paragraph.text.length, 0);

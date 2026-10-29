@@ -132,6 +132,8 @@ const restoreStatus = computed(() => {
 const plainText = /\.(txt|md)$/i;
 async function openFile(file: File) {
   if (!plainText.test(file.name)) return doc.openFile(file);
+  // Too large for the text page: a piece at a time on the folder page (decision 0174).
+  if (await folder.takeLarge(file)) return emit("navigate", "folder");
   doc.fileError.value = await run.openTextFile(file);
   if (!doc.fileError.value) emit("navigate", "text");
 }

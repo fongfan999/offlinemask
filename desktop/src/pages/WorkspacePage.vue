@@ -11,6 +11,7 @@ import QuickIntro from "../components/QuickIntro.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import {
+  folderKey,
   packKey,
   quickKey,
   runKey,
@@ -44,6 +45,7 @@ const emit = defineEmits<{
 }>();
 
 const pack = useProvided(packKey);
+const folder = useProvided(folderKey);
 const { status: models, ready: modelsReady, preparing } = pack;
 const {
   draft,
@@ -209,6 +211,9 @@ async function dropFile(event: DragEvent) {
   const file = event.dataTransfer?.files[0];
   if (!file) return;
   event.preventDefault();
+  // Too large for the text box: a piece at a time on the folder page (decision 0174).
+  if (/\.(txt|md)$/i.test(file.name) && (await folder.takeLarge(file)))
+    return emit("navigate", "folder");
   processingError.value = /\.(txt|md)$/i.test(file.name)
     ? await openTextFile(file)
     : "Ô này nhận tệp .txt hoặc .md. Mở tệp Excel ở Bảng tính, tệp Word ở Tài liệu.";

@@ -47,6 +47,8 @@ function openStep(target: number) {
   restoreStep.value = target === 3;
 }
 const count = (n: number) => n.toLocaleString("vi-VN");
+/** A large file masked here on its own (decision 0174) is a file, not a folder. */
+const subject = computed(() => (folder.files.value.length === 1 ? "Tệp này" : "Thư mục này"));
 const emptyReason = computed(
   () =>
     (folder.failed.value.length
@@ -247,7 +249,7 @@ defineExpose({
           @again="another"
         />
         <template v-else-if="phase === 'ready'">
-          <LongJobNote :seconds="folder.estimate.value" subject="Thư mục này" />
+          <LongJobNote :seconds="folder.estimate.value" :subject="subject" />
           <!-- Files it cannot open come first, folded to one line like the long-job note. -->
           <details v-if="folder.failed.value.length" class="long-job-note is-warning">
             <summary>

@@ -27,7 +27,16 @@ import { memoryRefusal, pdfCharLimit, pdfRefusal } from "./memoryBudget.ts";
 import { aliasScope, newSessionId, type Session } from "../core/sessions.ts";
 import { suggestColumn, type ColumnPlan } from "../core/sheet/columns.ts";
 import {
+  csvPieces,
+  maskedCsv,
+  maskedLines,
+  pieceCells,
+  surveyCsv,
+} from "../core/sheet/csv-stream.ts";
+import { linePieces, pieceStream, valueMasker } from "../core/stream.ts";
+import {
   AliasBook,
+  detectionReplacements,
   editedTexts,
   keepCells,
   maskTables,
@@ -54,6 +63,10 @@ export interface FolderFile {
   chars: number;
   sheets: { layout: string; preambleChars: number; columnChars: number[] }[];
   masked: number;
+  /** A CSV or text file, read a piece at a time at every step (decision 0174); a CSV's
+   * header row is kept from the survey. */
+  streamed: boolean;
+  headerRow: number;
 }
 /** Sheets with the same headers, and the column choices they share. */
 export interface FolderLayout {
@@ -68,10 +81,10 @@ export interface FolderLayout {
    * earliest file gives the example and the suggestions. */
   order: number;
 }
-interface Result {
-  kind: FolderKind;
-  edits: DocEdits | CellEdits;
-}
+type Result =
+  | { kind: FolderKind; edits: DocEdits | CellEdits }
+  /** A streamed file keeps only how often each code occurs in it. */
+  | { kind: "streamed"; counts: Map<string, number> };
 export interface FolderRunDependencies {
   detector: TextDetector;
   pack: { ready: Ref<boolean>; readyRoot: Ref<string | null> };
@@ -85,6 +98,9 @@ const suggestRows = 50;
 const cachedLength = 300;
 const cacheLimit = 200_000;
 const aliasLike = /\[[A-Z][A-Z_]*_\d+_[a-f0-9]{4,8}\]/gi;
+/** CSV and text files are streamed: they are the formats that grow past what the web
+ * view can hold (decision 0174). */
+export const streams = (name: string) => /\.(csv|txt|md)$/i.test(name);
 
 /** Where a file's masked copy goes inside the output folder, named as its page names it. */
 export function outputPath(file: FolderFile): string {
@@ -193,6 +209,30 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     return key;
   }
 
+  /** A streamed file's survey: a CSV's header, first rows and characters per column; a
+   * text file's characters. */
+  async function survey(item: FolderFile, index: number) {
+    const seen = (text: string) => notePresent([text]);
+    if (item.kind === "excel") {
+      const found = await surveyCsv(item.file, suggestRows, seen);
+      if (!found.header.some(Boolean) && !found.sample.length) throw new Error("empty");
+      item.headerRow = found.headerRow;
+      item.sheets = [
+        {
+          layout: addLayout(found.header, found.sample, item.path, index),
+          preambleChars: found.preambleChars,
+          columnChars: found.columnChars,
+        },
+      ];
+      return;
+    }
+    for await (const { lines } of linePieces(item.file))
+      for (const line of lines) {
+        if (line.text.trim()) item.chars += line.text.length;
+        if (line.text.includes("[")) seen(line.text);
+      }
+  }
+
   /** Take a folder: list what it holds and read each file once to size the work. */
   async function load(picked: PickedFolder): Promise<boolean> {
     if (busy.value && phase.value !== "surveying") return false;
@@ -216,6 +256,8 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
       chars: 0,
       sheets: [],
       masked: 0,
+      streamed: streams(entry.file.name),
+      headerRow: 0,
     }));
     phase.value = "surveying";
     workers.value = fileWorkers(await machineResources());
@@ -226,6 +268,16 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
       const item = files.value[index]!;
       const worker = pool[slot]!;
       item.status = "reading";
+      if (item.streamed) {
+        try {
+          await survey(item, index);
+          item.status = "ready";
+        } catch {
+          item.status = "failed";
+          item.error = folderFailure;
+        }
+        return;
+      }
       // Files open side by side, one per worker: each has its share of the budget.
       const share = 1 / workers.value;
       const refused = await memoryRefusal(item.file, share);
@@ -269,6 +321,13 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     if (run !== generation) return false;
     layouts.value.sort((a, b) => a.order - b.order);
     phase.value = "ready";
+    return true;
+  }
+  /** A CSV or text file too large to open whole on its own page is masked here, alone,
+   * a piece at a time (decision 0174). True when it was taken. */
+  async function takeLarge(file: File): Promise<boolean> {
+    if (!streams(file.name) || !(await memoryRefusal(file))) return false;
+    void load({ name: file.name.replace(/\.[^.]+$/, ""), entries: [{ path: file.name, file }] });
     return true;
   }
   function setPlan(key: string, column: number, plan: ColumnPlan) {
@@ -340,7 +399,13 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
       item.status = "masking";
       let handle = "";
       try {
-        if (item.kind === "word") {
+        if (item.streamed) {
+          const counts = new Map<string, number>();
+          item.masked = await maskStreamed(item, shared, counts, (fraction) =>
+            report(item.path, fraction),
+          );
+          results.set(item.path, { kind: "streamed", counts });
+        } else if (item.kind === "word") {
           const opened = await worker.openDoc(item.file);
           handle = opened.handle;
           const detections = await detect(
@@ -397,12 +462,67 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     tally();
     phase.value = "review";
   }
+  /** Mask a streamed file a piece at a time: only the codes it adds to the folder's book,
+   * and how often each occurs, are kept; saving reads it again (decision 0174). */
+  async function maskStreamed(
+    item: FolderFile,
+    shared: AliasBook,
+    counts: Map<string, number>,
+    report: (fraction: number) => void,
+  ): Promise<number> {
+    let masked = 0;
+    const add = (alias: string) => counts.set(alias, (counts.get(alias) ?? 0) + 1);
+    const scan = async (cells: { key: string; text: string }[], from: number, to: number) => {
+      const size = Math.max(1, item.file.size);
+      const found = await detect(cells, (fraction) =>
+        report((from + fraction * (to - from)) / size),
+      );
+      for (const cell of cells) {
+        const replacements = detectionReplacements(cell.text, found.get(cell.key) ?? [], shared);
+        if (replacements.length) masked++;
+        for (const replacement of replacements) add(replacement.text);
+      }
+    };
+    let read = 0;
+    if (item.kind === "excel") {
+      const plans = layoutOf(item.sheets[0]?.layout ?? "")?.plans ?? [];
+      for await (const piece of csvPieces(item.file)) {
+        piece.rows.forEach((row, index) => {
+          if (piece.first + index <= item.headerRow) return;
+          row.forEach((text, column) => {
+            const plan = plans[column];
+            if (plan?.mode !== "hide" || !text.trim()) return;
+            add(shared.alias(plan.type, plan.label, text.trim()));
+            masked++;
+          });
+        });
+        await scan(pieceCells(piece.rows, piece.first, item.headerRow, plans), read, piece.read);
+        read = piece.read;
+      }
+    } else
+      for await (const piece of linePieces(item.file)) {
+        const cells = piece.lines
+          .map((line, index) => ({ key: String(index), text: line.text }))
+          .filter((cell) => cell.text.trim());
+        await scan(cells, read, piece.read);
+        read = piece.read;
+      }
+    return masked;
+  }
+
   /** How often each alias occurs across the folder, and in how many files. */
   function tally() {
     const all = new Map<string, number>();
     const inFiles = new Map<string, number>();
     const findings = book?.findings ?? [];
     for (const result of results.values()) {
+      if (result.kind === "streamed") {
+        for (const [alias, count] of result.counts) {
+          all.set(alias, (all.get(alias) ?? 0) + count);
+          inFiles.set(alias, (inFiles.get(alias) ?? 0) + 1);
+        }
+        continue;
+      }
       const texts =
         result.kind === "word"
           ? editedAliases(result.edits as DocEdits)
@@ -470,6 +590,7 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     phase.value = "saving";
     const findings = book?.findings ?? [];
     const keep = kept.value;
+    const masker = valueMasker(findings, keep);
     const todo = masked.value;
     const startedAt = Date.now();
     let done = 0;
@@ -482,7 +603,20 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
       let handle = "";
       try {
         let bytes: Uint8Array;
-        if (result.kind === "word") {
+        if (result.kind === "streamed") {
+          const pieces =
+            item.kind === "excel"
+              ? maskedCsv(
+                  item.file,
+                  item.headerRow,
+                  layoutOf(item.sheets[0]?.layout ?? "")?.plans ?? [],
+                  masker,
+                )
+              : maskedLines(item.file, masker);
+          await target.writeStream(outputPath(item), pieceStream(pieces));
+          item.status = "saved";
+          return;
+        } else if (result.kind === "word") {
           handle = (await worker.openDoc(item.file)).handle;
           bytes = await worker.writeDoc(handle, keepReplacements(result.edits as DocEdits, keep));
         } else {
@@ -524,6 +658,7 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
     fileCounts,
     saveTarget,
     load,
+    takeLarge,
     setPlan,
     maskAll,
     cancel,
