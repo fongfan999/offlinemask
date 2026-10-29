@@ -36,6 +36,28 @@ const surveyed = computed(
   () => folder.files.value.filter((file) => !["waiting", "reading"].includes(file.status)).length,
 );
 const duration = computed(() => roughDuration(folder.estimate.value));
+/** The estimate in parts (decision 0171): documents, and spreadsheets' columns to scan.
+ * Shares of the total, for the bar; a part with nothing to read has none. */
+const timeShares = computed(() => {
+  const { docs, layouts } = folder.estimateParts.value;
+  const sheetSeconds = Object.values(layouts).reduce((sum, value) => sum + value, 0);
+  const total = docs + sheetSeconds;
+  return total ? { docs: docs / total, sheets: sheetSeconds / total } : { docs: 0, sheets: 0 };
+});
+const bothParts = computed(() => timeShares.value.docs > 0 && timeShares.value.sheets > 0);
+const scanColumns = computed(() =>
+  folder.layouts.value.reduce(
+    (sum, layout) => sum + layout.plans.filter((plan) => plan.mode === "scan").length,
+    0,
+  ),
+);
+/** A group's own time, only when it is worth saying (a minute or more). */
+const layoutTime = (key: string) => {
+  const value = folder.estimateParts.value.layouts[key] ?? 0;
+  return value >= 60 ? roughDuration(value) : "";
+};
+const percent = (share: number) => `${Math.round(share * 1000) / 10}%`;
+const capital = (text: string) => text.charAt(0).toUpperCase() + text.slice(1);
 const hidden = computed(() => folder.masked.value.reduce((sum, file) => sum + file.masked, 0));
 const aliases = computed(() =>
   folder.review.value.reduce((sum, group) => sum + group.items.length, 0),
@@ -143,10 +165,35 @@ defineExpose({
               cho công việc hoặc cho cả công ty, để máy làm việc của bạn không bị ảnh hưởng.
             </p>
           </div>
-          <p v-else-if="folder.readable.value.length" class="sheet-summary">
-            <AppIcon name="clock" :size="15" />Ẩn {{ count(folder.readable.value.length) }} tệp mất
-            {{ duration }} trên máy này.
-          </p>
+          <!-- How long, and what it is spent on: only text the model reads costs time. -->
+          <div v-else-if="folder.readable.value.length" class="folder-time">
+            <AppIcon name="clock" :size="20" />
+            <div>
+              <p class="folder-time-total">
+                <strong>{{ capital(duration) }}</strong> để ẩn
+                {{ count(folder.readable.value.length) }} tệp trên máy này
+              </p>
+              <div v-if="bothParts" class="folder-time-bar" aria-hidden="true">
+                <span class="is-docs" :style="{ width: percent(timeShares.docs) }"></span
+                ><span class="is-sheets" :style="{ width: percent(timeShares.sheets) }"></span>
+              </div>
+              <p class="folder-time-legend" :class="{ 'has-dots': bothParts }">
+                <span v-if="docs"><i class="is-docs"></i>Chữ trong {{ count(docs) }} tài liệu</span
+                ><span v-if="sheets"
+                  ><i class="is-sheets"></i
+                  >{{
+                    scanColumns
+                      ? `${count(scanColumns)} cột bảng tính cần đọc từng ô`
+                      : "Bảng tính: không cột nào cần đọc từng ô"
+                  }}</span
+                >
+              </p>
+              <p class="folder-time-why">
+                Thời gian dành cho việc đọc chữ. Cột “Ẩn” hay “Giữ nguyên” gần như không tốn thêm
+                thời gian; mỗi cột “Quét nội dung” thì có.
+              </p>
+            </div>
+          </div>
           <p v-if="folder.overflow.value" class="sheet-note">
             <AppIcon name="info" :size="14" />Thư mục có hơn {{ count(maxFolderFiles) }} tệp; lần
             này chỉ ẩn {{ count(maxFolderFiles) }} tệp đầu. Hãy chia nhỏ thư mục cho phần còn lại.
@@ -171,7 +218,12 @@ defineExpose({
               <summary>
                 <AppIcon name="table" :size="16" /><span class="folder-summary-text"
                   ><strong>{{ layoutTitle(layout.example) }}</strong
-                  ><span>{{ layoutSummary(layout.sheets, layout.plans) }}</span></span
+                  ><span
+                    >{{ layoutSummary(layout.sheets, layout.plans)
+                    }}<template v-if="layoutTime(layout.key)">
+                      · <b>{{ layoutTime(layout.key) }}</b></template
+                    ></span
+                  ></span
                 ><AppIcon class="folder-chevron" name="chevron" :size="14" />
               </summary>
               <SheetPreview
