@@ -2,6 +2,7 @@
 import type { PickedFolder } from "../adapters/folder.ts";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
+import CannotOpen from "../components/CannotOpen.vue";
 import BrandMark from "../components/BrandMark.vue";
 import DocPreview from "../components/DocPreview.vue";
 import FileDropZone from "../components/FileDropZone.vue";
@@ -274,7 +275,16 @@ defineExpose({
 
     <!-- Step 1: open a document, preview, mask all. -->
     <div v-if="!session" class="step-panel">
-      <template v-if="!draft">
+      <CannotOpen
+        v-if="!draft && doc.fileError.value"
+        icon="file"
+        title="Không mở được tệp này"
+        button="Chọn tệp khác"
+        @again="newDoc"
+      >
+        {{ doc.fileError.value }}
+      </CannotOpen>
+      <template v-else-if="!draft">
         <FileDropZone
           icon="file"
           title="Kéo thả tài liệu vào đây"
@@ -298,9 +308,6 @@ defineExpose({
         <div class="input-hint-row">
           <button type="button" class="sample-link" @click="trySample">Thử với tệp mẫu</button>
         </div>
-        <p v-if="doc.fileError.value" class="input-error drop-error" role="alert">
-          {{ doc.fileError.value }}
-        </p>
       </template>
       <template v-else>
         <template v-if="!doc.progress.value">

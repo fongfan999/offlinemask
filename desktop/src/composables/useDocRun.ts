@@ -237,6 +237,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
   function discardDraft() {
     const handle = draft.value?.handle;
     draft.value = null;
+    fileError.value = "";
     if (handle) release(handle);
   }
   function prune() {

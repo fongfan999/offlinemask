@@ -4198,23 +4198,23 @@ td.alias {
   font-weight: 600;
 }
 /* A folder with nothing to hide says so and offers another (decision 0171). */
-.folder-empty {
+.cannot-open {
   display: grid;
   justify-items: center;
   gap: 10px;
   padding: 40px 28px 36px;
   text-align: center;
 }
-.folder-empty > svg {
+.cannot-open > svg {
   color: var(--accent);
 }
-.folder-empty h2 {
+.cannot-open h2 {
   margin: 4px 0 0;
   font: 500 22px var(--sans);
   letter-spacing: -0.02em;
   color: var(--ink);
 }
-.folder-empty p {
+.cannot-open p {
   max-width: 440px;
   margin: 0 0 10px;
   font-size: 14px;

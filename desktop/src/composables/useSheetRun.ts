@@ -225,6 +225,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
   function discardDraft() {
     const handle = draft.value?.handle;
     draft.value = null;
+    fileError.value = "";
     if (handle) release(handle);
   }
   /** Step 1 of a masked file: the same file and its column choices, ready to mask

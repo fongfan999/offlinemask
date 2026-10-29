@@ -2,6 +2,7 @@
 import type { PickedFolder } from "../adapters/folder.ts";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
+import CannotOpen from "../components/CannotOpen.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
 import JobTime from "../components/JobTime.vue";
@@ -277,7 +278,16 @@ defineExpose({
 
     <!-- Step 1: open a file, choose per column, preview, mask all. -->
     <div v-if="!session" class="step-panel">
-      <template v-if="!draft">
+      <CannotOpen
+        v-if="!draft && sheet.fileError.value"
+        icon="table"
+        title="Không mở được tệp này"
+        button="Chọn tệp khác"
+        @again="newSheet"
+      >
+        {{ sheet.fileError.value }}
+      </CannotOpen>
+      <template v-else-if="!draft">
         <FileDropZone
           icon="table"
           title="Kéo thả bảng tính vào đây"
@@ -291,9 +301,6 @@ defineExpose({
         <div class="input-hint-row">
           <button type="button" class="sample-link" @click="trySample">Thử với tệp mẫu</button>
         </div>
-        <p v-if="sheet.fileError.value" class="input-error drop-error" role="alert">
-          {{ sheet.fileError.value }}
-        </p>
       </template>
       <template v-else>
         <!-- While masking runs, only the progress, Hủy and the busy button remain. -->

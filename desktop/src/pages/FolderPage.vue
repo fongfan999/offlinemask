@@ -2,6 +2,7 @@
 import { computed, ref, useTemplateRef, watch } from "vue";
 import type { PickedFolder } from "../adapters/folder.ts";
 import AppIcon from "../components/AppIcon.vue";
+import CannotOpen from "../components/CannotOpen.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
 import JobTime from "../components/JobTime.vue";
@@ -229,23 +230,22 @@ defineExpose({
       <div class="step-panel">
         <!-- What the folder holds, how long it takes, and column choices. -->
         <!-- Nothing to hide: an empty folder, or only files it cannot read. -->
-        <div v-if="phase === 'ready' && !folder.readable.value.length" class="folder-empty">
-          <AppIcon name="folder" :size="28" />
-          <h2>Không có tệp nào để ẩn</h2>
-          <p>
-            {{
-              folder.failed.value.length
-                ? "Không mở được tệp nào trong thư mục này; lý do ở bên dưới."
-                : folder.skipped.value.length
-                  ? "Thư mục này chỉ có những loại tệp OfflineMask chưa đọc được."
-                  : "Thư mục này trống."
-            }}
-            Hãy chọn một thư mục có tệp Word, PDF, Excel, CSV hoặc TXT.
-          </p>
-          <button class="primary-action" @click="another">
-            <AppIcon name="upload" :size="17" />Chọn thư mục khác
-          </button>
-        </div>
+        <CannotOpen
+          v-if="phase === 'ready' && !folder.readable.value.length"
+          icon="folder"
+          title="Không có tệp nào để ẩn"
+          button="Chọn thư mục khác"
+          @again="another"
+        >
+          {{
+            folder.failed.value.length
+              ? "Không mở được tệp nào trong thư mục này; lý do ở bên dưới."
+              : folder.skipped.value.length
+                ? "Thư mục này chỉ có những loại tệp OfflineMask chưa đọc được."
+                : "Thư mục này trống."
+          }}
+          Hãy chọn một thư mục có tệp Word, PDF, Excel, CSV hoặc TXT.
+        </CannotOpen>
         <template v-else-if="phase === 'ready'">
           <LongJobNote :seconds="folder.estimate.value" subject="Thư mục này" />
           <!-- Files it cannot open come first, folded to one line like the long-job note. -->
