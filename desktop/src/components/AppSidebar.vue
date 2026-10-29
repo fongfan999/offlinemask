@@ -26,6 +26,8 @@ const formats = [
   { page: "text", icon: "text", label: "Văn bản", types: "TXT, MD" },
   { page: "excel", icon: "table", label: "Bảng tính", types: "XLSX, XLS, ODS, CSV" },
   { page: "word", icon: "file", label: "Tài liệu", types: "DOCX, ODT, PDF" },
+  // A folder mixes the formats above (decision 0171).
+  { page: "folder", icon: "folder", label: "Thư mục", types: "Nhiều tệp cùng lúc" },
 ] as const;
 const upcomingFormats = [{ label: "Hình ảnh", icon: "image", types: "JPG, PNG" }];
 /** What the report says the user was looking at. */

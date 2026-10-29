@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from "vue";
-import { droppedFolder, isFolderDrop, type PickedFolder } from "../adapters/folder.ts";
+import { onMounted, ref, useTemplateRef } from "vue";
+import { droppedFolder, inputFolder, isFolderDrop, type PickedFolder } from "../adapters/folder.ts";
 import AppIcon from "./AppIcon.vue";
 
 /** Drop a file or click to pick one (spreadsheets, Word). The whole zone is one
@@ -16,12 +16,22 @@ const props = defineProps<{
   compact?: boolean;
   /** A dropped folder, or several files, opens the folder page (decision 0171). */
   folders?: boolean;
+  /** Clicking picks a folder rather than one file (the folder page). */
+  directory?: boolean;
 }>();
 const emit = defineEmits<{ file: [file: File]; folder: [folder: PickedFolder] }>();
 const picker = useTemplateRef<HTMLInputElement>("picker");
 const dragging = ref(false);
 
+// Set as a property: the attribute is not in Vue's typed list of input attributes.
+onMounted(() => {
+  if (props.directory && picker.value) picker.value.webkitdirectory = true;
+});
 function take(files: FileList | null | undefined) {
+  if (props.directory) {
+    if (files?.length) emit("folder", inputFolder(files));
+    return;
+  }
   const file = files?.[0];
   if (file) emit("file", file);
 }
@@ -47,7 +57,9 @@ function drop(transfer: DataTransfer | null) {
     <span class="drop-icon"><AppIcon :name="icon" :size="26" /></span>
     <span class="drop-words"
       ><strong>{{ busy ? "Đang mở tệp…" : title }}</strong>
-      <span>hoặc <u>chọn tệp</u> · {{ hint }}</span></span
+      <span
+        >hoặc <u>{{ directory ? "chọn thư mục" : "chọn tệp" }}</u> · {{ hint }}</span
+      ></span
     >
   </button>
   <input
@@ -55,6 +67,7 @@ function drop(transfer: DataTransfer | null) {
     class="sr-only"
     type="file"
     :accept="accept"
+    :multiple="directory"
     tabindex="-1"
     aria-hidden="true"
     @change="

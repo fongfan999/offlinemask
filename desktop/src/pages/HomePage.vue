@@ -5,6 +5,7 @@ import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
+import FolderPicker from "../components/FolderPicker.vue";
 import MaskingPreview from "../components/MaskingPreview.vue";
 import {
   docKey,
@@ -32,7 +33,8 @@ const sheet = useProvided(sheetKey);
 const doc = useProvided(docKey);
 const quick = useProvided(quickKey);
 const folder = useProvided(folderKey);
-/** A dropped folder, or several files, goes to the folder page (decision 0171). */
+/** A dropped or picked folder, or several files, goes to the folder page (decision 0171).
+ * Only home offers the folder picker: a folder may hold every format. */
 function startFolder(picked: PickedFolder) {
   void folder.load(picked);
   emit("start", "folder");
@@ -161,7 +163,7 @@ const packNotice = computed<PackNotice | null>(() => {
   <section class="start-box" aria-label="Bắt đầu">
     <FileDropZone
       icon="upload"
-      title="Kéo thả tệp hoặc dán văn bản"
+      title="Kéo thả tệp, thư mục hoặc dán văn bản"
       :hint="`Excel, CSV, Word, PDF, TXT · dán bằng ${pasteKey}`"
       :accept="accept"
       compact
@@ -172,9 +174,12 @@ const packNotice = computed<PackNotice | null>(() => {
     <p v-if="startError" class="input-error start-error" role="alert">{{ startError }}</p>
     <div class="start-notes">
       <span><AppIcon name="lock" :size="13" />Tệp và văn bản không rời khỏi máy bạn.</span>
-      <button type="button" class="sample-link" @click="startWithText(sampleText)">
-        Xem thử với ví dụ
-      </button>
+      <span class="start-links">
+        <FolderPicker @folder="startFolder" />
+        <button type="button" class="sample-link" @click="startWithText(sampleText)">
+          Xem thử với ví dụ
+        </button>
+      </span>
     </div>
     <!-- The other way in, until it works (decision 0099). -->
     <p v-if="quickOffer" class="start-quick">

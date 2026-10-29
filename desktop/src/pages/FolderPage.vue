@@ -4,7 +4,6 @@ import type { PickedFolder } from "../adapters/folder.ts";
 import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
-import FolderPicker from "../components/FolderPicker.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import ReviewList from "../components/ReviewList.vue";
 import SheetPreview from "../components/SheetPreview.vue";
@@ -102,11 +101,9 @@ defineExpose({
         hint="Word, PDF, Excel, CSV, TXT bên trong"
         accept=".docx,.odt,.pdf,.txt,.md,.xlsx,.xls,.ods,.csv"
         folders
+        directory
         @folder="open"
       />
-      <div class="input-hint-row">
-        <FolderPicker label="Chọn thư mục" @folder="open" />
-      </div>
     </div>
 
     <!-- Read each file once to size the work. -->

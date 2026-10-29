@@ -5,7 +5,6 @@ import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import DocPreview from "../components/DocPreview.vue";
 import FileDropZone from "../components/FileDropZone.vue";
-import FolderPicker from "../components/FolderPicker.vue";
 import KeepOffer from "../components/KeepOffer.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import RestoreIntro from "../components/RestoreIntro.vue";
@@ -34,7 +33,7 @@ const emit = defineEmits<{
   remove: [id: string];
 }>();
 const folder = useProvided(folderKey);
-/** A dropped or picked folder opens the folder page (decision 0171). */
+/** A dropped folder opens the folder page, which takes every format (decision 0171). */
 function openFolder(picked: PickedFolder) {
   void folder.load(picked);
   emit("navigate", "folder");
@@ -298,7 +297,6 @@ defineExpose({
         </p>
         <div class="input-hint-row">
           <button type="button" class="sample-link" @click="trySample">Thử với tệp mẫu</button>
-          <FolderPicker @folder="openFolder" />
         </div>
         <p v-if="doc.fileError.value" class="input-error drop-error" role="alert">
           {{ doc.fileError.value }}

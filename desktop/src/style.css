@@ -387,6 +387,9 @@ h1 {
   align-items: center;
   gap: 6px;
 }
+.start-notes > .start-links {
+  gap: 16px;
+}
 .start-notes svg {
   color: var(--accent);
 }

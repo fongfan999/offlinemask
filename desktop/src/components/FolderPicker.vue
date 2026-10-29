@@ -2,9 +2,8 @@
 import { onMounted, useTemplateRef } from "vue";
 import { inputFolder, type PickedFolder } from "../adapters/folder.ts";
 
-/** "Chọn thư mục": the system folder picker, through the web view's folder input, which
+/** "Chọn cả thư mục": the system folder picker, through the web view's folder input, which
  * hands the page that folder's files and nothing else (decision 0171). */
-defineProps<{ label?: string }>();
 const emit = defineEmits<{ folder: [folder: PickedFolder] }>();
 const picker = useTemplateRef<HTMLInputElement>("picker");
 // Set as a property: the attribute is not in Vue's typed list of input attributes.
@@ -18,9 +17,7 @@ function take(input: HTMLInputElement) {
 </script>
 
 <template>
-  <button type="button" class="sample-link" @click="picker?.click()">
-    {{ label ?? "Chọn cả thư mục" }}
-  </button>
+  <button type="button" class="sample-link" @click="picker?.click()">Chọn cả thư mục</button>
   <input
     ref="picker"
     class="sr-only"
