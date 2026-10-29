@@ -53,8 +53,9 @@ export function fileWorkers({ cores, memory }: MachineResources): number {
 export const assumedCharsPerSecond = 2_000;
 /** Loading the model before the first text. */
 export const modelLoadSeconds = 5;
-/** Above this, the page suggests a machine dedicated to OfflineMask. */
-export const dedicatedMachineSeconds = 60 * 60;
+/** Above this, a page says the job is long and suggests a machine kept for OfflineMask
+ * (decision 0173). */
+export const longJobSeconds = 10 * 60;
 export const estimateSeconds = (chars: number, perSecond = assumedCharsPerSecond) =>
   chars ? modelLoadSeconds + chars / perSecond : 0;
 /** "dưới 1 phút", "khoảng 25 phút", "khoảng 3 giờ", "khoảng 1 giờ 30 phút". */

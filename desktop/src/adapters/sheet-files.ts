@@ -75,7 +75,13 @@ export function createSheetFiles() {
       {
         progress,
         signal,
-      }: { progress?: (done: number, total: number) => void; signal?: AbortSignal } = {},
+        maxChars,
+      }: {
+        progress?: (done: number, total: number) => void;
+        signal?: AbortSignal;
+        /** A PDF stops with code "memory" past this many characters (decision 0173). */
+        maxChars?: number;
+      } = {},
     ): Promise<{
       handle: string;
       format: DocumentFormat;
@@ -89,7 +95,7 @@ export function createSheetFiles() {
       const cancel = () => void send({ type: "cancel", id });
       signal?.addEventListener("abort", cancel, { once: true });
       const reply = await send(
-        { type: "open-doc", id, handle, name: file.name, bytes },
+        { type: "open-doc", id, handle, name: file.name, bytes, maxChars },
         [bytes],
         progress,
       ).finally(() => signal?.removeEventListener("abort", cancel));

@@ -1,5 +1,7 @@
 import { computed, ref, shallowRef, watch, type Ref } from "vue";
 import { jobSeconds, recordPace } from "./jobTime.ts";
+import { appMemoryBudget, memoryRefusal, pdfCharLimit } from "./memoryBudget.ts";
+import { pdfMemoryMessage } from "../core/memory.ts";
 import {
   exportName,
   maskedSuffix,
@@ -43,6 +45,8 @@ export const docErrorMessages: Record<DocError, string> = {
   "old-font":
     "Chữ trong PDF này dùng phông chữ cũ (như TCVN3, VNI) nên chưa đọc được. Hãy mở tệp gốc, chuyển sang Unicode rồi xuất lại PDF.",
   cancelled: "",
+  // Worded with this machine's budget where it is caught (decision 0173).
+  memory: "",
 };
 export const docFailure =
   "Chưa xử lý được tài liệu trên thiết bị. Tệp gốc không bị thay đổi. Hãy thử lại.";
@@ -189,6 +193,11 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
       fileError.value = docErrorMessages.unsupported;
       return;
     }
+    const refused = await memoryRefusal(file);
+    if (refused) {
+      fileError.value = refused;
+      return;
+    }
     opening.value = true;
     openingProgress.value = null;
     const abort = (openingAbort = new AbortController());
@@ -196,6 +205,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
       const opened = await files.openDoc(file, {
         progress: (done, total) => (openingProgress.value = { done, total }),
         signal: abort.signal,
+        maxChars: await pdfCharLimit(),
       });
       discardDraft();
       previewDetections.value = new Map();
@@ -209,7 +219,11 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
         mailto: opened.mailto,
       };
     } catch (error) {
-      if (!abort.signal.aborted) fileError.value = errorMessage(error);
+      if (!abort.signal.aborted)
+        fileError.value =
+          (error as { code?: string })?.code === "memory"
+            ? pdfMemoryMessage(await appMemoryBudget())
+            : errorMessage(error);
     } finally {
       opening.value = false;
       openingProgress.value = null;
@@ -373,8 +387,10 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
   ): Promise<DocRestore | string> {
     if (!(fromPdf ? returnedForPdf : returnedName).test(file.name))
       return fromPdf ? unsupportedReturn : docErrorMessages.unsupported;
+    const refused = await memoryRefusal(file);
+    if (refused) return refused;
     try {
-      const opened = await files.openDoc(file);
+      const opened = await files.openDoc(file, { maxChars: await pdfCharLimit() });
       const result = restoreParagraphs(opened.paragraphs, findings, opened.mailto);
       return {
         fileName: file.name,

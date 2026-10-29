@@ -15,12 +15,22 @@ Each kind of job had its own ceiling, picked when it was built: a text up to 50 
   - **Spreadsheet:** the cells of columns set to "Quét nội dung", plus the lines above the header. The count follows the column choices.
   - **Folder:** the same counts for each of its files.
 - **Shown beside the start button.** `JobTime` puts "🕒 Khoảng N phút trên máy này" in the footer of step 1. On a spreadsheet, document or folder it always shows. On a text it shows from one minute up, since short texts take a moment.
-- **One warning over an hour.** `LongJobNote` appears above the content when the estimate passes an hour: "<Văn bản / Tài liệu / Bảng tính / Thư mục> này khá lớn. Cần khoảng N giờ trên máy này. Bạn vẫn có thể bắt đầu…", with the suggestion of a machine kept for OfflineMask (no contact, no price). The job can always start.
+- **One warning over ten minutes.** `LongJobNote` appears above the content when the estimate passes ten minutes (`longJobSeconds`; first an hour, which the owner found far too long): "<Văn bản / Tài liệu / Bảng tính / Thư mục> này khá lớn. Cần khoảng N phút trên máy này. Bạn vẫn có thể bắt đầu…", with the suggestion of a machine kept for OfflineMask (no contact, no price). The job can always start.
 - **ODS trailing rows.** ODS files often end with one empty row repeated a million times. The 100 000-row ceiling used to stop that from becoming a million-row grid. `odsGrid` now keeps empty rows only between rows with text, so the rows a sheet actually has come through at any count.
+- **The app limits its own memory.** The old ceilings had also kept a large file from taking the machine's memory. In their place OfflineMask keeps to a budget of its own: a quarter of the machine's memory, between 1 and 4 GB (`core/memory.ts`, from the machine's figure that also sizes the folder's workers). Before a file is read, its need is estimated, and a file that needs more is refused with the figures: "Tệp này cần khoảng 4,7 GB bộ nhớ để mở, quá mức OfflineMask tự giới hạn trên máy này (4 GB). Hãy chia nhỏ tệp rồi thử lại."
+  - **Measured.** Generated files were opened the way the app opens them (Node, 29 Oct 2026). Peak memory per byte was:
+    - a CSV, about 9–11 times its size;
+    - text, about 3 times;
+    - a workbook, 12–14 times its unzipped XML;
+    - a Word document, about 11 times its unzipped XML.
+    The factors are rounded up to 12, 4, 15 and 13. An .xls, not measured, counts as 15.
+  - **Zipped formats** (xlsx, ods, docx, odt) count by their unzipped size, read from the zip's central directory without inflating anything. Their compressed size says little: a 2 MB workbook needed 340 MB.
+  - **PDF** cannot be judged by size, since a scan and a text PDF of the same size need very different amounts. Its own bytes count three times up front. While its pages are read, every character extracted counts 50 bytes (measured: about 95 MB per 1.9 million characters), and reading stops with "PDF này cần nhiều bộ nhớ hơn mức OfflineMask tự giới hạn…" past the budget.
+  - **A folder** opens files side by side, one per worker. Each file is checked against its share of the budget, and one that does not fit is listed among the files not processed, with the reason.
 
 ## Consequences
 
-- Memory is the remaining bound. A very large workbook, document or PDF is read whole into the webview or a worker, and on a small machine it can fail to open or slow the machine. The limits had also stood in for that. If it happens on real files, the answer is streaming or a measured memory guard, not the old ceilings.
+- The budget is an estimate from generated files on one machine. A file of an unusual shape can still need more than predicted. If that happens on real files, re-measure the factor rather than shrink the budget.
 - The drop zones no longer say "tối đa 20 MB", and the "too-large", "too-many-rows" and "too-many-pages" errors and their messages are gone.
-- The 1-hour threshold and the 2 000 characters a second are measurements from one Apple-silicon Mac; slower machines correct themselves after their first large run.
-- Testing: generated files make each case. Use a text of about 7.2 million characters, a CSV with a sentence column of about 80 000 rows, or a folder of such files, for the warning. A 12 000-row sentence column shows a few minutes. Use the native engine (`pnpm -C desktop desktop:dev:native`) with the pack installed; without the pack the estimate is 20 times shorter.
+- The 2 000 characters a second is a measurement from one Apple-silicon Mac; slower machines correct themselves after their first large run.
+- Testing: generated files make each case. For the warning, use a text of about 1.2 million characters, or a CSV whose sentence column has about 13 000 rows, or a folder of such files. For a memory refusal, use a CSV larger than the budget divided by 12 (about 170 MB on an 8 GB machine). Use the native engine (`pnpm -C desktop desktop:dev:native`) with the pack installed; without the pack the estimate is 20 times shorter.

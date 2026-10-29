@@ -467,6 +467,9 @@ export interface PdfReading {
   onPage?: (read: number, total: number) => void;
   /** Checked between pages; reading stops with "cancelled" once it returns true. */
   stopped?: () => boolean;
+  /** The characters the app's memory budget allows (decision 0173); reading stops with
+   * "memory" past it. */
+  maxChars?: number;
 }
 /** pdf.js works through promises, which never let a waiting message (such as Hủy) in;
  * a timer every so often does. */
@@ -475,7 +478,7 @@ const nextTask = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 export async function openPdf(
   bytes: Uint8Array,
-  { onPage, stopped }: PdfReading = {},
+  { onPage, stopped, maxChars = Infinity }: PdfReading = {},
 ): Promise<{ source: PdfSource; paragraphs: DocParagraph[]; notes: string[] }> {
   const largeImages = countLargeImages(bytes);
   const { getDocument } = await loadPdfJs();
@@ -505,6 +508,7 @@ export async function openPdf(
     const pages: PdfPage[] = [];
     const paragraphs: DocParagraph[] = [];
     let yielded = performance.now();
+    let read = 0;
     for (let number = 1; number <= document.numPages; number++) {
       if (performance.now() - yielded > yieldEvery) {
         await nextTask();
@@ -527,6 +531,8 @@ export async function openPdf(
         ...annotationTexts((await page.getAnnotations()) as Annotation[]).map((text) => ({ text })),
       );
       const ids: number[] = [];
+      for (const { text } of texts) read += text.length;
+      if (read > maxChars) throw new DocFileError("memory");
       for (const { text: paragraph, table } of texts) {
         ids.push(paragraphs.length);
         paragraphs.push({

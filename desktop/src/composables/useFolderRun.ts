@@ -23,6 +23,8 @@ import {
   type FolderKind,
 } from "../core/folder.ts";
 import { jobSeconds, recordPace } from "./jobTime.ts";
+import { appMemoryBudget, memoryRefusal, pdfCharLimit } from "./memoryBudget.ts";
+import { pdfMemoryMessage } from "../core/memory.ts";
 import { aliasScope, newSessionId, type Session } from "../core/sessions.ts";
 import { suggestColumn, type ColumnPlan } from "../core/sheet/columns.ts";
 import {
@@ -225,9 +227,17 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
       const item = files.value[index]!;
       const worker = pool[slot]!;
       item.status = "reading";
+      // Files open side by side, one per worker: each has its share of the budget.
+      const share = 1 / workers.value;
+      const refused = await memoryRefusal(item.file, share);
+      if (refused) {
+        item.status = "failed";
+        item.error = refused;
+        return;
+      }
       try {
         if (item.kind === "word") {
-          const opened = await worker.openDoc(item.file);
+          const opened = await worker.openDoc(item.file, { maxChars: await pdfCharLimit(share) });
           worker.close(opened.handle);
           item.chars = opened.paragraphs.reduce((sum, paragraph) => sum + paragraph.text.length, 0);
           notePresent(opened.paragraphs.map((paragraph) => paragraph.text));
@@ -251,7 +261,10 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
         item.status = "ready";
       } catch (error) {
         item.status = "failed";
-        item.error = errorMessage(error, item.kind);
+        item.error =
+          (error as { code?: string })?.code === "memory"
+            ? pdfMemoryMessage((await appMemoryBudget()) * share)
+            : errorMessage(error, item.kind);
       }
     });
     if (run !== generation) return false;

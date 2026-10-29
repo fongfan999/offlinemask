@@ -20,7 +20,14 @@ import type { CellEdits, SheetTable } from "../core/sheet/mask.ts";
 export type FilesRequest =
   | { type: "open"; id: number; handle: string; name: string; bytes: ArrayBuffer }
   | { type: "write"; id: number; handle: string; edits: CellEdits }
-  | { type: "open-doc"; id: number; handle: string; name: string; bytes: ArrayBuffer }
+  | {
+      type: "open-doc";
+      id: number;
+      handle: string;
+      name: string;
+      bytes: ArrayBuffer;
+      maxChars?: number;
+    }
   | { type: "cancel"; id: number }
   | { type: "write-doc"; id: number; handle: string; edits: DocEdits }
   | { type: "close"; handle: string };
@@ -78,6 +85,7 @@ self.onmessage = async (event: MessageEvent<FilesRequest>) => {
       const file = await openDocument(new Uint8Array(request.bytes), request.name, {
         onPage: (done, total) => send({ type: "progress", id, done, total }),
         stopped: () => cancelled.has(id),
+        maxChars: request.maxChars,
       });
       docs.set(request.handle, file.source);
       send({

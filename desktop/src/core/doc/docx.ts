@@ -14,7 +14,9 @@ export type DocError =
   | "password"
   | "scanned"
   | "old-font"
-  | "cancelled";
+  | "cancelled"
+  // Over the app's memory budget (decision 0173).
+  | "memory";
 export class DocFileError extends Error {
   readonly code: DocError;
   constructor(code: DocError) {

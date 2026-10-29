@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed } from "vue";
-import { dedicatedMachineSeconds, roughDuration } from "../core/folder.ts";
+import { longJobSeconds, roughDuration } from "../core/folder.ts";
 
-/** Over an hour on this machine (decision 0173), the same note for a text, a file and a
+/** Over ten minutes on this machine (decision 0173), the same note for a text, a file and a
  * folder: it can still start, and a machine kept for OfflineMask suits regular big jobs. */
 const props = defineProps<{ seconds: number; subject: string }>();
-const shown = computed(() => props.seconds > dedicatedMachineSeconds);
+const shown = computed(() => props.seconds > longJobSeconds);
 </script>
 
 <template>

@@ -1,4 +1,5 @@
 import { computed, ref, watch, type Ref } from "vue";
+import { memoryRefusal } from "./memoryBudget.ts";
 import type { createTextDetector } from "../adapters/text-detection.ts";
 import {
   detectionOptions,
@@ -296,9 +297,12 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     }
   }
   /** A .txt or .md file becomes the draft (decision 0083); an error message otherwise.
-   * Any length: the page says how long it will take (decision 0173). */
+   * Any length the app's memory budget allows: the page says how long it will take
+   * (decision 0173). */
   async function openTextFile(file: File): Promise<string> {
     if (processing.value) return "Trang Văn bản đang ẩn một văn bản khác. Hãy thử lại khi xong.";
+    const refused = await memoryRefusal(file);
+    if (refused) return refused;
     const text = decodeText(new Uint8Array(await file.arrayBuffer()));
     if (!text.trim()) return "Tệp không có chữ để ẩn.";
     draft.value = text;

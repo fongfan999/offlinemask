@@ -1,5 +1,6 @@
 import { computed, ref, shallowRef, toRaw, watch, type Ref } from "vue";
 import { jobSeconds, recordPace } from "./jobTime.ts";
+import { memoryRefusal } from "./memoryBudget.ts";
 import {
   exportName,
   maskedSuffix,
@@ -189,6 +190,11 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
       fileError.value = fileErrorMessages.unsupported;
       return;
     }
+    const refused = await memoryRefusal(file);
+    if (refused) {
+      fileError.value = refused;
+      return;
+    }
     opening.value = true;
     try {
       const opened = await files.open(file);
@@ -371,6 +377,8 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     file: File,
   ): Promise<SheetRestore | string> {
     if (!sheetFormat(file.name)) return fileErrorMessages.unsupported;
+    const refused = await memoryRefusal(file);
+    if (refused) return refused;
     try {
       const opened = await files.open(file);
       const result = restoreTables(opened.tables, findings);
