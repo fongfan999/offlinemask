@@ -414,6 +414,11 @@ function primaryAction() {
   clearFeedback();
   emit("mask");
 }
+/** "Tạo mới" starts over at home like every page (decision 0172); a draft is let go. */
+function newText() {
+  if (!props.session) draft.value = "";
+  emit("navigate", "home");
+}
 /** ⌘/Ctrl+Enter inside the draft does what the primary button does. */
 function submitShortcut() {
   if (!primaryDisabled.value) primaryAction();
@@ -472,11 +477,11 @@ defineExpose({
       </h1>
       <p>{{ subtitle }}</p>
     </div>
-    <div v-if="session" class="editor-actions">
-      <button v-if="historyOn" class="quiet-button" @click="emit('remove', session.id)">
+    <div v-if="session || (format === 'text' && draft && !processing)" class="editor-actions">
+      <button v-if="session && historyOn" class="quiet-button" @click="emit('remove', session.id)">
         <AppIcon name="close" :size="15" />Xóa khỏi lịch sử
       </button>
-      <button class="quiet-button" @click="emit('navigate', 'home')">
+      <button class="quiet-button" @click="newText">
         <AppIcon name="plus" :size="15" />Tạo mới
       </button>
     </div>
@@ -550,6 +555,7 @@ defineExpose({
           </button>
         </header>
         <template v-if="format === 'text' && !session">
+          <LongJobNote :seconds="textSeconds" subject="Văn bản này" />
           <label class="sr-only" for="text-input">Văn bản cần ẩn thông tin</label>
           <textarea
             id="text-input"
@@ -572,7 +578,6 @@ defineExpose({
               Thử với văn bản mẫu
             </button>
           </div>
-          <LongJobNote v-if="format === 'text'" :seconds="textSeconds" subject="Văn bản này" />
           <!-- What to hide folds into one line; the checkboxes open on request. -->
           <fieldset class="detection-options" :disabled="processing">
             <legend class="sr-only">Bạn muốn ẩn thông tin nào?</legend>
