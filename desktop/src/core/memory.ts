@@ -109,9 +109,13 @@ export function memorySize(bytes: number): string {
   }
   return `${Math.max(1, Math.round(bytes / 1024 ** 2)).toLocaleString("vi-VN")} MB`;
 }
+/** The refusal is two lines, what happened and what to do; a card shows them as two
+ * lines, a list as one sentence after the other. */
+const moreMemory = (split: string) =>
+  `${split}, hoặc cho phép dùng nhiều hơn trong Cài đặt › Nâng cao.`;
 export function memoryMessage(need: number, allowed: number): string {
-  return `Tệp này cần khoảng ${memorySize(need)} bộ nhớ để mở, quá mức OfflineMask tự giới hạn trên máy này (${memorySize(allowed)}). Hãy chia nhỏ tệp, hoặc cho phép dùng nhiều hơn trong Cài đặt › Nâng cao.`;
+  return `Tệp này cần khoảng ${memorySize(need)} bộ nhớ, quá mức OfflineMask tự giới hạn trên máy này (${memorySize(allowed)}).\n${moreMemory("Hãy chia nhỏ tệp")}`;
 }
 export function pdfMemoryMessage(allowed: number): string {
-  return `PDF này cần nhiều bộ nhớ hơn mức OfflineMask tự giới hạn trên máy này (${memorySize(allowed)}). Hãy tách thành các tệp nhỏ hơn, hoặc cho phép dùng nhiều hơn trong Cài đặt › Nâng cao.`;
+  return `PDF này cần nhiều bộ nhớ hơn mức OfflineMask tự giới hạn trên máy này (${memorySize(allowed)}).\n${moreMemory("Hãy tách thành các tệp nhỏ hơn")}`;
 }

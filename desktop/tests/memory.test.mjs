@@ -42,5 +42,5 @@ test("plain files count by their size, and the refusal gives the figures", async
   assert.equal(await memoryNeed(new File(["x".repeat(1000)], "a.txt")), 4_000);
   assert.equal(memorySize(1.5 * gib), "1,5 GB");
   assert.equal(memorySize(800 * 1024 ** 2), "800 MB");
-  assert.match(memoryMessage(3 * gib, 2 * gib), /khoảng 3 GB.*tự giới hạn.*\(2 GB\).*Nâng cao/);
+  assert.match(memoryMessage(3 * gib, 2 * gib), /khoảng 3 GB.*tự giới hạn.*\(2 GB\)\.\n.*Nâng cao/);
 });

@@ -4215,7 +4215,8 @@ td.alias {
   color: var(--ink);
 }
 .cannot-open p {
-  max-width: 440px;
+  max-width: 620px;
+  white-space: pre-line;
   margin: 0 0 10px;
   font-size: 14px;
   line-height: 1.7;
