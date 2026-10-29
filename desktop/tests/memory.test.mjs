@@ -11,17 +11,18 @@ import {
 
 const gib = 1024 ** 3;
 
-test("the app keeps to a quarter of the machine's memory, between 1 and 4 GB", () => {
+test("the app keeps to a quarter of the machine's memory, between 1 and 3 GB", () => {
   assert.equal(memoryBudget(8 * gib), 2 * gib);
   assert.equal(memoryBudget(2 * gib), 1 * gib);
-  assert.equal(memoryBudget(64 * gib), 4 * gib);
+  assert.equal(memoryBudget(64 * gib), 3 * gib, "the web view's ceiling");
   assert.equal(memoryBudget(null), 2 * gib, "an unknown machine counts as 8 GB");
 });
 
-test("Cài đặt › Nâng cao chooses another share; only the default stays under 4 GB", () => {
+test("Cài đặt › Nâng cao chooses another share, under the same ceiling", () => {
   assert.equal(memoryBudget(8 * gib, "low"), 1 * gib);
-  assert.equal(memoryBudget(16 * gib, "high"), 8 * gib);
-  assert.equal(memoryBudget(16 * gib, "dedicated"), 12 * gib);
+  assert.equal(memoryBudget(4 * gib, "high"), 2 * gib);
+  assert.equal(memoryBudget(16 * gib, "high"), 3 * gib);
+  assert.equal(memoryBudget(16 * gib, "dedicated"), 3 * gib);
   assert.equal(memoryBudget(4 * gib, "low"), 1 * gib, "never under 1 GB");
 });
 
@@ -43,4 +44,9 @@ test("plain files count by their size, and the refusal gives the figures", async
   assert.equal(memorySize(1.5 * gib), "1,5 GB");
   assert.equal(memorySize(800 * 1024 ** 2), "800 MB");
   assert.match(memoryMessage(3 * gib, 2 * gib), /khoảng 3 GB.*tự giới hạn.*\(2 GB\)\.\n.*Nâng cao/);
+});
+
+test("a refusal points to Cài đặt only when another choice would allow more", () => {
+  assert.match(memoryMessage(4 * gib, 2 * gib), /Nâng cao/);
+  assert.match(memoryMessage(4 * gib, 3 * gib, false), /\(3 GB\)\.\nHãy chia nhỏ tệp\.$/);
 });

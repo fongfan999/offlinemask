@@ -84,6 +84,11 @@ export interface FolderTarget {
   name: string;
   write(path: string, bytes: Uint8Array): Promise<void>;
 }
+/** Whether making a folder failed because the name is taken. The system's words are in
+ * the user's language (Vietnamese Windows says "đã tồn tại"), so the code decides:
+ * EEXIST is 17 on macOS and Linux; on Windows ERROR_FILE_EXISTS is 80, ERROR_ALREADY_EXISTS 183. */
+export const folderExists = (error: unknown) =>
+  /\(os error (17|80|183)\)|exists/i.test(String(error));
 export async function pickFolderTarget(root: string): Promise<FolderTarget | null> {
   if (!isTauri())
     return {
@@ -114,7 +119,7 @@ export async function pickFolderTarget(root: string): Promise<FolderTarget | nul
       name = candidate;
       break;
     } catch (error) {
-      if (!/exist/i.test(String(error))) throw error;
+      if (!folderExists(error)) throw error;
       if (candidate.endsWith(" 99)")) throw new Error("No free folder name", { cause: error });
     }
   }

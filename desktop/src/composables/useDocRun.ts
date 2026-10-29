@@ -1,7 +1,6 @@
 import { computed, ref, shallowRef, watch, type Ref } from "vue";
 import { jobSeconds, recordPace } from "./jobTime.ts";
-import { appMemoryBudget, memoryRefusal, pdfCharLimit } from "./memoryBudget.ts";
-import { pdfMemoryMessage } from "../core/memory.ts";
+import { memoryRefusal, pdfCharLimit, pdfRefusal } from "./memoryBudget.ts";
 import {
   exportName,
   maskedSuffix,
@@ -222,7 +221,7 @@ export function useDocRun({ detector, files, pack, sessions, onSession }: DocRun
       if (!abort.signal.aborted)
         fileError.value =
           (error as { code?: string })?.code === "memory"
-            ? pdfMemoryMessage(await appMemoryBudget())
+            ? await pdfRefusal()
             : errorMessage(error);
     } finally {
       opening.value = false;

@@ -142,3 +142,12 @@ test("one alias book gives a value one alias in every file of the folder", () =>
   assert.notEqual(sheet.edits[0].get(2).get(0), alias);
   assert.equal(book.findings.length, 2);
 });
+
+test("a taken folder name is known by its error code, in any system language", async () => {
+  const { folderExists } = await import("../src/adapters/folder.ts");
+  const at = "failed to create directory at path: C:\\Users\\An\\Hồ sơ (OfflineMasked) with error:";
+  assert.ok(folderExists(`${at} Không thể tạo tệp khi tệp đó đã tồn tại. (os error 183)`));
+  assert.ok(folderExists(`${at} File exists (os error 17)`));
+  assert.ok(!folderExists(`${at} Truy cập bị từ chối. (os error 5)`));
+  assert.ok(!folderExists(`${at} Không đủ dung lượng trên đĩa. (os error 112)`));
+});

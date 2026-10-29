@@ -23,8 +23,7 @@ import {
   type FolderKind,
 } from "../core/folder.ts";
 import { jobSeconds, recordPace } from "./jobTime.ts";
-import { appMemoryBudget, memoryRefusal, pdfCharLimit } from "./memoryBudget.ts";
-import { pdfMemoryMessage } from "../core/memory.ts";
+import { memoryRefusal, pdfCharLimit, pdfRefusal } from "./memoryBudget.ts";
 import { aliasScope, newSessionId, type Session } from "../core/sessions.ts";
 import { suggestColumn, type ColumnPlan } from "../core/sheet/columns.ts";
 import {
@@ -263,7 +262,7 @@ export function useFolderRun({ detector, pack, sessions }: FolderRunDependencies
         item.status = "failed";
         item.error =
           (error as { code?: string })?.code === "memory"
-            ? pdfMemoryMessage((await appMemoryBudget()) * share)
+            ? await pdfRefusal(share)
             : errorMessage(error, item.kind);
       }
     });

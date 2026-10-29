@@ -6,6 +6,7 @@ import {
   memoryMessage,
   memoryNeed,
   pdfCharBytes,
+  pdfMemoryMessage,
   type MemoryChoice,
 } from "../core/memory.ts";
 
@@ -40,12 +41,20 @@ export async function appMemoryBudget(choice = memoryChoice.value): Promise<numb
   return memoryBudget(await machineMemory(), choice);
 }
 
+/** Whether a larger choice in Cài đặt would allow more on this machine. */
+async function canRaise(): Promise<boolean> {
+  return (await appMemoryBudget("dedicated")) > (await appMemoryBudget());
+}
 /** "" when the file fits in `share` of the budget (a folder's files open side by side,
  * each in its share), otherwise the reason it is refused. */
 export async function memoryRefusal(file: File, share = 1): Promise<string> {
   const allowed = (await appMemoryBudget()) * share;
   const need = await memoryNeed(file);
-  return need > allowed ? memoryMessage(need, allowed) : "";
+  return need > allowed ? memoryMessage(need, allowed, await canRaise()) : "";
+}
+/** Why a PDF stopped part way: its text passed `share` of the budget. */
+export async function pdfRefusal(share = 1): Promise<string> {
+  return pdfMemoryMessage((await appMemoryBudget()) * share, await canRaise());
 }
 
 /** The characters a PDF may yield within `share` of the budget, checked page by page. */

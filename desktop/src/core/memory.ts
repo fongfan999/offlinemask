@@ -32,12 +32,15 @@ export const memoryChoices: readonly {
 ];
 /** Assumed when the system does not say how much memory it has. */
 const assumedMemory = 8 * gib;
-/** Never under 1 GB; the default also stays under 4 GB, while a share someone chose
- * on purpose is theirs. */
+/** What the app's web view can hold at once, whatever the machine has. Windows' WebView2
+ * (Chromium) keeps the page and all its workers under one 4 GB JavaScript heap: measured
+ * 29 Oct 2026, two workers at 1,8 GB each ran and two at 2,5 GB took the page down. The
+ * app itself needs some of it, so a job gets at most 3 GB. */
+export const engineCeiling = 3 * gib;
+/** Never under 1 GB nor over the web view's ceiling. */
 export function memoryBudget(memory: number | null, choice: MemoryChoice = "normal"): number {
   const share = memoryChoices.find((entry) => entry.id === choice)?.share ?? 1 / 4;
-  const budget = Math.max(1 * gib, (memory ?? assumedMemory) * share);
-  return choice === "normal" ? Math.min(4 * gib, budget) : budget;
+  return Math.min(engineCeiling, Math.max(1 * gib, (memory ?? assumedMemory) * share));
 }
 
 /** Peak memory per byte, measured by opening generated files the way the app does
@@ -111,11 +114,13 @@ export function memorySize(bytes: number): string {
 }
 /** The refusal is two lines, what happened and what to do; a card shows them as two
  * lines, a list as one sentence after the other. */
-const moreMemory = (split: string) =>
-  `${split}, hoặc cho phép dùng nhiều hơn trong Cài đặt › Nâng cao.`;
-export function memoryMessage(need: number, allowed: number): string {
-  return `Tệp này cần khoảng ${memorySize(need)} bộ nhớ, quá mức OfflineMask tự giới hạn trên máy này (${memorySize(allowed)}).\n${moreMemory("Hãy chia nhỏ tệp")}`;
+const moreMemory = (split: string, canRaise: boolean) =>
+  canRaise ? `${split}, hoặc cho phép dùng nhiều hơn trong Cài đặt › Nâng cao.` : `${split}.`;
+/** `canRaise`: whether another choice in Cài đặt would allow more; at the web view's
+ * ceiling none does, and only splitting helps. */
+export function memoryMessage(need: number, allowed: number, canRaise = true): string {
+  return `Tệp này cần khoảng ${memorySize(need)} bộ nhớ, quá mức OfflineMask tự giới hạn trên máy này (${memorySize(allowed)}).\n${moreMemory("Hãy chia nhỏ tệp", canRaise)}`;
 }
-export function pdfMemoryMessage(allowed: number): string {
-  return `PDF này cần nhiều bộ nhớ hơn mức OfflineMask tự giới hạn trên máy này (${memorySize(allowed)}).\n${moreMemory("Hãy tách thành các tệp nhỏ hơn")}`;
+export function pdfMemoryMessage(allowed: number, canRaise = true): string {
+  return `PDF này cần nhiều bộ nhớ hơn mức OfflineMask tự giới hạn trên máy này (${memorySize(allowed)}).\n${moreMemory("Hãy tách thành các tệp nhỏ hơn", canRaise)}`;
 }
