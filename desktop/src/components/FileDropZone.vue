@@ -17,6 +17,8 @@ const props = defineProps<{
   folders?: boolean;
   /** Clicking picks a folder rather than one file (the folder page). */
   directory?: boolean;
+  /** The title already says the zone can be clicked ("Chọn hoặc kéo…"), so no second line. */
+  chooseInTitle?: boolean;
 }>();
 const emit = defineEmits<{ file: [file: File]; folder: [folder: PickedFolder] }>();
 const picker = useTemplateRef<HTMLInputElement>("picker");
@@ -56,7 +58,7 @@ function drop(transfer: DataTransfer | null) {
     <span class="drop-icon"><AppIcon :name="icon" :size="26" /></span>
     <span class="drop-words"
       ><strong>{{ busy ? "Đang mở tệp…" : title }}</strong>
-      <span
+      <span v-if="!chooseInTitle"
         >hoặc <u>{{ directory ? "chọn thư mục" : "chọn tệp" }}</u
         ><template v-if="hint"> · {{ hint }}</template></span
       ></span

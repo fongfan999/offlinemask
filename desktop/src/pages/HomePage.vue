@@ -222,7 +222,8 @@ const packNotice = computed<PackNotice | null>(() => {
   >
     <FileDropZone
       icon="upload"
-      title="Kéo tệp hoặc cả thư mục vào đây"
+      title="Chọn hoặc kéo tệp, thư mục vào đây"
+      choose-in-title
       :accept="accept"
       folders
       @file="startWith"
