@@ -25,3 +25,7 @@ People keep documents in folders: a year of bank statements, a client's contract
 - Text files in a folder go through the document flow, which skips name spans without a capital letter (decision 0079); the text page keeps them.
 - PDFs are read three times (survey, mask, save). Opening is cheap next to the model, but a long PDF is not free.
 - Concurrency is sized once, when the folder opens; it does not back off if memory runs short during the run.
+
+## Ready screen, reworded (29 October 2026)
+
+The owner asked to improve the screen before masking. Its parts touched the card's edges and spoke in the code's words ("Kiểu bảng 1 · Ẩn 0 cột · quét 2 cột · giữ 252 cột", in monospace), and nothing showed which rows open. Now: one line of time ("Ẩn 4 tệp mất dưới 1 phút trên máy này."), a heading "Cột trong bảng tính" over one sentence saying the choices are made already and a group opens to change them, each group named after its example file (and sheet, unless the sheet only repeats the file's name), with its sheets and columns in words that leave out zero counts ("1 trang tính · ẩn hẳn 4 cột · tìm thông tin trong 1 cột"). Every row that opens has an icon, a name over a quiet line and a chevron that turns; "Danh sách tệp" is "Các tệp trong thư mục" with the folder's counts, and skipped files say to open the row for the reasons. Everything sits 24 px inside the card.

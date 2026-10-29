@@ -4068,35 +4068,88 @@ td.alias {
 .folder-warning p {
   margin: 6px 0 0;
 }
+.folder-layouts,
+.folder-files,
+.folder-warning {
+  margin-left: 24px;
+  margin-right: 24px;
+}
 .folder-layouts {
-  margin-top: 16px;
+  margin-top: 22px;
+}
+.folder-section-title {
+  margin: 0 0 4px;
+  font: 600 14px var(--sans);
+  color: var(--ink);
 }
 .folder-layouts .sheet-hint {
-  margin: 0 0 8px;
+  margin: 0 0 12px;
+  font-size: 12.5px;
 }
 .folder-layout,
 .folder-files {
   margin-top: 8px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--paper-raised);
 }
+.folder-files {
+  margin-top: 12px;
+}
+.folder-layouts + .folder-files {
+  margin-top: 22px;
+}
+/* A row that opens: icon, a name over a quiet line, and a chevron that turns when open. */
 .folder-layout > summary,
 .folder-files > summary {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 12px;
-  padding: 10px 14px;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
   cursor: pointer;
-  font-size: 13px;
+  list-style: none;
+  border-radius: 12px;
 }
-.folder-layout > summary span {
+.folder-layout > summary::-webkit-details-marker,
+.folder-files > summary::-webkit-details-marker {
+  display: none;
+}
+.folder-layout > summary:hover,
+.folder-files > summary:hover {
+  background: var(--paper-sunk);
+}
+.folder-layout > summary > svg:first-child,
+.folder-files > summary > svg:first-child {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.folder-summary-text {
+  flex: 1;
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+.folder-summary-text strong {
+  font-size: 13.5px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.folder-summary-text span {
   color: var(--muted);
-  font: 11px var(--mono);
+  font-size: 12.5px;
 }
-.folder-layout[open] > summary {
+.folder-chevron {
+  flex-shrink: 0;
+  color: var(--muted);
+  transition: rotate 0.15s;
+}
+details[open] > summary > .folder-chevron {
+  rotate: 90deg;
+}
+.folder-layout[open] > summary,
+.folder-files[open] > summary {
   border-bottom: 1px solid var(--line);
+  border-radius: 12px 12px 0 0;
 }
 .folder-layout .sheet-caption-line {
   margin: 8px 14px 12px;
@@ -4108,6 +4161,9 @@ td.alias {
   padding: 0 14px 10px;
   overflow-y: auto;
   list-style: none;
+}
+.folder-files li:first-child {
+  border-top: 0;
 }
 .folder-files li {
   display: flex;

@@ -49,11 +49,24 @@ const statusLabel: Record<string, string> = {
   saved: "Đã lưu",
   failed: "Lỗi",
 };
-const planSummary = (plans: readonly { mode: string }[]) => {
+/** A group of sheets in words: how many, and what happens to their columns, without the
+ * zero counts. */
+const layoutSummary = (sheets: number, plans: readonly { mode: string }[]) => {
   const hide = plans.filter((plan) => plan.mode === "hide").length;
   const scan = plans.filter((plan) => plan.mode === "scan").length;
   const keep = plans.length - hide - scan;
-  return `Ẩn ${hide} cột · quét ${scan} cột · giữ ${keep} cột`;
+  const parts = [sheets > 1 ? `${count(sheets)} trang tính cùng cột` : "1 trang tính"];
+  if (hide) parts.push(`ẩn hẳn ${count(hide)} cột`);
+  if (scan) parts.push(`tìm thông tin trong ${count(scan)} cột`);
+  if (keep) parts.push(`giữ nguyên ${count(keep)} cột`);
+  return parts.join(" · ");
+};
+/** The example sheet's file name (and its sheet's), the group's title. */
+const layoutTitle = (example: string) => {
+  const [path = example, sheet] = example.split(" · ");
+  const name = path.split("/").pop() ?? path;
+  // A CSV's one sheet is named after the file: say it once.
+  return sheet && sheet !== name.replace(/\.[^.]+$/, "") ? `${name} · ${sheet}` : name;
 };
 
 async function open(picked: PickedFolder) {
@@ -131,7 +144,8 @@ defineExpose({
             </p>
           </div>
           <p v-else-if="folder.readable.value.length" class="sheet-summary">
-            <AppIcon name="info" :size="15" />Cần {{ duration }} trên máy này.
+            <AppIcon name="clock" :size="15" />Ẩn {{ count(folder.readable.value.length) }} tệp mất
+            {{ duration }} trên máy này.
           </p>
           <p v-if="folder.overflow.value" class="sheet-note">
             <AppIcon name="info" :size="14" />Thư mục có hơn {{ count(maxFolderFiles) }} tệp; lần
@@ -143,28 +157,31 @@ defineExpose({
           </p>
 
           <section v-if="folder.layouts.value.length" class="folder-layouts">
+            <h2 class="folder-section-title">Cột trong bảng tính</h2>
             <p class="sheet-hint">
-              Bảng tính cùng tiêu đề cột được gộp làm một. Chọn cách xử lý từng cột, áp dụng cho mọi
-              tệp cùng kiểu.
+              Các trang tính có cùng tên cột được gom thành một nhóm. Cách xử lý đã được chọn sẵn;
+              mở một nhóm nếu muốn đổi cho từng cột.
             </p>
             <details
-              v-for="(layout, index) in folder.layouts.value"
+              v-for="layout in folder.layouts.value"
               :key="layout.key"
               class="folder-layout"
               :open="folder.layouts.value.length === 1"
             >
               <summary>
-                <strong>Kiểu bảng {{ index + 1 }}</strong>
-                <span>{{ count(layout.sheets) }} trang · {{ planSummary(layout.plans) }}</span>
+                <AppIcon name="table" :size="16" /><span class="folder-summary-text"
+                  ><strong>{{ layoutTitle(layout.example) }}</strong
+                  ><span>{{ layoutSummary(layout.sheets, layout.plans) }}</span></span
+                ><AppIcon class="folder-chevron" name="chevron" :size="14" />
               </summary>
               <SheetPreview
                 :header="layout.header"
                 :rows="layout.sample"
                 :plans="layout.plans"
-                :label="`Kiểu bảng ${index + 1}, ví dụ ${layout.example}`"
+                :label="`Các cột của ${layout.example}`"
                 @plan="(column, plan) => folder.setPlan(layout.key, column, plan)"
               />
-              <p class="sheet-caption-line">Ví dụ: {{ layout.example }}</p>
+              <p class="sheet-caption-line">Xem trước: {{ layout.example }}</p>
             </details>
           </section>
         </template>
@@ -202,7 +219,11 @@ defineExpose({
         </template>
 
         <details v-if="folder.failed.value.length" class="folder-files" open>
-          <summary>{{ count(folder.failed.value.length) }} tệp chưa xử lý được</summary>
+          <summary>
+            <AppIcon name="info" :size="16" /><span class="folder-summary-text"
+              ><strong>{{ count(folder.failed.value.length) }} tệp chưa xử lý được</strong></span
+            ><AppIcon class="folder-chevron" name="chevron" :size="14" />
+          </summary>
           <ul>
             <li v-for="file in folder.failed.value.slice(0, shownFiles)" :key="file.path">
               <span class="folder-path">{{ file.path }}</span
@@ -211,7 +232,12 @@ defineExpose({
           </ul>
         </details>
         <details v-if="folder.skipped.value.length" class="folder-files">
-          <summary>{{ count(folder.skipped.value.length) }} tệp bỏ qua</summary>
+          <summary>
+            <AppIcon name="info" :size="16" /><span class="folder-summary-text"
+              ><strong>{{ count(folder.skipped.value.length) }} tệp bỏ qua</strong
+              ><span>Mở ra để xem lý do</span></span
+            ><AppIcon class="folder-chevron" name="chevron" :size="14" />
+          </summary>
           <ul>
             <li v-for="file in folder.skipped.value.slice(0, shownFiles)" :key="file.path">
               <span class="folder-path">{{ file.path }}</span
@@ -220,7 +246,11 @@ defineExpose({
           </ul>
         </details>
         <details v-if="folder.files.value.length" class="folder-files">
-          <summary>Danh sách tệp</summary>
+          <summary>
+            <AppIcon name="folder" :size="16" /><span class="folder-summary-text"
+              ><strong>Các tệp trong thư mục</strong><span>{{ subtitle }}</span></span
+            ><AppIcon class="folder-chevron" name="chevron" :size="14" />
+          </summary>
           <ul>
             <li v-for="file in folder.files.value.slice(0, shownFiles)" :key="file.path">
               <span class="folder-path">{{ file.path }}</span
