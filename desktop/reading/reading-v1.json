@@ -14,7 +14,7 @@
   "recogniser": {
     "name": "recogniser.onnx",
     "bytes": 7258670,
-    "sha256": "70c31d9fc69b00e5b07015a9dbf31c70b4f023d6baa4ce9189674395fc5961d5",
+    "sha256": "481b00cc500313fa4cf3247991e006770c1af23cf37e1281f0b56c3bf4dede08",
     "source": null,
     "height": 32,
     "stride": 4,

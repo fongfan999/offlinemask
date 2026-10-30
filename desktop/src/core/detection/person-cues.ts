@@ -54,8 +54,11 @@ const party = new RegExp(
   `(?<![\\p{L}\\p{M}])bên(?:[^\\S\\r\\n]+[\\p{L}\\p{M}]+){1,2}[^\\S\\r\\n]*[:：][^\\S\\r\\n]*(${word}(?:[^\\S\\r\\n]+${word}){1,4})`,
   "giu",
 );
-/** A signature note; the names are on one of the next two non-empty lines. */
-const signature = /\((?:ký|Ký|KÝ)[^)\r\n]*\)[^\r\n]*/gu;
+/** A signature note; the names are on one of the next two non-empty lines. On copier
+ * print the "Ký" may be misread ("(ý, ghi rố họ tên)", decision 0177): "ghi rõ họ tên"
+ * after it, whatever its marks, is still the note. */
+const signature =
+  /\((?:ký|Ký|KÝ|[^)\r\n]{0,3},[^\S\r\n]*ghi[^\S\r\n]+r\p{L}[^\S\r\n]+h\p{L}[^\S\r\n]+t\p{L}n)[^)\r\n]*\)[^\r\n]*/gu;
 
 function finding(start: number, end: number, source: string): Detection {
   return {
@@ -116,6 +119,7 @@ export function detectPersonCues(text: string): Detection[] {
       checked++;
       // Signatures side by side share a line: " · " (the PDF reader) or a tab (Word).
       let offset = 0;
+      const before = found.length;
       for (const cell of line.split(/[^\S\r\n]*(?:·|\t)[^\S\r\n]*/u)) {
         const at = line.indexOf(cell, offset);
         offset = at + cell.length;
@@ -127,6 +131,8 @@ export function detectPersonCues(text: string): Detection[] {
           found.push(finding(start, start + value.length, "Chữ ký · person-cues-v1"));
         }
       }
+      // The names are one line; the next may be the page's "Trang 1/1", read "Trang VI".
+      if (found.length > before) break;
       lineStart += line.length;
     }
   }

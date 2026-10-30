@@ -1,7 +1,9 @@
 // The texts of printed lines for training OfflineMask's line recogniser (decision 0172):
 // the synthetic generator's document models (decision 0153) for the seeds named, never
 // 1-26 (held out for every measurement), each title, paragraph, "Label: value" field,
-// table heading and cell and signature as it would stand on a line or in a cell.
+// table heading and cell and signature as it would stand on a line or in a cell; a
+// field's value also as a form with its labels in a column prints it (": value",
+// decision 0174), and a copied identity card's lines (decision 0176).
 // Nothing is rendered here; train.py draws the lines in fonts the documents do not use.
 //
 //   mise exec -- node scripts/ocr-train/export-lines.mjs <out.txt> --seeds 100-399
@@ -59,6 +61,7 @@ for (let seed = range[0]; seed <= range[1]; seed++) {
           for (const [label, value] of block.fields ?? []) {
             add(`${label}: ${value}`);
             add(value);
+            add(`: ${value}`);
           }
           if (block.table) {
             for (const column of block.table.columns) add(column.title);
@@ -70,6 +73,13 @@ for (let seed = range[0]; seed <= range[1]; seed++) {
                 if (String(cell).length > 30) wrapped(cell, rng);
                 else add(cell);
               }
+          }
+          if (block.card) {
+            for (const [label, value] of [...block.card.front, ...block.card.back]) {
+              add([label, value].filter(Boolean).join(" "));
+              add(value);
+            }
+            for (const line of block.card.machine) add(line);
           }
           for (const signature of block.signatures ?? [])
             for (const part of [signature.role, signature.note, signature.name]) add(part);

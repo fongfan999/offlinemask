@@ -431,6 +431,41 @@ test("a name hidden once is found again with other tone marks, in capitals (deci
   );
 });
 
+test("a name hidden whole elsewhere outranks part of it found on its line (decision 0177)", async () => {
+  const { maskParagraphs } = await import("../src/core/doc/mask.ts");
+  const paragraphs = [
+    "BÊN B: VŨ NGUYỄN BẢO TRÂM",
+    "Bên B VŨ NGUYỄN BẢO TRÂM",
+    "Bên B LÊ VĂN AN",
+  ].map((text, id) => ({ id, part: "p", text }));
+  const name = (id, value, type = "TEN") => {
+    const start = paragraphs[id].text.indexOf(value);
+    return {
+      start,
+      end: start + value.length,
+      type,
+      label: type,
+      source: "t",
+      reason: "t",
+      priority: 100,
+    };
+  };
+  const detections = new Map([
+    [0, [name(0, "VŨ NGUYỄN BẢO TRÂM")]],
+    [1, [name(1, "VŨ NGUYỄN")]],
+    // Another kind found there keeps its place.
+    [2, [name(2, "LÊ VĂN AN")]],
+  ]);
+  const { edits } = maskParagraphs(paragraphs, detections, "e0a1");
+  const kept = (id) => {
+    let text = paragraphs[id].text;
+    for (const r of [...edits.paragraphs.get(id)].reverse())
+      text = text.slice(0, r.start) + r.text + text.slice(r.end);
+    return text;
+  };
+  assert.equal(kept(1), kept(0).replace("BÊN B:", "Bên B"));
+});
+
 test("the worker's canvas factory is a class pdf.js can construct, making OffscreenCanvases", () => {
   // pdf.js does `new CanvasFactory({ ownerDocument, enableHWA })`; a plain object threw
   // before any page was read in the desktop app (decision 0171).

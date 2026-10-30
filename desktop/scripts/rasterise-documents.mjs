@@ -5,7 +5,7 @@
 // layer survives: the output has no text to read without recognition.
 //
 //   mise exec -- node scripts/rasterise-documents.mjs <source folder> <target folder>
-//                 [--dpi 200] [--jpeg 80] [--grey] [--tilt <degrees>] [--photo]
+//                 [--dpi 200] [--jpeg 80] [--grey] [--tilt <degrees>] [--photo] [--copier]
 //
 // --jpeg writes the pictures as JPEG at that quality (a copier's choice; the default)
 // and --grey in greyscale; --dpi sets the scan resolution (200 by default, what office
@@ -16,6 +16,10 @@
 // page look photographed rather than scanned: off-white paper, light falling off towards
 // one corner, a slight blur and grain. Both are deterministic: the same folder gives the
 // same pictures.
+//
+// --copier makes the page an office copier's bi-level scan (decision 0177): the toner
+// spread by about a pixel, every pixel black or white, a few specks, kept losslessly
+// (PNG) as a copier's fax-coded picture is. Its look is measured, not its coding.
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { basename, dirname, join, relative, resolve } from "node:path";
@@ -33,7 +37,7 @@ const positional = args.filter(
 );
 if (positional.length !== 2) {
   console.error(
-    "Usage: node scripts/rasterise-documents.mjs <source folder> <target folder> [--dpi 200] [--jpeg 80] [--grey] [--tilt <degrees>] [--photo]",
+    "Usage: node scripts/rasterise-documents.mjs <source folder> <target folder> [--dpi 200] [--jpeg 80] [--grey] [--tilt <degrees>] [--photo] [--copier]",
   );
   process.exit(2);
 }
@@ -43,6 +47,7 @@ const quality = option("--jpeg", 80);
 const grey = args.includes("--grey");
 const tilt = option("--tilt", 0);
 const photo = args.includes("--photo");
+const copier = args.includes("--copier");
 
 const require = createRequire(import.meta.url);
 const { createCanvas } = require("@napi-rs/canvas");
@@ -91,6 +96,39 @@ function damage(canvas, degrees, seed) {
   return out;
 }
 
+/** A page as a copier's bi-level scan: a pixel is black where any pixel of its 2 × 2
+ * block was darker than mid-grey (toner spread), otherwise white, with a speck in about
+ * one pixel in two thousand. */
+function bilevel(canvas, seed) {
+  const context = canvas.getContext("2d");
+  const image = context.getImageData(0, 0, canvas.width, canvas.height);
+  const { data, width, height } = image;
+  const grey = new Uint8Array(width * height);
+  for (let at = 0; at < grey.length; at++)
+    grey[at] = Math.round(
+      0.299 * data[at * 4] + 0.587 * data[at * 4 + 1] + 0.114 * data[at * 4 + 2],
+    );
+  let state = seed * 2654435761 + 7;
+  for (let y = 0; y < height; y++)
+    for (let x = 0; x < width; x++) {
+      let darkest = 255;
+      for (const [dx, dy] of [
+        [0, 0],
+        [1, 0],
+        [0, 1],
+        [1, 1],
+      ])
+        if (x + dx < width && y + dy < height)
+          darkest = Math.min(darkest, grey[(y + dy) * width + x + dx]);
+      state = (state * 1103515245 + 12345) >>> 0;
+      const value = darkest < 150 || (state >>> 16) % 2000 === 0 ? 0 : 255;
+      const at = (y * width + x) * 4;
+      data[at] = data[at + 1] = data[at + 2] = value;
+    }
+  context.putImageData(image, 0, 0);
+  return canvas;
+}
+
 /** Each page of a PDF as a JPEG picture with its size in points. */
 async function drawPages(bytes, degrees = 0, seed = 0) {
   const task = pdfjs.getDocument({
@@ -110,7 +148,8 @@ async function drawPages(bytes, degrees = 0, seed = 0) {
       const viewport = page.getViewport({ scale: dpi / 72 });
       const drawn = createCanvas(Math.ceil(viewport.width), Math.ceil(viewport.height));
       await page.render({ canvas: drawn, viewport, background: "#ffffff" }).promise;
-      const canvas = damage(drawn, degrees, seed + number);
+      const damaged = damage(drawn, degrees, seed + number);
+      const canvas = copier ? bilevel(damaged, seed + number) : damaged;
       const context = canvas.getContext("2d");
       if (grey) {
         const image = context.getImageData(0, 0, canvas.width, canvas.height);
@@ -122,8 +161,8 @@ async function drawPages(bytes, degrees = 0, seed = 0) {
         context.putImageData(image, 0, 0);
       }
       pages.push({
-        jpeg: canvas.toBuffer("image/jpeg", quality),
-        png: document.numPages === 1 ? canvas.toBuffer("image/png") : undefined,
+        jpeg: copier ? undefined : canvas.toBuffer("image/jpeg", quality),
+        png: copier || document.numPages === 1 ? canvas.toBuffer("image/png") : undefined,
         width: points.width,
         height: points.height,
       });
@@ -143,7 +182,7 @@ async function picturesPdf(pages) {
   doc.setModificationDate(fixed);
   doc.setProducer("OfflineMask rasterised documents");
   for (const page of pages) {
-    const image = await doc.embedJpg(page.jpeg);
+    const image = page.jpeg ? await doc.embedJpg(page.jpeg) : await doc.embedPng(page.png);
     doc.addPage([page.width, page.height]).drawImage(image, {
       x: 0,
       y: 0,
@@ -168,7 +207,7 @@ for (const path of listDocuments(source).filter((file) => file.toLowerCase().end
   writeFileSync(out, await picturesPdf(pages));
   copyFileSync(`${path}.expect.json`, `${out}.expect.json`);
   written++;
-  if (pages[0]?.png) {
+  if (pages.length === 1 && pages[0]?.png) {
     const picture = out.replace(/\.pdf$/i, ".png");
     writeFileSync(picture, pages[0].png);
     copyFileSync(`${path}.expect.json`, `${picture}.expect.json`);

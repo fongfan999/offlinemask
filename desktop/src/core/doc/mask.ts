@@ -56,14 +56,27 @@ export function repeatedValues(
       const whole =
         !(at > 0 && alphanumeric.test(paragraph.text[at - 1]!)) &&
         !(end < paragraph.text.length && alphanumeric.test(paragraph.text[end]!));
-      if (!whole || taken.some((other) => other.start < end && other.end > at)) return;
+      if (!whole) return;
+      const overlapping = taken.filter((other) => other.start < end && other.end > at);
+      // A name found whole elsewhere outranks part of it found here: a copier's signature
+      // line read "VŨ NGUYỄN" of "VŨ NGUYỄN BẢO TRÂM" (decision 0177).
+      const inside =
+        detection.type === "TEN" &&
+        overlapping.every(
+          (other) =>
+            other.type === "TEN" &&
+            other.start >= at &&
+            other.end <= end &&
+            other.end - other.start < end - at,
+        );
+      if (overlapping.length && !inside) return;
       extra.push({
         ...detection,
         start: at,
         end,
         source: "Giá trị đã ẩn ở chỗ khác trong tài liệu",
         reason: "Cùng giá trị đã được ẩn ở đoạn khác của tài liệu.",
-        priority: 1,
+        priority: Math.max(0, ...overlapping.map((other) => other.priority)) + 1,
       });
     };
     for (const [value, detection] of values)

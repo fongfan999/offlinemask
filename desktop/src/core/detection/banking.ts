@@ -47,8 +47,9 @@ const rules: readonly Rule[] = [
     type: "CCCD",
     label: "Số giấy tờ tùy thân",
     // "Số định danh cá nhân" is the official name of the 12-digit number (decision 0159).
+    // A copier scan may read the "số" after "CCCD" with another mark ("só", decision 0177).
     pattern: labelled(
-      `${vocabulary.labels.identifier}\\s*(?:số\\s*)?`,
+      `${vocabulary.labels.identifier}\\s*(?:s[oóòỏõọôốồổỗộơớờởỡợ]\\s*)?`,
       "(\\d{12}|\\d{9})(?![\\p{L}\\p{N}_])",
     ),
     reason: "Dãy 9 hoặc 12 chữ số sau nhãn giấy tờ; chưa xác minh tính hợp lệ.",

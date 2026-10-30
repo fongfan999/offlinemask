@@ -28,6 +28,13 @@ test("account numbers after a bank's TK and after a longer account label", () =>
   ])
     assert.deepEqual(values(text, detectBankingIdentifiers(text)), [["STK", "96873162835"]], text);
   assert.deepEqual(detectBankingIdentifiers("chuyen tien den ngay 10/10"), []);
+  // The "số" after "CCCD" read with another mark on a copier scan (decision 0177).
+  for (const text of ["CCCD só: 044088010671", "CCCD sô 044088010671", "CCCD SỐ: 044088010671"])
+    assert.deepEqual(
+      values(text, detectBankingIdentifiers(text)),
+      [["CCCD", "044088010671"]],
+      text,
+    );
 });
 
 test("names in transfer text: the sender before chuyen tien or CK, the recipient after TK", () => {
@@ -69,6 +76,20 @@ test("names after a form of address and under a signature; headings stay", () =>
   assert.deepEqual(
     values(text, detectPersonCues(text)).map(([, value]) => value),
     ["Võ Minh Yến", "Trang", "Võ Đức Hải", "LÊ THANH VY"],
+  );
+  // Copier print may lose the "Ký"; the rest of the note still names the row (decision 0177).
+  const copied =
+    "\tNgười lập phiốu\tKế toán trưởng\tNgười nhận (ý, ghi rố họ tên)\n\tBùi Kim Hà\tNgô Kim Trang\tHuỳnh Thu Lan";
+  assert.deepEqual(
+    values(copied, detectPersonCues(copied)).map(([, value]) => value),
+    ["Bùi Kim Hà", "Ngô Kim Trang", "Huỳnh Thu Lan"],
+  );
+  assert.deepEqual(detectPersonCues("(xem phụ lục)\nBùi Kim Hà"), []);
+  // The names are one line: the page number after them is not read as one.
+  const signed = "Người làm đơn (ý, ghi rở họ tên)\nTrần Ngọc Ngọc\nTrang VI";
+  assert.deepEqual(
+    values(signed, detectPersonCues(signed)).map(([, value]) => value),
+    ["Trần Ngọc Ngọc"],
   );
 });
 

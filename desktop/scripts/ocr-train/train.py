@@ -6,13 +6,20 @@ synthetic set's texts (`export-lines.mjs`, seeds 100-399; seeds 1-26 never), dra
 fly in the fonts of `--fonts`, which must not include the documents' own Be Vietnam Pro
 and Noto Serif: the measurement on the scanned seeds then reads print the model never
 saw. Each picture goes through what a copier does to a page (resolution, blur, JPEG,
-tilt, grey paper, table rules beside the text).
+tilt, grey paper, table rules beside the text), and with `--copier` a share of them
+through what an office copier's bi-level scan does (decision 0177): strokes thickened
+or broken by the threshold, specks, the neighbouring lines' marks in the box, and
+values in italics.
 
   uv run --project desktop/scripts/ocr-train train.py --lines <lines.txt> --dev <dev.txt>
       --fonts <folder> --out <run folder> [--hours 2] [--batch 48]
+      [--copier 0.4] [--init <run folder>]
 
 The run folder gets `charset.json`, `checkpoint.pt` (the best by dev character error) and
-`metrics.json`; `--export` writes `recogniser.onnx` from the checkpoint instead.
+`metrics.json`; `--export` writes `recogniser.onnx` from the checkpoint instead. `--init`
+starts from another run's checkpoint and alphabet with a fresh schedule (a fine-tune).
+`--evaluate` reads the dev lines with the checkpoint of `--out`, as before and as a
+copier leaves them, and writes nothing.
 """
 
 from __future__ import annotations
@@ -36,6 +43,11 @@ from torch.utils.data import DataLoader, IterableDataset
 HEIGHT = 32
 MAX_WIDTH = 1024
 HELD_OUT = ("bevietnampro", "notoserif")
+# Times New Roman is what Vietnamese administrative documents are printed in (Decree
+# 30/2020/ND-CP) and what contracts copy; Tinos has its metrics, and with `--copier` it
+# is drawn for this share of lines.
+TIMES = ("tinos",)
+TIMES_SHARE = 0.3
 
 
 def nfc(text: str) -> str:
@@ -62,11 +74,12 @@ class Fonts:
     def has(self, face, text: str) -> bool:
         return all(ord(char) in face["cmap"] for char in text if not char.isspace())
 
-    def pick(self, rng: random.Random, text: str, size: int):
+    def pick(self, rng: random.Random, text: str, size: int, times: float = 0.0):
         faces = [face for face in self.faces if self.has(face, text)]
         if not faces:
             return None, None
-        face = rng.choice(faces)
+        favoured = [face for face in faces if face["name"].lower().startswith(TIMES)]
+        face = rng.choice(favoured if favoured and rng.random() < times else faces)
         font = ImageFont.truetype(face["path"], size)
         if face["axes"]:
             values = []
@@ -84,10 +97,43 @@ class Fonts:
         return font, face["name"]
 
 
-def render(text: str, fonts: Fonts, rng: random.Random) -> Image.Image | None:
-    """One line as a copier would leave it, greyscale, `HEIGHT` pixels high."""
+def bilevel(image: Image.Image, size: int, rng: random.Random) -> Image.Image | None:
+    """An office copier's bi-level scan of a line printed at `size` pixels (decision
+    0177): toner spread or thinned, the page read at a lower resolution and cut at one
+    grey into black and white, so that strokes join or break, a few specks, then drawn
+    back at the line's size, sharp or smoothed as pdf.js draws a 1-bit picture. None
+    when nothing legible is left (a blot, or no ink)."""
+    if size >= 24 and rng.random() < 0.4:
+        image = image.filter(ImageFilter.MinFilter(3))
+    elif size >= 30 and rng.random() < 0.15:
+        image = image.filter(ImageFilter.MaxFilter(3))
+    factor = rng.uniform(0.5, 0.9)
+    whole = image.size
+    small = image.resize((max(1, int(whole[0] * factor)), max(1, int(whole[1] * factor))), Image.BILINEAR)
+    if rng.random() < 0.6:
+        small = small.filter(ImageFilter.GaussianBlur(rng.uniform(0.2, 0.7)))
+    noise = np.random.default_rng(rng.randrange(1 << 30))
+    array = np.asarray(small, dtype=np.float32)
+    array = array + noise.normal(0, rng.uniform(0, 15), array.shape)
+    array = np.where(array < rng.uniform(100, 200), 0, 255).astype(np.uint8)
+    # Few specks: more taught the recogniser to drop a colon's two dots as dirt.
+    if rng.random() < 0.2:
+        array[noise.random(array.shape) < rng.uniform(0.0002, 0.001)] = 0
+    if not 0.02 < (array == 0).mean() < 0.5:
+        return None
+    image = Image.fromarray(array).resize(whole, Image.NEAREST if rng.random() < 0.4 else Image.BILINEAR)
+    # Black on white, as a dark or a pale copy prints it.
+    ink, paper = rng.randint(0, 70), rng.randint(225, 255)
+    array = np.asarray(image, dtype=np.float32) / 255.0
+    return Image.fromarray((ink + array * (paper - ink)).astype(np.uint8))
+
+
+def render(text: str, fonts: Fonts, rng: random.Random, copier: float = 0.0, lines: list[str] | None = None) -> Image.Image | None:
+    """One line as a copier would leave it, greyscale, `HEIGHT` pixels high; a share
+    `copier` of them as an office copier's bi-level scan, with neighbours from `lines`."""
     size = rng.randint(18, 44)
-    font, _ = fonts.pick(rng, text, size)
+    copied = rng.random() < copier
+    font, _ = fonts.pick(rng, text, size, TIMES_SHARE if copier else 0.0)
     if font is None:
         return None
     left, top, right, bottom = font.getbbox(text)
@@ -100,11 +146,26 @@ def render(text: str, fonts: Fonts, rng: random.Random) -> Image.Image | None:
     text_bottom = max(bottom, ascent + descent // 2)
     width = right - left + 2 * pad_x
     height = text_bottom - text_top + pad_top + pad_bottom
-    paper = rng.randint(205, 255)
+    # A copier's line starts black on white; its greys come from `bilevel`.
+    paper = 255 if copied else rng.randint(205, 255)
+    ink = 0 if copied else rng.randint(0, 80)
+    # Values printed in italics, as a registration certificate's are: an upright face
+    # slanted, its box widened for it.
+    slant = rng.uniform(0.12, 0.25) if copier and rng.random() < 0.12 else 0.0
+    width += int(slant * height)
     image = Image.new("L", (width, height), paper)
     draw = ImageDraw.Draw(image)
-    ink = rng.randint(0, 80)
     draw.text((pad_x - left, pad_top - text_top), text, font=font, fill=ink)
+    # Close-set lines: the detector's box takes in the foot of the line above and the
+    # head of the line below.
+    if lines and copied and rng.random() < 0.4:
+        gap = size * rng.uniform(1.0, 1.3)
+        for direction in (-1, 1):
+            if rng.random() < 0.7:
+                at = (pad_x - left + rng.randint(-size, size), pad_top - text_top + direction * gap)
+                draw.text(at, rng.choice(lines), font=font, fill=ink)
+    if slant:
+        image = image.transform(image.size, Image.AFFINE, (1, slant, -slant * height * 0.5, 0, 1, 0), resample=Image.BILINEAR, fillcolor=paper)
     # Table rules the detector's box takes in beside or above the text.
     if rng.random() < 0.15:
         x = rng.choice([rng.randint(0, max(0, pad_x // 2)), width - 1 - rng.randint(0, max(0, pad_x // 2))])
@@ -114,6 +175,8 @@ def render(text: str, fonts: Fonts, rng: random.Random) -> Image.Image | None:
         draw.line([(0, y), (width, y)], fill=ink, width=1)
     if rng.random() < 0.5:
         image = image.rotate(rng.uniform(-1.2, 1.2), resample=Image.BILINEAR, expand=True, fillcolor=paper)
+    if copied and (image := bilevel(image, size, rng)) is None:
+        return None
     # A lower scan resolution and back, then blur, noise and JPEG.
     if rng.random() < 0.6:
         factor = rng.uniform(0.5, 0.95)
@@ -149,8 +212,9 @@ def variants(text: str, rng: random.Random) -> str:
 
 
 class Lines(IterableDataset):
-    def __init__(self, lines: list[str], fonts: Fonts, charset: dict[str, int], seed: int, batch: int, augment: bool = True):
+    def __init__(self, lines: list[str], fonts: Fonts, charset: dict[str, int], seed: int, batch: int, augment: bool = True, copier: float = 0.0):
         self.lines, self.fonts, self.charset, self.seed, self.batch, self.augment = lines, fonts, charset, seed, batch, augment
+        self.copier = copier
 
     def __iter__(self):
         info = torch.utils.data.get_worker_info()
@@ -164,7 +228,7 @@ class Lines(IterableDataset):
                     text = variants(text, rng)
                 if not all(char in self.charset for char in text):
                     continue
-                image = render(text, self.fonts, rng)
+                image = render(text, self.fonts, rng, self.copier, self.lines)
                 if image is not None and image.width // 4 >= 2 * len(text) + 2:
                     pool.append((image, text))
             pool.sort(key=lambda sample: sample[0].width)
@@ -269,6 +333,9 @@ def main():
     parser.add_argument("--lr", type=float, default=1e-3)
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--export", action="store_true")
+    parser.add_argument("--copier", type=float, default=0.0)
+    parser.add_argument("--init", type=Path)
+    parser.add_argument("--evaluate", action="store_true")
     args = parser.parse_args()
     torch.set_num_threads(args.threads)
     args.out.mkdir(parents=True, exist_ok=True)
@@ -280,7 +347,11 @@ def main():
     lines = [nfc(line.strip()) for line in args.lines.read_text("utf-8").splitlines() if line.strip()]
     dev_lines = [nfc(line.strip()) for line in args.dev.read_text("utf-8").splitlines() if line.strip()]
     charset_path = args.out / "charset.json"
-    if args.resume and charset_path.exists():
+    if args.init:
+        # A fine-tune keeps the alphabet, so the app's reading definition keeps its classes.
+        alphabet = json.loads((args.init / "charset.json").read_text("utf-8"))
+        charset_path.write_text(json.dumps(alphabet, ensure_ascii=False), "utf-8")
+    elif (args.resume or args.evaluate) and charset_path.exists():
         alphabet = json.loads(charset_path.read_text("utf-8"))
     else:
         # Every character of the texts, the Vietnamese alphabet in both cases and printable ASCII.
@@ -292,29 +363,49 @@ def main():
     fonts = Fonts(args.fonts)
     print(f"{len(lines)} lines, {len(dev_lines)} dev lines, {len(fonts.faces)} fonts, {len(alphabet)} classes", flush=True)
 
-    # A fixed dev set: 2 000 lines drawn once, the same augmentation as training.
-    rng = random.Random(1)
-    dev = []
-    while len(dev) < 2000:
-        text = variants(rng.choice(dev_lines), rng)
-        if all(char in charset for char in text) and (image := render(text, fonts, rng)) is not None:
-            dev.append((image, text))
-    dev.sort(key=lambda sample: sample[0].width)
-    dev_batches = [collate(dev[index : index + 64], charset) for index in range(0, len(dev), 64)]
+    # Fixed dev sets of 2 000 lines drawn once: as before (the old augmentation) and, when
+    # copier print is trained or evaluated, all as a copier's bi-level scan.
+    def dev_set(copier: float):
+        rng = random.Random(1)
+        dev = []
+        while len(dev) < 2000:
+            text = variants(rng.choice(dev_lines), rng)
+            if all(char in charset for char in text) and (image := render(text, fonts, rng, copier, dev_lines)) is not None:
+                dev.append((image, text))
+        dev.sort(key=lambda sample: sample[0].width)
+        batches = [collate(dev[index : index + 64], charset) for index in range(0, len(dev), 64)]
+        return [(images.to(memory_format=torch.channels_last), *rest) for images, *rest in batches]
+
+    dev_sets = {"cer": dev_set(0.0)}
+    if args.copier or args.evaluate:
+        dev_sets["copier"] = dev_set(1.0)
+
+    def measure(model):
+        results = {name: evaluate(model, batches, alphabet) for name, batches in dev_sets.items()}
+        metrics = results["cer"] | {f"{name}_{key}": value for name, result in results.items() if name != "cer" for key, value in result.items()}
+        # The checkpoint kept is the best over both kinds of print, the old kind counted
+        # twice: a fine-tune for copiers must not unlearn clean scans.
+        metrics["score"] = (2 * results["cer"]["cer"] + sum(result["cer"] for name, result in results.items() if name != "cer")) / (len(results) + 1)
+        return metrics
 
     model = Recogniser(len(alphabet))
     checkpoint_path = args.out / "checkpoint.pt"
     step, best, history = 0, math.inf, []
-    if args.resume and checkpoint_path.exists():
+    if args.evaluate:
+        model.load_state_dict(torch.load(checkpoint_path, weights_only=False)["model"])
+        print(json.dumps(measure(model.to(memory_format=torch.channels_last))), flush=True)
+        return
+    if args.init:
+        model.load_state_dict(torch.load(args.init / "checkpoint.pt", weights_only=False)["model"])
+    elif args.resume and checkpoint_path.exists():
         state = torch.load(checkpoint_path, weights_only=False)
         model.load_state_dict(state["model"])
         step, best, history = state["step"], state["best"], state["history"]
     # Channels-last convolutions are a fifth faster on the CPU's oneDNN.
     model = model.to(memory_format=torch.channels_last)
     optimiser = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=1e-4)
-    dev_batches = [(images.to(memory_format=torch.channels_last), *rest) for images, *rest in dev_batches]
     ctc = nn.CTCLoss(blank=0, zero_infinity=True)
-    loader = DataLoader(Lines(lines, fonts, charset, 1 + step, args.batch), batch_size=None, num_workers=args.workers, persistent_workers=True, prefetch_factor=4)
+    loader = DataLoader(Lines(lines, fonts, charset, 1 + step, args.batch, copier=args.copier), batch_size=None, num_workers=args.workers, persistent_workers=True, prefetch_factor=4)
     deadline = time.time() + args.hours * 3600
     started = time.time()
     running = 0.0
@@ -339,11 +430,11 @@ def main():
         if step % 100 == 0:
             print(f"step {step} loss {running:.3f} lr {lr:.2e} {(time.time() - started) / 60:.0f} min", flush=True)
         if step % 1000 == 0 or time.time() > deadline:
-            metrics = evaluate(model, dev_batches, alphabet) | {"step": step, "minutes": (time.time() - started) / 60, "loss": running}
+            metrics = measure(model) | {"step": step, "minutes": (time.time() - started) / 60, "loss": running}
             history.append(metrics)
             print(f"dev {metrics}", flush=True)
-            if metrics["cer"] < best:
-                best = metrics["cer"]
+            if metrics["score"] < best:
+                best = metrics["score"]
                 torch.save({"model": model.state_dict(), "step": step, "best": best, "history": history, "classes": len(alphabet)}, checkpoint_path)
             (args.out / "metrics.json").write_text(json.dumps({"best_cer": best, "history": history}, indent=2), "utf-8")
             if time.time() > deadline:

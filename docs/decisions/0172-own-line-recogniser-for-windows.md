@@ -100,12 +100,12 @@ They do not meet 0171's bar. Left unmasked, in kinds rather than counts, since t
 
 - **Form blocks with the labels in one column and the values, each after a colon, in the next** ("CCCD số / Ngày sinh / Số tài khoản" stacked beside ": … / : …"): two ID card numbers, two birth dates, an account number and a party's name where it first appears. The reader by place keeps the column of labels apart from the column of values, so no value follows its label. The synthetic documents never lay a form out so; it is a matter of the reader by place and detection, not of the recogniser, and Vision would give the same. Fixed in [0174](0174-forms-with-a-column-of-labels.md): such a block now reads one field a line, and those values are masked.
 - **Signature names**: the two names under the signatures of one contract, masked above but read here with one letter different or in a line the pack did not take as names. Fixed in [0175](0175-signature-names-on-copier-scans.md).
-- **Misreadings of a real copier's print**: a phone number and an e-mail address on the registration, read with slashes and wrong letters, so no longer a phone or an address; the end of a representative's name. A contract's price tables read poorly as a whole.
+- **Misreadings of a real copier's print**: a phone number and an e-mail address on the registration, read with slashes and wrong letters, so no longer a phone or an address; the end of a representative's name. A contract's price tables read poorly as a whole. Trained for in [0177](0177-recogniser-trained-on-copier-print.md): the phone and the e-mail address are now read and masked.
 - **A photographed ID card** pasted on a contract's last page: its number and the machine-readable lines are not masked. Fixed in [0176](0176-copied-identity-cards.md).
 
 Over-masked: "Sự Kiện Bát Khả Kháng" taken for an organisation about ten times, "Nam" (sex) for a name, and some misread words.
 
-So the next work on pictures was the layout of label and value columns (done in 0174), then a check of signature rows (done in 0175), measured on synthetic documents laid out that way; then a recogniser trained also on the fonts and print of copiers; and ID cards, which need a reading of their own (done in 0176). Opening `readingShipped` waits for it.
+So the next work on pictures was the layout of label and value columns (done in 0174), then a check of signature rows (done in 0175), measured on synthetic documents laid out that way; then a recogniser trained also on the fonts and print of copiers (done in 0177); and ID cards, which need a reading of their own (done in 0176). Opening `readingShipped` waits for it.
 
 ## Dependencies
 
