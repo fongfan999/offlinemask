@@ -4154,8 +4154,29 @@ td.alias {
   padding: 40px 28px 36px;
   text-align: center;
 }
-.cannot-open > svg {
-  color: var(--accent);
+.cannot-open-mascot {
+  transform-origin: 50% 90%;
+  animation: cannot-open-tilt 0.9s 0.2s ease-in-out both;
+}
+/* A puzzled tilt, once. */
+@keyframes cannot-open-tilt {
+  0% {
+    transform: rotate(0);
+  }
+  35% {
+    transform: rotate(-12deg);
+  }
+  70% {
+    transform: rotate(6deg);
+  }
+  100% {
+    transform: rotate(-4deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cannot-open-mascot {
+    animation: none;
+  }
 }
 .cannot-open h2 {
   margin: 4px 0 0;

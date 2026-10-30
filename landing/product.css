@@ -979,6 +979,48 @@
   font-size: clamp(17px, 1.45vw, 20px);
   line-height: 1.75;
 }
+/* Step 1's ninja (brand/mascot.svg) and the cut it makes: see cutValue in product.js. */
+.om-scene-doc {
+  position: relative;
+}
+.om-cutter {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  width: 2.4em;
+  height: 2.4em;
+  pointer-events: none;
+  visibility: hidden;
+}
+.om-cutter svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.om-cutter .om-mascot-head,
+.om-cutter .om-mascot-eyes {
+  fill: var(--ink);
+}
+.om-cutter .om-mascot-band {
+  fill: var(--accent);
+}
+.om-cut-slash {
+  position: absolute;
+  z-index: 1;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 2px;
+  background: var(--accent);
+  pointer-events: none;
+  transform-origin: left center;
+}
+.om-cut-half {
+  position: absolute;
+  margin: 0;
+  pointer-events: none;
+  white-space: nowrap;
+}
 .om-v {
   padding: 0.05em 0.25em;
   border-radius: 4px;

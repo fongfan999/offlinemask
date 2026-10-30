@@ -214,3 +214,43 @@
     min-width: 560px;
   }
 }
+
+/* The 404 page: the mascot sits above the heading and sways a little. */
+.om-lost {
+  text-align: center;
+}
+.om-lost-ninja {
+  display: block;
+  width: 140px;
+  height: 140px;
+  margin: 0 auto 8px;
+  background: url("../brand/mascot.svg") center / contain no-repeat;
+  transform-origin: 50% 90%;
+  animation: om-lost-sway 3.2s ease-in-out infinite alternate;
+}
+@keyframes om-lost-sway {
+  from {
+    transform: rotate(-5deg);
+  }
+  to {
+    transform: rotate(5deg) translateY(-4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .om-lost-ninja {
+    animation: none;
+  }
+}
+.om-lost .om-doc-lead {
+  margin-inline: auto;
+}
+.om-doc .om-lost-home {
+  display: inline-flex;
+  margin-top: 18px;
+  padding: 14px 26px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent) !important;
+  font-weight: 650;
+  text-decoration: none;
+}

@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import AppIcon from "./AppIcon.vue";
+import BrandMascot from "./BrandMascot.vue";
 
 /** A file or folder with nothing to hide, or one that cannot open: one card in place of the
- * page, and one way on, home to start over (decision 0172). */
-const props = defineProps<{ icon: string; title: string; detail: string; button: string }>();
+ * page, and one way on, home to start over (decision 0172). The mascot tilts its head at it
+ * (decision 0175). */
+const props = defineProps<{ title: string; detail: string; button: string }>();
 const emit = defineEmits<{ again: [] }>();
 
 /** What the eye should catch in the reason: sizes ("2,8 GB"). Odd parts are highlighted. */
@@ -14,7 +16,7 @@ const parts = computed(() => props.detail.split(highlight));
 
 <template>
   <div class="cannot-open" role="alert">
-    <AppIcon :name="icon" :size="28" />
+    <BrandMascot class="cannot-open-mascot" :size="72" />
     <h2>{{ title }}</h2>
     <p>
       <template v-for="(part, index) in parts" :key="index"

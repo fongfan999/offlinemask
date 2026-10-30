@@ -13,7 +13,7 @@ stack); the shipped mark files contain no text and embed no fonts.
 import os
 
 from make_mark import (COBALT, INK, PAPER, GX0, GX1, GY0, GY1, RGX0, RGX1, RGY0, RGY1,
-                       build_mark, build_restore, sketches, sketches2)
+                       build_mark, build_restore, build_mascot, sketches, sketches2, MASCOTS)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -24,6 +24,7 @@ MONO = "'JetBrains Mono', 'SF Mono', Menlo, monospace"
 
 M = build_mark(1.0)
 R = build_restore(1.0)
+MS = build_mascot(1.0)
 EXT = {id(M): (GX0, GX1, GY0, GY1), id(R): (RGX0, RGX1, RGY0, RGY1)}
 
 
@@ -118,6 +119,11 @@ module = (
     f"export const restoreBand =\n  \"{R['band']} {R['cuts'][0]}\";\n"
     f"export const restoreEyes = [\n  \"{R['holes'][0]}\",\n  \"{R['holes'][1]}\",\n];\n"
     f"export const restoreSlash =\n  \"{R['strokes'][0]}\";\n"
+    "// The mascot (brand/mascot.svg): the ninja who wears the mask. The head is ink,\n"
+    "// the band and the knot's tails cobalt, the eyes ink on the band.\n"
+    f"export const mascotHead =\n  \"{MS['head']}\";\n"
+    f"export const mascotBand =\n  \"{' '.join([MS['band']] + MS['tails'])}\";\n"
+    f"export const mascotEyes = [\n  \"{MS['eyes'][0]}\",\n  \"{MS['eyes'][1]}\",\n];\n"
 )
 write("desktop/src/components/brand-paths.ts", module)
 
@@ -221,4 +227,38 @@ def preview_sheet():
 
 
 write("brand/preview-sheet.svg", preview_sheet())
+
+
+# ---------------------------------------------------------------------------
+# 6. The mascot. Its parts carry classes so a page can recolour them with its own
+# tokens (the website does, for dark mode); the fills are the light colours.
+def mascot_body(m, ink, accent, classes=False):
+    c = (lambda name: f' class="om-mascot-{name}"') if classes else (lambda name: "")
+    return (f'<path{c("head")} d="{m["head"]}" fill="{ink}"/>'
+            f'<path{c("band")} d="{" ".join(m["tails"] + [m["band"]])}" fill="{accent}"/>'
+            f'<path{c("eyes")} d="{" ".join(m["eyes"])}" fill="{ink}"/>')
+
+
+write("brand/mascot.svg", svg(100, 100, mascot_body(MS, INK, COBALT, classes=True), title="OfflineMask mascot, the ninja who wears the mask"))
+write("brand/mascot-paper.svg", svg(100, 100, mascot_body(MS, INK_DARK, COBALT_DARK), title="OfflineMask mascot on dark"))
+
+
+def mascot_sheet():
+    W, H = 1260, 560
+    out = []
+    for y, bg, ink, accent, muted in ((0, PAPER, INK, COBALT, MUTED), (280, PAPER_DARK, INK_DARK, COBALT_DARK, MUTED_DARK)):
+        out.append(f'<rect y="{y}" width="{W}" height="280" fill="{bg}"/>')
+        for i, (fig, name, note, fn) in enumerate(MASCOTS):
+            x = 40 + i * 400
+            out.append(text(x, y + 40, f"FIG. {fig} / {name}", 11, muted, 500, MONO, spacing=1.2))
+            out.append(f'<g transform="translate({x + 20} {y + 56}) scale(1.6)">{mascot_body(fn(1.0), ink, accent)}</g>')
+            for k, s in enumerate((24, 48)):
+                out.append(f'<g transform="translate({x + 220 + k * 40} {y + 150 - s / 2}) scale({s / 100})">{mascot_body(fn(1.0), ink, accent)}</g>')
+            if y == 0:
+                out.append(text(x, y + 262, note, 12, muted, 400, SANS, italic=True))
+    out.append(text(40, H - 18, "Chosen: FIG. M2, the bean. It sits on a line of text. See docs/decisions/0175.", 12, MUTED_DARK, 400, SANS, italic=True))
+    return svg(W, H, "\n".join(out), label="OfflineMask mascot sketches")
+
+
+write("brand/mascots.svg", mascot_sheet())
 print("wrote brand files, desktop/public/favicon.svg and desktop/src/components/brand-paths.ts")

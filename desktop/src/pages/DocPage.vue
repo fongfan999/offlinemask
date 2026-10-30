@@ -279,7 +279,6 @@ defineExpose({
     <div v-if="!session" class="step-panel">
       <CannotOpen
         v-if="!draft && doc.fileError.value"
-        icon="file"
         title="Không mở được tệp này"
         :detail="doc.fileError.value"
         button="Chọn tệp khác"

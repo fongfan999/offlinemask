@@ -242,7 +242,6 @@ defineExpose({
         <!-- Nothing to hide: an empty folder, or only files it cannot read. -->
         <CannotOpen
           v-if="phase === 'ready' && !folder.readable.value.length"
-          icon="folder"
           title="Không có tệp nào để ẩn"
           :detail="emptyReason"
           button="Chọn thư mục khác"

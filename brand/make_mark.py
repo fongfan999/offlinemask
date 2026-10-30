@@ -390,6 +390,69 @@ SKETCHES2[1] = ("08", "NINJA", "two eyes above a cobalt band", sketch_ninja)
 del SKETCHES2[2]  # the hood was a variant of 08, not an idea of its own
 
 
+# ---------------------------------------------------------------------------
+# The mascot: the mark given a head. The logo is a ninja's mask, so the mascot
+# is the ninja who wears it: the same cobalt swipe and eye dots, tied around a
+# round head, with the knot's two tails flying behind. Every candidate returns
+# {"head", "band", "eyes", "tails"} in a 0 0 100 100 box: "head" is ink (paper
+# in dark), "band" and "tails" cobalt, "eyes" ink on the band.
+def blob(cx, cy, rx, ry, squash=0.0, n=60):
+    """A hand-drawn closed shape: an ellipse with a little tremor, flattened at
+    the bottom by `squash` (a bean sits; a ball rolls)."""
+    pts = []
+    for k in range(n):
+        a = 2 * math.pi * k / n
+        rr = 1 + 0.025 * math.sin(3 * a + 0.6) + 0.015 * math.cos(5 * a)
+        y = math.sin(a)
+        if y > 0:
+            y *= 1 - squash * y ** 2
+        pts.append((cx + rx * rr * math.cos(a), cy + ry * rr * y))
+    return to_path(pts)
+
+
+def tail(x0, y0, x1, y1, bow, half, weight=1.0):
+    pts = line((x0, y0), (x1, y1), n=40, bow=bow)
+    return to_path(brush(pts, lambda t: (half * (1 - 0.55 * t) + wobble(t, 0.04)) * weight, "round", "taper", 0.2))
+
+
+def mascot_ball(weight=1.0):
+    """A round head; the mask is tied on, the knot's tails fly behind."""
+    return {"head": blob(44, 54, 33, 33),
+            "band": swipe(15, 74, 50, half=9.0, weight=weight),
+            "eyes": [dot(33, 50.5, 4.6 * weight), dot(53, 49, 4.4 * weight)],
+            "tails": [tail(72, 47, 98, 30, -3.5, 4.4, weight), tail(72, 51, 96, 64, 3.0, 3.8, weight)]}
+
+
+def mascot_bean(weight=1.0):
+    """A taller head-and-body bean that sits, so it can stand on a line of text."""
+    return {"head": blob(44, 56, 30, 38, squash=0.25),
+            "band": swipe(17, 71, 42, half=8.6, weight=weight),
+            "eyes": [dot(34, 42.5, 4.4 * weight), dot(53, 41, 4.2 * weight)],
+            "tails": [tail(69, 39, 97, 22, -3.5, 4.2, weight), tail(69, 43, 95, 56, 3.0, 3.6, weight)]}
+
+
+def mascot_wide(weight=1.0):
+    """The logo itself, wider than the head: the mask is the face, the head
+    peeks out above and below it."""
+    return {"head": blob(46, 52, 28, 30),
+            "band": swipe(12, 80, 50, half=12.0, weight=weight),
+            "eyes": [dot(33, 50.5, 5.4 * weight), dot(58, 48.6, 5.2 * weight)],
+            "tails": [tail(78, 46, 98, 30, -3.0, 4.4, weight), tail(78, 52, 97, 66, 2.6, 3.8, weight)]}
+
+
+MASCOTS = [
+    ("M1", "BALL", "a round head, the mask tied on, its tails flying", mascot_ball),
+    ("M2", "BEAN", "a head-and-body bean that can sit on a line of text", mascot_bean),
+    ("M3", "WIDE", "the logo as the face, the head peeking out around it", mascot_wide),
+]
+
+
+def build_mascot(weight=1.0):
+    """The chosen mascot: M2, the bean. It sits on a line of text, which the
+    website's slice animation needs, and its band is the mark's own swipe."""
+    return mascot_bean(weight)
+
+
 if __name__ == "__main__":
     for k, v in build_mark().items():
         print(k, str(v)[:80], "...")

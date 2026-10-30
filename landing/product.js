@@ -1,6 +1,7 @@
 import { gsap } from "gsap";
 import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import mascot from "../brand/mascot.svg?raw";
 import introPoster from "./media/offlinemask-intro-poster.webp";
 import { showLatest } from "./latest.js";
 
@@ -168,8 +169,92 @@ function setupHow(root, motion) {
 }
 
 /**
+ * Step 1's masking is done by the mascot (brand/mascot.svg, decision 0175): the ninja hops onto a
+ * highlighted value and cuts it with one cobalt brush stroke; the two halves fall away and the
+ * code is left in its place. Each cut is measured when it starts, because the codes before it
+ * have already changed the line. Only transform and opacity move; the halves are copies of the
+ * value clipped along the cut (a value broken over two lines is cut without them).
+ */
+function cutValue(doc, ninja, value, first) {
+  const origin = doc.getBoundingClientRect();
+  const lines = value.getClientRects();
+  const box = lines[0];
+  const [x, y, w, h] = [box.left - origin.left, box.top - origin.top, box.width, box.height];
+  const size = ninja.offsetWidth;
+  const seat = { x: x + w / 2 - size / 2, y: y - size * 0.86 };
+  const angle = -Math.atan((0.24 * h) / w) * (180 / Math.PI);
+  const slash = doc.appendChild(document.createElement("span"));
+  slash.className = "om-cut-slash";
+  slash.setAttribute("aria-hidden", "true");
+  Object.assign(slash.style, { left: `${x - 4}px`, top: `${y + h / 2}px`, width: `${w + 8}px` });
+  const halves =
+    lines.length > 1
+      ? []
+      : ["0 0, 100% 0, 100% 38%, 0 62%", "0 62%, 100% 38%, 100% 100%, 0 100%"].map((clip) => {
+          const half = doc.appendChild(value.cloneNode(true));
+          half.classList.add("om-cut-half");
+          half.setAttribute("aria-hidden", "true");
+          Object.assign(half.style, {
+            left: `${x}px`,
+            top: `${y}px`,
+            clipPath: `polygon(${clip})`,
+          });
+          gsap.set(half, { autoAlpha: 0 });
+          return half;
+        });
+  const tl = gsap.timeline({
+    onComplete: () => [slash, ...halves].forEach((part) => part.remove()),
+  });
+  if (first)
+    tl.set(ninja, { ...seat, y: seat.y - 18, rotation: 0 }).fromTo(
+      ninja,
+      { autoAlpha: 0, scale: 0.6 },
+      { autoAlpha: 1, scale: 1, y: seat.y, duration: 0.3, ease: "back.out(2)" },
+    );
+  else
+    tl.to(ninja, { x: seat.x, duration: 0.3, ease: "power1.inOut" }, 0)
+      .to(ninja, { y: seat.y - 16, duration: 0.15, ease: "power2.out" }, 0)
+      .to(ninja, { y: seat.y, duration: 0.15, ease: "power2.in" }, 0.15);
+  tl.to(ninja, { rotation: -14, duration: 0.1, ease: "power1.out" }, 0.3)
+    .to(ninja, { rotation: 10, duration: 0.1, ease: "power3.in" }, 0.4)
+    .to(ninja, { rotation: 0, duration: 0.24, ease: "back.out(2)" }, 0.5)
+    .fromTo(
+      slash,
+      { rotation: angle, scaleX: 0, autoAlpha: 1 },
+      { scaleX: 1, duration: 0.1, ease: "power2.in" },
+      0.42,
+    )
+    .to(slash, { autoAlpha: 0, duration: 0.2 }, 0.56)
+    .set(halves, { autoAlpha: 1 }, 0.52)
+    .set(value, { opacity: 0 }, 0.52)
+    .to(
+      halves,
+      {
+        x: (k) => (k ? 6 : -6),
+        y: (k) => h * (k ? 1.5 : 1.1),
+        rotation: (k) => (k ? 8 : -10),
+        autoAlpha: 0,
+        duration: 0.5,
+        ease: "power2.in",
+      },
+      0.52,
+    )
+    .call(
+      () => {
+        value.textContent = value.dataset.code;
+        value.classList.add("om-coded");
+      },
+      [],
+      0.56,
+    )
+    .to(value, { opacity: 1, duration: 0.25, ease: "power1.out" }, 0.56);
+  return tl;
+}
+
+/**
  * The three "Cách hoạt động" illustrations loop while on screen, on every width, so a visitor can
- * watch them again: step 1's highlights appear and turn into codes, step 2's AI reply arrives,
+ * watch them again: step 1's highlights appear and the ninja cuts them into codes (cutValue),
+ * step 2's AI reply arrives,
  * step 3's codes turn back into real values. Switching the example role rebuilds the loops,
  * because the content changes. Without motion the static markup shows each end state.
  */
@@ -177,6 +262,14 @@ function setupSceneLoops(root, motion) {
   if (!motion) return () => {};
   const how = root.querySelector("[data-om-how]");
   const scenes = [...how.querySelectorAll("[data-om-scene]")];
+  const doc = scenes[0].querySelector('[data-om-part="doc"]');
+  const ninja = doc.appendChild(document.createElement("span"));
+  ninja.className = "om-cutter";
+  ninja.setAttribute("aria-hidden", "true");
+  ninja.innerHTML = mascot;
+  // The cuts run as their own short timelines, started by the loop.
+  const cuts = new Set();
+  const stopCuts = () => cuts.forEach((cut) => cut.progress(1).kill());
   // Step 1's card before and after masking: its pill and label follow the values.
   function setDocState(scene, count, masked) {
     const pill = scene.querySelector('[data-om-part="doc-count"]');
@@ -189,6 +282,8 @@ function setupSceneLoops(root, motion) {
   function prime(index) {
     const scene = scenes[index];
     if (index === 0) {
+      stopCuts();
+      gsap.set(ninja, { autoAlpha: 0 });
       const values = [...scene.querySelectorAll(".om-v")];
       values.forEach((value) => {
         value.dataset.real ??= value.textContent;
@@ -217,11 +312,22 @@ function setupSceneLoops(root, motion) {
       const press = values.length * 0.14 + 0.7;
       tl.to(button, { scale: 0.94, duration: 0.12, yoyo: true, repeat: 1 }, press);
       values.forEach((value, k) =>
-        swapText(tl, value, value.dataset.code, press + 0.2 + k * 0.1, () =>
-          value.classList.add("om-coded"),
+        tl.call(
+          () => {
+            const cut = cutValue(doc, ninja, value, k === 0);
+            cuts.add(cut);
+            cut.then(() => cuts.delete(cut));
+          },
+          [],
+          press + 0.3 + k * 0.85,
         ),
       );
-      tl.call(() => setDocState(scene, values.length, true), [], press + 0.3);
+      const done = press + 0.3 + values.length * 0.85;
+      tl.call(() => setDocState(scene, values.length, true), [], done).to(
+        ninja,
+        { y: "-=26", rotation: 200, autoAlpha: 0, duration: 0.34, ease: "power2.in" },
+        done,
+      );
     } else if (index === 1) {
       tl.to(scene.querySelector("[data-om-ai]"), {
         autoAlpha: 1,
@@ -264,6 +370,8 @@ function setupSceneLoops(root, motion) {
   return () => {
     loops.forEach((loop) => loop.kill());
     watches.forEach((watch) => watch.kill());
+    stopCuts();
+    ninja.remove();
     how.removeEventListener("om-role", build);
     how.querySelectorAll(".om-v").forEach((value) => {
       value.classList.remove("om-dim", "om-coded");

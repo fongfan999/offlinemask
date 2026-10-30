@@ -173,6 +173,9 @@ export default defineConfig({
       },
       generateBundle(_, bundle) {
         for (const file of Object.keys(bundle)) if (file.endsWith(".css")) delete bundle[file];
+        // The 404 page answers at any depth (/a/b/c), so its links start at the site root.
+        const lost = bundle["404.html"];
+        if (lost) lost.source = lost.source.replace(/(="|url\()\.\//g, "$1/");
       },
     },
     {
@@ -253,6 +256,7 @@ export default defineConfig({
         privacy: fileURLToPath(new URL("./privacy.html", import.meta.url)),
         install: fileURLToPath(new URL("./install.html", import.meta.url)),
         report: fileURLToPath(new URL("./bao-loi.html", import.meta.url)),
+        notFound: fileURLToPath(new URL("./404.html", import.meta.url)),
         blog: fileURLToPath(blogTemplate),
       },
     },
