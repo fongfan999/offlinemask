@@ -92,12 +92,15 @@ export default defineConfig({
         this.emitFile({ type: "asset", fileName: "robots.txt", source: robots() });
         // Cloudflare serves .txt as "text/plain" with no charset, and browsers then read UTF-8
         // Vietnamese as Latin-1; _headers (read by Cloudflare, not served) names the charset.
+        // Everything in assets/ has its content hash in its name, so browsers keep it for a year
+        // instead of asking again on every visit (Cloudflare's default is max-age=0).
         this.emitFile({
           type: "asset",
           fileName: "_headers",
-          source: ["/llms.txt", "/font-licenses.txt", "/robots.txt"]
-            .map((path) => `${path}\n  Content-Type: text/plain; charset=utf-8\n`)
-            .join(""),
+          source:
+            ["/llms.txt", "/font-licenses.txt", "/robots.txt"]
+              .map((path) => `${path}\n  Content-Type: text/plain; charset=utf-8\n`)
+              .join("") + "/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n",
         });
         this.emitFile({
           type: "asset",

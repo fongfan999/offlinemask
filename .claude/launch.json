@@ -12,6 +12,22 @@
       "runtimeExecutable": "mise",
       "runtimeArgs": ["exec", "--", "pnpm", "-C", "landing", "dev"],
       "port": 4322
+    },
+    {
+      "name": "landing-build",
+      "runtimeExecutable": "mise",
+      "runtimeArgs": [
+        "exec",
+        "--",
+        "pnpm",
+        "-C",
+        "landing",
+        "preview",
+        "--port",
+        "4173",
+        "--strictPort"
+      ],
+      "port": 4173
     }
   ]
 }
