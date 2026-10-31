@@ -294,12 +294,12 @@ export function useQuickActions({
 
   // Alias tables of every private session seen in this launch, RAM only. A session
   // replaced on the one-screen flow without a passcode (decision 0072) stays
-  // restorable: a text for a week, within a size limit (decision 0177), a file
-  // until the app closes; an explicitly deleted one is forgotten.
+  // restorable: a text for a week and a file for 30 days, each kind within its own
+  // size limit (decisions 0177 and 0178); an explicitly deleted one is forgotten.
   const tables = new Map<string, KeptTable>();
   // The map itself is not reactive; home's restore tab follows this count (decision 0172).
   const tablesChanged = ref(0);
-  /** Forgets the tables of replaced texts past their week or the size limit. */
+  /** Forgets the tables of replaced sessions past their age or size limit. */
   function prune(now = Date.now()) {
     const stale = staleTables(tables, now);
     for (const id of stale) tables.delete(id);

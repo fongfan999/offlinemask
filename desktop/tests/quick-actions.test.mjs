@@ -63,9 +63,9 @@ test("restore searches every table at once and reports aliases from no table", (
   assert.deepEqual(result.unknown, ["[SDT_1_dead]"]);
 });
 
-test("replaced texts' codes go after a week, then oldest first past the size limit; files stay", () => {
+test("replaced texts' codes go after a week, then oldest first past the size limit", () => {
   const day = 24 * 60 * 60 * 1000;
-  const now = 30 * day;
+  const now = 60 * day;
   const table = (ageDays, listed, bytes = 10, format = "text") => ({
     findings: [],
     format,
@@ -77,6 +77,7 @@ test("replaced texts' codes go after a week, then oldest first past the size lim
     ["old", table(8, false)],
     ["open", table(20, true)],
     ["week", table(6, false)],
+    // Files keep theirs for 30 days.
     ["sheet", table(8, false, 10, "excel")],
   ]);
   assert.deepEqual(staleTables(tables, now), ["old"]);
@@ -85,13 +86,53 @@ test("replaced texts' codes go after a week, then oldest first past the size lim
     ["b", table(2, false, 40)],
     ["c", table(1, false, 40)],
     ["open", table(5, true, 40)],
-    // Files neither count toward the limit nor are dropped by it.
-    ["doc", table(4, false, 900, "word")],
+    // Files do not count toward the texts' limit.
+    ["doc", table(4, false, 90, "word")],
   ]);
-  const limits = { maxAgeMs: 7 * day, maxBytes: 100 };
+  const limits = {
+    text: { maxAgeMs: 7 * day, maxBytes: 100 },
+    file: { maxAgeMs: 30 * day, maxBytes: 100 },
+  };
   assert.deepEqual(staleTables(sized, now, limits), ["a", "b"]);
   // An open session is never dropped, even alone over the limit.
   assert.deepEqual(staleTables(new Map([["open", table(9, true, 500)]]), now, limits), []);
+});
+
+test("replaced files' codes go after 30 days, then oldest first past their own limit", () => {
+  const day = 24 * 60 * 60 * 1000;
+  const now = 60 * day;
+  const table = (ageDays, listed, bytes = 10, format = "excel") => ({
+    findings: [],
+    format,
+    createdAt: now - ageDays * day,
+    listed,
+    bytes,
+  });
+  const aged = new Map([
+    ["month", table(31, false)],
+    ["weeks", table(29, false, 10, "word")],
+    ["open", table(40, true)],
+  ]);
+  assert.deepEqual(staleTables(aged, now), ["month"]);
+  const limits = {
+    text: { maxAgeMs: 7 * day, maxBytes: 100 },
+    file: { maxAgeMs: 30 * day, maxBytes: 100 },
+  };
+  const sized = new Map([
+    ["a", table(3, false, 40)],
+    ["b", table(2, false, 40, "word")],
+    ["c", table(1, false, 40)],
+    ["open", table(5, true, 40)],
+    // Texts do not count toward the files' limit.
+    ["text", table(1, false, 90, "text")],
+  ]);
+  assert.deepEqual(staleTables(sized, now, limits), ["a", "b"]);
+  // The newest replaced file stays even alone over the limit: its result may still come.
+  const huge = new Map([
+    ["older", table(2, false, 30)],
+    ["newest", table(1, false, 500)],
+  ]);
+  assert.deepEqual(staleTables(huge, now, limits), ["older"]);
 });
 
 test("sample sessions have no alias table; private ones expose theirs", () => {

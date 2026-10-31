@@ -41,7 +41,7 @@ export function restoreFromTables(
 /** A session's alias table as kept for restoring, with what pruning needs to know. */
 export interface KeptTable {
   findings: readonly Finding[];
-  /** Only text tables are limited; files need their own plan (decision 0177). */
+  /** Texts and files have their own limits (decisions 0177 and 0178). */
   format: Format;
   /** When the session was made, in milliseconds. */
   createdAt: number;
@@ -51,8 +51,18 @@ export interface KeptTable {
   bytes: number;
 }
 
-/** How long, and how much, the tables of texts no longer listed are kept (decision 0177). */
-export const keptTableLimits = { maxAgeMs: 7 * 24 * 60 * 60 * 1000, maxBytes: 32 * 1024 * 1024 };
+export interface TableLimits {
+  maxAgeMs: number;
+  maxBytes: number;
+}
+const day = 24 * 60 * 60 * 1000;
+/** How long, and how much, the tables of sessions no longer listed are kept: texts a week
+ * within 32 MB (decision 0177), spreadsheets and documents 30 days within 256 MB, since an
+ * AI's file can come back days later and one large sheet alone can take 100 MB (decision 0178). */
+export const keptTableLimits: { text: TableLimits; file: TableLimits } = {
+  text: { maxAgeMs: 7 * day, maxBytes: 32 * 1024 * 1024 },
+  file: { maxAgeMs: 30 * day, maxBytes: 256 * 1024 * 1024 },
+};
 
 /** Rough memory of a table: two bytes per UTF-16 unit of its strings, plus the object. */
 export function tableBytes(findings: readonly Finding[]): number {
@@ -70,34 +80,39 @@ export function tableBytes(findings: readonly Finding[]): number {
   return bytes;
 }
 
-/** Ids of tables to forget at `now`: unlisted text tables older than the age limit, then
- * the oldest of them until the text tables fit the size limit. Listed sessions are never
- * dropped here, their own lifetime (the open screen, or history's keep period) governs
- * them; nor are spreadsheet and document tables, which neither count toward the limit. */
+/** Ids of tables to forget at `now`, texts and files each against their own limits:
+ * unlisted tables older than the age limit, then the oldest of them until the kind fits
+ * its size limit. Listed sessions are never dropped here, their own lifetime (the open
+ * screen, or history's keep period) governs them. The newest unlisted file is never
+ * dropped for size: it is the one whose AI result is most likely still to come. */
 export function staleTables(
   tables: ReadonlyMap<string, KeptTable>,
   now: number,
   limits = keptTableLimits,
 ): string[] {
   const drop: string[] = [];
-  let total = 0;
-  const unlisted: [string, KeptTable][] = [];
-  for (const [id, table] of tables) {
-    if (table.format !== "text") continue;
-    if (!table.listed) {
-      if (now - table.createdAt > limits.maxAgeMs) {
-        drop.push(id);
-        continue;
+  for (const kind of ["text", "file"] as const) {
+    const { maxAgeMs, maxBytes } = limits[kind];
+    let total = 0;
+    const unlisted: [string, KeptTable][] = [];
+    for (const [id, table] of tables) {
+      if ((table.format === "text") !== (kind === "text")) continue;
+      if (!table.listed) {
+        if (now - table.createdAt > maxAgeMs) {
+          drop.push(id);
+          continue;
+        }
+        unlisted.push([id, table]);
       }
-      unlisted.push([id, table]);
+      total += table.bytes;
     }
-    total += table.bytes;
-  }
-  unlisted.sort((a, b) => a[1].createdAt - b[1].createdAt);
-  for (const [id, table] of unlisted) {
-    if (total <= limits.maxBytes) break;
-    drop.push(id);
-    total -= table.bytes;
+    unlisted.sort((a, b) => a[1].createdAt - b[1].createdAt);
+    if (kind === "file") unlisted.pop();
+    for (const [id, table] of unlisted) {
+      if (total <= maxBytes) break;
+      drop.push(id);
+      total -= table.bytes;
+    }
   }
   return drop;
 }
