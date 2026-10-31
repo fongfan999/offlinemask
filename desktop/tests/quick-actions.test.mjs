@@ -8,6 +8,7 @@ import {
   quickMessages,
   restoreFromTables,
   sessionFindings,
+  staleTables,
 } from "../src/core/quick-actions.ts";
 import {
   launchBlocked,
@@ -60,6 +61,33 @@ test("restore searches every table at once and reports aliases from no table", (
   assert.equal(result.text, "0901234567 / minh@example.com / [SDT_1_dead]");
   assert.equal(result.restored, 2);
   assert.deepEqual(result.unknown, ["[SDT_1_dead]"]);
+});
+
+test("replaced texts' codes go after a week, then oldest first past the size limit", () => {
+  const day = 24 * 60 * 60 * 1000;
+  const now = 30 * day;
+  const table = (ageDays, listed, bytes = 10) => ({
+    findings: [],
+    createdAt: now - ageDays * day,
+    listed,
+    bytes,
+  });
+  const tables = new Map([
+    ["old", table(8, false)],
+    ["open", table(20, true)],
+    ["week", table(6, false)],
+  ]);
+  assert.deepEqual(staleTables(tables, now), ["old"]);
+  const sized = new Map([
+    ["a", table(3, false, 40)],
+    ["b", table(2, false, 40)],
+    ["c", table(1, false, 40)],
+    ["open", table(5, true, 40)],
+  ]);
+  const limits = { maxAgeMs: 7 * day, maxBytes: 100 };
+  assert.deepEqual(staleTables(sized, now, limits), ["a", "b"]);
+  // An open session is never dropped, even alone over the limit.
+  assert.deepEqual(staleTables(new Map([["open", table(9, true, 500)]]), now, limits), []);
 });
 
 test("sample sessions have no alias table; private ones expose theirs", () => {
@@ -276,6 +304,29 @@ test("the same shortcut restores an AI reply, even after the session was replace
   assert.equal(status.message, quickMessages.restored(1, 0));
   assert.equal(adapter.clipboard, "Tóm tắt: khách gọi từ 0901234567.");
   assert.deepEqual(run.texts, []);
+});
+
+test("a replaced session's codes restore for a week, then are forgotten", async () => {
+  const sessions = ref([phoneSession()]);
+  await nextTick();
+  const created = Date.parse(sessions.value[0].createdAt);
+  const alias = sessions.value[0].analysis.findings[0].alias;
+  const adapter = fakeAdapter(`Gọi ${alias}`);
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage(),
+  });
+  sessions.value = [];
+  await nextTick();
+  const day = 24 * 60 * 60 * 1000;
+  quick.prune(created + 6 * day);
+  assert.equal(quick.knownFindings.value.length, 1);
+  quick.prune(created + 8 * day);
+  assert.equal(quick.knownFindings.value.length, 0);
+  assert.equal((await quick.act("auto")).message, quickMessages.unknown);
 });
 
 test("empty, foreign-alias, locked and busy cases change nothing on the clipboard", async () => {

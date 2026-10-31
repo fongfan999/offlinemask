@@ -14,6 +14,9 @@ import {
   quickMessages,
   restoreFromTables,
   sessionFindings,
+  staleTables,
+  tableBytes,
+  type KeptTable,
 } from "../core/quick-actions.ts";
 import {
   addPlace,
@@ -28,7 +31,6 @@ import {
   type PlacePlatform,
 } from "../core/places.ts";
 import { aliasTokens } from "../core/restore.ts";
-import type { Finding } from "../core/review.ts";
 import { isPrivate, sessionOutput, type Session, type TextSession } from "../core/sessions.ts";
 
 export const shortcutKey = "offlinemask.quick-shortcut.v1";
@@ -292,21 +294,42 @@ export function useQuickActions({
 
   // Alias tables of every private session seen in this launch, RAM only. A session
   // replaced on the one-screen flow without a passcode (decision 0072) stays
-  // restorable until the app closes; an explicitly deleted one is forgotten.
-  const tables = new Map<string, readonly Finding[]>();
+  // restorable for a week, within a size limit (decision 0177); an explicitly
+  // deleted one is forgotten.
+  const tables = new Map<string, KeptTable>();
   // The map itself is not reactive; home's restore tab follows this count (decision 0172).
   const tablesChanged = ref(0);
+  /** Forgets the tables of replaced sessions past their week or the size limit. */
+  function prune(now = Date.now()) {
+    const stale = staleTables(tables, now);
+    for (const id of stale) tables.delete(id);
+    if (stale.length) tablesChanged.value++;
+  }
   watch(
     sessions,
     (list) => {
-      for (const session of list)
-        if (isPrivate(session)) tables.set(session.id, sessionFindings(session));
+      const listed = new Set<string>();
+      for (const session of list) {
+        if (!isPrivate(session)) continue;
+        listed.add(session.id);
+        const findings = sessionFindings(session);
+        const kept = tables.get(session.id);
+        tables.set(session.id, {
+          findings,
+          createdAt: Date.parse(session.createdAt) || Date.now(),
+          listed: true,
+          bytes: kept?.findings === findings ? kept.bytes : tableBytes(findings),
+        });
+      }
+      for (const [id, table] of tables) if (!listed.has(id)) table.listed = false;
+      prune();
       tablesChanged.value++;
     },
     { deep: true, immediate: true },
   );
-  const knownTables = () => [...tables.values()];
-  const tables_entries = () => tables.entries();
+  const knownTables = () => [...tables.values()].map((table) => table.findings);
+  const tables_entries = () =>
+    [...tables.entries()].map(([id, table]) => [id, table.findings] as const);
   function forget(id: string) {
     tables.delete(id);
     tablesChanged.value++;
@@ -929,6 +952,7 @@ export function useQuickActions({
     shortcut,
     setShortcut,
     forget,
+    prune,
     knownFindings,
     start,
     stop,

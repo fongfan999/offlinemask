@@ -177,8 +177,10 @@ const sidebar = useTemplateRef<InstanceType<typeof AppSidebar>>("sidebar");
 const sidebarToggle = useTemplateRef<HTMLButtonElement>("sidebarToggle");
 
 /** History past its keep period goes while the app runs too (decision 0143): it can sit
- * in the tray for weeks. Checked hourly and whenever the window comes back. */
+ * in the tray for weeks. Checked hourly and whenever the window comes back, along with
+ * the restore codes of replaced texts (decision 0177). */
 function expireHistory() {
+  quick.prune();
   if (vault.state.value !== "unlocked") return;
   const target = active.value ? format.value : null;
   const removed = store.expire();

@@ -38,6 +38,66 @@ export function restoreFromTables(
   return restoreAliases(text, { findings: tables.flat(), spans: [] });
 }
 
+/** A session's alias table as kept for restoring, with what pruning needs to know. */
+export interface KeptTable {
+  findings: readonly Finding[];
+  /** When the session was made, in milliseconds. */
+  createdAt: number;
+  /** Whether the session is still in the app's list (open, recent or history). */
+  listed: boolean;
+  /** Its rough memory, from `tableBytes`. */
+  bytes: number;
+}
+
+/** How long, and how much, the tables of sessions no longer listed are kept (decision 0177). */
+export const keptTableLimits = { maxAgeMs: 7 * 24 * 60 * 60 * 1000, maxBytes: 32 * 1024 * 1024 };
+
+/** Rough memory of a table: two bytes per UTF-16 unit of its strings, plus the object. */
+export function tableBytes(findings: readonly Finding[]): number {
+  let bytes = 0;
+  for (const finding of findings)
+    bytes +=
+      64 +
+      2 *
+        (finding.id.length +
+          finding.label.length +
+          finding.value.length +
+          finding.alias.length +
+          finding.reason.length +
+          finding.source.length);
+  return bytes;
+}
+
+/** Ids of tables to forget at `now`: unlisted ones older than the age limit, then the oldest
+ * unlisted ones until all tables fit the size limit. Listed sessions are never dropped here;
+ * their own lifetime (the open screen, or history's keep period) governs them. */
+export function staleTables(
+  tables: ReadonlyMap<string, KeptTable>,
+  now: number,
+  limits = keptTableLimits,
+): string[] {
+  const drop: string[] = [];
+  let total = 0;
+  const unlisted: [string, KeptTable][] = [];
+  for (const [id, table] of tables) {
+    if (!table.listed) {
+      if (now - table.createdAt > limits.maxAgeMs) {
+        drop.push(id);
+        continue;
+      }
+      unlisted.push([id, table]);
+    }
+    total += table.bytes;
+  }
+  unlisted.sort((a, b) => a[1].createdAt - b[1].createdAt);
+  for (const [id, table] of unlisted) {
+    if (total <= limits.maxBytes) break;
+    drop.push(id);
+    total -= table.bytes;
+  }
+  return drop;
+}
+
 const count = (n: number) => n.toLocaleString("vi-VN");
 
 /** Status lines shown in the floating panel after a quick action. */
