@@ -1,9 +1,9 @@
-// The texts of printed lines for training OfflineMask's line recogniser (decision 0172):
+// The texts of printed lines for training OfflineMask's line recogniser (decision 0181):
 // the synthetic generator's document models (decision 0153) for the seeds named, never
 // 1-26 (held out for every measurement), each title, paragraph, "Label: value" field,
 // table heading and cell and signature as it would stand on a line or in a cell; a
 // field's value also as a form with its labels in a column prints it (": value",
-// decision 0174), and a copied identity card's lines (decision 0176).
+// decision 0183), and a copied identity card's lines (decision 0185).
 // Nothing is rendered here; train.py draws the lines in fonts the documents do not use.
 //
 //   mise exec -- node scripts/ocr-train/export-lines.mjs <out.txt> --seeds 100-399

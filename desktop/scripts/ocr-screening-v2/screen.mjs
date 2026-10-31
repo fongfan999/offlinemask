@@ -1,5 +1,5 @@
-// Screens OfflineMask's own line recogniser (decision 0172) the way ocr-screening-v1 screened
-// VietOCR and decision 0171 Vision and Tesseract: every page of one seed's text PDFs drawn
+// Screens OfflineMask's own line recogniser (decision 0181) the way ocr-screening-v1 screened
+// VietOCR and decision 0180 Vision and Tesseract: every page of one seed's text PDFs drawn
 // at 200 dpi and passed through JPEG quality 80 (as the rasterised scans are), the engine's
 // text, whitespace squeezed, searched for every value of the expectation lists.
 //

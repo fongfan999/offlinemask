@@ -8,9 +8,9 @@
 //
 // --definition measures a candidate pack (a copy of packs/<id>.json pinned by
 // `pnpm pack:prepare` against the files under --pack) instead of the shipping one.
-// --reading reads pictures with OfflineMask's own models (decision 0172,
+// --reading reads pictures with OfflineMask's own models (decision 0181,
 // scripts/reading-runtime.mjs) instead of the system's text recognition.
-// --misread, for a folder of scans (scripts/rasterise-documents.mjs, decision 0171),
+// --misread, for a folder of scans (scripts/rasterise-documents.mjs, decision 0180),
 // looks again at every value not read: text recognition may have read it with a wrong
 // letter or tone mark. Letters and digits without their marks are searched for, and the
 // value is reported as "misread, masked" when what was read is fully masked all the

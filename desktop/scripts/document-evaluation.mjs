@@ -15,7 +15,7 @@ import { createReadingEngine } from "./reading-runtime.mjs";
 import { loadPack } from "./pack-runtime.mjs";
 
 // pdf.js's picture decoders straight from the package, as the app serves them at `/pdfjs/`
-// (decision 0173).
+// (decision 0182).
 const decoders = new URL("wasm/", pathToFileURL(createRequire(import.meta.url).resolve("pdfjs-dist/package.json"))).href;
 
 export const buckets = ["notRead", "leaked", "over", "unlisted"];
@@ -43,9 +43,9 @@ export function listDocuments(directory) {
 
 /** The app's detector over a pack at `root`: the same policy and category filter, the
  * pack loaded once on first use. A candidate definition stands in for the shipping pack.
- * Pages without text and pictures go to the app's own text recognition (decision 0171),
+ * Pages without text and pictures go to the app's own text recognition (decision 0180),
  * started the first time one is met: the system's engine, or with `reading` OfflineMask's own
- * (decision 0172). */
+ * (decision 0181). */
 export function createDetector(root, definition, { reading = false } = {}) {
   const engine = createDetectionEngine(undefined, async (packRoot) => {
     const pack = await loadPack(packRoot, definition);
@@ -85,7 +85,7 @@ const squeeze = (text) => text.replace(/\s+/gu, " ").trim();
 const alphanumeric = /[\p{L}\p{N}]/u;
 /** A value that starts or ends with a letter or digit must not be found glued to
  * another: "0932732371" inside "093273237136" or "0887172791trú" (text recognition
- * running a value into its neighbour, decision 0171) is not the value read; it is
+ * running a value into its neighbour, decision 0180) is not the value read; it is
  * reported as not read, not as leaked. */
 const whole = (text, at, value) =>
   !(

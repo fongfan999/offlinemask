@@ -52,7 +52,7 @@ const detector = queueDetections(createTextDetector());
 const run = useMaskingRun({ detector, pack, sessions, onSession: adoptSession });
 const sheetFiles = createSheetFiles();
 const sheet = useSheetRun({ detector, files: sheetFiles, pack, sessions, onSession: adoptSession });
-// Text in pictures (decision 0171): the system's own recognition, where the machine has it.
+// Text in pictures (decision 0180): the system's own recognition, where the machine has it.
 const ocr = ref(false);
 void ocrAvailable().then((available) => (ocr.value = available));
 const doc = useDocRun({

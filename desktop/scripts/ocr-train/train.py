@@ -1,4 +1,4 @@
-"""Trains OfflineMask's own Vietnamese line recogniser (decision 0172).
+"""Trains OfflineMask's own Vietnamese line recogniser (decision 0181).
 
 A CRNN (a small convolutional stack, two bidirectional LSTM layers) read with CTC: a
 picture of one printed line or cell, 32 pixels high, becomes its text. The lines are the
@@ -7,7 +7,7 @@ fly in the fonts of `--fonts`, which must not include the documents' own Be Viet
 and Noto Serif: the measurement on the scanned seeds then reads print the model never
 saw. Each picture goes through what a copier does to a page (resolution, blur, JPEG,
 tilt, grey paper, table rules beside the text), and with `--copier` a share of them
-through what an office copier's bi-level scan does (decision 0177): strokes thickened
+through what an office copier's bi-level scan does (decision 0186): strokes thickened
 or broken by the threshold, specks, the neighbouring lines' marks in the box, and
 values in italics.
 
@@ -99,7 +99,7 @@ class Fonts:
 
 def bilevel(image: Image.Image, size: int, rng: random.Random) -> Image.Image | None:
     """An office copier's bi-level scan of a line printed at `size` pixels (decision
-    0177): toner spread or thinned, the page read at a lower resolution and cut at one
+    0186): toner spread or thinned, the page read at a lower resolution and cut at one
     grey into black and white, so that strokes join or break, a few specks, then drawn
     back at the line's size, sharp or smoothed as pdf.js draws a 1-bit picture. None
     when nothing legible is left (a blot, or no ink)."""

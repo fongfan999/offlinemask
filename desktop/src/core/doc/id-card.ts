@@ -3,7 +3,7 @@ import type { Detection } from "../detection/types.ts";
 import { vocabulary } from "../detection/vocabulary.ts";
 import type { DocParagraph } from "./docx.ts";
 
-/** A citizen identity card copied into a document (decision 0176), the way contracts and
+/** A citizen identity card copied into a document (decision 0185), the way contracts and
  * applications are filed: everything on it is the holder's (the number, name, dates, home
  * town, residence, distinguishing marks and the machine-readable lines, which repeat them),
  * and its printed wording is the same on every card. Its labels are small and bilingual,
@@ -15,7 +15,7 @@ import type { DocParagraph } from "./docx.ts";
  * lines, at the end of its page, or after `longest` paragraphs. */
 const card = vocabulary.wording.identityCard;
 /** A copier's specks may be read as a dot or a colon between the title's words ("CĂN.
- * CƯỚC: CÔNG DÂN", decision 0178). */
+ * CƯỚC: CÔNG DÂN", decision 0187). */
 const front = new RegExp(
   card.fronts.replaceAll("[^\\S\\r\\n]+", "[^\\S\\r\\n]*[.:,·]?[^\\S\\r\\n]+"),
   "gu",

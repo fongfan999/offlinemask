@@ -34,10 +34,10 @@ const rules: readonly Rule[] = [
     label: "Số tài khoản",
     // Transfer wording puts the account right after "den" ("chuyen tien den TK
     // 0123456789"). The "TK" may come out of text recognition as a letter or nothing
-    // (decision 0171: "chuyen tien den T 96873162835"), so after "chuyen tien den" or
+    // (decision 0180: "chuyen tien den T 96873162835"), so after "chuyen tien den" or
     // "chuyen khoan den" a number six digits or longer is an account whatever one short
     // token sits between; with "TK" there, the rule above already has it. On a copier scan
-    // the "TK" may be read as a cell of its own, joined as "TK · 1091834078" (decision 0177).
+    // the "TK" may be read as a cell of its own, joined as "TK · 1091834078" (decision 0186).
     pattern: new RegExp(
       `(?<=(?:chuyen tien|chuyen khoan|ck) den(?:${blank}(?!tk${blank}\\d)[A-Za-z]{1,2})?(?:${blank}·)?${blank})(\\d{6,20})(?![\\p{L}\\p{N}_]|[ -]?\\d)`,
       "giu",
@@ -48,7 +48,7 @@ const rules: readonly Rule[] = [
     type: "CCCD",
     label: "Số giấy tờ tùy thân",
     // "Số định danh cá nhân" is the official name of the 12-digit number (decision 0159).
-    // A copier scan may read the "số" after "CCCD" with another mark ("só", decision 0177).
+    // A copier scan may read the "số" after "CCCD" with another mark ("só", decision 0186).
     pattern: labelled(
       `${vocabulary.labels.identifier}\\s*(?:s[oóòỏõọôốồổỗộơớờởỡợ]\\s*)?`,
       "(\\d{12}|\\d{9})(?![\\p{L}\\p{N}_])",

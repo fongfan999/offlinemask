@@ -7,7 +7,7 @@ import {
   type DocParagraph,
 } from "./docx.ts";
 
-/** Text in pictures (decision 0171). A scanned PDF page or an image file is read by
+/** Text in pictures (decision 0180). A scanned PDF page or an image file is read by
  * the operating system's own text recognition (Apple's Vision framework on macOS; the
  * native `ocr` module), which returns lines of text with their boxes. The lines are
  * placed on the page like pdf.js's text items, so the same reading by place (lines,
@@ -24,7 +24,7 @@ export interface OcrLine {
   width: number;
   height: number;
   /** The font size, in fractions of the picture's height, where the engine can tell it
-   * from the print (OfflineMask's own reader, decision 0172); the same for every word of a
+   * from the print (OfflineMask's own reader, decision 0181); the same for every word of a
    * line. */
   size?: number;
   /** Which line the word is on, where the engine numbers its lines; otherwise the words
@@ -104,7 +104,7 @@ export function ocrTextItems(page: OcrPage, width: number, height: number): OcrT
     const box = line[0]!.height * height;
     const widths = letters >= 3 && room > 0 ? across / room : box / boxToFontSize;
     // Widths grow with bold print and the print's height does not: an engine that measures
-    // the height gets the mean of the two (decision 0172).
+    // the height gets the mean of the two (decision 0181).
     const measured = line[0]!.size;
     const estimate = measured ? (widths + measured * height) / 2 : widths;
     sizes.set(key, Math.max(1, Math.min(box, estimate)));
@@ -112,7 +112,7 @@ export function ocrTextItems(page: OcrPage, width: number, height: number): OcrT
   // An estimate is good to about a tenth, and most lines of a page share its body size: a
   // measured line that close to the page's median takes the median, so a gap the reader
   // weighs in font sizes (the end of a table, five lines) is weighed the same on every line.
-  // Headings and small print stay apart. Only for engines that measure (decision 0172).
+  // Headings and small print stay apart. Only for engines that measure (decision 0181).
   if (words.some((word) => word.size)) {
     const all = [...sizes.values()].sort((a, b) => a - b);
     const median = all[Math.floor(all.length / 2)]!;

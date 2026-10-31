@@ -93,7 +93,7 @@ test("links from the app open only OfflineMask.com and its report page (privacy 
 });
 
 test("text in pictures is read by the system's own engine, on the machine, only once the page says so (privacy §2)", () => {
-  // Decision 0171: scanned pages and images go to Apple's Vision framework through the
+  // Decision 0180: scanned pages and images go to Apple's Vision framework through the
   // native `ocr` module, which neither downloads a model, writes a file nor opens a
   // connection; the picture is held for the call and only lines of text come back.
   // The feature is built but gated off until its measurement is clean; the page
@@ -122,9 +122,9 @@ test("text in pictures is read by the system's own engine, on the machine, only 
 });
 
 test("where the system cannot read Vietnamese, models carried in the app do, only once the page says so (privacy §2)", () => {
-  // Decision 0172: two ONNX graphs built into the app (`public/reading/`, copied at build
+  // Decision 0181: two ONNX graphs built into the app (`public/reading/`, copied at build
   // time by scripts/prepare-reading.mjs) are read by a worker from the app itself; the
-  // picture never leaves the worker and nothing is written. On since decision 0182 (31
+  // picture never leaves the worker and nothing is written. On since decision 0191 (31
   // October 2026); the page describes it only while it is on.
   const worker = read("../src/workers/reading.worker.ts");
   const fetches = [...worker.matchAll(/fetch\(([^)]*)\)/g)].map((match) => match[1]);
@@ -147,7 +147,7 @@ test("where the system cannot read Vietnamese, models carried in the app do, onl
 });
 
 test("pdf.js loads nothing but its picture decoders, from the app itself (privacy §4)", () => {
-  // Decision 0173: with recognition at hand, a scanned page's fax, JBIG2 and JPEG 2000
+  // Decision 0182: with recognition at hand, a scanned page's fax, JBIG2 and JPEG 2000
   // pictures are decoded by the JavaScript builds pdf.js ships, served by the app at
   // `/pdfjs/`; no other URL (CMaps, fonts, ICC, WebAssembly) is given.
   const pdf = read("../src/core/doc/pdf.ts");

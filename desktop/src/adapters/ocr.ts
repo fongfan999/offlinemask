@@ -2,10 +2,10 @@ import { invoke, isTauri } from "@tauri-apps/api/core";
 import type { OcrPage } from "../core/doc/ocr.ts";
 import type { ReadingRequest, ReadingResponse } from "../workers/reading.worker.ts";
 
-/** Text recognition for pictures (decision 0171) lives in the native `ocr` module: the
+/** Text recognition for pictures (decision 0180) lives in the native `ocr` module: the
  * operating system's own engine, on this machine. Browser previews have none.
  *
- * On by the owner's decision of 28 October 2026 (decision 0171), once the scans of the
+ * On by the owner's decision of 28 October 2026 (decision 0180), once the scans of the
  * synthetic set leaked nothing the text PDFs did not and the feature ran end to end in
  * the app. Off, the machine reports no recognition and pictures keep "Sáº¯p cÃ³". The
  * state changes what the app does with pictures, so `landing/privacy.html` says so
@@ -14,9 +14,9 @@ export const ocrShipped = true;
 
 /** Where the system has no Vietnamese recognition (Windows, Macs before macOS 14),
  * OfflineMask's own models, carried inside the app, read the picture in a worker (decision
- * 0172). On by the owner's decision of 31 October 2026 (decision 0182), once the scans of
+ * 0181). On by the owner's decision of 31 October 2026 (decision 0191), once the scans of
  * the synthetic set leaked nothing on Windows and the owner's own copier scans, forms and
- * identity cards were masked (0173 to 0181). `landing/privacy.html` describes it while it
+ * identity cards were masked (0182 to 0190). `landing/privacy.html` describes it while it
  * is on (checked by `tests/privacy-contract.test.mjs`). */
 export const readingShipped = true;
 

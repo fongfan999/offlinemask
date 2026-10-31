@@ -1,5 +1,5 @@
 {
-  "$comment": "Wording of documents that a model reads as a name, place or organization: see README.md. Grouped by the kind of document that uses it; the phrase mechanism takes every group. Curated (decisions 0080, 0155, 0156, 0159, 0160, 0179, 0181).",
+  "$comment": "Wording of documents that a model reads as a name, place or organization: see README.md. Grouped by the kind of document that uses it; the phrase mechanism takes every group. Curated (decisions 0080, 0155, 0156, 0159, 0160, 0188, 0190).",
   "boilerplate": {
     "contracts": [
       "hợp đồng cộng tác viên",
@@ -241,7 +241,7 @@
   ],
   "partyWords": ["các", "hai", "ba", "mỗi", "một", "từng"],
   "identityCard": {
-    "$comment": "A citizen identity card copied into a document (decision 0176): the titles that start its front and its back, and the printed wording on it that stays readable; everything else on the card is the holder's.",
+    "$comment": "A citizen identity card copied into a document (decision 0185): the titles that start its front and its back, and the printed wording on it that stays readable; everything else on the card is the holder's.",
     "fronts": [
       "căn cước công dân",
       "căn cước",

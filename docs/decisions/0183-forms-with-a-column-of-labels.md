@@ -1,6 +1,6 @@
-# 0174 — Forms with their labels in a column
+# 0183 — Forms with their labels in a column
 
-Date: 29 October 2026. Status: built and measured. Follows [0172](0172-own-line-recogniser-for-windows.md), whose check on the owner's own scans found the gap ("The owner's own scans"), and the reader by place of [0149](0149-text-pdf-documents.md) and [0171](0171-scanned-pdfs-and-images-read-on-the-machine.md).
+Date: 29 October 2026. Status: built and measured. Follows [0181](0181-own-line-recogniser-for-windows.md), whose check on the owner's own scans found the gap ("The owner's own scans"), and the reader by place of [0149](0149-text-pdf-documents.md) and [0180](0180-scanned-pdfs-and-images-read-on-the-machine.md).
 
 ## Problem
 
@@ -36,8 +36,8 @@ Through the app's code (`pnpm eval:documents`, the pack on this PC, `--reading` 
 
 The 25 unlisted before were the city in "tại Thành phố Hồ Chí Minh", which the generator had not yet marked as either way. The 17 not read on the scanned forms are misreadings (one digit, a dropped space), all masked as read. Every paragraph of the 546 text documents reads exactly as before the change.
 
-The owner's two contracts, read as in 0172: each party's block now reads one field a line, and the ID numbers, birth dates, account number and the party's full name that were left visible are masked. What these documents still miss, in kinds: the last word of a representative's name after "Đại diện bởi: Ông …" (the model's reach), a form line whose label the reader misplaced on a crooked copier page, and the kinds 0172 lists apart from forms (signature rows, misread copier print, the photographed ID card).
+The owner's two contracts, read as in 0181: each party's block now reads one field a line, and the ID numbers, birth dates, account number and the party's full name that were left visible are masked. What these documents still miss, in kinds: the last word of a representative's name after "Đại diện bởi: Ông …" (the model's reach), a form line whose label the reader misplaced on a crooked copier page, and the kinds 0181 lists apart from forms (signature rows, misread copier print, the photographed ID card).
 
 ## Not decided here
 
-`readingShipped` stays off (0172). The next work on pictures is unchanged: signature rows, a recogniser trained also on copier print, and ID cards.
+`readingShipped` stays off (0181). The next work on pictures is unchanged: signature rows, a recogniser trained also on copier print, and ID cards.

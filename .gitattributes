@@ -2,5 +2,5 @@
 # licence notices (docs/licenses/), and Rust embeds pack files with include_str!, so a
 # Windows checkout must not turn them into CRLF (decision 0077).
 * text=auto eol=lf
-# Model graphs are binary: never normalised (the recogniser is committed, decision 0172).
+# Model graphs are binary: never normalised (the recogniser is committed, decision 0181).
 *.onnx binary

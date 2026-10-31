@@ -203,7 +203,7 @@ test("contract boilerplate in Title Case is never a name, place or organization"
 });
 
 test("boilerplate read with other tone marks is still boilerplate, unless every word could be a name", () => {
-  // Text recognition's misread marks (decision 0179).
+  // Text recognition's misread marks (decision 0188).
   const text =
     "Trong trường hợp xảy ra Sự Kiện Bát Khà Kháng, các bên. Bên đó chịu.\nThủ lao: 5.000.000 đồng.\nNgười nhận: Nguyễn Thanh Toàn; ông Phát.";
   const found = modelDetections(text, [
@@ -221,7 +221,7 @@ test("boilerplate read with other tone marks is still boilerplate, unless every 
 });
 
 test("a run of wording takes a party and a title with it; a name after it stays a name", () => {
-  // Headings as scans read them, joined to the motto (decision 0181).
+  // Headings as scans read them, joined to the motto (decision 0190).
   const text =
     "Đặc lập - Tự do - Hạnh phúc ĐƠN XIN VIỆC\nĐộc lập - Tự do - Hạnh phúc CĂN CƯỚC CÔNG DÂN\nBIÊN BẢN BÀN GIAO TÀI SẢN\ndoanh thu đạt 92% kế hoạch\nĐẠI DIỆN BÊN A\tĐại diện bên B ông Trần Hạnh Phúc";
   const found = modelDetections(text, [

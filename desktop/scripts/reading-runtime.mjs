@@ -1,4 +1,4 @@
-// OfflineMask's own text recognition (decision 0172) for the measurements: the app's
+// OfflineMask's own text recognition (decision 0181) for the measurements: the app's
 // `readPicture` with the two graphs of `reading/reading-v1.json` on the ONNX Runtime
 // Node build (`onnxruntime-node` 1.24.3, already installed under @huggingface/transformers;
 // the app runs the same graphs on the WASM build). Each graph is read from `reading/`

@@ -218,7 +218,7 @@ export async function renderPdf(model) {
   /** A copy of a citizen identity card, front over back, at its real size (85.6 × 54 mm)
    * on a grey ground: the national header and title, a photo, bilingual labels in small
    * print with the values after them or on the next line, and on the back the issuer and
-   * the three machine-readable lines in a monospaced font (decision 0176). */
+   * the three machine-readable lines in a monospaced font (decision 0185). */
   const card = ({ front, back, machine }) => {
     const cardWidth = 243;
     const cardHeight = 153;

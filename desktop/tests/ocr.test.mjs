@@ -17,7 +17,7 @@ import { OffscreenCanvasFactory, openPdf, readByPlace } from "../src/core/doc/pd
 import { fileKind } from "../src/core/file-kind.ts";
 import { fixtures, noisePng } from "./pdf-fixtures.mjs";
 
-// Text in pictures (decision 0171). The engine is the system's; these tests stand a
+// Text in pictures (decision 0180). The engine is the system's; these tests stand a
 // fake one in its place that answers with lines placed like Vision's: boxes in
 // fractions of the picture, origin top left.
 const line = (text, x, y, width, height = 0.02) => ({ text, confidence: 0.9, x, y, width, height });
@@ -71,7 +71,7 @@ test("recognised words become text items placed like pdf.js's, with y upwards", 
 });
 
 test("an engine that measures its print gets the mean of that and the widths, snapped to the body size", () => {
-  // Decision 0172. Two boxes at the same height are two lines when the engine numbers them;
+  // Decision 0181. Two boxes at the same height are two lines when the engine numbers them;
   // each word is a 0.1-wide "aaaaa" (2.855 font sizes of room, 35 pixels by width).
   const word = (x, y, number, measured) => ({
     ...line("aaaaa", x, y, 0.1, 0.03),
@@ -284,7 +284,7 @@ test("a scanned page of a real picture is drawn from the file's image", async ()
 test("a copier's fax-coded text picture is drawn with pdf.js's own decoders, and lost without them", async () => {
   // A 64 × 16 mask in CCITT Group 3 (one-dimensional) coding, as a copier's compact scan
   // keeps its text: four white rows, eight rows of 16 white, 32 black and 16 white, four
-  // white (decision 0173).
+  // white (decision 0182).
   const white = "11011" + "00110101";
   const bar = "101010" + "000001101010" + "101010";
   const bits = white.repeat(4) + bar.repeat(8) + white.repeat(4);
@@ -395,7 +395,7 @@ test("a value hidden once is hidden wherever else it appears whole, with the sam
   assert.equal(edits.paragraphs.get(5), undefined);
 });
 
-test("a name hidden once is found again with other tone marks, in capitals (decision 0175)", async () => {
+test("a name hidden once is found again with other tone marks, in capitals (decision 0184)", async () => {
   const { repeatedValues } = await import("../src/core/doc/mask.ts");
   const paragraphs = [
     "Đại diện: Ông NGÔ HOÀNG GIA MINH",
@@ -431,7 +431,7 @@ test("a name hidden once is found again with other tone marks, in capitals (deci
   );
 });
 
-test("a name hidden whole elsewhere outranks part of it found on its line (decision 0177)", async () => {
+test("a name hidden whole elsewhere outranks part of it found on its line (decision 0186)", async () => {
   const { maskParagraphs } = await import("../src/core/doc/mask.ts");
   const paragraphs = [
     "BÊN B: VŨ NGUYỄN BẢO TRÂM",
@@ -468,7 +468,7 @@ test("a name hidden whole elsewhere outranks part of it found on its line (decis
 
 test("the worker's canvas factory is a class pdf.js can construct, making OffscreenCanvases", () => {
   // pdf.js does `new CanvasFactory({ ownerDocument, enableHWA })`; a plain object threw
-  // before any page was read in the desktop app (decision 0171).
+  // before any page was read in the desktop app (decision 0180).
   const made = [];
   globalThis.OffscreenCanvas = class {
     constructor(width, height) {

@@ -30,7 +30,7 @@ test("bounded labels recognize complete names in upper/lower case without inspec
   assert.deepEqual(values("Tên trên giấy tờ: Lê Tú-Anh; email: test@example.org."), [
     ["TEN", "Lê Tú-Anh"],
   ]);
-  // A government form's label (business registration, decision 0178).
+  // A government form's label (business registration, decision 0187).
   assert.deepEqual(values("Họ, chữ đệm và tên: LÂM HOÀNG VŨ · Giới tính: Nam"), [
     ["TEN", "LÂM HOÀNG VŨ"],
   ]);

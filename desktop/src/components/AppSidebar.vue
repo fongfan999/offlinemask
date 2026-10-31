@@ -17,7 +17,7 @@ const props = defineProps<{
   preparing: boolean;
   /** History is a passcode feature: the list stays hidden until one is set. */
   history: boolean;
-  /** This machine reads text in pictures, so images open on Tài liệu (decision 0171). */
+  /** This machine reads text in pictures, so images open on Tài liệu (decision 0180). */
   images: boolean;
   version: string;
 }>();

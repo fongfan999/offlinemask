@@ -1034,7 +1034,7 @@ function order(rng, layout) {
 
 /** A service contract's appendix whose parties are set out as a form with the labels in
  * a column of their own and the values in the next after a colon ("Ngày sinh   : …"),
- * its lines closer than a paragraph's, as office contracts are typed (decision 0174). In
+ * its lines closer than a paragraph's, as office contracts are typed (decision 0183). In
  * "colon" the colon starts the values' column; in "label" it ends each label. */
 function appendix(rng, layout) {
   const r = recorder();
@@ -1125,7 +1125,7 @@ function machineLines(card) {
 }
 
 /** A contract with a copy of a party's citizen identity card on its last page, front and
- * back, as contracts are filed (decision 0176). Everything on the card is the holder's:
+ * back, as contracts are filed (decision 0185). Everything on the card is the holder's:
  * the number, name, dates, home town, residence and the machine-readable lines; the card's
  * printed wording stays. The issuing officer's name is either way. */
 function idcard(rng) {

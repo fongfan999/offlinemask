@@ -17,7 +17,7 @@ const prose = new Set(["TEN", "DIA_CHI", "TO_CHUC"]);
 
 const alphanumeric = /[\p{L}\p{N}]/u;
 /** A value hidden once is hidden wherever else it appears whole in the document, with
- * the same alias (decision 0171): the detector reads each paragraph on its own, and
+ * the same alias (decision 0180): the detector reads each paragraph on its own, and
  * a value's second occurrence may sit where its cue is missing, a transfer line whose
  * account number text recognition garbled before the name, or a form whose label a
  * line break split. Only values that mean the same wherever they stand: a person's
@@ -28,7 +28,7 @@ const alphanumeric = /[\p{L}\p{N}]/u;
  * detection at the same place.
  *
  * A name is also found with other tone marks, or none, where every word of it is
- * capitalised (decision 0175): text recognition reads a copier's "NGÔ" under a signature
+ * capitalised (decision 0184): text recognition reads a copier's "NGÔ" under a signature
  * as "NGÕ", and a transfer writes the name without marks. */
 export function repeatedValues(
   paragraphs: readonly DocParagraph[],
@@ -59,7 +59,7 @@ export function repeatedValues(
       if (!whole) return;
       const overlapping = taken.filter((other) => other.start < end && other.end > at);
       // A name found whole elsewhere outranks part of it found here: a copier's signature
-      // line read "VŨ NGUYỄN" of "VŨ NGUYỄN BẢO TRÂM" (decision 0177).
+      // line read "VŨ NGUYỄN" of "VŨ NGUYỄN BẢO TRÂM" (decision 0186).
       const inside =
         detection.type === "TEN" &&
         overlapping.every(
@@ -122,7 +122,7 @@ export function maskParagraphs(
   let masked = 0;
   for (const paragraph of paragraphs) {
     const card = cards.get(paragraph.id);
-    // On a copied card its printed wording stays whole (decision 0176).
+    // On a copied card its printed wording stays whole (decision 0185).
     const found = [
       ...own(paragraph.id).filter(
         (d) => !card?.wording.some(([start, end]) => d.start >= start && d.end <= end),

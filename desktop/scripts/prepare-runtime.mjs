@@ -11,7 +11,7 @@ await mkdir(runtimeDir, { recursive: true });
 for (const file of ["ort-wasm-simd-threaded.asyncify.wasm"])
   await copyFile(join(ortDir, file), join(runtimeDir, file));
 // pdf.js's decoders for fax (CCITT), JBIG2 and JPEG 2000 pictures, in their JavaScript
-// builds, served at `/pdfjs/` for a scanned page's text (decision 0173), with their
+// builds, served at `/pdfjs/` for a scanned page's text (decision 0182), with their
 // licences.
 const pdfjsDir = join(dirname(createRequire(import.meta.url).resolve("pdfjs-dist/package.json")), "wasm");
 const decodersDir = join(root, "public/pdfjs");

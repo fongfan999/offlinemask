@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { readPicture } from "../src/core/doc/reading.ts";
 import definition from "../reading/reading-v1.json" with { type: "json" };
 
-// OfflineMask's own text recognition (decision 0172). The graphs are stood in for by
+// OfflineMask's own text recognition (decision 0181). The graphs are stood in for by
 // fakes: a detector that sees one line where the test drew it, and a recogniser that
 // reads every run of ink it is given as the next letter, with a space between runs.
 const width = 200;

@@ -106,7 +106,7 @@ windows = { version = "=0.62.2", features = [
   "ApplicationModel_Activation",
   "Foundation",
   "Foundation_Collections",
-  # Text in scanned pages and images is read by Windows.Media.Ocr (decision 0171).
+  # Text in scanned pages and images is read by Windows.Media.Ocr (decision 0180).
   "Globalization",
   "Graphics_Imaging",
   "Media_Ocr",
@@ -137,6 +137,6 @@ objc2-foundation = { version = "=0.3.2", features = ["NSArray", "NSData", "NSDic
 objc2-app-kit = { version = "=0.3.2", features = ["NSApplication", "NSEvent", "NSPanel", "NSPasteboard", "NSPasteboardItem", "NSResponder", "NSRunningApplication", "NSScreen", "NSWindow", "NSWorkspace", "block2"] }
 block2 = "=0.6.2"
 core-foundation = "=0.10.1"
-# Text in scanned pages and images is read by the system's Vision framework (decision 0171).
+# Text in scanned pages and images is read by the system's Vision framework (decision 0180).
 objc2-vision = { version = "=0.3.2", default-features = false, features = ["std", "VNDefines", "VNDetectTextRectanglesRequest", "VNObservation", "VNRecognizeTextRequest", "VNRequest", "VNRequestHandler", "VNTypes", "VNRequestRevisionProviding", "objc2-core-foundation"] }
 objc2-core-foundation = { version = "=0.3.2", default-features = false, features = ["std", "CFCGTypes"] }

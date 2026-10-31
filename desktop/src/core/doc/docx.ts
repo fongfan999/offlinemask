@@ -18,7 +18,7 @@ export type DocError =
   | "scanned"
   | "old-font"
   | "cancelled"
-  // A picture on a machine without text recognition (decision 0171).
+  // A picture on a machine without text recognition (decision 0180).
   | "no-ocr";
 export class DocFileError extends Error {
   readonly code: DocError;

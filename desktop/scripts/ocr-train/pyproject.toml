@@ -1,4 +1,4 @@
-# Training environment for OfflineMask's own Vietnamese line recogniser (decision 0172). Run with uv:
+# Training environment for OfflineMask's own Vietnamese line recogniser (decision 0181). Run with uv:
 #   uv sync --project desktop/scripts/ocr-train          # creates .venv from uv.lock, offline after
 #   uv run --project desktop/scripts/ocr-train train.py …
 # uv.lock pins every wheel; `uv lock --upgrade` is a deliberate change to record.

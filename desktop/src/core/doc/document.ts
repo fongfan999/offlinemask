@@ -19,7 +19,7 @@ function isPdf(bytes: Uint8Array) {
 const plainName = /\.(md|txt)$/i;
 
 /** Open a Word, OpenDocument text or PDF file (decisions 0078, 0084, 0149), a PNG or
- * JPEG picture read by text recognition (decision 0171), or a .md or .txt file
+ * JPEG picture read by text recognition (decision 0180), or a .md or .txt file
  * returned by the AI for one of the last two. */
 export async function openDocument(bytes: Uint8Array, name = "", reading: PdfReading = {}) {
   if (isPdf(bytes)) return { ...(await openPdf(bytes, reading)), mailto: [] as string[] };

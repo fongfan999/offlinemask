@@ -435,7 +435,7 @@ test("a heading in capitals stays apart from the centred line below it", () => {
   );
 });
 
-test("a form with its labels in a column reads one field a line (decision 0174)", () => {
+test("a form with its labels in a column reads one field a line (decision 0183)", () => {
   const item = (str, x, y) => ({ str, transform: [11, 0, 0, 11, x, y], width: str.length * 6 });
   // Lines 1.2 font sizes apart, as a typed contract's: closer than a table's rows.
   const form = (rows) =>

@@ -15,14 +15,14 @@ import { ocrTextItems, type OcrEngine, type OcrTextItem } from "./ocr.ts";
  * asked for text only: nothing is drawn and no image is decoded, which is most of a
  * viewer's cost and memory.
  *
- * Phase 2 (decision 0171): when the machine can read text in pictures (`ocr.ts`), a
+ * Phase 2 (decision 0180): when the machine can read text in pictures (`ocr.ts`), a
  * page without text is drawn once, at 200 dpi, and read by the system's own text
  * recognition; its lines then take the same path as a text page's items. */
 export const maxPdfPages = 300;
 /** Images at least this many pixels count for the "has images" note; logos and icons
  * are usually smaller. */
 const largeImagePixels = 200_000;
-/** Pages without text are drawn at this resolution for recognition (decision 0171):
+/** Pages without text are drawn at this resolution for recognition (decision 0180):
  * what office scanners use, and enough for 8-point print. */
 const ocrDpi = 200;
 /** The longest side a drawn page may have; a poster-sized page is scaled down. */
@@ -160,7 +160,7 @@ function secondCell(line: Line): number | undefined {
 /** A label on its own in a cell: a capital, then up to 39 characters and no colon. */
 const labelCell = /^\p{Lu}[^\t:]{0,39}$/u;
 /** A form typed with its labels in a column and the values in the next ("Ngày sinh   :
- * 08/11/1998", "Ngày sinh:   08/11/1998", decision 0174) reads as "Label: value", as the
+ * 08/11/1998", "Ngày sinh:   08/11/1998", decision 0183) reads as "Label: value", as the
  * same form typed without the column does: a line of its own that the masker reads with
  * its label. Left as two cells, such lines made a table of two columns, and lines closer
  * than a row's height (a typed contract's) were one row: every label of a party in one
@@ -226,7 +226,7 @@ function columnSpans(pieces: readonly Piece[]): { x: number; end: number }[] {
 }
 /** One word read across a gutter must not merge two columns for the whole table: text
  * recognition glues a reference to the description beside it in one row of a
- * statement ("T26327506902: Rut tien ATM tai VPBank 9592", decision 0171), and the
+ * statement ("T26327506902: Rut tien ATM tai VPBank 9592", decision 0180), and the
  * text of a PDF can do the same with a cell that overflows. A span is split at a
  * stretch at least `gutter` wide (four fifths of the rows' typical font size) that the
  * words of at most one row cover, when at least two rows have words on each side of
@@ -597,7 +597,7 @@ export interface PdfReading {
    * a trailing slash: the app's `/pdfjs/`, or the package's `wasm/` folder in Node. A
    * copier's compact scan keeps its text as such a picture, which pdf.js otherwise skips
    * without a word. Only used with `ocr`, since only a drawn page decodes pictures
-   * (decision 0173). */
+   * (decision 0182). */
   decoders?: string;
 }
 

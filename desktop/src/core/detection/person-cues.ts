@@ -48,14 +48,14 @@ const addressed = new RegExp(
   "giu",
 );
 /** A contract's party, labelled ("BÊN B: LÝ THU THẢO", "Bên cho thuê: Lê Phi Long"),
- * decision 0174: the party may be a company, which is a name only to the organization
+ * decision 0183: the party may be a company, which is a name only to the organization
  * rules, so the value must look like a person's name. */
 const party = new RegExp(
   `(?<![\\p{L}\\p{M}])bên(?:[^\\S\\r\\n]+[\\p{L}\\p{M}]+){1,2}[^\\S\\r\\n]*[:：][^\\S\\r\\n]*(${word}(?:[^\\S\\r\\n]+${word}){1,4})`,
   "giu",
 );
 /** A signature note; the names are on one of the next two non-empty lines. On copier
- * print the "Ký" may be misread ("(ý, ghi rố họ tên)", decision 0177): "ghi rõ họ tên"
+ * print the "Ký" may be misread ("(ý, ghi rố họ tên)", decision 0186): "ghi rõ họ tên"
  * after it, whatever its marks, is still the note. */
 const signature =
   /\((?:ký|Ký|KÝ|[^)\r\n]{0,3},[^\S\r\n]*ghi[^\S\r\n]+r\p{L}[^\S\r\n]+h\p{L}[^\S\r\n]+t\p{L}n)[^)\r\n]*\)[^\r\n]*/gu;

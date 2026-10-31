@@ -1,5 +1,5 @@
 {
-  "$comment": "The labels a Vietnamese document puts before a value, by what the value is: see README.md. Written as they appear; the loader folds them for the readers that compare without tone marks. Curated (decisions 0081, 0154, 0155, 0159, 0160, 0178).",
+  "$comment": "The labels a Vietnamese document puts before a value, by what the value is: see README.md. Written as they appear; the loader folds them for the readers that compare without tone marks. Curated (decisions 0081, 0154, 0155, 0159, 0160, 0187).",
   "name": [
     "họ và tên",
     "họ, chữ đệm và tên khai sinh",

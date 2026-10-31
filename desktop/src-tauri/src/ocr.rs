@@ -1,4 +1,4 @@
-//! Text in pictures (decision 0171): a scanned PDF page or an image is read by the
+//! Text in pictures (decision 0180): a scanned PDF page or an image is read by the
 //! operating system's own text recognition, Apple's Vision framework on macOS and
 //! Windows.Media.Ocr on Windows, on this machine. No model is downloaded, no file is
 //! written and nothing leaves the computer: the picture comes from the web view as PNG
@@ -616,7 +616,7 @@ pub fn recognize(image: &[u8], width: u32, height: u32) -> Result<OcrPage, Strin
 }
 
 /// Whether the app reads pictures on Windows. The engine above is built and measured
-/// on its own (decision 0171, "Windows"); the app offers it only once the owner turns
+/// on its own (decision 0180, "Windows"); the app offers it only once the owner turns
 /// this on, and `landing/privacy.html` names Windows exactly then
 /// (`tests/privacy-contract.test.mjs`). The evaluation harness reads `available()`.
 pub const WINDOWS_SHIPPED: bool = false;

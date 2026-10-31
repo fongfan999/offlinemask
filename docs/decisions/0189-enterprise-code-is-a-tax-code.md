@@ -1,6 +1,6 @@
-# 0180 — An enterprise code is a tax code, not a phone number
+# 0189 — An enterprise code is a tax code, not a phone number
 
-Date: 31 October 2026. Status: committed. Follows [0177](0177-recogniser-trained-on-copier-print.md) ("the enterprise code is masked, under a phone's alias").
+Date: 31 October 2026. Status: committed. Follows [0186](0186-recogniser-trained-on-copier-print.md) ("the enterprise code is masked, under a phone's alias").
 
 ## Problem
 

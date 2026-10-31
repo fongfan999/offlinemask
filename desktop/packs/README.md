@@ -77,7 +77,7 @@ Optional, per model. A decoded span whose mean token probability is below `minSc
 
 ## Replacing the models, step by step
 
-1. **Put the files in place.** Create `artifacts/packs/<id>/<directory>/` for each model with its ONNX graph, `config.json`, `tokenizer.json` and `tokenizer_config.json`. `artifacts/` is ignored by git; pack weights are never committed (the one committed graph is the small text recogniser built into the app, decision 0172).
+1. **Put the files in place.** Create `artifacts/packs/<id>/<directory>/` for each model with its ONNX graph, `config.json`, `tokenizer.json` and `tokenizer_config.json`. `artifacts/` is ignored by git; pack weights are never committed (the one committed graph is the small text recogniser built into the app, decision 0181).
 2. **Describe the models.** Copy or edit a file in `packs/`, set `id`, `name`, `attribution` and the `models` list. Point `src/core/detection/pack.ts`, `src-tauri/src/models.rs`, `src-tauri/src/bin/*.rs` and `src-tauri/src/model_pack.rs`'s test helper at the new file name if you created one.
 3. **Pin the files.**
 
@@ -105,7 +105,7 @@ Optional, per model. A decoded span whose mean token probability is below `minSc
 
 ## Text recognition models
 
-The models that read text in pictures where the system cannot (Windows, [decision 0172](../../docs/decisions/0172-own-line-recogniser-for-windows.md)) are not a pack: they ship inside the app, described by [`reading/reading-v1.json`](../reading/reading-v1.json) (each file's size, SHA-256 and source, the detector's post-processing, the recogniser's classes). `scripts/prepare-reading.mjs` puts them in the build; `pnpm eval:documents <scans> --reading` measures them; `scripts/ocr-train/` trains the recogniser.
+The models that read text in pictures where the system cannot (Windows, [decision 0181](../../docs/decisions/0181-own-line-recogniser-for-windows.md)) are not a pack: they ship inside the app, described by [`reading/reading-v1.json`](../reading/reading-v1.json) (each file's size, SHA-256 and source, the detector's post-processing, the recogniser's classes). `scripts/prepare-reading.mjs` puts them in the build; `pnpm eval:documents <scans> --reading` measures them; `scripts/ocr-train/` trains the recogniser.
 
 ## What a pack cannot change
 

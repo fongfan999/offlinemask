@@ -59,7 +59,7 @@ const party = vocabulary.wording.party;
  * "Nguyễn Thanh Toán" or "Công ty Dịch vụ Bình An", which reach past them, are kept. */
 
 const phrase = vocabulary.wording.phraseAlternation;
-/** A run of wording may take a contract party with it ("ĐẠI DIỆN BÊN A", decision 0181). */
+/** A run of wording may take a contract party with it ("ĐẠI DIỆN BÊN A", decision 0190). */
 const runPart = `(?:${phrase}|${vocabulary.wording.partyAlternation})`;
 /** Countries and regions: a span that is only one of these is where something comes
  * from ("Thịt bò Úc"), not anyone's address; an address that ends in one is kept whole. */
@@ -77,7 +77,7 @@ const foldedBoilerplate = new RegExp(
 );
 /** Ranges of the boilerplate phrases in one text, for spans to be checked against; also
  * those read with other tone marks, where the phrase has a word no name has (decision
- * 0179). */
+ * 0188). */
 export function boilerplateRanges(text: string): [number, number][] {
   const nfc = text.normalize("NFC");
   const search = searchIndex(nfc);

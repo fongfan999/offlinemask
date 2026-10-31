@@ -54,7 +54,7 @@ const wordingPhrases = [
   ...people.roles,
   ...people.ranks,
   ...wording.codeLabels,
-  // A copied card's title ("… Hạnh phúc CĂN CƯỚC CÔNG DÂN", decision 0181).
+  // A copied card's title ("… Hạnh phúc CĂN CƯỚC CÔNG DÂN", decision 0190).
   ...wording.identityCard.fronts,
 ];
 const nameWords = lowerSet([...people.nameSyllables, ...people.familyNames], true);
@@ -120,7 +120,7 @@ export const vocabulary = {
       alternation(wordingPhrases),
     ].join("|")})`,
     /** The phrases compared without tone marks, for text recognition's misread marks
-     * ("Sự Kiện Bát Khà Kháng", "Thủ lao"; decision 0179): only those with a word no name
+     * ("Sự Kiện Bát Khà Kháng", "Thủ lao"; decision 0188): only those with a word no name
      * has, so "thanh toán" does not take "Thanh Toàn" nor "phạt" "Phát". */
     foldedPhraseAlternation: alternation(
       wordingPhrases.filter((entry) =>
@@ -134,14 +134,14 @@ export const vocabulary = {
     sexLabelAlternation: alternation(wording.sexLabels),
     sexes: lowerSet(wording.sexes),
     currencies: new RegExp(`^${alternation(wording.currencies)}$`, "iu"),
-    /** A copied identity card's titles and printed wording, folded (decision 0176). */
+    /** A copied identity card's titles and printed wording, folded (decision 0185). */
     identityCard: {
       fronts: alternation(wording.identityCard.fronts, { folded: true }),
       backs: alternation(wording.identityCard.backs, { folded: true }),
       wording: alternation(wording.identityCard.wording, { folded: true }),
     },
     party: new RegExp(`^${party}$`, "iu"),
-    /** The same, inside a run of wording ("ĐẠI DIỆN BÊN A", decision 0181). */
+    /** The same, inside a run of wording ("ĐẠI DIỆN BÊN A", decision 0190). */
     partyAlternation: party,
   },
   labels: {

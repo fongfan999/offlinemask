@@ -1,7 +1,7 @@
 //! Explicit evaluation harness; never bundled by the default app build. Reads one JSON
 //! object per line, `{"path": …, "width": …, "height": …}` for a PNG or JPEG file and
 //! its size in pixels, and prints the lines the app's own text recognition finds in it
-//! (decision 0171), one JSON object per input line.
+//! (decision 0180), one JSON object per input line.
 use std::io::{BufRead, Write};
 #[derive(serde::Deserialize)]
 struct Picture {

@@ -165,7 +165,7 @@ test("a tax code may be a 12-digit CCCD, after labels that say so", () => {
 });
 
 test("an enterprise code is a tax code, not a phone number", async () => {
-  // Decision 0180: ten digits from 0, which the phone rule would take.
+  // Decision 0189: ten digits from 0, which the phone rule would take.
   const text = "Mã số doanh nghiệp: 0318405612 · Điện thoại: 0903123456";
   assert.deepEqual(entries(text), [["GIAY_TO", "0318405612"]]);
   const detections = await createDetectionEngine()({ text, options: ["phone", "banking"] }, () =>

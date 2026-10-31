@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { cardValues } from "../src/core/doc/id-card.ts";
 import { maskParagraphs } from "../src/core/doc/mask.ts";
 
-// A citizen identity card copied into a document (decision 0176). Invented values.
+// A citizen identity card copied into a document (decision 0185). Invented values.
 const page = (texts, part = "page-2") => texts.map((text, id) => ({ id, part, text }));
 const hidden = (paragraphs, detections = new Map()) => {
   const { edits } = maskParagraphs(paragraphs, detections, "4aae");

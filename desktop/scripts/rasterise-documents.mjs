@@ -1,4 +1,4 @@
-// Turns a folder of PDFs into scans (decision 0171): every page is drawn with pdf.js and
+// Turns a folder of PDFs into scans (decision 0180): every page is drawn with pdf.js and
 // put back into a PDF as a picture alone, the way a copier's PDF holds it, so that the
 // same expectation lists judge what text recognition reads. A one-page document is
 // also written as a PNG picture, which measures the image route. Nothing of the text
@@ -12,12 +12,12 @@
 // copiers use). The `<document>.expect.json` beside each PDF is copied along.
 //
 // --tilt turns every page by that many degrees, one document clockwise and the next
-// counter-clockwise, as a page fed or laid crooked (decision 0172). --photo makes the
+// counter-clockwise, as a page fed or laid crooked (decision 0181). --photo makes the
 // page look photographed rather than scanned: off-white paper, light falling off towards
 // one corner, a slight blur and grain. Both are deterministic: the same folder gives the
 // same pictures.
 //
-// --copier makes the page an office copier's bi-level scan (decision 0177): the toner
+// --copier makes the page an office copier's bi-level scan (decision 0186): the toner
 // spread by about a pixel, every pixel black or white, a few specks, kept losslessly
 // (PNG) as a copier's fax-coded picture is. Its look is measured, not its coding.
 import { copyFileSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";

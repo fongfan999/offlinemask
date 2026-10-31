@@ -1,4 +1,4 @@
-// Puts OfflineMask's text recognition models (decision 0172) where the app serves them:
+// Puts OfflineMask's text recognition models (decision 0181) where the app serves them:
 // `public/reading/`, beside the WASM runtime, so the build carries them inside the app.
 // Each file of `reading/reading-v1.json` is taken from `reading/` itself (the recogniser
 // is committed there), else from `artifacts/reading/`, else, when the definition names a
@@ -6,7 +6,7 @@
 // when its size and SHA-256 match; a committed file that does not match fails the build.
 // A file that cannot be had leaves `public/reading/` out, and the app then offers no
 // reading of its own; while `readingShipped` (src/adapters/ocr.ts) is on that is a build
-// failure, so a release cannot lose the feature unnoticed (decision 0182). The app itself
+// failure, so a release cannot lose the feature unnoticed (decision 0191). The app itself
 // never fetches these files.
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";

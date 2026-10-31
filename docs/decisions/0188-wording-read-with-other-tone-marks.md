@@ -1,6 +1,6 @@
-# 0179 — Document wording read with other tone marks is still wording
+# 0188 — Document wording read with other tone marks is still wording
 
-Date: 31 October 2026. Status: measured through the app, committed; `readingShipped` stays off. Follows [0178](0178-close-set-lines-read-again.md) and [0177](0177-recogniser-trained-on-copier-print.md) ("capitalised contract terms … are hidden as names").
+Date: 31 October 2026. Status: measured through the app, committed; `readingShipped` stays off. Follows [0187](0187-close-set-lines-read-again.md) and [0186](0186-recogniser-trained-on-copier-print.md) ("capitalised contract terms … are hidden as names").
 
 ## Problem
 
@@ -17,7 +17,7 @@ On the owner's copier contracts, capitalised contract terms that text recognitio
 
 Through the app (`evaluate-documents.mjs --reading`), not read / leaked / over-masked / unlisted:
 
-| Documents | 0178 | This one |
+| Documents | 0187 | This one |
 | --- | --- | --- |
 | Text PDFs and Word, seeds 1–7 (546) | 0 / 0 / 0 / 0 | 0 / 0 / 0 / 0 |
 | Copier scans, seeds 1–7 (703) | 28 / 0 / 8 / 86 | 28 / 0 / 8 / 82 |
@@ -37,4 +37,4 @@ None.
 
 ## Not decided here
 
-`readingShipped` stays off (0172). Comparing letters as well as marks.
+`readingShipped` stays off (0181). Comparing letters as well as marks.

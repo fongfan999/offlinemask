@@ -50,10 +50,10 @@ export const docErrorMessages: Record<DocError, string> = {
 export const docFailure =
   "Chưa xử lý được tài liệu trên thiết bị. Tệp gốc không bị thay đổi. Hãy thử lại.";
 const documentName = /\.(docx|odt|pdf)$/i;
-/** Pictures open on machines with text recognition (decision 0171). */
+/** Pictures open on machines with text recognition (decision 0180). */
 export const imageName = /\.(png|jpe?g)$/i;
 /** What the AI may return for each kind of document: a document like the one sent, or,
- * for a PDF or a picture, whose masked copy is Markdown (decisions 0149, 0171), text or
+ * for a PDF or a picture, whose masked copy is Markdown (decisions 0149, 0180), text or
  * a document. */
 const returnedName = /\.(docx|odt)$/i;
 const returnedForPdf = /\.(md|txt|docx|odt)$/i;
@@ -100,7 +100,7 @@ export interface DocRunDependencies {
   detector: TextDetector;
   files: SheetFiles;
   pack: { ready: Ref<boolean>; readyRoot: Ref<string | null> };
-  /** Whether this machine reads text in pictures (decision 0171). */
+  /** Whether this machine reads text in pictures (decision 0180). */
   ocr: Ref<boolean>;
   sessions: Ref<readonly Session[]>;
   onSession: (session: Session) => void;

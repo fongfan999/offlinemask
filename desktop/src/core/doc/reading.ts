@@ -1,6 +1,6 @@
 import type { OcrLine, OcrPage } from "./ocr.ts";
 
-/** Text in pictures read by OfflineMask's own models (decision 0172), where the system
+/** Text in pictures read by OfflineMask's own models (decision 0181), where the system
  * has no Vietnamese recognition of its own (Windows). Two ONNX graphs, described by
  * `reading/reading-v1.json` and carried inside the app: PaddleOCR's PP-OCRv4 detector
  * finds the lines, and the recogniser trained for OfflineMask reads each one. The result
@@ -427,7 +427,7 @@ async function readPiece(
 /** How tall the line's print is, from the band of rows where its ink is densest (at least
  * half the densest row's): about half the font size in lower case, nearer three quarters
  * in capitals and digits (a least-squares fit over 1 882 lines of seed 1's scans against
- * their text PDFs, decision 0172). Unlike the letters' widths it does not grow with bold
+ * their text PDFs, decision 0181). Unlike the letters' widths it does not grow with bold
  * print; `ocr.ts` takes the mean of the two. */
 const band = { dense: 0.5, lower: 0.529, capitals: 0.206, ink: 0.02, paper: 0.5, rule: 0.9 };
 function bandSize(grey: Uint8Array, picture: Picture, found: Box, words: OcrLine[]): number {
@@ -474,7 +474,7 @@ function bandSize(grey: Uint8Array, picture: Picture, found: Box, words: OcrLine
 }
 
 /** How far toward a neighbouring line's core a line's box may reach, as a share of the
- * gap between the two cores (decision 0178), and how a reading's certainty is measured:
+ * gap between the two cores (decision 0187), and how a reading's certainty is measured:
  * its letters' mean probability, each word weighted by its length. */
 const toward = { above: 0.6, below: 0.5 };
 const certainty = (words: readonly OcrLine[]) => {
@@ -586,7 +586,7 @@ export async function readPicture(
       ...(found.core ? { core: found.core } : {}),
     };
     let words = await readBox(box);
-    // Close-set lines put much of the lines above and below in the box (decision 0178):
+    // Close-set lines put much of the lines above and below in the box (decision 0187):
     // the line is read again in a box stopped short of them, and the surer reading kept.
     const close = between(found, box);
     if (close.height < box.height * 0.95) {

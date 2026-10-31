@@ -19,7 +19,7 @@ import type { CellEdits, SheetTable } from "../core/sheet/mask.ts";
  * stay here, in memory only, until the page closes them; only text goes back. A PDF
  * reports each page read and can be cancelled while it is read (decision 0149). A
  * page without text, or a picture, is read by the system's text recognition through
- * the main thread, which alone can call native code (decision 0171). */
+ * the main thread, which alone can call native code (decision 0180). */
 export type FilesRequest =
   | { type: "open"; id: number; handle: string; name: string; bytes: ArrayBuffer }
   | { type: "write"; id: number; handle: string; edits: CellEdits }

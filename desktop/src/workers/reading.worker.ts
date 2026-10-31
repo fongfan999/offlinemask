@@ -4,7 +4,7 @@ import definition from "../../reading/reading-v1.json";
 import { readPicture, type ReadingDefinition, type ReadingModels } from "../core/doc/reading.ts";
 import type { OcrPage } from "../core/doc/ocr.ts";
 
-/** Reads text in pictures with OfflineMask's own models (decision 0172), off the main
+/** Reads text in pictures with OfflineMask's own models (decision 0181), off the main
  * thread, on the ONNX Runtime WASM build the app already carries (the one the detection
  * worker uses). The graphs come from the app itself (`/reading/`), never from the
  * network. A picture is held only while it is read. */

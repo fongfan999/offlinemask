@@ -1,6 +1,6 @@
 # Scanned documents and pictures read on the machine (28 October 2026)
 
-The measurements of [decision 0171](../decisions/0171-scanned-pdfs-and-images-read-on-the-machine.md): the synthetic document set's PDFs turned into scans and pictures, read by Apple's Vision framework through the app's own native module, and masked with the installed shipping pack (`e562a9b3…`, decision 0169) on an M1 Pro running macOS 26.6. Cells read not read / leaked / over-masked / unlisted, as `pnpm -C desktop eval:documents` prints them.
+The measurements of [decision 0180](../decisions/0180-scanned-pdfs-and-images-read-on-the-machine.md): the synthetic document set's PDFs turned into scans and pictures, read by Apple's Vision framework through the app's own native module, and masked with the installed shipping pack (`e562a9b3…`, decision 0169) on an M1 Pro running macOS 26.6. Cells read not read / leaked / over-masked / unlisted, as `pnpm -C desktop eval:documents` prints them.
 
 ## Engines screened on seed 1
 
@@ -63,7 +63,7 @@ Against the bar, the scans leak where the text PDFs do not, in both kinds: a lay
 
 ### Seeds 1–7 after the fixes (the twelve leaks diagnosed)
 
-The owner asked for each leak diagnosed and fixed where it belongs (decision 0171, "The 12 leaks, one by one"): the cell-gap threshold, the transfer-account rule, repeated values (names and numbers only), columns bridged by one glued word, a bar inside a word, the classification of a value glued to its neighbour, and page de-skew. Same scripts, same pack.
+The owner asked for each leak diagnosed and fixed where it belongs (decision 0180, "The 12 leaks, one by one"): the cell-gap threshold, the transfer-account rule, repeated values (names and numbers only), columns bridged by one glued word, a bar inside a word, the classification of a value glued to its neighbour, and page de-skew. Same scripts, same pack.
 
 | Seed | Scanned PDFs | Pictures (one-page documents) |
 | --- | --- | --- |
@@ -100,7 +100,7 @@ On the owner's Windows PC (Windows 11 Pro 10.0.26200, x64 CPU, no GPU used).
 
 Of the 104 hide values not read verbatim, 49 are read but in the wrong case ("công ty TNHH", "trần hưng đạo"), 15 are read without or with wrong tone marks, and 40 are not found even so: every e-mail address with "@" read as "0" ("ngoc.do40000utlook.com"), names of statement rows that wrap onto two lines and come apart in the screen's simple reading order, a stray segment inside an address ("Hồ Xã Chí Minh"), spaces dropped inside phone numbers. The reading-order losses are the screen's, which the app's reader by place would partly recover; the case and "@" errors are the model's, and an e-mail address read with "0" for "@" is one the policy no longer recognises. Below Tesseract verbatim and fifteen times slower than Vision: not a candidate as it stands.
 
-### OfflineMask's own recogniser (decision 0172)
+### OfflineMask's own recogniser (decision 0181)
 
 A CTC line recogniser trained for three hours on this machine's CPU from lines of the generator's seeds 100–399, drawn in 27 open fonts that exclude the documents' own (`recogniser.onnx` sha256 `70c31d9f…`; validation character error 0.28 %). Screened with `scripts/ocr-screening-v2/screen.mjs`: the same detector, pages and scoring as VietOCR's screen, each box widened by `--grow` of its height before it is read.
 
@@ -118,7 +118,7 @@ At 0.25, on all 703 scans and pictures of seeds 1–7 (`artifacts/seeds-scanned`
 
 The 91 are mostly long values that wrap: statement rows' names and companies ("CONG TY TNHH MTV VAN TAI DONG A"), company names over two heading lines, payslip addresses in a narrow cell, each joined by the screen's top-to-bottom order with the other column's words between its halves. About ten are the model's: "Châu" read "Chậu", "Đà" read ")à", "Sài" read "ài", "BN67551980" read "BN67651980", "NV24259", "PE52514527", one phone number and one e-mail address (in a scan and its picture). Not comparable with Vision's 223 "not read" above, which goes through the app's reader by place; that measurement needs the recogniser in the app.
 
-### OfflineMask's own recogniser through the app (decision 0172)
+### OfflineMask's own recogniser through the app (decision 0181)
 
 `pnpm -C desktop eval:documents artifacts/seeds-scanned --pack <shipping pack e562a9b3…> --reading --misread` on the owner's Windows PC: the recogniser and detector of `desktop/reading/reading-v1.json` read every page without text and every picture through `src/core/doc/reading.ts`, then the app's reader by place, detection and masking. Cells not read / leaked / over-masked / unlisted.
 
@@ -142,11 +142,11 @@ Reading by reading:
 | words drawn in to all the ink of the widened box, sizes from widths | 43 | 21 | 13 | 65 |
 | plus ink only within the detector's own text, sizes also from the height of the print, lines numbered, sizes near the page's median taken as it | 42 | 0 | 5 | 72 |
 
-The 21 leaks of the first reading: ten account numbers in `statement-classic` (a word reaching across the gutter merged the reference and description columns for the whole table, and "TK FT… 4762…" no longer reads as a transfer to an account), and eleven first signature names in `payslip-table` (the names row, 5.2–5.4 font sizes below the table, joined it as cells where a bold name's size was overestimated). The five over-masked of the second, and the text PDFs of the same seeds re-measured after the change to `ocr.ts` (546 documents, 0 / 0 / 0 / 0 in 1 013 s), are in decision 0172.
+The 21 leaks of the first reading: ten account numbers in `statement-classic` (a word reaching across the gutter merged the reference and description columns for the whole table, and "TK FT… 4762…" no longer reads as a transfer to an account), and eleven first signature names in `payslip-table` (the names row, 5.2–5.4 font sizes below the table, joined it as cells where a bold name's size was overestimated). The five over-masked of the second, and the text PDFs of the same seeds re-measured after the change to `ocr.ts` (546 documents, 0 / 0 / 0 / 0 in 1 013 s), are in decision 0181.
 
-### Tilted and photographed pages (decision 0172)
+### Tilted and photographed pages (decision 0181)
 
-`node scripts/rasterise-documents.mjs <seeds> <out> --tilt <degrees> [--photo --jpeg 70]` made crooked and photographed copies of the same documents (the photographed: paper `#ebe6dc`, 0.8 px blur, one corner shadowed to about grey 170, grain ±12, tilted 1.5°). With the page turned upright, the print height measured against each line's own paper and shadowed lines lifted (decision 0172), through the app with `--reading --misread`:
+`node scripts/rasterise-documents.mjs <seeds> <out> --tilt <degrees> [--photo --jpeg 70]` made crooked and photographed copies of the same documents (the photographed: paper `#ebe6dc`, 0.8 px blur, one corner shadowed to about grey 170, grain ±12, tilted 1.5°). With the page turned upright, the print height measured against each line's own paper and shadowed lines lifted (decision 0181), through the app with `--reading --misread`:
 
 | Pages | Documents | not read | leaked | over-masked | unlisted |
 | --- | --- | --- | --- | --- | --- |

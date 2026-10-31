@@ -20,18 +20,18 @@ test("account numbers after a bank's TK and after a longer account label", () =>
   // A ledger account has fewer than six digits.
   assert.deepEqual(detectBankingIdentifiers("Nợ TK 331, Có TK 1111"), []);
   // Transfer wording puts the account after "den"; text recognition may lose the "TK"
-  // (decision 0171), and the number is still the account, once.
+  // (decision 0180), and the number is still the account, once.
   for (const text of [
     "NGUYEN QUOC PHUC chuyen tien den T 96873162835 LY HUU KHANG",
     "NGUYEN QUOC PHUC chuyen tien den 96873162835 LY HUU KHANG",
     "NGUYEN QUOC PHUC chuyen tien den TK 96873162835 LY HUU KHANG",
-    // A copier scan may read the "TK" as a cell of its own (decision 0177).
+    // A copier scan may read the "TK" as a cell of its own (decision 0186).
     "NGUYEN QUOC PHUC chuyen tien den TK · 96873162835 LY HUU KHANG",
     "NGUYEN QUOC PHUC chuyen tien den · 96873162835 LY HUU KHANG",
   ])
     assert.deepEqual(values(text, detectBankingIdentifiers(text)), [["STK", "96873162835"]], text);
   assert.deepEqual(detectBankingIdentifiers("chuyen tien den ngay 10/10"), []);
-  // The "số" after "CCCD" read with another mark on a copier scan (decision 0177).
+  // The "số" after "CCCD" read with another mark on a copier scan (decision 0186).
   for (const text of ["CCCD só: 044088010671", "CCCD sô 044088010671", "CCCD SỐ: 044088010671"])
     assert.deepEqual(
       values(text, detectBankingIdentifiers(text)),
@@ -80,7 +80,7 @@ test("names after a form of address and under a signature; headings stay", () =>
     values(text, detectPersonCues(text)).map(([, value]) => value),
     ["Võ Minh Yến", "Trang", "Võ Đức Hải", "LÊ THANH VY"],
   );
-  // Copier print may lose the "Ký"; the rest of the note still names the row (decision 0177).
+  // Copier print may lose the "Ký"; the rest of the note still names the row (decision 0186).
   const copied =
     "\tNgười lập phiốu\tKế toán trưởng\tNgười nhận (ý, ghi rố họ tên)\n\tBùi Kim Hà\tNgô Kim Trang\tHuỳnh Thu Lan";
   assert.deepEqual(
@@ -96,7 +96,7 @@ test("names after a form of address and under a signature; headings stay", () =>
   );
 });
 
-test("a contract's party is a person when its value looks like a name (decision 0174)", () => {
+test("a contract's party is a person when its value looks like a name (decision 0183)", () => {
   const found = (text) => values(text, detectPersonCues(text)).map(([, value]) => value);
   assert.deepEqual(found("BÊN B: LÝ THU THẢO"), ["LÝ THU THẢO"]);
   assert.deepEqual(found("Bên cho thuê: Lê Phi Long, sinh năm 1988"), ["Lê Phi Long"]);
@@ -111,7 +111,7 @@ test("a contract's party is a person when its value looks like a name (decision 
   assert.deepEqual(born("Sinh năm: 1988"), []);
 });
 
-test("a four-word name ending in the older spelling Quí is read whole (decision 0175)", () => {
+test("a four-word name ending in the older spelling Quí is read whole (decision 0184)", () => {
   const text = "Đại diện bởi: Ông NGUYỄN TÙNG THANH QUÍ";
   assert.deepEqual(
     values(text, detectPersonCues(text)).map(([, value]) => value),

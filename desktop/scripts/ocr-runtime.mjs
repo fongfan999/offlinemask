@@ -1,4 +1,4 @@
-// The app's own text recognition for the measurements (decision 0171): the native
+// The app's own text recognition for the measurements (decision 0180): the native
 // `ocr` module, through the evaluation binary built with
 //   cargo build --manifest-path src-tauri/Cargo.toml --release \
 //     --features recognition-evaluation --bin ocr-check

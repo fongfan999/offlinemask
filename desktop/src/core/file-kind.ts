@@ -2,7 +2,7 @@ import type { Format } from "./sessions.ts";
 
 /** Which page opens a file, by its name (decision 0089; shared with the Finder
  * service of decision 0094). A PNG or JPEG picture opens on Tài liệu where the machine
- * reads text in pictures (`images`, decision 0171) and is "upcoming" elsewhere. */
+ * reads text in pictures (`images`, decision 0180) and is "upcoming" elsewhere. */
 export type FileKind = Format | "legacy-doc" | "upcoming" | "unknown";
 
 export function fileKind(name: string, { images = false } = {}): FileKind {

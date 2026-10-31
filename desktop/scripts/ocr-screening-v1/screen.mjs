@@ -1,4 +1,4 @@
-// Screens a cross-platform Vietnamese OCR engine the way decision 0171 screened Vision and
+// Screens a cross-platform Vietnamese OCR engine the way decision 0180 screened Vision and
 // Tesseract: every page of one seed's text PDFs drawn at 200 dpi and passed through JPEG
 // quality 80 (as the rasterised scans are), the engine's text, whitespace squeezed, searched
 // for every value of the expectation lists.

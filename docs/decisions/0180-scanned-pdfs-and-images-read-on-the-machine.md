@@ -1,4 +1,4 @@
-# 0171 — Scanned PDFs and images read on the machine (phase 2 of 0149)
+# 0180 — Scanned PDFs and images read on the machine (phase 2 of 0149)
 
 Date: 28 October 2026. Status: designed, built, measured and run in the app on this date; on for macOS 14 and later by the owner's decision the same day (see "What ships"). Follows [0149](0149-text-pdf-documents.md), which parked scanned PDFs and images because both need text recognition (OCR).
 
@@ -148,11 +148,11 @@ What is built: the native module's Windows side (`media_ocr` in `src-tauri/src/o
 
 So Windows needs an engine of its own: VietOCR as a downloaded pack (MIT, 150 MB, see the candidates), measured against Tesseract's floor and the bar of this decision, or Mac-only for now. The owner's decision.
 
-VietOCR read below Tesseract (see the evaluation), and OfflineMask's own recogniser took its place: [0172](0172-own-line-recogniser-for-windows.md), built into the app behind its own gate and measured to this decision's bar on all 703 scans (0 leaked).
+VietOCR read below Tesseract (see the evaluation), and OfflineMask's own recogniser took its place: [0181](0181-own-line-recogniser-for-windows.md), built into the app behind its own gate and measured to this decision's bar on all 703 scans (0 leaked).
 
 ## Not decided here
 
-- **Windows.** Windows.Media.Ocr has no Vietnamese recogniser (see "Windows"); [0172](0172-own-line-recogniser-for-windows.md) reads pictures with OfflineMask's own models instead, off until the owner opens it.
+- **Windows.** Windows.Media.Ocr has no Vietnamese recogniser (see "Windows"); [0181](0181-own-line-recogniser-for-windows.md) reads pictures with OfflineMask's own models instead, off until the owner opens it.
 - **Pages in old fonts** (0149's `old-font`) could be drawn and read like scans, which may read them better than their text layer; unmeasured.
 - **Skewed or photographed pages:** Vision reads them, but the layout step assumes lines run across the page; a photo at an angle reads line by line without its tables.
 - **HEIC and WebP** pictures stay "upcoming": Vision reads both, but the picture's size would need decoding in the worker.
