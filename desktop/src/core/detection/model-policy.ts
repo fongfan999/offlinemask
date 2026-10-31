@@ -1,5 +1,6 @@
 import type { DecodedEntitySpan } from "openmed";
 import type { Detection } from "./types.ts";
+import { searchIndex } from "./labelled-fields.ts";
 import { looksLikeKnownName } from "./person-cues.ts";
 import { vocabulary } from "./vocabulary.ts";
 import { vetoOn } from "./vetoes.ts";
@@ -67,12 +68,27 @@ const boilerplate = new RegExp(
   `(?<![\\p{L}\\p{M}\\p{N}])${phrase}(?:[^\\S\\r\\n]+${phrase})*(?![\\p{L}\\p{M}\\p{N}])`,
   "giu",
 );
-/** Ranges of the boilerplate phrases in one text, for spans to be checked against. */
+const folded = vocabulary.wording.foldedPhraseAlternation;
+const foldedBoilerplate = new RegExp(
+  `(?<![\\p{L}\\p{M}\\p{N}])${folded}(?:[^\\S\\r\\n]+${folded})*(?![\\p{L}\\p{M}\\p{N}])`,
+  "gu",
+);
+/** Ranges of the boilerplate phrases in one text, for spans to be checked against; also
+ * those read with other tone marks, where the phrase has a word no name has (decision
+ * 0179). */
 export function boilerplateRanges(text: string): [number, number][] {
-  return [...text.normalize("NFC").matchAll(boilerplate)].map((match) => [
-    match.index,
-    match.index + match[0].length,
-  ]);
+  const nfc = text.normalize("NFC");
+  const search = searchIndex(nfc);
+  return [
+    ...[...nfc.matchAll(boilerplate)].map((match): [number, number] => [
+      match.index,
+      match.index + match[0].length,
+    ]),
+    ...[...search.value.matchAll(foldedBoilerplate)].map((match): [number, number] => [
+      search.starts[match.index]!,
+      search.ends[match.index + match[0].length - 1]!,
+    ]),
+  ];
 }
 
 /** Whether a predicted name, place or organization can be one at all: it needs a letter

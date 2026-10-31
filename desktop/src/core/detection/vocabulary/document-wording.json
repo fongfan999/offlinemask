@@ -1,5 +1,5 @@
 {
-  "$comment": "Wording of documents that a model reads as a name, place or organization: see README.md. Grouped by the kind of document that uses it; the phrase mechanism takes every group. Curated (decisions 0080, 0155, 0156, 0159, 0160).",
+  "$comment": "Wording of documents that a model reads as a name, place or organization: see README.md. Grouped by the kind of document that uses it; the phrase mechanism takes every group. Curated (decisions 0080, 0155, 0156, 0159, 0160, 0179).",
   "boilerplate": {
     "contracts": [
       "hợp đồng cộng tác viên",
@@ -224,6 +224,9 @@
     "\\d{1,2}",
     "(?:thứ\\s+)?(?:nhất|hai|ba|bốn|năm)",
     "kia",
+    "đó",
+    "này",
+    "ấy",
     "còn\\s+lại",
     "(?:bị\\s+)?vi\\s+phạm",
     "bị\\s+ảnh\\s+hưởng",

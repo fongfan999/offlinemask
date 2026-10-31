@@ -47,6 +47,16 @@ const lowerSet = (entries: readonly string[], folded = false) =>
 const numbered = (words: readonly string[]) =>
   words.map((word) => `${escape(nfc(word)).replace(/ /g, ws)}${ws}\\d+(?:/\\d+)?`);
 
+// Wording a model reads as a name, place or organization: boilerplate by document kind,
+// roles, ranks and code labels.
+const wordingPhrases = [
+  ...Object.values(wording.boilerplate).flat(),
+  ...people.roles,
+  ...people.ranks,
+  ...wording.codeLabels,
+];
+const nameWords = lowerSet([...people.nameSyllables, ...people.familyNames], true);
+
 // Places
 const provinceNames = [
   ...places.provinces.map((p) => p.name),
@@ -102,13 +112,19 @@ export const vocabulary = {
       `${escape(nfc(wording.filing))}(?:${ws}[\\p{Lu}][\\p{Lu}.]*,?)*`,
       ...numbered(wording.numbered),
       `(?:${alternation(wording.amountWords)}${ws})+${alternation(wording.amountUnits)}`,
-      alternation([
-        ...Object.values(wording.boilerplate).flat(),
-        ...people.roles,
-        ...people.ranks,
-        ...wording.codeLabels,
-      ]),
+      alternation(wordingPhrases),
     ].join("|")})`,
+    /** The phrases compared without tone marks, for text recognition's misread marks
+     * ("Sự Kiện Bát Khà Kháng", "Thủ lao"; decision 0179): only those with a word no name
+     * has, so "thanh toán" does not take "Thanh Toàn" nor "phạt" "Phát". */
+    foldedPhraseAlternation: alternation(
+      wordingPhrases.filter((entry) =>
+        fold(entry)
+          .split(/[^\p{L}\p{N}]+/u)
+          .some((word) => word && !nameWords.has(word)),
+      ),
+      { folded: true },
+    ),
     headingAlternation: alternation(wording.wordingHeadings),
     sexLabelAlternation: alternation(wording.sexLabels),
     sexes: lowerSet(wording.sexes),

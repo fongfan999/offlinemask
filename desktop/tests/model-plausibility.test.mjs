@@ -202,6 +202,24 @@ test("contract boilerplate in Title Case is never a name, place or organization"
   assert.equal(modelDetections(decomposed, [span(decomposed, decomposed, "PERSON")]).length, 1);
 });
 
+test("boilerplate read with other tone marks is still boilerplate, unless every word could be a name", () => {
+  // Text recognition's misread marks (decision 0179).
+  const text =
+    "Trong trường hợp xảy ra Sự Kiện Bát Khà Kháng, các bên. Bên đó chịu.\nThủ lao: 5.000.000 đồng.\nNgười nhận: Nguyễn Thanh Toàn; ông Phát.";
+  const found = modelDetections(text, [
+    span(text, "Sự Kiện Bát Khà", "PERSON"),
+    span(text, "Kiện Bát Khà Kháng", "ORGANIZATION"),
+    span(text, "Bên đó", "PERSON"),
+    span(text, "Thủ lao", "PERSON"),
+    span(text, "Thanh Toàn", "PERSON"),
+    span(text, "Phát", "PERSON"),
+  ]);
+  assert.deepEqual(values(text, found), [
+    ["TEN", "Thanh Toàn"],
+    ["TEN", "Phát"],
+  ]);
+});
+
 test("boilerplate runs, titles and job titles are checked on the whole text as well as per window", () => {
   const text =
     "HỢP ĐỒNG CỘNG TÁC VIÊN\nMọi Thông Tin Mật sẽ:\nChức vụ: Giám Đốc Tài Chính\nĐiều 5. Phạt vi phạm Hợp đồng";
