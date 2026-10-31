@@ -63,11 +63,12 @@ test("restore searches every table at once and reports aliases from no table", (
   assert.deepEqual(result.unknown, ["[SDT_1_dead]"]);
 });
 
-test("replaced texts' codes go after a week, then oldest first past the size limit", () => {
+test("replaced texts' codes go after a week, then oldest first past the size limit; files stay", () => {
   const day = 24 * 60 * 60 * 1000;
   const now = 30 * day;
-  const table = (ageDays, listed, bytes = 10) => ({
+  const table = (ageDays, listed, bytes = 10, format = "text") => ({
     findings: [],
+    format,
     createdAt: now - ageDays * day,
     listed,
     bytes,
@@ -76,6 +77,7 @@ test("replaced texts' codes go after a week, then oldest first past the size lim
     ["old", table(8, false)],
     ["open", table(20, true)],
     ["week", table(6, false)],
+    ["sheet", table(8, false, 10, "excel")],
   ]);
   assert.deepEqual(staleTables(tables, now), ["old"]);
   const sized = new Map([
@@ -83,6 +85,8 @@ test("replaced texts' codes go after a week, then oldest first past the size lim
     ["b", table(2, false, 40)],
     ["c", table(1, false, 40)],
     ["open", table(5, true, 40)],
+    // Files neither count toward the limit nor are dropped by it.
+    ["doc", table(4, false, 900, "word")],
   ]);
   const limits = { maxAgeMs: 7 * day, maxBytes: 100 };
   assert.deepEqual(staleTables(sized, now, limits), ["a", "b"]);

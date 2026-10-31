@@ -8,8 +8,9 @@ Quick restore searches the alias table of every private session seen in this lau
 
 ## What
 
-- **Only tables of sessions no longer listed are limited.** Something open, in "Gần đây" or in history is never pruned here; history keeps its own keep period (decision 0143).
+- **Only text tables of sessions no longer listed are limited.** Something open, in "Gần đây" or in history is never pruned here; history keeps its own keep period (decision 0143). Text sessions made by Ẩn nhanh and by the text page are the same kind, so both follow these rules.
+- **Files are left out.** Spreadsheet and document tables are neither dropped nor counted toward the size limit; they stay until the app closes, as before. A file's AI result can come back much later and its table can be large, so it needs its own plan.
 - **A week.** Those tables go seven days after their session was made.
-- **32 MB.** Past that, the oldest of them go first until all tables fit. Size is estimated as two bytes per UTF-16 unit of each finding's strings plus 64 bytes per finding (`tableBytes`), computed once per table.
+- **32 MB.** Past that, the oldest of them go first until the text tables fit. Size is estimated as two bytes per UTF-16 unit of each finding's strings plus 64 bytes per finding (`tableBytes`), computed once per table.
 - **When.** Pruning runs whenever the session list changes, hourly, and when the window comes back (`expireHistory` in `App.vue`). The rules are `staleTables` in `src/core/quick-actions.ts`.
 - **Effect.** Codes from a forgotten table read as unknown ("Không tìm thấy bản gốc"), as after quitting. The privacy page's storage table says so.
