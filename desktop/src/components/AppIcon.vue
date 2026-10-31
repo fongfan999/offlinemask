@@ -26,6 +26,7 @@ const paths: Record<string, string> = {
   lock: "M5 10h14v11H5Z M8 10V7a4 4 0 0 1 8 0v3 M12 14v3",
   undo: "M3 10h11a7 7 0 0 1 0 14 M3 10l6-6 M3 10l6 6",
   reset: "M3 10a9 9 0 1 1 2 8 M3 4v6h6",
+  search: "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z m9 2-4-4",
   info: "M12 8h.01 M12 11v6 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
   help: "M9.5 8a2.5 2.5 0 1 1 4 2c-1 .5-1.5 1-1.5 2 M12 16h.01 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
   close: "m6 6 12 12 M6 18 18 6",
