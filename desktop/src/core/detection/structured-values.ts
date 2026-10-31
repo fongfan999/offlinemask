@@ -61,6 +61,14 @@ const specifications = [
     kind: "tax",
   },
   {
+    label: "Mã số doanh nghiệp",
+    type: "GIAY_TO",
+    // An enterprise's code is also its tax code (Law on Enterprises 2020, art. 29); ten
+    // digits from 0 that the phone rule would otherwise name (decision 0180).
+    pattern: "ma so doanh nghiep|ma doanh nghiep",
+    kind: "tax",
+  },
+  {
     label: "Mã bưu chính",
     type: "DIA_CHI",
     pattern: "ma buu chinh|postal code|postcode|zip code",

@@ -163,3 +163,19 @@ test("a tax code may be a 12-digit CCCD, after labels that say so", () => {
   assert.deepEqual(entries("Mã số thuế: 0104918404-001"), [["GIAY_TO", "0104918404-001"]]);
   assert.deepEqual(entries("Mã số thuế: 12345"), []);
 });
+
+test("an enterprise code is a tax code, not a phone number", async () => {
+  // Decision 0180: ten digits from 0, which the phone rule would take.
+  const text = "Mã số doanh nghiệp: 0318405612 · Điện thoại: 0903123456";
+  assert.deepEqual(entries(text), [["GIAY_TO", "0318405612"]]);
+  const detections = await createDetectionEngine()({ text, options: ["phone", "banking"] }, () =>
+    assert.fail("No model load"),
+  );
+  assert.deepEqual(
+    analyzeText(text, "12345678", detections).findings.map((f) => [f.label, f.value]),
+    [
+      ["Mã số doanh nghiệp", "0318405612"],
+      ["Số điện thoại", "0903123456"],
+    ],
+  );
+});
