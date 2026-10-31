@@ -65,15 +65,19 @@ test("the page names what the system web view connects to by itself (privacy §4
   assert.doesNotMatch(args, /component-update|ComponentUpdater|DnsOverHttps/i, UPDATE);
 });
 
-test("pack files come only from the project's Cloudflare R2 store (privacy §4)", () => {
+test("pack files come only from packs.offlinemask.com (privacy §4)", () => {
   const dir = new URL("../packs/", import.meta.url);
   const hosts = new Set();
   for (const file of readdirSync(dir).filter((f) => f.endsWith(".json"))) {
     for (const [, url] of read(`../packs/${file}`).matchAll(/"url":\s*"([^"]+)"/g))
       hosts.add(new URL(url).host);
   }
-  assert.deepEqual([...hosts], ["pub-5b0280497d774b8f99417b3438d8bce8.r2.dev"], UPDATE);
-  assert.match(read("../../landing/privacy.html"), /Cloudflare R2/, UPDATE);
+  assert.deepEqual([...hosts], ["packs.offlinemask.com"], UPDATE);
+  assert.match(
+    read("../../landing/privacy.html"),
+    /packs\.offlinemask\.com \(Cloudflare R2\)/,
+    UPDATE,
+  );
 });
 
 test("links from the app open only OfflineMask.com and its report page (privacy §4)", () => {

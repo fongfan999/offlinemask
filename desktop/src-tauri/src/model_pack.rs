@@ -53,10 +53,18 @@ pub(crate) enum Offsets {
     Sequential,
 }
 /// The installed-file catalog alone identifies a pack version on disk, so adding
-/// model metadata or renaming a pack never orphans an existing installation.
+/// model metadata, renaming a pack or moving its downloads never orphans an
+/// existing installation.
 #[derive(Serialize)]
 struct Catalog<'a> {
-    assets: &'a [Asset],
+    assets: Vec<InstalledFile<'a>>,
+}
+#[derive(Serialize)]
+struct InstalledFile<'a> {
+    directory: &'a str,
+    name: &'a str,
+    bytes: u64,
+    sha256: &'a str,
 }
 #[derive(Clone, Debug, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase", deny_unknown_fields)]
@@ -202,7 +210,16 @@ impl Pack {
     /// Content fingerprint of the installed files; names the on-disk version directory.
     pub fn fingerprint(&self) -> String {
         let catalog = Catalog {
-            assets: &self.assets,
+            assets: self
+                .assets
+                .iter()
+                .map(|a| InstalledFile {
+                    directory: &a.directory,
+                    name: &a.name,
+                    bytes: a.bytes,
+                    sha256: &a.sha256,
+                })
+                .collect(),
         };
         format!(
             "{:x}",
@@ -279,12 +296,29 @@ impl Pack {
         if self.installed(&root, cancel) {
             Some(root)
         }
+        // These files, verified under an earlier fingerprint (decision 0176), stay in use.
+        else if let Some(earlier) = self.verified_elsewhere(base) {
+            Some(earlier)
+        }
         // Existing development installations remain usable without moving their files.
         else if self.installed(base, cancel) {
             Some(base.to_path_buf())
         } else {
             None
         }
+    }
+    /// A version directory holding exactly these files with a matching verified stamp.
+    /// Only the stamp is compared, so other versions are never hashed.
+    fn verified_elsewhere(&self, base: &Path) -> Option<PathBuf> {
+        fs::read_dir(base.join("packs"))
+            .ok()?
+            .flatten()
+            .map(|entry| entry.path())
+            .find(|dir| {
+                self.stamp(dir).is_some_and(|stamp| {
+                    fs::read_to_string(dir.join(VERIFIED_STAMP)).is_ok_and(|r| r == stamp)
+                })
+            })
     }
     /// Bytes already in the download cache, for progress display only. Sizes are
     /// enough here: `install` verifies every cached file's digest before using it.
@@ -657,6 +691,41 @@ mod tests {
         assert_eq!(pack.discovered_root(&f.0, &cancel), Some(root));
     }
     #[test]
+    fn install_under_an_earlier_fingerprint_stays_in_use() {
+        let f = Fixture::new();
+        let (a, a_bytes) = asset(b"model bytes", "model.onnx");
+        let pack = pack(vec![a.clone()]);
+        cached(&pack, &f.0, &a, &a_bytes);
+        let cancel = AtomicBool::new(false);
+        let root = pack.install(&f.0, &Client::new(), &cancel, |_| {}).unwrap();
+        let earlier = f.0.join("packs/earlier-fingerprint");
+        fs::rename(&root, &earlier).unwrap();
+        assert_eq!(pack.discovered_root(&f.0, &cancel), Some(earlier.clone()));
+        assert_eq!(
+            pack.install(&f.0, &Client::new(), &cancel, |_| {}),
+            Ok(earlier.clone())
+        );
+        // An unverified copy is not trusted without hashing.
+        fs::remove_file(earlier.join(VERIFIED_STAMP)).unwrap();
+        assert_eq!(pack.discovered_root(&f.0, &cancel), None);
+    }
+    #[test]
+    fn moving_downloads_keeps_the_fingerprint() {
+        let pack = shipping_pack();
+        let mut moved = pack.clone();
+        for a in &mut moved.assets {
+            a.transport.url = a
+                .transport
+                .url
+                .as_ref()
+                .map(|_| "https://example.com/a".into());
+            for part in &mut a.transport.parts {
+                part.url = "https://example.com/b".into();
+            }
+        }
+        assert_eq!(pack.fingerprint(), moved.fingerprint());
+    }
+    #[test]
     fn interrupted_extraction_resumes_from_verified_cache() {
         let f = Fixture::new();
         let (a, bytes) = asset(&vec![42; 200_000], "model.onnx");
@@ -795,11 +864,13 @@ mod tests {
         let pack = shipping_pack();
         pack.validate().unwrap();
         assert_eq!(pack.id, "vietnamese-pii-v1");
-        // The version decision 0169 ships (the fine-tuned Underthesea graph of run 2);
-        // the previous fingerprint, 65245d3f…, stays installed beside it where it exists.
+        // The version decision 0169 ships (the fine-tuned Underthesea graph of run 2),
+        // fingerprinted by its installed files alone since decision 0176. Its folder under
+        // the earlier formula, e562a9b3…, stays in use where it exists, and the previous
+        // version, 65245d3f…, stays installed beside it.
         assert_eq!(
             pack.fingerprint(),
-            "e562a9b38c4bc14f14a2187f78fe5fd0a213d36ad0012c8d7144c0cac5af9a10"
+            "23ce8542972aca0a3b9e5ac15601352937d202da3bd4e81751ad3ab544ef7bc5"
         );
         assert!(pack.native_model("underthesea").is_some());
         assert!(pack.native_model("vietnamese-pii-multilingual").is_none());
