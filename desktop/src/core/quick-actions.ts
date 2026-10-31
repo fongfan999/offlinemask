@@ -1,4 +1,4 @@
-import { restoreAliases, aliasTokens, type Restoration } from "./restore.ts";
+import { aliasShape, aliasTokens, aliasValues, restoreWith, type Restoration } from "./restore.ts";
 import type { Finding } from "./review.ts";
 import type { Format, Session } from "./sessions.ts";
 
@@ -35,7 +35,7 @@ export function restoreFromTables(
   text: string,
   tables: readonly (readonly Finding[])[],
 ): Restoration {
-  return restoreAliases(text, { findings: tables.flat(), spans: [] });
+  return restoreWith(text, aliasValues(tables.flat()));
 }
 
 /** A session's alias table as kept for restoring, with what pruning needs to know. */
@@ -161,7 +161,7 @@ export function aliasMarks(
 ): { start: number; end: number }[] {
   const aliases = new Set(findings.map((finding) => finding.alias));
   const marks: { start: number; end: number }[] = [];
-  for (const token of text.matchAll(/\[[A-Z][A-Z_]*_\d+_[a-f0-9]{4,8}\]/g)) {
+  for (const token of text.matchAll(aliasShape)) {
     if (aliases.has(token[0]))
       marks.push({ start: token.index, end: token.index + token[0].length });
   }

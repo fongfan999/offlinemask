@@ -1,5 +1,6 @@
 import type { Detection } from "../detection/types.ts";
 import type { Finding } from "../review.ts";
+import { aliasValues } from "../restore.ts";
 import { AliasBook, detectionReplacements } from "../sheet/mask.ts";
 import {
   applyReplacements,
@@ -53,17 +54,17 @@ export function restoreParagraphs(
   mailto: readonly string[] = [],
 ): { edits: DocEdits; restored: number; unknown: string[] } {
   const edits: DocEdits = { paragraphs: new Map(), links: new Map() };
+  const values = aliasValues(findings);
   const unknown = new Set<string>();
   let restored = 0;
   for (const paragraph of paragraphs) {
     if (!paragraph.text.includes("[")) continue;
-    const result = restoreReplacements(paragraph.text, findings);
+    const result = restoreReplacements(paragraph.text, values);
     result.unknown.forEach((alias) => unknown.add(alias));
     if (!result.replacements.length) continue;
     restored += result.replacements.length;
     edits.paragraphs.set(paragraph.id, result.replacements);
   }
-  const values = new Map(findings.map((finding) => [finding.alias, finding.value]));
   for (const address of mailto) {
     const value = values.get(address);
     if (value) edits.links.set(address, value);

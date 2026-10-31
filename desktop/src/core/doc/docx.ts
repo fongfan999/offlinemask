@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import type { Finding } from "../review.ts";
+import { aliasShape, type AliasValues } from "../restore.ts";
 
 /** Word support (decision 0078): ordinary .docx files, read and written in memory.
  * Text lives in `<w:t>` runs inside `<w:p>` paragraphs; detection reads whole
@@ -425,12 +425,11 @@ export async function writeDocx(source: DocSource, edits: DocEdits): Promise<Uin
 /** Known aliases of `findings` in a paragraph, as replacements back to their values. */
 export function restoreReplacements(
   text: string,
-  findings: readonly Finding[],
+  values: AliasValues,
 ): { replacements: Replacement[]; unknown: string[] } {
-  const values = new Map(findings.map((finding) => [finding.alias, finding.value]));
   const replacements: Replacement[] = [];
   const unknown: string[] = [];
-  for (const match of text.matchAll(/\[[A-Z][A-Z_]*_\d+_[a-f0-9]{4,8}\]/g)) {
+  for (const match of text.matchAll(aliasShape)) {
     const value = values.get(match[0]);
     if (value === undefined) unknown.push(match[0]);
     else replacements.push({ start: match.index, end: match.index + match[0].length, text: value });
