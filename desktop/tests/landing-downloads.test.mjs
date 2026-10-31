@@ -62,6 +62,30 @@ test("the Worker redirects downloads, answers the version and serves the rest as
   assert.equal(await (await get("/")).text(), "asset");
 });
 
+test("a video answers byte ranges, so the intro can be seeked", async () => {
+  const env = { ASSETS: { fetch: async () => new Response("0123456789") } };
+  const get = (range) =>
+    worker.fetch(
+      new Request("https://offlinemask.com/assets/intro.mp4", { headers: range ? { range } : {} }),
+      env,
+    );
+
+  const whole = await get();
+  assert.equal(whole.status, 200);
+  assert.equal(whole.headers.get("accept-ranges"), "bytes");
+  assert.equal(await whole.text(), "0123456789");
+
+  const middle = await get("bytes=2-4");
+  assert.equal(middle.status, 206);
+  assert.equal(middle.headers.get("content-range"), "bytes 2-4/10");
+  assert.equal(await middle.text(), "234");
+
+  assert.equal(await (await get("bytes=7-")).text(), "789");
+  assert.equal(await (await get("bytes=-3")).text(), "789");
+  assert.equal(await (await get("bytes=5-99")).text(), "56789");
+  assert.equal((await get("bytes=10-")).status, 416);
+});
+
 test("a download adds one to its day and platform, and nothing else", async (t) => {
   t.mock.method(globalThis, "fetch", async (input) => github(String(input)));
   const store = new Map();

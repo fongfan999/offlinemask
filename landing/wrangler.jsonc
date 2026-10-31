@@ -3,8 +3,8 @@
   "name": "offlinemask-landing",
   "compatibility_date": "2026-10-01",
   // Answers /latest.json and /download/<platform> from the newest GitHub release (decision
-  // 0140) and takes bug reports at /report (decision 0147); every other path is a static
-  // asset and never runs it.
+  // 0140), takes bug reports at /report (decision 0147) and answers byte ranges of videos so
+  // they can be seeked; every other path is a static asset and never runs it.
   "main": "./worker.js",
   // offlinemask.com is registered at Cloudflare (20 October 2026). A deploy binds the
   // Worker to the apex as a custom domain and creates its DNS record. www is not served:
@@ -14,7 +14,7 @@
     "directory": "./dist",
     "not_found_handling": "404-page",
     "binding": "ASSETS",
-    "run_worker_first": ["/latest.json", "/download/*", "/report"],
+    "run_worker_first": ["/latest.json", "/download/*", "/report", "/assets/*.mp4"],
   },
   "observability": { "enabled": false },
   // DOWNLOADS: downloads per day and platform ("2026-10-25 deb": "12"), nothing about who
