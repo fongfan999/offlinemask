@@ -14,7 +14,12 @@ import type { DocParagraph } from "./docx.ts";
  * be joined into one paragraph or split over several; the card ends with its machine
  * lines, at the end of its page, or after `longest` paragraphs. */
 const card = vocabulary.wording.identityCard;
-const front = new RegExp(card.fronts, "gu");
+/** A copier's specks may be read as a dot or a colon between the title's words ("CĂN.
+ * CƯỚC: CÔNG DÂN", decision 0178). */
+const front = new RegExp(
+  card.fronts.replaceAll("[^\\S\\r\\n]+", "[^\\S\\r\\n]*[.:,·]?[^\\S\\r\\n]+"),
+  "gu",
+);
 const wording = new RegExp(card.wording, "gu");
 /** TD1's first line, as read: "IDVNM", the 0 of "ID" sometimes read as "O" or "0". */
 const machineStart = /i[do0]vnm/gu;

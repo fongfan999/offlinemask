@@ -473,6 +473,17 @@ function bandSize(grey: Uint8Array, picture: Picture, found: Box, words: OcrLine
   return (rows.at(-1)! - rows[0]! + 1) / (band.lower + band.capitals * capitals);
 }
 
+/** How far toward a neighbouring line's core a line's box may reach, as a share of the
+ * gap between the two cores (decision 0178), and how a reading's certainty is measured:
+ * its letters' mean probability, each word weighted by its length. */
+const toward = { above: 0.6, below: 0.5 };
+const certainty = (words: readonly OcrLine[]) => {
+  const letters = words.reduce((sum, word) => sum + word.text.length, 0);
+  return letters
+    ? words.reduce((sum, word) => sum + (word.confidence ?? 0) * word.text.length, 0) / letters
+    : 0;
+};
+
 /** Every word in the picture with its box, in fractions of the picture, origin top
  * left; the words of one line share its y, height, number and measured size, and all but
  * its last keep the space after them, as `ocr.ts` expects of an engine. */
@@ -501,19 +512,8 @@ export async function readPicture(
       1000;
   const { recogniser } = definition;
   const lines: OcrLine[] = [];
-  let number = 0;
-  for (const found of detected) {
-    number++;
-    const by = recogniser.grow * found.height;
-    const x = Math.max(0, found.x - by);
-    const y = Math.max(0, found.y - by);
-    const box: Box = {
-      x,
-      y,
-      width: Math.min(picture.width, found.x + found.width + by) - x,
-      height: Math.min(picture.height, found.y + found.height + by) - y,
-      ...(found.core ? { core: found.core } : {}),
-    };
+  /** The words of the line in `box`, cut into pieces of the recogniser's length. */
+  const readBox = async (box: Box): Promise<OcrLine[]> => {
     const across = Math.max(32, Math.ceil((recogniser.height * box.width) / box.height));
     const pieces: Box[] = [box];
     if (across > recogniser.piece + recogniser.piece / 6) {
@@ -548,10 +548,54 @@ export async function readPicture(
           text: word.text,
           confidence: word.confidence,
           x: (piece.x + word.start * scale) / picture.width,
-          y: found.y / picture.height,
+          y: 0,
           width: ((word.end - word.start) * scale) / picture.width,
-          height: found.height / picture.height,
+          height: 0,
         });
+    }
+    return words;
+  };
+  /** `box` stopped short of the lines above and below `found`: part of the way from its
+   * core to theirs, further up than down, where a line's tone marks stand. */
+  const between = (found: Box, box: Box): Box => {
+    const core = found.core;
+    if (!core) return box;
+    let top = box.y;
+    let bottom = box.y + box.height;
+    for (const other of detected) {
+      const near = other.core;
+      if (!near || other === found || near.right <= core.left || near.left >= core.right) continue;
+      if (near.bottom <= core.top)
+        top = Math.max(top, core.top - toward.above * (core.top - near.bottom));
+      else if (near.top >= core.bottom)
+        bottom = Math.min(bottom, core.bottom + toward.below * (near.top - core.bottom));
+    }
+    return { ...box, y: top, height: bottom - top };
+  };
+  let number = 0;
+  for (const found of detected) {
+    number++;
+    const by = recogniser.grow * found.height;
+    const x = Math.max(0, found.x - by);
+    const y = Math.max(0, found.y - by);
+    const box: Box = {
+      x,
+      y,
+      width: Math.min(picture.width, found.x + found.width + by) - x,
+      height: Math.min(picture.height, found.y + found.height + by) - y,
+      ...(found.core ? { core: found.core } : {}),
+    };
+    let words = await readBox(box);
+    // Close-set lines put much of the lines above and below in the box (decision 0178):
+    // the line is read again in a box stopped short of them, and the surer reading kept.
+    const close = between(found, box);
+    if (close.height < box.height * 0.95) {
+      const again = await readBox(close);
+      if (certainty(again) > certainty(words)) words = again;
+    }
+    for (const word of words) {
+      word.y = found.y / picture.height;
+      word.height = found.height / picture.height;
     }
     const size = words.length ? bandSize(grey, picture, found, words) : 0;
     words.forEach((word, index) => {

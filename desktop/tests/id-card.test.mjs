@@ -56,6 +56,14 @@ test("the back alone is found by its machine lines; prose about a card is not a 
   assert.equal(cardValues(prose, () => []).size, 0);
 });
 
+test("a copier's specks read as dots between the title's words still start a card", () => {
+  const paragraphs = page([
+    "Độc lập - Tự do - Hạnh phúc CĂN. CƯỚC: CÔNG DÂN",
+    "Số/No: 031068914443",
+  ]);
+  assert.deepEqual(hidden(paragraphs), [[], ["Số/No: 031068914443"]]);
+});
+
 test("on a card, another rule's find inside its printed wording is dropped", () => {
   const paragraphs = page([
     "CĂN CƯỚC CÔNG DÂN",

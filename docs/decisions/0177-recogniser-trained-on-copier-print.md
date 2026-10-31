@@ -65,4 +65,4 @@ None new. Training uses 0172's locked environment (`scripts/ocr-train/uv.lock`) 
 
 ## Not decided here
 
-`readingShipped` stays off (0172); opening it is the owner's decision. The close-set lines that still read poorly would need the detector's boxes cut between the lines rather than a better reader of what is in them. An account label read apart from its number is found again only after transfer wording; elsewhere, a " · " between a label and its value still parts them.
+`readingShipped` stays off (0172); opening it is the owner's decision. The close-set lines that still read poorly would need the detector's boxes cut between the lines rather than a better reader of what is in them. [0178](0178-close-set-lines-read-again.md) reads them again in a box stopped short of their neighbours. An account label read apart from its number is found again only after transfer wording; elsewhere, a " · " between a label and its value still parts them.
