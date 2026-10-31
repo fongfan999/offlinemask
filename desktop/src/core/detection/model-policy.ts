@@ -59,13 +59,15 @@ const party = vocabulary.wording.party;
  * "Nguyễn Thanh Toán" or "Công ty Dịch vụ Bình An", which reach past them, are kept. */
 
 const phrase = vocabulary.wording.phraseAlternation;
+/** A run of wording may take a contract party with it ("ĐẠI DIỆN BÊN A", decision 0181). */
+const runPart = `(?:${phrase}|${vocabulary.wording.partyAlternation})`;
 /** Countries and regions: a span that is only one of these is where something comes
  * from ("Thịt bò Úc"), not anyone's address; an address that ends in one is kept whole. */
 const countries = vocabulary.places.countries;
 // Longest phrase first, and consecutive phrases form one run ("HỢP ĐỒNG DỊCH VỤ").
 
 const boilerplate = new RegExp(
-  `(?<![\\p{L}\\p{M}\\p{N}])${phrase}(?:[^\\S\\r\\n]+${phrase})*(?![\\p{L}\\p{M}\\p{N}])`,
+  `(?<![\\p{L}\\p{M}\\p{N}])${phrase}(?:[^\\S\\r\\n]+${runPart})*(?![\\p{L}\\p{M}\\p{N}])`,
   "giu",
 );
 const folded = vocabulary.wording.foldedPhraseAlternation;

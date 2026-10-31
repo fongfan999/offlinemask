@@ -1,5 +1,5 @@
 {
-  "$comment": "Wording of documents that a model reads as a name, place or organization: see README.md. Grouped by the kind of document that uses it; the phrase mechanism takes every group. Curated (decisions 0080, 0155, 0156, 0159, 0160, 0179).",
+  "$comment": "Wording of documents that a model reads as a name, place or organization: see README.md. Grouped by the kind of document that uses it; the phrase mechanism takes every group. Curated (decisions 0080, 0155, 0156, 0159, 0160, 0179, 0181).",
   "boilerplate": {
     "contracts": [
       "hợp đồng cộng tác viên",
@@ -65,6 +65,8 @@
     "forms": [
       "cộng hòa xã hội chủ nghĩa việt nam",
       "cộng hoà xã hội chủ nghĩa việt nam",
+      "tự do - hạnh phúc",
+      "đơn xin việc",
       "độc lập - tự do - hạnh phúc",
       "giới tính",
       "dân tộc",
@@ -102,6 +104,7 @@
       "bảng điểm",
       "giấy xác nhận",
       "thư mời",
+      "tài sản",
       "thư mời nhận việc",
       "thông báo",
       "nhắc nợ",
@@ -137,6 +140,7 @@
       "thảo luận",
       "đánh giá",
       "kết luận",
+      "kế hoạch",
       "nội dung cuộc họp",
       "các ý kiến khác"
     ],

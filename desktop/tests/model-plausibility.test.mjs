@@ -220,6 +220,21 @@ test("boilerplate read with other tone marks is still boilerplate, unless every 
   ]);
 });
 
+test("a run of wording takes a party and a title with it; a name after it stays a name", () => {
+  // Headings as scans read them, joined to the motto (decision 0181).
+  const text =
+    "Đặc lập - Tự do - Hạnh phúc ĐƠN XIN VIỆC\nĐộc lập - Tự do - Hạnh phúc CĂN CƯỚC CÔNG DÂN\nBIÊN BẢN BÀN GIAO TÀI SẢN\ndoanh thu đạt 92% kế hoạch\nĐẠI DIỆN BÊN A\tĐại diện bên B ông Trần Hạnh Phúc";
+  const found = modelDetections(text, [
+    span(text, "Hạnh phúc ĐƠN", "PERSON"),
+    span(text, "phúc CĂN", "PERSON"),
+    span(text, "TÀI SẢN", "PERSON"),
+    span(text, "kế hoạch", "LOCATION"),
+    span(text, "ĐẠI DIỆN BÊN", "PERSON"),
+    span(text, "Trần Hạnh Phúc", "PERSON"),
+  ]);
+  assert.deepEqual(values(text, found), [["TEN", "Trần Hạnh Phúc"]]);
+});
+
 test("boilerplate runs, titles and job titles are checked on the whole text as well as per window", () => {
   const text =
     "HỢP ĐỒNG CỘNG TÁC VIÊN\nMọi Thông Tin Mật sẽ:\nChức vụ: Giám Đốc Tài Chính\nĐiều 5. Phạt vi phạm Hợp đồng";

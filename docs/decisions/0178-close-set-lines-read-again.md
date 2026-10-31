@@ -38,7 +38,7 @@ Over-masks that are new, one by one. Each is the contextual name model's guess o
 - Grey scans, seed 1, a delivery slip as PDF and as picture: "Giao giờ" in its note ("Giao giờ hành chính") taken for a name.
 - Photographed, seed 1, a meeting's minutes: "kế hoạch" in its subject taken for an address.
 - Photographed, seed 6, a delivery slip: "Sách Đắc" of a book's title taken for a name (the copier scans of seed 1 already did it under 0177).
-- Identity cards scanned, seed 4: "phúc CĂN", the end of the national motto and the start of the card's title, taken for a name. A find that runs into a card's title is not dropped: a real name read just before the title would be dropped with it.
+- Identity cards scanned, seed 4: "phúc CĂN", the end of the national motto and the start of the card's title, taken for a name. A find that runs into a card's title is not dropped: a real name read just before the title would be dropped with it. (Dropped since [0181](0181-headings-on-scans-are-wording.md), as lying wholly inside a run of wording.)
 
 The copier scans lose two over-masks of 0177 (a decision's signatory title and a meeting's agenda). The unlisted on the cards' pages are their garbled bilingual labels, hidden as part of the card, cut differently.
 

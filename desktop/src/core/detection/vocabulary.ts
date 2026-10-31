@@ -54,8 +54,13 @@ const wordingPhrases = [
   ...people.roles,
   ...people.ranks,
   ...wording.codeLabels,
+  // A copied card's title ("… Hạnh phúc CĂN CƯỚC CÔNG DÂN", decision 0181).
+  ...wording.identityCard.fronts,
 ];
 const nameWords = lowerSet([...people.nameSyllables, ...people.familyNames], true);
+
+/** A contract party ("Bên A", "Bên thuê", "các bên"). */
+const party = `(?:(?:${alternation(wording.partyWords)}\\s+)?bên(?:\\s+(?:${wording.partyRoles.join("|")}))?)`;
 
 // Places
 const provinceNames = [
@@ -135,10 +140,9 @@ export const vocabulary = {
       backs: alternation(wording.identityCard.backs, { folded: true }),
       wording: alternation(wording.identityCard.wording, { folded: true }),
     },
-    party: new RegExp(
-      `^(?:${alternation(wording.partyWords)}\\s+)?bên(?:\\s+(?:${wording.partyRoles.join("|")}))?$`,
-      "iu",
-    ),
+    party: new RegExp(`^${party}$`, "iu"),
+    /** The same, inside a run of wording ("ĐẠI DIỆN BÊN A", decision 0181). */
+    partyAlternation: party,
   },
   labels: {
     name: alternation(labels.name, { folded: true }),
