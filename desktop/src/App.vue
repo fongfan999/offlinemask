@@ -127,6 +127,11 @@ watch(
   },
   { deep: true },
 );
+// Made-up history for trying paging and search; dev builds only (decision 0192).
+if (import.meta.env.DEV)
+  void import("./dev/seed-history.ts").then(({ installSeed }) =>
+    installSeed(sessions, () => vault.state.value === "unlocked"),
+  );
 
 const page = ref<Page>("home");
 const activeId = ref<string | null>(null);

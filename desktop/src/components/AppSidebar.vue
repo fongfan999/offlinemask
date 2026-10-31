@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { ref, useTemplateRef } from "vue";
+import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
 import ReportDialog from "./ReportDialog.vue";
 import { vTip } from "../directives/tip.ts";
 import type { Page } from "../composables/context.ts";
-import { sessionPreview } from "../core/session-preview.ts";
+import { matchesSearch, sessionDate, sessionPreview } from "../core/session-preview.ts";
 import { isPrivate, sessionTitle, type Session } from "../core/sessions.ts";
 
-defineProps<{
+const props = defineProps<{
   sessions: readonly Session[];
   activeId: string | null;
   page: Page;
@@ -50,13 +50,35 @@ function leaveInfo(event: FocusEvent) {
   if (!box.contains(event.relatedTarget as Node | null)) infoOpen.value = false;
 }
 const report = useTemplateRef<InstanceType<typeof ReportDialog>>("report");
-function dateLabel(value: string) {
-  return new Date(value).toLocaleString("vi-VN", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+/** A busy day leaves dozens of entries: the list shows a page at a time, with "Xem thêm"
+ * for the next, and a search behind the magnifier beside "Lịch sử" (decision 0192). */
+const pageSize = 30;
+const shown = ref(pageSize);
+const searching = ref(false);
+const query = ref("");
+const searchField = useTemplateRef<HTMLInputElement>("searchField");
+const matches = computed(() =>
+  query.value.trim()
+    ? props.sessions.filter((session) => matchesSearch(session, query.value))
+    : props.sessions,
+);
+const visible = computed(() => matches.value.slice(0, shown.value));
+const remaining = computed(() => matches.value.length - visible.value.length);
+watch(query, () => (shown.value = pageSize));
+// Locking clears history; the next list starts from its first page with no search.
+watch(
+  () => props.history,
+  () => closeSearch(),
+);
+async function openSearch() {
+  searching.value = true;
+  await nextTick();
+  searchField.value?.focus();
+}
+function closeSearch() {
+  searching.value = false;
+  query.value = "";
+  shown.value = pageSize;
 }
 defineExpose({
   focusStart() {
@@ -133,6 +155,29 @@ defineExpose({
           </button>
         </span>
       </span>
+      <button
+        v-if="history && sessions.length"
+        v-tip="searching ? 'Đóng tìm kiếm' : 'Tìm trong lịch sử'"
+        class="history-search-toggle"
+        :aria-label="searching ? 'Đóng tìm kiếm' : 'Tìm trong lịch sử'"
+        :aria-expanded="searching"
+        aria-controls="history-search"
+        @click="searching ? closeSearch() : openSearch()"
+      >
+        <AppIcon :name="searching ? 'close' : 'search'" :size="15" />
+      </button>
+    </div>
+    <div v-if="searching" class="history-search">
+      <AppIcon name="search" :size="14" />
+      <input
+        id="history-search"
+        ref="searchField"
+        v-model="query"
+        type="search"
+        placeholder="Tên tệp, nội dung, ngày..."
+        aria-label="Tìm trong lịch sử"
+        @keydown.esc.stop="closeSearch()"
+      />
     </div>
     <div class="history-list">
       <button
@@ -149,8 +194,11 @@ defineExpose({
       <p v-if="!sessions.length && !folder" class="empty-history">
         {{ history ? "Chưa có mục nào." : "Văn bản và tệp bạn ẩn sẽ nằm ở đây." }}
       </p>
+      <p v-else-if="query.trim() && !matches.length" class="empty-history" role="status">
+        Không có mục nào khớp "{{ query.trim() }}".
+      </p>
       <button
-        v-for="session in sessions"
+        v-for="session in visible"
         :key="session.id"
         class="history-item"
         :aria-current="activeId === session.id ? 'page' : undefined"
@@ -162,10 +210,13 @@ defineExpose({
         /><span
           ><strong>{{ sessionPreview(session) }}</strong
           ><small
-            >{{ isPrivate(session) ? `${sessionTitle(session)} - ` : ""
-            }}{{ dateLabel(session.createdAt) }}{{ isPrivate(session) ? "" : " - Mẫu" }}</small
+            >{{ isPrivate(session) ? `${sessionTitle(session)} - ` : "" }}{{ sessionDate(session)
+            }}{{ isPrivate(session) ? "" : " - Mẫu" }}</small
           ></span
         >
+      </button>
+      <button v-if="remaining > 0" class="history-more" @click="shown += pageSize">
+        Xem thêm<small>{{ remaining }} mục nữa</small>
       </button>
     </div>
     <nav class="settings-nav" aria-label="Cài đặt ứng dụng">
