@@ -119,7 +119,7 @@ Training only; nothing below ships with the app. Locked in `scripts/ocr-train/uv
 
 ## Not decided here
 
-- **Opening it.** `readingShipped` stays off; the owner opens it. `landing/privacy.html` must then say so in the same change, with its "Cập nhật ngày …" line, and `tests/privacy-contract.test.mjs` checks for it. The sentence in §2 would become, for example: "… chữ trong ảnh được đọc ngay trên máy, không qua mạng: trên macOS 14 trở lên bằng bộ nhận dạng ký tự có sẵn của hệ điều hành (Vision của Apple), trên Windows bằng mô hình đọc chữ đi kèm ứng dụng (cài sẵn cùng OfflineMask, không tải thêm); ảnh không được lưu lại và không có trong bản đã ẩn, chỉ có chữ đọc được."
+- **Opening it.** Opened by the owner on 31 October 2026 ([0182](0182-windows-reading-opened.md)), after 0173 to 0181. As written here: `readingShipped` stays off; the owner opens it. `landing/privacy.html` must then say so in the same change, with its "Cập nhật ngày …" line, and `tests/privacy-contract.test.mjs` checks for it. The sentence in §2 would become, for example: "… chữ trong ảnh được đọc ngay trên máy, không qua mạng: trên macOS 14 trở lên bằng bộ nhận dạng ký tự có sẵn của hệ điều hành (Vision của Apple), trên Windows bằng mô hình đọc chữ đi kèm ứng dụng (cài sẵn cùng OfflineMask, không tải thêm); ảnh không được lưu lại và không có trong bản đã ẩn, chỉ có chữ đọc được."
 - **Macs before macOS 14** would also get this reading once the gate is on; it was measured on Windows only.
 - **Real scans.** Four of the owner's own documents were read on 29 October 2026 ("The owner's own scans" above) and miss values; what they show is the next work, not decided here.
 - **What happens to `media_ocr`**, the Windows.Media.Ocr engine of 0171, which no Windows machine can reach today.

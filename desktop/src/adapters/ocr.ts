@@ -12,11 +12,13 @@ import type { ReadingRequest, ReadingResponse } from "../workers/reading.worker.
  * while it is on (`tests/privacy-contract.test.mjs` checks both states). */
 export const ocrShipped = true;
 
-/** Where the system has no Vietnamese recognition (Windows), OfflineMask's own models,
- * carried inside the app, read the picture in a worker (decision 0172). Off until the
- * owner opens it; `landing/privacy.html` must describe it while it is on (checked by
- * `tests/privacy-contract.test.mjs`). */
-export const readingShipped = false;
+/** Where the system has no Vietnamese recognition (Windows, Macs before macOS 14),
+ * OfflineMask's own models, carried inside the app, read the picture in a worker (decision
+ * 0172). On by the owner's decision of 31 October 2026 (decision 0182), once the scans of
+ * the synthetic set leaked nothing on Windows and the owner's own copier scans, forms and
+ * identity cards were masked (0173 to 0181). `landing/privacy.html` describes it while it
+ * is on (checked by `tests/privacy-contract.test.mjs`). */
+export const readingShipped = true;
 
 let engine: "system" | "reading" | undefined;
 

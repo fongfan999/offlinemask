@@ -124,8 +124,8 @@ test("text in pictures is read by the system's own engine, on the machine, only 
 test("where the system cannot read Vietnamese, models carried in the app do, only once the page says so (privacy §2)", () => {
   // Decision 0172: two ONNX graphs built into the app (`public/reading/`, copied at build
   // time by scripts/prepare-reading.mjs) are read by a worker from the app itself; the
-  // picture never leaves the worker and nothing is written. Gated off until the owner
-  // opens it; the page describes it only while it is on.
+  // picture never leaves the worker and nothing is written. On since decision 0182 (31
+  // October 2026); the page describes it only while it is on.
   const worker = read("../src/workers/reading.worker.ts");
   const fetches = [...worker.matchAll(/fetch\(([^)]*)\)/g)].map((match) => match[1]);
   assert.deepEqual(fetches, ["`/reading/${file.name}`"], UPDATE);

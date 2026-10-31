@@ -5,7 +5,9 @@
 // source, fetched from it into `artifacts/reading/` (the detector). A file is used only
 // when its size and SHA-256 match; a committed file that does not match fails the build.
 // A file that cannot be had leaves `public/reading/` out, and the app then offers no
-// reading of its own. The app itself never fetches these files.
+// reading of its own; while `readingShipped` (src/adapters/ocr.ts) is on that is a build
+// failure, so a release cannot lose the feature unnoticed (decision 0182). The app itself
+// never fetches these files.
 import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
@@ -43,7 +45,10 @@ const files = [definition.detector, definition.recogniser];
 const paths = await Promise.all(files.map(obtain));
 const missing = files.filter((_, index) => !paths[index]).map((file) => file.name);
 if (missing.length) {
-  console.log(`No text recognition models in this build (missing ${missing.join(", ")}).`);
+  const message = `No text recognition models in this build (missing ${missing.join(", ")}).`;
+  const adapter = readFileSync(new URL("../src/adapters/ocr.ts", import.meta.url), "utf8");
+  if (/export const readingShipped = true;/.test(adapter)) throw new Error(message);
+  console.log(message);
 } else {
   mkdirSync(target, { recursive: true });
   files.forEach((file, index) => copyFileSync(paths[index], `${target}${file.name}`));
