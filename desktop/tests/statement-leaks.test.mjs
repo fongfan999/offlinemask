@@ -25,6 +25,9 @@ test("account numbers after a bank's TK and after a longer account label", () =>
     "NGUYEN QUOC PHUC chuyen tien den T 96873162835 LY HUU KHANG",
     "NGUYEN QUOC PHUC chuyen tien den 96873162835 LY HUU KHANG",
     "NGUYEN QUOC PHUC chuyen tien den TK 96873162835 LY HUU KHANG",
+    // A copier scan may read the "TK" as a cell of its own (decision 0177).
+    "NGUYEN QUOC PHUC chuyen tien den TK · 96873162835 LY HUU KHANG",
+    "NGUYEN QUOC PHUC chuyen tien den · 96873162835 LY HUU KHANG",
   ])
     assert.deepEqual(values(text, detectBankingIdentifiers(text)), [["STK", "96873162835"]], text);
   assert.deepEqual(detectBankingIdentifiers("chuyen tien den ngay 10/10"), []);

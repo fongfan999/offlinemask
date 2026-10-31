@@ -36,9 +36,10 @@ const rules: readonly Rule[] = [
     // 0123456789"). The "TK" may come out of text recognition as a letter or nothing
     // (decision 0171: "chuyen tien den T 96873162835"), so after "chuyen tien den" or
     // "chuyen khoan den" a number six digits or longer is an account whatever one short
-    // token sits between; with "TK" there, the rule above already has it.
+    // token sits between; with "TK" there, the rule above already has it. On a copier scan
+    // the "TK" may be read as a cell of its own, joined as "TK · 1091834078" (decision 0177).
     pattern: new RegExp(
-      `(?<=(?:chuyen tien|chuyen khoan|ck) den(?:${blank}(?!tk${blank})[A-Za-z]{1,2})?${blank})(\\d{6,20})(?![\\p{L}\\p{N}_]|[ -]?\\d)`,
+      `(?<=(?:chuyen tien|chuyen khoan|ck) den(?:${blank}(?!tk${blank}\\d)[A-Za-z]{1,2})?(?:${blank}·)?${blank})(\\d{6,20})(?![\\p{L}\\p{N}_]|[ -]?\\d)`,
       "giu",
     ),
     reason: "Dãy số sau 'chuyen tien den' trong nội dung chuyển khoản.",

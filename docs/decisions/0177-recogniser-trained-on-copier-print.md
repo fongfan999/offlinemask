@@ -47,7 +47,7 @@ Through the app's code (`pnpm eval:documents`, the pack on this PC, `--reading -
 | Identity cards scanned (14) | 56 / 0 / 0 / 111 | 24 / 0 / 0 / 126 |
 | Identity cards photographed (14) | 57 / 0 / 0 / 88 | 20 / 0 / 0 / 90 |
 
-The copier leak, one by one: in `1/statement/statement-classic-2`, the scan, an account number after "chuyen tien den TK" whose wrapped cell is put back together as "TK · 1091…", so the account's cue no longer touches it. It is not a misreading of the value.
+The copier leak, one by one: in `1/statement/statement-classic-2`, the scan, an account number after "chuyen tien den TK", read exactly, but with the "TK" read as a cell of its own, so the line came out "TK · 1091…" and the account's cue no longer touched it. Fixed after this table: after "chuyen tien den", the transfer rule (`detection/banking.ts`) takes the number past a " · ", with or without the "TK". Measured again, all 31 copier-scanned statements of seeds 1–7 leak 0 and over-mask 0; so do the 62 grey-scanned and photographed statements, and the 546 text documents stay 0 / 0 / 0 / 0.
 
 The over-masks, one by one (the text documents have none, so each is recorded as 0171 asks; a PDF and its PNG count as two):
 
@@ -65,4 +65,4 @@ None new. Training uses 0172's locked environment (`scripts/ocr-train/uv.lock`) 
 
 ## Not decided here
 
-`readingShipped` stays off (0172); opening it is the owner's decision. The close-set lines that still read poorly would need the detector's boxes cut between the lines rather than a better reader of what is in them. A wrapped cell joined before the account it labels is not taken apart.
+`readingShipped` stays off (0172); opening it is the owner's decision. The close-set lines that still read poorly would need the detector's boxes cut between the lines rather than a better reader of what is in them. An account label read apart from its number is found again only after transfer wording; elsewhere, a " · " between a label and its value still parts them.
