@@ -73,7 +73,7 @@ export async function card({ title, date }) {
             fontSize: 28,
             fontWeight: 500,
           },
-          [element("span", {}, `Blog · ${day(date)}`), element("span", {}, "offlinemask.com")],
+          [element("span", {}, `Blog - ${day(date)}`), element("span", {}, "offlinemask.com")],
         ),
       ],
     ),

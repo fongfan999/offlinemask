@@ -168,8 +168,78 @@ function setupHow(root, motion) {
 }
 
 /**
+ * Step 1's masking (decision 0175): each highlighted value is cut with one cobalt brush stroke;
+ * the two halves fall away and the code is left in its place. Each cut is measured when it
+ * starts, because the codes before it have already changed the line. Only transform and opacity
+ * move; the halves are copies of the value clipped along the cut (a value broken over two lines
+ * is cut without them). An earlier draft had the ninja mascot hop from value to value to make
+ * the cuts; that much movement was tiring to watch, so only the cut is left.
+ */
+function cutValue(doc, value) {
+  const origin = doc.getBoundingClientRect();
+  const lines = value.getClientRects();
+  const box = lines[0];
+  const [x, y, w, h] = [box.left - origin.left, box.top - origin.top, box.width, box.height];
+  const angle = -Math.atan((0.24 * h) / w) * (180 / Math.PI);
+  const slash = doc.appendChild(document.createElement("span"));
+  slash.className = "om-cut-slash";
+  slash.setAttribute("aria-hidden", "true");
+  Object.assign(slash.style, { left: `${x - 4}px`, top: `${y + h / 2}px`, width: `${w + 8}px` });
+  const halves =
+    lines.length > 1
+      ? []
+      : ["0 0, 100% 0, 100% 38%, 0 62%", "0 62%, 100% 38%, 100% 100%, 0 100%"].map((clip) => {
+          const half = doc.appendChild(value.cloneNode(true));
+          half.classList.add("om-cut-half");
+          half.setAttribute("aria-hidden", "true");
+          Object.assign(half.style, {
+            left: `${x}px`,
+            top: `${y}px`,
+            clipPath: `polygon(${clip})`,
+          });
+          gsap.set(half, { autoAlpha: 0 });
+          return half;
+        });
+  const tl = gsap.timeline({
+    onComplete: () => [slash, ...halves].forEach((part) => part.remove()),
+  });
+  tl.fromTo(
+    slash,
+    { rotation: angle, scaleX: 0, autoAlpha: 1 },
+    { scaleX: 1, duration: 0.1, ease: "power2.in" },
+    0,
+  )
+    .to(slash, { autoAlpha: 0, duration: 0.2 }, 0.14)
+    .set(halves, { autoAlpha: 1 }, 0.1)
+    .set(value, { opacity: 0 }, 0.1)
+    .to(
+      halves,
+      {
+        x: (k) => (k ? 6 : -6),
+        y: (k) => h * (k ? 1.5 : 1.1),
+        rotation: (k) => (k ? 8 : -10),
+        autoAlpha: 0,
+        duration: 0.5,
+        ease: "power2.in",
+      },
+      0.1,
+    )
+    .call(
+      () => {
+        value.textContent = value.dataset.code;
+        value.classList.add("om-coded");
+      },
+      [],
+      0.14,
+    )
+    .to(value, { opacity: 1, duration: 0.25, ease: "power1.out" }, 0.14);
+  return tl;
+}
+
+/**
  * The three "Cách hoạt động" illustrations loop while on screen, on every width, so a visitor can
- * watch them again: step 1's highlights appear and turn into codes, step 2's AI reply arrives,
+ * watch them again: step 1's highlights appear and are cut into codes (cutValue),
+ * step 2's AI reply arrives,
  * step 3's codes turn back into real values. Switching the example role rebuilds the loops,
  * because the content changes. Without motion the static markup shows each end state.
  */
@@ -177,6 +247,10 @@ function setupSceneLoops(root, motion) {
   if (!motion) return () => {};
   const how = root.querySelector("[data-om-how]");
   const scenes = [...how.querySelectorAll("[data-om-scene]")];
+  const doc = scenes[0].querySelector('[data-om-part="doc"]');
+  // The cuts run as their own short timelines, started by the loop.
+  const cuts = new Set();
+  const stopCuts = () => cuts.forEach((cut) => cut.progress(1).kill());
   // Step 1's card before and after masking: its pill and label follow the values.
   function setDocState(scene, count, masked) {
     const pill = scene.querySelector('[data-om-part="doc-count"]');
@@ -189,6 +263,7 @@ function setupSceneLoops(root, motion) {
   function prime(index) {
     const scene = scenes[index];
     if (index === 0) {
+      stopCuts();
       const values = [...scene.querySelectorAll(".om-v")];
       values.forEach((value) => {
         value.dataset.real ??= value.textContent;
@@ -217,11 +292,21 @@ function setupSceneLoops(root, motion) {
       const press = values.length * 0.14 + 0.7;
       tl.to(button, { scale: 0.94, duration: 0.12, yoyo: true, repeat: 1 }, press);
       values.forEach((value, k) =>
-        swapText(tl, value, value.dataset.code, press + 0.2 + k * 0.1, () =>
-          value.classList.add("om-coded"),
+        tl.call(
+          () => {
+            const cut = cutValue(doc, value);
+            cuts.add(cut);
+            cut.then(() => cuts.delete(cut));
+          },
+          [],
+          press + 0.4 + k * 0.45,
         ),
       );
-      tl.call(() => setDocState(scene, values.length, true), [], press + 0.3);
+      tl.call(
+        () => setDocState(scene, values.length, true),
+        [],
+        press + 0.4 + values.length * 0.45,
+      );
     } else if (index === 1) {
       tl.to(scene.querySelector("[data-om-ai]"), {
         autoAlpha: 1,
@@ -264,6 +349,7 @@ function setupSceneLoops(root, motion) {
   return () => {
     loops.forEach((loop) => loop.kill());
     watches.forEach((watch) => watch.kill());
+    stopCuts();
     how.removeEventListener("om-role", build);
     how.querySelectorAll(".om-v").forEach((value) => {
       value.classList.remove("om-dim", "om-coded");
@@ -503,6 +589,100 @@ function setupRoles(root) {
   };
 }
 
+/**
+ * The top logo leaves like the ninja its mark is, as the app's logo does when the sidebar folds
+ * (decision 0172): past the first 90 px it crouches leaning back, springs up into a flip and is
+ * gone in a puff of smoke; back at the top it drops in through a puff, turning, and lands tipped
+ * a little past upright before it settles. Transform and opacity only, played once per crossing
+ * rather than scrubbed. With reduced motion the logo keeps scrolling away with the hero.
+ */
+function setupNinjaLogo(root, motion) {
+  if (!motion) return () => {};
+  const top = root.querySelector(".om-top");
+  const logo = top.querySelector(".om-logo");
+  const mark = logo.querySelector("svg");
+  root.classList.add("om-ninja");
+  let move;
+  const puff = (delay) => {
+    const box = logo.getBoundingClientRect();
+    const cloud = document.createElement("div");
+    cloud.className = "om-puff";
+    cloud.setAttribute("aria-hidden", "true");
+    cloud.style.translate = `${Math.round(box.left + box.width / 2)}px ${Math.round(box.top + box.height / 2)}px`;
+    // Around the chip's outline, in front of it, so the logo goes behind the smoke.
+    const dots = Array.from({ length: 10 }, (_, i) => {
+      const dot = cloud.appendChild(document.createElement("span"));
+      const angle = (i / 10) * Math.PI * 2 + 0.3;
+      const spread = 1 + (i % 3) * 0.12;
+      const [cos, sin] = [Math.cos(angle), Math.sin(angle)];
+      return {
+        dot,
+        from: { x: cos * box.width * 0.32, y: sin * box.height * 0.25 },
+        to: { x: cos * (box.width / 2 + 14) * spread, y: sin * (box.height / 2 + 12) * spread },
+      };
+    });
+    root.append(cloud);
+    const tl = gsap.timeline({ delay, onComplete: () => cloud.remove() });
+    dots.forEach(({ dot, from, to }) =>
+      tl.fromTo(
+        dot,
+        { ...from, scale: 0.5, autoAlpha: 0.85 },
+        { ...to, scale: 1.4, autoAlpha: 0, duration: 0.5, ease: "power2.out" },
+        0,
+      ),
+    );
+    return tl;
+  };
+  const vanish = () => {
+    move?.kill();
+    top.classList.add("om-ninja-moving");
+    move = gsap
+      .timeline({ onComplete: () => top.classList.remove("om-ninja-moving") })
+      .to(logo, { y: 3, scaleX: 1.06, scaleY: 0.9, duration: 0.1, ease: "power1.out" })
+      .to(mark, { rotation: -16, duration: 0.1, ease: "power1.out" }, 0)
+      .add(puff(0), 0.14)
+      .to(logo, { y: -30, scale: 0.7, autoAlpha: 0, duration: 0.3, ease: "power2.in" }, 0.1)
+      .to(mark, { rotation: 200, duration: 0.3, ease: "power2.in" }, 0.1);
+  };
+  const appear = () => {
+    move?.kill();
+    top.classList.add("om-ninja-moving");
+    move = gsap
+      .timeline({
+        onComplete: () => {
+          top.classList.remove("om-ninja-moving");
+          gsap.set([logo, mark], { clearProps: "transform" });
+        },
+      })
+      .add(puff(0), 0)
+      .fromTo(
+        logo,
+        { y: -30, scale: 0.7, autoAlpha: 0 },
+        { y: 0, scale: 1, autoAlpha: 1, duration: 0.34, ease: "power2.out" },
+        0.06,
+      )
+      .fromTo(mark, { rotation: -348 }, { rotation: 12, duration: 0.34, ease: "power2.out" }, 0.06)
+      .to(logo, { scaleX: 1.07, scaleY: 0.9, duration: 0.08, ease: "power1.out" })
+      .to(mark, { rotation: 0, duration: 0.2, ease: "back.out(2)" }, "<")
+      .to(logo, { scaleX: 1, scaleY: 1, duration: 0.18, ease: "back.out(2)" }, "<0.06");
+  };
+  const trigger = ScrollTrigger.create({
+    start: 0,
+    end: 90,
+    onLeave: vanish,
+    onEnterBack: appear,
+  });
+  // Opened part-way down the page: no logo, and no show of leaving.
+  if (trigger.progress === 1) gsap.set(logo, { y: -30, scale: 0.7, autoAlpha: 0 });
+  return () => {
+    trigger.kill();
+    move?.kill();
+    gsap.set([logo, mark], { clearProps: "all" });
+    top.classList.remove("om-ninja-moving");
+    root.classList.remove("om-ninja");
+  };
+}
+
 /** Mount on one page root; dispose before replacing that root (including Astro navigation). */
 export function initOfflineMask(root) {
   if (!root) return () => {};
@@ -600,6 +780,7 @@ export function initOfflineMask(root) {
       const undoQuick = setupQuick(root, context.conditions.motion, context.conditions.phone);
       const undoSheet = setupSheet(root, context.conditions.motion);
       const undoLoops = setupSceneLoops(root, context.conditions.motion);
+      const undoNinja = setupNinjaLogo(root, context.conditions.motion);
       return () => {
         undoScan();
         undoHow();
@@ -608,6 +789,7 @@ export function initOfflineMask(root) {
         undoQuick();
         undoSheet();
         undoLoops();
+        undoNinja();
       };
     },
   );

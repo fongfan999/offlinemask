@@ -3114,7 +3114,7 @@ dependencies = [
 
 [[package]]
 name = "offlinemask"
-version = "2.4.0"
+version = "2.5.0"
 dependencies = [
  "argon2",
  "block2",
@@ -3799,7 +3799,7 @@ dependencies = [
 
 [[package]]
 name = "recognition-sidecar"
-version = "2.4.0"
+version = "2.5.0"
 dependencies = [
  "ort",
  "serde",

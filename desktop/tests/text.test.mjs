@@ -1,12 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  analyzeText,
-  maskedText,
-  maxTextLength,
-  textParts,
-  validateText,
-} from "../src/core/text.ts";
+import { analyzeText, maskedText, textParts, validateText } from "../src/core/text.ts";
 import {
   createSession,
   createTextSession,
@@ -133,7 +127,7 @@ test("session creation retries colliding namespaces", (context) => {
 });
 
 test("invalid input and malformed provider offsets fail closed", () => {
-  for (const text of ["", " \n\t ", "a".repeat(maxTextLength + 1)]) {
+  for (const text of ["", " \n\t "]) {
     assert.ok(validateText(text));
     assert.throws(() => createTextSession(text, [], []));
   }
@@ -145,8 +139,10 @@ test("invalid input and malformed provider offsets fail closed", () => {
     [NaN, 2],
   ])
     assert.throws(() => analyzeText("abc", scope, [{ ...finding("abc", "a"), start, end }]));
-  const exact = "a".repeat(maxTextLength);
-  assert.equal(sessionOutput(createTextSession(exact, [], [])), exact);
+  // No length limit (decision 0173): the page says how long it takes instead.
+  const long = "a".repeat(60_000);
+  assert.equal(validateText(long), "");
+  assert.equal(sessionOutput(createTextSession(long, [], [])), long);
 });
 
 test("unreviewed decisions cannot be copied", () => {

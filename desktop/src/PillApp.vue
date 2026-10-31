@@ -330,7 +330,7 @@ function preview() {
         settings: true,
       },
     },
-    "circle-busy": { message: "Đang ẩn thông tin…", tone: "busy", inPlace: true },
+    "circle-busy": { message: "Đang ẩn thông tin...", tone: "busy", inPlace: true },
     "circle-done": { message: "Đã ẩn 2 thông tin", tone: "ok", inPlace: true },
     "circle-error": {
       message: "Không thấy thông tin cần ẩn. Clipboard được giữ nguyên.",
@@ -362,7 +362,7 @@ function preview() {
         canOpen: true,
       },
     },
-    busy: { message: "Đang ẩn thông tin…", tone: "busy" },
+    busy: { message: "Đang ẩn thông tin...", tone: "busy" },
   };
   status.value = samples[state === "copied" ? "preview" : state] ?? null;
   copied.value = state === "copied";

@@ -15,10 +15,13 @@ const paths: Record<string, string> = {
   mask: "M9.5 5.5h-3v13h3 M14.5 5.5h3v13h-3 M9.8 12.3l4.4-.4",
   file: "M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Z M14 2v6h6 M8 13h8 M8 17h5",
   // A picture frame with a hill and the sun.
+  folder: "M3 5h6l2 2h10v12H3Z M3 10h18",
+  sidebar: "M3 4h18v16H3Z M9 4v16 M5.5 8h1 M5.5 11h1",
   image: "M3 5h18v14H3Z M3 16l5-5 4 4 3-3 6 6 M15.5 9h.01",
   arrow: "M5 12h14 M13 6l6 6-6 6",
   external: "M14 3h7v7 M21 3l-11 11 M10 3H3v18h18v-7",
   chevron: "m9 5 7 7-7 7",
+  clock: "M12 7v5l3 2 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
   check: "m5 12 4 4L19 6",
   lock: "M5 10h14v11H5Z M8 10V7a4 4 0 0 1 8 0v3 M12 14v3",
   undo: "M3 10h11a7 7 0 0 1 0 14 M3 10l6-6 M3 10l6 6",

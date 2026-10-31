@@ -1,12 +1,15 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, useTemplateRef } from "vue";
+import type { PickedFolder } from "../adapters/folder.ts";
+import { computed, nextTick, onBeforeUnmount, onMounted, ref, useTemplateRef } from "vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import AppIcon from "../components/AppIcon.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
-import MaskingPreview from "../components/MaskingPreview.vue";
+import FolderPicker from "../components/FolderPicker.vue";
+import RestoreBox from "../components/RestoreBox.vue";
 import {
   docKey,
+  folderKey,
   packKey,
   quickKey,
   runKey,
@@ -15,20 +18,30 @@ import {
   type Page,
 } from "../composables/context.ts";
 import { fileKind, fileKindErrors } from "../core/file-kind.ts";
+import { quickDirection } from "../core/quick-actions.ts";
 import { sampleText } from "../core/review.ts";
 import { packProgress } from "../composables/useRecognitionPack.ts";
 
 const emit = defineEmits<{
-  /** A link: Cài đặt, or a format's page as the user last left it. */
+  /** A link: Cài đặt, or a format's page as last left. */
   navigate: [destination: Page];
   /** The start box: the format's first step, where the file or text just went. */
   start: [destination: Page];
+  /** The text field: an empty text page with the cursor in it. */
+  type: [];
 }>();
 const pack = useProvided(packKey);
 const run = useProvided(runKey);
 const sheet = useProvided(sheetKey);
 const doc = useProvided(docKey);
 const quick = useProvided(quickKey);
+const folder = useProvided(folderKey);
+/** A dropped or picked folder, or several files, goes to the folder page (decision 0171).
+ * Only home offers the folder picker: a folder may hold every format. */
+function startFolder(picked: PickedFolder) {
+  void folder.load(picked);
+  emit("start", "folder");
+}
 /** Ẩn nhanh, the way in from other apps (decision 0099): offered while it does not work. */
 const quickOffer = computed(
   () => quick.desktop && quick.popoverSupported.value && !quick.quickReady.value,
@@ -42,9 +55,21 @@ const accept = computed(() =>
     : ".xlsx,.xls,.ods,.csv,.docx,.odt,.pdf,.txt,.md",
 );
 const pasteKey = /Mac|iPhone|iPad/.test(navigator.userAgent) ? "⌘V" : "Ctrl+V";
+/** By the hour on this machine: sáng until 11, trưa until 13, chiều until 18, then tối. */
+const hour = new Date().getHours();
+const greeting =
+  hour >= 5 && hour < 11
+    ? "Chào buổi sáng."
+    : hour >= 11 && hour < 13
+      ? "Chào buổi trưa."
+      : hour >= 13 && hour < 18
+        ? "Chào buổi chiều."
+        : "Chào buổi tối.";
 const startError = ref("");
 async function startWith(file: File) {
   startError.value = "";
+  // A CSV or text file too large to open whole: a piece at a time (decision 0174).
+  if (await folder.takeLarge(file)) return emit("start", "folder");
   const kind = fileKind(file.name, { images: doc.ocr.value });
   if (kind === "text") {
     startError.value = await run.openTextFile(file);
@@ -66,12 +91,36 @@ function startWithText(text: string) {
   run.processingError.value = "";
   emit("start", "text");
 }
+/** What the drop zone opens, in the words people use for them (decision 0172). */
+const formats = [
+  { label: "Word", ext: ".docx", icon: "file" },
+  { label: "PDF", ext: ".pdf", icon: "file" },
+  { label: "Excel", ext: ".xlsx .xls", icon: "table" },
+  { label: "CSV", ext: ".csv", icon: "table" },
+  { label: "OpenDocument", ext: ".odt .ods", icon: "file" },
+  { label: "Văn bản", ext: ".txt .md", icon: "text" },
+  { label: "Cả thư mục", ext: "", icon: "folder" },
+] as const;
+/** Which half of the job the box is for; a pasted AI reply switches it (decision 0172). */
+const mode = ref<"hide" | "restore">("hide");
+const restoreBox = useTemplateRef<InstanceType<typeof RestoreBox>>("restoreBox");
+const known = computed(() => [...quick.knownFindings.value, ...folder.findings.value]);
+async function openRestore(text: string) {
+  mode.value = "restore";
+  await nextTick();
+  restoreBox.value?.fill(text);
+}
 function paste(event: ClipboardEvent) {
+  // Typing into the restore box (or any field) is the field's own business.
+  const target = event.target as HTMLElement | null;
+  if (target?.closest("input, textarea, [contenteditable]")) return;
   const file = event.clipboardData?.files[0];
   const text = event.clipboardData?.getData("text/plain") ?? "";
   if (!file && !text.trim()) return;
   event.preventDefault();
   if (file) void startWith(file);
+  else if (mode.value === "restore" || quickDirection(text, [known.value]) === "restore")
+    void openRestore(text);
   else startWithText(text);
 }
 onMounted(() => window.addEventListener("paste", paste));
@@ -80,6 +129,9 @@ const heading = useTemplateRef<HTMLHeadingElement>("heading");
 defineExpose({
   focusHeading() {
     heading.value?.focus({ preventScroll: true });
+  },
+  startOver() {
+    mode.value = "hide";
   },
 });
 
@@ -107,7 +159,7 @@ const packNotice = computed<PackNotice | null>(() => {
     case "downloading":
       return {
         icon: "download",
-        title: `Đang tải về… ${packProgress(status)} %`,
+        title: `Đang tải về... ${packProgress(status)} %`,
         detail: "Chỉ cần tải một lần.",
         action: progress(),
       };
@@ -115,7 +167,7 @@ const packNotice = computed<PackNotice | null>(() => {
     case "cancelling":
       return {
         icon: "download",
-        title: `Đang cài đặt… ${packProgress(status)} %`,
+        title: `Đang cài đặt... ${packProgress(status)} %`,
         detail: "Chỉ cần tải một lần.",
         action: progress(),
       };
@@ -150,25 +202,75 @@ const packNotice = computed<PackNotice | null>(() => {
     <span class="hero-logo brand-mark" aria-hidden="true">
       <BrandMark :size="38" />
     </span>
-    <h1 ref="heading" tabindex="-1">Ẩn thông tin riêng<span>trước khi chia sẻ với AI.</span></h1>
-    <p>Số tài khoản, số điện thoại, họ tên… được đổi thành mã thay thế ngay trên máy bạn.</p>
-    <MaskingPreview />
+    <!-- People open the app to work, not to be sold to: a greeting and the question. -->
+    <h1 ref="heading" tabindex="-1">{{ greeting }}</h1>
+    <p>Hôm nay bạn cần ẩn thông tin gì?</p>
+    <!-- What masking does, at a glance: a value struck out, its code beside it. -->
+    <div class="home-swaps" aria-hidden="true">
+      <span class="home-swap"><s>Phong Phan</s><b>[TEN_1_5102]</b></span>
+      <span class="home-swap"><s>0901234567</s><b>[SDT_1_5102]</b></span>
+    </div>
   </div>
-  <section class="start-box" aria-label="Bắt đầu">
+  <!-- Home holds both ends of the job (decision 0172): hide before asking the AI, and put
+       the real information back into its reply. -->
+  <div class="home-tabs" role="tablist" aria-label="Việc cần làm">
+    <button
+      id="tab-hide"
+      role="tab"
+      :aria-selected="mode === 'hide'"
+      aria-controls="panel-hide"
+      @click="mode = 'hide'"
+    >
+      <AppIcon name="mask" :size="17" />Ẩn thông tin riêng
+    </button>
+    <button
+      id="tab-restore"
+      role="tab"
+      :aria-selected="mode === 'restore'"
+      aria-controls="panel-restore"
+      @click="mode = 'restore'"
+    >
+      <AppIcon name="undo" :size="17" />Nhận lại bản đầy đủ
+    </button>
+  </div>
+  <section
+    v-if="mode === 'hide'"
+    id="panel-hide"
+    class="start-box"
+    role="tabpanel"
+    aria-labelledby="tab-hide"
+  >
     <FileDropZone
       icon="upload"
-      title="Kéo thả tệp hoặc dán văn bản"
-      :hint="`Excel, CSV, Word, PDF, ${doc.ocr.value ? 'ảnh, ' : ''}TXT · dán bằng ${pasteKey}`"
+      title="Chọn hoặc kéo tệp, thư mục vào đây"
+      choose-in-title
       :accept="accept"
-      compact
+      folders
       @file="startWith"
-    />
+      @folder="startFolder"
+    >
+      <!-- Every kind the app opens, named the way people know them. -->
+      <span class="home-formats" aria-label="Mở được">
+        <span v-for="format in formats" :key="format.label" class="home-format"
+          ><AppIcon :name="format.icon" :size="14" />{{ format.label
+          }}<small v-if="format.ext">{{ format.ext }}</small></span
+        >
+      </span>
+    </FileDropZone>
     <p v-if="startError" class="input-error start-error" role="alert">{{ startError }}</p>
-    <div class="start-notes">
-      <span><AppIcon name="lock" :size="13" />Tệp và văn bản không rời khỏi máy bạn.</span>
+    <!-- Looks like the text box it opens, so typing is as obvious as dropping. -->
+    <button type="button" class="home-type" @click="emit('type')">
+      <AppIcon name="compose" :size="17" /><span>Hoặc gõ, dán văn bản vào đây...</span
+      ><kbd>{{ pasteKey }}</kbd>
+    </button>
+    <div class="start-actions">
+      <FolderPicker @folder="startFolder" />
       <button type="button" class="sample-link" @click="startWithText(sampleText)">
         Xem thử với ví dụ
       </button>
+      <span class="start-private"
+        ><AppIcon name="lock" :size="13" />Thông tin của bạn không rời khỏi máy này.</span
+      >
     </div>
     <!-- The other way in, until it works (decision 0099). -->
     <p v-if="quickOffer" class="start-quick">
@@ -178,6 +280,9 @@ const packNotice = computed<PackNotice | null>(() => {
       </button>
     </p>
   </section>
+  <div v-else id="panel-restore" role="tabpanel" aria-labelledby="tab-restore">
+    <RestoreBox ref="restoreBox" @hide="mode = 'hide'" />
+  </div>
   <div v-if="packNotice" class="pack-notice" role="status">
     <AppIcon :name="packNotice.icon" :size="16" />
     <p>

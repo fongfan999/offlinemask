@@ -5,7 +5,11 @@ import type { ReviewGroup } from "../core/file-review.ts";
 /** Every value a masked file hides, most frequent first, to keep the ones that need
  * no hiding (decision 0079). A value is kept everywhere in the file; a type can be
  * kept as a whole. */
-const props = defineProps<{ groups: readonly ReviewGroup[] }>();
+const props = defineProps<{
+  groups: readonly ReviewGroup[];
+  /** For a folder (decision 0171): how many files each alias appears in. */
+  files?: ReadonlyMap<string, number>;
+}>();
 const emit = defineEmits<{ change: [aliases: string[], keep: boolean] }>();
 
 const shownLimit = 100;
@@ -42,8 +46,14 @@ function toggleType(group: ReviewGroup, all: boolean) {
 <template>
   <section class="review-list" aria-labelledby="review-list-title">
     <header class="review-head">
-      <strong id="review-list-title">Kiểm tra trước khi tải</strong>
-      <span
+      <strong id="review-list-title">{{
+        files ? "Những gì đã ẩn" : "Kiểm tra trước khi tải"
+      }}</strong>
+      <span v-if="files"
+        >Giá trị bỏ chọn, như tên nhân vật lịch sử hay địa danh, được giữ nguyên ở mọi chỗ trong mọi
+        tệp.</span
+      >
+      <span v-else
         >Bỏ chọn những gì không cần ẩn, như tên nhân vật lịch sử hay địa danh. Giá trị bỏ chọn được
         giữ nguyên ở mọi chỗ trong tệp.</span
       >
@@ -68,7 +78,7 @@ function toggleType(group: ReviewGroup, all: boolean) {
       v-model="query"
       type="search"
       class="review-search"
-      placeholder="Tìm giá trị…"
+      placeholder="Tìm giá trị..."
       aria-label="Tìm giá trị"
     />
     <ul class="review-values" :class="{ 'is-steady': items.length > 12 }">
@@ -80,7 +90,9 @@ function toggleType(group: ReviewGroup, all: boolean) {
             @change="emit('change', [item.alias], !item.kept)"
           /><span class="review-text">{{ item.value }}</span
           ><span class="review-meta"
-            >{{ item.label }} · {{ item.count.toLocaleString("vi-VN") }} chỗ</span
+            >{{ item.label }} - {{ item.count.toLocaleString("vi-VN") }} chỗ<template v-if="files">
+              - {{ (files.get(item.alias) ?? 1).toLocaleString("vi-VN") }} tệp</template
+            ></span
           >
         </label>
       </li>

@@ -1,15 +1,20 @@
 <script setup lang="ts">
+import type { PickedFolder } from "../adapters/folder.ts";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
+import CannotOpen from "../components/CannotOpen.vue";
 import BrandMark from "../components/BrandMark.vue";
 import DocPreview from "../components/DocPreview.vue";
 import FileDropZone from "../components/FileDropZone.vue";
+import JobTime from "../components/JobTime.vue";
+import LongJobNote from "../components/LongJobNote.vue";
 import KeepOffer from "../components/KeepOffer.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import RestoreIntro from "../components/RestoreIntro.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import ReviewList from "../components/ReviewList.vue";
 import {
+  folderKey,
   docKey,
   packKey,
   runKey,
@@ -30,6 +35,12 @@ const emit = defineEmits<{
   navigate: [destination: Page, id?: string | null];
   remove: [id: string];
 }>();
+const folder = useProvided(folderKey);
+/** A dropped folder opens the folder page, which takes every format (decision 0171). */
+function openFolder(picked: PickedFolder) {
+  void folder.load(picked);
+  emit("navigate", "folder");
+}
 
 const doc = useProvided(docKey);
 const pack = useProvided(packKey);
@@ -83,12 +94,12 @@ const subtitle = computed(() => {
   if (props.session)
     return step.value === 3
       ? `Tài liệu #${props.session.number}`
-      : `Tài liệu #${props.session.number} · ${props.session.paragraphs.toLocaleString("vi-VN")} đoạn · Đọc lại bản đã ẩn, rồi tải về để gửi AI.`;
+      : `Tài liệu #${props.session.number} - ${props.session.paragraphs.toLocaleString("vi-VN")} đoạn - Đọc lại bản đã ẩn, rồi tải về để gửi AI.`;
   return draft.value
-    ? `${draft.value.paragraphs.length.toLocaleString("vi-VN")} đoạn · Xem trước rồi ẩn toàn bộ.`
+    ? `${draft.value.paragraphs.length.toLocaleString("vi-VN")} đoạn - Xem trước rồi ẩn toàn bộ.`
     : doc.ocr.value
-      ? "Mở tệp Word, LibreOffice, PDF, kể cả ảnh scan, hoặc hình ảnh. Thông tin riêng tư được thay bằng mã như [TEN_1_…], ngay trên máy bạn. Word giữ nguyên định dạng; PDF và hình ảnh cho ra bản chữ để gửi AI."
-      : "Mở tệp Word, LibreOffice hoặc PDF. Thông tin riêng tư được thay bằng mã như [TEN_1_…], ngay trên máy bạn. Word giữ nguyên định dạng; PDF cho ra bản chữ để gửi AI.";
+      ? "Mở tệp Word, LibreOffice, PDF, kể cả ảnh scan, hoặc hình ảnh. Thông tin riêng tư được thay bằng mã như [TEN_1_...], ngay trên máy bạn. Word giữ nguyên định dạng; PDF và hình ảnh cho ra bản chữ để gửi AI."
+      : "Mở tệp Word, LibreOffice hoặc PDF. Thông tin riêng tư được thay bằng mã như [TEN_1_...], ngay trên máy bạn. Word giữ nguyên định dạng; PDF cho ra bản chữ để gửi AI.";
 });
 const draftView = computed(() => {
   const current = draft.value;
@@ -123,6 +134,8 @@ const restoreStatus = computed(() => {
 const plainText = /\.(txt|md)$/i;
 async function openFile(file: File) {
   if (!plainText.test(file.name)) return doc.openFile(file);
+  // Too large for the text page: a piece at a time on the folder page (decision 0174).
+  if (await folder.takeLarge(file)) return emit("navigate", "folder");
   doc.fileError.value = await run.openTextFile(file);
   if (!doc.fileError.value) emit("navigate", "text");
 }
@@ -130,9 +143,10 @@ async function trySample() {
   const bytes = await sampleDocx();
   await doc.openFile(new File([new Uint8Array(bytes)], sampleDocName));
 }
+/** A new job starts where every job does: home (decision 0172). */
 function newDoc() {
   doc.discardDraft();
-  emit("navigate", "word");
+  emit("navigate", "home");
 }
 async function download() {
   if (!props.session) return;
@@ -140,7 +154,7 @@ async function download() {
   try {
     if (await doc.download(props.session)) {
       status.value =
-        "Đã lưu tệp đã ẩn. Gửi tệp này cho công cụ AI bạn dùng (ChatGPT, Claude, Gemini…), rồi đưa tệp hoặc câu trả lời AI trả về vào bước Khôi phục.";
+        "Đã lưu tệp đã ẩn. Gửi tệp này cho công cụ AI bạn dùng (ChatGPT, Claude, Gemini...), rồi đưa tệp hoặc câu trả lời AI trả về vào bước Khôi phục.";
       restoreStep.value = true;
     }
   } catch {
@@ -154,7 +168,7 @@ async function copyMasked() {
   try {
     if (await doc.copyMasked(props.session)) {
       status.value =
-        "Đã sao chép bản đã ẩn. Dán vào công cụ AI bạn dùng (ChatGPT, Claude, Gemini…), rồi đưa câu trả lời của AI vào bước Khôi phục.";
+        "Đã sao chép bản đã ẩn. Dán vào công cụ AI bạn dùng (ChatGPT, Claude, Gemini...), rồi đưa câu trả lời của AI vào bước Khôi phục.";
       restoreKind.value = "text";
       restoreStep.value = true;
     }
@@ -225,11 +239,8 @@ defineExpose({
       <button v-if="session && historyOn" class="quiet-button" @click="emit('remove', session.id)">
         <AppIcon name="close" :size="15" />Xóa khỏi lịch sử
       </button>
-      <button v-if="session" class="quiet-button" @click="newDoc">
+      <button v-if="session || !doc.processing.value" class="quiet-button" @click="newDoc">
         <AppIcon name="plus" :size="15" />Tạo mới
-      </button>
-      <button v-else-if="!doc.processing.value" class="quiet-button" @click="doc.discardDraft()">
-        <AppIcon name="upload" :size="15" />Chọn tệp khác
       </button>
     </div>
   </div>
@@ -268,20 +279,25 @@ defineExpose({
 
     <!-- Step 1: open a document, preview, mask all. -->
     <div v-if="!session" class="step-panel">
-      <template v-if="!draft">
+      <CannotOpen
+        v-if="!draft && doc.fileError.value"
+        title="Không mở được tệp này"
+        :detail="doc.fileError.value"
+        button="Chọn tệp khác"
+        @again="newDoc"
+      />
+      <template v-else-if="!draft">
         <FileDropZone
           icon="file"
           title="Kéo thả tài liệu vào đây"
-          :hint="
-            doc.ocr.value
-              ? '.docx, .odt, .pdf, .png, .jpg · tối đa 20 MB'
-              : '.docx, .odt, .pdf · tối đa 20 MB'
-          "
+          :hint="doc.ocr.value ? '.docx, .odt, .pdf, .png, .jpg' : '.docx, .odt, .pdf'"
           :accept="
             doc.ocr.value ? '.docx,.odt,.pdf,.png,.jpg,.jpeg,.txt,.md' : '.docx,.odt,.pdf,.txt,.md'
           "
           :busy="doc.opening.value"
+          folders
           @file="openFile"
+          @folder="openFolder"
         />
         <p
           v-if="doc.openingProgress.value"
@@ -296,14 +312,14 @@ defineExpose({
         <div class="input-hint-row">
           <button type="button" class="sample-link" @click="trySample">Thử với tệp mẫu</button>
         </div>
-        <p v-if="doc.fileError.value" class="input-error drop-error" role="alert">
-          {{ doc.fileError.value }}
-        </p>
       </template>
       <template v-else>
         <template v-if="!doc.progress.value">
+          <LongJobNote :seconds="doc.estimate.value" subject="Tài liệu này" />
           <header class="card-header sheet-toolbar">
-            <p class="sheet-hint">Họ tên, số điện thoại, email, số tài khoản… được thay bằng mã.</p>
+            <p class="sheet-hint">
+              Họ tên, số điện thoại, email, số tài khoản... được thay bằng mã.
+            </p>
             <div class="view-switch" aria-label="Chọn bản xem">
               <button :aria-pressed="!showOriginal" @click="showOriginal = false">
                 Xem trước bản đã ẩn</button
@@ -318,7 +334,7 @@ defineExpose({
           {{ draft.paragraphs.length.toLocaleString("vi-VN") }} đoạn đầu<template
             v-if="doc.previewScanning.value"
           >
-            · <span class="spinner" aria-hidden="true"></span> Đang đọc…</template
+            - <span class="spinner" aria-hidden="true"></span> Đang đọc...</template
           >
         </p>
         <p v-if="!pack.ready.value && !doc.progress.value" class="sheet-note">
@@ -332,6 +348,7 @@ defineExpose({
           {{ doc.processingError.value }}
         </p>
         <footer class="card-footer sheet-footer">
+          <JobTime v-if="!doc.processing.value" :seconds="doc.estimate.value" />
           <button v-if="doc.processing.value" class="quiet-button" @click="doc.cancelMask()">
             Hủy
           </button>
@@ -343,7 +360,7 @@ defineExpose({
           >
             <span v-if="doc.processing.value" class="spinner" aria-hidden="true"></span
             ><BrandMark v-else :size="17" />{{
-              doc.processing.value ? "Đang ẩn…" : "Ẩn toàn bộ tài liệu"
+              doc.processing.value ? "Đang ẩn..." : "Ẩn toàn bộ tài liệu"
             }}<AppIcon name="arrow" :size="16" />
           </button>
         </footer>
@@ -353,7 +370,7 @@ defineExpose({
     <!-- Step 2: read the masked result and save the masked copy. -->
     <div v-else-if="step === 2" class="step-panel">
       <p class="sheet-summary">
-        <AppIcon name="check" :size="15" />Đã ẩn {{ session.masked.toLocaleString("vi-VN") }} chỗ ·
+        <AppIcon name="check" :size="15" />Đã ẩn {{ session.masked.toLocaleString("vi-VN") }} chỗ -
         {{ session.findings.length.toLocaleString("vi-VN") }} mã thay thế
       </p>
       <DocPreview :paragraphs="session.preview" :label="`Bản đã ẩn, ${session.fileName}`" />
@@ -420,7 +437,8 @@ defineExpose({
           </p>
           <p v-if="restore.unknown.length" class="sheet-note restore-unknown">
             {{ restore.unknown.length }} mã thay thế không thuộc tài liệu này được giữ nguyên:
-            {{ restore.unknown.slice(0, 5).join(", ") }}{{ restore.unknown.length > 5 ? "…" : "" }}
+            {{ restore.unknown.slice(0, 5).join(", ")
+            }}{{ restore.unknown.length > 5 ? "..." : "" }}
           </p>
           <DocPreview
             :paragraphs="restoreView"

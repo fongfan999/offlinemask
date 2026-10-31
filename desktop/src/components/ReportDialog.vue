@@ -20,7 +20,7 @@ const message = ref("");
 const error = ref("");
 const os = systemName(navigator.userAgent);
 const details = computed(() =>
-  [`OfflineMask ${props.version}`, os, `màn hình ${props.screen}`].filter(Boolean).join(" · "),
+  [`OfflineMask ${props.version}`, os, `màn hình ${props.screen}`].filter(Boolean).join(" - "),
 );
 
 function open() {

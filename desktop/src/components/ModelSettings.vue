@@ -79,8 +79,8 @@ const errorMessage = computed(() => {
         <span>{{
           installing
             ? status.installed === status.installedBytes
-              ? "Đang kiểm tra lần cuối…"
-              : "Đang cài đặt trên máy…"
+              ? "Đang kiểm tra lần cuối..."
+              : "Đang cài đặt trên máy..."
             : `${sizes(status.downloaded)} / ${sizes(status.total)}`
         }}</span
         ><span>{{ progress }}%</span>
@@ -95,7 +95,7 @@ const errorMessage = computed(() => {
           status.stage === "paused"
             ? "Phần đã tải được giữ lại."
             : status.stage === "cancelling"
-              ? "Đang kết thúc phần tải hiện tại…"
+              ? "Đang kết thúc phần tải hiện tại..."
               : "Bạn có thể tiếp tục dùng ứng dụng trong khi tải."
         }}
       </p>
@@ -107,7 +107,7 @@ const errorMessage = computed(() => {
       Mở ứng dụng OfflineMask trên máy tính để tải gói nhận diện.
     </p>
     <p v-if="status.stage === 'checking'" class="model-checking" role="status">
-      Đang tìm gói trên máy…
+      Đang tìm gói trên máy...
     </p>
     <div v-else class="model-download-actions">
       <div
@@ -119,7 +119,7 @@ const errorMessage = computed(() => {
           status.stage === "ready"
             ? "Đã cài trên máy"
             : status.installedBytes !== status.total
-              ? `Tải một lần · chiếm ${sizes(status.installedBytes)} trên máy`
+              ? `Tải một lần - chiếm ${sizes(status.installedBytes)} trên máy`
               : "Chỉ cần tải một lần"
         }}</span>
       </div>
@@ -129,7 +129,7 @@ const errorMessage = computed(() => {
         :disabled="busy || status.stage === 'cancelling'"
         @click="$emit('pause')"
       >
-        {{ status.stage === "cancelling" ? "Đang tạm dừng…" : "Tạm dừng" }}
+        {{ status.stage === "cancelling" ? "Đang tạm dừng..." : "Tạm dừng" }}
       </button>
       <button
         v-else-if="status.stage !== 'ready'"

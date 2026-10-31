@@ -1,25 +1,24 @@
 import JSZip from "jszip";
-import type { Finding } from "../review.ts";
+import { aliasShape, type AliasValues } from "../restore.ts";
 
 /** Word support (decision 0078): ordinary .docx files, read and written in memory.
  * Text lives in `<w:t>` runs inside `<w:p>` paragraphs; detection reads whole
  * paragraphs and replacements are written back into the runs they cover, so the
  * formatting of every run is kept. A small tag scanner is enough for Word's
  * well-formed XML and works inside a worker, where DOMParser does not exist. */
-export const maxDocBytes = 20 * 1024 * 1024;
 export type DocError =
   | "unsupported"
-  | "too-large"
   | "unreadable"
   | "empty"
   // PDF only (decision 0149).
   | "password"
-  | "too-many-pages"
   | "scanned"
   | "old-font"
   | "cancelled"
   // A picture on a machine without text recognition (decision 0180).
-  | "no-ocr";
+  | "no-ocr"
+  // Over the app's memory budget (decision 0173).
+  | "memory";
 export class DocFileError extends Error {
   readonly code: DocError;
   constructor(code: DocError) {
@@ -291,7 +290,6 @@ export function applyReplacements(text: string, replacements: readonly Replaceme
 export async function openDocx(
   bytes: Uint8Array,
 ): Promise<{ source: DocSource; paragraphs: DocParagraph[]; notes: string[] }> {
-  if (bytes.byteLength > maxDocBytes) throw new DocFileError("too-large");
   let zip: JSZip;
   try {
     zip = await JSZip.loadAsync(bytes);
@@ -429,12 +427,11 @@ export async function writeDocx(source: DocSource, edits: DocEdits): Promise<Uin
 /** Known aliases of `findings` in a paragraph, as replacements back to their values. */
 export function restoreReplacements(
   text: string,
-  findings: readonly Finding[],
+  values: AliasValues,
 ): { replacements: Replacement[]; unknown: string[] } {
-  const values = new Map(findings.map((finding) => [finding.alias, finding.value]));
   const replacements: Replacement[] = [];
   const unknown: string[] = [];
-  for (const match of text.matchAll(/\[[A-Z][A-Z_]*_\d+_[a-f0-9]{4,8}\]/g)) {
+  for (const match of text.matchAll(aliasShape)) {
     const value = values.get(match[0]);
     if (value === undefined) unknown.push(match[0]);
     else replacements.push({ start: match.index, end: match.index + match[0].length, text: value });

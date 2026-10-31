@@ -77,7 +77,7 @@ const placeGroups = computed(() =>
             Ô nhập được thay ngay; chữ không sửa được thì hiện bản xem trước để sao chép.
           </p>
           <p v-if="quick.quickReady.value && !quick.lastSkip.value" class="quick-ready">
-            Đang bật · thử bôi đen một đoạn trong
+            Đang bật - thử bôi đen một đoạn trong
             {{ quick.placesSupported.value ? "ChatGPT hay Claude" : "ứng dụng khác" }}.
           </p>
           <p v-if="!quick.popoverSupported.value" class="quick-note">
@@ -148,11 +148,7 @@ const placeGroups = computed(() =>
           <template v-for="group in placeGroups" :key="group.label">
             <p class="quick-places-label">{{ group.label }}</p>
             <ul class="quick-places" :aria-label="`${group.label} có nút OfflineMask`">
-              <li
-                v-for="place in group.places"
-                :key="`${place.kind}:${place.id}`"
-                :title="place.kind === 'host' ? place.name : undefined"
-              >
+              <li v-for="place in group.places" :key="`${place.kind}:${place.id}`">
                 {{ place.kind === "host" ? place.id : place.name }}
                 <button
                   class="quick-place-remove"
@@ -167,7 +163,7 @@ const placeGroups = computed(() =>
           <!-- Adding comes from use, so the way to add is said under the list (decision 0136). -->
           <p class="quick-note quick-places-hint">
             {{ quick.places.value.length ? "Thêm nơi khác:" : "Chưa có nơi nào. Để thêm:" }}
-            bôi đen chữ ở đó, nhấn {{ quickShortcutLabel }} rồi chọn “Luôn hiện nút ở …”.
+            bôi đen chữ ở đó, nhấn {{ quickShortcutLabel }} rồi chọn "Luôn hiện nút ở ...".
           </p>
           <button
             v-if="quick.placesChanged.value"

@@ -14,11 +14,16 @@ import { nativeQuickActions } from "./adapters/quick-actions.ts";
 import { createSheetFiles } from "./adapters/sheet-files.ts";
 import { createTextDetector, queueDetections } from "./adapters/text-detection.ts";
 import AppIcon from "./components/AppIcon.vue";
+import AppFooter from "./components/AppFooter.vue";
+import { flyBrand } from "./composables/brandFlight.ts";
+import { vTip } from "./directives/tip.ts";
 import AppSidebar from "./components/AppSidebar.vue";
+import BrandMark from "./components/BrandMark.vue";
 import LockPage from "./components/LockPage.vue";
 import {
   packKey,
   docKey,
+  folderKey,
   quickKey,
   runKey,
   sessionsKey,
@@ -32,6 +37,7 @@ import { useQuickActions } from "./composables/useQuickActions.ts";
 import { useRecognitionPack } from "./composables/useRecognitionPack.ts";
 import { useSessions } from "./composables/useSessions.ts";
 import { useDocRun } from "./composables/useDocRun.ts";
+import { useFolderRun } from "./composables/useFolderRun.ts";
 import { useSheetRun } from "./composables/useSheetRun.ts";
 import { useVault } from "./composables/useVault.ts";
 import { ocrAvailable } from "./adapters/ocr.ts";
@@ -39,6 +45,7 @@ import { fileKind, fileKindErrors } from "./core/file-kind.ts";
 import type { Format, Session } from "./core/sessions.ts";
 import HomePage from "./pages/HomePage.vue";
 import DocPage from "./pages/DocPage.vue";
+import FolderPage from "./pages/FolderPage.vue";
 import SettingsPage from "./pages/SettingsPage.vue";
 import SheetPage from "./pages/SheetPage.vue";
 import WorkspacePage from "./pages/WorkspacePage.vue";
@@ -63,6 +70,7 @@ const doc = useDocRun({
   sessions,
   onSession: adoptSession,
 });
+const folder = useFolderRun({ detector, pack, sessions });
 const vault = useVault();
 // Clipboard quick actions (decision 0090) reuse the text run and every alias table.
 const quick = useQuickActions({
@@ -85,6 +93,11 @@ const quick = useQuickActions({
   },
   // A file from the Finder service (decision 0094) opens like one dropped on the home page.
   openFile: async (file) => {
+    // A CSV or text file too large to open whole: a piece at a time (decision 0174).
+    if (await folder.takeLarge(file)) {
+      void navigate("folder");
+      return "";
+    }
     const kind = fileKind(file.name, { images: ocr.value });
     if (kind === "text") {
       const error = await run.openTextFile(file);
@@ -111,6 +124,7 @@ provide(runKey, run);
 provide(vaultKey, vault);
 provide(sheetKey, sheet);
 provide(docKey, doc);
+provide(folderKey, folder);
 
 // The app passcode is optional (decision 0064). When one exists the lock page
 // comes first; private sessions mirror into the vault while it is open.
@@ -144,12 +158,24 @@ const format = computed<Format>(
   () =>
     active.value?.format ?? (page.value === "excel" || page.value === "word" ? page.value : "text"),
 );
-// Settings has no crumb: its heading already says "Cài đặt".
-const topbarLabel = computed(() =>
-  page.value === "home" || page.value === "settings"
-    ? ""
-    : { text: "Văn bản", excel: "Bảng tính", word: "Tài liệu" }[format.value],
-);
+/** A folder in progress has no session, so the sidebar lists it from here (decision 0172). */
+const folderStatus: Record<string, string> = {
+  surveying: "Đang đọc thư mục",
+  ready: "Chờ bắt đầu",
+  review: "Đã ẩn - chờ lưu",
+  saving: "Đang lưu",
+  saved: "Đã lưu",
+};
+const folderItem = computed(() => {
+  const phase = folder.phase.value;
+  if (phase === "empty") return null;
+  const progress = folder.progress.value;
+  const status =
+    phase === "masking"
+      ? `Đang ẩn - ${progress?.total ? Math.floor((progress.done / progress.total) * 100) : 0}%`
+      : folderStatus[phase]!;
+  return { name: folder.name.value, status };
+});
 
 /** History is a passcode feature (decision 0071). Without it each format has one
  * screen: a new result replaces the previous one, and coming back to the format
@@ -162,8 +188,10 @@ const sidebar = useTemplateRef<InstanceType<typeof AppSidebar>>("sidebar");
 const sidebarToggle = useTemplateRef<HTMLButtonElement>("sidebarToggle");
 
 /** History past its keep period goes while the app runs too (decision 0143): it can sit
- * in the tray for weeks. Checked hourly and whenever the window comes back. */
+ * in the tray for weeks. Checked hourly and whenever the window comes back, along with
+ * the restore codes of replaced sessions (decisions 0177 and 0178). */
 function expireHistory() {
+  quick.prune();
   if (vault.state.value !== "unlocked") return;
   const target = active.value ? format.value : null;
   const removed = store.expire();
@@ -226,10 +254,31 @@ async function navigate(destination: Page, id: string | null = null) {
 /** The sidebar and home cards open a format; without history that means its last screen.
  * "Tạo mới" and "Sửa văn bản" inside the page go through `navigate` and start a draft. */
 function openFormat(destination: Page, id: string | null = null) {
-  if (id || historyOn.value || destination === "home" || destination === "settings")
+  if (
+    id ||
+    historyOn.value ||
+    destination === "home" ||
+    destination === "settings" ||
+    destination === "folder"
+  )
     return navigate(destination, id);
   const last = lastOpened[destination];
   return navigate(destination, last && store.find(last) ? last : null);
+}
+/** "+ Ẩn thông tin mới": home on its first tab, even when home is already open. */
+async function startNew() {
+  await navigate("home");
+  pageRef.value?.startOver?.();
+}
+/** The sidebar's note without a passcode: set one to keep the list (decision 0172). */
+async function keepHistory() {
+  await navigate("settings");
+  pageRef.value?.setUpPasscode?.();
+}
+/** Home's text field: an empty text page with the cursor in the box (decision 0172). */
+async function startTyping() {
+  await navigate("text");
+  pageRef.value?.focusInput?.();
 }
 async function startMasking() {
   await run.mask("text");
@@ -239,6 +288,55 @@ function removeSession(id: string) {
   store.remove(id);
   quick.forget(id);
   if (target) void navigate(target);
+}
+/** Wide windows can fold the sidebar away (decision 0172). The sidebar's column shrinks
+ * while the sidebar slides by the same amount on the same curve (CSS), and the logo flies
+ * between the sidebar and the top bar's centre, turning once on the way: a copy of it
+ * travels above the page from where it is to where it will be, measured before the
+ * layout starts moving, and both real logos stay hidden until it lands. With reduced
+ * motion it simply switches. Kept in memory only: a launch starts with the sidebar open. */
+const collapsed = ref(false);
+const measuring = ref(false);
+const flying = ref(false);
+const shell = useTemplateRef<HTMLDivElement>("shell");
+const sidebarExpand = useTemplateRef<HTMLButtonElement>("sidebarExpand");
+const foldMs = 560;
+const foldEase = "cubic-bezier(0.65, 0, 0.35, 1)";
+const brandOf = (root: HTMLElement, folded: boolean) =>
+  root.querySelector<HTMLElement>(folded ? ".topbar-brand" : ".sidebar .brand");
+async function toggleCollapsed() {
+  // One fold at a time: a second click mid-flight would launch a second logo.
+  if (measuring.value || flying.value) return;
+  const target = !collapsed.value;
+  const root = shell.value;
+  const from = root && brandOf(root, !target);
+  const still = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (!root || !from || still) {
+    collapsed.value = target;
+    await nextTick();
+  } else {
+    const first = from.getBoundingClientRect();
+    // Where the logo lands: the end state laid out once with transitions off, then undone.
+    measuring.value = true;
+    collapsed.value = target;
+    await nextTick();
+    const landing = brandOf(root, target)!;
+    const last = landing.getBoundingClientRect();
+    const lastMark = landing.querySelector(".brand-mark")?.getBoundingClientRect() ?? last;
+    collapsed.value = !target;
+    await nextTick();
+    void root.offsetWidth;
+    measuring.value = false;
+    await nextTick();
+    void root.offsetWidth;
+    // Now the real move: the layout transitions while the logo leaps (brandFlight.ts).
+    flying.value = true;
+    collapsed.value = target;
+    await flyBrand(from, first, last, lastMark, foldMs, foldEase);
+    flying.value = false;
+  }
+  if (collapsed.value) sidebarExpand.value?.focus();
+  else sidebar.value?.focusStart();
 }
 async function openSidebar() {
   sidebarOpen.value = true;
@@ -255,7 +353,12 @@ async function closeSidebar() {
 <template>
   <div class="ambient" aria-hidden="true"></div>
   <LockPage v-if="vault.state.value === 'locked'" />
-  <div v-else-if="vault.checked.value" class="app-shell">
+  <div
+    v-else-if="vault.checked.value"
+    ref="shell"
+    class="app-shell"
+    :class="{ 'is-collapsed': collapsed, 'is-measuring': measuring, 'is-flying': flying }"
+  >
     <button
       v-if="sidebarOpen"
       class="sidebar-scrim"
@@ -270,13 +373,16 @@ async function closeSidebar() {
       :open="sidebarOpen"
       :preparing="pack.preparing.value"
       :history="historyOn"
-      :images="ocr"
+      :folder="folderItem"
       :version="version"
       @navigate="openFormat"
       @close="closeSidebar"
+      @collapse="toggleCollapsed"
+      @start="startNew"
+      @keep="keepHistory"
     />
     <div class="workspace" :inert="sidebarOpen">
-      <header class="topbar" :class="{ 'home-topbar': page === 'home' }">
+      <header class="topbar">
         <div>
           <button
             ref="sidebarToggle"
@@ -287,15 +393,45 @@ async function closeSidebar() {
             @click="openSidebar"
           >
             <AppIcon name="list" /></button
-          ><span v-if="topbarLabel">{{ topbarLabel }}</span>
+          ><button
+            ref="sidebarExpand"
+            v-tip="'Mở thanh bên'"
+            class="sidebar-expand"
+            aria-label="Mở thanh bên"
+            @click="toggleCollapsed"
+          >
+            <AppIcon name="sidebar" :size="18" />
+          </button>
         </div>
+        <!-- Folded sidebar: its logo sits here, centred (decision 0172). Always rendered,
+             shown only while folded, so its place can be measured before the move. -->
+        <button
+          class="brand topbar-brand"
+          aria-label="OfflineMask - Trang chủ"
+          @click="openFormat('home')"
+        >
+          <span class="brand-mark"><BrandMark :size="28" /></span
+          ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
+        </button>
       </header>
-      <main :class="{ 'home-page': page === 'home', 'wide-page': page === 'excel' }">
+      <main
+        :class="{
+          'home-page': page === 'home',
+          'wide-page': page === 'excel' || page === 'folder',
+        }"
+      >
         <!-- The text and spreadsheet pages stay alive across navigation, so the step,
              view and pasted reply are still there on return. All of it is RAM only. -->
-        <KeepAlive include="WorkspacePage,SheetPage,DocPage">
-          <HomePage v-if="page === 'home'" ref="pageRef" @navigate="openFormat" @start="navigate" />
+        <KeepAlive include="WorkspacePage,SheetPage,DocPage,FolderPage">
+          <HomePage
+            v-if="page === 'home'"
+            ref="pageRef"
+            @navigate="openFormat"
+            @start="navigate"
+            @type="startTyping"
+          />
           <SettingsPage v-else-if="page === 'settings'" ref="pageRef" />
+          <FolderPage v-else-if="page === 'folder'" ref="pageRef" @navigate="navigate" />
           <SheetPage
             v-else-if="page === 'excel'"
             ref="pageRef"
@@ -325,6 +461,7 @@ async function closeSidebar() {
           {{ storageError }}
         </p>
       </main>
+      <AppFooter :version="version" />
     </div>
   </div>
 </template>

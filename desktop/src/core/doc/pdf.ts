@@ -1,11 +1,5 @@
 import { blocksToMarkdown, toBlocks } from "./blocks.ts";
-import {
-  applyReplacements,
-  DocFileError,
-  maxDocBytes,
-  type DocEdits,
-  type DocParagraph,
-} from "./docx.ts";
+import { applyReplacements, DocFileError, type DocEdits, type DocParagraph } from "./docx.ts";
 import { ocrTextItems, type OcrEngine, type OcrTextItem } from "./ocr.ts";
 
 /** PDF support, phase 1 (decision 0149): only PDFs that contain text. The text is read
@@ -18,7 +12,6 @@ import { ocrTextItems, type OcrEngine, type OcrTextItem } from "./ocr.ts";
  * Phase 2 (decision 0180): when the machine can read text in pictures (`ocr.ts`), a
  * page without text is drawn once, at 200 dpi, and read by the system's own text
  * recognition; its lines then take the same path as a text page's items. */
-export const maxPdfPages = 300;
 /** Images at least this many pixels count for the "has images" note; logos and icons
  * are usually smaller. */
 const largeImagePixels = 200_000;
@@ -480,7 +473,7 @@ export function pageList(pages: readonly number[]): string {
   for (let index = 0; index < pages.length;) {
     let end = index;
     while (pages[end + 1] === pages[end]! + 1) end++;
-    ranges.push(end > index ? `${pages[index]}–${pages[end]}` : `${pages[index]}`);
+    ranges.push(end > index ? `${pages[index]}-${pages[end]}` : `${pages[index]}`);
     index = end + 1;
   }
   return ranges.join(", ");
@@ -599,6 +592,9 @@ export interface PdfReading {
    * without a word. Only used with `ocr`, since only a drawn page decodes pictures
    * (decision 0182). */
   decoders?: string;
+  /** The characters the app's memory budget allows (decision 0173); reading stops with
+   * "memory" past it. */
+  maxChars?: number;
 }
 
 /** A page's items read by their place: lines, tables and forms, then paragraphs. Tables
@@ -667,9 +663,8 @@ const nextTask = () => new Promise((resolve) => setTimeout(resolve, 0));
 
 export async function openPdf(
   bytes: Uint8Array,
-  { onPage, stopped, ocr, decoders }: PdfReading = {},
+  { onPage, stopped, ocr, decoders, maxChars = Infinity }: PdfReading = {},
 ): Promise<{ source: PdfSource; paragraphs: DocParagraph[]; notes: string[] }> {
-  if (bytes.byteLength > maxDocBytes) throw new DocFileError("too-large");
   const largeImages = countLargeImages(bytes);
   const { getDocument } = await loadPdfJs();
   // No URL is given for CMaps, standard fonts or ICC profiles, and system fonts are off;
@@ -700,10 +695,10 @@ export async function openPdf(
         (error as { name?: string })?.name === "PasswordException" ? "password" : "unreadable",
       );
     }
-    if (document.numPages > maxPdfPages) throw new DocFileError("too-many-pages");
     const pages: PdfPage[] = [];
     const paragraphs: DocParagraph[] = [];
     let yielded = performance.now();
+    let read = 0;
     for (let number = 1; number <= document.numPages; number++) {
       if (performance.now() - yielded > yieldEvery) {
         await nextTask();
@@ -737,6 +732,8 @@ export async function openPdf(
         ...annotationTexts((await page.getAnnotations()) as Annotation[]).map((text) => ({ text })),
       );
       const ids: number[] = [];
+      for (const { text } of texts) read += text.length;
+      if (read > maxChars) throw new DocFileError("memory");
       for (const { text: paragraph, table } of texts) {
         ids.push(paragraphs.length);
         paragraphs.push({
@@ -793,9 +790,9 @@ export async function openPdf(
 }
 
 const placeholders: Partial<Record<PdfPageKind, string>> = {
-  "no-text": "(Trang không có chữ đọc được, thường là ảnh scan — không có trong bản đã ẩn)",
-  blank: "(Trang không có chữ đọc được, trang trống hoặc ảnh quá mờ — không có trong bản đã ẩn)",
-  "old-font": "(Trang dùng phông chữ cũ, chưa đọc được — không có trong bản đã ẩn)",
+  "no-text": "(Trang không có chữ đọc được, thường là ảnh scan - không có trong bản đã ẩn)",
+  blank: "(Trang không có chữ đọc được, trang trống hoặc ảnh quá mờ - không có trong bản đã ẩn)",
+  "old-font": "(Trang dùng phông chữ cũ, chưa đọc được - không có trong bản đã ẩn)",
 };
 /** The masked document as Markdown: each page under its own heading, its paragraphs
  * with the replacements applied, rows of cells as tables (`blocks.ts`), and a line in

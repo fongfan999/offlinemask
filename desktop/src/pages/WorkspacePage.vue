@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
+import JobTime from "../components/JobTime.vue";
+import LongJobNote from "../components/LongJobNote.vue";
 import BrandMark from "../components/BrandMark.vue";
 import HighlightedText from "../components/HighlightedText.vue";
 import MaskProgress from "../components/MaskProgress.vue";
@@ -9,6 +11,7 @@ import QuickIntro from "../components/QuickIntro.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import { desktopModels, formatModelBytes } from "../adapters/models.ts";
 import {
+  folderKey,
   packKey,
   quickKey,
   runKey,
@@ -31,7 +34,8 @@ import {
   type SampleSession,
   type TextSession,
 } from "../core/sessions.ts";
-import { maxTextLength } from "../core/text.ts";
+import { jobSeconds } from "../composables/jobTime.ts";
+import { vTip } from "../directives/tip.ts";
 
 const props = defineProps<{ format: Format; session?: SampleSession | TextSession }>();
 const emit = defineEmits<{
@@ -41,6 +45,7 @@ const emit = defineEmits<{
 }>();
 
 const pack = useProvided(packKey);
+const folder = useProvided(folderKey);
 const { status: models, ready: modelsReady, preparing } = pack;
 const {
   draft,
@@ -60,6 +65,8 @@ const quick = useProvided(quickKey);
 /** History is a passcode feature (decision 0071). Without one nothing talks about
  * saving: the user chose not to keep anything, and the review screen offers it once. */
 const historyOn = computed(() => vault.state.value === "unlocked");
+/** The hide button's shortcut, named in its tip. */
+const submitKey = /Mac|iPhone|iPad/.test(navigator.userAgent) ? "⌘ Enter" : "Ctrl Enter";
 const savedNote = vault.savedNote;
 
 const view = ref<ReviewView>("masked");
@@ -190,9 +197,9 @@ const subtitle = computed(() =>
     ? privateSession.value
       ? step.value === 3
         ? sessionTitle(session.value)
-        : `${sessionTitle(session.value)} · Đọc lại bản đã ẩn, rồi sao chép để gửi AI.`
+        : `${sessionTitle(session.value)} - Đọc lại bản đã ẩn, rồi sao chép để gửi AI.`
       : "Đọc lại kết quả, rồi sao chép khi bạn thấy phù hợp."
-    : "Thông tin bạn chọn được thay bằng mã như [SDT_1_…], ngay trên máy bạn.",
+    : "Thông tin bạn chọn được thay bằng mã như [SDT_1_...], ngay trên máy bạn.",
 );
 /** A text run keeps going in the background while the user navigates. */
 /** A .txt or .md file dropped on the text box becomes the draft (decision 0088); other
@@ -204,6 +211,9 @@ async function dropFile(event: DragEvent) {
   const file = event.dataTransfer?.files[0];
   if (!file) return;
   event.preventDefault();
+  // Too large for the text box: a piece at a time on the folder page (decision 0174).
+  if (/\.(txt|md)$/i.test(file.name) && (await folder.takeLarge(file)))
+    return emit("navigate", "folder");
   processingError.value = /\.(txt|md)$/i.test(file.name)
     ? await openTextFile(file)
     : "Ô này nhận tệp .txt hoặc .md. Mở tệp Excel ở Bảng tính, tệp Word ở Tài liệu.";
@@ -245,9 +255,9 @@ function openStep(target: number) {
   restoreStep.value = target === 3;
   pendingFocus.value = target === 3 ? "restore" : "step2";
 }
-const characterLimit = maxTextLength.toLocaleString("vi-VN");
 /** The counter only matters near the limit. */
-const showCounter = computed(() => draft.value.length >= maxTextLength * 0.9);
+/** How long the text takes on this machine (decision 0173); said once it is a minute. */
+const textSeconds = computed(() => jobSeconds(draft.value.length, pack.ready.value));
 /** Categories fold into one line under the text; the checkboxes open on request. */
 const optionsOpen = ref(false);
 const optionsSummary = computed(() => {
@@ -325,9 +335,9 @@ const packWait = computed(() => {
       return {
         busy: true,
         percent,
-        title: `Đang tải gói nhận diện… ${percent} %`,
-        detail: `${formatModelBytes(status.downloaded)} / ${formatModelBytes(status.total)} · Tải xong sẽ tự cài đặt, rồi nút Ẩn thông tin bật lại.`,
-        button: `Đang tải… ${percent} %`,
+        title: `Đang tải gói nhận diện... ${percent} %`,
+        detail: `${formatModelBytes(status.downloaded)} / ${formatModelBytes(status.total)} - Tải xong sẽ tự cài đặt, rồi nút Ẩn thông tin bật lại.`,
+        button: `Đang tải... ${percent} %`,
         action: "pause" as const,
       };
     case "installing":
@@ -336,29 +346,29 @@ const packWait = computed(() => {
         percent,
         title:
           status.installed >= status.installedBytes
-            ? "Đang kiểm tra gói nhận diện lần cuối…"
-            : `Đang cài đặt gói nhận diện… ${percent} %`,
+            ? "Đang kiểm tra gói nhận diện lần cuối..."
+            : `Đang cài đặt gói nhận diện... ${percent} %`,
         detail: "Bước này không cần Internet. Xong là nút Ẩn thông tin bật lại.",
         button:
           status.installed >= status.installedBytes
-            ? "Đang kiểm tra…"
-            : `Đang cài đặt… ${percent} %`,
+            ? "Đang kiểm tra..."
+            : `Đang cài đặt... ${percent} %`,
         action: "pause" as const,
       };
     case "cancelling":
       return {
         busy: true,
         percent,
-        title: "Đang tạm dừng…",
+        title: "Đang tạm dừng...",
         detail: "Phần đã tải được giữ lại.",
-        button: "Đang tạm dừng…",
+        button: "Đang tạm dừng...",
         action: null,
       };
     case "paused":
       return {
         busy: false,
         percent,
-        title: `Đã tạm dừng tải · ${percent} %`,
+        title: `Đã tạm dừng tải - ${percent} %`,
         detail: "Phần đã tải được giữ lại.",
         button: "Tiếp tục tải",
         action: "resume" as const,
@@ -377,7 +387,7 @@ const packWait = computed(() => {
         busy: false,
         percent: null,
         title: "Tải gói nhận diện để dùng các mục đã chọn.",
-        detail: `${formatModelBytes(status.total)} · Chỉ cần tải một lần`,
+        detail: `${formatModelBytes(status.total)} - Chỉ cần tải một lần`,
         button: "Tải thêm để tiếp tục",
         action: "details" as const,
       };
@@ -409,6 +419,11 @@ function primaryAction() {
   clearFeedback();
   emit("mask");
 }
+/** "Tạo mới" starts over at home like every page (decision 0172); a draft is let go. */
+function newText() {
+  if (!props.session) draft.value = "";
+  emit("navigate", "home");
+}
 /** ⌘/Ctrl+Enter inside the draft does what the primary button does. */
 function submitShortcut() {
   if (!primaryDisabled.value) primaryAction();
@@ -424,7 +439,7 @@ async function copy(restore = false) {
     copied.value = true;
     copyStatus.value =
       restore && privateSession.value
-        ? "Đã sao chép bản đã ẩn. Dán vào công cụ AI bạn dùng (ChatGPT, Claude, Gemini…), rồi đưa câu trả lời của AI vào bước Khôi phục."
+        ? "Đã sao chép bản đã ẩn. Dán vào công cụ AI bạn dùng (ChatGPT, Claude, Gemini...), rồi đưa câu trả lời của AI vào bước Khôi phục."
         : "Đã sao chép. Bạn có thể dán vào nơi mình chọn.";
     if (restore && privateSession.value) openStep(3);
     // The trip Ẩn nhanh saves: offer it once (decision 0098).
@@ -442,6 +457,10 @@ async function copy(restore = false) {
 defineExpose({
   focusHeading() {
     heading.value?.focus({ preventScroll: true });
+  },
+  /** Home's text field leads here, ready to type (decision 0172). */
+  focusInput() {
+    document.getElementById("text-input")?.focus({ preventScroll: true });
   },
   /** After masking, focus the copy button but keep the heading and text in view. */
   focusResult() {
@@ -463,11 +482,11 @@ defineExpose({
       </h1>
       <p>{{ subtitle }}</p>
     </div>
-    <div v-if="session" class="editor-actions">
-      <button v-if="historyOn" class="quiet-button" @click="emit('remove', session.id)">
+    <div v-if="session || (format === 'text' && draft && !processing)" class="editor-actions">
+      <button v-if="session && historyOn" class="quiet-button" @click="emit('remove', session.id)">
         <AppIcon name="close" :size="15" />Xóa khỏi lịch sử
       </button>
-      <button class="quiet-button" @click="emit('navigate', format)">
+      <button class="quiet-button" @click="newText">
         <AppIcon name="plus" :size="15" />Tạo mới
       </button>
     </div>
@@ -491,13 +510,6 @@ defineExpose({
             'is-upcoming': index + 1 > step,
           }"
           :aria-label="`Bước ${index + 1}: ${label}`"
-          :title="
-            index === 0 && session
-              ? historyOn
-                ? 'Sửa văn bản rồi ẩn lại. Bản này vẫn được giữ trong lịch sử.'
-                : 'Sửa văn bản rồi ẩn lại.'
-              : undefined
-          "
           :aria-current="index + 1 === step ? 'step' : undefined"
           :disabled="!canOpenStep(index + 1)"
           @click="openStep(index + 1)"
@@ -522,7 +534,7 @@ defineExpose({
           ref="restorePanel"
           :session-id="session.id"
           :analysis="session.analysis"
-          @new-text="emit('navigate', 'text')"
+          @new-text="emit('navigate', 'home')"
           @pasted="(pasted) => (replyPasted = pasted)"
         >
           <template v-if="savedNote" #hint
@@ -543,57 +555,33 @@ defineExpose({
             </button>
           </div>
           <span v-if="!privateSession" class="sample-tag">Dữ liệu mẫu</span>
-          <button
-            v-else-if="privateSession"
-            class="quiet-button edit-text"
-            :title="historyOn ? 'Bản này vẫn được giữ trong lịch sử.' : undefined"
-            @click="openStep(1)"
-          >
+          <button v-else-if="privateSession" class="quiet-button edit-text" @click="openStep(1)">
             <AppIcon name="compose" :size="14" />Sửa văn bản
           </button>
         </header>
         <template v-if="format === 'text' && !session">
+          <LongJobNote :seconds="textSeconds" subject="Văn bản này" />
           <label class="sr-only" for="text-input">Văn bản cần ẩn thông tin</label>
           <textarea
             id="text-input"
             v-model="draft"
             :disabled="processing"
             class="text-content draft-input"
-            placeholder="Nhập, dán văn bản hoặc kéo thả tệp .txt vào đây…"
+            placeholder="Nhập, dán văn bản hoặc kéo thả tệp .txt vào đây..."
             spellcheck="false"
             autocomplete="off"
             autocorrect="off"
             autocapitalize="off"
-            aria-describedby="text-input-hint"
-            :aria-invalid="draft.length > maxTextLength"
             @input="processingError = ''"
             @dragover="dragOver"
             @drop="dropFile"
             @keydown.meta.enter.prevent="submitShortcut"
             @keydown.ctrl.enter.prevent="submitShortcut"
           ></textarea>
-          <div v-if="(!draft && !processing) || showCounter" class="input-hint-row">
-            <button
-              v-if="!draft && !processing"
-              type="button"
-              class="sample-link"
-              @click="draft = sampleText"
-            >
+          <div v-if="!draft && !processing" class="input-hint-row">
+            <button type="button" class="sample-link" @click="draft = sampleText">
               Thử với văn bản mẫu
             </button>
-            <p
-              v-if="showCounter"
-              id="text-input-hint"
-              class="input-hint"
-              :class="{ 'input-error': draft.length > maxTextLength }"
-              aria-live="polite"
-            >
-              {{
-                draft.length > maxTextLength
-                  ? draftError
-                  : `${draft.length.toLocaleString("vi-VN")} / ${characterLimit} ký tự`
-              }}
-            </p>
           </div>
           <!-- What to hide folds into one line; the checkboxes open on request. -->
           <fieldset class="detection-options" :disabled="processing">
@@ -601,7 +589,7 @@ defineExpose({
             <div class="options-summary">
               <p>
                 Sẽ ẩn: <strong>{{ optionsSummary }}</strong
-                ><small v-if="optionsNeedPack && !optionsOpen"> · Một số mục cần tải thêm</small>
+                ><small v-if="optionsNeedPack && !optionsOpen"> - Một số mục cần tải thêm</small>
               </p>
               <button
                 type="button"
@@ -617,16 +605,16 @@ defineExpose({
               <label
                 v-for="option in detectionOptions"
                 :key="option.id"
+                v-tip="{ title: option.label, text: option.detail }"
                 class="detection-option"
                 :class="{ selected: selectedOptions.includes(option.id) }"
-                :title="option.detail"
               >
                 <input
                   v-model="selectedOptions"
                   type="checkbox"
                   :aria-label="
                     option.model && !modelsReady
-                      ? `${option.label} · ${packWait.busy ? 'Đang tải' : 'Cần tải thêm'}`
+                      ? `${option.label} - ${packWait.busy ? 'Đang tải' : 'Cần tải thêm'}`
                       : option.label
                   "
                   :value="option.id"
@@ -635,7 +623,7 @@ defineExpose({
                 <span
                   >{{ option.label
                   }}<small v-if="option.model && !modelsReady">{{
-                    packWait.busy ? "Đang tải…" : "Cần tải thêm"
+                    packWait.busy ? "Đang tải..." : "Cần tải thêm"
                   }}</small></span
                 >
               </label>
@@ -734,7 +722,7 @@ defineExpose({
                 class="quiet-button"
                 @click="hideName(name)"
               >
-                Ẩn “{{ name }}”
+                Ẩn "{{ name }}"
               </button>
             </div>
           </div>
@@ -761,7 +749,7 @@ defineExpose({
           >
             <span
               ><AppIcon name="check" :size="15" />Đã ẩn {{ maskCount }} mục{{
-                unchecked ? ` · ${unchecked.count} loại chưa kiểm tra` : " thông tin"
+                unchecked ? ` - ${unchecked.count} loại chưa kiểm tra` : " thông tin"
               }}</span
             ><span
               >{{ changesOpen ? "Thu gọn" : "Xem thay đổi" }}<AppIcon name="chevron" :size="12"
@@ -787,6 +775,10 @@ defineExpose({
         </div>
         <MaskProgress v-if="textProcessing && progressShown && progress" :progress="progress" />
         <footer class="card-footer">
+          <JobTime
+            v-if="!session && format === 'text' && !textProcessing && textSeconds >= 60"
+            :seconds="textSeconds"
+          />
           <span v-if="session" class="action-hint"
             ><AppIcon v-if="privateSession && savedNote" name="lock" :size="13" />{{
               privateSession ? savedNote : "Bản mẫu"
@@ -797,9 +789,9 @@ defineExpose({
           </button>
           <button
             v-if="!session"
+            v-tip="format === 'text' ? `Phím tắt: ${submitKey}` : undefined"
             class="primary-action"
             :disabled="primaryDisabled"
-            :title="format === 'text' ? '⌘/Ctrl + Enter' : undefined"
             @click="primaryAction"
           >
             <span
@@ -809,7 +801,7 @@ defineExpose({
             ></span
             ><BrandMark v-else :size="17" />{{
               textProcessing
-                ? "Đang xử lý…"
+                ? "Đang xử lý..."
                 : format === "text" && missingSelectedModels
                   ? packWait.button
                   : "Ẩn thông tin"

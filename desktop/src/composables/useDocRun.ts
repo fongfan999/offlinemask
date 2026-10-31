@@ -1,4 +1,6 @@
 import { computed, ref, shallowRef, watch, type Ref } from "vue";
+import { jobSeconds, recordPace } from "./jobTime.ts";
+import { memoryRefusal, pdfCharLimit, pdfRefusal } from "./memoryBudget.ts";
 import {
   exportName,
   maskedSuffix,
@@ -9,7 +11,7 @@ import {
   withoutMaskedSuffix,
 } from "../adapters/sheet-files.ts";
 import type { DocumentFormat } from "../core/doc/document.ts";
-import { maxDocBytes, type DocEdits, type DocParagraph, type DocError } from "../core/doc/docx.ts";
+import { type DocEdits, type DocParagraph, type DocError } from "../core/doc/docx.ts";
 import {
   editedAliases,
   editedPlaces,
@@ -33,20 +35,22 @@ export const docPreviewParagraphs = 20;
 export const docErrorMessages: Record<DocError, string> = {
   unsupported:
     "Chỉ hỗ trợ tệp .docx, .odt và .pdf. Tệp .doc cũ hãy mở bằng Word và lưu lại thành .docx trước.",
-  "too-large": "Tệp lớn hơn 20 MB. Hãy chia nhỏ tài liệu rồi thử lại.",
   unreadable:
     "Chưa đọc được tệp này. Hãy kiểm tra tệp mở được trong Word hoặc LibreOffice và không có mật khẩu.",
   empty: "Tài liệu không có chữ để ẩn.",
   password:
     "PDF này cần mật khẩu để mở. Hãy mở bằng trình đọc PDF, lưu lại bản không mật khẩu rồi thử lại.",
-  "too-many-pages": "PDF dài hơn 300 trang. Hãy tách thành các tệp nhỏ hơn rồi thử lại.",
-  scanned:
-    "PDF này là ảnh scan. Máy này chưa đọc được chữ trong ảnh scan: cần macOS 14 trở lên; trên Windows sắp có.",
+  scanned: "PDF này là ảnh scan. Máy này chưa đọc được chữ trong ảnh scan.",
   "old-font":
     "Chữ trong PDF này dùng phông chữ cũ (như TCVN3, VNI) nên chưa đọc được. Hãy mở tệp gốc, chuyển sang Unicode rồi xuất lại PDF.",
   cancelled: "",
-  "no-ocr": "Máy này chưa đọc được chữ trong hình ảnh: cần macOS 14 trở lên; trên Windows sắp có.",
+  "no-ocr": "Máy này chưa đọc được chữ trong hình ảnh.",
+  // Worded with this machine's budget where it is caught (decision 0173).
+  memory: "",
 };
+/** A picture past `maxImagePixels` (decision 0180); the memory budget has no say in it. */
+export const imageTooLarge =
+  "Ảnh này quá lớn (hơn 25 triệu điểm ảnh). Hãy thu nhỏ ảnh rồi thử lại.";
 export const docFailure =
   "Chưa xử lý được tài liệu trên thiết bị. Tệp gốc không bị thay đổi. Hãy thử lại.";
 const documentName = /\.(docx|odt|pdf)$/i;
@@ -117,6 +121,13 @@ function errorMessage(error: unknown) {
  * and later restore the AI's returned document. Documents stay in the worker, in RAM. */
 export function useDocRun({ detector, files, pack, ocr, sessions, onSession }: DocRunDependencies) {
   const draft = shallowRef<DocDraft | null>(null);
+  /** Seconds on this machine for the document's text (decision 0173). */
+  const estimate = computed(() =>
+    jobSeconds(
+      (draft.value?.paragraphs ?? []).reduce((sum, paragraph) => sum + paragraph.text.length, 0),
+      pack.ready.value,
+    ),
+  );
   const opening = ref(false);
   /** Pages read while a PDF opens. */
   const openingProgress = ref<{ done: number; total: number } | null>(null);
@@ -196,8 +207,9 @@ export function useDocRun({ detector, files, pack, ocr, sessions, onSession }: D
       fileError.value = docErrorMessages.unsupported;
       return;
     }
-    if (file.size > maxDocBytes) {
-      fileError.value = docErrorMessages["too-large"];
+    const refused = await memoryRefusal(file);
+    if (refused) {
+      fileError.value = refused;
       return;
     }
     opening.value = true;
@@ -208,6 +220,7 @@ export function useDocRun({ detector, files, pack, ocr, sessions, onSession }: D
         progress: (done, total) => (openingProgress.value = { done, total }),
         signal: abort.signal,
         ocr: ocr.value,
+        maxChars: await pdfCharLimit(),
       });
       discardDraft();
       previewDetections.value = new Map();
@@ -221,7 +234,13 @@ export function useDocRun({ detector, files, pack, ocr, sessions, onSession }: D
         mailto: opened.mailto,
       };
     } catch (error) {
-      if (!abort.signal.aborted) fileError.value = errorMessage(error);
+      if (!abort.signal.aborted)
+        fileError.value =
+          (error as { code?: string })?.code === "memory"
+            ? imageName.test(file.name)
+              ? imageTooLarge
+              : await pdfRefusal()
+            : errorMessage(error);
     } finally {
       opening.value = false;
       openingProgress.value = null;
@@ -235,6 +254,7 @@ export function useDocRun({ detector, files, pack, ocr, sessions, onSession }: D
   function discardDraft() {
     const handle = draft.value?.handle;
     draft.value = null;
+    fileError.value = "";
     if (handle) release(handle);
   }
   function prune() {
@@ -261,6 +281,12 @@ export function useDocRun({ detector, files, pack, ocr, sessions, onSession }: D
         new Map(),
         () => cancelled,
       );
+      if (!cancelled)
+        recordPace(
+          current.paragraphs.reduce((sum, paragraph) => sum + paragraph.text.length, 0),
+          (Date.now() - startedAt) / 1000,
+          pack.ready.value,
+        );
       progress.value = { stage: "masking", done: 0, total: 0, startedAt };
       const id = sessions.value.some((s) => aliasScope(s.id) === aliasScope(current.sessionId))
         ? newSessionId(sessions.value)
@@ -368,12 +394,22 @@ export function useDocRun({ detector, files, pack, ocr, sessions, onSession }: D
     return true;
   }
   async function openReturned(session: DocSession, file: File): Promise<DocRestore | string> {
-    if (!(isPdfSession(session) ? returnedForPdf : returnedName).test(file.name))
-      return isPdfSession(session) ? unsupportedReturn : docErrorMessages.unsupported;
-    if (file.size > maxDocBytes) return docErrorMessages["too-large"];
+    return openReply(session.findings, file, isPdfSession(session));
+  }
+  /** A returned document restored with any aliases: home's restore tab passes every table
+   * it knows, and takes the Markdown and text a PDF's copy comes back as (decision 0172). */
+  async function openReply(
+    findings: readonly Finding[],
+    file: File,
+    fromPdf = true,
+  ): Promise<DocRestore | string> {
+    if (!(fromPdf ? returnedForPdf : returnedName).test(file.name))
+      return fromPdf ? unsupportedReturn : docErrorMessages.unsupported;
+    const refused = await memoryRefusal(file);
+    if (refused) return refused;
     try {
-      const opened = await files.openDoc(file);
-      const result = restoreParagraphs(opened.paragraphs, session.findings, opened.mailto);
+      const opened = await files.openDoc(file, { maxChars: await pdfCharLimit() });
+      const result = restoreParagraphs(opened.paragraphs, findings, opened.mailto);
       return {
         fileName: file.name,
         handle: opened.handle,
@@ -396,6 +432,7 @@ export function useDocRun({ detector, files, pack, ocr, sessions, onSession }: D
     /** Pictures and scanned pages can be read on this machine. */
     ocr,
     draft,
+    estimate,
     opening,
     openingProgress,
     cancelOpen,
@@ -416,6 +453,7 @@ export function useDocRun({ detector, files, pack, ocr, sessions, onSession }: D
     download,
     copyMasked,
     openReturned,
+    openReply,
     downloadRestored,
     closeReturned,
   };

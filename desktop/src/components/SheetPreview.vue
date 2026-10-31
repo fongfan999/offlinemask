@@ -58,7 +58,7 @@ function choose(column: number, value: string) {
   <div v-if="preambleLines.length" class="sheet-preamble" aria-label="Phần đầu trang tính">
     <p v-for="(cells, index) in preambleLines" :key="index">
       <template v-for="(cell, position) in cells" :key="position"
-        ><span v-if="position" aria-hidden="true"> · </span
+        ><span v-if="position" aria-hidden="true"> - </span
         ><mark v-if="cell.marked" :class="tone ?? 'alias'">{{ cell.text }}</mark
         ><template v-else>{{ cell.text }}</template></template
       >

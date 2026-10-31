@@ -116,7 +116,7 @@ export function useTextReview(options: TextReviewOptions) {
       ),
     );
     reviewStatus.value =
-      ranges.length === 1 ? `Đã ẩn “${value}”.` : `Đã ẩn “${value}” ở ${ranges.length} chỗ.`;
+      ranges.length === 1 ? `Đã ẩn "${value}".` : `Đã ẩn "${value}" ở ${ranges.length} chỗ.`;
     return true;
   }
   function apply(

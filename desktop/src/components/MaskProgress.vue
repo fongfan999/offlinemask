@@ -36,9 +36,9 @@ const view = computed(() => {
     elapsed <= 5 || percent < 5
       ? ""
       : percent >= 95 || progress.stage === "masking"
-        ? "Sắp xong…"
+        ? "Sắp xong..."
         : `Còn khoảng ${duration((elapsed * (progress.total - progress.done)) / Math.max(1, progress.done))}`;
-  return { title: `Đang ẩn thông tin… ${percent} %`, percent, detail };
+  return { title: `Đang ẩn thông tin... ${percent} %`, percent, detail };
 });
 </script>
 

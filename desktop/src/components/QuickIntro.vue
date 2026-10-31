@@ -62,7 +62,7 @@ onBeforeUnmount(() => {
         <template v-else-if="quick.introStage.value === 'waiting'">
           <strong id="quick-intro-title">Bật Ẩn nhanh</strong>
           <span role="status">
-            Trong Cài đặt hệ thống › Trợ năng, bật OfflineMask rồi quay lại đây. Ẩn nhanh sẽ tự bật.
+            Trong Cài đặt hệ thống > Trợ năng, bật OfflineMask rồi quay lại đây. Ẩn nhanh sẽ tự bật.
           </span>
           <div class="quick-intro-actions">
             <button class="quiet-button" @click="quick.dismissIntro()">Để sau</button>

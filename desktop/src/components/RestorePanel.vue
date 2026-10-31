@@ -10,7 +10,8 @@ const props = withDefaults(
   defineProps<{
     sessionId: string;
     analysis: TextAnalysis;
-    /** What was masked, as the page names it: văn bản, bảng tính, tài liệu. */
+    /** What was masked, as the page names it: văn bản, bảng tính, tài liệu. Empty in
+     * home's restore tab, which reads replies about anything masked (decision 0172). */
     subject?: string;
     newLabel?: string;
   }>(),
@@ -30,6 +31,10 @@ const input = useTemplateRef<HTMLTextAreaElement>("input");
 defineExpose({
   focusInput() {
     input.value?.focus({ preventScroll: true });
+  },
+  /** A reply pasted elsewhere on the page (home's restore tab, decision 0172). */
+  fill(text: string) {
+    reply.value = text;
   },
 });
 
@@ -57,7 +62,9 @@ const status = computed(() => {
   const current = result.value;
   if (!current) return "";
   if (!current.restored && !current.unknown.length)
-    return `Không tìm thấy mã thay thế của ${props.subject} này trong nội dung đã dán.`;
+    return props.subject
+      ? `Không tìm thấy mã thay thế của ${props.subject} này trong nội dung đã dán.`
+      : "Không tìm thấy mã thay thế nào bạn đã ẩn trong nội dung đã dán.";
   return current.restored === 1
     ? "Đã khôi phục 1 mã thay thế."
     : `Đã khôi phục ${current.restored.toLocaleString("vi-VN")} mã thay thế.`;
@@ -65,7 +72,8 @@ const status = computed(() => {
 const unknownNote = computed(() => {
   const unknown = result.value?.unknown ?? [];
   if (!unknown.length) return "";
-  return `${unknown.length === 1 ? "1 mã thay thế" : `${unknown.length} mã thay thế`} không thuộc ${props.subject} này được giữ nguyên: ${unknown.join(", ")}.`;
+  const owner = props.subject ? `${props.subject} này` : "nội dung nào bạn đã ẩn trên máy này";
+  return `${unknown.length === 1 ? "1 mã thay thế" : `${unknown.length} mã thay thế`} không thuộc ${owner} được giữ nguyên: ${unknown.join(", ")}.`;
 });
 
 /** Clear the box for the AI's next reply in the same conversation. */
@@ -100,7 +108,7 @@ async function copy() {
       ref="input"
       v-model="reply"
       class="text-content restore-input"
-      placeholder="Dán câu trả lời của AI vào đây…"
+      placeholder="Dán câu trả lời của AI vào đây..."
       spellcheck="false"
       autocomplete="off"
       autocorrect="off"

@@ -2,6 +2,7 @@ import { fold, searchIndex } from "../detection/labelled-fields.ts";
 import type { Detection } from "../detection/types.ts";
 import type { Finding } from "../review.ts";
 import { cardValues } from "./id-card.ts";
+import { aliasValues } from "../restore.ts";
 import { AliasBook, detectionReplacements } from "../sheet/mask.ts";
 import {
   applyReplacements,
@@ -110,11 +111,14 @@ export function maskParagraphs(
   detections: ReadonlyMap<number, readonly Detection[]>,
   scope: string,
   mailto: readonly string[] = [],
+  /** A folder's shared book (decision 0171); its findings then cover every file. */
+  shared?: AliasBook,
 ): { edits: DocEdits; findings: Finding[]; masked: number } {
   const existing = paragraphs
     .map((paragraph) => paragraph.text)
     .filter((text) => text.includes("["));
-  const book = new AliasBook(scope, (alias) => existing.some((text) => text.includes(alias)));
+  const book =
+    shared ?? new AliasBook(scope, (alias) => existing.some((text) => text.includes(alias)));
   const edits: DocEdits = { paragraphs: new Map(), links: new Map() };
   const repeats = repeatedValues(paragraphs, detections);
   const own = (id: number) => [...(detections.get(id) ?? []), ...(repeats.get(id) ?? [])];
@@ -150,17 +154,17 @@ export function restoreParagraphs(
   mailto: readonly string[] = [],
 ): { edits: DocEdits; restored: number; unknown: string[] } {
   const edits: DocEdits = { paragraphs: new Map(), links: new Map() };
+  const values = aliasValues(findings);
   const unknown = new Set<string>();
   let restored = 0;
   for (const paragraph of paragraphs) {
     if (!paragraph.text.includes("[")) continue;
-    const result = restoreReplacements(paragraph.text, findings);
+    const result = restoreReplacements(paragraph.text, values);
     result.unknown.forEach((alias) => unknown.add(alias));
     if (!result.replacements.length) continue;
     restored += result.replacements.length;
     edits.paragraphs.set(paragraph.id, result.replacements);
   }
-  const values = new Map(findings.map((finding) => [finding.alias, finding.value]));
   for (const address of mailto) {
     const value = values.get(address);
     if (value) edits.links.set(address, value);

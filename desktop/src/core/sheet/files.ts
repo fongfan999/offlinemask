@@ -6,10 +6,8 @@ import { odsGrid, parseOds, readOdsPackage, writeOds, type OdsSource } from "./o
 
 /** Supported input (decisions 0076, 0085, 0086): .xlsx, .xls and .ods workbooks and .csv
  * files, up to these limits. Everything stays in memory on this machine. */
-export const maxFileBytes = 20 * 1024 * 1024;
-export const maxDataRows = 100_000;
 export type SheetFormat = "xlsx" | "xls" | "ods" | "csv";
-export type FileError = "unsupported" | "too-large" | "too-many-rows" | "unreadable" | "empty";
+export type FileError = "unsupported" | "unreadable" | "empty";
 
 export function sheetFormat(fileName: string): SheetFormat | null {
   const extension = fileName.toLowerCase().split(".").pop();
@@ -77,9 +75,7 @@ function tableFrom(name: string, grid: string[][]): SheetTable {
     rows: grid.slice(headerRow + 1).map(pad),
   };
 }
-function checkRows(tables: readonly SheetTable[]) {
-  const rows = tables.reduce((sum, table) => sum + table.rows.length, 0);
-  if (rows > maxDataRows) throw new SheetFileError("too-many-rows");
+function checkNotEmpty(tables: readonly SheetTable[]) {
   if (!tables.some((table) => table.header.some(Boolean) || table.rows.length))
     throw new SheetFileError("empty");
 }
@@ -108,7 +104,7 @@ export function readCsv(bytes: Uint8Array, name: string): OpenedFile {
   // A final line break leaves one empty row behind; drop it.
   while (rows.length && rows[rows.length - 1]!.every((cell) => cell === "")) rows.pop();
   const tables = [tableFrom(name.replace(/\.csv$/i, ""), rows)];
-  checkRows(tables);
+  checkNotEmpty(tables);
   return {
     source: {
       format: "csv",
@@ -183,7 +179,7 @@ export function workbookFile(workbook: ExcelJS.Workbook, notes: string[]): Opene
     while (grid.length && grid[grid.length - 1]!.every((cell) => cell === "")) grid.pop();
     return tableFrom(sheet.name, grid);
   });
-  checkRows(tables);
+  checkNotEmpty(tables);
   return { source: { format: "xlsx", workbook, sheets }, tables, notes };
 }
 
@@ -214,8 +210,8 @@ export async function readOds(bytes: Uint8Array): Promise<OpenedFile> {
   if (!zip) throw new SheetFileError("unreadable");
   const xml = await zip.file("content.xml")!.async("string");
   const sheets = parseOds(xml);
-  const tables = sheets.map((sheet) => tableFrom(sheet.name, odsGrid(sheet.rows, maxDataRows)));
-  checkRows(tables);
+  const tables = sheets.map((sheet) => tableFrom(sheet.name, odsGrid(sheet.rows)));
+  checkNotEmpty(tables);
   return {
     source: { format: "ods", zip, xml, sheets },
     tables,
@@ -226,7 +222,6 @@ export async function readOds(bytes: Uint8Array): Promise<OpenedFile> {
 export async function openSheetFile(bytes: Uint8Array, name: string): Promise<OpenedFile> {
   const format = sheetFormat(name);
   if (!format) throw new SheetFileError("unsupported");
-  if (bytes.byteLength > maxFileBytes) throw new SheetFileError("too-large");
   if (format === "csv") {
     try {
       return readCsv(bytes, name);

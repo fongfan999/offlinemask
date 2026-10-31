@@ -1,7 +1,7 @@
 // Explicit developer packaging; never imported by startup/builds. No upload occurs here.
 import {readFile,writeFile,mkdir,copyFile} from 'node:fs/promises';
 import {createHash} from 'node:crypto';
-const base='https://pub-5b0280497d774b8f99417b3438d8bce8.r2.dev';
+const base='https://packs.offlinemask.com';
 const output='artifacts/r2-v1-upload';
 const results=JSON.parse(await readFile('../docs/evaluations/pack-compression-v1/results.json'));
 const hash=b=>createHash('sha256').update(b).digest('hex');

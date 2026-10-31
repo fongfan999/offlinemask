@@ -10,9 +10,13 @@ import { packKey, runKey, useProvided } from "../composables/context.ts";
 const { status, busy, error, run } = useProvided(packKey);
 const { processing } = useProvided(runKey);
 const heading = useTemplateRef<HTMLHeadingElement>("heading");
+const vaultCard = useTemplateRef<InstanceType<typeof VaultSettings>>("vaultCard");
 defineExpose({
   focusHeading() {
     heading.value?.focus({ preventScroll: true });
+  },
+  setUpPasscode() {
+    void vaultCard.value?.setUp();
   },
 });
 </script>
@@ -29,7 +33,7 @@ defineExpose({
     @pause="run('pause')"
     @uninstall="run('uninstall')"
   />
-  <VaultSettings />
+  <VaultSettings ref="vaultCard" />
   <QuickActionSettings />
   <AppSettings />
 </template>

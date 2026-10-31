@@ -10,7 +10,7 @@
     <meta name="theme-color" content="#f7f5ee" />
     <link rel="canonical" href="https://offlinemask.com/privacy" />
     <link rel="icon" href="../brand/mark-ink.svg" type="image/svg+xml" />
-    <title>Quyền riêng tư — OfflineMask</title>
+    <title>Quyền riêng tư - OfflineMask</title>
     <link rel="stylesheet" href="./standalone.css" />
   </head>
   <body>
@@ -19,7 +19,7 @@
         <a class="om-brand" href="./"
           ><span class="om-mark" aria-hidden="true"></span><span>Offline<span>Mask</span></span></a
         >
-        <a class="om-text-link" href="./">← Về trang chủ</a>
+        <a class="om-text-link" href="./">Về trang chủ</a>
       </header>
       <main class="om-doc om-wrap">
         <p class="om-maker-label">Cập nhật ngày 31 tháng 10 năm 2026</p>
@@ -84,16 +84,16 @@
         <h2 id="luong-du-lieu"><span>2</span>Dữ liệu đi qua ứng dụng thế nào</h2>
         <ol class="om-doc-flow">
           <li>
-            <strong>Bạn đưa nội dung vào:</strong> dán văn bản, mở tệp, hoặc bôi đen chữ trong ứng
-            dụng khác. Với PDF là ảnh scan và hình ảnh (PNG, JPG), chữ trong ảnh được đọc ngay trên
-            máy, không qua mạng: trên macOS 14 trở lên bằng bộ nhận dạng ký tự có sẵn của hệ điều
-            hành (Vision của Apple), trên Windows bằng mô hình đọc chữ đi kèm ứng dụng (cài sẵn cùng
-            OfflineMask, không tải thêm); ảnh không được lưu lại và không có trong bản đã ẩn, chỉ có
-            chữ đọc được.
+            <strong>Bạn đưa nội dung vào:</strong> dán văn bản, mở tệp hay cả một thư mục, hoặc bôi
+            đen chữ trong ứng dụng khác. Với PDF là ảnh scan và hình ảnh (PNG, JPG), chữ trong ảnh
+            được đọc ngay trên máy, không qua mạng: trên macOS 14 trở lên bằng bộ nhận dạng ký tự có
+            sẵn của hệ điều hành (Vision của Apple), trên Windows bằng mô hình đọc chữ đi kèm ứng
+            dụng (cài sẵn cùng OfflineMask, không tải thêm); ảnh không được lưu lại và không có
+            trong bản đã ẩn, chỉ có chữ đọc được.
           </li>
           <li>
-            <strong>OfflineMask nhận diện</strong> số điện thoại, số tài khoản, email, CCCD… (và họ
-            tên, địa chỉ nếu có gói tiếng Việt), ngay trên máy.
+            <strong>OfflineMask nhận diện</strong> số điện thoại, số tài khoản, email, CCCD... (và
+            họ tên, địa chỉ nếu có gói tiếng Việt), ngay trên máy.
           </li>
           <li>
             <strong>Thông tin riêng được thay bằng mã</strong> như <code>[SDT_1_4e8c]</code>. Bảng
@@ -120,7 +120,12 @@
               <tr>
                 <td>Văn bản, tệp và bảng đối chiếu (chưa đặt mật mã)</td>
                 <td>Bộ nhớ của ứng dụng</td>
-                <td>Đến khi bạn thoát ứng dụng</td>
+                <td>
+                  Đến khi bạn thoát ứng dụng. Riêng bảng đối chiếu của văn bản hay tệp đã được thay
+                  bằng cái mới thì tự xóa sớm hơn: văn bản sau 7 ngày hoặc khi chúng chiếm quá 32
+                  MB, tệp sau 30 ngày hoặc khi chúng chiếm quá 256 MB (xóa cái cũ nhất trước, nhưng
+                  luôn giữ tệp mới nhất)
+                </td>
               </tr>
               <tr>
                 <td>Lịch sử (đã đặt mật mã)</td>
@@ -172,7 +177,7 @@
               </tr>
               <tr>
                 <td>Bạn tải gói tiếng Việt trong Cài đặt</td>
-                <td>Kho tệp của dự án (Cloudflare R2)</td>
+                <td>Kho tệp của dự án, packs.offlinemask.com (Cloudflare R2)</td>
                 <td>Yêu cầu tải tệp; không kèm nội dung hay thông tin của bạn</td>
               </tr>
               <tr>
@@ -229,9 +234,9 @@
             Trên macOS cần quyền Trợ năng; trên Windows dùng UI Automation của hệ thống.
           </li>
           <li>
-            <strong>Nút chỉ hiện ở nơi có AI:</strong> các ứng dụng AI (ChatGPT, Claude…) và các
-            trang AI trong trình duyệt (chatgpt.com, gemini.google.com…), theo một danh sách bạn xem
-            và sửa được trong Cài đặt › Thao tác nhanh. Ở ứng dụng khác, phần bôi đen không được
+            <strong>Nút chỉ hiện ở nơi có AI:</strong> các ứng dụng AI (ChatGPT, Claude...) và các
+            trang AI trong trình duyệt (chatgpt.com, gemini.google.com...), theo một danh sách bạn
+            xem và sửa được trong Cài đặt > Thao tác nhanh. Ở ứng dụng khác, phần bôi đen không được
             đọc; chỉ khi bạn nhấn ⌘⇧M (Ctrl+Shift+M). Trong trình duyệt, OfflineMask đọc địa chỉ của
             trang đang bôi đen, chỉ dùng tên miền để so với danh sách, và không lưu lại. Nút không
             hiện ở thanh địa chỉ hay ô đặt tên tệp.
@@ -242,7 +247,7 @@
           </li>
           <li>
             <strong>Thay chữ tại chỗ</strong> khi bạn bấm nút hoặc ⌘⇧M. Trong ứng dụng gốc của macOS
-            (TextEdit, Ghi chú…), OfflineMask đọc và thay phần bôi đen qua quyền Trợ năng, không
+            (TextEdit, Ghi chú...), OfflineMask đọc và thay phần bôi đen qua quyền Trợ năng, không
             đụng tới bộ nhớ tạm. Ở trình duyệt và ứng dụng web, việc đó cần một lần sao chép và một
             lần dán: trước đó toàn bộ bộ nhớ tạm của bạn (cả ảnh, tệp, chữ có định dạng) được giữ
             lại, và được trả lại ngay khi việc thay xong (hoặc khi không thay nữa), trừ khi bạn vừa
@@ -258,8 +263,17 @@
         </ul>
         <p>
           OfflineMask không đọc ô mật khẩu và chính cửa sổ của nó. Bạn có thể tắt mọi thao tác nhanh
-          trong Cài đặt › Thao tác nhanh, hoặc thu hồi quyền Trợ năng trong Cài đặt hệ thống bất cứ
+          trong Cài đặt > Thao tác nhanh, hoặc thu hồi quyền Trợ năng trong Cài đặt hệ thống bất cứ
           lúc nào.
+        </p>
+        <p>
+          <strong>Tệp và thư mục.</strong> OfflineMask chỉ đọc tệp hay thư mục bạn kéo thả hoặc
+          chọn, và chỉ ghi vào nơi bạn chọn trong hộp thoại lưu: một tệp, hoặc khi ẩn cả thư mục,
+          một thư mục mới (như "Hồ sơ (OfflineMasked)") bên trong thư mục bạn chọn. Tệp CSV và tệp
+          văn bản được đọc và ghi từng phần một vào đúng nơi đó, để tệp rất lớn không phải nằm hết
+          trong bộ nhớ. Tệp gốc không bị thay đổi. Để biết nên mở bao nhiêu tệp cùng lúc, ứng dụng
+          xem máy có bao nhiêu nhân xử lý và bao nhiêu bộ nhớ; các con số này không được lưu hay gửi
+          đi.
         </p>
 
         <h2 id="cong-cu-ai"><span>6</span>Công cụ AI bạn dùng</h2>
@@ -304,7 +318,7 @@
         <p>
           Khi cách ứng dụng xử lý dữ liệu thay đổi, trang này được cập nhật cùng ngày, và mọi thay
           đổi đều xem được trong lịch sử mã nguồn. Gặp lỗi, hãy dùng
-          <a href="./bao-loi">trang báo lỗi</a> (trong ứng dụng: thanh bên › Báo lỗi). Câu hỏi khác,
+          <a href="./bao-loi">trang báo lỗi</a> (trong ứng dụng: thanh bên > Báo lỗi). Câu hỏi khác,
           hãy mở một
           <a href="https://github.com/fongfan999/offlinemask/issues">issue trên GitHub</a>.
         </p>
@@ -312,7 +326,7 @@
       <footer class="om-doc-footer om-wrap">
         <span>© 2026 Phong Phan</span><a href="./">OfflineMask.com</a
         ><a href="https://github.com/fongfan999/offlinemask/blob/main/LICENSE.md"
-          >Giấy phép O’Saasy ↗</a
+          >Giấy phép O'Saasy</a
         >
       </footer>
     </div>

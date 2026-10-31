@@ -26,6 +26,7 @@ async function announce(message: string) {
 }
 /** The setup form opens on request, like the offer on the review screen. */
 const settingUp = ref(false);
+const card = useTemplateRef<HTMLElement>("card");
 
 const nextMismatch = computed(
   () => nextConfirm.value.length === 6 && next.value !== nextConfirm.value,
@@ -80,12 +81,23 @@ async function wipe() {
     await announce("Đã xóa lịch sử, bỏ mật mã và tắt lịch sử.");
   }
 }
+/** From the sidebar's note (decision 0172): the setup form, open and in view. */
+defineExpose({
+  async setUp() {
+    if (vault.state.value !== "none") return card.value?.scrollIntoView({ block: "start" });
+    settingUp.value = true;
+    notice.value = "";
+    await nextTick();
+    card.value?.scrollIntoView({ block: "start", behavior: "smooth" });
+    card.value?.querySelector<HTMLInputElement>("input")?.focus({ preventScroll: true });
+  },
+});
 </script>
 
 <template>
-  <section class="vault-settings glass glass-card" aria-labelledby="vault-title">
+  <section ref="card" class="vault-settings glass glass-card" aria-labelledby="vault-title">
     <div class="model-card-heading">
-      <h2 id="vault-title">Mật mã · Lưu lịch sử</h2>
+      <h2 id="vault-title">Mật mã - Lưu lịch sử</h2>
       <span
         v-if="vault.state.value !== 'unavailable'"
         class="model-badge"

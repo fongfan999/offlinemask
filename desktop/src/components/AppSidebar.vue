@@ -1,65 +1,55 @@
 <script setup lang="ts">
-import { computed, ref, useTemplateRef } from "vue";
+import { ref, useTemplateRef } from "vue";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
-import ComingSoonBadge from "./ComingSoonBadge.vue";
 import ReportDialog from "./ReportDialog.vue";
-import { openProductWebsite, productWebsite } from "../adapters/desktop.ts";
+import { vTip } from "../directives/tip.ts";
 import type { Page } from "../composables/context.ts";
 import { sessionPreview } from "../core/session-preview.ts";
 import { isPrivate, sessionTitle, type Session } from "../core/sessions.ts";
 
-const props = defineProps<{
+defineProps<{
   sessions: readonly Session[];
   activeId: string | null;
   page: Page;
   open: boolean;
   preparing: boolean;
-  /** History is a passcode feature: the list stays hidden until one is set. */
+  /** With a passcode the list is history; without one it is what is open now, in RAM. */
   history: boolean;
-  /** This machine reads text in pictures, so images open on Tài liệu (decision 0180). */
-  images: boolean;
+  /** A folder being masked or reviewed, which is no session (decision 0171). */
+  folder: { name: string; status: string } | null;
+  /** For the report only; home shows it (decision 0172). */
   version: string;
 }>();
-const emit = defineEmits<{ navigate: [destination: Page, id?: string | null]; close: [] }>();
+const emit = defineEmits<{
+  navigate: [destination: Page, id?: string | null];
+  close: [];
+  /** Wide windows: fold the sidebar away; the logo moves to the top bar (decision 0172). */
+  collapse: [];
+  /** "+ Ẩn thông tin mới": home, on its first tab, from anywhere (home included). */
+  start: [];
+  /** "Đặt mật mã" in the list's note: Cài đặt with the passcode form open. */
+  keep: [];
+}>();
 
-/** Each content type with the files it opens (decision 0088). */
-const formats = computed(
-  () =>
-    [
-      { page: "text", icon: "text", label: "Văn bản", types: "TXT, MD" },
-      { page: "excel", icon: "table", label: "Bảng tính", types: "XLSX, XLS, ODS, CSV" },
-      {
-        page: "word",
-        icon: "file",
-        label: "Tài liệu",
-        types: props.images ? "DOCX, ODT, PDF, PNG, JPG" : "DOCX, ODT, PDF",
-      },
-    ] as const,
-);
-/** Planned but not built on this machine: pictures where no text recognition runs. */
-const upcomingFormats = computed(() =>
-  props.images ? [] : [{ label: "Hình ảnh", icon: "image", types: "JPG, PNG" }],
-);
 /** What the report says the user was looking at. */
 const screens: Record<Page, string> = {
   home: "Trang chủ",
   settings: "Cài đặt",
+  folder: "Thư mục",
   text: "Văn bản",
   excel: "Bảng tính",
   word: "Tài liệu",
 };
 const start = useTemplateRef<HTMLButtonElement>("start");
-const report = useTemplateRef<InstanceType<typeof ReportDialog>>("report");
-const websiteError = ref("");
-async function visitWebsite(event: MouseEvent) {
-  websiteError.value = "";
-  try {
-    await openProductWebsite(event);
-  } catch {
-    websiteError.value = "Chưa mở được trình duyệt. Bạn có thể truy cập OfflineMask.com.";
-  }
+/** Without a passcode the list is RAM only; the "i" beside its heading says so and offers
+ * the passcode (decision 0172). Shown on hover or focus, or held open by a click. */
+const infoOpen = ref(false);
+function leaveInfo(event: FocusEvent) {
+  const box = event.currentTarget as HTMLElement;
+  if (!box.contains(event.relatedTarget as Node | null)) infoOpen.value = false;
 }
+const report = useTemplateRef<InstanceType<typeof ReportDialog>>("report");
 function dateLabel(value: string) {
   return new Date(value).toLocaleString("vi-VN", {
     day: "2-digit",
@@ -83,74 +73,101 @@ defineExpose({
     aria-label="Điều hướng và lịch sử"
     @keydown.esc="emit('close')"
   >
-    <button
-      ref="start"
-      class="brand"
-      aria-label="OfflineMask — Trang chủ"
-      @click="emit('navigate', 'home')"
-    >
-      <span class="brand-mark"><BrandMark :size="28" /></span
-      ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
-    </button>
-    <nav aria-label="Định dạng">
+    <div class="sidebar-head">
       <button
-        :aria-current="page === 'home' ? 'page' : undefined"
+        ref="start"
+        class="brand"
+        aria-label="OfflineMask - Trang chủ"
         @click="emit('navigate', 'home')"
       >
-        <AppIcon name="home" />Trang chủ
+        <span class="brand-mark"><BrandMark :size="28" /></span
+        ><span class="brand-name">Offline<span class="brand-accent">Mask</span></span>
       </button>
       <button
-        v-for="format in formats"
-        :key="format.page"
-        :aria-current="page === format.page && (!activeId || !history) ? 'page' : undefined"
-        @click="emit('navigate', format.page)"
+        v-tip="'Thu gọn thanh bên'"
+        class="sidebar-collapse"
+        aria-label="Thu gọn thanh bên"
+        @click="emit('collapse')"
       >
-        <AppIcon :name="format.icon" /><span class="nav-text"
-          >{{ format.label }}<small>{{ format.types }}</small></span
-        >
+        <AppIcon name="sidebar" :size="18" />
       </button>
-      <!-- Formats that are planned but not built: visible, not clickable. -->
-      <button
-        v-for="upcoming in upcomingFormats"
-        :key="upcoming.label"
-        class="nav-upcoming"
-        :aria-label="`${upcoming.label}, sắp có`"
-        disabled
+    </div>
+    <!-- The pattern AI users know from their chat apps (decision 0172): start something new
+         at the top, what is open or kept below. -->
+    <!-- An action, never "current": it looked selected, and so not clickable. -->
+    <button class="sidebar-new" @click="emit('start')">
+      <AppIcon name="plus" :size="16" />Ẩn thông tin mới
+    </button>
+    <div class="history-heading">
+      {{ history ? "Lịch sử" : "Gần đây" }}
+      <span
+        v-if="!history"
+        class="history-info"
+        :class="{ 'is-open': infoOpen }"
+        @keydown.esc.stop="infoOpen = false"
+        @focusout="leaveInfo"
       >
-        <AppIcon :name="upcoming.icon" /><span class="nav-text nav-label"
-          >{{ upcoming.label }}<small v-if="upcoming.types">{{ upcoming.types }}</small></span
-        ><ComingSoonBadge />
-      </button>
-    </nav>
-    <template v-if="history">
-      <div class="history-heading">
-        LỊCH SỬ <span>{{ sessions.length || "" }}</span>
-      </div>
-      <div class="history-list">
-        <p v-if="!sessions.length" class="empty-history">Chưa có mục nào.</p>
         <button
-          v-for="session in sessions"
-          :key="session.id"
-          class="history-item"
-          :aria-current="activeId === session.id ? 'page' : undefined"
-          @click="emit('navigate', session.format, session.id)"
+          class="history-info-button"
+          aria-label="Các mục này được giữ đến khi nào?"
+          :aria-expanded="infoOpen"
+          aria-controls="history-tip"
+          @click="infoOpen = !infoOpen"
         >
-          <AppIcon
-            :name="
-              session.format === 'text' ? 'text' : session.format === 'word' ? 'file' : 'table'
-            "
-            :size="16"
-          /><span
-            ><strong>{{ sessionPreview(session) }}</strong
-            ><small
-              >{{ isPrivate(session) ? `${sessionTitle(session)} · ` : ""
-              }}{{ dateLabel(session.createdAt) }}{{ isPrivate(session) ? "" : " · Mẫu" }}</small
-            ></span
-          >
+          <AppIcon name="info" :size="14" />
         </button>
-      </div>
-    </template>
-    <div v-else class="sidebar-spacer"></div>
+        <span id="history-tip" class="history-tip" role="note">
+          <strong>Chỉ giữ đến khi bạn đóng ứng dụng</strong>
+          <span
+            >Mỗi loại chỉ giữ bản mới nhất. Đặt mật mã để lưu tất cả trên máy này, mở lại khi
+            cần.</span
+          >
+          <button
+            class="history-tip-action"
+            @click="
+              infoOpen = false;
+              emit('keep');
+            "
+          >
+            Đặt mật mã<AppIcon name="arrow" :size="13" />
+          </button>
+        </span>
+      </span>
+    </div>
+    <div class="history-list">
+      <button
+        v-if="folder"
+        class="history-item"
+        :aria-current="page === 'folder' ? 'page' : undefined"
+        @click="emit('navigate', 'folder')"
+      >
+        <AppIcon name="folder" :size="16" /><span
+          ><strong>{{ folder.name }}</strong
+          ><small>{{ folder.status }}</small></span
+        >
+      </button>
+      <p v-if="!sessions.length && !folder" class="empty-history">
+        {{ history ? "Chưa có mục nào." : "Văn bản và tệp bạn ẩn sẽ nằm ở đây." }}
+      </p>
+      <button
+        v-for="session in sessions"
+        :key="session.id"
+        class="history-item"
+        :aria-current="activeId === session.id ? 'page' : undefined"
+        @click="emit('navigate', session.format, session.id)"
+      >
+        <AppIcon
+          :name="session.format === 'text' ? 'text' : session.format === 'word' ? 'file' : 'table'"
+          :size="16"
+        /><span
+          ><strong>{{ sessionPreview(session) }}</strong
+          ><small
+            >{{ isPrivate(session) ? `${sessionTitle(session)} - ` : ""
+            }}{{ dateLabel(session.createdAt) }}{{ isPrivate(session) ? "" : " - Mẫu" }}</small
+          ></span
+        >
+      </button>
+    </div>
     <nav class="settings-nav" aria-label="Cài đặt ứng dụng">
       <button
         :aria-current="page === 'settings' ? 'page' : undefined"
@@ -162,15 +179,8 @@ defineExpose({
           aria-label="Đang chuẩn bị gói nhận diện"
         ></span>
       </button>
-      <button @click="report?.open()"><AppIcon name="help" />Báo lỗi</button>
+      <button @click="report?.open()"><AppIcon name="help" />Báo lỗi hoặc góp ý</button>
     </nav>
     <ReportDialog ref="report" :version="version" :screen="screens[page]" />
-    <footer class="sidebar-footer">
-      <a :href="productWebsite" target="_blank" rel="noopener noreferrer" @click="visitWebsite">
-        OfflineMask.com<AppIcon name="external" :size="12" />
-      </a>
-      <span class="app-version" :aria-label="`Phiên bản ${version}`">{{ version }}</span>
-      <p v-if="websiteError" class="website-error" role="alert">{{ websiteError }}</p>
-    </footer>
   </aside>
 </template>

@@ -1,6 +1,6 @@
-import { restoreAliases, aliasTokens, type Restoration } from "./restore.ts";
+import { aliasShape, aliasTokens, aliasValues, restoreWith, type Restoration } from "./restore.ts";
 import type { Finding } from "./review.ts";
-import type { Session } from "./sessions.ts";
+import type { Format, Session } from "./sessions.ts";
 
 /** What the quick action should do with the text on the clipboard (decision 0090).
  * - `restore`: it holds at least one alias of a session seen in this launch;
@@ -35,7 +35,86 @@ export function restoreFromTables(
   text: string,
   tables: readonly (readonly Finding[])[],
 ): Restoration {
-  return restoreAliases(text, { findings: tables.flat(), spans: [] });
+  return restoreWith(text, aliasValues(tables.flat()));
+}
+
+/** A session's alias table as kept for restoring, with what pruning needs to know. */
+export interface KeptTable {
+  findings: readonly Finding[];
+  /** Texts and files have their own limits (decisions 0177 and 0178). */
+  format: Format;
+  /** When the session was made, in milliseconds. */
+  createdAt: number;
+  /** Whether the session is still in the app's list (open, recent or history). */
+  listed: boolean;
+  /** Its rough memory, from `tableBytes`. */
+  bytes: number;
+}
+
+export interface TableLimits {
+  maxAgeMs: number;
+  maxBytes: number;
+}
+const day = 24 * 60 * 60 * 1000;
+/** How long, and how much, the tables of sessions no longer listed are kept: texts a week
+ * within 32 MB (decision 0177), spreadsheets and documents 30 days within 256 MB, since an
+ * AI's file can come back days later and one large sheet alone can take 100 MB (decision 0178). */
+export const keptTableLimits: { text: TableLimits; file: TableLimits } = {
+  text: { maxAgeMs: 7 * day, maxBytes: 32 * 1024 * 1024 },
+  file: { maxAgeMs: 30 * day, maxBytes: 256 * 1024 * 1024 },
+};
+
+/** Rough memory of a table: two bytes per UTF-16 unit of its strings, plus the object. */
+export function tableBytes(findings: readonly Finding[]): number {
+  let bytes = 0;
+  for (const finding of findings)
+    bytes +=
+      64 +
+      2 *
+        (finding.id.length +
+          finding.label.length +
+          finding.value.length +
+          finding.alias.length +
+          finding.reason.length +
+          finding.source.length);
+  return bytes;
+}
+
+/** Ids of tables to forget at `now`, texts and files each against their own limits:
+ * unlisted tables older than the age limit, then the oldest of them until the kind fits
+ * its size limit. Listed sessions are never dropped here, their own lifetime (the open
+ * screen, or history's keep period) governs them. The newest unlisted file is never
+ * dropped for size: it is the one whose AI result is most likely still to come. */
+export function staleTables(
+  tables: ReadonlyMap<string, KeptTable>,
+  now: number,
+  limits = keptTableLimits,
+): string[] {
+  const drop: string[] = [];
+  for (const kind of ["text", "file"] as const) {
+    const { maxAgeMs, maxBytes } = limits[kind];
+    let total = 0;
+    const unlisted: [string, KeptTable][] = [];
+    for (const [id, table] of tables) {
+      if ((table.format === "text") !== (kind === "text")) continue;
+      if (!table.listed) {
+        if (now - table.createdAt > maxAgeMs) {
+          drop.push(id);
+          continue;
+        }
+        unlisted.push([id, table]);
+      }
+      total += table.bytes;
+    }
+    unlisted.sort((a, b) => a[1].createdAt - b[1].createdAt);
+    if (kind === "file") unlisted.pop();
+    for (const [id, table] of unlisted) {
+      if (total <= maxBytes) break;
+      drop.push(id);
+      total -= table.bytes;
+    }
+  }
+  return drop;
 }
 
 const count = (n: number) => n.toLocaleString("vi-VN");
@@ -51,14 +130,14 @@ export const quickMessages = {
   failed: "Chưa thực hiện được thao tác. Nội dung được giữ nguyên, hãy thử lại.",
   // Short on purpose: in place the change is visible, otherwise one line says where it is.
   masked: (n: number, replaced = false) =>
-    replaced ? `Đã ẩn ${count(n)} thông tin` : `Đã ẩn ${count(n)} thông tin · dán để dùng`,
+    replaced ? `Đã ẩn ${count(n)} thông tin` : `Đã ẩn ${count(n)} thông tin - dán để dùng`,
   /** The preview's title when the selection changed while masking ran (decision 0127). */
   maskedMoved: "Vùng chọn đã đổi",
   restored: (n: number, unknown: number, replaced = false) =>
     (replaced
       ? `Đã khôi phục ${count(n)} thông tin`
-      : `Đã khôi phục ${count(n)} thông tin · dán để dùng`) +
-    (unknown ? ` · ${count(unknown)} mã lạ giữ nguyên` : ""),
+      : `Đã khôi phục ${count(n)} thông tin - dán để dùng`) +
+    (unknown ? ` - ${count(unknown)} mã lạ giữ nguyên` : ""),
   /** What a click on the circle will do, shown while it is hovered (decision 0096). */
   hintMask: "Ẩn thông tin",
   hintRestore: "Khôi phục thông tin",
@@ -85,9 +164,9 @@ export const quickMessages = {
   selectMask: "Ẩn thông tin trong phần vừa chọn? Kết quả thay ngay tại chỗ.",
   selectRestore: "Khôi phục mã thay thế trong phần vừa chọn? Kết quả thay ngay tại chỗ.",
   /** A Finder service handed over more than one file (decision 0094). */
-  oneFile: (name: string) => `Mỗi lần một tệp: đã mở “${name}”.`,
+  oneFile: (name: string) => `Mỗi lần một tệp: đã mở "${name}".`,
   /** Shown once per launch when the selection could not be taken for lack of permission. */
-  permissionHint: "Muốn thay ngay tại chỗ? Cấp quyền Trợ năng trong Cài đặt › Thao tác nhanh.",
+  permissionHint: "Muốn thay ngay tại chỗ? Cấp quyền Trợ năng trong Cài đặt > Thao tác nhanh.",
 } as const;
 
 /** Where each alias sits in masked text, for highlighting in the preview. */
@@ -97,7 +176,7 @@ export function aliasMarks(
 ): { start: number; end: number }[] {
   const aliases = new Set(findings.map((finding) => finding.alias));
   const marks: { start: number; end: number }[] = [];
-  for (const token of text.matchAll(/\[[A-Z][A-Z_]*_\d+_[a-f0-9]{4,8}\]/g)) {
+  for (const token of text.matchAll(aliasShape)) {
     if (aliases.has(token[0]))
       marks.push({ start: token.index, end: token.index + token[0].length });
   }

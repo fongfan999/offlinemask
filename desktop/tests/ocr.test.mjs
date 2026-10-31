@@ -186,7 +186,7 @@ test("a picture is refused without recognition, when empty, and when too large",
   );
   await assert.rejects(
     openImage(await jpeg(6000, 5000), async () => ({ lines: [] }), readByPlace),
-    failure("too-large"),
+    failure("memory"),
   );
   await assert.rejects(
     openImage(

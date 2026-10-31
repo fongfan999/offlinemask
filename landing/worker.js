@@ -3,6 +3,7 @@
 //   /latest.json         the newest version, its release day and its download paths
 //   /download/<platform> a redirect straight to that release's file
 //   /report              a bug report the visitor sends from /bao-loi (decision 0147)
+// and the byte ranges of videos, which static assets always send whole, so a player could not seek.
 // It asks GitHub, never the visitor's browser, so the page still loads nothing from third
 // parties. It reads no cookies and keeps no logs (observability is off in wrangler.jsonc); each
 // download adds one to that day's count for its platform (decision 0144), nothing else.
@@ -112,6 +113,37 @@ async function receiveReport(request, store) {
   return new Response(null, { status: 204 });
 }
 
+/**
+ * The asset, or the bytes a Range header asks for. Cloudflare's static assets ignore Range and
+ * answer 200 with the whole file; a video player needs 206 to jump to a point it has not loaded.
+ */
+export async function assetRange(request, assets) {
+  const range = /^bytes=(\d*)-(\d*)$/.exec(request.headers.get("range") ?? "");
+  const asset = await assets.fetch(request);
+  if (asset.status !== 200 || !range || (!range[1] && !range[2])) return withRanges(asset);
+  const body = await asset.arrayBuffer();
+  const size = body.byteLength;
+  // "bytes=500-" is from 500 to the end; "bytes=-500" is the last 500 bytes.
+  const start = range[1] ? Number(range[1]) : Math.max(0, size - Number(range[2]));
+  const end = range[1] && range[2] ? Math.min(Number(range[2]), size - 1) : size - 1;
+  const headers = new Headers(asset.headers);
+  headers.set("accept-ranges", "bytes");
+  if (start >= size || start > end) {
+    headers.set("content-range", `bytes */${size}`);
+    headers.delete("content-length");
+    return new Response(null, { status: 416, headers });
+  }
+  headers.set("content-range", `bytes ${start}-${end}/${size}`);
+  headers.set("content-length", String(end - start + 1));
+  return new Response(body.slice(start, end + 1), { status: 206, headers });
+}
+
+const withRanges = (response) => {
+  const headers = new Headers(response.headers);
+  headers.set("accept-ranges", "bytes");
+  return new Response(response.body, { status: response.status, headers });
+};
+
 const unavailable = () =>
   new Response("Chưa lấy được bản tải về. Bạn thử lại sau ít phút nhé.", {
     status: 503,
@@ -154,6 +186,7 @@ export default {
         return unavailable();
       }
     }
+    if (pathname.endsWith(".mp4")) return assetRange(request, env.ASSETS);
     return env.ASSETS.fetch(request);
   },
 };

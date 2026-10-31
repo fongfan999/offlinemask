@@ -1,15 +1,26 @@
 <script setup lang="ts">
+import type { PickedFolder } from "../adapters/folder.ts";
 import { computed, ref, shallowRef, useTemplateRef, watch } from "vue";
 import AppIcon from "../components/AppIcon.vue";
+import CannotOpen from "../components/CannotOpen.vue";
 import BrandMark from "../components/BrandMark.vue";
 import FileDropZone from "../components/FileDropZone.vue";
+import JobTime from "../components/JobTime.vue";
+import LongJobNote from "../components/LongJobNote.vue";
 import KeepOffer from "../components/KeepOffer.vue";
 import MaskProgress from "../components/MaskProgress.vue";
 import RestoreIntro from "../components/RestoreIntro.vue";
 import RestorePanel from "../components/RestorePanel.vue";
 import ReviewList from "../components/ReviewList.vue";
 import SheetPreview from "../components/SheetPreview.vue";
-import { packKey, sheetKey, useProvided, vaultKey, type Page } from "../composables/context.ts";
+import {
+  folderKey,
+  packKey,
+  sheetKey,
+  useProvided,
+  vaultKey,
+  type Page,
+} from "../composables/context.ts";
 import type { SheetRestore } from "../composables/useSheetRun.ts";
 import { applyEdits } from "../core/sheet/mask.ts";
 import { sampleSheetCsv, sampleSheetName } from "../core/sheet/sample.ts";
@@ -20,6 +31,18 @@ const emit = defineEmits<{
   navigate: [destination: Page, id?: string | null];
   remove: [id: string];
 }>();
+const folder = useProvided(folderKey);
+/** A dropped folder opens the folder page, which takes every format (decision 0171). */
+function openFolder(picked: PickedFolder) {
+  void folder.load(picked);
+  emit("navigate", "folder");
+}
+/** A CSV too large to open whole is masked a piece at a time on the folder page
+ * (decision 0174). */
+async function openFile(file: File) {
+  if (await folder.takeLarge(file)) emit("navigate", "folder");
+  else await sheet.openFile(file);
+}
 
 const sheet = useProvided(sheetKey);
 const pack = useProvided(packKey);
@@ -77,12 +100,12 @@ const subtitle = computed(() => {
     const rows = props.session.sheets.reduce((sum, item) => sum + item.rows, 0);
     return step.value === 3
       ? `Bảng tính #${props.session.number}`
-      : `Bảng tính #${props.session.number} · ${rows.toLocaleString("vi-VN")} dòng · Đọc lại bản đã ẩn, rồi tải về để gửi AI.`;
+      : `Bảng tính #${props.session.number} - ${rows.toLocaleString("vi-VN")} dòng - Đọc lại bản đã ẩn, rồi tải về để gửi AI.`;
   }
   return draft.value
     ? // The card says what to do with the columns; the subtitle only sizes the file.
-      `${totalRows.value.toLocaleString("vi-VN")} dòng${draft.value.tables.length > 1 ? ` · ${draft.value.tables.length} trang tính` : ""}`
-    : "Mở tệp Excel, LibreOffice hoặc CSV. Thông tin bạn chọn được thay bằng mã như [SDT_1_…], ngay trên máy bạn.";
+      `${totalRows.value.toLocaleString("vi-VN")} dòng${draft.value.tables.length > 1 ? ` - ${draft.value.tables.length} trang tính` : ""}`
+    : "Mở tệp Excel, LibreOffice hoặc CSV. Thông tin bạn chọn được thay bằng mã như [SDT_1_...], ngay trên máy bạn.";
 });
 const totalRows = computed(
   () => draft.value?.tables.reduce((sum, table) => sum + table.rows.length, 0) ?? 0,
@@ -137,7 +160,7 @@ async function download() {
   try {
     if (await sheet.download(props.session)) {
       status.value =
-        "Đã lưu tệp đã ẩn. Gửi tệp này cho công cụ AI bạn dùng (ChatGPT, Claude, Gemini…), rồi đưa tệp hoặc câu trả lời AI trả về vào bước Khôi phục.";
+        "Đã lưu tệp đã ẩn. Gửi tệp này cho công cụ AI bạn dùng (ChatGPT, Claude, Gemini...), rồi đưa tệp hoặc câu trả lời AI trả về vào bước Khôi phục.";
       restoreStep.value = true;
     }
   } catch {
@@ -169,10 +192,11 @@ function anotherFile() {
   restore.value = null;
   restoreSaved.value = false;
 }
-/** "Tạo mới" and "Ẩn bảng tính mới" start from an empty drop zone. */
+/** "Tạo mới" and "Ẩn bảng tính mới" start a new job where every job
+ * does: home (decision 0172). */
 function newSheet() {
   sheet.discardDraft();
-  emit("navigate", "excel");
+  emit("navigate", "home");
 }
 function openStep(target: number) {
   if (!props.session) return;
@@ -220,15 +244,8 @@ defineExpose({
       <button v-if="session && historyOn" class="quiet-button" @click="emit('remove', session.id)">
         <AppIcon name="close" :size="15" />Xóa khỏi lịch sử
       </button>
-      <button v-if="session" class="quiet-button" @click="newSheet">
+      <button v-if="session || !sheet.processing.value" class="quiet-button" @click="newSheet">
         <AppIcon name="plus" :size="15" />Tạo mới
-      </button>
-      <button
-        v-else-if="!sheet.processing.value"
-        class="quiet-button"
-        @click="sheet.discardDraft()"
-      >
-        <AppIcon name="upload" :size="15" />Chọn tệp khác
       </button>
     </div>
   </div>
@@ -267,25 +284,32 @@ defineExpose({
 
     <!-- Step 1: open a file, choose per column, preview, mask all. -->
     <div v-if="!session" class="step-panel">
-      <template v-if="!draft">
+      <CannotOpen
+        v-if="!draft && sheet.fileError.value"
+        title="Không mở được tệp này"
+        :detail="sheet.fileError.value"
+        button="Chọn tệp khác"
+        @again="newSheet"
+      />
+      <template v-else-if="!draft">
         <FileDropZone
           icon="table"
           title="Kéo thả bảng tính vào đây"
-          hint=".xlsx, .xls, .ods, .csv · tối đa 20 MB"
+          hint=".xlsx, .xls, .ods, .csv"
           accept=".xlsx,.xls,.ods,.csv"
           :busy="sheet.opening.value"
-          @file="sheet.openFile"
+          folders
+          @file="openFile"
+          @folder="openFolder"
         />
         <div class="input-hint-row">
           <button type="button" class="sample-link" @click="trySample">Thử với tệp mẫu</button>
         </div>
-        <p v-if="sheet.fileError.value" class="input-error drop-error" role="alert">
-          {{ sheet.fileError.value }}
-        </p>
       </template>
       <template v-else>
         <!-- While masking runs, only the progress, Hủy and the busy button remain. -->
         <template v-if="!sheet.progress.value">
+          <LongJobNote :seconds="sheet.estimate.value" subject="Bảng tính này" />
           <header class="card-header sheet-toolbar">
             <p class="sheet-hint">Chọn cách xử lý từng cột. Gợi ý dựa trên tên cột và dữ liệu.</p>
             <div class="view-switch" aria-label="Chọn bản xem">
@@ -322,7 +346,7 @@ defineExpose({
           Xem trước {{ Math.min(sheetPreviewRows, draft.tables[sheetIndex]?.rows.length ?? 0) }} /
           {{ (draft.tables[sheetIndex]?.rows.length ?? 0).toLocaleString("vi-VN") }} dòng
           đầu<template v-if="sheet.previewScanning.value">
-            · <span class="spinner" aria-hidden="true"></span> Đang đọc các ô được quét…</template
+            - <span class="spinner" aria-hidden="true"></span> Đang đọc các ô được quét...</template
           >
         </p>
         <p v-if="scanNeedsPack && !sheet.progress.value" class="sheet-note">
@@ -337,6 +361,7 @@ defineExpose({
         </p>
         <footer class="card-footer sheet-footer">
           <span v-if="!hidden" class="action-hint">Chưa chọn cột nào để ẩn hoặc quét.</span>
+          <JobTime v-else-if="!sheet.processing.value" :seconds="sheet.estimate.value" />
           <button v-if="sheet.processing.value" class="quiet-button" @click="sheet.cancelMask()">
             Hủy
           </button>
@@ -349,7 +374,7 @@ defineExpose({
             <span v-if="sheet.processing.value" class="spinner" aria-hidden="true"></span
             ><BrandMark v-else :size="17" />{{
               sheet.processing.value
-                ? "Đang ẩn…"
+                ? "Đang ẩn..."
                 : `Ẩn toàn bộ ${totalRows.toLocaleString("vi-VN")} dòng`
             }}<AppIcon name="arrow" :size="16" />
           </button>
@@ -360,7 +385,7 @@ defineExpose({
     <!-- Step 2: read the masked result and save the masked copy. -->
     <div v-else-if="step === 2" class="step-panel">
       <p class="sheet-summary">
-        <AppIcon name="check" :size="15" />Đã ẩn {{ session.masked.toLocaleString("vi-VN") }} ô ·
+        <AppIcon name="check" :size="15" />Đã ẩn {{ session.masked.toLocaleString("vi-VN") }} ô -
         {{ session.findings.length.toLocaleString("vi-VN") }} mã thay thế
       </p>
       <div v-if="sheetNames.length > 1" class="sheet-tabs" role="tablist">
@@ -439,7 +464,8 @@ defineExpose({
           </p>
           <p v-if="restore.unknown.length" class="sheet-note restore-unknown">
             {{ restore.unknown.length }} mã thay thế không thuộc bảng tính này được giữ nguyên:
-            {{ restore.unknown.slice(0, 5).join(", ") }}{{ restore.unknown.length > 5 ? "…" : "" }}
+            {{ restore.unknown.slice(0, 5).join(", ")
+            }}{{ restore.unknown.length > 5 ? "..." : "" }}
           </p>
           <SheetPreview
             v-if="restoreView"

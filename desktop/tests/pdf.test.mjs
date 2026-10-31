@@ -172,7 +172,7 @@ test("a scanned page among text pages is named and left out of the output", asyn
   const output = maskValues(opened, [["Trịnh Văn Long", "TEN"]]);
   assert.equal(
     output,
-    `## Trang 1\n\nTrang một: hợp đồng của [TEN_1_${scope}].\n\n## Trang 2\n\n(Trang không có chữ đọc được, thường là ảnh scan — không có trong bản đã ẩn)\n\n## Trang 3\n\nTrang ba: chữ ký các bên.\n`,
+    `## Trang 1\n\nTrang một: hợp đồng của [TEN_1_${scope}].\n\n## Trang 2\n\n(Trang không có chữ đọc được, thường là ảnh scan - không có trong bản đã ẩn)\n\n## Trang 3\n\nTrang ba: chữ ký các bên.\n`,
   );
 });
 
@@ -194,12 +194,8 @@ test("a PDF that needs a password is refused; one that only restricts printing o
   assert.deepEqual(texts(opened), ["Hop dong thue nha cua Tran Thi Mai, so dien thoai 0912345678"]);
 });
 
-test("files that are not PDFs, too large or too long are refused", async () => {
+test("files that are not PDFs are refused", async () => {
   await assert.rejects(openPdf(new TextEncoder().encode("not a pdf")), failure("unreadable"));
-  await assert.rejects(openPdf(new Uint8Array(20 * 1024 * 1024 + 1)), failure("too-large"));
-  const long = await PDFDocument.create();
-  for (let index = 0; index < 301; index++) long.addPage();
-  await assert.rejects(openPdf(await long.save()), failure("too-many-pages"));
 });
 
 test("reading a PDF fetches nothing", async () => {
@@ -236,7 +232,7 @@ test("old-font text is told apart from Vietnamese and other languages", () => {
 
 test("page lists collapse runs", () => {
   assert.equal(pageList([2]), "2");
-  assert.equal(pageList([3, 5, 6, 7, 9]), "3, 5–7, 9");
+  assert.equal(pageList([3, 5, 6, 7, 9]), "3, 5-7, 9");
 });
 
 test("documents route a PDF by its header and write it as Markdown", async () => {
@@ -469,4 +465,23 @@ test("a form with its labels in a column reads one field a line (decision 0183)"
   assert.deepEqual(read([item("Nơi nhận:", 46, 700), item("KT. GIÁM ĐỐC", 380, 700)]), [
     "Nơi nhận: · KT. GIÁM ĐỐC",
   ]);
+});
+
+test("a PDF stops with code memory once its text passes the allowance (decision 0173)", async () => {
+  const pdf = await PDFDocument.create();
+  const font = await pdf.embedFont(StandardFonts.Helvetica);
+  for (let page = 0; page < 3; page++)
+    for (let line = 0; line < 40; line++)
+      pdf.addPage().drawText(`Trang ${page} dong ${line} Nguyen Van An 0912345678`, {
+        x: 50,
+        y: 780,
+        size: 10,
+        font,
+      });
+  const bytes = await pdf.save();
+  const all = await openPdf(bytes.slice());
+  const chars = all.paragraphs.reduce((sum, paragraph) => sum + paragraph.text.length, 0);
+  // Allowed exactly what it holds: it opens. One page's worth less: it stops.
+  await openPdf(bytes.slice(), { maxChars: chars });
+  await assert.rejects(openPdf(bytes.slice(), { maxChars: chars / 2 }), failure("memory"));
 });

@@ -65,15 +65,19 @@ test("the page names what the system web view connects to by itself (privacy §4
   assert.doesNotMatch(args, /component-update|ComponentUpdater|DnsOverHttps/i, UPDATE);
 });
 
-test("pack files come only from the project's Cloudflare R2 store (privacy §4)", () => {
+test("pack files come only from packs.offlinemask.com (privacy §4)", () => {
   const dir = new URL("../packs/", import.meta.url);
   const hosts = new Set();
   for (const file of readdirSync(dir).filter((f) => f.endsWith(".json"))) {
     for (const [, url] of read(`../packs/${file}`).matchAll(/"url":\s*"([^"]+)"/g))
       hosts.add(new URL(url).host);
   }
-  assert.deepEqual([...hosts], ["pub-5b0280497d774b8f99417b3438d8bce8.r2.dev"], UPDATE);
-  assert.match(read("../../landing/privacy.html"), /Cloudflare R2/, UPDATE);
+  assert.deepEqual([...hosts], ["packs.offlinemask.com"], UPDATE);
+  assert.match(
+    read("../../landing/privacy.html"),
+    /packs\.offlinemask\.com \(Cloudflare R2\)/,
+    UPDATE,
+  );
 });
 
 test("links from the app open only OfflineMask.com and its report page (privacy §4)", () => {
@@ -176,7 +180,11 @@ test("the app's system permissions are the ones the page explains (privacy §5)"
     [
       "clipboard-manager:allow-read-text",
       "clipboard-manager:allow-write-text",
+      "dialog:allow-open",
       "dialog:allow-save",
+      "fs:allow-mkdir",
+      "fs:allow-open",
+      "fs:allow-write",
       "fs:allow-write-file",
       "global-shortcut:allow-is-registered",
       "global-shortcut:allow-register",
@@ -186,6 +194,25 @@ test("the app's system permissions are the ones the page explains (privacy §5)"
     UPDATE,
   );
   assert.deepEqual(ids("pill"), [], UPDATE);
+  // Decision 0174: large CSV and text files are written a piece at a time.
+  assert.match(read("../../landing/privacy.html"), /đọc\s+và\s+ghi\s+từng\s+phần\s+một/, UPDATE);
+  // Decision 0171: a masked folder is written as a new folder where the user chooses.
+  assert.match(
+    read("../../landing/privacy.html"),
+    /khi ẩn cả thư mục,\s+một\s+thư\s+mục\s+mới/,
+    UPDATE,
+  );
+});
+
+test("the machine check reads processor count and memory only (privacy §5)", () => {
+  const machine = read("../src-tauri/src/machine.rs");
+  assert.match(machine, /struct Resources \{\s*cores: usize,\s*memory: Option<u64>,\s*\}/, UPDATE);
+  assert.doesNotMatch(machine, /reqwest|write|create_dir/, UPDATE);
+  assert.match(
+    read("../../landing/privacy.html"),
+    /bao\s+nhiêu\s+nhân\s+xử\s+lý\s+và\s+bao\s+nhiêu\s+bộ\s+nhớ;\s+các\s+con\s+số\s+này\s+không\s+được\s+lưu\s+hay\s+gửi\s+đi/,
+    UPDATE,
+  );
 });
 
 test("selection watching observes mouse buttons only, never keys (privacy §5)", () => {

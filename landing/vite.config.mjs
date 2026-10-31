@@ -92,12 +92,15 @@ export default defineConfig({
         this.emitFile({ type: "asset", fileName: "robots.txt", source: robots() });
         // Cloudflare serves .txt as "text/plain" with no charset, and browsers then read UTF-8
         // Vietnamese as Latin-1; _headers (read by Cloudflare, not served) names the charset.
+        // Everything in assets/ has its content hash in its name, so browsers keep it for a year
+        // instead of asking again on every visit (Cloudflare's default is max-age=0).
         this.emitFile({
           type: "asset",
           fileName: "_headers",
-          source: ["/llms.txt", "/font-licenses.txt", "/robots.txt"]
-            .map((path) => `${path}\n  Content-Type: text/plain; charset=utf-8\n`)
-            .join(""),
+          source:
+            ["/llms.txt", "/font-licenses.txt", "/robots.txt"]
+              .map((path) => `${path}\n  Content-Type: text/plain; charset=utf-8\n`)
+              .join("") + "/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n",
         });
         this.emitFile({
           type: "asset",
@@ -170,6 +173,9 @@ export default defineConfig({
       },
       generateBundle(_, bundle) {
         for (const file of Object.keys(bundle)) if (file.endsWith(".css")) delete bundle[file];
+        // The 404 page answers at any depth (/a/b/c), so its links start at the site root.
+        const lost = bundle["404.html"];
+        if (lost) lost.source = lost.source.replace(/(="|url\()\.\//g, "$1/");
       },
     },
     {
@@ -250,6 +256,7 @@ export default defineConfig({
         privacy: fileURLToPath(new URL("./privacy.html", import.meta.url)),
         install: fileURLToPath(new URL("./install.html", import.meta.url)),
         report: fileURLToPath(new URL("./bao-loi.html", import.meta.url)),
+        notFound: fileURLToPath(new URL("./404.html", import.meta.url)),
         blog: fileURLToPath(blogTemplate),
       },
     },

@@ -1,4 +1,5 @@
 import { computed, ref, watch, type Ref } from "vue";
+import { memoryRefusal } from "./memoryBudget.ts";
 import type { createTextDetector } from "../adapters/text-detection.ts";
 import {
   detectionOptions,
@@ -17,7 +18,7 @@ import { carryDetections } from "../core/detection/carry.ts";
 import { filterDetections } from "../core/detection/options.ts";
 import { localDetections } from "../core/detection/policy.ts";
 import { decodeText } from "../core/decode-text.ts";
-import { maxTextLength, validateText } from "../core/text.ts";
+import { validateText } from "../core/text.ts";
 import type { SheetProgress } from "./useSheetRun.ts";
 
 export const processingFailure =
@@ -296,13 +297,13 @@ export function useMaskingRun({ detector, pack, sessions, onSession }: MaskingRu
     }
   }
   /** A .txt or .md file becomes the draft (decision 0083); an error message otherwise.
-   * Four bytes per character is the most UTF-8 needs, so larger files are refused unread. */
+   * Any length the app's memory budget allows: the page says how long it will take
+   * (decision 0173). */
   async function openTextFile(file: File): Promise<string> {
     if (processing.value) return "Trang Văn bản đang ẩn một văn bản khác. Hãy thử lại khi xong.";
-    const text =
-      file.size > maxTextLength * 4 ? null : decodeText(new Uint8Array(await file.arrayBuffer()));
-    if (text === null || text.length > maxTextLength)
-      return `Tệp văn bản dài hơn ${maxTextLength.toLocaleString("vi-VN")} ký tự. Hãy chia nhỏ rồi dán từng phần.`;
+    const refused = await memoryRefusal(file);
+    if (refused) return refused;
+    const text = decodeText(new Uint8Array(await file.arrayBuffer()));
     if (!text.trim()) return "Tệp không có chữ để ẩn.";
     draft.value = text;
     processingError.value = "";

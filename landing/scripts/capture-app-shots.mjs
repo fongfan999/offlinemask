@@ -9,7 +9,9 @@
 // `magick <frame>.png -crop 2528x1500+16+0 +repage -resize '2048x1216!' -quality 82 <name>.webp`.
 // Then add the hero's smaller sizes for its srcset: `magick <name>.webp -resize 800x -quality 82
 // <name>-800.webp`, and the same for 1280.
-// The text flow below is the web-build fallback without a name.
+// The text flow below is the web-build fallback without a name; without the pack the app warns that
+// names were not checked, so the published shots come from the desktop app. Only the text shots are
+// published; spreadsheets and documents are drawn in HTML on the product page.
 import { spawn } from "node:child_process";
 import { writeFileSync, mkdirSync } from "node:fs";
 
@@ -146,14 +148,14 @@ const frame = () =>
   })()`);
 
 await fresh();
-console.log(await click("Văn bản"));
-await sleep(1000);
-console.log(await setArea("textarea", TEXT));
-await sleep(500);
+// Home's text field opens the text page (decision 0172); the page swaps in with a transition.
+console.log(await click("Hoặc gõ, dán văn bản"));
+await sleep(2000);
+console.log(await setArea("#text-input", TEXT));
+await sleep(800);
 console.log(
   await evaluate(`(() => {
-    const el = [...document.querySelectorAll('button')].find(e =>
-      e.textContent.includes('Ẩn thông tin') && !(e.getAttribute('aria-label')||'').startsWith('Bước'));
+    const el = document.querySelector('.glass-card .primary-action');
     if (!el) return 'no mask button'; el.click(); return 'masked';
   })()`),
 );
@@ -179,44 +181,5 @@ await sleep(1500);
 console.log(await frame());
 await sleep(600);
 await shot("text-restored");
-await send("Emulation.setDeviceMetricsOverride", {
-  width: 1280,
-  height: 800,
-  deviceScaleFactor: 2,
-  mobile: false,
-});
-
-// Spreadsheet sample.
-await fresh();
-console.log(await click("Bảng tính"));
-await sleep(1200);
-console.log(await click("Thử với tệp mẫu"));
-await sleep(2500);
-await shot("sheet-review");
-console.log(
-  await evaluate(`(() => {
-    const el = document.querySelector('.primary-action');
-    if (!el) return 'no primary'; el.click(); return el.textContent.trim();
-  })()`),
-);
-await sleep(3000);
-await shot("sheet-masked");
-
-// Document sample.
-await fresh();
-console.log(await click("Tài liệu"));
-await sleep(1200);
-console.log(await click("Thử với tệp mẫu"));
-await sleep(3000);
-await shot("doc-review");
-console.log(
-  await evaluate(`(() => {
-    const el = document.querySelector('.primary-action');
-    if (!el) return 'no primary'; el.click(); return el.textContent.trim();
-  })()`),
-);
-await sleep(3500);
-await shot("doc-masked");
-
 ws.close();
 chrome.kill();

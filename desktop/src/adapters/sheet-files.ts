@@ -8,8 +8,6 @@ import { recognizeImage } from "./ocr.ts";
 
 export const fileErrorMessages: Record<FileError, string> = {
   unsupported: "Chỉ hỗ trợ tệp Excel (.xlsx, .xls), .ods và .csv.",
-  "too-large": "Tệp lớn hơn 20 MB. Hãy chia nhỏ tệp rồi thử lại.",
-  "too-many-rows": "Tệp có hơn 100.000 dòng. Hãy chia nhỏ tệp rồi thử lại.",
   unreadable:
     "Chưa đọc được tệp này. Hãy kiểm tra tệp mở được trong Excel hoặc LibreOffice và không có mật khẩu.",
   empty: "Tệp không có dữ liệu.",
@@ -89,10 +87,13 @@ export function createSheetFiles() {
         progress,
         signal,
         ocr = false,
+        maxChars,
       }: {
         progress?: (done: number, total: number) => void;
         signal?: AbortSignal;
         ocr?: boolean;
+        /** A PDF stops with code "memory" past this many characters (decision 0173). */
+        maxChars?: number;
       } = {},
     ): Promise<{
       handle: string;
@@ -107,7 +108,7 @@ export function createSheetFiles() {
       const cancel = () => void send({ type: "cancel", id });
       signal?.addEventListener("abort", cancel, { once: true });
       const reply = await send(
-        { type: "open-doc", id, handle, name: file.name, bytes, ocr },
+        { type: "open-doc", id, handle, name: file.name, bytes, ocr, maxChars },
         [bytes],
         progress,
       ).finally(() => signal?.removeEventListener("abort", cancel));
@@ -128,6 +129,14 @@ export function createSheetFiles() {
     },
     close(handle: string) {
       void send({ type: "close", handle });
+    },
+    /** Stop the worker and drop every file it holds; it starts again when next used. */
+    dispose() {
+      worker?.terminate();
+      worker = undefined;
+      for (const { resolve } of waiting.values())
+        resolve({ type: "failed", id: -1, code: "unreadable" });
+      waiting.clear();
     },
   };
 }

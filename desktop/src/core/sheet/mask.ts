@@ -1,7 +1,7 @@
 import type { Detection } from "../detection/types.ts";
 import { keepAliases } from "../file-review.ts";
 import type { Finding } from "../review.ts";
-import { restoreAliases } from "../restore.ts";
+import { aliasValues, restoreWith } from "../restore.ts";
 import type { ColumnPlan } from "./columns.ts";
 
 /** One sheet as the app sees it, as display strings: optional lines above the
@@ -143,11 +143,14 @@ export function maskTables(
   tables: readonly SheetTable[],
   plan: MaskPlan,
   scope: string,
+  /** A folder's shared book (decision 0171); its findings then cover every file. */
+  shared?: AliasBook,
 ): { edits: CellEdits; findings: Finding[]; masked: number } {
   const existing = tables
     .flatMap((table) => [...table.preamble, ...table.rows].flat())
     .filter((text) => text.includes("["));
-  const book = new AliasBook(scope, (alias) => existing.some((text) => text.includes(alias)));
+  const book =
+    shared ?? new AliasBook(scope, (alias) => existing.some((text) => text.includes(alias)));
   let masked = 0;
   const edits: CellEdits = tables.map((table, sheet) => {
     const changes = new Map<number, Map<number, string>>();
@@ -179,7 +182,7 @@ export function restoreTables(
   tables: readonly SheetTable[],
   findings: readonly Finding[],
 ): { edits: CellEdits; restored: number; unknown: string[] } {
-  const analysis = { findings: [...findings], spans: [] };
+  const lookup = aliasValues(findings);
   const unknown = new Set<string>();
   let restored = 0;
   const edits: CellEdits = tables.map((table) => {
@@ -187,7 +190,7 @@ export function restoreTables(
     for (const [row, values] of sheetRows(table))
       values.forEach((text, column) => {
         if (!text.includes("[")) return;
-        const result = restoreAliases(text, analysis);
+        const result = restoreWith(text, lookup);
         result.unknown.forEach((alias) => unknown.add(alias));
         if (!result.restored) return;
         restored += result.restored;

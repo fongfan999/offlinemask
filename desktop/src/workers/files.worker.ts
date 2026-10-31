@@ -31,6 +31,7 @@ export type FilesRequest =
       bytes: ArrayBuffer;
       /** Whether the main thread can answer `ocr` requests. */
       ocr?: boolean;
+      maxChars?: number;
     }
   | { type: "cancel"; id: number }
   | { type: "write-doc"; id: number; handle: string; edits: DocEdits }
@@ -114,6 +115,7 @@ self.onmessage = async (event: MessageEvent<FilesRequest>) => {
         ...(request.ocr
           ? { ocr: recognise, decoders: new URL("/pdfjs/", location.href).href }
           : {}),
+        maxChars: request.maxChars,
       });
       docs.set(request.handle, file.source);
       send({

@@ -32,7 +32,7 @@ People mask to send the content to AI, not the layout, and AI reads Markdown wel
 - **Lines and spaces:** pdf.js gives text items with positions. Items on the same baseline join into a line; a gap wider than a fraction of the font size becomes a space (many PDFs draw words without space characters); a larger vertical gap starts a paragraph. Items in clear columns are read column by column; tables come out as lines with tabs between cells. This is best effort and is checked with fixtures, not promised.
 - **Vietnamese:** text is normalised to NFC, since PDFs often store "ệ" as a base letter and combining marks. Words split across lines ("Nguyễn Văn" ⏎ "An") are joined for detection the same way a Word paragraph is.
 - **Invisible text** (render mode 3, the OCR layer some scanners add) is read like visible text. It is what the AI would read, so it must be masked too.
-- **Limits:** up to 20 MB like Word, and up to 300 pages ("PDF dài hơn 300 trang. Hãy tách thành các tệp nhỏ hơn rồi thử lại."); larger files get a message instead of a slow, memory-heavy run. Pages are read one at a time and released, so a long PDF does not sit in memory twice.
+- **Limits** (removed by [0173](0173-no-limits-only-estimates.md)): up to 20 MB like Word, and up to 300 pages ("PDF dài hơn 300 trang. Hãy tách thành các tệp nhỏ hơn rồi thử lại."); larger files get a message instead of a slow, memory-heavy run. Pages are read one at a time and released, so a long PDF does not sit in memory twice.
 
 ### What we tell users about scanned PDFs
 

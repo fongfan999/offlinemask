@@ -21,6 +21,6 @@ export function sessionPreview(session: Session): string {
         .slice(0, previewLength)
         .map((item) => item.segment)
         .join("")
-        .trimEnd() + "…"
+        .trimEnd() + "..."
     : line;
 }

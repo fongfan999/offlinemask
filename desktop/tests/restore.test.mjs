@@ -65,10 +65,35 @@ test("sidebar preview shows the first masked line, truncated by grapheme", () =>
   const preview = sessionPreview(session);
   assert.ok(preview.startsWith("Email [EMAIL_1_"));
   assert.ok(!preview.includes("minh.anh"));
-  assert.ok(preview.endsWith("…"));
+  assert.ok(preview.endsWith("..."));
   assert.ok([...preview].length <= 46);
   const short = createTextSession("Xin chào", [], []);
   assert.equal(sessionPreview(short), "Xin chào");
   const emoji = createTextSession("👩‍👩‍👧‍👦".repeat(50), [], []);
-  assert.ok(sessionPreview(emoji).endsWith("👩‍👩‍👧‍👦…"));
+  assert.ok(sessionPreview(emoji).endsWith("👩‍👩‍👧‍👦..."));
+});
+
+test("restore scales with the text, not with how many aliases are known (decision 0179)", async () => {
+  const { restoreTables } = await import("../src/core/sheet/mask.ts");
+  const { restoreFromTables } = await import("../src/core/quick-actions.ts");
+  // About one 100,000-row sheet's worth of aliases, which crashed the old single regex.
+  const findings = Array.from({ length: 500_000 }, (_, i) => ({
+    id: `f${i}`,
+    label: "Số điện thoại",
+    value: `09${String(i).padStart(8, "0")}`,
+    alias: `[SDT_${i + 1}_${scope}]`,
+    reason: "",
+    source: "",
+  }));
+  const started = performance.now();
+  const reply = restoreFromTables(`Gọi [SDT_1_${scope}] và [SDT_500000_${scope}].`, [findings]);
+  assert.equal(reply.text, "Gọi 0900000000 và 0900499999.");
+  const rows = Array.from({ length: 5_000 }, (_, i) => [`[SDT_${i + 1}_${scope}]`, "x"]);
+  const sheet = restoreTables(
+    [{ name: "Kết quả", headerRow: 0, preamble: [], header: ["Khách", "Ghi chú"], rows }],
+    findings,
+  );
+  assert.equal(sheet.restored, 5_000);
+  // Generous for slow CI; the per-cell regex took minutes here.
+  assert.ok(performance.now() - started < 5_000);
 });

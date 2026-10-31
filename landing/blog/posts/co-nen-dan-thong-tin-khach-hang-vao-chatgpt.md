@@ -4,7 +4,7 @@ description: Dán họ tên, số điện thoại, số tài khoản của khác
 date: 2026-10-25
 ---
 
-Câu trả lời ngắn: **không nên dán nguyên văn**. Nhưng bạn cũng không cần bỏ AI. Cách an toàn là thay những gì nhận ra được một người (họ tên, số điện thoại, số tài khoản, CCCD…) bằng mã trước khi gửi, để AI vẫn hiểu việc cần làm mà không biết bạn đang nói về ai. Bài này giải thích vì sao, và làm thế nào cho nhanh.
+Câu trả lời ngắn: **không nên dán nguyên văn**. Nhưng bạn cũng không cần bỏ AI. Cách an toàn là thay những gì nhận ra được một người (họ tên, số điện thoại, số tài khoản, CCCD...) bằng mã trước khi gửi, để AI vẫn hiểu việc cần làm mà không biết bạn đang nói về ai. Bài này giải thích vì sao, và làm thế nào cho nhanh.
 
 ## Chuyện gì xảy ra khi bạn dán vào ChatGPT
 
@@ -38,7 +38,7 @@ Gần như không bao giờ. Hãy xem một yêu cầu quen thuộc của bộ p
 
 > Tóm tắt giúp tôi khiếu nại đơn hàng giao chậm ba ngày của khách [TEN_1], số [SDT_1], và soạn tin nhắn xin lỗi.
 
-AI sẽ trả lời bằng chính những mã đó, ví dụ "Chào chị [TEN_1], chúng tôi xin lỗi vì đơn hàng đến trễ…". Bạn chỉ việc đổi mã về tên thật trước khi gửi cho khách.
+AI sẽ trả lời bằng chính những mã đó, ví dụ "Chào chị [TEN_1], chúng tôi xin lỗi vì đơn hàng đến trễ...". Bạn chỉ việc đổi mã về tên thật trước khi gửi cho khách.
 
 Điều này đúng với hầu hết việc văn phòng: tóm tắt email, viết lại thư, phân tích bảng chi phí, soạn hợp đồng theo mẫu. AI cần **ngữ cảnh**, không cần **danh tính**.
 
@@ -57,7 +57,7 @@ Vài mẹo nếu làm thủ công:
 
 [OfflineMask](../) làm đúng các bước trên, nhưng tự động và chạy hoàn toàn trên máy bạn:
 
-1. **Ẩn.** Dán văn bản hoặc mở tệp Excel, Word. OfflineMask tự tìm email, số điện thoại, số tài khoản, số thẻ, CCCD, mã số thuế…, và cả họ tên, địa chỉ khi bạn cài gói tiếng Việt. Bạn xem lại, bôi đen để ẩn thêm chỗ còn sót, rồi sao chép bản đã ẩn.
+1. **Ẩn.** Dán văn bản hoặc mở tệp Excel, Word. OfflineMask tự tìm email, số điện thoại, số tài khoản, số thẻ, CCCD, mã số thuế..., và cả họ tên, địa chỉ khi bạn cài gói tiếng Việt. Bạn xem lại, bôi đen để ẩn thêm chỗ còn sót, rồi sao chép bản đã ẩn.
 2. **Hỏi AI như mọi khi.** Dán bản đã ẩn vào ChatGPT, Claude hay Gemini.
 3. **Khôi phục.** Dán câu trả lời của AI vào lại OfflineMask, mọi mã tự đổi về thông tin thật.
 

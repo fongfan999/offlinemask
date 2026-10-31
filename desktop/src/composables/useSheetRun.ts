@@ -1,4 +1,6 @@
-import { computed, ref, shallowRef, watch, type Ref } from "vue";
+import { computed, ref, shallowRef, toRaw, watch, type Ref } from "vue";
+import { jobSeconds, recordPace } from "./jobTime.ts";
+import { memoryRefusal } from "./memoryBudget.ts";
 import {
   exportName,
   maskedSuffix,
@@ -25,7 +27,7 @@ import {
   type CellEdits,
   type SheetTable,
 } from "../core/sheet/mask.ts";
-import { maxFileBytes, sheetFormat } from "../core/sheet/files.ts";
+import { sheetFormat } from "../core/sheet/files.ts";
 import {
   aliasScope,
   newSessionId,
@@ -69,7 +71,7 @@ export interface SheetProgress {
   startedAt: number;
 }
 /** An .xls is read into the .xlsx workbook model, so its copies are .xlsx (decision 0086). */
-const savedName = (name: string) => name.replace(/\.xls$/i, ".xlsx");
+export const savedName = (name: string) => name.replace(/\.xls$/i, ".xlsx");
 export const sheetFailure =
   "Chưa xử lý được bảng tính trên thiết bị. Tệp gốc không bị thay đổi. Hãy thử lại.";
 
@@ -115,6 +117,17 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
   );
   // "Quét nội dung" on a column covers scanning; there is no separate all-cells mode.
   const plans = computed(() => draft.value?.plans ?? []);
+  /** Seconds on this machine for the cells the model will read under the current choices
+   * (decision 0173). The rows are read raw: only the choices need watching. */
+  const estimate = computed(() => {
+    const current = draft.value;
+    if (!current) return 0;
+    const cells = scanCells(toRaw(current.tables), plans.value);
+    return jobSeconds(
+      cells.reduce((sum, cell) => sum + cell.text.length, 0),
+      pack.ready.value,
+    );
+  });
   const previewTables = computed(() =>
     (draft.value?.tables ?? []).map((table) => ({
       ...table,
@@ -177,8 +190,9 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
       fileError.value = fileErrorMessages.unsupported;
       return;
     }
-    if (file.size > maxFileBytes) {
-      fileError.value = fileErrorMessages["too-large"];
+    const refused = await memoryRefusal(file);
+    if (refused) {
+      fileError.value = refused;
       return;
     }
     opening.value = true;
@@ -211,6 +225,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
   function discardDraft() {
     const handle = draft.value?.handle;
     draft.value = null;
+    fileError.value = "";
     if (handle) release(handle);
   }
   /** Step 1 of a masked file: the same file and its column choices, ready to mask
@@ -264,6 +279,12 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
         new Map(),
         () => cancelled,
       );
+      if (!cancelled)
+        recordPace(
+          cells.reduce((sum, cell) => sum + cell.text.length, 0),
+          (Date.now() - startedAt) / 1000,
+          pack.ready.value,
+        );
       progress.value = { stage: "masking", done: 0, total: 0, startedAt };
       const id = sessions.value.some((s) => aliasScope(s.id) === aliasScope(current.sessionId))
         ? newSessionId(sessions.value)
@@ -349,11 +370,19 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
 
   /** Open the file that came back from the AI and swap this session's aliases back. */
   async function openReturned(session: SheetSession, file: File): Promise<SheetRestore | string> {
+    return openReply(session.findings, file);
+  }
+  /** A returned workbook restored with any aliases, for home's restore tab (decision 0172). */
+  async function openReply(
+    findings: readonly Finding[],
+    file: File,
+  ): Promise<SheetRestore | string> {
     if (!sheetFormat(file.name)) return fileErrorMessages.unsupported;
-    if (file.size > maxFileBytes) return fileErrorMessages["too-large"];
+    const refused = await memoryRefusal(file);
+    if (refused) return refused;
     try {
       const opened = await files.open(file);
-      const result = restoreTables(opened.tables, session.findings);
+      const result = restoreTables(opened.tables, findings);
       return { fileName: file.name, handle: opened.handle, tables: opened.tables, ...result };
     } catch (error) {
       return error instanceof SheetAdapterError ? error.message : fileErrorMessages.unreadable;
@@ -372,6 +401,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
 
   return {
     draft,
+    estimate,
     opening,
     fileError,
     processing,
@@ -393,6 +423,7 @@ export function useSheetRun({ detector, files, pack, sessions, onSession }: Shee
     setKept,
     download,
     openReturned,
+    openReply,
     downloadRestored,
     closeReturned,
   };

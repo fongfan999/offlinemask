@@ -2,7 +2,6 @@ import JSZip from "jszip";
 import {
   DocFileError,
   escapeXml,
-  maxDocBytes,
   paragraphText,
   rewriteParts,
   unescapeXml,
@@ -112,7 +111,6 @@ export function parseOdtPart(name: string, xml: string): PartModel {
 export async function openOdt(
   bytes: Uint8Array,
 ): Promise<{ source: DocSource; paragraphs: DocParagraph[]; notes: string[] }> {
-  if (bytes.byteLength > maxDocBytes) throw new DocFileError("too-large");
   let zip: JSZip;
   try {
     zip = await JSZip.loadAsync(bytes);

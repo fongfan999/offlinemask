@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { normalizeHeader, suggestColumn } from "../src/core/sheet/columns.ts";
+import { odsGrid } from "../src/core/sheet/ods.ts";
 import {
   AliasBook,
   applyEdits,
@@ -197,13 +198,7 @@ test("scan batches stay under the limit and detections map back to their own cel
 });
 
 import ExcelJS from "exceljs";
-import {
-  decodeText,
-  maxDataRows,
-  openSheetFile,
-  sheetFormat,
-  writeSheetFile,
-} from "../src/core/sheet/files.ts";
+import { decodeText, openSheetFile, sheetFormat, writeSheetFile } from "../src/core/sheet/files.ts";
 
 const editsOf = (entries) => [
   new Map(entries.map(([row, column, text]) => [row, new Map([[column, text]])])),
@@ -272,15 +267,25 @@ test("XLSX keeps every sheet, styles, numbers and formulas outside the edited ce
 
 test("files outside the supported scope are refused with a reason", async () => {
   await assert.rejects(openSheetFile(new Uint8Array(1), "a.numbers"), { code: "unsupported" });
-  await assert.rejects(openSheetFile(new Uint8Array(21 * 1024 * 1024), "a.csv"), {
-    code: "too-large",
-  });
   await assert.rejects(openSheetFile(new TextEncoder().encode("\n\n"), "a.csv"), { code: "empty" });
   await assert.rejects(openSheetFile(new Uint8Array([1, 2, 3]), "a.xlsx"), { code: "unreadable" });
-  const many = "a\n" + "1\n".repeat(maxDataRows + 1);
-  await assert.rejects(openSheetFile(new TextEncoder().encode(many), "a.csv"), {
-    code: "too-many-rows",
-  });
+});
+
+test("any number of rows opens (decision 0173)", async () => {
+  const many = "a\n" + "1\n".repeat(100_001);
+  const opened = await openSheetFile(new TextEncoder().encode(many), "a.csv");
+  assert.equal(opened.tables[0].rows.length, 100_001);
+});
+
+test("an ODS sheet keeps blank rows between rows, not the million after the last", () => {
+  const cell = (text) => ({ column: 0, repeat: 1, text });
+  const grid = odsGrid([
+    { cells: [cell("Tên")], repeat: 1 },
+    { cells: [], repeat: 2 },
+    { cells: [cell("An")], repeat: 1 },
+    { cells: [], repeat: 1_048_573 },
+  ]);
+  assert.deepEqual(grid, [["Tên"], [""], [""], ["An"]]);
 });
 
 import {

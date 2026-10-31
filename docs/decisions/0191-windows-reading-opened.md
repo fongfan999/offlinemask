@@ -38,6 +38,16 @@ Every set leaks 0; the over-masks left are a book title, a delivery note and a j
 - **A build without the models fails while the gate is on** (`scripts/prepare-reading.mjs`). Before, a detector that could not be fetched left `public/reading/` out and the app silently offered no reading of its own; with the feature promised, a release must not lose it unnoticed. With the gate off the build still only reports it.
 - **The PRD** no longer defers scanned pages on Windows.
 
+## Merged with main
+
+The branch was merged with `main` on 31 October 2026, after release 2.5.0 had landed there with the folder masking ([0171](0171-mask-a-whole-folder.md)), the sidebar by task ([0172](0172-sidebar-by-task.md)), the memory budget in place of size limits ([0173](0173-no-limits-only-estimates.md)) and the app's text in keyboard characters. What the merge settled:
+
+- **The sidebar no longer lists formats**, so it no longer says "PNG, JPG" or shows "Hình ảnh - Sắp có"; whether this machine reads pictures shows on the Tài liệu page (its subtitle, hint and accepted files) and in home's drop zone (accepted files).
+- **Pictures have no byte limit**: the memory budget refuses a file before it opens, as for every document. A picture of more than 25 million pixels is still refused, as a memory refusal worded for pictures (`imageTooLarge` in `useDocRun.ts`), since the budget has no say in how large a decoded picture is.
+- **The refusals no longer promise Windows "sắp có"**: where no reading is at hand (a browser preview, a build without the models) they say only that this machine cannot read the text in a scan or a picture.
+- **A folder does not read pictures.** The folder masking opens its documents without the reading, so a scanned PDF in a folder is reported as a scan it cannot read and a PNG or JPG as unsupported; pictures are read one at a time on Tài liệu. Reading them in a folder is later work.
+- **Measured after the merge** on seed 1's 102 grey scans and 102 copier scans through the merged code (`evaluate-documents.mjs --reading --misread`): 2 / 0 / 2 / 11 and 6 / 0 / 2 / 13, the same documents, values and counts as the last full run after 0190; 493 tests, lint, types, the build and the native checks pass.
+
 ## Not decided here
 
 - **A Store build on a real copier scan.** The Windows reading was run end to end through `tauri dev` and the dev server (0181), not in an installed Store build; the first release carrying it should be installed and tried once on a copier scan before it is published.

@@ -55,7 +55,7 @@ async function create() {
       <button class="primary-action" type="submit" :disabled="disabled">
         <span v-if="vault.busy.value" class="spinner" aria-hidden="true"></span
         ><AppIcon v-else name="lock" :size="17" />{{
-          vault.busy.value ? "Đang lưu…" : "Đặt mật mã và lưu"
+          vault.busy.value ? "Đang lưu..." : "Đặt mật mã và lưu"
         }}
       </button>
       <!-- Optional secondary action, such as cancelling, beside the submit button. -->

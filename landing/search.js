@@ -88,7 +88,7 @@ ${[
  */
 export const llms = ({ pages: described, posts = [] }) => `# OfflineMask
 
-> OfflineMask là ứng dụng miễn phí trên máy tính, ẩn thông tin riêng (họ tên, số điện thoại, số tài khoản, CCCD…) bằng mã ngay trên máy trước khi bạn hỏi AI như ChatGPT, Claude hay Gemini, rồi đổi mã trong câu trả lời về thông tin thật.
+> OfflineMask là ứng dụng miễn phí trên máy tính, ẩn thông tin riêng (họ tên, số điện thoại, số tài khoản, CCCD...) bằng mã ngay trên máy trước khi bạn hỏi AI như ChatGPT, Claude hay Gemini, rồi đổi mã trong câu trả lời về thông tin thật.
 
 - Miễn phí, không quảng cáo, không cần tài khoản. Có cho macOS (Apple Silicon và Intel), Windows và Linux.
 - Ẩn và khôi phục chạy hoàn toàn trên máy, kể cả khi không có mạng; bảng đối chiếu mã không rời máy. OfflineMask không kết nối với AI nào.

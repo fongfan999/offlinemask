@@ -1,11 +1,5 @@
 import { blocksToMarkdown, toBlocks } from "./blocks.ts";
-import {
-  applyReplacements,
-  DocFileError,
-  maxDocBytes,
-  type DocEdits,
-  type DocParagraph,
-} from "./docx.ts";
+import { applyReplacements, DocFileError, type DocEdits, type DocParagraph } from "./docx.ts";
 
 /** Text in pictures (decision 0180). A scanned PDF page or an image file is read by
  * the operating system's own text recognition (Apple's Vision framework on macOS; the
@@ -175,11 +169,10 @@ export async function openImage(
   engine: OcrEngine | undefined,
   read: PlaceReader,
 ): Promise<{ source: ImageSource; paragraphs: DocParagraph[]; notes: string[] }> {
-  if (bytes.byteLength > maxDocBytes) throw new DocFileError("too-large");
   if (!engine) throw new DocFileError("no-ocr");
   const size = imageSize(bytes);
   if (!size || !size.width || !size.height) throw new DocFileError("unreadable");
-  if (size.width * size.height > maxImagePixels) throw new DocFileError("too-large");
+  if (size.width * size.height > maxImagePixels) throw new DocFileError("memory");
   let page: OcrPage;
   try {
     page = await engine(bytes, size.width, size.height);
