@@ -2073,3 +2073,43 @@ test("where the platform has no AI places, the circle names none and offers none
   assert.equal(quick.lastStatus.value.place, undefined);
   quick.stop();
 });
+
+test("Ẩn nhanh is on by default on Windows, which asks for no permission, and opt-in on macOS (decision 0195)", async () => {
+  for (const [platform, permission, expected] of [
+    ["windows", "granted", true],
+    ["macos", "denied", false],
+    ["macos", "granted", false],
+  ]) {
+    const sessions = ref([]);
+    const adapter = fakeAdapter();
+    adapter.permission = permission;
+    const storage = memoryStorage();
+    const quick = useQuickActions({
+      adapter,
+      run: fakeRun(sessions),
+      sessions,
+      locked: () => false,
+      storage,
+      platform,
+    });
+    await quick.start();
+    assert.equal(quick.popoverOn.value, expected, platform);
+    assert.equal(quick.quickReady.value, expected, platform);
+    quick.stop();
+  }
+  // The user's own choice still wins on Windows.
+  const sessions = ref([]);
+  const adapter = fakeAdapter();
+  adapter.permission = "granted";
+  const quick = useQuickActions({
+    adapter,
+    run: fakeRun(sessions),
+    sessions,
+    locked: () => false,
+    storage: memoryStorage({ [popoverKey]: "off" }),
+    platform: "windows",
+  });
+  await quick.start();
+  assert.equal(quick.popoverOn.value, false);
+  quick.stop();
+});

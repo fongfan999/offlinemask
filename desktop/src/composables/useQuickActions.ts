@@ -162,8 +162,9 @@ export function useQuickActions({
   let circlePlace: Place | null = null;
   let offeredPlace: Place | null = null;
   const shortcutOn = ref(adapter.desktop && read(shortcutKey, true));
-  // The selection popover (decision 0096): opt-in; the last selection waits for a button.
-  const popoverOn = ref(adapter.desktop && read(popoverKey, false));
+  // The selection popover (decision 0096); the last selection waits for a button. On by
+  // default where it asks for no permission (Windows), opt-in on macOS (decision 0195).
+  const popoverOn = ref(adapter.desktop && read(popoverKey, platform === "windows"));
   const popoverSupported = ref(false);
   const popoverFailure = ref("");
   let pendingSelection: {
