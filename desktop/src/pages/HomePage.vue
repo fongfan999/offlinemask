@@ -91,16 +91,18 @@ function startWithText(text: string) {
   run.processingError.value = "";
   emit("start", "text");
 }
-/** What the drop zone opens, in the words people use for them (decision 0172). */
-const formats = [
+/** What the drop zone opens, in the words people use for them (decision 0172). Pictures
+ * are listed only where this machine reads them (decisions 0180, 0191), like `accept`. */
+const formats = computed(() => [
   { label: "Word", ext: ".docx", icon: "file" },
   { label: "PDF", ext: ".pdf", icon: "file" },
+  ...(doc.ocr.value ? [{ label: "Hình ảnh", ext: ".png .jpg", icon: "image" }] : []),
   { label: "Excel", ext: ".xlsx .xls", icon: "table" },
   { label: "CSV", ext: ".csv", icon: "table" },
   { label: "OpenDocument", ext: ".odt .ods", icon: "file" },
   { label: "Văn bản", ext: ".txt .md", icon: "text" },
   { label: "Cả thư mục", ext: "", icon: "folder" },
-] as const;
+]);
 /** Which half of the job the box is for; a pasted AI reply switches it (decision 0172). */
 const mode = ref<"hide" | "restore">("hide");
 const restoreBox = useTemplateRef<InstanceType<typeof RestoreBox>>("restoreBox");
