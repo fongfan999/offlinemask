@@ -1,6 +1,7 @@
 // Package the native recognition provider for a qualified target (decisions 0049, 0077)
-// without developer model fixtures. Build-time only: no model downloads, network
-// checks, or user-data access.
+// without developer model fixtures. Build-time only: no recognition-pack downloads,
+// network checks, or user-data access. The one fetch is scripts/prepare-reading.mjs's
+// pinned text-recognition detector when artifacts/reading/ lacks it (decision 0196).
 import { createRequire } from 'node:module';
 import { fileURLToPath } from 'node:url';
 import { dirname, join, relative, sep } from 'node:path';
@@ -71,12 +72,21 @@ if (process.platform === 'darwin') {
   }
 }
 const frontend = join(stage, 'frontend');
+// The text recognition models (decision 0181) live in the gitignored public/reading/,
+// which only prepare-reading.mjs creates. `pnpm build` runs it; this script built the
+// frontend on its own, so a fresh checkout shipped 2.6.0 without the models while the
+// app still promised pictures (decision 0196). Run it here, and refuse a frontend that
+// lacks them while the feature is on, as prepare-reading itself does.
+execFileSync(process.execPath, [join(root, 'scripts/prepare-reading.mjs')], { cwd: root, stdio: 'inherit' });
 await build({ configFile: join(root, 'vite.config.ts'), define: { 'import.meta.env.VITE_NATIVE_RECOGNITION': JSON.stringify('1') }, build: { outDir: frontend, emptyOutDir: true, copyPublicDir: false } });
 checkWorkerChunks(join(frontend, 'assets'));
 // Native graphs never use the browser WASM binary. Neither engine includes weights.
 for (const name of await readdir(join(root, 'public'))) {
   if (!['models', 'runtime'].includes(name)) await cp(join(root, 'public', name), join(frontend, name), { recursive: true });
 }
+const readingShipped = /export const readingShipped = true;/.test(await readFile(join(root, 'src/adapters/ocr.ts'), 'utf8'));
+const readingBundled = existsSync(join(frontend, 'reading/reading-v1.json'));
+if (readingShipped && !readingBundled) throw Error('The frontend has no text recognition models (public/reading/) while readingShipped is on');
 const shipped = [runtime.file, ...companions.map(file => file.name), helper];
 const config = {
   ...(qa ? { productName: 'OfflineMask Release QA', identifier: 'dev.offlinemask.releaseqa20260921' } : {}),
@@ -96,5 +106,5 @@ await writeFile(join(stage, 'tauri.conf.json'), JSON.stringify(config, null, 2) 
 // Windows release builds compile these hashes in and check them before starting the helper.
 const hashes = await Promise.all(shipped.map(async name => `${name}=${digest(await readFile(join(native, name)))}`));
 await writeFile(join(stage, 'native-sha256.txt'), hashes.join(',') + '\n');
-await writeFile(join(stage, 'provenance.json'), JSON.stringify({ platform: process.platform, arch: process.arch, runtime, companions, notices, helper: { name: helper, sha256: digest(await readFile(join(native, helper))) }, modelsBundled: false, qa }, null, 2) + '\n');
+await writeFile(join(stage, 'provenance.json'), JSON.stringify({ platform: process.platform, arch: process.arch, runtime, companions, notices, helper: { name: helper, sha256: digest(await readFile(join(native, helper))) }, modelsBundled: false, readingBundled, qa }, null, 2) + '\n');
 console.log('Prepared native desktop bundle configuration at artifacts/native-desktop/tauri.conf.json');

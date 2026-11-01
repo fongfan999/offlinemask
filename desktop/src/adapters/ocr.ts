@@ -1,4 +1,5 @@
 import { invoke, isTauri } from "@tauri-apps/api/core";
+import definition from "../../reading/reading-v1.json" with { type: "json" };
 import type { OcrPage } from "../core/doc/ocr.ts";
 import type { ReadingRequest, ReadingResponse } from "../workers/reading.worker.ts";
 
@@ -30,11 +31,22 @@ async function systemAvailable(): Promise<boolean> {
   }
 }
 
-/** The models are in the app only when the build had them (`scripts/prepare-reading.mjs`). */
-async function readingAvailable(): Promise<boolean> {
+/** The models are in the app only when the build had them (`scripts/prepare-reading.mjs`).
+ * The app's asset server answers any unknown path with the page itself, 200 and HTML, so
+ * a reply counts only when it is the manifest the worker was built with: 2.6.0 shipped
+ * without the models and promised pictures on the strength of that fallback (decision
+ * 0196). */
+export async function readingAvailable(): Promise<boolean> {
   if (!readingShipped) return false;
   try {
-    return (await fetch("/reading/reading-v1.json")).ok;
+    const response = await fetch("/reading/reading-v1.json");
+    if (!response.ok) return false;
+    const manifest: unknown = await response.json();
+    return (
+      typeof manifest === "object" &&
+      manifest !== null &&
+      (manifest as { id?: unknown }).id === definition.id
+    );
   } catch {
     return false;
   }

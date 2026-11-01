@@ -148,6 +148,17 @@ test("where the system cannot read Vietnamese, models carried in the app do, onl
     assert.match(page, /mô hình đọc chữ đi kèm ứng dụng/, UPDATE);
     assert.doesNotMatch(page, /Trên Windows, phần này chưa có/, UPDATE);
   } else assert.doesNotMatch(page, /mô hình đọc chữ đi kèm ứng dụng/, UPDATE);
+  // Decision 0196: the promise holds only when the models are in the build. Every build
+  // path that stages the frontend runs prepare-reading, which fails without them while
+  // the gate is on, and the native build refuses a frontend that lacks them.
+  assert.match(JSON.parse(read("../package.json")).scripts.build, /prepare-reading\.mjs/, UPDATE);
+  const nativeBuild = read("../scripts/prepare-native-desktop.mjs");
+  assert.match(
+    nativeBuild,
+    /execFileSync\(process\.execPath, \[join\(root, 'scripts\/prepare-reading\.mjs'\)\]/,
+    UPDATE,
+  );
+  assert.match(nativeBuild, /readingShipped && !readingBundled\) throw/, UPDATE);
 });
 
 test("pdf.js loads nothing but its picture decoders, from the app itself (privacy §4)", () => {

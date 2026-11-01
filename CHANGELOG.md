@@ -8,6 +8,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 - On Windows, where it needs no permission, Ẩn nhanh is on from the first launch; on macOS it stays off until the user turns it on and grants Accessibility. Turning it off in Cài đặt or the tray is remembered as before ([0195](docs/decisions/0195-quick-mask-on-by-default-on-windows.md)).
 
+### Fixed
+
+- Pictures and scanned PDFs are read again on Windows and on Macs before macOS 14. The 2.6.0 builds for those machines (Windows, Apple Silicon) left the app's text recognition models out, so Tài liệu listed PNG and JPG and then answered "Không mở được tệp này". The build now stages the models on every path and fails without them, and the app offers pictures only when it finds its own manifest, not the page the asset server answers for a missing file ([0196](docs/decisions/0196-reading-models-in-native-builds.md)).
+
 ## [2.6.0] - 2026-11-01
 
 Scanned PDFs and pictures are read on the machine, and a long history can be searched and shown a page at a time.
