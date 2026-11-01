@@ -8,7 +8,10 @@
 // line, capture the window below its title bar and crop with
 // `magick <frame>.png -crop 2528x1500+16+0 +repage -resize '2048x1216!' -quality 82 <name>.webp`.
 // Then add the hero's smaller sizes for its srcset: `magick <name>.webp -resize 800x -quality 82
-// <name>-800.webp`, and the same for 1280.
+// <name>-800.webp`, and the same for 1280. Run the app under its own identifier so the owner's
+// history stays out of the sidebar (`tauri dev --config '{"identifier":"dev.offlinemask.shots"}'`,
+// with the installed pack cloned into that data directory), paste the letter from a UTF-8 clipboard,
+// and switch views with real mouse events (CGEvent), since an accessibility press leaves a focus ring.
 // The text flow below is the web-build fallback without a name; without the pack the app warns that
 // names were not checked, so the published shots come from the desktop app. Only the text shots are
 // published; spreadsheets and documents are drawn in HTML on the product page.
