@@ -4,16 +4,29 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-11-01
+
+Scanned PDFs and pictures are read on the machine, and a long history can be searched and shown a page at a time.
+
 ### Added
 
-- Tài liệu reads scanned PDFs and pictures (PNG, JPG): a page without text is drawn once and read on the machine, with no download and no new permission. On macOS 14 and later the system's own text recognition (Apple's Vision framework) reads it; on Windows and older Macs a detector and recogniser that come with the app do, OfflineMask's own, trained on the invented documents and on copier print. The words are placed on the page like a text PDF's, so tables and "Label: value" forms keep their layout, a tilted or photographed page is straightened, a copied identity card is hidden whole, and the masked copy is the same text-only Markdown: the picture itself never reaches it ([0180](docs/decisions/0180-scanned-pdfs-and-images-read-on-the-machine.md), [0181](docs/decisions/0181-own-line-recogniser-for-windows.md), [0191](docs/decisions/0191-windows-reading-opened.md)).
+- Tài liệu reads scanned PDFs and pictures (PNG, JPG): a page without text is drawn once and read on the machine, with no download and no new permission. On macOS 14 and later the system's own text recognition (Apple's Vision framework) reads it; on Windows and older Macs a detector and recogniser that come with the app do, OfflineMask's own, trained on the invented documents and on copier print. The words are placed on the page like a text PDF's, so tables and "Label: value" forms keep their layout, a tilted or photographed page is straightened, a copied identity card is hidden whole, and the masked copy is the same text-only Markdown: the picture itself never reaches it. Copier scans whose text is a fax-coded, JBIG2 or JPEG 2000 picture are read too, close-set lines are read again where a neighbour gets in the way, and a scan's headings and misread contract terms stay as wording ([0180](docs/decisions/0180-scanned-pdfs-and-images-read-on-the-machine.md), [0181](docs/decisions/0181-own-line-recogniser-for-windows.md), [0182](docs/decisions/0182-pdf-picture-decoders-inside-the-app.md), [0185](docs/decisions/0185-copied-identity-cards.md), [0186](docs/decisions/0186-recogniser-trained-on-copier-print.md), [0187](docs/decisions/0187-close-set-lines-read-again.md), [0188](docs/decisions/0188-wording-read-with-other-tone-marks.md), [0190](docs/decisions/0190-headings-on-scans-are-wording.md), [0191](docs/decisions/0191-windows-reading-opened.md)).
 - Home's "Mở được" row lists "Hình ảnh .png .jpg" between PDF and Excel on a machine that reads pictures, and the website's product page says scanned PDFs and pictures are read on the machine instead of "Hình ảnh thì chưa".
 - A value hidden once in a document is hidden wherever else it appears whole, with the same alias: a person's name of two words or more, or a number of six characters or more, whose second occurrence sits where its cue is missing; a name is found again even when a scan misreads one of its tone marks ([0180](docs/decisions/0180-scanned-pdfs-and-images-read-on-the-machine.md), [0184](docs/decisions/0184-signature-names-on-copier-scans.md)).
 - Contract forms with their labels in one column and the values after a colon in the next read one field a line, in Word and PDF files as in scans ([0183](docs/decisions/0183-forms-with-a-column-of-labels.md)); "Mã số doanh nghiệp" is masked as a tax code, not a phone number ([0189](docs/decisions/0189-enterprise-code-is-a-tax-code.md)).
 
+- With a passcode, "Lịch sử" shows the newest 30 entries and "Xem thêm" adds the next 30; a magnifier by the heading searches titles, dates, file names, texts and the values hidden in files ([0192](docs/decisions/0192-history-search-and-paging.md)).
+
 ### Changed
 
 - The OfflineMask name has its own logotype: "Mask" sits under a cobalt brush swipe drawn with the same brush as the mask, and reads through it ([0193](docs/decisions/0193-logotype-swipe.md)).
+- Restore codes of a text you have moved on from are kept a week, within 32 MB, and of a replaced spreadsheet or document 30 days, within 256 MB (the newest file is always kept), so an app left open for weeks does not keep growing; until now they stayed until the app closed ([0177](docs/decisions/0177-restore-codes-age-and-size-limit.md), [0178](docs/decisions/0178-restore-codes-of-files.md)).
+- Recognition packs download from packs.offlinemask.com. A pack already installed stays in use, with no new download ([0176](docs/decisions/0176-packs-at-offlinemask-com.md)).
+- A file that cannot be opened shows the mascot, the ninja who wears the mask, in place of the file icon ([0175](docs/decisions/0175-ninja-mascot.md)).
+
+### Fixed
+
+- Restoring a reply or a returned spreadsheet looks each code up once, so it no longer slows down as codes pile up: a returned 1,000-row file took 10 seconds before ([0179](docs/decisions/0179-restore-in-one-pass.md)).
 
 ## [2.5.0] - 2026-10-29
 
