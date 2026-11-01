@@ -4,6 +4,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.6.1] - 2026-11-01
+
+Pictures and scanned PDFs are read again on Windows and Apple Silicon Macs, where the 2.6.0 builds had left the reading models out; Ẩn nhanh starts on for Windows.
+
 ### Changed
 
 - On Windows, where it needs no permission, Ẩn nhanh is on from the first launch; on macOS it stays off until the user turns it on and grants Accessibility. Turning it off in Cài đặt or the tray is remembered as before ([0195](docs/decisions/0195-quick-mask-on-by-default-on-windows.md)).
