@@ -185,4 +185,4 @@ The owner gave full freedom over copy and design before rolling out to offlinema
   - Ẩn nhanh masks the message in the AI tool, the AI replies in codes, and the reply is restored in a Word document. The film says "Nhận lại bản đầy đủ" there, because nothing is masked in Word or Zalo;
   - it ends with four on-beat shots (spreadsheets, no network needed, privacy, free) and the end card "macOS · Windows · Linux".
 
-  Every line was checked for size and for time on screen before export. The poster is the finished slogan frame at 7.2s.
+  Every line was checked for size and for time on screen before export. The poster is the finished slogan frame at 7.2s. Updated for the app of 2.5.0 on 1 November 2026 (the shortcut restores in Word, PDF and folders in the shots): [0194](0194-intro-video-follows-the-app.md).
