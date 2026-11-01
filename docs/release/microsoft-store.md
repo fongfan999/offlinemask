@@ -44,12 +44,11 @@ OfflineMask thay họ tên, số tài khoản, số điện thoại, CCCD, email
 Không tài khoản, không máy chủ, không thống kê sử dụng. Ứng dụng chỉ dùng mạng khi bạn bấm tải gói nhận diện. Hãy luôn xem lại kết quả trước khi chia sẻ.
 ```
 
-**What's new in this version** (2.6.0; 2.5.0 listed folder masking, starting every job from one place and no size limits; 2.4.0 listed the pack's new model, a 158 MB update trained only on invented documents; 2.3.0 listed PDFs on Tài liệu, the (OfflineMasked) names and better masking of invoices, statements and contracts; 2.2.0 listed Báo lỗi, history that deletes itself and the circle acting only on the selection; the first submission said "Bản đầu tiên trên Microsoft Store.")
+**What's new in this version** (2.6.1; 2.6.0 listed scanned PDFs and pictures read on the machine, history search and paging, and faster restore within bounded memory; 2.5.0 listed folder masking, starting every job from one place and no size limits; 2.4.0 listed the pack's new model, a 158 MB update trained only on invented documents; 2.3.0 listed PDFs on Tài liệu, the (OfflineMasked) names and better masking of invoices, statements and contracts; 2.2.0 listed Báo lỗi, history that deletes itself and the circle acting only on the selection; the first submission said "Bản đầu tiên trên Microsoft Store.")
 
 ```
-- Đọc được PDF scan và hình ảnh (PNG, JPG) ngay trên máy: không tải thêm, không gửi đi đâu. Bảng biểu và biểu mẫu giữ đúng bố cục, ảnh chụp CCCD được ẩn trọn.
-- Lịch sử dài hiện từng trang và tìm được theo tên tệp, ngày hay chính thông tin đã ẩn.
-- Khôi phục câu trả lời và bảng tính lớn nhanh hơn nhiều; ứng dụng để mở cả tuần cũng không phình bộ nhớ.
+- Sửa lỗi bản 2.6.0 trên Windows: PDF scan và hình ảnh (PNG, JPG) báo "Không mở được tệp này" vì bản cài thiếu mô hình đọc chữ. Nay đọc được ngay trên máy như đã hứa: không tải thêm, không gửi đi đâu.
+- Ẩn nhanh bật sẵn từ lần mở đầu trên Windows, nơi không cần cấp quyền gì. Tắt trong Cài đặt hay khay hệ thống vẫn được ghi nhớ.
 ```
 
 **Product features** (one per line in Partner Center)
