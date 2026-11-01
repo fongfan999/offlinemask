@@ -25,4 +25,4 @@ The film's own player was run headless with Chrome from the type's render-offlin
 
 ## Export
 
-A video file comes only from the film page's Export. The owner exports the new cut over `landing/media/offlinemask-intro.mp4`; the poster, the worker's byte ranges and `desktop/tests/landing-downloads.test.mjs` need no change. When scanning is released, the files shot's line is the place to say that pictures and scans are read too.
+A video file comes only from the film page's Export. The owner exported the new cut on 1 November 2026 over `landing/media/offlinemask-intro.mp4` (37.65 s, 1920×1080, 30 fps, H.264 with AAC, 4.25 MB; the previous file was 35.78 s and 3.97 MB). Frames taken from the file at 7.2, 21.65, 27.35 and 36 s show the unchanged poster, the keycaps beside the selection, the saved folder and the end card with the swipe. The poster, the worker's byte ranges and `desktop/tests/landing-downloads.test.mjs` need no change. When scanning is released, the files shot's line is the place to say that pictures and scans are read too.
