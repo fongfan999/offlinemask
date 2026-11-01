@@ -13,7 +13,8 @@ stack); the shipped mark files contain no text and embed no fonts.
 import os
 
 from make_mark import (COBALT, INK, PAPER, GX0, GX1, GY0, GY1, RGX0, RGX1, RGY0, RGY1,
-                       build_mark, build_restore, build_mascot, sketches, sketches2, MASCOTS)
+                       build_mark, build_restore, build_mascot, sketches, sketches2, MASCOTS,
+                       WORDMARK_BOX, wordmark_swipe)
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
@@ -103,6 +104,12 @@ write("brand/tile-cobalt.svg", app_icon())
 # macOS menu bar template: the mark in black, eye holes transparent, in a tight square
 # (the status bar scales it to 18 pt high). Rendered to PNG by png.sh.
 write("brand/tray-template.svg", svg(92, 92, f'<g transform="translate(-4 -4)">{mark(0, 0, 100, "#000", "#000")}</g>', title="OfflineMask menu bar icon"))
+# The logotype's swipe, a mask image the app and the website stretch behind "Mask"
+# (preserveAspectRatio none), so it is one colour and has no title.
+_ww, _wh = WORDMARK_BOX
+write("brand/wordmark-swipe.svg",
+      f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {_ww} {_wh}" preserveAspectRatio="none">'
+      f'<path d="{wordmark_swipe()}"/></svg>\n')
 write("desktop/public/favicon.svg", svg(48, 48, tile_body(48, 0.22, COBALT, PAPER, PAPER, 0.84), title="OfflineMask"))
 
 

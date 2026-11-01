@@ -30,6 +30,15 @@ const wasm = () =>
 
 const element = (type, style, children) => ({ type, props: { style, children } });
 
+// The logotype's swipe (decision 0193), light cobalt as on every cobalt ground, stretched
+// behind "Mask" the way the site's CSS does it.
+const swipe = `data:image/svg+xml;base64,${Buffer.from(
+  readFileSync(new URL("../brand/wordmark-swipe.svg", import.meta.url), "utf8").replace(
+    "<path ",
+    '<path fill="#b3c3ff" ',
+  ),
+).toString("base64")}`;
+
 /** The 1200×630 PNG for a post. */
 export async function card({ title, date }) {
   const svg = await satori(
@@ -49,10 +58,35 @@ export async function card({ title, date }) {
           "radial-gradient(circle at 12% 18%, #6f8de8 0%, transparent 45%), radial-gradient(circle at 90% 100%, #1d3184 0%, transparent 55%)",
       },
       [
-        element("div", { display: "flex", fontSize: 40, fontWeight: 700, letterSpacing: -1.6 }, [
-          element("span", {}, "Offline"),
-          element("span", { color: "#b3c3ff" }, "Mask"),
-        ]),
+        element(
+          "div",
+          { display: "flex", fontSize: 40, fontWeight: 700, lineHeight: 1, letterSpacing: -1.6 },
+          [
+            element("span", {}, "Offline"),
+            element(
+              "span",
+              {
+                position: "relative",
+                display: "flex",
+                marginLeft: 4,
+                padding: "0 5px",
+                lineHeight: 1,
+                letterSpacing: -0.8,
+                color: "#3453b6",
+              },
+              [
+                {
+                  type: "img",
+                  props: {
+                    src: swipe,
+                    style: { position: "absolute", left: -1, top: 0, width: "103%", height: 44 },
+                  },
+                },
+                "Mask",
+              ],
+            ),
+          ],
+        ),
         element(
           "div",
           {

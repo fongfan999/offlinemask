@@ -49,12 +49,31 @@
       .wordmark {
         margin: 18px 0 0 -6px;
         font:
-          750 132px/1 "Noto Sans",
+          750 112px/1 "Noto Sans",
           sans-serif;
         letter-spacing: -0.055em;
+        white-space: nowrap;
       }
       .wordmark span {
-        color: #b3c3ff;
+        position: relative;
+        isolation: isolate;
+        display: inline-block;
+        margin-left: 0.1em;
+        padding: 0 0.12em;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        color: #3453b6;
+      }
+      /* The logotype's swipe (decision 0193), light cobalt on cobalt. */
+      .wordmark span::before {
+        content: "";
+        position: absolute;
+        z-index: -1;
+        inset: 0 -0.02em auto;
+        height: 1.1em;
+        background: #b3c3ff;
+        -webkit-mask: url("../wordmark-swipe.svg") 0 0 / 100% 100% no-repeat;
+        mask: url("../wordmark-swipe.svg") 0 0 / 100% 100% no-repeat;
       }
       .facts {
         display: flex;

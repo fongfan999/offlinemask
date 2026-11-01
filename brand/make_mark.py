@@ -42,7 +42,7 @@ def _cap(p, ux, uy, nx, ny, w, squash=1.0):
     ]
 
 
-def brush(pts, width, start="taper", end="round", taper_len=0.1):
+def brush(pts, width, start="taper", end="round", taper_len=0.1, squash=1.0):
     """Offset a centerline into a filled outline.
 
     width: function t -> half-width. start/end: "taper" (pen touching down or
@@ -62,9 +62,9 @@ def brush(pts, width, start="taper", end="round", taper_len=0.1):
         left.append((x + nx * w, y + ny * w))
         right.append((x - nx * w, y - ny * w))
     ux, uy, nx, ny = nrm[-1]
-    end_cap = _cap(pts[-1], ux, uy, nx, ny, width(1.0)) if end == "round" else []
+    end_cap = _cap(pts[-1], ux, uy, nx, ny, width(1.0), squash) if end == "round" else []
     ux, uy, nx, ny = nrm[0]
-    start_cap = _cap(pts[0], -ux, -uy, -nx, -ny, width(0.0)) if start == "round" else []
+    start_cap = _cap(pts[0], -ux, -uy, -nx, -ny, width(0.0), squash) if start == "round" else []
     return left + end_cap + right[::-1] + start_cap
 
 
@@ -350,6 +350,20 @@ def swipe(x0=8.0, x1=92.0, y=50.0, half=16.0, tilt=-4.0, bow=0.4, weight=1.0):
 
 
 EYES = ((33.0, 50.0, 6.6), (67.0, 48.0, 6.4))
+
+
+# The logotype's swipe (decision 0193): the mark's brush, run long and wide behind
+# "Mask", which reads through it in the background colour. Heavy where the pen lands,
+# a little lighter at the end, tilted less than the mark (-2.5 degrees) so the whole
+# word stays inside it. Drawn in a 0 0 220 100 box that pages stretch over the word;
+# the caps are squashed so they stay round once stretched to about 2.4 by 1.1 em.
+WORDMARK_BOX = (220, 100)
+
+
+def wordmark_swipe():
+    pts = rotate(line((14.0, 46.0), (206.0, 46.0), n=120, bow=0.6), -2.5, 110.0, 46.0)
+    w = lambda t: 45.0 - 6.0 * t ** 1.4 + wobble(t, 0.15)
+    return to_path(brush(pts, w, start="round", end="round", squash=0.3))
 
 # Glyph extents in the 100-box (weight 1.0).
 GX0, GX1, GY0, GY1 = 6.0, 94.0, 30.0, 70.0

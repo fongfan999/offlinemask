@@ -10,6 +10,10 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 - A value hidden once in a document is hidden wherever else it appears whole, with the same alias: a person's name of two words or more, or a number of six characters or more, whose second occurrence sits where its cue is missing; a name is found again even when a scan misreads one of its tone marks ([0180](docs/decisions/0180-scanned-pdfs-and-images-read-on-the-machine.md), [0184](docs/decisions/0184-signature-names-on-copier-scans.md)).
 - Contract forms with their labels in one column and the values after a colon in the next read one field a line, in Word and PDF files as in scans ([0183](docs/decisions/0183-forms-with-a-column-of-labels.md)); "Mã số doanh nghiệp" is masked as a tax code, not a phone number ([0189](docs/decisions/0189-enterprise-code-is-a-tax-code.md)).
 
+### Changed
+
+- The OfflineMask name has its own logotype: "Mask" sits under a cobalt brush swipe drawn with the same brush as the mask, and reads through it ([0193](docs/decisions/0193-logotype-swipe.md)).
+
 ## [2.5.0] - 2026-10-29
 
 Mask a whole folder at once, start every job from one place, and no more size limits: OfflineMask says how long a job will take instead, and reads very large CSV and text files a piece at a time.

@@ -229,7 +229,9 @@ p {
 .brand:hover .brand-mark {
   rotate: -4deg;
 }
-/* Wordmark: "Offline" in ink, "Mask" in cobalt — the hidden part is the accent. */
+/* Wordmark: "Offline" in ink, "Mask" under the cobalt swipe (decision 0193) — the hidden
+   part is the accent. The swipe is brand/wordmark-swipe.svg stretched over the word; its box
+   is set in em for the bundled face's metrics, so "Mask" stays inside it at every size. */
 .brand-name {
   white-space: nowrap;
   font-family: "OfflineMask Wordmark", var(--sans);
@@ -237,7 +239,24 @@ p {
   letter-spacing: -0.04em;
 }
 .brand-accent {
-  color: var(--accent);
+  position: relative;
+  isolation: isolate;
+  display: inline-block;
+  margin-left: 0.1em;
+  padding: 0 0.12em;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--on-accent);
+}
+.brand-accent::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 -0.02em auto;
+  height: 1.1em;
+  background: var(--accent);
+  -webkit-mask: url("../../brand/wordmark-swipe.svg") 0 0 / 100% 100% no-repeat;
+  mask: url("../../brand/wordmark-swipe.svg") 0 0 / 100% 100% no-repeat;
 }
 /* The mark inside running text: cobalt, on the x-height, a hair of air after it. */
 .inline-mark {

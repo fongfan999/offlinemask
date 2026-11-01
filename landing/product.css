@@ -106,8 +106,29 @@
   font-weight: 750;
   letter-spacing: -0.04em;
 }
-.om-brand > span > span {
-  color: var(--accent);
+/* "Mask" under the cobalt swipe (decision 0193): brand/wordmark-swipe.svg stretched over the
+   word, its box in em for Noto Sans's metrics, as in the app. The hero sets its own colours. */
+.om-brand > span > span,
+.om-wordmark-mask {
+  position: relative;
+  isolation: isolate;
+  display: inline-block;
+  margin-left: 0.1em;
+  padding: 0 0.12em;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  color: var(--on-accent);
+}
+.om-brand > span > span::before,
+.om-wordmark-mask::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 -0.02em auto;
+  height: 1.1em;
+  background: var(--accent);
+  -webkit-mask: url("../brand/wordmark-swipe.svg") 0 0 / 100% 100% no-repeat;
+  mask: url("../brand/wordmark-swipe.svg") 0 0 / 100% 100% no-repeat;
 }
 .om-brand .om-mark {
   position: relative;
@@ -385,8 +406,12 @@
   letter-spacing: -0.055em;
   white-space: nowrap;
 }
+/* On cobalt the swipe is the light cobalt and the letters show the cobalt through it. */
 .om-wordmark-mask {
-  color: #b3c3ff;
+  color: var(--cobalt);
+}
+.om-wordmark-mask::before {
+  background: #b3c3ff;
 }
 .om-wordmark span {
   display: inline-block;
@@ -604,6 +629,10 @@
   .om-wordmark > span > span,
   .om-wordmark > span:not(.om-wordmark-mask) {
     animation: om-letter 1.2s cubic-bezier(0.16, 1, 0.3, 1) calc(0.1s + var(--i) * 0.035s) backwards;
+  }
+  /* The swipe is brushed on once the letters of "Mask" are up. */
+  .om-wordmark-mask::before {
+    animation: om-logo-paint 0.7s cubic-bezier(0.6, 0, 0.3, 1) 0.55s both;
   }
   .om-hero-window {
     animation: om-tilt-up 1.6s cubic-bezier(0.16, 1, 0.3, 1) 0.35s backwards;
