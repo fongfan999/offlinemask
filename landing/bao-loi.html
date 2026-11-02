@@ -3,12 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="description" content="Báo cho OfflineMask biết khi ứng dụng làm sai." />
-    <meta name="robots" content="noindex" />
+    <meta
+      name="description"
+      content="Báo cho OfflineMask biết khi ứng dụng làm sai, hoặc góp ý tính năng bạn muốn có."
+    />
     <meta name="theme-color" content="#f7f5ee" />
     <link rel="canonical" href="https://offlinemask.com/bao-loi" />
     <link rel="icon" href="../brand/mark-ink.svg" type="image/svg+xml" />
-    <title>Báo lỗi - OfflineMask</title>
+    <title>Báo lỗi hoặc góp ý - OfflineMask</title>
     <link rel="stylesheet" href="./standalone.css" />
   </head>
   <body>
@@ -20,15 +22,15 @@
         <a class="om-text-link" href="./">Về trang chủ</a>
       </header>
       <main class="om-doc om-wrap">
-        <p class="om-maker-label">Báo lỗi</p>
-        <h1>Có gì chưa đúng?</h1>
+        <p class="om-maker-label">Báo lỗi hoặc góp ý</p>
+        <h1>Có gì chưa đúng, hay bạn muốn thêm gì?</h1>
         <p class="om-doc-lead">
           Cảm ơn bạn đã báo. Xem lại nội dung bên dưới rồi bấm <strong>Gửi</strong>, vậy là xong.
         </p>
 
         <form class="om-report" data-om-report novalidate>
           <fieldset>
-            <legend>Chuyện gì đã xảy ra?</legend>
+            <legend>Bạn muốn báo điều gì?</legend>
             <label
               ><input type="radio" name="kind" value="missed" checked /> Còn sót thông tin chưa
               ẩn</label
@@ -37,6 +39,10 @@
             <label
               ><input type="radio" name="kind" value="crash" /> Ứng dụng báo lỗi, treo hoặc tự
               tắt</label
+            >
+            <label
+              ><input type="radio" name="kind" value="idea" /> Góp ý hoặc đề xuất tính năng
+              mới</label
             >
             <label><input type="radio" name="kind" value="other" /> Chuyện khác</label>
           </fieldset>
@@ -59,7 +65,7 @@
         </form>
         <div class="om-report-done" data-om-report-done hidden tabindex="-1">
           <h2>Đã gửi. Cảm ơn bạn!</h2>
-          <p>Báo lỗi của bạn đã tới tay người làm OfflineMask. Bạn có thể đóng trang này.</p>
+          <p>Lời nhắn của bạn đã tới tay người làm OfflineMask. Bạn có thể đóng trang này.</p>
         </div>
         <noscript><p>Trang này cần bật JavaScript để gửi báo lỗi.</p></noscript>
 

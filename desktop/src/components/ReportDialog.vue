@@ -10,7 +10,7 @@ import {
   type ReportKind,
 } from "../core/report.ts";
 
-// Báo lỗi (decision 0147): the user writes here, the website sends. The app itself has no
+// Báo lỗi hoặc góp ý (decisions 0147, 0197): the user writes here, the website sends. The app itself has no
 // internet access, so it only opens the report page with this text filled in.
 const props = defineProps<{ version: string; screen: string }>();
 
@@ -19,6 +19,11 @@ const kind = ref<ReportKind>("missed");
 const message = ref("");
 const error = ref("");
 const os = systemName(navigator.userAgent);
+const placeholder = computed(() =>
+  kind.value === "idea"
+    ? "Ví dụ: cho phép ẩn cả biển số xe."
+    : "Ví dụ: số điện thoại có dấu chấm ở giữa không được ẩn.",
+);
 const details = computed(() =>
   [`OfflineMask ${props.version}`, os, `màn hình ${props.screen}`].filter(Boolean).join(" - "),
 );
@@ -46,7 +51,7 @@ async function send() {
     kind.value = "missed";
     message.value = "";
   } catch {
-    error.value = "Chưa mở được trình duyệt. Bạn có thể vào OfflineMask.com/bao-loi để báo lỗi.";
+    error.value = "Chưa mở được trình duyệt. Bạn có thể vào OfflineMask.com/bao-loi để gửi.";
   }
 }
 defineExpose({ open });
@@ -56,7 +61,7 @@ defineExpose({ open });
   <dialog ref="dialog" class="report-dialog glass" aria-labelledby="report-title">
     <form @submit.prevent="send">
       <header class="report-header">
-        <h2 id="report-title">Báo lỗi</h2>
+        <h2 id="report-title">Báo lỗi hoặc góp ý</h2>
         <button
           type="button"
           class="icon-button report-close"
@@ -74,7 +79,7 @@ defineExpose({ open });
         >
       </p>
       <fieldset class="report-kinds">
-        <legend>Chuyện gì đã xảy ra?</legend>
+        <legend>Bạn muốn báo điều gì?</legend>
         <label v-for="choice in reportKinds" :key="choice.kind">
           <input v-model="kind" type="radio" name="report-kind" :value="choice.kind" />{{
             choice.label
@@ -89,7 +94,7 @@ defineExpose({ open });
         rows="4"
         :maxlength="reportMessageLimit"
         aria-describedby="report-hint"
-        placeholder="Ví dụ: số điện thoại có dấu chấm ở giữa không được ẩn."
+        :placeholder="placeholder"
       ></textarea>
       <p id="report-hint" class="report-hint">
         Chỉ cần mô tả. Đừng dán tên, số điện thoại hay nội dung giấy tờ thật.

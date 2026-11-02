@@ -1,4 +1,4 @@
-// Bug reports (decision 0147). The app never sends anything: it opens the report page on
+// Bug reports and suggestions (decisions 0147, 0197). The app never sends anything: it opens the report page on
 // OfflineMask.com with what the user wrote in the address's fragment, which the browser keeps
 // to itself, and the user presses Gửi there.
 
@@ -9,6 +9,7 @@ export const reportKinds = [
   { kind: "missed", label: "Còn sót thông tin chưa ẩn" },
   { kind: "wrong", label: "Ẩn nhầm chữ bình thường" },
   { kind: "crash", label: "Ứng dụng báo lỗi, treo hoặc tự tắt" },
+  { kind: "idea", label: "Góp ý hoặc đề xuất tính năng mới" },
   { kind: "other", label: "Chuyện khác" },
 ] as const;
 export type ReportKind = (typeof reportKinds)[number]["kind"];

@@ -76,7 +76,7 @@ async function count(store, platform) {
 }
 
 /** What a report may say; the app fills these in, the visitor reads them and presses Gửi. */
-export const reportKinds = ["missed", "wrong", "crash", "other"];
+export const reportKinds = ["missed", "wrong", "crash", "idea", "other"];
 const reportLimits = { message: 2000, version: 20, os: 20, screen: 20 };
 
 /** The report as stored, or undefined when it is not one the page could have sent. */
