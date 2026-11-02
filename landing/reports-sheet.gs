@@ -82,6 +82,10 @@ function doPost(event) {
 /** Run once from the editor: headers, the status dropdown and colours, and the board. */
 function setup() {
   const sheet = dataSheet();
+  // Reports that came in before setup start at row 1: make room for the headers above them.
+  if (sheet.getLastRow() > 0 && sheet.getRange(1, 1).getValue() !== COLUMNS[0]) {
+    sheet.insertRowBefore(1);
+  }
   sheet.getRange(1, 1, 1, COLUMNS.length).setValues([COLUMNS]).setFontWeight("bold");
   sheet.setFrozenRows(1);
   [150, 90, 420, 80, 100, 100, 110, 120, 220, 210].forEach((width, i) =>
