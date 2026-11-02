@@ -52,7 +52,13 @@ function doPost(event) {
   try {
     const sheet = dataSheet();
     const last = sheet.getLastRow();
-    const ids = last > 1 ? sheet.getRange(2, ID, last - 1).getValues().flat() : [];
+    const ids =
+      last > 1
+        ? sheet
+            .getRange(2, ID, last - 1)
+            .getValues()
+            .flat()
+        : [];
     if (!ids.includes(report.id)) {
       sheet.appendRow([
         new Date(report.at),
