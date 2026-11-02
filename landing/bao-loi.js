@@ -10,6 +10,10 @@ const about = document.querySelector("[data-om-report-about]");
 const status = document.querySelector("[data-om-report-status]");
 const done = document.querySelector("[data-om-report-done]");
 const missing = document.querySelector("[data-om-report-missing]");
+const title = document.querySelector("[data-om-report-title]");
+const asked = title.textContent;
+const [lead, appLead] = document.querySelectorAll("[data-om-report-lead]");
+const note = document.querySelector("[data-om-report-note]");
 const sent = new URLSearchParams(location.hash.slice(1));
 const app = {
   version: sent.get("version") ?? "",
@@ -41,6 +45,8 @@ const markMissing = (on) => {
   message.setAttribute("aria-describedby", on ? "" : "om-report-hint");
 };
 message.addEventListener("input", () => markMissing(false));
+// Coming from the app the form is already filled in: the visitor only reviews and sends.
+if (sent.get("message")) [lead.hidden, appLead.hidden] = [true, false];
 if (location.hash) history.replaceState(null, "", location.pathname + location.search);
 
 form.addEventListener("submit", async (event) => {
@@ -60,11 +66,29 @@ form.addEventListener("submit", async (event) => {
       body: JSON.stringify({ kind: kind.value, message: message.value, ...app }),
     });
     if (!reply.ok) throw new Error(`HTTP ${reply.status}`);
-    form.hidden = true;
-    done.hidden = false;
-    done.focus();
+    showSent(true);
   } catch {
     status.textContent = "Chưa gửi được. Bạn kiểm tra kết nối mạng rồi bấm Gửi lại nhé.";
+  } finally {
     button.disabled = false;
   }
+});
+
+/** Sent: the page says so at the top and drops what only applies before sending. */
+function showSent(on) {
+  title.textContent = on ? "Đã gửi. Cảm ơn bạn!" : asked;
+  for (const element of [form, lead, note]) element.hidden = on;
+  appLead.hidden = true;
+  done.hidden = !on;
+  status.textContent = "";
+  title.focus();
+}
+
+// "Gửi thêm": an empty form for another note, keeping the app's details if it opened the page.
+document.querySelector("[data-om-report-again]").addEventListener("click", () => {
+  form.reset();
+  showExample();
+  markMissing(false);
+  showSent(false);
+  message.focus();
 });

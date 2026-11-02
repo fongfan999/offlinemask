@@ -23,8 +23,12 @@
       </header>
       <main class="om-doc om-wrap">
         <p class="om-maker-label">Báo lỗi hoặc góp ý</p>
-        <h1>Có gì chưa đúng, hay bạn muốn thêm gì?</h1>
-        <p class="om-doc-lead">
+        <h1 data-om-report-title tabindex="-1">Có gì chưa đúng, hay bạn muốn thêm gì?</h1>
+        <p class="om-doc-lead" data-om-report-lead>
+          Lỗi hay ý tưởng, bạn cứ kể ngắn gọn rồi bấm <strong>Gửi</strong>. Mỗi lời nhắn đều được
+          đọc.
+        </p>
+        <p class="om-doc-lead" data-om-report-lead="app" hidden>
           Cảm ơn bạn đã báo. Xem lại nội dung bên dưới rồi bấm <strong>Gửi</strong>, vậy là xong.
         </p>
 
@@ -93,13 +97,19 @@
           <button class="om-report-send" type="submit">Gửi</button>
           <p class="om-report-status" data-om-report-status role="status"></p>
         </form>
-        <div class="om-report-done" data-om-report-done hidden tabindex="-1">
-          <h2>Đã gửi. Cảm ơn bạn!</h2>
-          <p>Lời nhắn của bạn đã tới tay người làm OfflineMask. Bạn có thể đóng trang này.</p>
+        <div class="om-report-done" data-om-report-done hidden>
+          <p>
+            Lời nhắn của bạn đã tới tay người làm OfflineMask. Bạn có thể đóng trang này, hoặc gửi
+            thêm điều khác.
+          </p>
+          <div class="om-report-next">
+            <button class="om-report-again" type="button" data-om-report-again>Gửi thêm</button>
+            <a class="om-text-link" href="./">Về trang chủ</a>
+          </div>
         </div>
         <noscript><p>Trang này cần bật JavaScript để gửi báo lỗi.</p></noscript>
 
-        <p class="om-doc-note">
+        <p class="om-doc-note" data-om-report-note>
           Trang chỉ gửi những gì bạn thấy ở trên, cùng phiên bản ứng dụng, hệ điều hành và màn hình
           bạn đang mở nếu bạn đến từ ứng dụng. Không kèm địa chỉ IP hay cookie. Xem thêm về
           <a href="./privacy.html#trang-web">quyền riêng tư</a>.
