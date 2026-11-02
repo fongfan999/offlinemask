@@ -18,7 +18,7 @@ Upload the unsigned `OfflineMask_<version>_x64.msix` from the `msix-windows-x64`
 - **Privacy policy URL:** `https://offlinemask.com/privacy`
 - **Website:** `https://offlinemask.com`
 - **Support contact:** `https://github.com/fongfan999/offlinemask/issues`
-- **Does this product access, collect or transmit personal information?** No. Everything is processed on the device. The app uses the network only when the user clicks: to download the recognition pack, or to open OfflineMask.com in the browser (including the *Báo lỗi* page, where the user presses *Gửi* themselves).
+- **Does this product access, collect or transmit personal information?** No. Everything is processed on the device. The app uses the network only when the user clicks: to download the recognition pack, or to open OfflineMask.com in the browser (including the *Báo lỗi hoặc góp ý* page, where the user presses *Gửi* themselves).
 - **System requirements:** x64, 8 GB memory recommended when the recognition pack is used.
 
 ## Age ratings (IARC questionnaire)
@@ -44,11 +44,12 @@ OfflineMask thay họ tên, số tài khoản, số điện thoại, CCCD, email
 Không tài khoản, không máy chủ, không thống kê sử dụng. Ứng dụng chỉ dùng mạng khi bạn bấm tải gói nhận diện. Hãy luôn xem lại kết quả trước khi chia sẻ.
 ```
 
-**What's new in this version** (2.6.1; 2.6.0 listed scanned PDFs and pictures read on the machine, history search and paging, and faster restore within bounded memory; 2.5.0 listed folder masking, starting every job from one place and no size limits; 2.4.0 listed the pack's new model, a 158 MB update trained only on invented documents; 2.3.0 listed PDFs on Tài liệu, the (OfflineMasked) names and better masking of invoices, statements and contracts; 2.2.0 listed Báo lỗi, history that deletes itself and the circle acting only on the selection; the first submission said "Bản đầu tiên trên Microsoft Store.")
+**What's new in this version** (2.7.0; 2.6.1 listed the fix for scanned PDFs and pictures on Windows and Ẩn nhanh on from the first launch there; 2.6.0 listed scanned PDFs and pictures read on the machine, history search and paging, and faster restore within bounded memory; 2.5.0 listed folder masking, starting every job from one place and no size limits; 2.4.0 listed the pack's new model, a 158 MB update trained only on invented documents; 2.3.0 listed PDFs on Tài liệu, the (OfflineMasked) names and better masking of invoices, statements and contracts; 2.2.0 listed Báo lỗi, history that deletes itself and the circle acting only on the selection; the first submission said "Bản đầu tiên trên Microsoft Store.")
 
 ```
-- Sửa lỗi bản 2.6.0 trên Windows: PDF scan và hình ảnh (PNG, JPG) báo "Không mở được tệp này" vì bản cài thiếu mô hình đọc chữ. Nay đọc được ngay trên máy như đã hứa: không tải thêm, không gửi đi đâu.
-- Ẩn nhanh bật sẵn từ lần mở đầu trên Windows, nơi không cần cấp quyền gì. Tắt trong Cài đặt hay khay hệ thống vẫn được ghi nhớ.
+- Nút "Báo lỗi / Góp ý" nay nằm ở góc dưới bên phải mọi trang, dễ thấy hơn.
+- Ngoài báo lỗi, bạn có thể góp ý hoặc đề xuất tính năng mới ngay từ nút đó.
+- Biểu mẫu gọn hơn: chọn loại bằng một chạm, mỗi loại có gợi ý viết riêng.
 ```
 
 **Product features** (one per line in Partner Center)
