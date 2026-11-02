@@ -28,13 +28,20 @@ test("the report travels in the fragment of the report page", () => {
   });
 });
 
-test("the app, the page and the Worker offer the same kinds", () => {
-  const kinds = reportKinds.map(({ kind }) => kind);
-  assert.deepEqual(kinds, acceptedKinds);
-  const page = readFileSync(new URL("../../landing/bao-loi.html", import.meta.url), "utf8");
+test("the app, the page and the Worker offer the same kinds, labels and examples", () => {
   assert.deepEqual(
-    [...page.matchAll(/name="kind" value="(\w+)"/g)].map((m) => m[1]),
-    kinds,
+    reportKinds.map(({ kind }) => kind),
+    acceptedKinds,
+  );
+  const page = readFileSync(new URL("../../landing/bao-loi.html", import.meta.url), "utf8");
+  const offered = [
+    ...page.matchAll(
+      /name="kind"\s+value="(\w+)"\s+data-example="([^"]+)"[^>]*\/>([^<]+)<\/label/g,
+    ),
+  ].map(([, kind, example, label]) => ({ kind, label: label.replace(/\s+/g, " "), example }));
+  assert.deepEqual(
+    offered,
+    reportKinds.map(({ kind, label, example }) => ({ kind, label, example })),
   );
 });
 

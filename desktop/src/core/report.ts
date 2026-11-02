@@ -4,13 +4,34 @@
 
 export const reportPage = "https://offlinemask.com/bao-loi";
 
-/** The choices the report dialog offers; landing/worker.js accepts exactly these kinds. */
+/** The choices the report dialog offers; landing/worker.js accepts exactly these kinds, and
+ * landing/bao-loi.html offers the same labels and examples. */
 export const reportKinds = [
-  { kind: "missed", label: "Còn sót thông tin chưa ẩn" },
-  { kind: "wrong", label: "Ẩn nhầm chữ bình thường" },
-  { kind: "crash", label: "Ứng dụng báo lỗi, treo hoặc tự tắt" },
-  { kind: "idea", label: "Góp ý hoặc đề xuất tính năng mới" },
-  { kind: "other", label: "Chuyện khác" },
+  {
+    kind: "missed",
+    label: "Còn sót thông tin chưa ẩn",
+    example: "Ví dụ: số điện thoại có dấu chấm ở giữa không được ẩn.",
+  },
+  {
+    kind: "wrong",
+    label: "Ẩn nhầm chữ bình thường",
+    example: "Ví dụ: chữ “Tổng cộng” trong bảng bị thay bằng mã.",
+  },
+  {
+    kind: "crash",
+    label: "Ứng dụng báo lỗi, treo hoặc tự tắt",
+    example: "Ví dụ: mở tệp Excel khoảng 20 MB thì ứng dụng treo.",
+  },
+  {
+    kind: "idea",
+    label: "Góp ý hoặc đề xuất tính năng mới",
+    example: "Ví dụ: cho phép ẩn cả biển số xe.",
+  },
+  {
+    kind: "other",
+    label: "Chuyện khác",
+    example: "Kể điều bạn muốn nhắn người làm OfflineMask.",
+  },
 ] as const;
 export type ReportKind = (typeof reportKinds)[number]["kind"];
 

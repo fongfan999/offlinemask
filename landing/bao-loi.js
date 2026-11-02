@@ -9,6 +9,7 @@ const form = document.querySelector("[data-om-report]");
 const about = document.querySelector("[data-om-report-about]");
 const status = document.querySelector("[data-om-report-status]");
 const done = document.querySelector("[data-om-report-done]");
+const missing = document.querySelector("[data-om-report-missing]");
 const sent = new URLSearchParams(location.hash.slice(1));
 const app = {
   version: sent.get("version") ?? "",
@@ -28,13 +29,24 @@ if (details.some(Boolean)) {
   about.textContent = `Gửi kèm: ${details.filter(Boolean).join(" - ")}`;
   about.hidden = false;
 }
+// Each kind carries its own example, the same as the app's (src/core/report.ts).
+const message = form.elements.namedItem("message");
+const showExample = () =>
+  (message.placeholder = [...kind].find((input) => input.checked).dataset.example);
+form.addEventListener("change", showExample);
+showExample();
+const markMissing = (on) => {
+  missing.hidden = !on;
+  message.toggleAttribute("aria-invalid", on);
+  message.setAttribute("aria-describedby", on ? "" : "om-report-hint");
+};
+message.addEventListener("input", () => markMissing(false));
 if (location.hash) history.replaceState(null, "", location.pathname + location.search);
 
 form.addEventListener("submit", async (event) => {
   event.preventDefault();
-  const message = form.elements.namedItem("message");
   if (!message.value.trim()) {
-    status.textContent = "Bạn viết vài chữ về chuyện đã xảy ra nhé.";
+    markMissing(true);
     message.focus();
     return;
   }

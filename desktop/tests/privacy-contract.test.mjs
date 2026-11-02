@@ -92,7 +92,7 @@ test("links from the app open only OfflineMask.com and its report page (privacy 
   // on the page (decision 0147).
   assert.match(read("../src/core/report.ts"), /return `\$\{reportPage\}#\$\{fields\}`;/, UPDATE);
   const page = read("../../landing/privacy.html");
-  assert.match(page, /Bạn bấm Mở trang báo lỗi, rồi bấm Gửi trên trang đó/, UPDATE);
+  assert.match(page, /Bạn bấm Tiếp tục trên trình duyệt, rồi bấm Gửi trên trang đó/, UPDATE);
   assert.match(page, /OfflineMask chỉ dùng mạng trong bốn trường hợp/, UPDATE);
 });
 

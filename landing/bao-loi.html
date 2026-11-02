@@ -32,19 +32,46 @@
           <fieldset>
             <legend>Bạn muốn báo điều gì?</legend>
             <label
-              ><input type="radio" name="kind" value="missed" checked /> Còn sót thông tin chưa
-              ẩn</label
+              ><input
+                type="radio"
+                name="kind"
+                value="missed"
+                data-example="Ví dụ: số điện thoại có dấu chấm ở giữa không được ẩn."
+                checked
+              />Còn sót thông tin chưa ẩn</label
             >
-            <label><input type="radio" name="kind" value="wrong" /> Ẩn nhầm chữ bình thường</label>
             <label
-              ><input type="radio" name="kind" value="crash" /> Ứng dụng báo lỗi, treo hoặc tự
-              tắt</label
+              ><input
+                type="radio"
+                name="kind"
+                value="wrong"
+                data-example="Ví dụ: chữ “Tổng cộng” trong bảng bị thay bằng mã."
+              />Ẩn nhầm chữ bình thường</label
             >
             <label
-              ><input type="radio" name="kind" value="idea" /> Góp ý hoặc đề xuất tính năng
-              mới</label
+              ><input
+                type="radio"
+                name="kind"
+                value="crash"
+                data-example="Ví dụ: mở tệp Excel khoảng 20 MB thì ứng dụng treo."
+              />Ứng dụng báo lỗi, treo hoặc tự tắt</label
             >
-            <label><input type="radio" name="kind" value="other" /> Chuyện khác</label>
+            <label
+              ><input
+                type="radio"
+                name="kind"
+                value="idea"
+                data-example="Ví dụ: cho phép ẩn cả biển số xe."
+              />Góp ý hoặc đề xuất tính năng mới</label
+            >
+            <label
+              ><input
+                type="radio"
+                name="kind"
+                value="other"
+                data-example="Kể điều bạn muốn nhắn người làm OfflineMask."
+              />Chuyện khác</label
+            >
           </fieldset>
           <label class="om-report-field" for="om-report-message">Kể thêm một chút</label>
           <textarea
@@ -56,6 +83,9 @@
             aria-describedby="om-report-hint"
             placeholder="Ví dụ: số điện thoại có dấu chấm ở giữa không được ẩn."
           ></textarea>
+          <p class="om-report-missing" data-om-report-missing role="alert" hidden>
+            Bạn viết vài chữ trước khi gửi nhé.
+          </p>
           <p id="om-report-hint" class="om-report-hint">
             Chỉ cần mô tả. Đừng dán tên, số điện thoại hay nội dung giấy tờ thật.
           </p>

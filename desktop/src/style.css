@@ -4088,7 +4088,7 @@ td.alias {
 }
 .report-dialog form {
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 .report-header {
   display: flex;
@@ -4102,50 +4102,63 @@ td.alias {
   width: 32px;
   height: 32px;
 }
+/* Where the sending happens, beside the button that goes there (decisions 0147, 0197). */
 .report-offline {
   display: flex;
-  gap: 10px;
-  padding: 12px 14px;
+  gap: 8px;
+  margin-top: 8px;
+  padding: 10px 12px;
   border-radius: 10px;
   background: var(--note);
   color: var(--note-ink);
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 12px;
+  line-height: 1.5;
 }
 .report-offline svg {
   flex-shrink: 0;
   margin-top: 2px;
 }
+/* The kinds as chips that wrap, so five choices take two or three lines, not five rows. */
 .report-kinds {
-  display: grid;
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
-  margin: 4px 0 6px;
+  margin: 10px 0 10px;
   padding: 0;
   border: 0;
 }
 .report-kinds legend,
 .report-field {
+  padding: 0;
   margin-bottom: 6px;
   font-size: 14px;
   font-weight: 600;
 }
 .report-kinds label {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 12px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  font-size: 14px;
+  padding: 7px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  font-size: 13px;
   cursor: pointer;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
+}
+.report-kinds label:hover {
+  border-color: var(--accent);
 }
 .report-kinds label:has(input:checked) {
   border-color: var(--accent);
   background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-weight: 600;
 }
 .report-kinds input {
-  margin: 0;
-  accent-color: var(--accent);
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
 }
 .report-kinds label:has(input:focus-visible) {
   outline: 2px solid var(--accent);
@@ -4163,6 +4176,24 @@ td.alias {
   line-height: 1.5;
   resize: vertical;
 }
+.report-dialog textarea::placeholder {
+  color: var(--muted);
+}
+.report-dialog textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.report-dialog textarea[aria-invalid] {
+  border-color: var(--error);
+}
+.report-dialog textarea[aria-invalid]:focus-visible {
+  outline-color: var(--error);
+}
+.report-missing {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--error);
+}
 .report-hint {
   font-size: 12px;
   line-height: 1.5;
@@ -4173,7 +4204,7 @@ td.alias {
   justify-content: flex-end;
   align-items: center;
   gap: 10px;
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 /* Masking a whole folder (decision 0171). */
