@@ -8,7 +8,7 @@ Real questions people search, in the order they will be written. `[ ]` to write,
 - [x] Nhờ AI soạn hợp đồng mà không lộ tên, CCCD của các bên — `nho-ai-soan-hop-dong-khong-lo-ten-cccd`
 - [x] Kế toán dùng ChatGPT thế nào cho an toàn với số tài khoản, mã số thuế? — `ke-toan-dung-chatgpt-an-toan-so-tai-khoan-ma-so-thue`
 - [x] Nhân sự dùng AI để viết đánh giá, tính lương: thông tin nào không được đưa vào? — `nhan-su-dung-ai-viet-danh-gia-tinh-luong`
-- [ ] Luật bảo vệ dữ liệu cá nhân ở Việt Nam nói gì về việc dùng AI ở công ty?
+- [x] Luật bảo vệ dữ liệu cá nhân ở Việt Nam nói gì về việc dùng AI ở công ty? — `luat-bao-ve-du-lieu-ca-nhan-dung-ai-cong-ty`
 - [ ] Dùng AI trả lời khiếu nại khách hàng mà không lộ số điện thoại của khách
 - [ ] Ẩn danh dữ liệu (anonymization) và mã hóa giả danh (pseudonymization) khác nhau thế nào?
 - [ ] Có nên dùng tài khoản ChatGPT cá nhân cho việc công ty không?
