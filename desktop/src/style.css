@@ -2247,26 +2247,30 @@ td.alias {
   border-radius: 999px;
   font-variant-numeric: tabular-nums;
 }
-/* "Báo lỗi / Góp ý" (decision 0197): a raised pill at the footer's right end, so it floats in
-   the same place on every page and never sits over a page's own action row. */
+/* "Báo lỗi / Góp ý" (decision 0197): a raised cobalt pill at the footer's right end, so it
+   floats in the same place on every page and never sits over a page's own action row. */
 .feedback-button {
   display: inline-flex;
   align-items: center;
   gap: 7px;
   margin: -4px 0;
   padding: 7px 14px;
-  border: 1px solid var(--line-strong);
+  border: 1px solid var(--accent);
   border-radius: 999px;
-  background: var(--paper);
-  color: var(--ink);
+  background: var(--accent);
+  color: var(--on-accent);
   font: 600 13px var(--sans);
   letter-spacing: 0;
   box-shadow: 3px 4px 0 var(--shadow);
   cursor: pointer;
 }
 .feedback-button:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+  border-color: var(--accent-strong);
+  background: var(--accent-strong);
+}
+.feedback-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
 }
 /* A narrow window keeps the pill on the footer's line: the bubble alone. */
 @media (max-width: 520px) {

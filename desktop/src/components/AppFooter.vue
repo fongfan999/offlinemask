@@ -40,6 +40,7 @@ async function visitWebsite(event: MouseEvent) {
       <AppIcon name="message" :size="15" /><span>Báo lỗi / Góp ý</span>
     </button>
     <p v-if="websiteError" class="website-error" role="alert">{{ websiteError }}</p>
-    <ReportDialog ref="report" :version="version" :screen="screens[page]" />
   </footer>
+  <!-- Beside the footer, not in it, so it keeps the app's type instead of the footer's mono. -->
+  <ReportDialog ref="report" :version="version" :screen="screens[page]" />
 </template>
