@@ -21,3 +21,5 @@ The report page from decision 0147 existed, but users still could not find it:
 - Nothing changes in what is sent or stored, or when, so `landing/privacy.html` keeps its date; only §9's pointer now names the button in the bottom-right corner instead of the sidebar.
 
 GitHub issues and their templates remain for contributors; most users still have no GitHub account (decision 0147).
+
+Reports stay anonymous: an optional contact field (email or Zalo) so the owner could reply was offered and declined on 2 November 2026 ("No, keep it anonymous"). Don't add one without new direction.
