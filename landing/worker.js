@@ -2,7 +2,8 @@
 // answers three paths:
 //   /latest.json         the newest version, its release day and its download paths
 //   /download/<platform> a redirect straight to that release's file
-//   /report              a bug report the visitor sends from /bao-loi (decision 0147)
+//   /report              a bug report the visitor sends from /bao-loi (decision 0147), copied
+//                        to the owner's Google Sheet (decision 0198)
 // and the byte ranges of videos, which static assets always send whole, so a player could not seek.
 // It asks GitHub, never the visitor's browser, so the page still loads nothing from third
 // parties. It reads no cookies and keeps no logs (observability is off in wrangler.jsonc); each
@@ -92,10 +93,30 @@ export function readReport(body) {
 }
 
 /**
- * Keeps one report in KV under "<time> <random>", with its kind and version as metadata so a
- * key listing shows what came in. Nothing about the sender: no IP address, country or browser.
+ * Copies a stored report to the Google Sheet where it is read and tracked (decision 0198): the
+ * Apps Script in landing/reports-sheet.gs, reached at the REPORTS_SHEET_URL secret and checking
+ * REPORTS_SHEET_SECRET. Only what KV keeps goes, plus its key so a report is never added twice.
+ * Without both secrets nothing is sent; a failure leaves the report in KV.
  */
-async function receiveReport(request, store) {
+export async function copyToSheet(entry, env, fetcher = fetch) {
+  if (!env?.REPORTS_SHEET_URL || !env?.REPORTS_SHEET_SECRET) return;
+  try {
+    await fetcher(env.REPORTS_SHEET_URL, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ secret: env.REPORTS_SHEET_SECRET, ...entry }),
+    });
+  } catch {
+    // KV still has it.
+  }
+}
+
+/**
+ * Keeps one report in KV under "<time> <random>", with its kind and version as metadata so a
+ * key listing shows what came in, then copies it to the Sheet once the visitor has their answer.
+ * Nothing about the sender: no IP address, country or browser.
+ */
+async function receiveReport(request, env, context) {
   const text = request.method === "POST" ? await request.text() : "";
   let body;
   try {
@@ -107,9 +128,10 @@ async function receiveReport(request, store) {
   if (!report) return new Response("Báo lỗi chưa hợp lệ.", { status: 400 });
   const at = new Date().toISOString();
   const key = `${at} ${crypto.randomUUID().slice(0, 8)}`;
-  await store.put(key, JSON.stringify({ at, ...report }), {
+  await env.REPORTS.put(key, JSON.stringify({ at, ...report }), {
     metadata: { kind: report.kind, version: report.version },
   });
+  context?.waitUntil(copyToSheet({ id: key, at, ...report }, env));
   return new Response(null, { status: 204 });
 }
 
@@ -169,7 +191,7 @@ export default {
     }
     if (pathname === "/report") {
       try {
-        return await receiveReport(request, env.REPORTS);
+        return await receiveReport(request, env, context);
       } catch {
         return new Response("Chưa gửi được. Bạn thử lại sau ít phút nhé.", { status: 503 });
       }

@@ -19,7 +19,9 @@
   "observability": { "enabled": false },
   // DOWNLOADS: downloads per day and platform ("2026-10-25 deb": "12"), nothing about who
   // (decision 0144). REPORTS: bug reports sent from /bao-loi, what the visitor wrote and the
-  // app's version, nothing about who sent them (decision 0147).
+  // app's version, nothing about who sent them (decision 0147). Each is also copied to the
+  // owner's Google Sheet through the secrets REPORTS_SHEET_URL and REPORTS_SHEET_SECRET, set
+  // with `wrangler secret put`, never here (decision 0198).
   "kv_namespaces": [
     { "binding": "DOWNLOADS", "id": "9ad97a5609c342e4b49f10c2e3dae2c5" },
     { "binding": "REPORTS", "id": "3bcc4d99a5ec436d9c5ab7aa9a430f6e" },

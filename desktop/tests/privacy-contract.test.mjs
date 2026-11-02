@@ -96,6 +96,23 @@ test("links from the app open only OfflineMask.com and its report page (privacy 
   assert.match(page, /OfflineMask chỉ dùng mạng trong bốn trường hợp/, UPDATE);
 });
 
+test("a sent report is copied to the owner's Google Sheet, and the page says so (privacy §7)", () => {
+  // Decision 0198: the Worker forwards what KV keeps, nothing about the sender, to the Apps
+  // Script behind two secrets; a new destination must change this page first.
+  const worker = read("../../landing/worker.js");
+  assert.match(
+    worker,
+    /body: JSON\.stringify\(\{ secret: env\.REPORTS_SHEET_SECRET, \.\.\.entry \}\)/,
+    UPDATE,
+  );
+  assert.match(worker, /copyToSheet\(\{ id: key, at, \.\.\.report \}, env\)/, UPDATE);
+  assert.match(
+    read("../../landing/privacy.html").replace(/\s+/g, " "),
+    /được chép sang một bảng tính Google Sheets riêng tư/,
+    UPDATE,
+  );
+});
+
 test("text in pictures is read by the system's own engine, on the machine, only once the page says so (privacy §2)", () => {
   // Decision 0180: scanned pages and images go to Apple's Vision framework through the
   // native `ocr` module, which neither downloads a model, writes a file nor opens a

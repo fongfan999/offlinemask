@@ -4,7 +4,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { reportKinds, reportUrl, systemName } from "../src/core/report.ts";
-import worker, { reportKinds as acceptedKinds, readReport } from "../../landing/worker.js";
+import worker, {
+  copyToSheet,
+  reportKinds as acceptedKinds,
+  readReport,
+} from "../../landing/worker.js";
 
 test("the report travels in the fragment of the report page", () => {
   const url = new URL(
@@ -107,4 +111,58 @@ test("a report without the app's details is still a report", () => {
     os: "",
     screen: "",
   });
+});
+
+test("the Worker copies a stored report to the Sheet, after answering and only when set up", async () => {
+  const store = new Map();
+  const waiting = [];
+  const sent = [];
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = async (url, init) => {
+    sent.push([url, JSON.parse(init.body)]);
+    return new Response("ok");
+  };
+  try {
+    const env = {
+      REPORTS: { put: async (key, value) => store.set(key, value) },
+      REPORTS_SHEET_URL: "https://script.google.com/macros/s/test/exec",
+      REPORTS_SHEET_SECRET: "s3cret",
+    };
+    const report = { kind: "idea", message: "Ẩn biển số xe", version: "2.6.1", os: "", screen: "" };
+    const reply = await worker.fetch(
+      new Request("https://offlinemask.com/report", {
+        method: "POST",
+        headers: { "cf-connecting-ip": "203.0.113.9" },
+        body: JSON.stringify(report),
+      }),
+      env,
+      { waitUntil: (promise) => waiting.push(promise) },
+    );
+    assert.equal(reply.status, 204);
+    await Promise.all(waiting);
+    const [[key]] = store;
+    assert.equal(sent.length, 1);
+    const [url, body] = sent[0];
+    assert.equal(url, env.REPORTS_SHEET_URL);
+    assert.deepEqual(
+      { ...body, at: undefined },
+      { secret: "s3cret", id: key, ...report, at: undefined },
+    );
+    assert.ok(!JSON.stringify(body).includes("203.0.113.9"));
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+
+  let called = false;
+  await copyToSheet({ id: "x" }, { REPORTS_SHEET_URL: "https://example.test" }, async () => {
+    called = true;
+  });
+  assert.equal(called, false, "no secret, nothing sent");
+  await copyToSheet(
+    { id: "x" },
+    { REPORTS_SHEET_URL: "https://example.test", REPORTS_SHEET_SECRET: "s" },
+    async () => {
+      throw new Error("offline");
+    },
+  );
 });
