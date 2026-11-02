@@ -4,6 +4,19 @@ Notable changes to OfflineMask, newest first. The format follows [Keep a Changel
 
 ## [Unreleased]
 
+## [2.7.0] - 2026-11-02
+
+Bugs and ideas for new features are sent from the same place, a button that now sits in the bottom-right corner of every page.
+
+### Added
+
+- The report dialog takes ideas as well as problems: a fifth kind, "Góp ý hoặc đề xuất tính năng mới", sits beside the four kinds of bug, and the dialog is titled "Báo lỗi hoặc góp ý" ([0197](docs/decisions/0197-suggestions-alongside-bug-reports.md)).
+
+### Changed
+
+- "Báo lỗi / Góp ý" leaves the sidebar, where it read as one more setting, for a cobalt button at the right end of the footer, in the same corner on every page; on a narrow window only its speech bubble shows ([0197](docs/decisions/0197-suggestions-alongside-bug-reports.md)).
+- The report form is lighter: the kinds are chips, each with its own example in the message box; an empty message turns the box red with a short line under it; the note about what is sent along sits beside the button, which reads "Tiếp tục trên trình duyệt" ([0197](docs/decisions/0197-suggestions-alongside-bug-reports.md)).
+
 ## [2.6.1] - 2026-11-01
 
 Pictures and scanned PDFs are read again on Windows and Apple Silicon Macs, where the 2.6.0 builds had left the reading models out; Ẩn nhanh starts on for Windows.
