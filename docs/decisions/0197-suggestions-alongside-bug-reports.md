@@ -15,7 +15,8 @@ The report page from decision 0147 existed, but users still could not find it:
 
 - A fifth kind, `idea` (*Góp ý hoặc đề xuất tính năng mới*), sits before `other` in `src/core/report.ts`, `landing/bao-loi.html` and the Worker's `reportKinds`. It is stored like any other report; `desktop/tests/report.test.mjs` already checks that all three lists match. When it is picked, the dialog's example text changes to a feature idea.
 - The dialog and the page are titled *Báo lỗi hoặc góp ý*, and the question reads *Bạn muốn báo điều gì?*. The button stays *Mở trang báo lỗi*, the label the privacy policy names.
-- The website links the page from the homepage footer (*Tài nguyên*) and from the install and privacy pages' footers. The `noindex` is dropped so a search for OfflineMask feedback can find it.
+- **On the website**, the owner asked for the same button, highlighted: a cobalt (`--accent`) pill, *Báo lỗi / Góp ý*, `position: fixed` at the bottom-right of the homepage, install, privacy and blog pages (the blog template, so every post too), linking to `/bao-loi`. There a fixed button is safe: the only other pinned control is the centred download dock, which phones do not show. It is left off `/bao-loi` itself and the 404 page, and hidden when printing.
+- The website also links the page from the homepage footer (*Tài nguyên*) and from the install and privacy pages' footers. The `noindex` is dropped so a search for OfflineMask feedback can find it.
 - Nothing changes in what is sent or stored, or when, so `landing/privacy.html` keeps its date; only §9's pointer now names the button in the bottom-right corner instead of the sidebar.
 
 GitHub issues and their templates remain for contributors; most users still have no GitHub account (decision 0147).

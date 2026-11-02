@@ -1989,6 +1989,57 @@
   transform: translateY(-2px);
 }
 
+/* Báo lỗi / Góp ý (decision 0197): the one cobalt button that floats on every page, at the
+   bottom-right, clear of the centred download dock. */
+.om-feedback {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 40;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent) !important;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none !important;
+  box-shadow: 0 16px 36px -14px #0b154aa6;
+  transition:
+    transform 0.2s,
+    background 0.2s;
+}
+.om-feedback svg {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.om-feedback:hover {
+  background: var(--accent-strong);
+  transform: translateY(-2px);
+}
+.om-feedback:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+@media (max-width: 520px) {
+  .om-feedback {
+    right: 16px;
+    bottom: 16px;
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+}
+@media print {
+  .om-feedback {
+    display: none;
+  }
+}
+
 /* Footer */
 .om-footer {
   padding-top: 72px;
