@@ -379,7 +379,6 @@ async function closeSidebar() {
       :preparing="pack.preparing.value"
       :history="historyOn"
       :folder="folderItem"
-      :version="version"
       @navigate="openFormat"
       @close="closeSidebar"
       @collapse="toggleCollapsed"
@@ -466,7 +465,7 @@ async function closeSidebar() {
           {{ storageError }}
         </p>
       </main>
-      <AppFooter :version="version" />
+      <AppFooter :version="version" :page="page" />
     </div>
   </div>
 </template>

@@ -1,6 +1,6 @@
-# 0197 — Suggestions go through the bug report page, and the website links it
+# 0197 — A floating "Báo lỗi / Góp ý" button, suggestions alongside bug reports
 
-Date: 2 November 2026. Status: implemented. Owner: "users are complaining they don't see a place to report bugs or suggest new features".
+Date: 2 November 2026. Status: implemented. Owner: "users are complaining they don't see a place to report bugs or suggest new features"; "it's not about the title, it's about a placement, they also suggested a floating button".
 
 ## Problem
 
@@ -11,9 +11,11 @@ The report page from decision 0147 existed, but users still could not find it:
 
 ## Decision
 
+- **Placement.** The entry leaves the sidebar, where it sat under *Cài đặt* and read as one more setting, for a raised pill, *Báo lỗi / Góp ý* with a speech bubble, at the right end of the app's footer (`AppFooter.vue`, which now owns `ReportDialog` and the screen names). The footer is pinned to the window's bottom on every page, so the pill floats in the same corner everywhere. A free-floating button over the page was rejected: the bottom-right corner is where each step's sticky action row (*Ẩn thông tin*, decision 0134) puts its primary button. Below 520 px the pill shows only the bubble, so it stays on the footer's line.
+
 - A fifth kind, `idea` (*Góp ý hoặc đề xuất tính năng mới*), sits before `other` in `src/core/report.ts`, `landing/bao-loi.html` and the Worker's `reportKinds`. It is stored like any other report; `desktop/tests/report.test.mjs` already checks that all three lists match. When it is picked, the dialog's example text changes to a feature idea.
 - The dialog and the page are titled *Báo lỗi hoặc góp ý*, and the question reads *Bạn muốn báo điều gì?*. The button stays *Mở trang báo lỗi*, the label the privacy policy names.
 - The website links the page from the homepage footer (*Tài nguyên*) and from the install and privacy pages' footers. The `noindex` is dropped so a search for OfflineMask feedback can find it.
-- Nothing changes in what is sent or stored, or when, so `landing/privacy.html` stays as it is.
+- Nothing changes in what is sent or stored, or when, so `landing/privacy.html` keeps its date; only §9's pointer now names the button in the bottom-right corner instead of the sidebar.
 
 GitHub issues and their templates remain for contributors; most users still have no GitHub account (decision 0147).

@@ -27,6 +27,9 @@ const paths: Record<string, string> = {
   undo: "M3 10h11a7 7 0 0 1 0 14 M3 10l6-6 M3 10l6 6",
   reset: "M3 10a9 9 0 1 1 2 8 M3 4v6h6",
   search: "M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14Z m9 2-4-4",
+  // A speech bubble: "Báo lỗi / Góp ý" (decision 0197).
+  message:
+    "M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.6-5A8 8 0 1 1 21 12Z M8.5 12h.01 M12 12h.01 M15.5 12h.01",
   info: "M12 8h.01 M12 11v6 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
   help: "M9.5 8a2.5 2.5 0 1 1 4 2c-1 .5-1.5 1-1.5 2 M12 16h.01 M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
   close: "m6 6 12 12 M6 18 18 6",

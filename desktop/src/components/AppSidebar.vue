@@ -2,7 +2,6 @@
 import { computed, nextTick, ref, useTemplateRef, watch } from "vue";
 import AppIcon from "./AppIcon.vue";
 import BrandMark from "./BrandMark.vue";
-import ReportDialog from "./ReportDialog.vue";
 import { vTip } from "../directives/tip.ts";
 import type { Page } from "../composables/context.ts";
 import { matchesSearch, sessionDate, sessionPreview } from "../core/session-preview.ts";
@@ -18,8 +17,6 @@ const props = defineProps<{
   history: boolean;
   /** A folder being masked or reviewed, which is no session (decision 0171). */
   folder: { name: string; status: string } | null;
-  /** For the report only; home shows it (decision 0172). */
-  version: string;
 }>();
 const emit = defineEmits<{
   navigate: [destination: Page, id?: string | null];
@@ -32,15 +29,6 @@ const emit = defineEmits<{
   keep: [];
 }>();
 
-/** What the report says the user was looking at. */
-const screens: Record<Page, string> = {
-  home: "Trang chủ",
-  settings: "Cài đặt",
-  folder: "Thư mục",
-  text: "Văn bản",
-  excel: "Bảng tính",
-  word: "Tài liệu",
-};
 const start = useTemplateRef<HTMLButtonElement>("start");
 /** Without a passcode the list is RAM only; the "i" beside its heading says so and offers
  * the passcode (decision 0172). Shown on hover or focus, or held open by a click. */
@@ -49,7 +37,6 @@ function leaveInfo(event: FocusEvent) {
   const box = event.currentTarget as HTMLElement;
   if (!box.contains(event.relatedTarget as Node | null)) infoOpen.value = false;
 }
-const report = useTemplateRef<InstanceType<typeof ReportDialog>>("report");
 /** A busy day leaves dozens of entries: the list shows a page at a time, with "Xem thêm"
  * for the next, and a search behind the magnifier beside "Lịch sử" (decision 0192). */
 const pageSize = 30;
@@ -230,8 +217,6 @@ defineExpose({
           aria-label="Đang chuẩn bị gói nhận diện"
         ></span>
       </button>
-      <button @click="report?.open()"><AppIcon name="help" />Báo lỗi hoặc góp ý</button>
     </nav>
-    <ReportDialog ref="report" :version="version" :screen="screens[page]" />
   </aside>
 </template>
