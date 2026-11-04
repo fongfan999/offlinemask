@@ -43,4 +43,10 @@ Changing `reports-sheet.gs` later means pasting it again and *Deploy → Manage 
 
 - Anyone with the web app address and the secret can add rows; both live only in the Worker's secrets and the script's properties.
 - Apps Script allows roughly 20,000 calls a day on a personal account, far above the KV write limit that already caps reports (decision 0147).
-- Sheets sends no notification for a new row; turn on *Tools → Notification settings* in the Sheet for an email when it changes.
+- Sheets' own *Notification settings* do not fire for rows the script adds, because the script runs as the owner and Sheets does not notify you of your own edits.
+
+## Email alerts
+
+Added 4 November 2026. Owner: "how do I get alert when someone submits?". Each new row sends an email to the addresses in the script property `NOTIFY` (comma-separated, for example the owner and the friends who triage). The email carries only the kind and a link to the Sheet, not the message, so the report itself stays in the Sheet that `privacy.html` §7 names. Without `NOTIFY` nothing is sent. A failed email (quota: about 100 recipients a day on a personal account) is ignored; the row is already saved.
+
+To turn it on: paste the updated script, add `NOTIFY` under *Project Settings → Script properties*, run `testNotify` once from the editor to grant the mail permission and receive a test, then *Deploy → Manage deployments → Edit → New version*.

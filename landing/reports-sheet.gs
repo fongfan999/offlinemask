@@ -72,11 +72,37 @@ function doPost(event) {
         "",
         asText(report.id),
       ]);
+      notify(report);
     }
   } finally {
     lock.releaseLock();
   }
   return reply("ok");
+}
+
+/**
+ * Emails the addresses in the script property NOTIFY (comma-separated) that a report arrived.
+ * Only the kind and a link to the Sheet go in the email; the message stays in the Sheet.
+ */
+function notify(report) {
+  const to = PropertiesService.getScriptProperties().getProperty("NOTIFY");
+  if (!to) return;
+  const kind = KINDS[report.kind] ?? "Khác";
+  const url = SpreadsheetApp.getActiveSpreadsheet().getUrl();
+  try {
+    MailApp.sendEmail({
+      to,
+      subject: `OfflineMask: phản hồi mới (${kind})`,
+      body: `Có một phản hồi mới loại "${kind}". Xem trong bảng tính:\n${url}`,
+    });
+  } catch {
+    // Over the daily mail quota or not authorised yet: the row is already there.
+  }
+}
+
+/** Run from the editor after setting NOTIFY: grants the mail permission and sends a test. */
+function testNotify() {
+  notify({ kind: "other" });
 }
 
 /** Run once from the editor: headers, the status dropdown and colours, and the board. */
