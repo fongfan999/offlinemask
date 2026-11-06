@@ -10,7 +10,7 @@ Real questions people search, in the order they will be written. `[ ]` to write,
 - [x] Nhân sự dùng AI để viết đánh giá, tính lương: thông tin nào không được đưa vào? — `nhan-su-dung-ai-viet-danh-gia-tinh-luong`
 - [x] Luật bảo vệ dữ liệu cá nhân ở Việt Nam nói gì về việc dùng AI ở công ty? — `luat-bao-ve-du-lieu-ca-nhan-dung-ai-cong-ty`
 - [x] Dùng AI trả lời khiếu nại khách hàng mà không lộ số điện thoại của khách — `dung-ai-tra-loi-khieu-nai-khach-hang`
-- [ ] Ẩn danh dữ liệu (anonymization) và mã hóa giả danh (pseudonymization) khác nhau thế nào?
+- [x] Ẩn danh dữ liệu (anonymization) và mã hóa giả danh (pseudonymization) khác nhau thế nào? — `an-danh-du-lieu-va-ma-hoa-gia-danh-khac-nhau`
 - [ ] Có nên dùng tài khoản ChatGPT cá nhân cho việc công ty không?
 - [ ] Cách xóa lịch sử trò chuyện trong ChatGPT, Claude và Gemini
 - [ ] Gửi file Word cho AI tóm tắt: những gì cần xóa trước khi tải lên
