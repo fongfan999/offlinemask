@@ -13,7 +13,7 @@ Real questions people search, in the order they will be written. `[ ]` to write,
 - [x] Ẩn danh dữ liệu (anonymization) và mã hóa giả danh (pseudonymization) khác nhau thế nào? — `an-danh-du-lieu-va-ma-hoa-gia-danh-khac-nhau`
 - [x] Có nên dùng tài khoản ChatGPT cá nhân cho việc công ty không? — `tai-khoan-chatgpt-ca-nhan-cho-viec-cong-ty`
 - [x] Cách xóa lịch sử trò chuyện trong ChatGPT, Claude và Gemini — `cach-xoa-lich-su-tro-chuyen-chatgpt-claude-gemini`
-- [ ] Gửi file Word cho AI tóm tắt: những gì cần xóa trước khi tải lên
+- [x] Gửi file Word cho AI tóm tắt: những gì cần xóa trước khi tải lên — `gui-file-word-cho-ai-tom-tat-can-xoa-gi`
 - [ ] Chế độ trò chuyện tạm thời của ChatGPT có thật sự không lưu lại?
 - [ ] Giáo viên dùng AI nhận xét học sinh thế nào để không lộ thông tin các em?
 - [ ] Nhờ AI viết email cho khách mà vẫn giữ kín thông tin: mẫu câu lệnh dùng được ngay
