@@ -1,5 +1,7 @@
 # Verifies the landing page. Cloudflare's GitHub integration builds and deploys
 # offlinemask.com from main on its own (landing/README.md), so this workflow never deploys.
+# After a push to main it tells the IndexNow engines (Bing and others) which pages changed,
+# once Cloudflare has them live (decision 0199).
 name: "Landing: Verify"
 
 on:
@@ -43,3 +45,20 @@ jobs:
       - run: mise exec -- pnpm install --frozen-lockfile
       - run: mise exec -- pnpm lint
       - run: mise exec -- pnpm -C landing deploy:check
+
+  indexnow:
+    name: Tell search engines what changed
+    if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+      - uses: jdx/mise-action@v5
+      - run: mise exec -- pnpm install --frozen-lockfile --filter offlinemask-landing
+      - name: Ping IndexNow with the changed pages
+        env:
+          BEFORE: ${{ github.event.before }}
+        run: |
+          git fetch --quiet --depth=1 origin "$BEFORE"
+          git diff --name-only "$BEFORE" HEAD | xargs mise exec -- node landing/scripts/indexnow.mjs

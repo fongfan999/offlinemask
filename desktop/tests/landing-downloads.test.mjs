@@ -39,6 +39,13 @@ test("the newest release names every platform's file and its day", async () => {
   });
 });
 
+// The changelog's headings used "—" until 29 October 2026 and "-" since; both give the day.
+test("the release day is read whichever dash its changelog heading uses", async () => {
+  const plain = async (url) =>
+    url.endsWith("CHANGELOG.md") ? new Response("## [2.3.0] - 2026-11-02\n") : github(url);
+  assert.equal((await latestRelease(plain)).date, "2026-11-02");
+});
+
 test("a release without a changelog day still has its version", async () => {
   const noChangelog = async (url) => (url.endsWith("CHANGELOG.md") ? github("") : github(url));
   assert.equal((await latestRelease(noChangelog)).date, undefined);

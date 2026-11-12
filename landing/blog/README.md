@@ -22,7 +22,7 @@ Only these, or what `landing/product.html`, `landing/privacy.html` and `PRD.md` 
 - Free, no ads, no account, no paid tier. macOS (Apple Silicon and Intel), Windows (also via Microsoft Store), Linux.
 - Masks on the user's computer; works with no internet. Flow: mask → paste into any AI → paste the answer back → codes turn back into the real information. The mapping never leaves the computer.
 - Detects email, phone, bank account, card number, CCCD, passport, tax code, passwords; names, addresses and organisations with the optional Vietnamese pack (about 1.2 GB, downloaded once).
-- Text, plus spreadsheets and documents: XLSX, XLS, ODS, CSV, DOCX, ODT, keeping the formatting, and PDFs that contain text (the masked copy is Markdown). A whole folder can be masked at once, very large CSV and text files included. **No scanned PDFs or images yet.**
+- Text, plus spreadsheets and documents: XLSX, XLS, ODS, CSV, DOCX, ODT, keeping the formatting, and PDFs. Scanned PDFs and pictures (PNG, JPG) are read on the computer, with nothing downloaded or sent; a PDF's or picture's masked copy is Markdown text. A whole folder can be masked at once, very large CSV and text files included. The formats the product page lists in its format list are the ones to name.
 - Ẩn nhanh (quick mask): select text in any app and press a button or ⌘⇧M to mask/restore in place. macOS and Windows only.
 - History is kept, encrypted, only if the user sets a passcode, and deletes itself after the chosen period.
 - OfflineMask does not connect to any AI. If the AI edits a code, that code is left as is for the user to check.

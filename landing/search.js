@@ -1,9 +1,18 @@
 // What the build tells search engines and AI assistants about the site (decision 0145): the
-// structured data in the home page's head, sitemap.xml and robots.txt. The FAQ entries are read
-// from the page's own questions, so the structured data always says what the page says.
+// structured data in the home page's head, sitemap.xml, robots.txt and llms.txt. The FAQ entries
+// and the file formats are read from the page itself, so what crawlers and assistants are told
+// always says what the page says (decision 0199).
 
 export const site = "https://offlinemask.com";
 export const pages = ["/", "/privacy", "/install", "/blog/"];
+// The site's IndexNow key (decision 0199). It is public by design: the build serves it as
+// /<key>.txt, and engines only accept URLs from whoever can put that file on the site.
+export const indexNowKey = "fba01db3abd23b9057084797a5de1fb0";
+// The app's other homes, for the structured data's sameAs.
+export const elsewhere = (storeId) => [
+  "https://github.com/fongfan999/offlinemask",
+  `https://apps.microsoft.com/detail/${storeId}`,
+];
 
 const entities = { amp: "&", lt: "<", gt: ">", quot: '"', "#39": "'", nbsp: " " };
 const text = (html) =>
@@ -31,8 +40,21 @@ export function faq(fragment) {
     });
 }
 
+/**
+ * The formats the page lists in its `.om-formats` list, and the note right after the list
+ * (what happens to scanned PDFs and pictures), both as plain text.
+ */
+export function formats(fragment) {
+  const list = /<ul class="om-formats"[^>]*>([\s\S]*?)<\/ul>\s*<p[^>]*>([\s\S]*?)<\/p>/.exec(
+    fragment,
+  );
+  if (!list) throw new Error("The page has no format list followed by its note");
+  const names = [...list[1].matchAll(/<li>([^<]+)<\/li>/g)].map(([, name]) => text(name));
+  return { names, note: text(list[2]) };
+}
+
 /** The `<script type="application/ld+json">` for the home page. */
-export function structuredData({ fragment, description, version }) {
+export function structuredData({ fragment, description, version, storeId }) {
   const graph = [
     {
       "@type": "SoftwareApplication",
@@ -47,6 +69,7 @@ export function structuredData({ fragment, description, version }) {
       downloadUrl: `${site}/#om-download`,
       isAccessibleForFree: true,
       offers: { "@type": "Offer", price: "0", priceCurrency: "VND" },
+      ...(storeId ? { sameAs: elsewhere(storeId) } : {}),
       publisher: { "@type": "Organization", name: "Wot Da Fong", url: "https://wotdafong.dev" },
     },
     {
@@ -68,12 +91,26 @@ export function structuredData({ fragment, description, version }) {
   return `<script type="application/ld+json">${json}</script>`;
 }
 
-/** The pages, then each blog post with the day it last changed (`posts()` from posts.js). */
-export const sitemap = (posts = []) =>
+/** The day the privacy page says it was last updated ("Cập nhật ngày 2 tháng 11 năm 2026"). */
+export function privacyUpdated(html) {
+  const [, day, month, year] =
+    /Cập nhật ngày (\d{1,2}) tháng (\d{1,2}) năm (\d{4})/.exec(html) ?? [];
+  if (!year) throw new Error("privacy.html has no Cập nhật ngày line");
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+}
+
+/**
+ * The pages, then each blog post with the day it last changed (`posts()` from posts.js).
+ * `changed` gives a page's last change as YYYY-MM-DD where the build knows it.
+ */
+export const sitemap = (posts = [], changed = {}) =>
   `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 ${[
-  ...pages.map((page) => `  <url><loc>${site}${page}</loc></url>`),
+  ...pages.map(
+    (page) =>
+      `  <url><loc>${site}${page}</loc>${changed[page] ? `<lastmod>${changed[page]}</lastmod>` : ""}</url>`,
+  ),
   ...posts.map(
     ({ slug, updated }) =>
       `  <url><loc>${site}/blog/${slug}</loc><lastmod>${updated}</lastmod></url>`,
@@ -86,14 +123,14 @@ ${[
  * `/llms.txt` (decision 0148): what the site is, in the format proposed at llmstxt.org, for AI
  * assistants that read it: the summary, the pages with their own descriptions, then every post.
  */
-export const llms = ({ pages: described, posts = [] }) => `# OfflineMask
+export const llms = ({ pages: described, posts = [], formats: { names, note } }) => `# OfflineMask
 
 > OfflineMask là ứng dụng miễn phí trên máy tính, ẩn thông tin riêng (họ tên, số điện thoại, số tài khoản, CCCD...) bằng mã ngay trên máy trước khi bạn hỏi AI như ChatGPT, Claude hay Gemini, rồi đổi mã trong câu trả lời về thông tin thật.
 
 - Miễn phí, không quảng cáo, không cần tài khoản. Có cho macOS (Apple Silicon và Intel), Windows và Linux.
 - Ẩn và khôi phục chạy hoàn toàn trên máy, kể cả khi không có mạng; bảng đối chiếu mã không rời máy. OfflineMask không kết nối với AI nào.
 - Tự nhận ra email, số điện thoại, số tài khoản, số thẻ, CCCD, hộ chiếu, mã số thuế, mật khẩu; thêm họ tên, địa chỉ, tổ chức với gói tiếng Việt tải một lần.
-- Làm việc với văn bản, bảng tính (XLSX, XLS, ODS, CSV) và tài liệu (DOCX, ODT), giữ nguyên định dạng. Chưa hỗ trợ PDF và hình ảnh.
+- Làm việc với văn bản và các tệp ${names.join(", ")}. Bảng tính và tài liệu giữ nguyên định dạng; PDF và hình ảnh cho ra bản Markdown đã ẩn. ${note}
 - Ẩn nhanh trên macOS và Windows: bôi đen chữ trong bất kỳ ứng dụng nào để ẩn và khôi phục tại chỗ.
 
 ## Trang
@@ -108,6 +145,27 @@ ${posts.map(({ slug, title, description }) => `- [${title}](${site}/blog/${slug}
 
 - [Mã nguồn trên GitHub](https://github.com/fongfan999/offlinemask): mã nguồn mở của ứng dụng và trang web.
 `;
+
+/**
+ * The site's URLs that a push changed, from the repository paths it touched (decision 0199): a
+ * post (written, edited or deleted) and the blog's index, or a page whose own file changed.
+ * Layout, style and script changes are left out; they change no page's words.
+ */
+export function changedUrls(paths) {
+  const own = {
+    "landing/index.html": "/",
+    "landing/product.html": "/",
+    "landing/privacy.html": "/privacy",
+    "landing/install.html": "/install",
+  };
+  const urls = new Set();
+  for (const path of paths) {
+    const slug = /^landing\/blog\/posts\/([a-z0-9-]+)\.md$/.exec(path)?.[1];
+    if (slug) urls.add(`${site}/blog/${slug}`).add(`${site}/blog/`);
+    else if (own[path]) urls.add(`${site}${own[path]}`);
+  }
+  return [...urls];
+}
 
 // Cloudflare may put its managed content-signal notes above these lines; they leave crawling open.
 export const robots = () => `User-agent: *

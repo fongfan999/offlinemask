@@ -13,7 +13,16 @@ import {
   rss,
 } from "./posts.js";
 import { card } from "./cards.js";
-import { llms, pages, robots, sitemap, structuredData } from "./search.js";
+import {
+  formats,
+  indexNowKey,
+  llms,
+  pages,
+  privacyUpdated,
+  robots,
+  sitemap,
+  structuredData,
+} from "./search.js";
 import worker, { latestRelease } from "./worker.js";
 
 const fragment = new URL("./product.html", import.meta.url);
@@ -28,7 +37,7 @@ const release = await latestRelease().catch((error) => {
     readFileSync(new URL("../desktop/package.json", import.meta.url), "utf8"),
   );
   const changelog = readFileSync(new URL("../CHANGELOG.md", import.meta.url), "utf8");
-  const date = new RegExp(`^## \\[${version.replaceAll(".", "\\.")}\\] — (\\S+)`, "m").exec(
+  const date = new RegExp(`^## \\[${version.replaceAll(".", "\\.")}\\] [—-] (\\S+)`, "m").exec(
     changelog,
   )?.[1];
   console.warn(`Latest release unavailable (${error.message}); the page names ${version}.`);
@@ -53,6 +62,15 @@ const describe = (path) => {
     description: /<meta\s+name="description"\s+content="([^"]+)"/.exec(html)[1],
   };
 };
+// Each page's last change, for the sitemap: the release for the home and install pages (they
+// name it), the date the privacy page states, the newest post for the blog's index.
+const changed = (entries) => ({
+  ...(release.date ? { "/": release.date, "/install": release.date } : {}),
+  "/privacy": privacyUpdated(readFileSync(new URL("./privacy.html", import.meta.url), "utf8")),
+  ...(entries.length
+    ? { "/blog/": entries.map(({ updated }) => updated).reduce((a, b) => (a > b ? a : b)) }
+    : {}),
+});
 const postPath = (url) => /^\/blog\/([a-z0-9-]+)$/.exec(url.split("?")[0])?.[1];
 export default defineConfig({
   root: fileURLToPath(new URL(".", import.meta.url)),
@@ -72,6 +90,7 @@ export default defineConfig({
                   fragment: productPage(),
                   description: /<meta\s+name="description"\s+content="([^"]+)"/.exec(html)[1],
                   version: release.version,
+                  storeId,
                 }),
               ),
           ),
@@ -88,7 +107,13 @@ export default defineConfig({
           source: readFileSync(new URL("./og/og.png", import.meta.url)),
         });
         // Crawlers' files (decision 0145); the site's other paths are its three pages.
-        this.emitFile({ type: "asset", fileName: "sitemap.xml", source: sitemap(posts()) });
+        this.emitFile({
+          type: "asset",
+          fileName: "sitemap.xml",
+          source: sitemap(posts(), changed(posts())),
+        });
+        // IndexNow's proof that the site owns its key (decision 0199): the key, at the root.
+        this.emitFile({ type: "asset", fileName: `${indexNowKey}.txt`, source: indexNowKey });
         this.emitFile({ type: "asset", fileName: "robots.txt", source: robots() });
         // Cloudflare serves .txt as "text/plain" with no charset, and browsers then read UTF-8
         // Vietnamese as Latin-1; _headers (read by Cloudflare, not served) names the charset.
@@ -98,14 +123,18 @@ export default defineConfig({
           type: "asset",
           fileName: "_headers",
           source:
-            ["/llms.txt", "/font-licenses.txt", "/robots.txt"]
+            ["/llms.txt", "/font-licenses.txt", "/robots.txt", `/${indexNowKey}.txt`]
               .map((path) => `${path}\n  Content-Type: text/plain; charset=utf-8\n`)
               .join("") + "/assets/*\n  Cache-Control: public, max-age=31536000, immutable\n",
         });
         this.emitFile({
           type: "asset",
           fileName: "llms.txt",
-          source: llms({ pages: pages.map(describe), posts: posts() }),
+          source: llms({
+            pages: pages.map(describe),
+            posts: posts(),
+            formats: formats(withRelease(productPage())),
+          }),
         });
       },
       configureServer(server) {

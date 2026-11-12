@@ -3,7 +3,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { faq, llms, pages, robots, sitemap, structuredData } from "../../landing/search.js";
+import {
+  changedUrls,
+  faq,
+  formats,
+  indexNowKey,
+  llms,
+  pages,
+  privacyUpdated,
+  robots,
+  sitemap,
+  structuredData,
+} from "../../landing/search.js";
 
 const fragment = readFileSync(new URL("../../landing/product.html", import.meta.url), "utf8");
 
@@ -20,7 +31,12 @@ test("every question on the page is in the FAQ structured data, as plain text", 
 });
 
 test("the home page's structured data is one safe JSON-LD script", () => {
-  const script = structuredData({ fragment, description: "Mô tả <b>", version: "2.3.0" });
+  const script = structuredData({
+    fragment,
+    description: "Mô tả <b>",
+    version: "2.3.0",
+    storeId: "9ABC",
+  });
   const json = /^<script type="application\/ld\+json">(.*)<\/script>$/.exec(script)[1];
   assert.doesNotMatch(json, /</);
   const {
@@ -30,18 +46,24 @@ test("the home page's structured data is one safe JSON-LD script", () => {
   assert.equal(app.softwareVersion, "2.3.0");
   assert.equal(app.description, "Mô tả <b>");
   assert.deepEqual(app.offers, { "@type": "Offer", price: "0", priceCurrency: "VND" });
+  assert.deepEqual(app.sameAs, [
+    "https://github.com/fongfan999/offlinemask",
+    "https://apps.microsoft.com/detail/9ABC",
+  ]);
   assert.equal(questions["@type"], "FAQPage");
   assert.equal(questions.mainEntity.length, faq(fragment).length);
 });
 
 test("the sitemap lists the pages and each post, and robots.txt points to it", () => {
-  const xml = sitemap([{ slug: "mot-bai", updated: "2026-10-27" }]);
+  const xml = sitemap([{ slug: "mot-bai", updated: "2026-10-27" }], { "/privacy": "2026-11-02" });
   const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url);
   assert.deepEqual(urls, [
     ...pages.map((page) => `https://offlinemask.com${page}`),
     "https://offlinemask.com/blog/mot-bai",
   ]);
   assert.match(xml, /mot-bai<\/loc><lastmod>2026-10-27<\/lastmod>/);
+  assert.match(xml, /\/privacy<\/loc><lastmod>2026-11-02<\/lastmod>/);
+  assert.match(xml, /<loc>https:\/\/offlinemask\.com\/install<\/loc><\/url>/);
   assert.match(robots(), /^User-agent: \*\nAllow: \/\n/);
   assert.match(robots(), /^Sitemap: https:\/\/offlinemask\.com\/sitemap\.xml$/m);
 });
@@ -50,6 +72,7 @@ test("llms.txt lists the pages and every post with their descriptions", () => {
   const text = llms({
     pages: [{ path: "/install", title: "Cài đặt", description: "Cài trong một phút." }],
     posts: [{ slug: "mot-bai", title: "Một bài", description: "Câu trả lời." }],
+    formats: formats(fragment),
   });
   assert.match(text, /^# OfflineMask\n\n> /);
   assert.match(
@@ -60,4 +83,44 @@ test("llms.txt lists the pages and every post with their descriptions", () => {
     text,
     /^## Blog\n\n- \[Một bài\]\(https:\/\/offlinemask\.com\/blog\/mot-bai\): Câu trả lời\.$/m,
   );
+});
+
+// llms.txt once said OfflineMask could not read PDFs or pictures, long after it could; its
+// formats now come from the page's own list, so the two cannot disagree again.
+test("llms.txt names every format the page lists, and the page's note about scans", () => {
+  const { names, note } = formats(fragment);
+  assert.ok(names.includes("XLSX") && names.includes("PDF"), names.join());
+  assert.match(note, /scan/);
+  const text = llms({ pages: [], posts: [], formats: { names, note } });
+  for (const name of names) assert.match(text, new RegExp(`\\b${name}\\b`), name);
+  assert.ok(text.includes(note));
+  assert.doesNotMatch(text, /chưa hỗ trợ/i);
+});
+
+test("the privacy page's own date is read for the sitemap", () => {
+  const html = readFileSync(new URL("../../landing/privacy.html", import.meta.url), "utf8");
+  assert.match(privacyUpdated(html), /^\d{4}-\d{2}-\d{2}$/);
+  assert.equal(privacyUpdated("Cập nhật ngày 2 tháng 11 năm 2026"), "2026-11-02");
+  assert.throws(() => privacyUpdated("<p>no date</p>"));
+});
+
+test("a push's changed files become the URLs IndexNow is told about", () => {
+  assert.deepEqual(
+    changedUrls([
+      "landing/blog/posts/mot-bai.md",
+      "landing/blog/topics.md",
+      "landing/product.html",
+      "landing/product.css",
+      "landing/privacy.html",
+      "desktop/src/App.vue",
+    ]),
+    [
+      "https://offlinemask.com/blog/mot-bai",
+      "https://offlinemask.com/blog/",
+      "https://offlinemask.com/",
+      "https://offlinemask.com/privacy",
+    ],
+  );
+  assert.deepEqual(changedUrls(["landing/main.js"]), []);
+  assert.match(indexNowKey, /^[a-zA-Z0-9-]{8,128}$/);
 });

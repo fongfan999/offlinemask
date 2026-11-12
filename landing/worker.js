@@ -35,12 +35,13 @@ export async function latestRelease(fetcher = fetch) {
     const file = files.find((name) => ending.test(name));
     if (file) downloads[platform] = `${repository}/releases/download/v${version}/${file}`;
   }
-  // "## [2.1.1] — 2026-10-24" in that tag's changelog; the page simply omits a missing date.
+  // "## [2.7.0] - 2026-11-02" in that tag's changelog (older tags used "—"); the page simply
+  // omits a missing date.
   let date;
   const changelog = await fetcher(`${raw}/v${version}/CHANGELOG.md`).catch(() => undefined);
   if (changelog?.ok) {
     const heading = new RegExp(
-      `^## \\[${version.replaceAll(".", "\\.")}\\] — (\\d{4}-\\d{2}-\\d{2})`,
+      `^## \\[${version.replaceAll(".", "\\.")}\\] [—-] (\\d{4}-\\d{2}-\\d{2})`,
       "m",
     );
     date = heading.exec(await changelog.text())?.[1];
