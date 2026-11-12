@@ -4,7 +4,7 @@
 // always says what the page says (decision 0199).
 
 export const site = "https://offlinemask.com";
-export const pages = ["/", "/privacy", "/install", "/blog/", "/huong-dan/"];
+export const pages = ["/", "/en/", "/privacy", "/install", "/blog/", "/huong-dan/"];
 // The site's IndexNow key (decision 0199). It is public by design: the build serves it as
 // /<key>.txt, and engines only accept URLs from whoever can put that file on the site.
 export const indexNowKey = "fba01db3abd23b9057084797a5de1fb0";
@@ -53,11 +53,28 @@ export function formats(fragment) {
   return { names, note: text(list[2]) };
 }
 
+/**
+ * What the page says OfflineMask finds: the chips it lists as built in ("Có sẵn") and those that
+ * need the Vietnamese pack, as plain text, lower-cased except for abbreviations like CCCD.
+ */
+export function detects(fragment) {
+  const art = /<div class="om-bento-art om-art-detect"[\s\S]*?<\/div>/.exec(fragment)?.[0];
+  const builtIn = /<ul class="om-chips">([\s\S]*?)<\/ul>/.exec(art ?? "")?.[1];
+  const pack = /<ul class="om-chips om-chips-pack">([\s\S]*?)<\/ul>/.exec(art ?? "")?.[1];
+  if (!builtIn || !pack) throw new Error("The page has no built-in and pack detection lists");
+  const names = (list) =>
+    [...list.matchAll(/<li>([^<]+)<\/li>/g)]
+      .map(([, name]) => text(name))
+      .map((name) => (name === name.toUpperCase() ? name : name[0].toLowerCase() + name.slice(1)));
+  return { builtIn: names(builtIn), pack: names(pack) };
+}
+
 /** The `<script type="application/ld+json">` for the home page. */
 export function structuredData({ fragment, description, version, storeId }) {
   const graph = [
     {
       "@type": "SoftwareApplication",
+      "@id": `${site}/#app`,
       name: "OfflineMask",
       url: `${site}/`,
       description,
@@ -128,15 +145,18 @@ export const llms = ({
   posts = [],
   guides = [],
   formats: { names, note },
+  detects: { builtIn, pack },
 }) => `# OfflineMask
 
 > OfflineMask là ứng dụng miễn phí trên máy tính, ẩn thông tin riêng (họ tên, số điện thoại, số tài khoản, CCCD...) bằng mã ngay trên máy trước khi bạn hỏi AI như ChatGPT, Claude hay Gemini, rồi đổi mã trong câu trả lời về thông tin thật.
 
 - Miễn phí, không quảng cáo, không cần tài khoản. Có cho macOS (Apple Silicon và Intel), Windows và Linux.
 - Ẩn và khôi phục chạy hoàn toàn trên máy, kể cả khi không có mạng; bảng đối chiếu mã không rời máy. OfflineMask không kết nối với AI nào.
-- Tự nhận ra email, số điện thoại, số tài khoản, số thẻ, CCCD, hộ chiếu, mã số thuế, mật khẩu; thêm họ tên, địa chỉ, tổ chức với gói tiếng Việt tải một lần.
+- Tự nhận ra ${builtIn.join(", ")}; với gói nhận diện tiếng Việt (tải một lần, tùy chọn) thêm ${pack.join(", ")}.
 - Làm việc với văn bản và các tệp ${names.join(", ")}. Bảng tính và tài liệu giữ nguyên định dạng; PDF và hình ảnh cho ra bản Markdown đã ẩn. ${note}
 - Ẩn nhanh trên macOS và Windows: bôi đen chữ trong bất kỳ ứng dụng nào để ẩn và khôi phục tại chỗ.
+
+In English: OfflineMask is a free desktop app that replaces names, phone numbers, account and ID numbers with codes on the user's computer before they ask ChatGPT, Claude or Gemini, then restores the real details in the answer. It works offline and never connects to an AI. It is made for Vietnamese: its interface is Vietnamese and it is tuned for Vietnamese documents. English page: ${site}/en/
 
 ## Trang
 
@@ -166,6 +186,7 @@ export function changedUrls(paths) {
     "landing/product.html": "/",
     "landing/privacy.html": "/privacy",
     "landing/install.html": "/install",
+    "landing/en/index.html": "/en/",
   };
   const urls = new Set();
   for (const path of paths) {

@@ -3,8 +3,10 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
+import { detectionOptions } from "../src/core/detection/options.ts";
 import {
   changedUrls,
+  detects,
   faq,
   formats,
   indexNowKey,
@@ -81,6 +83,7 @@ test("llms.txt lists the pages and every post with their descriptions", () => {
     posts: [{ path: "/blog/mot-bai", title: "Một bài", description: "Câu trả lời." }],
     guides: [{ path: "/huong-dan/mot-cach", title: "Một cách", description: "Từng bước." }],
     formats: formats(fragment),
+    detects: detects(fragment),
   });
   assert.match(text, /^# OfflineMask\n\n> /);
   assert.match(
@@ -103,7 +106,7 @@ test("llms.txt names every format the page lists, and the page's note about scan
   const { names, note } = formats(fragment);
   assert.ok(names.includes("XLSX") && names.includes("PDF"), names.join());
   assert.match(note, /scan/);
-  const text = llms({ pages: [], posts: [], formats: { names, note } });
+  const text = llms({ pages: [], posts: [], formats: { names, note }, detects: detects(fragment) });
   for (const name of names) assert.match(text, new RegExp(`\\b${name}\\b`), name);
   assert.ok(text.includes(note));
   assert.doesNotMatch(text, /chưa hỗ trợ/i);
@@ -125,6 +128,7 @@ test("a push's changed files become the URLs IndexNow is told about", () => {
       "landing/product.html",
       "landing/product.css",
       "landing/privacy.html",
+      "landing/en/index.html",
       "desktop/src/App.vue",
     ]),
     [
@@ -134,8 +138,57 @@ test("a push's changed files become the URLs IndexNow is told about", () => {
       "https://offlinemask.com/huong-dan/",
       "https://offlinemask.com/",
       "https://offlinemask.com/privacy",
+      "https://offlinemask.com/en/",
     ],
   );
   assert.deepEqual(changedUrls(["landing/main.js"]), []);
   assert.match(indexNowKey, /^[a-zA-Z0-9-]{8,128}$/);
+});
+
+// The English page (decision 0201): it and the home page each name both languages and a default,
+// as hreflang requires, and it lists the same formats as the home page.
+test("the home and English pages point at each other with hreflang", () => {
+  const read = (file) => readFileSync(new URL(`../../landing/${file}`, import.meta.url), "utf8");
+  const alternates = (html) =>
+    Object.fromEntries(
+      [...html.matchAll(/<link rel="alternate" hreflang="([^"]+)" href="([^"]+)" \/>/g)].map(
+        ([, lang, href]) => [lang, href],
+      ),
+    );
+  const expected = {
+    vi: "https://offlinemask.com/",
+    en: "https://offlinemask.com/en/",
+    "x-default": "https://offlinemask.com/",
+  };
+  const home = read("index.html");
+  const english = read("en/index.html");
+  assert.deepEqual(alternates(home), expected);
+  assert.deepEqual(alternates(english), expected);
+  assert.match(english, /<html lang="en"/);
+  assert.match(english, /<link rel="canonical" href="https:\/\/offlinemask\.com\/en\/" \/>/);
+  assert.match(fragment, /href="\.\/en\/"/, "the home footer links the English page");
+  const listed = /<span data-om-formats>([^<]+)<\/span>/.exec(english)[1];
+  assert.equal(listed, formats(fragment).names.join(", "));
+});
+
+// The page once listed card numbers and passwords as built in, but the app finds them only with
+// the Vietnamese pack: their category ("other") needs it, like names and addresses. The page's
+// two lists follow the app's categories, and llms.txt follows the page.
+test("the page lists as built in only what the app finds without the pack", () => {
+  const { builtIn, pack } = detects(fragment);
+  const needsPack = (id) => detectionOptions.find((option) => option.id === id).model;
+  assert.equal(needsPack("banking"), false);
+  assert.equal(needsPack("other"), true);
+  for (const name of ["email", "điện thoại", "số tài khoản", "CCCD", "hộ chiếu", "mã số thuế"])
+    assert.ok(builtIn.includes(name), name);
+  for (const name of ["họ tên", "địa chỉ", "tổ chức", "số thẻ", "mật khẩu"])
+    assert.ok(pack.includes(name), name);
+  const text = llms({
+    pages: [],
+    posts: [],
+    formats: formats(fragment),
+    detects: { builtIn, pack },
+  });
+  assert.ok(text.includes(`Tự nhận ra ${builtIn.join(", ")};`));
+  assert.ok(text.includes(`thêm ${pack.join(", ")}.`));
 });

@@ -12,7 +12,7 @@ Hướng dẫn này đi qua từng bước với một ví dụ thật ngắn.
 ## Bạn cần chuẩn bị gì?
 
 - OfflineMask, [tải miễn phí](../#om-download) cho macOS, Windows hoặc Linux. Không cần tài khoản.
-- Nếu muốn ứng dụng tự tìm cả **họ tên, địa chỉ và tên tổ chức**, hãy tải thêm gói nhận diện tiếng Việt (tải một lần, không bắt buộc). Không có gói, OfflineMask vẫn tự tìm email, số điện thoại, số tài khoản, số thẻ, CCCD, hộ chiếu, mã số thuế và mật khẩu.
+- Nếu muốn ứng dụng tự tìm cả **họ tên, địa chỉ, tên tổ chức, số thẻ và mật khẩu**, hãy tải thêm gói nhận diện tiếng Việt (tải một lần, không bắt buộc). Không có gói, OfflineMask vẫn tự tìm email, số điện thoại, số tài khoản, CCCD, hộ chiếu và mã số thuế.
 
 Ví dụ trong bài là một tin nhắn khiếu nại, với thông tin hư cấu:
 
