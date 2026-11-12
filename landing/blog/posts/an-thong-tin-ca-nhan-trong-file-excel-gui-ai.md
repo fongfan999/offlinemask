@@ -2,6 +2,7 @@
 title: Cách ẩn thông tin cá nhân trong file Excel trước khi gửi AI phân tích
 description: Làm một bản sao, bỏ cột AI không cần, thay họ tên, số điện thoại bằng mã nhất quán và dọn phần ẩn trong file trước khi tải lên ChatGPT hay Gemini.
 date: 2026-10-25
+updated: 2026-11-12
 ---
 
 Muốn nhờ AI phân tích một file Excel có thông tin khách hàng hay nhân viên, hãy làm trên **một bản sao**: xóa những cột AI không cần, thay các cột nhận ra được một người (họ tên, số điện thoại, số tài khoản, CCCD...) bằng mã nhất quán như `KH_001`, dọn trang tính ẩn, ghi chú và thông tin tác giả, rồi mới tải lên. Bảng đối chiếu mã giữ riêng trên máy bạn. Các con số cần phân tích để nguyên, nên AI vẫn tính đúng. Dưới đây là cách làm từng bước.
@@ -81,7 +82,7 @@ Với một file nhỏ, dùng một lần, làm thủ công như trên mất ch�
 
 [OfflineMask](../) là ứng dụng miễn phí làm việc này ngay trên máy bạn, không cần mạng. Bạn mở file XLSX, XLS, ODS hoặc CSV; ứng dụng tự tìm số điện thoại, số tài khoản, email, CCCD, mã số thuế..., và cả họ tên, địa chỉ khi cài gói tiếng Việt. Bạn có thể ẩn cả cột họ tên, số điện thoại, số tài khoản trong một lần bấm, xem lại, rồi xuất một bản đã ẩn để gửi AI; định dạng của bảng được giữ nguyên. Cùng một người luôn mang cùng một mã, kiểu `[TEN_1_4e8c]`.
 
-Khi AI trả lời, bạn dán câu trả lời vào lại OfflineMask, các mã tự đổi về thông tin thật. Bảng đối chiếu không rời khỏi máy bạn. OfflineMask tìm được phần lớn thông tin riêng chứ không phải tất cả, nên hãy luôn xem lại bản đã ẩn trước khi gửi, nhất là các cột ghi chú. Chưa hỗ trợ PDF và hình ảnh.
+Khi AI trả lời, bạn dán câu trả lời vào lại OfflineMask, các mã tự đổi về thông tin thật. Bảng đối chiếu không rời khỏi máy bạn. OfflineMask tìm được phần lớn thông tin riêng chứ không phải tất cả, nên hãy luôn xem lại bản đã ẩn trước khi gửi, nhất là các cột ghi chú.
 
 Nếu bạn còn băn khoăn có nên đưa dữ liệu khách hàng cho AI hay không, bài [Có nên dán thông tin khách hàng vào ChatGPT không?](./co-nen-dan-thong-tin-khach-hang-vao-chatgpt) giải thích kỹ hơn.
 

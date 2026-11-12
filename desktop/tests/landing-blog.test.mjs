@@ -3,7 +3,17 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { card } from "../../landing/cards.js";
-import { fill, indexPage, parse, postPage, posts, rss } from "../../landing/posts.js";
+import {
+  allGuides,
+  fill,
+  guides,
+  guidesIndexPage,
+  indexPage,
+  parse,
+  postPage,
+  posts,
+  rss,
+} from "../../landing/posts.js";
 
 const words = (count) => Array.from({ length: count }, () => "chữ").join(" ");
 const post = (fields, body = words(420)) =>
@@ -71,4 +81,39 @@ test("a post's share image is a 1200×630 PNG", async () => {
   const png = await card({ title: "Ẩn số tài khoản trước khi gửi cho AI", date: "2026-10-25" });
   assert.equal(png.subarray(1, 4).toString(), "PNG");
   assert.deepEqual([png.readUInt32BE(16), png.readUInt32BE(20)], [1200, 630]);
+});
+
+// The guides (decision 0200) are checked by the same rules and need an order.
+test("guides need an order and render as articles under /huong-dan/", () => {
+  const source = post({ ...good, order: 2 });
+  assert.throws(() => parse(post(good), "mot-cach.md", guides), /order/);
+  assert.throws(() => parse(source, "mot-cach.md"), /unknown field "order"/);
+  const guide = parse(source, "mot-cach.md", guides);
+  assert.equal(guide.path, "/huong-dan/mot-cach");
+  assert.equal(guide.order, 2);
+  const page = fill("<!-- blog-head --><!-- blog-main -->", postPage(guide, [guide], guides));
+  assert.match(
+    page,
+    /<link rel="canonical" href="https:\/\/offlinemask\.com\/huong-dan\/mot-cach" \/>/,
+  );
+  assert.match(page, /<a href="\.\/">Hướng dẫn<\/a>/);
+  const json = JSON.parse(/<script type="application\/ld\+json">(.*?)<\/script>/.exec(page)[1]);
+  assert.equal(json["@graph"][0]["@type"], "Article");
+  assert.equal(json["@graph"][1].itemListElement[1].item, "https://offlinemask.com/huong-dan/");
+  const list = fill("<!-- blog-head --><!-- blog-main -->", guidesIndexPage([guide]));
+  assert.match(list, /href="\.\/mot-cach"/);
+  assert.doesNotMatch(list, /<time/);
+});
+
+test("every published guide passes the checks, in a strict order", () => {
+  const all = allGuides();
+  const orders = all.map(({ order }) => order);
+  assert.equal(new Set(orders).size, orders.length, "two guides share an order");
+  const slugs = new Set(posts().map(({ slug }) => slug));
+  for (const { slug, html } of all) {
+    assert.doesNotMatch(html, /<(script|iframe|img src="http)/, slug);
+    // A guide's links to the blog must reach a post that exists.
+    for (const [, target] of html.matchAll(/href="\.\.\/blog\/([a-z0-9-]+)"/g))
+      assert.ok(slugs.has(target), `${slug} links to a missing post ${target}`);
+  }
 });

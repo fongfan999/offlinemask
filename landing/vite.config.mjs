@@ -3,10 +3,15 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import { releaseDay } from "./latest.js";
 import {
+  allGuides,
+  blog,
   blogDescription,
   blogTitle,
   fill,
-  images,
+  guides,
+  guidesDescription,
+  guidesIndexPage,
+  guidesTitle,
   indexPage,
   postPage,
   posts,
@@ -54,7 +59,8 @@ const blogTemplate = new URL("./blog/index.html", import.meta.url);
 // Each page's own title and description, for llms.txt.
 const pageFiles = { "/": "index.html", "/privacy": "privacy.html", "/install": "install.html" };
 const describe = (path) => {
-  if (!pageFiles[path]) return { path, title: blogTitle, description: blogDescription };
+  if (path === "/blog/") return { path, title: blogTitle, description: blogDescription };
+  if (path === "/huong-dan/") return { path, title: guidesTitle, description: guidesDescription };
   const html = readFileSync(new URL(pageFiles[path], import.meta.url), "utf8");
   return {
     path,
@@ -63,15 +69,75 @@ const describe = (path) => {
   };
 };
 // Each page's last change, for the sitemap: the release for the home and install pages (they
-// name it), the date the privacy page states, the newest post for the blog's index.
-const changed = (entries) => ({
+// name it), the date the privacy page states, the newest post or guide for each list.
+const newest = (entries) => entries.map(({ updated }) => updated).reduce((a, b) => (a > b ? a : b));
+const changed = (entries, guideEntries) => ({
   ...(release.date ? { "/": release.date, "/install": release.date } : {}),
   "/privacy": privacyUpdated(readFileSync(new URL("./privacy.html", import.meta.url), "utf8")),
-  ...(entries.length
-    ? { "/blog/": entries.map(({ updated }) => updated).reduce((a, b) => (a > b ? a : b)) }
-    : {}),
+  ...(entries.length ? { "/blog/": newest(entries) } : {}),
+  ...(guideEntries.length ? { "/huong-dan/": newest(guideEntries) } : {}),
 });
-const postPath = (url) => /^\/blog\/([a-z0-9-]+)$/.exec(url.split("?")[0])?.[1];
+const guidesTemplate = new URL("./huong-dan/index.html", import.meta.url);
+
+/** The Vite plugin that turns one collection's Markdown into its pages, cards and images. */
+function collection({ collection: kind, template, entries, index, extra = () => {} }) {
+  const prefix = `/${kind.dir}/`;
+  const slugOf = (url) => new RegExp(`^${prefix}([a-z0-9-]+)$`).exec(url.split("?")[0])?.[1];
+  const marker = `${kind.dir}/index.html`;
+  return {
+    name: `offlinemask-${kind.dir}`,
+    enforce: "post",
+    transformIndexHtml: {
+      order: "pre",
+      handler(html, { path, server }) {
+        if (!server || !html.includes("<!-- blog-main -->") || !path.startsWith(prefix))
+          return html;
+        const list = entries();
+        const page = list.find(({ slug }) => slug === slugOf(path));
+        return fill(html, page ? postPage(page, list, kind) : index(list));
+      },
+    },
+    configureServer(server) {
+      server.middlewares.use(async (request, response, next) => {
+        const image = new RegExp(`^${prefix}([a-z0-9-]+)\\.png$`).exec(
+          request.url.split("?")[0],
+        )?.[1];
+        const page = image && entries().find(({ slug }) => slug === image);
+        if (!page) return next();
+        response.setHeader("content-type", "image/png");
+        response.end(await card(page, kind.label));
+      });
+      server.middlewares.use(async (request, response, next) => {
+        if (!slugOf(request.url)) return next();
+        try {
+          const html = await server.transformIndexHtml(request.url, readFileSync(template, "utf8"));
+          response.setHeader("content-type", "text/html; charset=utf-8");
+          response.end(html);
+        } catch (error) {
+          next(error);
+        }
+      });
+      server.watcher.add(fileURLToPath(kind.folder));
+      server.watcher.on("change", (path) => {
+        if (path.endsWith(".md")) server.ws.send({ type: "full-reload" });
+      });
+    },
+    async generateBundle(_, bundle) {
+      const page = bundle[marker];
+      if (!page) return;
+      const list = entries();
+      const emit = (fileName, source) => this.emitFile({ type: "asset", fileName, source });
+      for (const entry of list) {
+        emit(`${kind.dir}/${entry.slug}.html`, fill(page.source, postPage(entry, list, kind)));
+        emit(`${kind.dir}/${entry.slug}.png`, await card(entry, kind.label));
+      }
+      page.source = fill(page.source, index(list));
+      extra(emit, list);
+      for (const picture of new Set(list.flatMap(({ pictures }) => pictures)))
+        emit(`${kind.dir}/images/${picture}`, readFileSync(new URL(picture, kind.images)));
+    },
+  };
+}
 export default defineConfig({
   root: fileURLToPath(new URL(".", import.meta.url)),
   base: "./",
@@ -110,7 +176,7 @@ export default defineConfig({
         this.emitFile({
           type: "asset",
           fileName: "sitemap.xml",
-          source: sitemap(posts(), changed(posts())),
+          source: sitemap([...posts(), ...allGuides()], changed(posts(), allGuides())),
         });
         // IndexNow's proof that the site owns its key (decision 0199): the key, at the root.
         this.emitFile({ type: "asset", fileName: `${indexNowKey}.txt`, source: indexNowKey });
@@ -133,6 +199,7 @@ export default defineConfig({
           source: llms({
             pages: pages.map(describe),
             posts: posts(),
+            guides: allGuides(),
             formats: formats(withRelease(productPage())),
           }),
         });
@@ -207,73 +274,23 @@ export default defineConfig({
         if (lost) lost.source = lost.source.replace(/(="|url\()\.\//g, "$1/");
       },
     },
-    {
-      // The blog (decision 0146): blog/index.html is the template for the list and for every
-      // post. The dev server fills it per request; the build fills it once the page is final
-      // (its stylesheet inlined), so each post is the same page with other head and main.
-      name: "offlinemask-blog",
-      enforce: "post",
-      transformIndexHtml: {
-        order: "pre",
-        handler(html, { path, server }) {
-          if (!server || !html.includes("<!-- blog-main -->")) return html;
-          const entries = posts();
-          const post = entries.find(({ slug }) => slug === postPath(path));
-          return fill(html, post ? postPage(post, entries) : indexPage(entries));
-        },
-      },
-      configureServer(server) {
-        server.middlewares.use(async (request, response, next) => {
-          const image = /^\/blog\/([a-z0-9-]+)\.png$/.exec(request.url.split("?")[0])?.[1];
-          const post = image && posts().find(({ slug }) => slug === image);
-          if (!post) return next();
-          response.setHeader("content-type", "image/png");
-          response.end(await card(post));
-        });
-        server.middlewares.use(async (request, response, next) => {
-          if (!postPath(request.url)) return next();
-          try {
-            const html = await server.transformIndexHtml(
-              request.url,
-              readFileSync(blogTemplate, "utf8"),
-            );
-            response.setHeader("content-type", "text/html; charset=utf-8");
-            response.end(html);
-          } catch (error) {
-            next(error);
-          }
-        });
-        server.watcher.add(fileURLToPath(new URL("./blog/posts/", import.meta.url)));
-        server.watcher.on("change", (path) => {
-          if (path.endsWith(".md")) server.ws.send({ type: "full-reload" });
-        });
-      },
-      async generateBundle(_, bundle) {
-        const page = bundle["blog/index.html"];
-        if (!page) return;
-        const entries = posts();
-        for (const post of entries)
-          this.emitFile({
-            type: "asset",
-            fileName: `blog/${post.slug}.html`,
-            source: fill(page.source, postPage(post, entries)),
-          });
-        for (const post of entries)
-          this.emitFile({
-            type: "asset",
-            fileName: `blog/${post.slug}.png`,
-            source: await card(post),
-          });
-        page.source = fill(page.source, indexPage(entries));
-        this.emitFile({ type: "asset", fileName: "blog/rss.xml", source: rss(entries) });
-        for (const picture of new Set(entries.flatMap(({ pictures }) => pictures)))
-          this.emitFile({
-            type: "asset",
-            fileName: `blog/images/${picture}`,
-            source: readFileSync(new URL(picture, images)),
-          });
-      },
-    },
+    // The blog (decision 0146) and the guides (decision 0200): each collection's index.html is
+    // the template for its list and for every page in it. The dev server fills it per request;
+    // the build fills it once the page is final (its stylesheet inlined), so each page is the
+    // same file with other head and main.
+    collection({
+      collection: blog,
+      template: blogTemplate,
+      entries: posts,
+      index: indexPage,
+      extra: (emit, entries) => emit("blog/rss.xml", rss(entries)),
+    }),
+    collection({
+      collection: guides,
+      template: guidesTemplate,
+      entries: allGuides,
+      index: guidesIndexPage,
+    }),
   ],
   server: { port: 4322, strictPort: true },
   build: {
@@ -287,6 +304,7 @@ export default defineConfig({
         report: fileURLToPath(new URL("./bao-loi.html", import.meta.url)),
         notFound: fileURLToPath(new URL("./404.html", import.meta.url)),
         blog: fileURLToPath(blogTemplate),
+        guides: fileURLToPath(guidesTemplate),
       },
     },
   },

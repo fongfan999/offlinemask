@@ -1,17 +1,39 @@
 // The blog (decision 0146): Markdown files in blog/posts/ become pages at /blog/<slug> when the
 // site is built. Each post is checked here, so a post that would publish badly fails the build
 // instead: a scheduled writer pushes straight to main, and the build is its only reviewer.
+// The guides (decision 0200) are a second collection of the same kind: huong-dan/pages/ becomes
+// /huong-dan/<slug>, checked by the same rules, listed in their own order rather than by date.
 
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { Marked } from "marked";
 import { site } from "./search.js";
 
-const folder = new URL("./blog/posts/", import.meta.url);
-export const images = new URL("./blog/images/", import.meta.url);
+/** The two collections of Markdown pages, and what differs between them. */
+export const blog = {
+  dir: "blog",
+  folder: new URL("./blog/posts/", import.meta.url),
+  images: new URL("./blog/images/", import.meta.url),
+  label: "Blog",
+  schema: "BlogPosting",
+  fields: ["title", "description", "date", "updated"],
+};
+export const guides = {
+  dir: "huong-dan",
+  folder: new URL("./huong-dan/pages/", import.meta.url),
+  images: new URL("./huong-dan/images/", import.meta.url),
+  label: "Hướng dẫn",
+  schema: "Article",
+  // `order` places a guide in the list (1 first); guides are read as a set, not a stream.
+  fields: ["title", "description", "date", "updated", "order"],
+};
+export const images = blog.images;
 const publisher = { "@type": "Organization", name: "Wot Da Fong", url: "https://wotdafong.dev" };
 export const blogTitle = "Blog OfflineMask";
 export const blogDescription =
   "Hỏi AI mà vẫn giữ kín thông tin: hướng dẫn và câu trả lời cho dân văn phòng, kế toán, nhân sự, chăm sóc khách hàng.";
+export const guidesTitle = "Hướng dẫn dùng OfflineMask";
+export const guidesDescription =
+  "Từng bước ẩn thông tin riêng trong văn bản, file Word, PDF, ảnh chụp và cả thư mục trước khi hỏi AI, rồi nhận lại bản đầy đủ.";
 
 const escape = (value) =>
   String(value)
@@ -47,16 +69,18 @@ const isDate = (value) =>
   new Date(value).toISOString().startsWith(value);
 
 /** Parses and checks one post. Every rule here is one a reader or a crawler would notice. */
-export function parse(source, file) {
+export function parse(source, file, collection = blog) {
   const slug = file.replace(/\.md$/, "");
   const fail = (problem) => {
-    throw new Error(`blog/posts/${file}: ${problem}`);
+    throw new Error(`${collection.dir}/${file}: ${problem}`);
   };
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) fail("the file name is not a lowercase-ascii slug");
   const { fields, markdown } = split(source, file);
-  const { title, description, date, updated } = fields;
+  const { title, description, date, updated, order } = fields;
   for (const key of Object.keys(fields))
-    if (!["title", "description", "date", "updated"].includes(key)) fail(`unknown field "${key}"`);
+    if (!collection.fields.includes(key)) fail(`unknown field "${key}"`);
+  if (collection.fields.includes("order") && !/^[1-9]\d?$/.test(order ?? ""))
+    fail("order must be a whole number from 1");
   if (!title || title.length > 70) fail("title is missing or longer than 70 characters");
   if (!description || description.length < 70 || description.length > 170)
     fail("description must be 70-170 characters (the search-result snippet)");
@@ -74,13 +98,14 @@ export function parse(source, file) {
       fail("uses a # heading; the title is the h1");
     if (token.type === "image") {
       if (!/^images\/[\w.-]+\.(webp|png|jpg|svg)$/.test(token.href))
-        fail(`image "${token.href}" is not a file in blog/images/`);
+        fail(`image "${token.href}" is not a file in ${collection.dir}/images/`);
       if (!token.text) fail(`image "${token.href}" has no alt text`);
       pictures.push(token.href.slice("images/".length));
     }
   });
   for (const picture of pictures)
-    if (!existsSync(new URL(picture, images))) fail(`blog/images/${picture} does not exist`);
+    if (!existsSync(new URL(picture, collection.images)))
+      fail(`${collection.dir}/images/${picture} does not exist`);
   const words = markdown.match(/[\p{L}\p{N}]+/gu)?.length ?? 0;
   if (words < 400) fail(`has ${words} words; a post answers its question in at least 400`);
 
@@ -107,17 +132,35 @@ export function parse(source, file) {
   };
   marked.use({ renderer });
   const html = marked.parser(tokens);
-  return { slug, title, description, date, updated: updated ?? date, html, pictures };
+  return {
+    slug,
+    path: `/${collection.dir}/${slug}`,
+    title,
+    description,
+    date,
+    updated: updated ?? date,
+    ...(order ? { order: Number(order) } : {}),
+    html,
+    pictures,
+  };
 }
 
+const read = (collection) =>
+  existsSync(collection.folder)
+    ? readdirSync(collection.folder)
+        .filter((file) => file.endsWith(".md"))
+        .map((file) =>
+          parse(readFileSync(new URL(file, collection.folder), "utf8"), file, collection),
+        )
+    : [];
+
 /** Every post, newest first. */
-export function posts() {
-  if (!existsSync(folder)) return [];
-  const list = readdirSync(folder)
-    .filter((file) => file.endsWith(".md"))
-    .map((file) => parse(readFileSync(new URL(file, folder), "utf8"), file));
-  return list.sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
-}
+export const posts = () =>
+  read(blog).sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
+
+/** Every guide, in its `order`. */
+export const allGuides = () =>
+  read(guides).sort((a, b) => a.order - b.order || a.slug.localeCompare(b.slug));
 
 const shareTags = ({ title, description, url, type, image = `${site}/og.png` }) => `
     <meta name="description" content="${escape(description)}" />
@@ -133,12 +176,12 @@ const shareTags = ({ title, description, url, type, image = `${site}/og.png` }) 
     <meta name="twitter:card" content="summary_large_image" />
     <link rel="alternate" type="application/rss+xml" title="${blogTitle}" href="${site}/blog/rss.xml" />`;
 
-const list = (entries) =>
+const list = (entries, { dated = true } = {}) =>
   `<ol class="om-blog-list">${entries
     .map(
       (post) => `
           <li>
-            <time datetime="${post.date}">${day(post.date)}</time>
+            ${dated ? `<time datetime="${post.date}">${day(post.date)}</time>` : ""}
             <h2><a href="./${post.slug}">${escape(post.title)}</a></h2>
             <p>${escape(post.description)}</p>
           </li>`,
@@ -162,12 +205,36 @@ export function indexPage(entries) {
   };
 }
 
-/** One post's page: its head tags and its main content, with a few other posts after it. */
-export function postPage(post, entries) {
-  const url = `${site}/blog/${post.slug}`;
-  const others = entries.filter((other) => other.slug !== post.slug).slice(0, 3);
+/** The `/huong-dan/` page: every guide, in order. */
+export function guidesIndexPage(entries) {
+  const url = `${site}/huong-dan/`;
+  return {
+    head: `<title>${guidesTitle}</title>${shareTags({ title: guidesTitle, description: guidesDescription, url, type: "website" })}
+    ${json({ "@type": "CollectionPage", name: guidesTitle, url, inLanguage: "vi", description: guidesDescription, publisher })}`,
+    main: `<p class="om-maker-label">Hướng dẫn</p>
+        <h1>Ẩn thông tin riêng, từng bước một</h1>
+        <p class="om-doc-lead">
+          Văn bản, file Word, PDF, ảnh chụp hay cả một thư mục: mỗi hướng dẫn chỉ cách ẩn thông tin
+          riêng trên máy trước khi hỏi AI, rồi nhận lại bản đầy đủ khi AI trả lời.
+        </p>
+        ${list(entries, { dated: false })}`,
+  };
+}
+
+/**
+ * One post's or guide's page: its head tags and its main content, with a few others after it
+ * (the newest posts, or the guides that follow this one).
+ */
+export function postPage(post, entries, collection = blog) {
+  const url = `${site}${post.path}`;
+  const rest = entries.filter((other) => other.slug !== post.slug);
+  const at = entries.findIndex((other) => other.slug === post.slug);
+  const others =
+    collection === blog
+      ? rest.slice(0, 3)
+      : [...entries.slice(at + 1), ...entries.slice(0, at)].slice(0, 3);
   const article = {
-    "@type": "BlogPosting",
+    "@type": collection.schema,
     headline: post.title,
     description: post.description,
     url,
@@ -183,7 +250,12 @@ export function postPage(post, entries) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: "OfflineMask", item: `${site}/` },
-      { "@type": "ListItem", position: 2, name: "Blog", item: `${site}/blog/` },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: collection.label,
+        item: `${site}/${collection.dir}/`,
+      },
       { "@type": "ListItem", position: 3, name: post.title, item: url },
     ],
   };
@@ -192,7 +264,7 @@ export function postPage(post, entries) {
     <meta property="article:published_time" content="${post.date}" />
     <meta property="article:modified_time" content="${post.updated}" />
     ${json({ "@graph": [article, trail] })}`,
-    main: `<p class="om-maker-label"><a href="./">Blog</a> - <time datetime="${post.date}">${day(post.date)}</time>${
+    main: `<p class="om-maker-label"><a href="./">${collection.label}</a> - <time datetime="${post.date}">${day(post.date)}</time>${
       post.updated !== post.date
         ? ` - cập nhật <time datetime="${post.updated}">${day(post.updated)}</time>`
         : ""

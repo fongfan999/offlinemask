@@ -39,8 +39,8 @@ const swipe = `data:image/svg+xml;base64,${Buffer.from(
   ),
 ).toString("base64")}`;
 
-/** The 1200×630 PNG for a post. */
-export async function card({ title, date }) {
+/** The 1200×630 PNG for a post, or for a guide with `label` "Hướng dẫn". */
+export async function card({ title, date }, label = "Blog") {
   const svg = await satori(
     element(
       "div",
@@ -107,7 +107,10 @@ export async function card({ title, date }) {
             fontSize: 28,
             fontWeight: 500,
           },
-          [element("span", {}, `Blog - ${day(date)}`), element("span", {}, "offlinemask.com")],
+          [
+            element("span", {}, label === "Blog" ? `Blog - ${day(date)}` : label),
+            element("span", {}, "offlinemask.com"),
+          ],
         ),
       ],
     ),

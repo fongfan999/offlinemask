@@ -4,7 +4,7 @@
 // always says what the page says (decision 0199).
 
 export const site = "https://offlinemask.com";
-export const pages = ["/", "/privacy", "/install", "/blog/"];
+export const pages = ["/", "/privacy", "/install", "/blog/", "/huong-dan/"];
 // The site's IndexNow key (decision 0199). It is public by design: the build serves it as
 // /<key>.txt, and engines only accept URLs from whoever can put that file on the site.
 export const indexNowKey = "fba01db3abd23b9057084797a5de1fb0";
@@ -100,7 +100,8 @@ export function privacyUpdated(html) {
 }
 
 /**
- * The pages, then each blog post with the day it last changed (`posts()` from posts.js).
+ * The pages, then each post and guide with the day it last changed (`posts()` and `allGuides()`
+ * from posts.js; each has its `path`).
  * `changed` gives a page's last change as YYYY-MM-DD where the build knows it.
  */
 export const sitemap = (posts = [], changed = {}) =>
@@ -112,8 +113,7 @@ ${[
       `  <url><loc>${site}${page}</loc>${changed[page] ? `<lastmod>${changed[page]}</lastmod>` : ""}</url>`,
   ),
   ...posts.map(
-    ({ slug, updated }) =>
-      `  <url><loc>${site}/blog/${slug}</loc><lastmod>${updated}</lastmod></url>`,
+    ({ path, updated }) => `  <url><loc>${site}${path}</loc><lastmod>${updated}</lastmod></url>`,
   ),
 ].join("\n")}
 </urlset>
@@ -123,7 +123,12 @@ ${[
  * `/llms.txt` (decision 0148): what the site is, in the format proposed at llmstxt.org, for AI
  * assistants that read it: the summary, the pages with their own descriptions, then every post.
  */
-export const llms = ({ pages: described, posts = [], formats: { names, note } }) => `# OfflineMask
+export const llms = ({
+  pages: described,
+  posts = [],
+  guides = [],
+  formats: { names, note },
+}) => `# OfflineMask
 
 > OfflineMask là ứng dụng miễn phí trên máy tính, ẩn thông tin riêng (họ tên, số điện thoại, số tài khoản, CCCD...) bằng mã ngay trên máy trước khi bạn hỏi AI như ChatGPT, Claude hay Gemini, rồi đổi mã trong câu trả lời về thông tin thật.
 
@@ -137,9 +142,13 @@ export const llms = ({ pages: described, posts = [], formats: { names, note } })
 
 ${described.map(({ path, title, description }) => `- [${title}](${site}${path}): ${description}`).join("\n")}
 
+## Hướng dẫn
+
+${guides.map(({ path, title, description }) => `- [${title}](${site}${path}): ${description}`).join("\n")}
+
 ## Blog
 
-${posts.map(({ slug, title, description }) => `- [${title}](${site}/blog/${slug}): ${description}`).join("\n")}
+${posts.map(({ path, title, description }) => `- [${title}](${site}${path}): ${description}`).join("\n")}
 
 ## Optional
 
@@ -148,7 +157,7 @@ ${posts.map(({ slug, title, description }) => `- [${title}](${site}/blog/${slug}
 
 /**
  * The site's URLs that a push changed, from the repository paths it touched (decision 0199): a
- * post (written, edited or deleted) and the blog's index, or a page whose own file changed.
+ * post or guide (written, edited or deleted) and its list, or a page whose own file changed.
  * Layout, style and script changes are left out; they change no page's words.
  */
 export function changedUrls(paths) {
@@ -160,8 +169,9 @@ export function changedUrls(paths) {
   };
   const urls = new Set();
   for (const path of paths) {
-    const slug = /^landing\/blog\/posts\/([a-z0-9-]+)\.md$/.exec(path)?.[1];
-    if (slug) urls.add(`${site}/blog/${slug}`).add(`${site}/blog/`);
+    const [, dir, slug] =
+      /^landing\/(blog|huong-dan)\/(?:posts|pages)\/([a-z0-9-]+)\.md$/.exec(path) ?? [];
+    if (slug) urls.add(`${site}/${dir}/${slug}`).add(`${site}/${dir}/`);
     else if (own[path]) urls.add(`${site}${own[path]}`);
   }
   return [...urls];

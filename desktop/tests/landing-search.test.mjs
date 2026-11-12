@@ -55,11 +55,18 @@ test("the home page's structured data is one safe JSON-LD script", () => {
 });
 
 test("the sitemap lists the pages and each post, and robots.txt points to it", () => {
-  const xml = sitemap([{ slug: "mot-bai", updated: "2026-10-27" }], { "/privacy": "2026-11-02" });
+  const xml = sitemap(
+    [
+      { path: "/blog/mot-bai", updated: "2026-10-27" },
+      { path: "/huong-dan/mot-cach", updated: "2026-11-12" },
+    ],
+    { "/privacy": "2026-11-02" },
+  );
   const urls = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map(([, url]) => url);
   assert.deepEqual(urls, [
     ...pages.map((page) => `https://offlinemask.com${page}`),
     "https://offlinemask.com/blog/mot-bai",
+    "https://offlinemask.com/huong-dan/mot-cach",
   ]);
   assert.match(xml, /mot-bai<\/loc><lastmod>2026-10-27<\/lastmod>/);
   assert.match(xml, /\/privacy<\/loc><lastmod>2026-11-02<\/lastmod>/);
@@ -71,13 +78,18 @@ test("the sitemap lists the pages and each post, and robots.txt points to it", (
 test("llms.txt lists the pages and every post with their descriptions", () => {
   const text = llms({
     pages: [{ path: "/install", title: "Cài đặt", description: "Cài trong một phút." }],
-    posts: [{ slug: "mot-bai", title: "Một bài", description: "Câu trả lời." }],
+    posts: [{ path: "/blog/mot-bai", title: "Một bài", description: "Câu trả lời." }],
+    guides: [{ path: "/huong-dan/mot-cach", title: "Một cách", description: "Từng bước." }],
     formats: formats(fragment),
   });
   assert.match(text, /^# OfflineMask\n\n> /);
   assert.match(
     text,
     /^- \[Cài đặt\]\(https:\/\/offlinemask\.com\/install\): Cài trong một phút\.$/m,
+  );
+  assert.match(
+    text,
+    /^## Hướng dẫn\n\n- \[Một cách\]\(https:\/\/offlinemask\.com\/huong-dan\/mot-cach\): Từng bước\.$/m,
   );
   assert.match(
     text,
@@ -109,6 +121,7 @@ test("a push's changed files become the URLs IndexNow is told about", () => {
     changedUrls([
       "landing/blog/posts/mot-bai.md",
       "landing/blog/topics.md",
+      "landing/huong-dan/pages/mot-cach.md",
       "landing/product.html",
       "landing/product.css",
       "landing/privacy.html",
@@ -117,6 +130,8 @@ test("a push's changed files become the URLs IndexNow is told about", () => {
     [
       "https://offlinemask.com/blog/mot-bai",
       "https://offlinemask.com/blog/",
+      "https://offlinemask.com/huong-dan/mot-cach",
+      "https://offlinemask.com/huong-dan/",
       "https://offlinemask.com/",
       "https://offlinemask.com/privacy",
     ],

@@ -1,11 +1,11 @@
 // Tells Bing and the other IndexNow engines which pages a push to main changed (decision 0199),
-// so new posts are found within the day rather than whenever the crawler comes back. Cloudflare
+// so new posts and guides are found within the day rather than whenever the crawler comes back. Cloudflare
 // deploys the site on its own, so this first waits until the live sitemap shows the changed posts'
 // and privacy page's dates; for a change it cannot see there, it waits a few minutes instead.
 //
 // Usage: node scripts/indexnow.mjs <changed repository paths...>   (run from landing/)
 import { readFileSync } from "node:fs";
-import { posts } from "../posts.js";
+import { allGuides, posts } from "../posts.js";
 import { changedUrls, indexNowKey, privacyUpdated, site } from "../search.js";
 
 const urls = changedUrls(process.argv.slice(2));
@@ -16,7 +16,7 @@ if (!urls.length) {
 
 // What the live sitemap says once this push is deployed, for the URLs whose date it shows.
 const dates = Object.fromEntries([
-  ...posts().map(({ slug, updated }) => [`${site}/blog/${slug}`, updated]),
+  ...[...posts(), ...allGuides()].map(({ path, updated }) => [`${site}${path}`, updated]),
   [
     `${site}/privacy`,
     privacyUpdated(readFileSync(new URL("../privacy.html", import.meta.url), "utf8")),
