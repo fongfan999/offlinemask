@@ -14,7 +14,7 @@ import { openDocument, writeDocument } from "../src/core/doc/document.ts";
 import { maskParagraphs } from "../src/core/doc/mask.ts";
 import { imageSize, ocrNote, ocrTextItems, openImage } from "../src/core/doc/ocr.ts";
 import { OffscreenCanvasFactory, openPdf, readByPlace } from "../src/core/doc/pdf.ts";
-import { fileKind } from "../src/core/file-kind.ts";
+import { fileKind, fileKindErrors } from "../src/core/file-kind.ts";
 import { fixtures, noisePng } from "./pdf-fixtures.mjs";
 
 // Text in pictures (decision 0180). The engine is the system's; these tests stand a
@@ -344,11 +344,23 @@ test("a copier's fax-coded text picture is drawn with pdf.js's own decoders, and
 });
 
 test("pictures open on Tài liệu only where the machine reads them", () => {
-  assert.equal(fileKind("ảnh.png"), "upcoming");
+  assert.equal(fileKind("ảnh.png"), "no-picture-reader");
+  assert.equal(fileKind("ảnh.heic"), "no-picture-reader");
   assert.equal(fileKind("ảnh.png", { images: true }), "word");
   assert.equal(fileKind("ảnh.JPG", { images: true }), "word");
-  assert.equal(fileKind("ảnh.heic", { images: true }), "upcoming");
+  assert.equal(fileKind("ảnh.heic", { images: true }), "picture-format");
+  assert.equal(fileKind("ảnh.WEBP", { images: true }), "picture-format");
   assert.equal(fileKind("hồ sơ.pdf", { images: true }), "word");
+});
+
+// Pictures have been read on Windows and older Macs since 2.6.1 (decisions 0191, 0196), so no
+// message may still say they need macOS 14 or are coming to Windows.
+test("the messages for pictures that do not open name no platform", () => {
+  for (const kind of ["no-picture-reader", "picture-format"]) {
+    assert.ok(fileKindErrors[kind], kind);
+    assert.doesNotMatch(fileKindErrors[kind], /macOS|Windows|sắp có/, kind);
+  }
+  assert.match(fileKindErrors["picture-format"], /\.jpg hoặc \.png/);
 });
 
 test("a value hidden once is hidden wherever else it appears whole, with the same alias", async () => {
