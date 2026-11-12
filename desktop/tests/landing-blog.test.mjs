@@ -40,6 +40,10 @@ test("a well-formed post renders, with ids on its headings", () => {
   const parsed = parse(post(good, `## Đường dẫn ở đâu?\n\n${words(420)}`), "mot-bai.md");
   assert.equal(parsed.slug, "mot-bai");
   assert.equal(parsed.updated, "2026-10-25");
+  assert.equal(parsed.checked, "2026-10-25");
+  const rechecked = parse(post({ ...good, checked: "2026-12-20" }), "mot-bai.md");
+  assert.equal(rechecked.checked, "2026-12-20");
+  assert.equal(rechecked.updated, "2026-10-25", "a re-check alone does not change the post");
   assert.match(parsed.html, /<h2 id="duong-dan-o-dau">Đường dẫn ở đâu\?<\/h2>/);
 });
 
@@ -51,6 +55,8 @@ test("posts that would publish badly are rejected", () => {
   rejects(post({ ...good, date: "2026-13-01" }), "a.md", /date/);
   rejects(post({ ...good, updated: "2026-10-01" }), "a.md", /updated/);
   rejects(post({ ...good, author: "ai" }), "a.md", /unknown field/);
+  rejects(post({ ...good, checked: "2026-10-01" }), "a.md", /checked/);
+  rejects(post({ ...good, updated: "2026-11-01", checked: "2026-10-30" }), "a.md", /checked/);
   rejects(post(good, words(100)), "a.md", /words/);
   rejects(post(good, `# Tiêu đề\n\n${words(420)}`), "a.md", /# heading/);
   rejects(post(good, `<iframe src="x"></iframe>\n\n${words(420)}`), "a.md", /HTML/);

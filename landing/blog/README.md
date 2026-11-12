@@ -37,7 +37,7 @@ Never invent features, numbers, customers, reviews or comparisons. Link to the a
 
 ## Format and SEO
 
-- Front matter: `title` (≤ 70 characters, the reader's question or a clear answer to it, the main search phrase near the start), `description` (70–170 characters, the answer in a sentence), `date` (YYYY-MM-DD, today in Vietnam). Add `updated` only when revising an older post.
+- Front matter: `title` (≤ 70 characters, the reader's question or a clear answer to it, the main search phrase near the start), `description` (70–170 characters, the answer in a sentence), `date` (YYYY-MM-DD, today in Vietnam). Add `updated` only when revising an older post. `checked` (YYYY-MM-DD, never shown) records the last day the post's outside facts were verified, whether or not anything changed; see step 2 below.
 - File name = slug: lowercase ASCII words of the title without diacritics, hyphenated, at most about 8 words (`co-nen-dan-thong-tin-khach-hang-vao-chatgpt`).
 - 700–1,400 words. `##` sections whose headings are the sub-questions people ask; `###` below them if needed. No `#` heading (the title is the page's h1).
 - Plain Markdown only: no HTML, no embeds, no remote images. Images are optional; if used, put a WebP under `blog/images/`, reference it as `images/<file>.webp` with Vietnamese alt text, and show only fictional sample data.
@@ -47,8 +47,9 @@ Never invent features, numbers, customers, reviews or comparisons. Link to the a
 ## The routine's steps
 
 1. `git pull` on `main`. Read this file, [topics.md](topics.md), the existing posts (so you never repeat one), and the product facts above.
-2. Take the first unchecked `[ ]` topic. If it overlaps an existing post or cannot be answered honestly, mark it `[-]` with a short reason and take the next.
-3. Research it (web search for anything factual), then write `posts/<slug>.md` dated today (Asia/Ho_Chi_Minh).
-4. Mark the topic `[x]` with the slug. When fewer than ten unchecked topics remain, append five new real questions in the same style (things people actually search; no duplicates).
-5. Check: `pnpm install --frozen-lockfile`, `pnpm -C landing build`, `pnpm test`, `pnpm lint`. Fix anything that fails. Reread the post once as a picky Vietnamese editor and tighten it.
-6. Commit only the post, its images and `topics.md` with the message `Blog: <title>`, and push to `main`. Never touch other files; if something outside the blog needs changing, stop and say so in the run's summary instead.
+2. **Re-check one older post, if one is due.** A post is due when it states what a law or regulation says, or what an AI provider's settings, data policy or product does, and its last verification (`checked`, else `updated`, else `date`) is more than 60 days ago. Take the oldest due post. Open every official source it links, search for changes since that day, and check its statements about OfflineMask against the product facts above. If anything changed, correct the post, set both `updated` and `checked` to today, and commit it alone as `Blog: update <title>`. If nothing changed, set only `checked` to today and commit it alone as `Blog: re-check <title>`. At most one re-check per run; then carry on with the new post.
+3. Take the first unchecked `[ ]` topic marked `(search)` if there is one, otherwise the first unchecked topic. `(search)` topics are real queries the owner copied from Google Search Console. If it overlaps an existing post or cannot be answered honestly, mark it `[-]` with a short reason and take the next.
+4. Research it (web search for anything factual), then write `posts/<slug>.md` dated today (Asia/Ho_Chi_Minh).
+5. Mark the topic `[x]` with the slug. When fewer than ten unchecked topics remain, append five new real questions in the same style (things people actually search; no duplicates).
+6. Check: `pnpm install --frozen-lockfile`, `pnpm -C landing build`, `pnpm test`, `pnpm lint`. Fix anything that fails. Reread the post once as a picky Vietnamese editor and tighten it.
+7. Commit only the post, its images and `topics.md` with the message `Blog: <title>`, and push to `main` (with the re-check commit, if there was one). Never touch other files; if something outside the blog needs changing, stop and say so in the run's summary instead.

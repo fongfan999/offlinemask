@@ -15,7 +15,9 @@ export const blog = {
   images: new URL("./blog/images/", import.meta.url),
   label: "Blog",
   schema: "BlogPosting",
-  fields: ["title", "description", "date", "updated"],
+  // `checked`: the day the post's outside facts (laws, AI providers' settings) were last verified
+  // against their sources, changed or not (decision 0202); never shown, it paces the re-checks.
+  fields: ["title", "description", "date", "updated", "checked"],
 };
 export const guides = {
   dir: "huong-dan",
@@ -76,7 +78,7 @@ export function parse(source, file, collection = blog) {
   };
   if (!/^[a-z0-9]+(-[a-z0-9]+)*$/.test(slug)) fail("the file name is not a lowercase-ascii slug");
   const { fields, markdown } = split(source, file);
-  const { title, description, date, updated, order } = fields;
+  const { title, description, date, updated, checked, order } = fields;
   for (const key of Object.keys(fields))
     if (!collection.fields.includes(key)) fail(`unknown field "${key}"`);
   if (collection.fields.includes("order") && !/^[1-9]\d?$/.test(order ?? ""))
@@ -87,6 +89,8 @@ export function parse(source, file, collection = blog) {
   if (!isDate(date)) fail("date must be YYYY-MM-DD");
   if (updated !== undefined && (!isDate(updated) || updated < date))
     fail("updated must be YYYY-MM-DD, on or after date");
+  if (checked !== undefined && (!isDate(checked) || checked < (updated ?? date)))
+    fail("checked must be YYYY-MM-DD, on or after updated and date");
 
   const marked = new Marked({ gfm: true });
   const tokens = marked.lexer(markdown);
@@ -139,6 +143,7 @@ export function parse(source, file, collection = blog) {
     description,
     date,
     updated: updated ?? date,
+    checked: checked ?? updated ?? date,
     ...(order ? { order: Number(order) } : {}),
     html,
     pictures,

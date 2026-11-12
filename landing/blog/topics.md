@@ -1,6 +1,6 @@
 # Blog topics
 
-Real questions people search, in the order they will be written. `[ ]` to write, `[x]` written (with its slug), `[-]` skipped (with why). See [README.md](README.md).
+Real questions people search, in the order they will be written. `[ ]` to write, `[x]` written (with its slug), `[-]` skipped (with why). A topic ending in `(search)` is a real query copied from Google Search Console and is written first. See [README.md](README.md).
 
 - [x] Có nên dán thông tin khách hàng vào ChatGPT không? — `co-nen-dan-thong-tin-khach-hang-vao-chatgpt`
 - [x] Cách ẩn thông tin cá nhân trong file Excel trước khi gửi cho AI phân tích — `an-thong-tin-ca-nhan-trong-file-excel-gui-ai`
