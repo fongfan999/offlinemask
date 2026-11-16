@@ -16,7 +16,7 @@ Real questions people search, in the order they will be written. `[ ]` to write,
 - [x] Gửi file Word cho AI tóm tắt: những gì cần xóa trước khi tải lên — `gui-file-word-cho-ai-tom-tat-can-xoa-gi`
 - [x] Chế độ trò chuyện tạm thời của ChatGPT có thật sự không lưu lại? — `che-do-tro-chuyen-tam-thoi-chatgpt-co-luu-khong`
 - [x] Giáo viên dùng AI nhận xét học sinh thế nào để không lộ thông tin các em? — `giao-vien-dung-ai-nhan-xet-hoc-sinh`
-- [ ] Nhờ AI viết email cho khách mà vẫn giữ kín thông tin: mẫu câu lệnh dùng được ngay
+- [x] Nhờ AI viết email cho khách mà vẫn giữ kín thông tin: mẫu câu lệnh dùng được ngay — `nho-ai-viet-email-cho-khach-giu-kin-thong-tin`
 - [ ] Thông tin nào được coi là dữ liệu cá nhân nhạy cảm?
 - [ ] Công ty cấm dùng ChatGPT: làm sao đề xuất cách dùng an toàn với sếp?
 - [ ] Dùng Copilot trong Word, Excel có an toàn với dữ liệu khách hàng không?
