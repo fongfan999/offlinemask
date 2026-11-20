@@ -18,7 +18,7 @@ Real questions people search, in the order they will be written. `[ ]` to write,
 - [x] Giáo viên dùng AI nhận xét học sinh thế nào để không lộ thông tin các em? — `giao-vien-dung-ai-nhan-xet-hoc-sinh`
 - [x] Nhờ AI viết email cho khách mà vẫn giữ kín thông tin: mẫu câu lệnh dùng được ngay — `nho-ai-viet-email-cho-khach-giu-kin-thong-tin`
 - [x] Thông tin nào được coi là dữ liệu cá nhân nhạy cảm? — `thong-tin-nao-la-du-lieu-ca-nhan-nhay-cam`
-- [ ] Công ty cấm dùng ChatGPT: làm sao đề xuất cách dùng an toàn với sếp?
+- [x] Công ty cấm dùng ChatGPT: làm sao đề xuất cách dùng an toàn với sếp? — `cong-ty-cam-dung-chatgpt-de-xuat-voi-sep`
 - [ ] Dùng Copilot trong Word, Excel có an toàn với dữ liệu khách hàng không?
 - [ ] Làm sao biết một ứng dụng có thật sự chạy offline, không gửi dữ liệu đi?
 - [ ] Dán bảng lương vào AI để làm báo cáo: rủi ro và cách làm an toàn
