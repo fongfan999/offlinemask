@@ -20,7 +20,7 @@ Real questions people search, in the order they will be written. `[ ]` to write,
 - [x] Thông tin nào được coi là dữ liệu cá nhân nhạy cảm? — `thong-tin-nao-la-du-lieu-ca-nhan-nhay-cam`
 - [x] Công ty cấm dùng ChatGPT: làm sao đề xuất cách dùng an toàn với sếp? — `cong-ty-cam-dung-chatgpt-de-xuat-voi-sep`
 - [x] Dùng Copilot trong Word, Excel có an toàn với dữ liệu khách hàng không? — `dung-copilot-trong-word-excel-co-an-toan-khong`
-- [ ] Làm sao biết một ứng dụng có thật sự chạy offline, không gửi dữ liệu đi?
+- [x] Làm sao biết một ứng dụng có thật sự chạy offline, không gửi dữ liệu đi? — `lam-sao-biet-ung-dung-that-su-chay-offline`
 - [ ] Dán bảng lương vào AI để làm báo cáo: rủi ro và cách làm an toàn
 - [ ] Luật sư, công chứng viên dùng AI thế nào mà vẫn giữ bí mật cho thân chủ?
 - [ ] Shop online dùng AI trả lời tin nhắn khách: đừng dán những gì?
