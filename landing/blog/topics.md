@@ -21,7 +21,7 @@ Real questions people search, in the order they will be written. `[ ]` to write,
 - [x] Công ty cấm dùng ChatGPT: làm sao đề xuất cách dùng an toàn với sếp? — `cong-ty-cam-dung-chatgpt-de-xuat-voi-sep`
 - [x] Dùng Copilot trong Word, Excel có an toàn với dữ liệu khách hàng không? — `dung-copilot-trong-word-excel-co-an-toan-khong`
 - [x] Làm sao biết một ứng dụng có thật sự chạy offline, không gửi dữ liệu đi? — `lam-sao-biet-ung-dung-that-su-chay-offline`
-- [ ] Dán bảng lương vào AI để làm báo cáo: rủi ro và cách làm an toàn
+- [x] Dán bảng lương vào AI để làm báo cáo: rủi ro và cách làm an toàn — `dan-bang-luong-vao-ai-lam-bao-cao-an-toan`
 - [ ] Luật sư, công chứng viên dùng AI thế nào mà vẫn giữ bí mật cho thân chủ?
 - [ ] Shop online dùng AI trả lời tin nhắn khách: đừng dán những gì?
 - [ ] Gemini có đọc được Gmail và Google Drive của tôi không?
@@ -32,3 +32,8 @@ Real questions people search, in the order they will be written. `[ ]` to write,
 - [ ] Rò rỉ dữ liệu qua công cụ AI: những vụ việc thật và bài học cho dân văn phòng
 - [ ] Dùng AI phân tích dữ liệu khảo sát khách hàng mà không lộ danh tính người trả lời
 - [ ] Bộ kiểm tra nhanh trước khi dán bất cứ thứ gì vào AI
+- [ ] Gửi ảnh chụp CCCD cho AI đọc thông tin có an toàn không?
+- [ ] Dùng AI tóm tắt biên bản cuộc họp mà không lộ tên người phát biểu
+- [ ] Bác sĩ, phòng khám dùng AI soạn giấy tờ thế nào để không lộ hồ sơ bệnh nhân?
+- [ ] Nhờ AI viết CV, thư xin việc: nên bỏ những thông tin cá nhân nào?
+- [ ] Chủ nhà trọ, môi giới bất động sản dùng AI soạn hợp đồng thuê mà không lộ CCCD khách
