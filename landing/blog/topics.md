@@ -22,7 +22,7 @@ Real questions people search, in the order they will be written. `[ ]` to write,
 - [x] Dùng Copilot trong Word, Excel có an toàn với dữ liệu khách hàng không? — `dung-copilot-trong-word-excel-co-an-toan-khong`
 - [x] Làm sao biết một ứng dụng có thật sự chạy offline, không gửi dữ liệu đi? — `lam-sao-biet-ung-dung-that-su-chay-offline`
 - [x] Dán bảng lương vào AI để làm báo cáo: rủi ro và cách làm an toàn — `dan-bang-luong-vao-ai-lam-bao-cao-an-toan`
-- [ ] Luật sư, công chứng viên dùng AI thế nào mà vẫn giữ bí mật cho thân chủ?
+- [x] Luật sư, công chứng viên dùng AI thế nào mà vẫn giữ bí mật cho thân chủ? — `luat-su-cong-chung-vien-dung-ai-giu-bi-mat`
 - [ ] Shop online dùng AI trả lời tin nhắn khách: đừng dán những gì?
 - [ ] Gemini có đọc được Gmail và Google Drive của tôi không?
 - [ ] Cách viết câu lệnh (prompt) cho AI khi đã thay tên bằng mã
